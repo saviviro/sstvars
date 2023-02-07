@@ -34,21 +34,21 @@ test_that("vech and unvech work correctly", {
   expect_equal(unvech(d=3, a=b3), B3)
 })
 
-W1 <- matrix(0:3, nrow=2, byrow=FALSE)
-W2 <- matrix(c(1, 2, 0, 3, 0, 4, 5, 6, 7), nrow=3, byrow=FALSE)
-W3 <- matrix(c(1, 0, 2, 3, 4, 0, 0, 5, 0, 6, 7, 8, 0, 9, 0, 0), nrow=4, byrow=FALSE)
-W4 <- matrix(1:25, nrow=5, byrow=FALSE)
+B1 <- matrix(0:3, nrow=2, byrow=FALSE)
+B2 <- matrix(c(1, 2, 0, 3, 0, 4, 5, 6, 7), nrow=3, byrow=FALSE)
+B3 <- matrix(c(1, 0, 2, 3, 4, 0, 0, 5, 0, 6, 7, 8, 0, 9, 0, 0), nrow=4, byrow=FALSE)
+B4 <- matrix(1:25, nrow=5, byrow=FALSE)
 
-test_that("Wvec and unWvec work correctly", {
-  expect_equal(Wvec(W1), 1:3)
-  expect_equal(Wvec(W2), 1:7)
-  expect_equal(Wvec(W3), 1:9)
-  expect_equal(Wvec(W4), 1:25)
+test_that("Bvec and unBvec work correctly", {
+  expect_equal(Bvec(B1), 1:3)
+  expect_equal(Bvec(B2), 1:7)
+  expect_equal(Bvec(B3), 1:9)
+  expect_equal(Bvec(B4), 1:25)
 
-  expect_equal(unWvec(Wvector=Wvec(W1), d=2, structural_pars=list(W=W1)), W1)
-  expect_equal(unWvec(Wvector=Wvec(W2), d=3, structural_pars=list(W=W2)), W2)
-  expect_equal(unWvec(Wvector=Wvec(W3), d=4, structural_pars=list(W=W3)), W3)
-  expect_equal(unWvec(Wvector=Wvec(W4), d=5, structural_pars=list(W=W4)), W4)
+  expect_equal(unBvec(Bvector=Bvec(B1), d=2, B_constraints=B1), B1)
+  expect_equal(unBvec(Bvector=Bvec(B2), d=3, B_constraints=B2), B2)
+  expect_equal(unBvec(Bvector=Bvec(B3), d=4, B_constraints=B3), B3)
+  expect_equal(unBvec(Bvector=Bvec(B4), d=5, B_constraints=B4), B4)
 })
 
 Omega1_2 <- matrix(c(0.93, -0.15, -0.15, 5.20), nrow=2, byrow=FALSE) # d=2

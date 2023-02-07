@@ -1,11 +1,14 @@
 Package: sstvars
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Toolkit for structural smooth transition vector autoregressive models
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
+Authors@R: person("Savi", "Virolainen", email = "savi.virolainen@helsinki.fi", role = c("aut", "cre"),
+                  comment = c(ORCID = "0000-0002-5075-6821"))
+Maintainer: Savi Virolainen <savi.virolainen@helsinki.fi>
+Description: TO BE FILLED IN
     Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Depends: R (>= 3.6.0)
+BugReports: https://github.com/saviviro/sstvars/issues
+License: GDPL-3
 Encoding: UTF-8
 LazyData: true
