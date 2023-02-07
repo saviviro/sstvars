@@ -165,11 +165,12 @@ diag_Omegas <- function(Omega1, Omega2) {
 #' @description \code{redecompose_Omegas} exchanges the order of the covariance matrices in
 #'   the decomposition of Muirhead (1982, Theorem A9.9) and returns the new decomposition.
 #'
-#' @inheritParams is_stationary
+#' @param M the number of regimes in the model
+#' @param d the number of time series in the system
 #' @param W a length \code{d^2} vector containing the vectorized W matrix.
 #' @param lambdas a length \code{d*(M-1)} vector of the form \strong{\eqn{\lambda_{2}}}\eqn{,...,}\strong{\eqn{\lambda_{M}}}
 #'   where \strong{\eqn{\lambda_{m}}}\eqn{=(\lambda_{m1},...,\lambda_{md})}
-#' @param perm a vector of length \code{M} giving the new order of the covarince matrices
+#' @param perm a vector of length \code{M} giving the new order of the covariance matrices
 #'   (relative to the current order)
 #' @details We consider the following decomposition of positive definite covariannce matrices:
 #'  \eqn{\Omega_1 = WW'}, \eqn{\Omega_m = W\Lambda_{m}W'}, \eqn{m=2,..,M} where \eqn{\Lambda_{m} = diag(\lambda_{m1},...,\lambda_{md})}
@@ -211,7 +212,7 @@ diag_Omegas <- function(Omega1, Omega2) {
 #'  new_W%*%tcrossprod(diag(new_lambdas), new_W) # = Omega1
 #' @export
 
-redecompose_Omegas <- function(M, d, W, lambdas, perm=1:sum(M)) {
+redecompose_Omegas <- function(M, d, W, lambdas, perm=1:M) {
   M <- sum(M)
   if(all(perm == 1:M)) {
     return(c(W, lambdas))
