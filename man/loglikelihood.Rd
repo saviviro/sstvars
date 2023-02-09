@@ -12,7 +12,7 @@ loglikelihood(
   weight_function = c("relative_dens", "logit"),
   cond_dist = c("Gaussian", "Student"),
   parametrization = c("intercept", "mean"),
-  identification = c("reduced_form", "impact_responses", "heteroskedasticity"),
+  identification = c("reduced_form", "recursive", "heteroskedasticity"),
   AR_constraints = NULL,
   mean_constraints = NULL,
   B_constraints = NULL,
@@ -38,7 +38,7 @@ where
 \itemize{
   \item{\eqn{\phi_{m,0} = } the \eqn{(d \times 1)} intercept (or mean) vector of the \eqn{m}th regime.}
   \item{\eqn{\varphi_m = (vec(A_{m,1}),...,vec(A_{m,p}))} \eqn{(pd^2 \times 1)}.}
-  \item{\eqn{\sigma = (vech(\Omega_1),...,vech(\Omega_M)} \eqn{(Md(d - 1)/2 \times 1)}.}
+  \item{\eqn{\sigma = (vech(\Omega_1),...,vech(\Omega_M)} \eqn{(Md(d + 1)/2 \times 1)}.}
   \item{\eqn{\alpha} contains the transition weights parameters}
   \item{\eqn{\nu > 2} is the degrees of freedom parameter that is included only if \code{cond_dist="Student"}.}
 }

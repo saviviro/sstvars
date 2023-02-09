@@ -13,7 +13,7 @@
 #'   \itemize{
 #'     \item{\eqn{\phi_{m,0} = } the \eqn{(d \times 1)} intercept (or mean) vector of the \eqn{m}th regime.}
 #'     \item{\eqn{\varphi_m = (vec(A_{m,1}),...,vec(A_{m,p}))} \eqn{(pd^2 \times 1)}.}
-#'     \item{\eqn{\sigma = (vech(\Omega_1),...,vech(\Omega_M)} \eqn{(Md(d - 1)/2 \times 1)}.}
+#'     \item{\eqn{\sigma = (vech(\Omega_1),...,vech(\Omega_M)} \eqn{(Md(d + 1)/2 \times 1)}.}
 #'     \item{\eqn{\alpha} contains the transition weights parameters}
 #'     \item{\eqn{\nu > 2} is the degrees of freedom parameter that is included only if \code{cond_dist="Student"}.}
 #'   }
@@ -64,7 +64,7 @@
 
 loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
                           parametrization=c("intercept", "mean"),
-                          identification=c("reduced_form", "impact_responses", "heteroskedasticity"),
+                          identification=c("reduced_form", "recursive", "heteroskedasticity"),
                           AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
                           to_return=c("loglik"), check_params=TRUE, minval=NULL,
                           stat_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
@@ -85,7 +85,13 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   T_obs <- n_obs - p
 
   # Collect the parameter values
-  # First remove all constraints, if any, TO BE IMPLEMENTED
+  # First remove all constraints, if any; also switch to reduced form parameter vector; TO BE IMPLEMENTED
+
+  # Pick params
+  all_phi0 <- pick_phi0(M=M, d=d, params=params) # [d, M]
+  all_A <- pick_allA(p=p, M=M, d=d, params=params) # [d, d, p, M]
+  all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params) # [d, d, M]
+  weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist)
 
   # Check that the parameter vector lies in the parameter space
 }

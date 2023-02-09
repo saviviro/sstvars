@@ -10,7 +10,7 @@
 #'   \itemize{
 #'     \item{\eqn{\phi_{m,0} = } the \eqn{(d \times 1)} intercept (or mean) vector of the \eqn{m}th regime.}
 #'     \item{\eqn{\varphi_m = (vec(A_{m,1}),...,vec(A_{m,p}))} \eqn{(pd^2 \times 1)}.}
-#'     \item{\eqn{\sigma = (vech(\Omega_1),...,vech(\Omega_M)} \eqn{(Md(d - 1)/2 \times 1)}.}
+#'     \item{\eqn{\sigma = (vech(\Omega_1),...,vech(\Omega_M)} \eqn{(Md(d + 1)/2 \times 1)}.}
 #'     \item{\eqn{\alpha} contains the transition weights parameters}
 #'     \item{\eqn{\nu > 2} is the degrees of freedom parameter that is included only if \code{cond_dist="Student"}.}
 #'   }
@@ -66,3 +66,96 @@ pick_Ami <- function(p, M, d, params, m, i, unvec=TRUE) {
   }
 }
 
+
+#' @title Pick coefficient matrices
+#'
+#' @description \code{pick_Am} picks the coefficient matrices \eqn{A_{m,i} (i=1,..,p)}
+#'   from the given parameter vector for a given regime, so that they are arranged in
+#'   a 3D array with the third dimension indicating each lag.
+#'
+#' @inheritParams pick_Ami
+#' @return Returns a 3D array containing the coefficient matrices of the given regime.
+#'  The coefficient matrix \eqn{A_{m,i}} can be obtained by choosing \code{[, , i]}.
+#' @inherit pick_Ami details references
+#' @inheritSection pick_Ami Warning
+#' @keywords internal
+
+pick_Am <- function(p, M, d, params, m, structural_pars=NULL) {
+  array(params[(d*M + d^2*p*(m - 1) + 1):(d*M + d^2*p*m)], dim=c(d, d, p))
+}
+
+
+#' @title Pick coefficient all matrices
+#'
+#' @description \code{pick_allA} picks all coefficient matrices \eqn{A_{m,i} (i=1,..,p, m=1,..,M)}
+#'   from the given parameter vector so that they are arranged in a 4D array with the fourth dimension
+#'   indicating each regime and third dimension indicating each lag.
+#'
+#' @inheritParams pick_Am
+#' @return Returns a 4D array containing the coefficient matrices of the all components. Coefficient matrix
+#'  \eqn{A_{m,i}} can be obtained by choosing \code{[, , i, m]}.
+#' @inherit pick_Ami details references
+#' @inheritSection pick_Ami Warning
+#' @keywords internal
+
+pick_allA <- function(p, M, d, params) {
+  array(params[(d*M + 1):(d*M + d^2*p*M)], dim=c(d, d, p, M))
+}
+
+
+#' @title Pick covariance matrices
+#'
+#' @description \code{pick_Omegas} picks the covariance matrices \eqn{\Omega_{m} (m=1,..,M)}
+#'  from the given parameter vector so that they are arranged in a 3D array with the third
+#'  dimension indicating each component.
+#'
+#' @inherit pick_Am
+#' @return Returns a 3D array containing the covariance matrices of the given model. Coefficient matrix
+#'  \eqn{\Omega_{m}} can be obtained by choosing \code{[, , m]}.
+#' @details Does not work with constraint NOR structural parameter vectors!
+#' @inheritSection pick_Ami Warning
+#' @inherit pick_Ami references
+#' @keywords internal
+
+pick_Omegas <- function(p, M, d, params) {
+  Omegas <- array(dim=c(d, d, M))
+  qm1 <- d*M*(1 + p*d) + (1:M - 1)*d*(d + 1)/2
+  for(m in 1:M) {
+    Omegas[, , m] <- unvech(d=d, a=params[(qm1[m] + 1):(qm1[m] + d*(d + 1)/2)])
+  }
+  Omegas
+}
+
+
+#' @title Pick transition weight parameters
+#'
+#' @description \code{pick_weightpars} picks the transition weight parameters from the given parameter vector.
+#'
+#' @inheritParams pick_Ami
+#' @inheritParams loglikelihood
+#' @return
+#'   \describe{
+#'     \item{If \code{weight_function = "relative_dens"}:}{Returns a length M vector containing the transition weight
+#'           parameters \eqn{alpha_{m}, m=1,...,M}, including the non-parametrized \eqn{alpha_{M}}.}
+#'     \item{If \code{weight_function = "logit"}:}{NOT YET IMPLEMENTED}
+#'   }
+
+#' @inheritSection pick_Ami Warning
+#' @inherit pick_Ami references
+#' @keywords internal
+
+pick_weightpars <- function(p, M, d, params, weight_function=c("relative_dens", "logit"),
+                            cond_dist=c("Gaussian", "Student")) {
+  weight_function <- match.arg(weight_function)
+  cond_dist <- match.arg(cond_dist)
+  stopifnot(weight_function == "relative_dens") # Only this weight function is currently implement
+  n_dfs <- ifelse(cond_dist == "Student", 1, 0)
+  if(weight_function == "relative_dens") {
+    if(M == 1) {
+      return(1)
+    } else {
+      alphas <- params[(length(params) - M - n_dfs + 2):(length(params) - n_dfs)]
+      return(c(alphas, 1 - sum(alphas)))
+    }
+  }
+}

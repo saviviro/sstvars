@@ -18,6 +18,11 @@ Omega1_212 <- matrix(c(0.58, 0.01, 0.01, 0.06), nrow=2, byrow=FALSE)
 
 theta_212relg <- c(phi10_212, vec(A11_212), vec(A12_212), vech(Omega1_212))
 
+# p=3, M=1, d=2
+phi10_312 <- phi10_212; A11_312 <- A11_212; A12_312 <- A12_212; Omega1_312 <- Omega1_212
+A13_312 <-  matrix(c(-0.15, -0.01, 0.06, -0.23), nrow=2, byrow=FALSE)
+theta_312relg <- c(phi10_312, vec(A11_312), vec(A12_312), vec(A13_312), vech(Omega1_312))
+
 # p=1, M=2, d=2
 phi10_122 <- c(0.55, 0.11)
 A11_122 <- matrix(c(0.34, 0.05, -0.01, 0.72), nrow=2, byrow=FALSE)
@@ -85,6 +90,7 @@ theta_123relg <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1
 test_that("pick_phi0 work correctly", {
   expect_equal(pick_phi0(M=1, d=2, params=theta_112relg), as.matrix(phi10_112))
   expect_equal(pick_phi0(M=1, d=2, params=theta_212relg), as.matrix(phi10_212))
+  expect_equal(pick_phi0(M=1, d=2, params=theta_312relg), as.matrix(phi10_312))
   expect_equal(pick_phi0(M=2, d=2, params=theta_122relg)[,1], phi10_122)
   expect_equal(pick_phi0(M=2, d=2, params=theta_122relg)[,2], phi20_122)
   expect_equal(pick_phi0(M=2, d=2, params=theta_222relg)[,1], phi10_222)
@@ -102,6 +108,9 @@ test_that("pick_Ami work correctly", {
   expect_equal(pick_Ami(p=1, M=1, d=2, m=1, i=1, params=theta_112relg), A11_112)
   expect_equal(pick_Ami(p=2, M=1, d=2, m=1, i=1, params=theta_212relg), A11_212)
   expect_equal(pick_Ami(p=2, M=1, d=2, m=1, i=2, params=theta_212relg), A12_212)
+  expect_equal(pick_Ami(p=3, M=1, d=2, m=1, i=1, params=theta_312relg), A11_312)
+  expect_equal(pick_Ami(p=3, M=1, d=2, m=1, i=2, params=theta_312relg), A12_312)
+  expect_equal(pick_Ami(p=3, M=1, d=2, m=1, i=3, params=theta_312relg), A13_312)
   expect_equal(pick_Ami(p=1, M=2, d=2, m=1, i=1, params=theta_122relg), A11_122)
   expect_equal(pick_Ami(p=1, M=2, d=2, m=2, i=1, params=theta_122relg), A21_122)
   expect_equal(pick_Ami(p=2, M=2, d=2, m=1, i=1, params=theta_222relg), A11_222)
@@ -124,4 +133,83 @@ test_that("pick_Ami work correctly", {
   expect_equal(pick_Ami(p=2, M=1, d=3, m=1, i=1, params=theta_213relg, unvec=FALSE), vec(A11_213))
 })
 
+test_that("pick_Am work correctly", {
+  expect_equal(pick_Am(p=1, M=1, d=2, m=1, params=theta_112relg)[, , 1], A11_112)
+  expect_equal(pick_Am(p=2, M=1, d=2, m=1, params=theta_212relg)[, , 1], A11_212)
+  expect_equal(pick_Am(p=2, M=1, d=2, m=1, params=theta_212relg)[, , 2], A12_212)
+  expect_equal(pick_Am(p=3, M=1, d=2, m=1, params=theta_312relg)[, , 1], A11_312)
+  expect_equal(pick_Am(p=3, M=1, d=2, m=1, params=theta_312relg)[, , 2], A12_312)
+  expect_equal(pick_Am(p=3, M=1, d=2, m=1, params=theta_312relg)[, , 3], A13_312)
+  expect_equal(pick_Am(p=1, M=2, d=2, m=1, params=theta_122relg)[, , 1], A11_122)
+  expect_equal(pick_Am(p=1, M=2, d=2, m=2, params=theta_122relg)[, , 1], A21_122)
+  expect_equal(pick_Am(p=2, M=2, d=2, m=1, params=theta_222relg)[, , 1], A11_222)
+  expect_equal(pick_Am(p=2, M=2, d=2, m=1, params=theta_222relg)[, , 2], A12_222)
+  expect_equal(pick_Am(p=2, M=2, d=2, m=2, params=theta_222relg)[, , 1], A21_222)
+  expect_equal(pick_Am(p=2, M=2, d=2, m=2, params=theta_222relg)[, , 2], A22_222)
+  expect_equal(pick_Am(p=1, M=3, d=2, m=1, params=theta_132relg)[, , 1], A11_132)
+  expect_equal(pick_Am(p=1, M=3, d=2, m=2, params=theta_132relg)[, , 1], A21_132)
+  expect_equal(pick_Am(p=1, M=3, d=2, m=3, params=theta_132relg)[, , 1], A31_132)
+  expect_equal(pick_Am(p=1, M=1, d=3, m=1, params=theta_113relg)[, , 1], A11_113)
+  expect_equal(pick_Am(p=2, M=1, d=3, m=1, params=theta_213relg)[, , 1], A11_213)
+  expect_equal(pick_Am(p=2, M=1, d=3, m=1, params=theta_213relg)[, , 2], A12_213)
+  expect_equal(pick_Am(p=1, M=2, d=3, m=1, params=theta_123relg)[, , 1], A11_123)
+  expect_equal(pick_Am(p=1, M=2, d=3, m=2, params=theta_123relg)[, , 1], A21_123)
+})
+
+test_that("pick_allA work correctly", {
+  expect_equal(pick_allA(p=1, M=1, d=2, params=theta_112relg)[, , 1, 1], A11_112)
+  expect_equal(pick_allA(p=2, M=1, d=2, params=theta_212relg)[, , 1, 1], A11_212)
+  expect_equal(pick_allA(p=2, M=1, d=2, params=theta_212relg)[, , 2, 1], A12_212)
+  expect_equal(pick_allA(p=3, M=1, d=2, params=theta_312relg)[, , 1, 1], A11_312)
+  expect_equal(pick_allA(p=3, M=1, d=2, params=theta_312relg)[, , 2, 1], A12_312)
+  expect_equal(pick_allA(p=3, M=1, d=2, params=theta_312relg)[, , 3, 1], A13_312)
+  expect_equal(pick_allA(p=1, M=2, d=2, params=theta_122relg)[, , 1, 1], A11_122)
+  expect_equal(pick_allA(p=1, M=2, d=2, params=theta_122relg)[, , 1, 2], A21_122)
+  expect_equal(pick_allA(p=2, M=2, d=2, params=theta_222relg)[, , 1, 1], A11_222)
+  expect_equal(pick_allA(p=2, M=2, d=2, params=theta_222relg)[, , 2, 1], A12_222)
+  expect_equal(pick_allA(p=2, M=2, d=2, params=theta_222relg)[, , 1, 2], A21_222)
+  expect_equal(pick_allA(p=2, M=2, d=2, params=theta_222relg)[, , 2, 2], A22_222)
+  expect_equal(pick_allA(p=1, M=3, d=2, params=theta_132relg)[, , 1, 2], A11_132)
+  expect_equal(pick_allA(p=1, M=3, d=2, params=theta_132relg)[, , 1, 2], A21_132)
+  expect_equal(pick_allA(p=1, M=3, d=2, params=theta_132relg)[, , 1, 3], A31_132)
+  expect_equal(pick_allA(p=1, M=1, d=3, params=theta_113relg)[, , 1, 1], A11_113)
+  expect_equal(pick_allA(p=2, M=1, d=3, params=theta_213relg)[, , 1, 1], A11_213)
+  expect_equal(pick_allA(p=2, M=1, d=3, params=theta_213relg)[, , 2, 1], A12_213)
+  expect_equal(pick_allA(p=1, M=2, d=3, params=theta_123relg)[, , 1, 1], A11_123)
+  expect_equal(pick_allA(p=1, M=2, d=3, params=theta_123relg)[, , 1, 2], A21_123)
+})
+
+test_that("pick_Omegas work correctly", {
+  expect_equal(pick_Omegas(p=1, M=1, d=2, params=theta_112relg)[, , 1], Omega1_112)
+  expect_equal(pick_Omegas(p=2, M=1, d=2, params=theta_212relg)[, , 1], Omega1_212)
+  expect_equal(pick_Omegas(p=3, M=1, d=2, params=theta_312relg)[, , 1], Omega1_312)
+  expect_equal(pick_Omegas(p=1, M=2, d=2, params=theta_122relg)[, , 1], Omega1_122)
+  expect_equal(pick_Omegas(p=1, M=2, d=2, params=theta_122relg)[, , 2], Omega2_122)
+  expect_equal(pick_Omegas(p=2, M=2, d=2, params=theta_222relg)[, , 1], Omega1_222)
+  expect_equal(pick_Omegas(p=2, M=2, d=2, params=theta_222relg)[, , 2], Omega2_222)
+  expect_equal(pick_Omegas(p=1, M=3, d=2, params=theta_132relg)[, , 1], Omega1_132)
+  expect_equal(pick_Omegas(p=1, M=3, d=2, params=theta_132relg)[, , 2], Omega2_132)
+  expect_equal(pick_Omegas(p=1, M=3, d=2, params=theta_132relg)[, , 3], Omega3_132)
+  expect_equal(pick_Omegas(p=1, M=1, d=3, params=theta_113relg)[, , 1], Omega1_113)
+  expect_equal(pick_Omegas(p=2, M=1, d=3, params=theta_213relg)[, , 1], Omega1_213)
+  expect_equal(pick_Omegas(p=1, M=2, d=3, params=theta_123relg)[, , 1], Omega1_123)
+  expect_equal(pick_Omegas(p=1, M=2, d=3, params=theta_123relg)[, , 2], Omega2_123)
+})
+
+test_that("pick_weightpars work correctly", {
+  # relative_dens, Gaussian
+  expect_equal(pick_weightpars(p=1, M=1, d=2, params=theta_112relg, weight_function="relative_dens", cond_dist="Gaussian"), 1)
+  expect_equal(pick_weightpars(p=2, M=1, d=2, params=theta_212relg, weight_function="relative_dens", cond_dist="Gaussian"), 1)
+  expect_equal(pick_weightpars(p=3, M=1, d=2, params=theta_312relg, weight_function="relative_dens", cond_dist="Gaussian"), 1)
+  expect_equal(pick_weightpars(p=1, M=2, d=2, params=theta_122relg, weight_function="relative_dens", cond_dist="Gaussian"),
+               c(alpha1_122, 1 - alpha1_122))
+  expect_equal(pick_weightpars(p=2, M=2, d=2, params=theta_222relg, weight_function="relative_dens", cond_dist="Gaussian"),
+               c(alpha1_222, 1 - alpha1_222))
+  expect_equal(pick_weightpars(p=1, M=3, d=2, params=theta_132relg, weight_function="relative_dens", cond_dist="Gaussian"),
+               c(alpha1_132, alpha2_132, 1 - alpha1_132 - alpha2_132))
+  expect_equal(pick_weightpars(p=1, M=1, d=3, params=theta_113relg, weight_function="relative_dens", cond_dist="Gaussian"), 1)
+  expect_equal(pick_weightpars(p=2, M=1, d=3, params=theta_213relg, weight_function="relative_dens", cond_dist="Gaussian"), 1)
+  expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123relg, weight_function="relative_dens", cond_dist="Gaussian"),
+               c(alpha1_123, 1 - alpha1_123))
+})
 
