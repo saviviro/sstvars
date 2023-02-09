@@ -43,8 +43,8 @@ where
   \item{\eqn{\nu > 2} is the degrees of freedom parameter that is included only if \code{cond_dist="Student"}.}
 }
 \describe{
-  \item{For models with \code{weight_function="relative_dens"}:}{\eqn{\alpha = (\alpha_1,...,\alpha_{M-1})} \eqn{(M - 1 \times 1)},
-        where \eqn{\alpha_m} \eqn{(1\times 1), m=1,...,M-1} are the transition weight parameters.}
+  \item{For models with \code{weight_function="relative_dens"}:}{\eqn{\alpha = (\alpha_1,...,\alpha_{M-1})}
+        \eqn{(M - 1 \times 1)}, where \eqn{\alpha_m} \eqn{(1\times 1), m=1,...,M-1} are the transition weight parameters.}
   \item{For models with \code{weight_function="logit"}:}{\eqn{\alpha = (\gamma_1,...,\gamma_M)} \eqn{((M-1)k\times 1)},
         where \eqn{\gamma_m} \eqn{(k\times 1), m=1,...,M-1} contains the logit-regression coefficients of the \eqn{m}th regime.}
 }
@@ -97,7 +97,10 @@ FILL IN
 }
 \references{
 \itemize{
-   \item Currently no references
+   \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis,
+         \emph{Springer}.
+   \item McElroy T. 2017. Computation of vector ARMA autocovariances.
+         \emph{Statistics and Probability Letters}, \strong{124}, 92-96.
  }
 }
 \keyword{internal}
