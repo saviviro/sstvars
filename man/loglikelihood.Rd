@@ -101,6 +101,7 @@ FILL IN
          \emph{Springer}.
    \item McElroy T. 2017. Computation of vector ARMA autocovariances.
          \emph{Statistics and Probability Letters}, \strong{124}, 92-96.
+   \item References to the STVAR models TO BE INCLUDED.
  }
 }
 \keyword{internal}

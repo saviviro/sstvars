@@ -59,6 +59,7 @@
 #'          \emph{Springer}.
 #'    \item McElroy T. 2017. Computation of vector ARMA autocovariances.
 #'          \emph{Statistics and Probability Letters}, \strong{124}, 92-96.
+#'    \item References to the STVAR models TO BE INCLUDED.
 #'  }
 #' @keywords internal
 
@@ -92,6 +93,7 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   all_A <- pick_allA(p=p, M=M, d=d, params=params) # [d, d, p, M]
   all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params) # [d, d, M]
   weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist)
+  all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
 
   # Check that the parameter vector lies in the parameter space
 }
