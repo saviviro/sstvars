@@ -93,7 +93,7 @@ Omega1_113 <- matrix(c(c(1, 0.2, 0.3, 0.2, 2, 0.4, 0.3, 0.4, 3)), nrow=3)
 Omega1_113_notpd <- matrix(c(c(1, 0.2, 0.3, 0.02, 0.2, 0.4, 0.3, 0.4, 0.3)), nrow=3)
 
 theta_113relg <- c(phi10_113, vec(A11_113), vech(Omega1_113))
-theta_113relg_notpd <- c(phi10_113, vec(A11_113), vech(Omega1_113))
+theta_113relg_notpd <- c(phi10_113, vec(A11_113), vech(Omega1_113_notpd))
 
 # p=2, M=1, d=3
 phi10_213 <- phi10_113; A11_213 <- A11_113; Omega1_213 <- Omega1_113
@@ -131,7 +131,6 @@ Omegas_213 <- pick_Omegas(p=2, M=1, d=3, params=theta_213relg_notstab)
 Omegas_123 <- pick_Omegas(p=1, M=2, d=3, params=theta_123relg_notstab)
 Omegas_123_notpd <- pick_Omegas(p=1, M=2, d=3, params=theta_123relg_notpd)
 
-
 boldA_112 <- form_boldA(p=1, M=1, d=2, all_A=pick_allA(p=1, M=1, d=2, params=theta_112relg))
 boldA_212_notstab <- form_boldA(p=2, M=1, d=2, all_A=pick_allA(p=2, M=1, d=2, params=theta_212relg_notstab))
 boldA_212 <- form_boldA(p=2, M=1, d=2, all_A=pick_allA(p=2, M=1, d=2, params=theta_212relg))
@@ -146,6 +145,16 @@ boldA_213_notstab <- form_boldA(p=2, M=1, d=3, all_A=pick_allA(p=2, M=1, d=3, pa
 boldA_213 <- form_boldA(p=2, M=1, d=3, all_A=pick_allA(p=2, M=1, d=3, params=theta_213relg))
 boldA_123_notstab <- form_boldA(p=1, M=2, d=3, all_A=pick_allA(p=1, M=2, d=3, params=theta_123relg_notstab))
 boldA_123 <- form_boldA(p=1, M=2, d=3, all_A=pick_allA(p=1, M=2, d=3, params=theta_123relg_notpd))
+
+weightpars_112rel <- pick_weightpars(p=1, M=1, d=2, params=theta_112relg, weight_function="relative_dens", cond_dist="Gaussian")
+weightpars_212rel <- pick_weightpars(p=2, M=1, d=2, params=theta_212relg, weight_function="relative_dens", cond_dist="Gaussian")
+weightpars_312rel <- pick_weightpars(p=3, M=1, d=2, params=theta_312relg, weight_function="relative_dens", cond_dist="Gaussian")
+weightpars_122rel <- pick_weightpars(p=1, M=2, d=2, params=theta_122relg, weight_function="relative_dens", cond_dist="Gaussian")
+weightpars_222rel <- pick_weightpars(p=2, M=2, d=2, params=theta_222relg, weight_function="relative_dens", cond_dist="Gaussian")
+weightpars_132rel <- pick_weightpars(p=1, M=3, d=2, params=theta_132relg_notpd, weight_function="relative_dens", cond_dist="Gaussian")
+weightpars_113rel <- pick_weightpars(p=1, M=1, d=3, params=theta_113relg, weight_function="relative_dens", cond_dist="Gaussian")
+weightpars_213rel <- pick_weightpars(p=2, M=1, d=3, params=theta_213relg, weight_function="relative_dens", cond_dist="Gaussian")
+weightpars_123rel <- pick_weightpars(p=1, M=2, d=3, params=theta_123relg_notpd, weight_function="relative_dens", cond_dist="Gaussian")
 
 
 test_that("stab_conds_satisfied work correctly", {
@@ -171,32 +180,88 @@ test_that("stab_conds_satisfied work correctly", {
 test_that("stab_conds_satisfied work correctly", {
   # Checks stability conditions
   expect_true(in_paramspace(p=1, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian",
-                            all_boldA=boldA_112, all_Omega=Omegas_112, weightpars=1))
+                            all_boldA=boldA_112, all_Omegas=Omegas_112, weightpars=weightpars_112rel))
   expect_false(in_paramspace(p=2, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian",
-                             all_boldA=boldA_212_notstab, all_Omega=Omegas_212, weightpars=1))
+                             all_boldA=boldA_212_notstab, all_Omegas=Omegas_212, weightpars=weightpars_312rel))
   expect_false(in_paramspace(p=3, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian",
-                             all_boldA=boldA_312_notstab, all_Omega=Omegas_312, weightpars=1))
+                             all_boldA=boldA_312_notstab, all_Omegas=Omegas_312, weightpars=weightpars_312rel))
   expect_true(in_paramspace(p=1, M=2, d=2, weight_function="relative_dens", cond_dist="Gaussian",
-                            all_boldA=boldA_122, all_Omega=Omegas_122, weightpars=alpha1_122))
+                            all_boldA=boldA_122, all_Omegas=Omegas_122, weightpars=weightpars_122rel))
   expect_true(in_paramspace(p=2, M=2, d=2, weight_function="relative_dens", cond_dist="Gaussian",
-                            all_boldA=boldA_222, all_Omega=Omegas_222, weightpars=alpha1_222))
+                            all_boldA=boldA_222, all_Omegas=Omegas_222, weightpars=weightpars_222rel))
   expect_false(in_paramspace(p=1, M=3, d=2, weight_function="relative_dens", cond_dist="Gaussian",
-                             all_boldA=boldA_132_notstab, all_Omega=Omegas_132, weightpars=c(alpha1_132, alpha2_132)))
+                             all_boldA=boldA_132_notstab, all_Omegas=Omegas_132, weightpars=weightpars_132rel))
   expect_true(in_paramspace(p=1, M=1, d=3, weight_function="relative_dens", cond_dist="Gaussian",
-                            all_boldA=boldA_113, all_Omega=Omegas_113, weightpars=1))
+                            all_boldA=boldA_113, all_Omegas=Omegas_113, weightpars=weightpars_113rel))
   expect_false(in_paramspace(p=2, M=1, d=3, weight_function="relative_dens", cond_dist="Gaussian",
-                             all_boldA=boldA_213_notstab, all_Omega=Omegas_213, weightpars=1))
+                             all_boldA=boldA_213_notstab, all_Omegas=Omegas_213, weightpars=weightpars_213rel))
   expect_false(in_paramspace(p=1, M=2, d=3, weight_function="relative_dens", cond_dist="Gaussian",
-                             all_boldA=boldA_123_notstab, all_Omega=Omegas_123, weightpars=alpha1_123))
+                             all_boldA=boldA_123_notstab, all_Omegas=Omegas_123, weightpars=weightpars_123rel))
 
   # Check Omegas
-
-
-
-
+  expect_true(in_paramspace(p=1, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                            all_boldA=boldA_112, all_Omegas=Omegas_112, weightpars=weightpars_112rel))
+  expect_false(in_paramspace(p=1, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                            all_boldA=boldA_112, all_Omegas=Omegas_112_notpd, weightpars=weightpars_112rel))
+  expect_true(in_paramspace(p=2, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                            all_boldA=boldA_212, all_Omegas=Omegas_212, weightpars=weightpars_212rel))
+  expect_true(in_paramspace(p=1, M=2, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                            all_boldA=boldA_122, all_Omegas=Omegas_122, weightpars=weightpars_122rel))
+  expect_false(in_paramspace(p=1, M=2, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                             all_boldA=boldA_122, all_Omegas=Omegas_122_notpd, weightpars=weightpars_122rel))
+  expect_true(in_paramspace(p=2, M=2, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                            all_boldA=boldA_222, all_Omegas=Omegas_222, weightpars=weightpars_222rel))
+  expect_true(in_paramspace(p=1, M=3, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                             all_boldA=boldA_132, all_Omegas=Omegas_132, weightpars=weightpars_132rel))
+  expect_false(in_paramspace(p=1, M=3, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                             all_boldA=boldA_132, all_Omegas=Omegas_132_notpd, weightpars=weightpars_132rel))
+  expect_false(in_paramspace(p=1, M=1, d=3, weight_function="relative_dens", cond_dist="Gaussian",
+                             all_boldA=boldA_113, all_Omegas=Omegas_113_notpd, weightpars=weightpars_113rel))
+  expect_true(in_paramspace(p=1, M=2, d=3, weight_function="relative_dens", cond_dist="Gaussian",
+                             all_boldA=boldA_123, all_Omegas=Omegas_123, weightpars=weightpars_123rel))
+  expect_false(in_paramspace(p=1, M=2, d=3, weight_function="relative_dens", cond_dist="Gaussian",
+                             all_boldA=boldA_123, all_Omegas=Omegas_123_notpd, weightpars=weightpars_123rel))
 
   # Check weightpars
+  expect_false(in_paramspace(p=1, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                            all_boldA=boldA_112, all_Omegas=Omegas_112, weightpars=-0.001))
+  expect_false(in_paramspace(p=1, M=2, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                            all_boldA=boldA_122, all_Omegas=Omegas_122, weightpars=c(1.0, 0.0001)))
+  expect_false(in_paramspace(p=1, M=3, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                            all_boldA=boldA_132, all_Omegas=Omegas_132, weightpars=c(0.99, 0.01001, 0.00001)))
+  expect_false(in_paramspace(p=1, M=3, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                            all_boldA=boldA_132, all_Omegas=Omegas_132, weightpars=c(0.99, -0.01, 0.01)))
+  expect_false(in_paramspace(p=1, M=2, d=3, weight_function="relative_dens", cond_dist="Gaussian",
+                            all_boldA=boldA_123, all_Omegas=Omegas_123, weightpars=c(1.01, 0.01)))
+  expect_false(in_paramspace(p=1, M=2, d=3, weight_function="relative_dens", cond_dist="Gaussian",
+                             all_boldA=boldA_123, all_Omegas=Omegas_123, weightpars=c(-0.01, 0.99)))
 
   # Checks df
   # TO BE FILLED IN
 })
+
+
+test_that("check_pMd works correctly", {
+  expect_error(check_pMd(p=1, M=1, d=1))
+  expect_error(check_pMd(p=1, M=1.2, d=2))
+  expect_error(check_pMd(p=0, M=1, d=2))
+  expect_error(check_pMd(p=1, M=-1, d=2))
+  expect_error(check_pMd(p=1.1, M=1, d=2))
+  expect_error(check_pMd(p=1, M=1, d=2.2))
+  expect_error(check_pMd(p=2, M=c(1, 1), d=2))
+  expect_error(check_pMd(p=-1, M=1, d=2))
+  expect_error(check_pMd(p=c(1, 1), M=1, d=2))
+})
+
+test_that("all_pos_ints works correctly", {
+  expect_true(all_pos_ints(c(1, 2, 3)))
+  expect_true(all_pos_ints(1))
+  expect_true(all_pos_ints(list(1, 3, 100)))
+
+  expect_false(all_pos_ints(c(1, 2, 0)))
+  expect_false(all_pos_ints(-1))
+  expect_false(all_pos_ints(0.1))
+  expect_false(all_pos_ints(1.1))
+  expect_false(all_pos_ints(list(1, 2, 3, 0.1)))
+})
+

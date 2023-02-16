@@ -60,7 +60,7 @@ stab_conds_satisfied <- function(p, M, d, params, all_boldA=NULL, tolerance=1e-3
 #'  }
 #'  @keywords internal
 
-in_paramspace <- function(p, M, d, weight_function, cond_dist, all_boldA, all_Omega, weightpars, df,
+in_paramspace <- function(p, M, d, weight_function, cond_dist, all_boldA, all_Omegas, weightpars, df,
                           stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
 
   if(cond_dist == "Student") { # Check degrees of freedom parameter
@@ -79,10 +79,75 @@ in_paramspace <- function(p, M, d, weight_function, cond_dist, all_boldA, all_Om
     return(FALSE)
   }
   for(m in 1:M) {
-    if(any(eigen(all_Omega[, , m], symmetric=TRUE, only.values=TRUE)$values < posdef_tol)) {
+    if(any(eigen(all_Omegas[, , m], symmetric=TRUE, only.values=TRUE)$values < posdef_tol)) {
       return(FALSE)
     }
   }
   TRUE
 }
 
+
+#' @title Check whether the parameter vector is in the parameter space and throw error if not
+#'
+#' @description \code{check_parameters} checks whether the parameter vector is in the parameter
+#'   space.
+#'
+#' @inheritParams loglikelihood
+#' @inheritParams in_paramspace
+#' @return Throws an informative error if there is something wrong with the parameter vector.
+#' @inherit in_paramspace references
+#' @examples
+#'  \dontrun{
+#'  # There examples will cause an informative error
+#'  params112relg_notpd <- c(6.5e-01, 7.0e-01, 2.9e-01, 2.0e-02, -1.4e-01,
+#'   9.0e-01, 6.0e-01, -1.0e-02, 1.0e-07)
+#'
+#'  # FILL IN!
+#'  }
+#' @export
+
+check_parameters <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
+                             parametrization=c("intercept", "mean"),
+                             identification=c("reduced_form", "recursive", "heteroskedasticity"),
+                             AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
+                             stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
+
+  # FILL IN!
+  # FILL IN!
+}
+
+
+#' @title Check whether all arguments are positive integers
+#'
+#' @description \code{all_pos_ints} checks whether all the elements in a vector
+#'   are positive integers.
+#'
+#' @param x a vector containing the elements to be tested.
+#' @return Returns \code{TRUE} or \code{FALSE} accordingly.
+#' @keywords internal
+
+all_pos_ints <- function(x) {
+  all(vapply(x, function(x1) x1 %% 1 == 0 && length(x1) == 1 && x1 >= 1, logical(1)))
+}
+
+#' @title Check that p, M, and d are correctly set
+#'
+#' @description \code{check_pMd} checks the arguments p, M, and d.
+#'
+#' @inheritParams stab_conds_satisfied
+#' @return Throws an error if something is wrong.
+#' @keywords internal
+
+check_pMd <- function(p, M, d) {
+  if(!all_pos_ints(M) || length(M) != 1) {
+    stop("The argument M must be a positive integer!")
+  }
+  if(!all_pos_ints(p) || length(p) != 1) {
+    stop("The argument p must be a positive integer!")
+  }
+  if(!missing(d)) {
+    if(d < 2 | d%%1 != 0) {
+      stop("The argument d, the number of columns in the data matrix, has to be a positive integer larger than one!")
+    }
+  }
+}

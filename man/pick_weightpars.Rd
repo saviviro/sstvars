@@ -49,7 +49,7 @@ of a given matrix from the principal diagonal downwards (including elements on t
 \value{
 \describe{
     \item{If \code{weight_function = "relative_dens"}:}{Returns a length M vector containing the transition weight
-          parameters \eqn{alpha_{m}, m=1,...,M}, including the non-parametrized \eqn{alpha_{M}}.}
+          parameters \eqn{\alpha_{m}, m=1,...,M}, including the non-parametrized \eqn{\alpha_{M}}.}
     \item{If \code{weight_function = "logit"}:}{NOT YET IMPLEMENTED}
   }
 }

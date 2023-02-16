@@ -11,7 +11,7 @@ in_paramspace(
   weight_function,
   cond_dist,
   all_boldA,
-  all_Omega,
+  all_Omegas,
   weightpars,
   df,
   stab_tol = 0.001,
@@ -33,8 +33,6 @@ in_paramspace(
 \item{all_boldA}{3D array containing the \eqn{((dp)x(dp))} "bold A" (companion form) matrices of each regime,
 obtained from \code{form_boldA}. Will be computed if not given.}
 
-\item{all_Omega}{3D array containing all covariance matrices \eqn{\Omega_{m}}, obtained from \code{pick_Omegas}.}
-
 \item{weightpars}{numerical vector containing the transition weight parameters, obtained from \code{pick_weightpars}.}
 
 \item{stab_tol}{numerical tolerance for the stability condition of each regime: if the "bold A" matrix of any regime
@@ -48,6 +46,8 @@ evaluation of the log-likelihood might fail and cause error.}
 
 \item{df_tol}{the parameter vector is considered to be outside the parameter space the degrees of
 freedom parameters is not larger than \code{2 + df_tol}.}
+
+\item{all_Omega}{3D array containing all covariance matrices \eqn{\Omega_{m}}, obtained from \code{pick_Omegas}.}
 }
 \value{
 Returns \code{TRUE} if the given parameter values are in the parameter space and \code{FALSE} otherwise.

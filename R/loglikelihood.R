@@ -89,7 +89,11 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   # First remove all constraints, if any; also switch to reduced form parameter vector; TO BE IMPLEMENTED
 
   # Pick params
-  all_phi0 <- pick_phi0(M=M, d=d, params=params) # [d, M]
+  if(parametrization == "intercept") { # [d, M]
+    all_phi0 <- pick_phi0(M=M, d=d, params=params)
+  } else {
+    all_mu <- pick_phi0(M=M, d=d, params=params) # mean parameters instead of intercepts
+  }
   all_A <- pick_allA(p=p, M=M, d=d, params=params) # [d, d, p, M]
   all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params) # [d, d, M]
   weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist)
@@ -97,6 +101,83 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   df <- numeric(0) # FILL IN WHEN STUDENT IS IMPLEMENTED
 
   # Check that the parameter vector lies in the parameter space
+  if(check_params) {
+    if(!in_paramspace(p=p, M=M, d=d, weight_function=weight_functions, cond_dist=cond_dist,
+                      all_boldA=all_boldA, all_Omegas=all_Omegas, weightpars=weightpars, df=df,
+                      stab_tol=stab_tol, posdef_tol=posdef_tol, df_tol=df_tol)) {
+      return(minval)
+    }
+  }
 
-  # in_paramsspace ... (tehty mutta ei testatty!)
+  # i:th row denotes the vector \bold{y_{i-1}} = (y_{i-1},...,y_{i-p}) (dpx1),
+  # assuming the observed data is y_{-p+1},...,y_0,y_1,...,y_{T}
+  Y <- reform_data(data, p)
+
+  # NOTE! IF parametrization == "intercept" && weight_function == "logit" WE DONT NEED TO CALCULATE all_mu
+  # THAT MIGHT SAVE COMPUTATION TIME IN GRADIENT BASED ESTIMATION!
+  # Calculate unconditional regime-specific expected values (column per component) or phi0-parameters if using mean-parametrization
+  Id <- diag(nrow=d)
+  if(parametrization == "intercept") {
+    all_mu <- vapply(1:M, function(m) solve(Id - rowSums(all_A[, , , m, drop=FALSE], dims=2), all_phi0[,m]), numeric(d)) # rowSums: sum over dims+1=3
+  } else {
+    all_phi0 <- vapply(1:M, function(m) (Id - rowSums(all_A[, , , m, drop=FALSE], dims=2))%*%all_mu[,m], numeric(d))
+  }
+
+  # Calculate the transition weights
+  # get_alpha_mt ...
+}
+
+
+
+
+#' @title Get the transition weights alpha_mt
+#'
+#' @description \code{get_alpha_mt} computes the transition weights.
+#'
+#' @inheritParams loglikelihood
+#' @inheritParams in_paramspace
+#' @param epsilon the smallest number such that its exponent is wont classified as numerically zero
+#'   (around \code{-698} is used).
+#' @details Note that we index the time series as \eqn{-p+1,...,0,1,...,T}.
+#' @return Returns the mixing weights a \eqn{(T x M)} matrix, so that the t:th row is for the time point t
+#'   and m:th column is for the regime m.
+#' @inherit in_paramspace references
+#' @keywords internal
+
+get_alpha_mt <- function(data, p, M, weight_function, all_boldA, all_Omegas, weightpars, epsilon) {
+  T_obs <- nrow(data) - p
+  if(M == 1) {
+    return(as.matrix(rep(1, times=T_obs)))
+  }
+
+  if(weight_function == "relative_dens") {
+
+    # Calculate the transition weights based on the log-multivariate density values
+    if(!is.matrix(log_mvdvalues)) log_mvdvalues <- t(as.matrix(log_mvdvalues)) # Only one time point but multiple regimes
+    log_mvdvalues_orig <- log_mvdvalues
+    small_logmvns <- log_mvdvalues < epsilon
+    if(any(small_logmvns)) {
+      # If too small or large non-log-density values are present (i.e., that would yield -Inf or Inf),
+      # we replace them with ones that are not too small or large but imply the same mixing weights
+      # up to negligible numerical tolerance (tested in gmvarkit).
+      which_change <- rowSums(small_logmvns) > 0 # Which rows contain too small  values
+      to_change <- log_mvdvalues[which_change, , drop=FALSE]
+      largest_vals <- do.call(pmax, split(to_change, f=rep(1:ncol(to_change), each=nrow(to_change)))) # The largest values of those rows
+      diff_to_largest <- to_change - largest_vals # Differences to the largest value of the row
+
+      # For each element in each row, check the (negative) distance from the largest value of the row. If the difference
+      # is smaller than epsilon, replace the with epsilon. The results are then the new log_mvn values.
+      diff_to_largest[diff_to_largest < epsilon] <- epsilon
+
+      # Replace the old log_mvdvalues with the new ones
+      log_mvdvalues[which_change,] <- diff_to_largest
+    }
+
+    mvnvalues <- exp(log_mvdvalues)
+    denominator <- as.vector(mvnvalues%*%weightpars)
+    alpha_mt <- (mvnvalues/denominator)%*%diag(weightpars)
+  } else if(weight_function == "logit") {
+    stop("Logit weight function is not yet implemented to get_alpha_mt")
+  }
+  alpha_mt
 }

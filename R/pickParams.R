@@ -136,7 +136,7 @@ pick_Omegas <- function(p, M, d, params) {
 #' @return
 #'   \describe{
 #'     \item{If \code{weight_function = "relative_dens"}:}{Returns a length M vector containing the transition weight
-#'           parameters \eqn{alpha_{m}, m=1,...,M}, including the non-parametrized \eqn{alpha_{M}}.}
+#'           parameters \eqn{\alpha_{m}, m=1,...,M}, including the non-parametrized \eqn{\alpha_{M}}.}
 #'     \item{If \code{weight_function = "logit"}:}{NOT YET IMPLEMENTED}
 #'   }
 
