@@ -20,14 +20,19 @@ phi10_212 <- c(0.53, 0.03)
 A11_212 <- matrix(c(0.23, 0.02, -0.17, 0.66), nrow=2, byrow=FALSE)
 A12_212 <- matrix(c(1.18, 0.02, 1.04, 0.26), nrow=2, byrow=FALSE)
 Omega1_212 <- matrix(c(0.58, 0.01, 0.01, 0.06), nrow=2, byrow=FALSE)
+A12_212_stab <- matrix(c(0.18, 0.02, 0.04, 0.26), nrow=2, byrow=FALSE)
 
 theta_212relg_notstab <- c(phi10_212, vec(A11_212), vec(A12_212), vech(Omega1_212))
+theta_212relg <- c(phi10_212, vec(A11_212), vec(A12_212_stab), vech(Omega1_212))
 
 
 # p=3, M=1, d=2
-phi10_312 <- phi10_212; A11_312 <- A11_212; A12_312 <- A12_212; Omega1_312 <- Omega1_212
-A13_312 <-  matrix(c(-0.15, -0.01, 0.06, -0.23), nrow=2, byrow=FALSE)
+phi10_312 <- phi10_212; A11_312 <- A11_212; A12_312 <- A12_212; Omega1_312 <- Omega1_212; A12_312_stab <- A12_212_stab
+A13_312 <- matrix(c(-0.15, -0.01, 0.06, -0.23), nrow=2, byrow=FALSE)
+A13_312_stab <- matrix(c(-0.015, -0.01, 0.06, -0.023), nrow=2, byrow=FALSE)
+
 theta_312relg_notstab <- c(phi10_312, vec(A11_312), vec(A12_312), vec(A13_312), vech(Omega1_312))
+theta_312relg <- c(phi10_312, vec(A11_312), vec(A12_312_stab), vec(A13_312_stab), vech(Omega1_312))
 
 # p=1, M=2, d=2
 phi10_122 <- c(0.55, 0.11)
@@ -93,8 +98,11 @@ theta_113relg_notpd <- c(phi10_113, vec(A11_113), vech(Omega1_113))
 # p=2, M=1, d=3
 phi10_213 <- phi10_113; A11_213 <- A11_113; Omega1_213 <- Omega1_113
 A12_213 <- matrix(c(0.13, 0.03, 0.21, 0.03, 0.14, 2.15, 0.06, -1.07, 0.08), nrow=3)
-A12_213_stab <- matrix(c(0.13, 0.03, 0.21, 0.03, 0.14, 0.15, 0.06, -1.07, 0.08), nrow=3)
+A12_213_stab <- matrix(c(0.13, 0.03, 0.21, 0.03, 0.14, 0.15, 0.06, -0.07, 0.08), nrow=3)
+
 theta_213relg_notstab <- c(phi10_213, vec(A11_213), vec(A12_213), vech(Omega1_213))
+theta_213relg <- c(phi10_213, vec(A11_213), vec(A12_213_stab), vech(Omega1_213))
+
 
 # p=1, M=2, d=3
 phi10_123 <- phi10_113; A11_123 <- A11_113; A21_123 <- A12_213; Omega1_123 <- Omega1_113; A21_123_stab <- A12_213_stab
@@ -171,6 +179,10 @@ test_that("stab_conds_satisfied work correctly", {
                              all_boldA=boldA_123_notstab, all_Omega=Omegas_123, weightpars=alpha1_123))
 
   # Check Omegas
+  expect_false(in_paramspace(p=1, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                            all_boldA=boldA_112, all_Omega=Omegas_112, weightpars=1))
+
+
 
 
   # Check weightpars
