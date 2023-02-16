@@ -93,15 +93,20 @@ theta_113relg_notpd <- c(phi10_113, vec(A11_113), vech(Omega1_113))
 # p=2, M=1, d=3
 phi10_213 <- phi10_113; A11_213 <- A11_113; Omega1_213 <- Omega1_113
 A12_213 <- matrix(c(0.13, 0.03, 0.21, 0.03, 0.14, 2.15, 0.06, -1.07, 0.08), nrow=3)
+A12_213_stab <- matrix(c(0.13, 0.03, 0.21, 0.03, 0.14, 0.15, 0.06, -1.07, 0.08), nrow=3)
 theta_213relg_notstab <- c(phi10_213, vec(A11_213), vec(A12_213), vech(Omega1_213))
 
 # p=1, M=2, d=3
-phi10_123 <- phi10_113; A11_123 <- A11_113; A21_123 <- A12_213; Omega1_123 <- Omega1_113
+phi10_123 <- phi10_113; A11_123 <- A11_113; A21_123 <- A12_213; Omega1_123 <- Omega1_113; A21_123_stab <- A12_213_stab
 phi20_123 <- c(0.1, 0.2, 0.3)
 Omega2_123 <- matrix(c(c(1.1, -0.2, -0.3, -0.2, 2.2, -0.4, -0.3, -0.4, 3.3)), nrow=3)
+Omega2_123_notpd <- matrix(c(c(0.1, -0.2, -0.3, -0.2, 2.2, -0.4, -0.3, -0.4, 0.3)), nrow=3)
 alpha1_123 <- 0.6
 theta_123relg_notstab <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123),
                            vech(Omega2_123), alpha1_123)
+theta_123relg_notpd <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123_stab), vech(Omega1_123),
+                           vech(Omega2_123_notpd), alpha1_123)
+
 
 Omegas_112 <- pick_Omegas(p=1, M=1, d=2, params=theta_112relg)
 Omegas_212 <- pick_Omegas(p=2, M=1, d=2, params=theta_212relg_notstab)
