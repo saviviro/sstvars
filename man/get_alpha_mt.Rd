@@ -6,12 +6,16 @@
 \usage{
 get_alpha_mt(
   data,
+  Y,
   p,
   M,
+  d,
   weight_function,
+  all_A,
   all_boldA,
   all_Omegas,
   weightpars,
+  all_mu,
   epsilon
 )
 }
@@ -19,16 +23,24 @@ get_alpha_mt(
 \item{data}{data a matrix or class \code{'ts'} object with \code{d>1} columns. Each column is taken to represent
 a univariate time series. Missing values are not supported.}
 
+\item{Y}{the data arranged as obtained from \code{reform_data(data, p)}}
+
 \item{p}{a positive integer specifying the autoregressive order}
 
 \item{M}{a positive integer specifying the number of regimes}
 
+\item{d}{the number of time series in the system, i.e., the dimension}
+
 \item{weight_function}{what type of transition weights should be used?}
+
+\item{all_A}{4D array containing all coefficient matrices \eqn{A_{m,i}}, obtained from \code{pick_allA}.}
 
 \item{all_boldA}{3D array containing the \eqn{((dp)x(dp))} "bold A" (companion form) matrices of each regime,
 obtained from \code{form_boldA}. Will be computed if not given.}
 
 \item{weightpars}{numerical vector containing the transition weight parameters, obtained from \code{pick_weightpars}.}
+
+\item{all_mu}{an \eqn{(d \times M)} matrix containing the unconditional regime-specific means}
 
 \item{epsilon}{the smallest number such that its exponent is wont classified as numerically zero
 (around \code{-698} is used).}

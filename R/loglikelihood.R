@@ -51,7 +51,13 @@
 #' @details FILL IN
 #' @return
 #'   \describe{
-#'     \item{If \code{to_return="loglik"}:}{the log-likelihood of the specified model}
+#'     \item{If \code{to_return="loglik"}:}{the log-likelihood of the specified model.}
+#'     \item{If \code{to_return=="tw"}:}{a size \eqn{((n_obs-p)\times M)} matrix containing the transition weights: for m:th component
+#'       in m:th column.}
+#'     \item{If \code{to_return=="terms"}:}{a size \eqn{((n_obs-p)\times 1)} numeric vector containing the terms \eqn{l_{t}}.}
+#'     \item{If \code{to_return=="regime_cmeans"}:}{an \code{[n_obs-p, d, M]} array containing the regimewise conditional means.}
+#'     \item{If \code{to_return=="total_cmeans"}:}{a \code{[n_obs-p, d]} matrix containing the conditional means of the process.}
+#'     \item{If \code{to_return=="total_ccovs"}:}{an \code{[d, d, n_obs-p]} array containing the conditional covariance matrices of the process.}
 #'   }
 #' @references
 #'  \itemize{
@@ -67,8 +73,8 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
                           parametrization=c("intercept", "mean"),
                           identification=c("reduced_form", "recursive", "heteroskedasticity"),
                           AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
-                          to_return=c("loglik"), check_params=TRUE, minval=NULL,
-                          stat_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
+                          to_return=c("loglik", "tw", "terms", "regime_cmeans", "total_cmeans", "total_ccovs"),
+                          check_params=TRUE, minval=NULL, stat_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
   # Match args
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -112,6 +118,7 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   # i:th row denotes the vector \bold{y_{i-1}} = (y_{i-1},...,y_{i-p}) (dpx1),
   # assuming the observed data is y_{-p+1},...,y_0,y_1,...,y_{T}
   Y <- reform_data(data, p)
+  Y2 <- Y[1:T_obs,] # Last row removed; not needed when calculating something based on lagged observations
 
   # NOTE! IF parametrization == "intercept" && weight_function == "logit" WE DONT NEED TO CALCULATE all_mu
   # THAT MIGHT SAVE COMPUTATION TIME IN GRADIENT BASED ESTIMATION!
@@ -123,8 +130,39 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
     all_phi0 <- vapply(1:M, function(m) (Id - rowSums(all_A[, , , m, drop=FALSE], dims=2))%*%all_mu[,m], numeric(d))
   }
 
-  # Calculate the transition weights
-  # get_alpha_mt ...
+  # Calculate the transition weights [T_obs, M] with [t,m] indexing (nothing for the initial values here)
+  alpha_mt <- get_alpha_mt(data=data, Y2=Y2, p=p, M=M, d=d, weight_function=weight_function, all_A=all_A, all_boldA=all_boldA,
+                           all_Omegas=all_Omegas, weightpars=weightpars, all_mu=all_mu, epsilon=epsilon)
+  if(to_return == "tw") {
+    return(alpha_mt)
+  }
+
+  # Calculate the conditional means mu_{m,t}
+  # The dimensions of mu_mt will be: [t, p, m]
+  all_A2 <- array(all_A, dim=c(d, d*p, M)) # cbind coefficient matrices of each component: m:th component is obtained at [, , m]
+  mu_mt <- array(vapply(1:M, function(m) t(all_phi0[, m] + tcrossprod(all_A2[, , m], Y2)), numeric(d*T_obs)), dim=c(T_obs, d, M)) # [, , m]
+
+  # Return conditional moments if those were to be returned
+  if(to_return == "regime_cmeans") { # Regime-specific conditional menas
+    return(mu_mt)
+  } else if(to_return == "total_cmeans") { # Cond means of the process: weighted sum of regime-specific conditional means
+    return(matrix(rowSums(vapply(1:M, function(m) alpha_mt[,m]*mu_mt[, , m], numeric(d*T_obs))), nrow=T_obs, ncol=d, byrow=FALSE))
+  } else if(to_return == "total_ccovs") { # Cond covariance matrices of the process: weighted sum of regime-specific cond cov mats
+    return(array(rowSums(vapply(1:M, function(m) rep(alpha_mt[, m], each=d*d)*as.vector(all_Omegas[, , m]),
+                                numeric(d*d*T_obs))), dim=c(d, d, T_obs)))
+  }
+
+  # Calculate the conditional log-likelihood
+  dat <- data[(p + 1):n_obs,] # Initial values are not used here (conditional means and variances are already calculated)
+  mvd_vals <- matrix(nrow=T_obs, ncol=M)
+  if(cond_dist == "Gaussian") { # Gaussian conditiona distribution
+    # mvnfast taitaa käyttää samaa kovarianssimatriisia kaikilla t. Eli joutuunee laskemaan käsin?
+    # total_ccovs antaa ne kovarianssimatriisit
+
+    #mvd_vals <- vapply(1:M, function(m) mvnfast::dmvn(X=dat - mu_mt[, , m], mu=rep(0, times=d), sigma=all_Omega[, , m], log=FALSE, ncores=1, isChol=FALSE), numeric(T_obs))
+  } else if(cond_dist == "Student") {
+    stop("Student's t cond_dist is not implemented yet!")
+  }
 }
 
 
@@ -136,6 +174,9 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
 #'
 #' @inheritParams loglikelihood
 #' @inheritParams in_paramspace
+#' @inheritParams get_Sigmas
+#' @param Y2 the data arranged as obtained from \code{reform_data(data, p)} but excluding the last row
+#' @param all_mu an \eqn{(d \times M)} matrix containing the unconditional regime-specific means
 #' @param epsilon the smallest number such that its exponent is wont classified as numerically zero
 #'   (around \code{-698} is used).
 #' @details Note that we index the time series as \eqn{-p+1,...,0,1,...,T}.
@@ -144,13 +185,28 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
 #' @inherit in_paramspace references
 #' @keywords internal
 
-get_alpha_mt <- function(data, p, M, weight_function, all_boldA, all_Omegas, weightpars, epsilon) {
+get_alpha_mt <- function(data, Y2, p, M, d, weight_function, all_A, all_boldA, all_Omegas, weightpars, all_mu, epsilon) {
   T_obs <- nrow(data) - p
   if(M == 1) {
     return(as.matrix(rep(1, times=T_obs)))
   }
-
   if(weight_function == "relative_dens") {
+    # Calculate the covariance matrices Sigma_{m,p} (Lutkepohl 2005, eq. (2.1.39) or the algorithm proposed by McElroy 2017)
+    Sigmas <- get_Sigmas(p=p, M=M, d=d, all_A=all_A, all_boldA=all_boldA, all_Omegas=all_Omegas) # Store the (dpxdp) covariance matrices
+    chol_Sigmas <- array(dim=c(d*p, d*p, M))
+    for(m in 1:M) {
+      chol_Sigmas[, , m] <- chol(Sigmas[, , m]) # Take Cholesky here to avoid unnecessary warnings from mvnfast::dmvn
+    }
+
+    # Calculate the dp-dimensional multinormal densities in logarithm with the package mvnfast:
+    # i:th row for index i-1 etc, m:th column for m:th component.
+    # We calculate in logarithm because the non-log values may be too close to zero for machine accuracy (if they are too close to zero
+    # for all regimes and computer handles them as zero, we would divide by zero when calculating the transition weights).
+    log_mvdvalues <- vapply(1:M, function(m) mvnfast::dmvn(X=Y2, mu=rep(all_mu[,m], p), sigma=chol_Sigmas[, , m],
+                                                                   log=TRUE, ncores=1, isChol=TRUE),
+                            numeric(T_obs + 1)) # [T_obs, M] removes the period T+1 weights
+
+
 
     # Calculate the transition weights based on the log-multivariate density values
     if(!is.matrix(log_mvdvalues)) log_mvdvalues <- t(as.matrix(log_mvdvalues)) # Only one time point but multiple regimes
