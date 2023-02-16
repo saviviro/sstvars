@@ -90,6 +90,16 @@ alpha1_123 <- 0.6
 theta_123relg <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123),
                    vech(Omega2_123), alpha1_123)
 
+Omegas_112 <- pick_Omegas(p=1, M=1, d=2, params=theta_112relg)
+Omegas_212 <- pick_Omegas(p=2, M=1, d=2, params=theta_212relg)
+Omegas_312 <- pick_Omegas(p=3, M=1, d=2, params=theta_312relg)
+Omegas_122 <- pick_Omegas(p=1, M=2, d=2, params=theta_122relg)
+Omegas_222 <- pick_Omegas(p=2, M=2, d=2, params=theta_222relg)
+Omegas_123 <- pick_Omegas(p=1, M=2, d=3, params=theta_123relg)
+Omegas_113 <- pick_Omegas(p=1, M=1, d=3, params=theta_113relg)
+Omegas_213 <- pick_Omegas(p=2, M=1, d=3, params=theta_213relg)
+Omegas_123 <- pick_Omegas(p=1, M=2, d=3, params=theta_123relg)
+
 
 boldA_112 <- form_boldA(p=1, M=1, d=2, all_A=pick_allA(p=1, M=1, d=2, params=theta_112relg))
 boldA_212 <- form_boldA(p=2, M=1, d=2, all_A=pick_allA(p=2, M=1, d=2, params=theta_212relg))
@@ -120,3 +130,33 @@ test_that("stab_conds_satisfied work correctly", {
   expect_false(stab_conds_satisfied(p=1, M=2, d=3, params=theta_123relg))
 })
 
+
+test_that("stab_conds_satisfied work correctly", {
+  # Checks stability conditions
+  expect_true(in_paramspace(p=1, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                            all_boldA=boldA_112, all_Omega=Omegas_112, weightpars=1))
+  expect_false(in_paramspace(p=2, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                             all_boldA=boldA_212, all_Omega=Omegas_212, weightpars=1))
+  expect_false(in_paramspace(p=3, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                             all_boldA=boldA_312, all_Omega=Omegas_312, weightpars=1))
+  expect_true(in_paramspace(p=1, M=2, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                            all_boldA=boldA_122, all_Omega=Omegas_122, weightpars=alpha1_122))
+  expect_true(in_paramspace(p=2, M=2, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                            all_boldA=boldA_222, all_Omega=Omegas_222, weightpars=alpha1_222))
+  expect_false(in_paramspace(p=1, M=3, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                             all_boldA=boldA_132, all_Omega=Omegas_132, weightpars=c(alpha1_132, alpha2_132)))
+  expect_true(in_paramspace(p=1, M=1, d=3, weight_function="relative_dens", cond_dist="Gaussian",
+                            all_boldA=boldA_113, all_Omega=Omegas_113, weightpars=1))
+  expect_false(in_paramspace(p=2, M=1, d=3, weight_function="relative_dens", cond_dist="Gaussian",
+                             all_boldA=boldA_213, all_Omega=Omegas_213, weightpars=1))
+  expect_false(in_paramspace(p=1, M=2, d=3, weight_function="relative_dens", cond_dist="Gaussian",
+                             all_boldA=boldA_123, all_Omega=Omegas_123, weightpars=alpha1_123))
+
+  # Check Omegas
+
+
+  # Check weightpars
+
+  # Checks df
+  # TO BE FILLED IN
+})

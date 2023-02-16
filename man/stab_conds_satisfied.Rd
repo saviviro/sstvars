@@ -60,8 +60,7 @@ Does not support constrained parameter vectors.
 
 \references{
 \itemize{
-   \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis,
-         \emph{Springer}.
+   \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis, \emph{Springer}.
  }
 }
 \keyword{internal}

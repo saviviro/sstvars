@@ -7,7 +7,7 @@ Authors@R: person("Savi", "Virolainen", email = "savi.virolainen@helsinki.fi", r
 Maintainer: Savi Virolainen <savi.virolainen@helsinki.fi>
 Description: TO BE FILLED IN
     Use four spaces when indenting paragraphs within the Description.
-Depends: R (>= 3.6.0)
+Depends: R (>= 4.0.0)
 BugReports: https://github.com/saviviro/sstvars/issues
 License: GDPL-3
 Encoding: UTF-8

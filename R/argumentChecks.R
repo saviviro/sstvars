@@ -60,8 +60,8 @@ stab_conds_satisfied <- function(p, M, d, params, all_boldA=NULL, tolerance=1e-3
 #'  }
 #'  @keywords internal
 
-in_paramspace_int <- function(p, M, d, weight_function, cond_dist, all_boldA, all_Omega, weightpars, df,
-                              stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
+in_paramspace <- function(p, M, d, weight_function, cond_dist, all_boldA, all_Omega, weightpars, df,
+                          stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
 
   if(cond_dist == "Student") { # Check degrees of freedom parameter
     if(df <= 2 + df_tol) {

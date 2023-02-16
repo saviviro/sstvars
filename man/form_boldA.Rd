@@ -33,8 +33,7 @@ The "bold A" (companion form) matrix is given, for instance, in Lütkepohl (2005
 
 \references{
 \itemize{
-   \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis,
-         \emph{Springer}.
+   \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis, \emph{Springer}.
  }
 }
 \keyword{internal}
