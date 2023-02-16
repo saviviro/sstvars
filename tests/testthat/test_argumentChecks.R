@@ -82,7 +82,7 @@ alpha2_132 <- 0.3
 theta_132relg_notstab <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
                            vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), alpha1_132, alpha2_132)
 
-theta_132relg_notpd <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132stab),
+theta_132relg_notpd <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132_stab),
                            vech(Omega1_132), vech(Omega2_132), vech(Omega3_132_notpd), alpha1_132, alpha2_132)
 
 
@@ -117,25 +117,36 @@ theta_123relg_notpd <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123_stab), 
 
 
 Omegas_112 <- pick_Omegas(p=1, M=1, d=2, params=theta_112relg)
+Omegas_112_notpd <- pick_Omegas(p=1, M=1, d=2, params=theta_112relg_notpd)
 Omegas_212 <- pick_Omegas(p=2, M=1, d=2, params=theta_212relg_notstab)
 Omegas_312 <- pick_Omegas(p=3, M=1, d=2, params=theta_312relg_notstab)
 Omegas_122 <- pick_Omegas(p=1, M=2, d=2, params=theta_122relg)
+Omegas_122_notpd <- pick_Omegas(p=1, M=2, d=2, params=theta_122relg_notpd)
 Omegas_222 <- pick_Omegas(p=2, M=2, d=2, params=theta_222relg)
 Omegas_132 <- pick_Omegas(p=1, M=3, d=2, params=theta_132relg_notstab)
+Omegas_132_notpd <- pick_Omegas(p=1, M=3, d=2, params=theta_132relg_notpd)
 Omegas_113 <- pick_Omegas(p=1, M=1, d=3, params=theta_113relg)
+Omegas_113_notpd <- pick_Omegas(p=1, M=1, d=3, params=theta_113relg_notpd)
 Omegas_213 <- pick_Omegas(p=2, M=1, d=3, params=theta_213relg_notstab)
 Omegas_123 <- pick_Omegas(p=1, M=2, d=3, params=theta_123relg_notstab)
+Omegas_123_notpd <- pick_Omegas(p=1, M=2, d=3, params=theta_123relg_notpd)
 
 
 boldA_112 <- form_boldA(p=1, M=1, d=2, all_A=pick_allA(p=1, M=1, d=2, params=theta_112relg))
 boldA_212_notstab <- form_boldA(p=2, M=1, d=2, all_A=pick_allA(p=2, M=1, d=2, params=theta_212relg_notstab))
+boldA_212 <- form_boldA(p=2, M=1, d=2, all_A=pick_allA(p=2, M=1, d=2, params=theta_212relg))
 boldA_312_notstab <- form_boldA(p=3, M=1, d=2, all_A=pick_allA(p=3, M=1, d=2, params=theta_312relg_notstab))
+boldA_312 <- form_boldA(p=3, M=1, d=2, all_A=pick_allA(p=3, M=1, d=2, params=theta_312relg))
 boldA_122 <- form_boldA(p=1, M=2, d=2, all_A=pick_allA(p=1, M=2, d=2, params=theta_122relg))
 boldA_222 <- form_boldA(p=2, M=2, d=2, all_A=pick_allA(p=2, M=2, d=2, params=theta_222relg))
 boldA_132_notstab <- form_boldA(p=1, M=3, d=2, all_A=pick_allA(p=1, M=3, d=2, params=theta_132relg_notstab))
+boldA_132 <- form_boldA(p=1, M=3, d=2, all_A=pick_allA(p=1, M=3, d=2, params=theta_132relg_notpd))
 boldA_113 <- form_boldA(p=1, M=1, d=3, all_A=pick_allA(p=1, M=1, d=3, params=theta_113relg))
 boldA_213_notstab <- form_boldA(p=2, M=1, d=3, all_A=pick_allA(p=2, M=1, d=3, params=theta_213relg_notstab))
+boldA_213 <- form_boldA(p=2, M=1, d=3, all_A=pick_allA(p=2, M=1, d=3, params=theta_213relg))
 boldA_123_notstab <- form_boldA(p=1, M=2, d=3, all_A=pick_allA(p=1, M=2, d=3, params=theta_123relg_notstab))
+boldA_123 <- form_boldA(p=1, M=2, d=3, all_A=pick_allA(p=1, M=2, d=3, params=theta_123relg_notpd))
+
 
 test_that("stab_conds_satisfied work correctly", {
   expect_true(stab_conds_satisfied(p=1, M=1, d=2, all_boldA=boldA_112))
@@ -179,8 +190,7 @@ test_that("stab_conds_satisfied work correctly", {
                              all_boldA=boldA_123_notstab, all_Omega=Omegas_123, weightpars=alpha1_123))
 
   # Check Omegas
-  expect_false(in_paramspace(p=1, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian",
-                            all_boldA=boldA_112, all_Omega=Omegas_112, weightpars=1))
+
 
 
 
