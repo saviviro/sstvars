@@ -156,8 +156,51 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   dat <- data[(p + 1):n_obs,] # Initial values are not used here (conditional means and variances are already calculated)
   mvd_vals <- matrix(nrow=T_obs, ncol=M)
   if(cond_dist == "Gaussian") { # Gaussian conditiona distribution
+    # TÄÄLLÄ:
+    # https://gallery.rcpp.org/articles/dmvnorm_arma/
+    # on tämän: https://gallery.rcpp.org/articles/dmvnorm_arma/
+    # koodit saatavilla ja käytettävissä. Ja siellä sanotaan:
+    # "For instance, the inverse Cholesky decomposition can be put inside the main loop, if varying covariance matrices are necessary."
+    # Eli tuo varmaan on syytä ottaa käyttöön sopivalla modifikaatiolla! Sen voi varmaan ottaa käyttöön myös alpha_mt:ssä?
+    # Kun compile-codea löytyy joka tapauksessa käyttämään.
+    # MUTTA ensin hidas versio, jolla saadaan jotkut luvut, jotta voidaan testata koodin rikkoitumista yksikkötesteillä.
+    # Jätä hidas tapa laskea kommentteihin, jotta voi myöhemmin CRAN-tiimille perustellessa laskea eroja estimointiajoissa
+    # ja sillä perustella compiled koodin käyttöä.
+
     # mvnfast taitaa käyttää samaa kovarianssimatriisia kaikilla t. Eli joutuunee laskemaan käsin?
+    # Notable computational effort is required to invert all the covariance matrcies for all the
     # total_ccovs antaa ne kovarianssimatriisit
+    # RccpArmadillo? https://gallery.rcpp.org/articles/dmvnorm_arma/
+    #backsolve (chol2inv nopeampi)
+
+    # tmp <- matrix(round(rnorm(16), 2), nrow=4)
+    # testcovmat <- crossprod(tmp)
+    # tmp2 <- backsolve(chol(testcovmat), x=diag(4)) # noin 10 mikrosekunttia; tmp2%*%t(tmp2) == testcovmat (jälkimmäinen noin 500 nanosekunttia)
+    # sum(log(diag(tmp2))) # = -0.5*log(det); noin 3 mikrosekunttia - diag on jostain syystä hidas
+
+
+    #  microbenchmark::microbenchmark(chol2inv(chol(testcovmat))) # Noin 5.5 mikrosekunttia eli tämä nopeampi
+    #  microbenchmark::microbenchmark(det(testcovmat)) # Noin 5.5 mikrosekunttia eli chol2inv + det hieman nopeampi?; menee noin 12 microsekunntia yht
+    # --> toista 300 havainnolle niin tulee 1.65 millisekunttia; mikähän on koko loglikin evualuoinnin aika?
+    # Mutta tuo ei laske determinanttia, joten backsolvella menee varmaan yht nopeammin?
+    # HUOM hidastuu huomattavasti jos aikasarjan pituus kasvaa! Looppi rccp:llä? Koska joutuu mennä kaikki t:t läpi.. Miksi sum vie myös sekunnin?
+
+    # Voi myös koittaa loopata mwnfastia? Mutta se on varmaan hitain tapa..
+
+    # 12*300*0.001 = 3.6 millisekunttia eli ehkä 5 millisekunttia tms kuluu kokonaisuudessaan?
+    # Seuraavaksi varmaan tee loppuun että saat jotkut arvot ja ala testailemaan aikoja ja nopeutuksia? Muista testata eri d ja T arvoilla
+
+    # gmvarkitissä GMVAR(3,2) d=4 loglik 300 obsilla vie noin 2.5 millisekunttia (läppärillä).
+
+    # mvnfast::dmvn käyttää .Call("dmvtCpp", X_ = X, mu_ = mu, sigma_ = sigma, df = -1,  log_ = log, ncores_ = ncores, isChol_ = isChol)
+    # Voiko tuota dmvtCpp:tä käyttää suoraan myös sstvarssista? Tämä on mvnfast/src paketin oma funktio
+    # https://github.com/mfasiolo/mvnfast/blob/master/src/dmvtCpp.cpp
+    # Tuosta voi GNU lisenssin perusteella muokata omaan tarpeeseen ja testata nopeuttaako.
+
+    # KUN OLET TESTANNUT JONKIN MENETELMÄT, ETTÄ SAA LOGLIKARVOJA; KOKEILE VOIKO MYÖS ALPHA_MT NOPEUTTAA KÄYTÄTMÄLLÄ:
+    #rooti <- backsolve(chol(Sigmas[, , M]), x=diag(d))
+    #quads <- colSums((crossprod(rooti,(t(Y2) - all_mu[,m])))^2) # Saako rep(all_mu[,m], times=p) implementoilla nopeammaksi?
+    #exp(-(d/2)*log(2*pi) + sum(log(diag(rooti))) - .5*quads) # =  sum(log(diag(rooti))) = det
 
     #mvd_vals <- vapply(1:M, function(m) mvnfast::dmvn(X=dat - mu_mt[, , m], mu=rep(0, times=d), sigma=all_Omega[, , m], log=FALSE, ncores=1, isChol=FALSE), numeric(T_obs))
   } else if(cond_dist == "Student") {
