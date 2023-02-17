@@ -74,14 +74,14 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
                           identification=c("reduced_form", "recursive", "heteroskedasticity"),
                           AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
                           to_return=c("loglik", "tw", "terms", "regime_cmeans", "total_cmeans", "total_ccovs"),
-                          check_params=TRUE, minval=NULL, stat_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
+                          check_params=TRUE, minval=NULL, stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
   # Match args
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
   identification <- match.arg(identification)
   to_return <- match.arg(to_return)
-  if(identification != "reduced form") stop("Only reduced form models are currently supported")
+  if(identification != "reduced_form") stop("Only reduced form models are currently supported")
   if(!is.null(AR_constraints) || !is.null(mean_constraints) || !is.null(B_constraints)) stop("Constrained models are not
                                                                                              currently supported")
 
@@ -108,7 +108,7 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
 
   # Check that the parameter vector lies in the parameter space
   if(check_params) {
-    if(!in_paramspace(p=p, M=M, d=d, weight_function=weight_functions, cond_dist=cond_dist,
+    if(!in_paramspace(p=p, M=M, d=d, weight_function=weight_function, cond_dist=cond_dist,
                       all_boldA=all_boldA, all_Omegas=all_Omegas, weightpars=weightpars, df=df,
                       stab_tol=stab_tol, posdef_tol=posdef_tol, df_tol=df_tol)) {
       return(minval)
@@ -142,20 +142,40 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   all_A2 <- array(all_A, dim=c(d, d*p, M)) # cbind coefficient matrices of each component: m:th component is obtained at [, , m]
   mu_mt <- array(vapply(1:M, function(m) t(all_phi0[, m] + tcrossprod(all_A2[, , m], Y2)), numeric(d*T_obs)), dim=c(T_obs, d, M)) # [, , m]
 
+  # mu_yt VAIHDA NOPEAMPAAN KUN SAADAAN JOTAIN LUKUJA!!!
+  mu_yt <- matrix(nrow=T_obs, ncol=d) # [t, d]
+  for(i1 in 1:T_obs) {
+    for(i2 in 1:d) {
+      mu_yt[i1, i2] <- sum(alpha_mt[i1,]*mu_mt[i1,i2,])
+    }
+  }
+
   # Return conditional moments if those were to be returned
   if(to_return == "regime_cmeans") { # Regime-specific conditional menas
     return(mu_mt)
   } else if(to_return == "total_cmeans") { # Cond means of the process: weighted sum of regime-specific conditional means
     return(matrix(rowSums(vapply(1:M, function(m) alpha_mt[,m]*mu_mt[, , m], numeric(d*T_obs))), nrow=T_obs, ncol=d, byrow=FALSE))
-  } else if(to_return == "total_ccovs") { # Cond covariance matrices of the process: weighted sum of regime-specific cond cov mats
-    return(array(rowSums(vapply(1:M, function(m) rep(alpha_mt[, m], each=d*d)*as.vector(all_Omegas[, , m]),
-                                numeric(d*d*T_obs))), dim=c(d, d, T_obs)))
+  } else { # Cond covariance matrices of the process: weighted sum of regime-specific cond cov mats
+    all_covmats <- array(rowSums(vapply(1:M, function(m) rep(alpha_mt[, m], each=d*d)*as.vector(all_Omegas[, , m]),
+                                        numeric(d*d*T_obs))), dim=c(d, d, T_obs))
+    if(to_return == "total_ccovs") {
+      return(all_covmats)
+    }
   }
 
   # Calculate the conditional log-likelihood
   dat <- data[(p + 1):n_obs,] # Initial values are not used here (conditional means and variances are already calculated)
   mvd_vals <- matrix(nrow=T_obs, ncol=M)
   if(cond_dist == "Gaussian") { # Gaussian conditiona distribution
+    all_lt <- numeric(T_obs)
+    for(i1 in 1:T_obs) {
+      # Calculate the l_t multinormal density for each observation
+      # # +p in data because the first row is for the initial values
+      all_lt[i1] <- -0.5*d*log(2*pi) - 0.5*log(det(all_covmats[, , i1])) - 0.5*crossprod(data[i1+p,] - mu_yt[i1,],
+                                                                                         solve(all_covmats[, , i1],
+                                                                                               data[i1+p,] - mu_yt[i1,]))
+    }
+
     # TÄÄLLÄ:
     # https://gallery.rcpp.org/articles/dmvnorm_arma/
     # on tämän: https://gallery.rcpp.org/articles/dmvnorm_arma/
@@ -176,7 +196,8 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
     # tmp <- matrix(round(rnorm(16), 2), nrow=4)
     # testcovmat <- crossprod(tmp)
     # tmp2 <- backsolve(chol(testcovmat), x=diag(4)) # noin 10 mikrosekunttia; tmp2%*%t(tmp2) == testcovmat (jälkimmäinen noin 500 nanosekunttia)
-    # sum(log(diag(tmp2))) # = -0.5*log(det); noin 3 mikrosekunttia - diag on jostain syystä hidas
+    # sum(log(diag(tmp2))) # = -0.5*log(det); noin 3 mikrosekunttia - diag on jostain syystä hidas; siksi hidas koska ei voi laskea kaikille t saman
+    # samanaikaisesti; mutta voi testata miten kun tuon quadratic formin saa laskettua nopeammin niin toimiiko
 
 
     #  microbenchmark::microbenchmark(chol2inv(chol(testcovmat))) # Noin 5.5 mikrosekunttia eli tämä nopeampi
@@ -202,10 +223,16 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
     #quads <- colSums((crossprod(rooti,(t(Y2) - all_mu[,m])))^2) # Saako rep(all_mu[,m], times=p) implementoilla nopeammaksi?
     #exp(-(d/2)*log(2*pi) + sum(log(diag(rooti))) - .5*quads) # =  sum(log(diag(rooti))) = det
 
-    #mvd_vals <- vapply(1:M, function(m) mvnfast::dmvn(X=dat - mu_mt[, , m], mu=rep(0, times=d), sigma=all_Omega[, , m], log=FALSE, ncores=1, isChol=FALSE), numeric(T_obs))
+    #mvd_vals <- vapply(1:M, function(m) mvnfast::dmvn(X=dat - mu_mt[, , m], mu=rep(0, times=d), sigma=all_Omega[, , m], log=FALSE,
+    #                   ncores=1, isChol=FALSE), numeric(T_obs))
   } else if(cond_dist == "Student") {
+    # Entä RCCP toimiiko Studentille? Pitää vain koodata
     stop("Student's t cond_dist is not implemented yet!")
   }
+  if(to_return == "terms") {
+    return(all_lt)
+  }
+  sum(all_lt)
 }
 
 
@@ -247,7 +274,7 @@ get_alpha_mt <- function(data, Y2, p, M, d, weight_function, all_A, all_boldA, a
     # for all regimes and computer handles them as zero, we would divide by zero when calculating the transition weights).
     log_mvdvalues <- vapply(1:M, function(m) mvnfast::dmvn(X=Y2, mu=rep(all_mu[,m], p), sigma=chol_Sigmas[, , m],
                                                                    log=TRUE, ncores=1, isChol=TRUE),
-                            numeric(T_obs + 1)) # [T_obs, M] removes the period T+1 weights
+                            numeric(T_obs)) # [T_obs, M] removes the period T+1 weights
 
 
 

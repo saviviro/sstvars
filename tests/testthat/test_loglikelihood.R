@@ -1,7 +1,7 @@
 context("loglikelihood")
 library(sstvars)
 
-# set.seed(1); data2 <- cbind(gdpdef, round(rnorm(nrow(gdpdef)), 3))
+set.seed(1); data2 <- cbind(gdpdef, round(rnorm(nrow(gdpdef)), 3))
 
 # p=1, M=1, d=2
 phi10_112 <- c(0.65, 0.7)
@@ -45,11 +45,42 @@ alpha1_222 <- 0.37
 theta_222relg <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
                    vech(Omega1_222), vech(Omega2_222), alpha1_222)
 
+
+# p=4, M=1, d=3, data2 (note: very bad fit)
+theta_413relg <- c(0.5334, -0.036, 0.0065, 0.2421, 0.0198, -0.1067, -0.1501, 0.573, 0.0079, -0.0118,
+                   0.0039, -0.0329, 0.1896, 0.0092, -0.0428, 0.1309, 0.1249, -0.4213, 0.0265, 0.0179,
+                   -0.0475, -0.0396, 0.028, -0.0352, -0.2699, 0.1325, 0.3774, -0.0336, 0.0229, 0.015,
+                   0.0405, 0.0421, 0.1274, 0.1589, 0.1201, 0.1134, -0.0358, 0.0028, 0.0502, 0.5676,
+                   -0.0024, -0.0356, 0.0582, -7e-04, 0.8796)
+
+# # Nuo gmvarkit antaa eri tuloksen, eli jossain virhe; tuo on vain lineaarinen VAR
+# loglikelihood(gdpdef, p=1, M=1, params=theta_112relg)
+#loglikelihood(gdpdef, p=2, M=1, params=theta_212relg)
+#loglikelihood(data2, p=4, M=1, params=theta_413relg)
+#
+# # Tarkista: kovarianssimatriisi vakio; avaa gmvarkit viereen ja tarkastele eroja;
+# # mu_mt p=4,M=1, d=3 mallilla oikein; mu_yt myös; all_covmats = regime_ccovs = total_ccovs
+#
+# gmvarkit::loglikelihood(gdpdef, p=1, M=1, params=theta_112relg, conditional=TRUE, model="GMVAR")
+# gmvarkit::loglikelihood(gdpdef, p=2, M=1, params=theta_212relg, conditional=TRUE, model="GMVAR")
+
+#gmvarkit::loglikelihood(data2, p=4, M=1, params=theta_413relg, conditional=TRUE, model="GMVAR")
+
+#terms2 <- gmvarkit:::loglikelihood_int(data2, p=4, M=1, params=theta_413relg, conditional=TRUE, to_return="terms")
+
+#gmvar413 <- gmvarkit::fitGSMVAR(data2, p=4, M=1, model="GMVAR", conditional=TRUE, ncalls=4, ncores=4, maxit=20000)
+#paste0(round(gmvar413$params, 4), collapse=", ")
+
+
+# terms2 suurinosa samoja mutta osassa eroa
+# dmvn ei laske loggina; joten varmaan gmvarkit laskee pienellä virheellä?
+#
+# loglikelihood(gdpdef, p=1, M=2, params=theta_122relg)
+
+
 test_that("loglikelihood works correctly", {
   # Relative_dens Gausssian STVAR
-  expect_true(TRUE)
-#  expect_equal(loglikelihood(data=gdpdef, p=1, M=1, params=theta_112relg), 0, tolerance=1e-3)
-#  expect_equal(loglikelihood(data=gdpdef, p=2, M=1, params=theta_212relg), 0, tolerance=1e-3)
-#  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122relg), 0, tolerance=1e-3)
-#  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_222relg), 0, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=1, params=theta_112relg), -1000.653, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=1, params=theta_212relg), -286.5474, tolerance=1e-3)
+  expect_equal(loglikelihood(data=data2, p=4, M=1, params=theta_413relg), -596.6938, tolerance=1e-3)
 })

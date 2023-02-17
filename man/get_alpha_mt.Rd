@@ -6,7 +6,7 @@
 \usage{
 get_alpha_mt(
   data,
-  Y,
+  Y2,
   p,
   M,
   d,
@@ -23,7 +23,7 @@ get_alpha_mt(
 \item{data}{data a matrix or class \code{'ts'} object with \code{d>1} columns. Each column is taken to represent
 a univariate time series. Missing values are not supported.}
 
-\item{Y}{the data arranged as obtained from \code{reform_data(data, p)}}
+\item{Y2}{the data arranged as obtained from \code{reform_data(data, p)} but excluding the last row}
 
 \item{p}{a positive integer specifying the autoregressive order}
 
