@@ -173,6 +173,7 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
       all_lt[i1] <- -0.5*d*log(2*pi) + sum(log(diag(tmp))) - 0.5*tcrossprod(tmp2, tmp2)
     }
 
+    # Git and RStudio: https://happygitwithr.com
 
     # TÄÄLLÄ:
     # https://gallery.rcpp.org/articles/dmvnorm_arma/
@@ -188,8 +189,11 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
     # mvnfast taitaa käyttää samaa kovarianssimatriisia kaikilla t. Eli joutuunee laskemaan käsin?
     # Notable computational effort is required to invert all the covariance matrcies for all the
     # total_ccovs antaa ne kovarianssimatriisit
-    # RccpArmadillo? https://gallery.rcpp.org/articles/dmvnorm_arma/
+    # RcppArmadillo? https://gallery.rcpp.org/articles/dmvnorm_arma/
     #backsolve (chol2inv nopeampi)
+
+    # Rcpp yleiset ohjeet: http://adv-r.had.co.nz/Rcpp.html
+    # Muita rcpp-ohjeita: https://cpp11.r-lib.org
 
     # tmp <- matrix(round(rnorm(16), 2), nrow=4)
     # testcovmat <- crossprod(tmp)
