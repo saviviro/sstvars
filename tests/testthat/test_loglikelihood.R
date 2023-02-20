@@ -58,41 +58,11 @@ theta_413relg <- c(0.5334, -0.036, 0.0065, 0.2421, 0.0198, -0.1067, -0.1501, 0.5
                    0.0405, 0.0421, 0.1274, 0.1589, 0.1201, 0.1134, -0.0358, 0.0028, 0.0502, 0.5676,
                    -0.0024, -0.0356, 0.0582, -7e-04, 0.8796)
 
-# p=7, M=2, d=2
-theta_722relg <- c(0.556, -0.027, 0.267, 0.021, -0.15, 0.622, 0.078, 0.026, 0.158, 0.04, -0.027, 0.015, -0.242, 0.099, 0.05,
-               0.057, -0.235, 0.27, -0.069, -0.002, 0.249, -0.135, -0.014, 0.032, 0.054, 0.058, -0.09, 0.081, 0.132,
-               -0.053, 0.843, 0.021, 0.082, 0.537, 0.061, 0.167, 0.051, -0.112, 0.308, 0.372, 0.039, 0.211, 0.227,
-               -0.139, 0.066, -0.371, 0.208, 0.142, -0.046, -0.071, 0.076, -0.164, 0.012, -0.163, 0.03, 0.165, 0.006,
-               -0.496, 0.234, 0.271, -0.089, 0.225, -0.259, 0.218, 0.002, 0.021, 0.721)
 
-
-
-
-
-# # Nuo gmvarkit antaa eri tuloksen, eli jossain virhe; tuo on vain lineaarinen VAR
-# loglikelihood(gdpdef, p=1, M=1, params=theta_112relg)
-#loglikelihood(gdpdef, p=2, M=1, params=theta_212relg)
-#loglikelihood(data2, p=4, M=1, params=theta_413relg)
-#
-# # Tarkista: kovarianssimatriisi vakio; avaa gmvarkit viereen ja tarkastele eroja;
-# # mu_mt p=4,M=1, d=3 mallilla oikein; mu_yt myös; all_covmats = regime_ccovs = total_ccovs
-#
-# gmvarkit::loglikelihood(gdpdef, p=1, M=1, params=theta_112relg, conditional=TRUE, model="GMVAR")
-# gmvarkit::loglikelihood(gdpdef, p=2, M=1, params=theta_212relg, conditional=TRUE, model="GMVAR")
-
-#gmvarkit::loglikelihood(data2, p=4, M=1, params=theta_413relg, conditional=TRUE, model="GMVAR")
-
-#terms2 <- gmvarkit:::loglikelihood_int(data2, p=4, M=1, params=theta_413relg, conditional=TRUE, to_return="terms")
-
-#gmvar413 <- gmvarkit::fitGSMVAR(data2, p=4, M=1, model="GMVAR", conditional=TRUE, ncalls=4, ncores=4, maxit=20000)
-#paste0(round(gmvar413$params, 4), collapse=", ")
-
-
-# terms2 suurinosa samoja mutta osassa eroa
-# dmvn ei laske loggina; joten varmaan gmvarkit laskee pienellä virheellä?
-#
-# loglikelihood(gdpdef, p=1, M=2, params=theta_122relg)
-
+# ADD MORE M>1 TESTS WHEN SOME KIND OF ESTIMATES CAN BE OBTAINED!
+# microbenchmark::microbenchmark(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222relg))
+# p=2, M=2, d=2: alle 1 millisekuntti menee kaikkeen muuhun + noin 6 millisekunttia menee multivariate normal arvoihin; vapply ei nopeuta.
+# Yhteensä noin 6.5ms backsolve-kaavalla, eli hyvin pieni nopeutus d=2 tapauksessa. Käytännössä
 
 test_that("loglikelihood works correctly", {
   # Relative_dens Gausssian STVAR
@@ -103,6 +73,4 @@ test_that("loglikelihood works correctly", {
 
   expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122relg), -314.6693, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222relg), -239.3485, tolerance=1e-3)
-#  expect_equal(loglikelihood(data=gdpdef, p=7, M=2, params=theta_722relg), -239.3485, tolerance=1e-3)
-  # miksi tulee NULL? tee check_params funktio...
 })

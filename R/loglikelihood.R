@@ -142,13 +142,8 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   all_A2 <- array(all_A, dim=c(d, d*p, M)) # cbind coefficient matrices of each component: m:th component is obtained at [, , m]
   mu_mt <- array(vapply(1:M, function(m) t(all_phi0[, m] + tcrossprod(all_A2[, , m], Y2)), numeric(d*T_obs)), dim=c(T_obs, d, M)) # [, , m]
 
-  # mu_yt VAIHDA NOPEAMPAAN KUN SAADAAN JOTAIN LUKUJA!!!
-  mu_yt <- matrix(nrow=T_obs, ncol=d) # [t, d]
-  for(i1 in 1:T_obs) {
-    for(i2 in 1:d) {
-      mu_yt[i1, i2] <- sum(alpha_mt[i1,]*mu_mt[i1,i2,])
-    }
-  }
+  # Calculate the conditional means of the process mu_yt
+  mu_yt <- vapply(1:d, function(i1) rowSums(alpha_mt*mu_mt[,i1,]), numeric(T_obs)) # [T_obs, d]
 
   # Return conditional moments if those were to be returned
   if(to_return == "regime_cmeans") { # Regime-specific conditional menas
@@ -165,16 +160,19 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
 
   # Calculate the conditional log-likelihood
   dat <- data[(p + 1):n_obs,] # Initial values are not used here (conditional means and variances are already calculated)
-  mvd_vals <- matrix(nrow=T_obs, ncol=M)
   if(cond_dist == "Gaussian") { # Gaussian conditiona distribution
     all_lt <- numeric(T_obs)
     for(i1 in 1:T_obs) {
       # Calculate the l_t multinormal density for each observation
       # # +p in data because the first row is for the initial values
-      all_lt[i1] <- -0.5*d*log(2*pi) - 0.5*log(det(all_covmats[, , i1])) - 0.5*crossprod(data[i1+p,] - mu_yt[i1,],
-                                                                                         solve(all_covmats[, , i1],
-                                                                                               data[i1+p,] - mu_yt[i1,]))
+      #all_lt[i1] <- -0.5*d*log(2*pi) - 0.5*log(det(all_covmats[, , i1])) - 0.5*crossprod(data[i1+p,] - mu_yt[i1,],
+      #                                                                                  chol2inv(chol(all_covmats[, , i1]))%*%(data[i1+p,] - mu_yt[i1,]))
+
+      tmp <- backsolve(chol(all_covmats[, , i1]), x=diag(d))
+      tmp2 <- crossprod(data[i1+p,] - mu_yt[i1,], tmp)
+      all_lt[i1] <- -0.5*d*log(2*pi) + sum(log(diag(tmp))) - 0.5*tcrossprod(tmp2, tmp2)
     }
+
 
     # TÄÄLLÄ:
     # https://gallery.rcpp.org/articles/dmvnorm_arma/
