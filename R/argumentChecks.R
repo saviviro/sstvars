@@ -62,6 +62,8 @@ stab_conds_satisfied <- function(p, M, d, params, all_boldA=NULL, tolerance=1e-3
 
 in_paramspace <- function(p, M, d, weight_function, cond_dist, all_boldA, all_Omegas, weightpars, df,
                           stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
+  # in_paramspace is internal function that always takes in non-constrained reduced form parameter vector
+  # Reform the parameter vectors before checking with in_paramspace
 
   if(cond_dist == "Student") { # Check degrees of freedom parameter
     if(df <= 2 + df_tol) {
@@ -74,6 +76,8 @@ in_paramspace <- function(p, M, d, weight_function, cond_dist, all_boldA, all_Om
     } else if(any(weightpars <= 0)) {
       return(FALSE)
     }
+  } else {
+    stop("Other weight functions are not yet implemented!")
   }
   if(!stab_conds_satisfied(p=p, M=M, d=d, all_boldA=all_boldA, tolerance=stab_tol)) {
     return(FALSE)
@@ -89,7 +93,7 @@ in_paramspace <- function(p, M, d, weight_function, cond_dist, all_boldA, all_Om
 
 #' @title Check whether the parameter vector is in the parameter space and throw error if not
 #'
-#' @description \code{check_parameters} checks whether the parameter vector is in the parameter
+#' @description \code{check_params} checks whether the parameter vector is in the parameter
 #'   space.
 #'
 #' @inheritParams loglikelihood
@@ -101,19 +105,65 @@ in_paramspace <- function(p, M, d, weight_function, cond_dist, all_boldA, all_Om
 #'  # There examples will cause an informative error
 #'  params112relg_notpd <- c(6.5e-01, 7.0e-01, 2.9e-01, 2.0e-02, -1.4e-01,
 #'   9.0e-01, 6.0e-01, -1.0e-02, 1.0e-07)
-#'
-#'  # FILL IN!
+#'  check_params(p=1, M=1, d=2, params=params112relg_notpd)
 #'  }
 #' @export
 
-check_parameters <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
+check_params <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
                              parametrization=c("intercept", "mean"),
                              identification=c("reduced_form", "recursive", "heteroskedasticity"),
                              AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
                              stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
+  check_pMd(p=p, M=M, d=d)
+  weight_function <- match.arg(weight_function)
+  cond_dist <- match.arg(cond_dist)
+  parametrization <- match.arg(parametrization)
+  identification <- match.arg(identification)
 
-  # FILL IN!
-  # FILL IN!
+  # Pick params
+  all_phi0 <- pick_phi0(M=M, d=d, params=params) # phi0 or mean parameters
+  all_A <- pick_allA(p=p, M=M, d=d, params=params) # [d, d, p, M]
+  all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params) # [d, d, M]
+  weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist)
+  all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
+  df <- numeric(0) # FILL IN WHEN STUDENT IS IMPLEMENTED
+
+  if(!is.null(AR_constraints)) {
+    stop("AR_constraints are not yet implemented!")
+  }
+  if(!is.null(mean_constraints)) {
+    stop("mean_constraints are not yet implemented!")
+  }
+  if(!is.null(B_constraints)) {
+    stop("B_constraints are not yet implemented!")
+  }
+  if(identification != "reduced_form") {
+    stop("Only reduced form models are currently implemented!")
+  }
+
+  if(cond_dist == "Student") { # Check degrees of freedom parameter
+    stop("cond_dist = Student is not yet implented!")
+    if(df <= 2 + df_tol) {
+      stop("The degrees of freedom parameter needs to be strictly larger than two (with large enough numerical tolerance)!")
+    }
+  }
+  if(weight_function == "relative_dens") {
+    if(M >= 2 & sum(weightpars[-M]) >= 1) {
+      stop("The transition weight parameter alphas must sum to one!")
+    } else if(any(weightpars <= 0)) {
+      stop("The transition weight parameter alphas must be strictly larger than zero!")
+    }
+  } else {
+    stop("Other weight functions are not yet implemented!")
+  }
+  if(!stab_conds_satisfied(p=p, M=M, d=d, all_boldA=all_boldA, tolerance=stab_tol)) {
+    stop("At least one of the regimes does not satisfy the stability condition (with large enough numerical tolerance)!")
+  }
+  for(m in 1:M) {
+    if(any(eigen(all_Omegas[, , m], symmetric=TRUE, only.values=TRUE)$values < posdef_tol)) {
+      stop(paste0("The conditional covariance matrix of Regime ", m, " is not positive definite (with large enough numerical tolerance)!"))
+    }
+  }
 }
 
 

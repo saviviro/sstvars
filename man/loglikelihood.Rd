@@ -19,7 +19,7 @@ loglikelihood(
   to_return = c("loglik", "tw", "terms", "regime_cmeans", "total_cmeans", "total_ccovs"),
   check_params = TRUE,
   minval = NULL,
-  stat_tol = 0.001,
+  stab_tol = 0.001,
   posdef_tol = 1e-08,
   df_tol = 1e-08
 )
@@ -72,10 +72,6 @@ computation time if it does for sure.}
 \item{minval}{the value that will be returned if the parameter vector does not lie in the parameter space
 (excluding the identification condition).}
 
-\item{stat_tol}{numerical tolerance for stability of condition of the regimes: if the "bold A" matrix of any regime
-has eigenvalues larger that \code{1 - stat_tol} the parameter is considered to be outside the parameter space.
-Note that if tolerance is too small, numerical evaluation of the log-likelihood might fail and cause error.}
-
 \item{posdef_tol}{numerical tolerance for positive definiteness of the error term covariance matrices: if
 the error term covariance matrix of any regime has eigenvalues smaller than this, the parameter is considered
 to be outside the parameter space. Note that if the tolerance is too small, numerical evaluation of the
@@ -83,6 +79,10 @@ log-likelihood might fail and cause error.}
 
 \item{df_tol}{the parameter vector is considered to be outside the parameter space if the degrees of
 freedom parameters is not larger than \code{2 + df_tol} (applies only if \code{cond_dist="Student"}).}
+
+\item{stat_tol}{numerical tolerance for stability of condition of the regimes: if the "bold A" matrix of any regime
+has eigenvalues larger that \code{1 - stat_tol} the parameter is considered to be outside the parameter space.
+Note that if tolerance is too small, numerical evaluation of the log-likelihood might fail and cause error.}
 }
 \value{
 \describe{

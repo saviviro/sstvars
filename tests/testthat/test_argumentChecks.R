@@ -48,6 +48,9 @@ alpha1_122 <- 0.60
 theta_122relg <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), alpha1_122)
 theta_122relg_notpd <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122_notpd), alpha1_122)
 
+theta_122relg_badalphas <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122_notpd), 1)
+
+
 # p=2, M=2, d=2
 phi10_222 <- c(0.36, 0.12)
 A11_222 <- matrix(c(0.22, 0.06, -0.15, 0.39), nrow=2, byrow=FALSE)
@@ -84,6 +87,10 @@ theta_132relg_notstab <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A2
 
 theta_132relg_notpd <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132_stab),
                            vech(Omega1_132), vech(Omega2_132), vech(Omega3_132_notpd), alpha1_132, alpha2_132)
+theta_132relg_badalphas <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132_stab),
+                             vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), 0.6, 0.4)
+theta_132relg_badalphas2 <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132_stab),
+                              vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), 0.6, -0.2)
 
 
 # p=1, M=1, d=3
@@ -157,7 +164,7 @@ weightpars_213rel <- pick_weightpars(p=2, M=1, d=3, params=theta_213relg, weight
 weightpars_123rel <- pick_weightpars(p=1, M=2, d=3, params=theta_123relg_notpd, weight_function="relative_dens", cond_dist="Gaussian")
 
 
-test_that("stab_conds_satisfied work correctly", {
+test_that("stab_conds_satisfied works correctly", {
   expect_true(stab_conds_satisfied(p=1, M=1, d=2, all_boldA=boldA_112))
   expect_false(stab_conds_satisfied(p=2, M=1, d=2, all_boldA=boldA_212_notstab))
   expect_false(stab_conds_satisfied(p=3, M=1, d=2, all_boldA=boldA_312_notstab))
@@ -177,7 +184,7 @@ test_that("stab_conds_satisfied work correctly", {
 })
 
 
-test_that("stab_conds_satisfied work correctly", {
+test_that("in_paramspace work correctly", {
   # Checks stability conditions
   expect_true(in_paramspace(p=1, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian",
                             all_boldA=boldA_112, all_Omegas=Omegas_112, weightpars=weightpars_112rel))
@@ -238,6 +245,45 @@ test_that("stab_conds_satisfied work correctly", {
 
   # Checks df
   # TO BE FILLED IN
+})
+
+test_that("check_params work correctly", {
+  # Checks stability conditions
+  check_params(p=1, M=1, d=2, params=theta_112relg, weight_function="relative_dens", cond_dist="Gaussian")
+  check_params(p=1, M=2, d=2, params=theta_122relg, weight_function="relative_dens", cond_dist="Gaussian")
+  check_params(p=2, M=2, d=2, params=theta_222relg, weight_function="relative_dens", cond_dist="Gaussian")
+  check_params(p=1, M=1, d=3, params=theta_113relg, weight_function="relative_dens", cond_dist="Gaussian")
+  expect_error(check_params(p=2, M=1, d=2, params=theta_212relg_notstab, weight_function="relative_dens", cond_dist="Gaussian"))
+  expect_error(check_params(p=3, M=1, d=2, params=theta_312relg_notstab, weight_function="relative_dens", cond_dist="Gaussian"))
+  expect_error(check_params(p=1, M=3, d=2, params=theta_132relg_notstab, weight_function="relative_dens", cond_dist="Gaussian"))
+  expect_error(check_params(p=2, M=1, d=3, params=theta_213relg_notstab, weight_function="relative_dens", cond_dist="Gaussian"))
+  expect_error(check_params(p=1, M=2, d=3, params=theta_123relg_notstab, weight_function="relative_dens", cond_dist="Gaussian"))
+
+  # Check Omegas
+  check_params(p=1, M=1, d=2, params=theta_112relg, weight_function="relative_dens", cond_dist="Gaussian")
+  check_params(p=2, M=1, d=2, params=theta_212relg, weight_function="relative_dens", cond_dist="Gaussian")
+  check_params(p=1, M=2, d=2, params=theta_122relg, weight_function="relative_dens", cond_dist="Gaussian")
+  check_params(p=2, M=2, d=2, params=theta_222relg, weight_function="relative_dens", cond_dist="Gaussian")
+
+  expect_error(check_params(p=1, M=1, d=2, params=theta_112relg_notpd, weight_function="relative_dens", cond_dist="Gaussian"))
+  expect_error(check_params(p=1, M=2, d=2, params=theta_122relg_notpd, weight_function="relative_dens", cond_dist="Gaussian"))
+  expect_error(check_params(p=1, M=3, d=2, params=theta_132relg_notpd, weight_function="relative_dens", cond_dist="Gaussian"))
+  expect_error(check_params(p=1, M=1, d=3, params=theta_113relg_notpd, weight_function="relative_dens", cond_dist="Gaussian"))
+  expect_error(check_params(p=1, M=2, d=3, params=theta_123relg_notpd, weight_function="relative_dens", cond_dist="Gaussian"))
+
+  # Check weightpars
+  expect_error(check_params(p=1, M=2, d=2, params=theta_122relg_badalphas, weight_function="relative_dens", cond_dist="Gaussian"))
+  expect_error(check_params(p=1, M=3, d=2, params=theta_132relg_badalphas, weight_function="relative_dens", cond_dist="Gaussian"))
+  expect_error(check_params(p=1, M=3, d=2, params=theta_132relg_badalphas2, weight_function="relative_dens", cond_dist="Gaussian"))
+
+  # Checks df
+  # TO BE FILLED IN
+
+  # Check weight pars with other weight functions
+  # TO BE FILLED IN
+
+  # Check various constraints
+  # TO BE FILLED
 })
 
 

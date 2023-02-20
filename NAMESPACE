@@ -2,7 +2,7 @@
 
 export(calc_gradient)
 export(calc_hessian)
-export(check_parameters)
+export(check_params)
 export(diag_Omegas)
 export(get_foc)
 export(get_gradient)
