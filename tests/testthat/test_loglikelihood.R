@@ -61,8 +61,8 @@ theta_413relg <- c(0.5334, -0.036, 0.0065, 0.2421, 0.0198, -0.1067, -0.1501, 0.5
 
 # ADD MORE M>1 TESTS WHEN SOME KIND OF ESTIMATES CAN BE OBTAINED!
 # microbenchmark::microbenchmark(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222relg))
-# p=2, M=2, d=2: alle 1 millisekuntti menee kaikkeen muuhun + noin 6 millisekunttia menee multivariate normal arvoihin; vapply ei nopeuta.
-# Yhteensä noin 6.5ms backsolve-kaavalla, eli hyvin pieni nopeutus d=2 tapauksessa. Käytännössä
+# p=2, M=2, d=2: alle 1 millisekuntti menee kaikkeen muuhun + reilu 4 millisekunttia menee multivariate normal arvoihin; vapply ei nopeuta.
+# chol2inv on hieman nopeampi kuin backsolve
 
 test_that("loglikelihood works correctly", {
   # Relative_dens Gausssian STVAR

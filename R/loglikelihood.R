@@ -159,19 +159,24 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   }
 
   # Calculate the conditional log-likelihood
-  dat <- data[(p + 1):n_obs,] # Initial values are not used here (conditional means and variances are already calculated)
+  obs_minus_cmean <- data[(p+1):nrow(data),] - mu_yt # The initial values are not used here
   if(cond_dist == "Gaussian") { # Gaussian conditiona distribution
     all_lt <- numeric(T_obs)
+    tmp0 <- -0.5*d*log(2*pi)
     for(i1 in 1:T_obs) {
       # Calculate the l_t multinormal density for each observation
-      # # +p in data because the first row is for the initial values
-      #all_lt[i1] <- -0.5*d*log(2*pi) - 0.5*log(det(all_covmats[, , i1])) - 0.5*crossprod(data[i1+p,] - mu_yt[i1,],
-      #                                                                                  chol2inv(chol(all_covmats[, , i1]))%*%(data[i1+p,] - mu_yt[i1,]))
+      all_lt[i1] <- tmp0 - 0.5*log(det(all_covmats[, , i1])) - 0.5*crossprod(obs_minus_cmean[i1,],
+                                                                             chol2inv(chol(all_covmats[, , i1]))%*%(obs_minus_cmean[i1,]))
 
-      tmp <- backsolve(chol(all_covmats[, , i1]), x=diag(d))
-      tmp2 <- crossprod(data[i1+p,] - mu_yt[i1,], tmp)
-      all_lt[i1] <- -0.5*d*log(2*pi) + sum(log(diag(tmp))) - 0.5*tcrossprod(tmp2, tmp2)
+      #tmp <- backsolve(chol(all_covmats[, , i1]), x=diag(d))
+      #tmp2 <- crossprod(obs_minus_cmean[i1,], tmp)
+      #all_lt[i1] <- tmp0 + sum(log(diag(tmp))) - 0.5*tcrossprod(tmp2, tmp2)
     }
+    # HUOM! cpp-filen pitää ottaa data, mu_yt, ja covmatrin argumentteina!
+    # Jos array on hankala antaa argumenttina, voi antaa vektorina ja muodostaa siitä
+    # aina kullakin iteraatiolla haluttu matriisi?
+    # Voi data - mu_yt voi tosin laskea myös R:ssä valmiiksi ja varmaan kannattaa koska se ei vie aikaa.
+    #
 
     # Git and RStudio: https://happygitwithr.com
 
