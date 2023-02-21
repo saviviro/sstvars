@@ -4,7 +4,7 @@
 #'   easier to use when calculating log-likelihood values etc.
 #'
 #' @inheritParams loglikelihood
-#' @return Returns the data reformed into a \eqn{((n_obs-p+1)x(dp))} matrix. The i:th row
+#' @return Returns the data reformed into a \eqn{((n_{obs}-p+1)x(dp))} matrix. The i:th row
 #'   of the matrix contains the vector \eqn{(y_{i-1}',...,y_{i-p}')} \eqn{((dp)x1)}, where
 #'   \eqn{y_{i}=(y_{1i},...,y_{di})} \eqn{(dx1)}.
 #' @section Warning:
