@@ -11,35 +11,36 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// GaussianDensities
-NumericVector GaussianDensities(double const_term, NumericMatrix obs_minus_cmean);
-RcppExport SEXP _sstvars_GaussianDensities(SEXP const_termSEXP, SEXP obs_minus_cmeanSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type const_term(const_termSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type obs_minus_cmean(obs_minus_cmeanSEXP);
-    rcpp_result_gen = Rcpp::wrap(GaussianDensities(const_term, obs_minus_cmean));
-    return rcpp_result_gen;
-END_RCPP
-}
-// GaussianDensities2
-arma::vec GaussianDensities2(arma::mat obs, arma::mat mean, arma::mat covmat);
-RcppExport SEXP _sstvars_GaussianDensities2(SEXP obsSEXP, SEXP meanSEXP, SEXP covmatSEXP) {
+// Gaussian_densities_Cpp
+arma::vec Gaussian_densities_Cpp(arma::mat obs, arma::mat mean, arma::mat covmat);
+RcppExport SEXP _sstvars_Gaussian_densities_Cpp(SEXP obsSEXP, SEXP meanSEXP, SEXP covmatSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat >::type obs(obsSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type mean(meanSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type covmat(covmatSEXP);
-    rcpp_result_gen = Rcpp::wrap(GaussianDensities2(obs, mean, covmat));
+    rcpp_result_gen = Rcpp::wrap(Gaussian_densities_Cpp(obs, mean, covmat));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Gaussian_densities_const_Cpp
+arma::vec Gaussian_densities_const_Cpp(arma::mat obs, arma::mat mean, arma::mat covmat);
+RcppExport SEXP _sstvars_Gaussian_densities_const_Cpp(SEXP obsSEXP, SEXP meanSEXP, SEXP covmatSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type obs(obsSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type mean(meanSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type covmat(covmatSEXP);
+    rcpp_result_gen = Rcpp::wrap(Gaussian_densities_const_Cpp(obs, mean, covmat));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_sstvars_GaussianDensities", (DL_FUNC) &_sstvars_GaussianDensities, 2},
-    {"_sstvars_GaussianDensities2", (DL_FUNC) &_sstvars_GaussianDensities2, 3},
+    {"_sstvars_Gaussian_densities_Cpp", (DL_FUNC) &_sstvars_Gaussian_densities_Cpp, 3},
+    {"_sstvars_Gaussian_densities_const_Cpp", (DL_FUNC) &_sstvars_Gaussian_densities_const_Cpp, 3},
     {NULL, NULL, 0}
 };
 

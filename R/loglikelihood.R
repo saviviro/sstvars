@@ -242,7 +242,7 @@ get_alpha_mt <- function(data, Y2, p, M, d, weight_function, all_A, all_boldA, a
     #  -0.5*d*log(2*pi) - 0.5*log(det(Sigmas[, , m]))
     #-sum(log(diag(chol(Sigmas[, , m]))))
 
-    log_mvdvalues <- -0.5*d*log(2*pi) + vapply(1:M, function(m) GaussianDensities2(obs=Y2, mean=matrix(rep(all_mu[,m], times=p), nrow=1),
+    log_mvdvalues <- -0.5*d*log(2*pi) + vapply(1:M, function(m) Gaussian_densities_const_Cpp(obs=Y2, mean=matrix(rep(all_mu[,m], times=p), nrow=1),
                                                                                    covmat=Sigmas[, , m]),
                             numeric(T_obs)) # [T_obs, M] removes the period T+1 weights
 
