@@ -160,24 +160,33 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
 
   # Calculate the conditional log-likelihood
   obs_minus_cmean <- data[(p+1):nrow(data),] - mu_yt # The initial values are not used here
+  cond_covmats <- array(dim=c(d, d, M))
   if(cond_dist == "Gaussian") { # Gaussian conditiona distribution
-    #all_lt <- numeric(T_obs)
-    #tmp0 <- -0.5*d*log(2*pi)
-    all_lt <- -0.5*d*log(2*pi) + Gaussian_densities_Cpp(obs=data[(p+1):nrow(data),], means=mu_yt, covmats=all_covmats)
-    #for(i1 in 1:T_obs) {
-      # Calculate the l_t multinormal density for each observation
-    #  all_lt[i1] <- tmp0 - 0.5*log(det(all_covmats[, , i1])) - 0.5*crossprod(obs_minus_cmean[i1,],
-    #                                                                         chol2inv(chol(all_covmats[, , i1]))%*%(obs_minus_cmean[i1,]))
+    all_lt <- numeric(T_obs)
+    tmp0 <- -0.5*d*log(2*pi)
+    all_lt <- -0.5*d*log(2*pi) + Gaussian_densities_Cpp(obs=data[(p+1):nrow(data),], means=mu_yt, covmats=all_Omegas, alpha_mt=alpha_mt)
+    # JÄIN TÄHÄN: all_covmats kanssa toimii, mutta nopeuttaa hieman jos laittaa all_Omegas ja laskee cond-covmatit Rcpp:llä.
+    # Nykyinen Rcpp-koodi ei kuitenkaan anna oikeaa tulosta; all_covmatsin kanssa antaa oikean tuloksen.
+    # Alla oleva R-looppi varmisti, että loopin kanssa toimii kyllä, Rcpp:llä looppi vain on väärin.
+    # ELI: katso Rcpp-koodin testisyötteellä mitä alla olevan oikean loopin pitäisi antaa; ja
+    # testaa mitä Rcpp-looppi laskee väärin ja korjaa se.
+    # Tämän jälkeen: mieti muutatko muita kohtia loglikistä myös Rcpp:lle nopeuttaaksesi koodia?
 
-      #tmp <- backsolve(chol(all_covmats[, , i1]), x=diag(d))
-      #tmp2 <- crossprod(obs_minus_cmean[i1,], tmp)
-      #all_lt[i1] <- tmp0 + sum(log(diag(tmp))) - 0.5*tcrossprod(tmp2, tmp2)
-
-      # THE CONDITIONAL COVARIANCE MATRICES SHOULD POSSIBLY ALSO BE CALCULATED IN RCPP? SEPARATE FUNCTION AS THEY ARE USED IN OTHER DENSITIES AS WELL?
-      # OR: just calculate it in the loop in each iteration?
-  #  }
+    # for(i1 in 1:T_obs) {
+    #    # Calculate the l_t multinormal density for each observation
+    #   cond_covmat <- matrix(0, nrow=d, ncol=d)
+    #   for(i2 in 1:M) {
+    #     #cond_covmats[, , i2] <- alpha_mt[i1, i2]*all_Omegas[, , i2]
+    #     cond_covmat <- cond_covmat + alpha_mt[i1, i2]*all_Omegas[, , i2]
+    #   }
+    # #  print(cond_covmat - all_Omegas[, , 1])
+    #   #cond_covmat <- apply(cond_covmats, MARGIN=1:2, sum)
+    #   all_lt[i1] <- tmp0 - 0.5*log(det(cond_covmat)) - 0.5*crossprod(obs_minus_cmean[i1,],
+    #                                                                          chol2inv(chol(cond_covmat))%*%(obs_minus_cmean[i1,]))
+    #   #all_lt[i1] <- tmp0 - 0.5*log(det(all_covmats[, , i1])) - 0.5*crossprod(obs_minus_cmean[i1,],
+    #   #                                                                       chol2inv(chol(all_covmats[, , i1]))%*%(obs_minus_cmean[i1,]))
+    # }
   } else if(cond_dist == "Student") {
-    # Entä RCCP toimiiko Studentille? Pitää vain koodata
     stop("Student's t cond_dist is not implemented yet!")
   }
   if(to_return == "terms") {

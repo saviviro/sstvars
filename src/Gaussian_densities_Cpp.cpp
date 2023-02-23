@@ -18,18 +18,23 @@ using namespace Rcpp;
 //' @return a numeric vector containing the multivariate Gaussian densities, excluding the constant term.
 //' @keywords internal
 // [[Rcpp::export]]
-arma::vec Gaussian_densities_Cpp(arma::mat obs, arma::mat means, arma::cube covmats) {
+arma::vec Gaussian_densities_Cpp(arma::mat obs, arma::mat means, arma::cube covmats, arma::mat alpha_mt) {
   int T_obs = obs.n_rows; // The number of observations
   int d = obs.n_cols; // The dimension d
+  int M = alpha_mt.n_cols;
   arma::vec vals(T_obs); // Contains the densities for each observation
   arma::mat tmp(d, 1);
   arma::mat tmp2(1, 1);
-  arma::mat cholcovmat(d, d); //arma::chol(covmats);
-  arma::mat inv_cholcovmat(d, d); //= arma::inv(trimatu(cholcovmat));
-  // double det_term = -arma::accu(arma::log(cholcovmat.diag()));
+  arma::mat cholcovmat(d, d);
+  arma::mat inv_cholcovmat(d, d);
+  arma::mat condcovmat(d, d, arma::fill::zeros);
 
   for(int i1 = 0; i1 < T_obs; i1++) {
-    cholcovmat = arma::chol(covmats.slice(i1));
+    for(int i2 = 0; i2 < M; i2++) {
+      condcovmat += alpha_mt(i1, i2)*covmats.slice(i2);
+    }
+    //cholcovmat = arma::chol(covmats.slice(i1));
+    cholcovmat = arma::chol(condcovmat);
     inv_cholcovmat = arma::inv(trimatu(cholcovmat));
     tmp = (obs.row(i1) - means.row(i1))*inv_cholcovmat;
     tmp2 = dot(tmp, tmp);
@@ -41,5 +46,6 @@ arma::vec Gaussian_densities_Cpp(arma::mat obs, arma::mat means, arma::cube covm
 
 
 /*** R
-Gaussian_densities_Cpp(obs=matrix(c(1:6), nrow=3), means=matrix(0, nrow=3, ncol=2), covmats=array(rep(c(1, 0.1, 0.1, 1), times=3), dim=c(2, 2, 3)))
+Gaussian_densities_Cpp(obs=matrix(c(1:6), nrow=3), means=matrix(0, nrow=3, ncol=2), covmats=array(rep(c(1, 0.1, 0.1, 1), times=2), dim=c(2, 2, 2)),
+                       alpha_mt=matrix(rep(0.5, times=2*3), nrow=3))
 */

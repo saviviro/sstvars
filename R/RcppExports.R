@@ -16,8 +16,8 @@
 #'   contains the time t conditional covariance matrix.
 #' @return a numeric vector containing the multivariate Gaussian densities, excluding the constant term.
 #' @keywords internal
-Gaussian_densities_Cpp <- function(obs, means, covmats) {
-    .Call('_sstvars_Gaussian_densities_Cpp', PACKAGE = 'sstvars', obs, means, covmats)
+Gaussian_densities_Cpp <- function(obs, means, covmats, alpha_mt) {
+    .Call('_sstvars_Gaussian_densities_Cpp', PACKAGE = 'sstvars', obs, means, covmats, alpha_mt)
 }
 
 #' @name Gaussian_densities_const_Cpp
