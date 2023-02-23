@@ -16,17 +16,19 @@ GaussianDensities <- function(const_term, obs_minus_cmean) {
 #' @name GaussianDensities2
 #' @title Calculate log multivariate Gaussian densities
 #' @description Calculates logs of multivariate Gaussian densities with varying mean but
-#'   constant covariance matrix.
+#'   constant covariance matrix AND EXCLUDING the constant term and determinant.
+#'   Ehkä laita laskemaan pelkät kvadraattiset muodot?
 #'
 #' @inheritParams GaussianDensities
-#' @param obs_minus_mean a \eqn{(T \times dp)} such that the i:th row of the matrix contains
+#' @param obs a \eqn{(T \times dp)} such that the i:th row of the matrix contains
 #'  the vector \eqn{(y_{i-1}',...,y_{i-p}') - }\code{rep(all_mu[,m], times=p)}
 #'  \eqn{((dp)x1)}, where \eqn{y_{i}=(y_{1i},...,y_{di})} \eqn{(dx1)}. That is, the initial values are
 #'  included but the last observations not (used in relative dens transition weights).
+#' @param mean
 #' @param covmat the \eqn{(dp \times dp)} covariance matrix that is the same for all
 #'   observations.
-#' @return a numeric vector containing the multivariate Gaussian densities
-GaussianDensities2 <- function(const_term, obs_minus_mean, covmat) {
-    .Call('_sstvars_GaussianDensities2', PACKAGE = 'sstvars', const_term, obs_minus_mean, covmat)
+#' @return a numeric vector containing the multivariate Gaussian densities, excluding the constant term.
+GaussianDensities2 <- function(obs, mean, covmat) {
+    .Call('_sstvars_GaussianDensities2', PACKAGE = 'sstvars', obs, mean, covmat)
 }
 

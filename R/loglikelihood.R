@@ -172,66 +172,6 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
       #tmp2 <- crossprod(obs_minus_cmean[i1,], tmp)
       #all_lt[i1] <- tmp0 + sum(log(diag(tmp))) - 0.5*tcrossprod(tmp2, tmp2)
     }
-    # HUOM! cpp-filen pitää ottaa data, mu_yt, ja covmatrin argumentteina!
-    # Jos array on hankala antaa argumenttina, voi antaa vektorina ja muodostaa siitä
-    # aina kullakin iteraatiolla haluttu matriisi?
-    # Voi data - mu_yt voi tosin laskea myös R:ssä valmiiksi ja varmaan kannattaa koska se ei vie aikaa.
-    #
-
-    # Git and RStudio: https://happygitwithr.com
-
-    # TÄÄLLÄ:
-    # https://gallery.rcpp.org/articles/dmvnorm_arma/
-    # on tämän: https://gallery.rcpp.org/articles/dmvnorm_arma/
-    # koodit saatavilla ja käytettävissä. Ja siellä sanotaan:
-    # "For instance, the inverse Cholesky decomposition can be put inside the main loop, if varying covariance matrices are necessary."
-    # Eli tuo varmaan on syytä ottaa käyttöön sopivalla modifikaatiolla! Sen voi varmaan ottaa käyttöön myös alpha_mt:ssä?
-    # Kun compile-codea löytyy joka tapauksessa käyttämään.
-    # MUTTA ensin hidas versio, jolla saadaan jotkut luvut, jotta voidaan testata koodin rikkoitumista yksikkötesteillä.
-    # Jätä hidas tapa laskea kommentteihin, jotta voi myöhemmin CRAN-tiimille perustellessa laskea eroja estimointiajoissa
-    # ja sillä perustella compiled koodin käyttöä.
-
-    # mvnfast taitaa käyttää samaa kovarianssimatriisia kaikilla t. Eli joutuunee laskemaan käsin?
-    # Notable computational effort is required to invert all the covariance matrcies for all the
-    # total_ccovs antaa ne kovarianssimatriisit
-    # RcppArmadillo? https://gallery.rcpp.org/articles/dmvnorm_arma/
-    #backsolve (chol2inv nopeampi)
-
-    # Rcpp yleiset ohjeet: http://adv-r.had.co.nz/Rcpp.html
-    # Muita rcpp-ohjeita: https://cpp11.r-lib.org
-
-    # tmp <- matrix(round(rnorm(16), 2), nrow=4)
-    # testcovmat <- crossprod(tmp)
-    # tmp2 <- backsolve(chol(testcovmat), x=diag(4)) # noin 10 mikrosekunttia; tmp2%*%t(tmp2) == testcovmat (jälkimmäinen noin 500 nanosekunttia)
-    # sum(log(diag(tmp2))) # = -0.5*log(det); noin 3 mikrosekunttia - diag on jostain syystä hidas; siksi hidas koska ei voi laskea kaikille t saman
-    # samanaikaisesti; mutta voi testata miten kun tuon quadratic formin saa laskettua nopeammin niin toimiiko
-
-
-    #  microbenchmark::microbenchmark(chol2inv(chol(testcovmat))) # Noin 5.5 mikrosekunttia eli tämä nopeampi
-    #  microbenchmark::microbenchmark(det(testcovmat)) # Noin 5.5 mikrosekunttia eli chol2inv + det hieman nopeampi?; menee noin 12 microsekunntia yht
-    # --> toista 300 havainnolle niin tulee 1.65 millisekunttia; mikähän on koko loglikin evualuoinnin aika?
-    # Mutta tuo ei laske determinanttia, joten backsolvella menee varmaan yht nopeammin?
-    # HUOM hidastuu huomattavasti jos aikasarjan pituus kasvaa! Looppi rccp:llä? Koska joutuu mennä kaikki t:t läpi.. Miksi sum vie myös sekunnin?
-
-    # Voi myös koittaa loopata mwnfastia? Mutta se on varmaan hitain tapa..
-
-    # 12*300*0.001 = 3.6 millisekunttia eli ehkä 5 millisekunttia tms kuluu kokonaisuudessaan?
-    # Seuraavaksi varmaan tee loppuun että saat jotkut arvot ja ala testailemaan aikoja ja nopeutuksia? Muista testata eri d ja T arvoilla
-
-    # gmvarkitissä GMVAR(3,2) d=4 loglik 300 obsilla vie noin 2.5 millisekunttia (läppärillä).
-
-    # mvnfast::dmvn käyttää .Call("dmvtCpp", X_ = X, mu_ = mu, sigma_ = sigma, df = -1,  log_ = log, ncores_ = ncores, isChol_ = isChol)
-    # Voiko tuota dmvtCpp:tä käyttää suoraan myös sstvarssista? Tämä on mvnfast/src paketin oma funktio
-    # https://github.com/mfasiolo/mvnfast/blob/master/src/dmvtCpp.cpp
-    # Tuosta voi GNU lisenssin perusteella muokata omaan tarpeeseen ja testata nopeuttaako.
-
-    # KUN OLET TESTANNUT JONKIN MENETELMÄT, ETTÄ SAA LOGLIKARVOJA; KOKEILE VOIKO MYÖS ALPHA_MT NOPEUTTAA KÄYTÄTMÄLLÄ:
-    #rooti <- backsolve(chol(Sigmas[, , M]), x=diag(d))
-    #quads <- colSums((crossprod(rooti,(t(Y2) - all_mu[,m])))^2) # Saako rep(all_mu[,m], times=p) implementoilla nopeammaksi?
-    #exp(-(d/2)*log(2*pi) + sum(log(diag(rooti))) - .5*quads) # =  sum(log(diag(rooti))) = det
-
-    #mvd_vals <- vapply(1:M, function(m) mvnfast::dmvn(X=dat - mu_mt[, , m], mu=rep(0, times=d), sigma=all_Omega[, , m], log=FALSE,
-    #                   ncores=1, isChol=FALSE), numeric(T_obs))
   } else if(cond_dist == "Student") {
     # Entä RCCP toimiiko Studentille? Pitää vain koodata
     stop("Student's t cond_dist is not implemented yet!")
@@ -270,19 +210,50 @@ get_alpha_mt <- function(data, Y2, p, M, d, weight_function, all_A, all_boldA, a
   if(weight_function == "relative_dens") {
     # Calculate the covariance matrices Sigma_{m,p} (Lutkepohl 2005, eq. (2.1.39) or the algorithm proposed by McElroy 2017)
     Sigmas <- get_Sigmas(p=p, M=M, d=d, all_A=all_A, all_boldA=all_boldA, all_Omegas=all_Omegas) # Store the (dpxdp) covariance matrices
-    chol_Sigmas <- array(dim=c(d*p, d*p, M))
-    for(m in 1:M) {
-      chol_Sigmas[, , m] <- chol(Sigmas[, , m]) # Take Cholesky here to avoid unnecessary warnings from mvnfast::dmvn
-    }
+    #chol_Sigmas <- array(dim=c(d*p, d*p, M))
+    #for(m in 1:M) {
+    #  chol_Sigmas[, , m] <- chol(Sigmas[, , m]) # Take Cholesky here to avoid unnecessary warnings from mvnfast::dmvn
+    #}
 
     # Calculate the dp-dimensional multinormal densities in logarithm with the package mvnfast:
     # i:th row for index i-1 etc, m:th column for m:th component.
     # We calculate in logarithm because the non-log values may be too close to zero for machine accuracy (if they are too close to zero
     # for all regimes and computer handles them as zero, we would divide by zero when calculating the transition weights).
-    log_mvdvalues <- vapply(1:M, function(m) mvnfast::dmvn(X=Y2, mu=rep(all_mu[,m], p), sigma=chol_Sigmas[, , m],
-                                                                   log=TRUE, ncores=1, isChol=TRUE),
+    #log_mvdvalues <- vapply(1:M, function(m) mvnfast::dmvn(X=Y2, mu=rep(all_mu[,m], p), sigma=chol_Sigmas[, , m],
+    #                                                               log=TRUE, ncores=1, isChol=TRUE),
+    #                        numeric(T_obs)) # [T_obs, M] removes the period T+1 weights
+
+    #obs_minus_mean <- Y2 - rep(all_mu[,m], times=p)
+    #const_term <- -0.5*d*log(2*pi) - 0.5*log(det(Sigmas))
+    #inv_cholcovmat = solve(chol(Sigmas[, , m]))
+    #log_mvdvalues <- vapply(1:M, function(m) -0.5*d*log(2*pi) - 0.5*log(det(Sigmas[, , m])) - 0.5*solve(chol(Sigmas[, , m])), numeric(T_obs))
+    # log_mvdvalues_test0 <- matrix(nrow=T_obs, ncol=M)
+    # for(m in 1:M) {
+    #   obs_minus_mean <- t(t(Y2) - rep(all_mu[,m], times=p))
+    #   for(i1 in 1:T_obs) {
+    #     log_mvdvalues_test0[i1, m] <-  -0.5*d*log(2*pi) - 0.5*log(det(Sigmas[, , m])) - 0.5*t(obs_minus_mean[i1,])%*%solve(Sigmas[, , m])%*%obs_minus_mean[i1,]
+    #   }
+    # }
+    #log_mvdvalues[2,]
+    #log_mvdvalues_test0[2,]
+     #
+    #log_mvdvalues - log_mvdvalues_test0
+    #log_mvdvalues - log_mvdvalues0
+    #  -0.5*d*log(2*pi) - 0.5*log(det(Sigmas[, , m]))
+    #-sum(log(diag(chol(Sigmas[, , m]))))
+
+    log_mvdvalues <- -0.5*d*log(2*pi) + vapply(1:M, function(m) GaussianDensities2(obs=Y2, mean=matrix(rep(all_mu[,m], times=p), nrow=1),
+                                                                                   covmat=Sigmas[, , m]),
                             numeric(T_obs)) # [T_obs, M] removes the period T+1 weights
 
+    #log_mvdvalues <- log_mvdvalues0
+
+    #microbenchmark::microbenchmark(t(t(Y2) - rep(all_mu[,m], times=p)), times=10000L)
+    #microbenchmark::microbenchmark(GaussianDensities2(obs_minus_mean=t(t(Y2) - rep(all_mu[,m], times=p)), covmat=Sigmas[, , m]), times=10000L)
+    #microbenchmark::microbenchmark(GaussianDensities2(obs=Y2, mean=matrix(rep(all_mu[,m], times=p), nrow=1), covmat=Sigmas[, , m]), times=100000L)
+
+    #microbenchmark::microbenchmark(mvnfast::dmvn(X=Y2, mu=rep(all_mu[,m], p), sigma=Sigmas[, , m], log=TRUE, ncores=1, isChol=FALSE), times=10000L)
+    #microbenchmark::microbenchmark(tmpfun(X=Y2, mu=rep(all_mu[,m], p), Sigma=Sigmas[, , m]), times=500L)
 
 
     # Calculate the transition weights based on the log-multivariate density values

@@ -64,13 +64,16 @@ theta_413relg <- c(0.5334, -0.036, 0.0065, 0.2421, 0.0198, -0.1067, -0.1501, 0.5
 # p=2, M=2, d=2: alle 1 millisekuntti menee kaikkeen muuhun + reilu 4 millisekunttia menee multivariate normal arvoihin; vapply ei nopeuta.
 # chol2inv on hieman nopeampi kuin backsolve
 
+# mvfast: medion 5.0-5.3ms (usein noin 5.1)
+# Oma: noin yhtä suuri.
+
 test_that("loglikelihood works correctly", {
   # Relative_dens Gausssian STVAR
-  expect_equal(loglikelihood(data=gdpdef, p=1, M=1, params=theta_112relg), -1000.653, tolerance=1e-3)
-  expect_equal(loglikelihood(data=gdpdef, p=2, M=1, params=theta_212relg), -286.5474, tolerance=1e-3)
-  expect_equal(loglikelihood(data=gdpdef, p=8, M=1, params=theta_812relg), -257.0505, tolerance=1e-3)
-  expect_equal(loglikelihood(data=data2, p=4, M=1, params=theta_413relg), -596.6938, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=1, params=theta_112relg, weight_function="relative_dens"), -1000.653, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=1, params=theta_212relg, weight_function="relative_dens"), -286.5474, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=8, M=1, params=theta_812relg, weight_function="relative_dens"), -257.0505, tolerance=1e-3)
+  expect_equal(loglikelihood(data=data2, p=4, M=1, params=theta_413relg, weight_function="relative_dens"), -596.6938, tolerance=1e-3)
 
-  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122relg), -314.6693, tolerance=1e-3)
-  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222relg), -239.3485, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122relg, weight_function="relative_dens"), -314.6693, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222relg, weight_function="relative_dens"), -239.3485, tolerance=1e-3)
 })
