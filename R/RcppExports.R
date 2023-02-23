@@ -3,38 +3,36 @@
 
 #' @name Gaussian_densities_Cpp
 #' @title Calculate log multivariate Gaussian densities
-#' @description Calculates logs of multivariate Gaussian densities with constant mean
-#'   and constant covariance matrix AND EXCLUDING the constant term of density
+#' @description Calculates logs of multivariate Gaussian densities with varying mean
+#'   and varying covariance matrix AND EXCLUDING the constant term of the density
 #'   (the constant is calculated and added in R code).
 #'
-#' @param obs a \eqn{(T \times dp)} such that the i:th row of the matrix contains
-#'  the vector \eqn{(y_{i-1}',...,y_{i-p}') }\code{rep(all_mu[,m], times=p)}
-#'  \eqn{((dp)x1)}, where \eqn{y_{i}=(y_{1i},...,y_{di})} \eqn{(dx1)}. That is, the initial values are
-#'  included but the last observations not (used in relative dens transition weights).
-#' @param mean the \eqn{((dp)x1)} mean vector, \code{rep(all_mu[,m], times=p)}, that is the same for
-#'  all observations.
-#' @param covmat the \eqn{(dp \times dp)} covariance matrix that is the same for all
-#'   observations.
+#' @param obs a \eqn{(T \times d)} matrix such that the i:th row contains the vector
+#'  \eqn{y_{i}=(y_{1i},...,y_{di})} \eqn{(dx1)}. That is, the initial values are
+#'  excluded but the last observations is included.
+#' @param means a \eqn{(T \times d)} matrix such that the i:th row constraints the
+#'   conditional mean of the process \eqn{\mu_{y,i}}.
+#' @param covmats a \eqn{(d \times d \times T)} array such that the slice \code{[, , t]}
+#'   contains the time t conditional covariance matrix.
 #' @return a numeric vector containing the multivariate Gaussian densities, excluding the constant term.
 #' @keywords internal
-Gaussian_densities_Cpp <- function(obs, mean, covmat) {
-    .Call('_sstvars_Gaussian_densities_Cpp', PACKAGE = 'sstvars', obs, mean, covmat)
+Gaussian_densities_Cpp <- function(obs, means, covmats) {
+    .Call('_sstvars_Gaussian_densities_Cpp', PACKAGE = 'sstvars', obs, means, covmats)
 }
 
 #' @name Gaussian_densities_const_Cpp
 #' @title Calculate log multivariate Gaussian densities
 #' @description Calculates logs of multivariate Gaussian densities with constant mean
-#'   and constant covariance matrix AND EXCLUDING the constant term of density
+#'   and constant covariance matrix AND EXCLUDING the constant term of the density
 #'   (the constant is calculated and added in R code).
 #'
-#' @param obs a \eqn{(T \times dp)} such that the i:th row of the matrix contains
-#'  the vector \eqn{(y_{i-1}',...,y_{i-p}') }\code{rep(all_mu[,m], times=p)}
-#'  \eqn{((dp)x1)}, where \eqn{y_{i}=(y_{1i},...,y_{di})} \eqn{(dx1)}. That is, the initial values are
-#'  included but the last observations not (used in relative dens transition weights).
+#' @param obs a \eqn{(T \times dp)} matrix such that the i:th row contains the vector
+#'  \eqn{(y_{i-1}',...,y_{i-p}')} \eqn{((dp)x1)}, where \eqn{y_{i}=(y_{1i},...,y_{di})}
+#'  \eqn{(dx1)}. That is, the initial values are included but the last observations not.
 #' @param mean the \eqn{((dp)x1)} mean vector, \code{rep(all_mu[,m], times=p)}, that is the same for
 #'  all observations.
-#' @param covmat the \eqn{(dp \times dp)} covariance matrix that is the same for all
-#'   observations.
+#' @param covmat the \eqn{(dp \times dp)} covariance matrix that is the same for all observations.
+#' @details This function is used in the relative density transition weights with Gaussian regimes.
 #' @return a numeric vector containing the multivariate Gaussian densities, excluding the constant term.
 #' @keywords internal
 Gaussian_densities_const_Cpp <- function(obs, mean, covmat) {

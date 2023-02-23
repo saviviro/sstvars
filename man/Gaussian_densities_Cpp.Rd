@@ -4,26 +4,25 @@
 \alias{Gaussian_densities_Cpp}
 \title{Calculate log multivariate Gaussian densities}
 \usage{
-Gaussian_densities_Cpp(obs, mean, covmat)
+Gaussian_densities_Cpp(obs, means, covmats)
 }
 \arguments{
-\item{obs}{a \eqn{(T \times dp)} such that the i:th row of the matrix contains
-the vector \eqn{(y_{i-1}',...,y_{i-p}') }\code{rep(all_mu[,m], times=p)}
-\eqn{((dp)x1)}, where \eqn{y_{i}=(y_{1i},...,y_{di})} \eqn{(dx1)}. That is, the initial values are
-included but the last observations not (used in relative dens transition weights).}
+\item{obs}{a \eqn{(T \times d)} matrix such that the i:th row contains the vector
+\eqn{y_{i}=(y_{1i},...,y_{di})} \eqn{(dx1)}. That is, the initial values are
+excluded but the last observations is included.}
 
-\item{mean}{the \eqn{((dp)x1)} mean vector, \code{rep(all_mu[,m], times=p)}, that is the same for
-all observations.}
+\item{means}{a \eqn{(T \times d)} matrix such that the i:th row constraints the
+conditional mean of the process \eqn{\mu_{y,i}}.}
 
-\item{covmat}{the \eqn{(dp \times dp)} covariance matrix that is the same for all
-observations.}
+\item{covmats}{a \eqn{(d \times d \times T)} array such that the slice \code{[, , t]}
+contains the time t conditional covariance matrix.}
 }
 \value{
 a numeric vector containing the multivariate Gaussian densities, excluding the constant term.
 }
 \description{
-Calculates logs of multivariate Gaussian densities with constant mean
-  and constant covariance matrix AND EXCLUDING the constant term of density
+Calculates logs of multivariate Gaussian densities with varying mean
+  and varying covariance matrix AND EXCLUDING the constant term of the density
   (the constant is calculated and added in R code).
 }
 \keyword{internal}

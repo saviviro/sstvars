@@ -161,17 +161,21 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   # Calculate the conditional log-likelihood
   obs_minus_cmean <- data[(p+1):nrow(data),] - mu_yt # The initial values are not used here
   if(cond_dist == "Gaussian") { # Gaussian conditiona distribution
-    all_lt <- numeric(T_obs)
-    tmp0 <- -0.5*d*log(2*pi)
-    for(i1 in 1:T_obs) {
+    #all_lt <- numeric(T_obs)
+    #tmp0 <- -0.5*d*log(2*pi)
+    all_lt <- -0.5*d*log(2*pi) + Gaussian_densities_Cpp(obs=data[(p+1):nrow(data),], means=mu_yt, covmats=all_covmats)
+    #for(i1 in 1:T_obs) {
       # Calculate the l_t multinormal density for each observation
-      all_lt[i1] <- tmp0 - 0.5*log(det(all_covmats[, , i1])) - 0.5*crossprod(obs_minus_cmean[i1,],
-                                                                             chol2inv(chol(all_covmats[, , i1]))%*%(obs_minus_cmean[i1,]))
+    #  all_lt[i1] <- tmp0 - 0.5*log(det(all_covmats[, , i1])) - 0.5*crossprod(obs_minus_cmean[i1,],
+    #                                                                         chol2inv(chol(all_covmats[, , i1]))%*%(obs_minus_cmean[i1,]))
 
       #tmp <- backsolve(chol(all_covmats[, , i1]), x=diag(d))
       #tmp2 <- crossprod(obs_minus_cmean[i1,], tmp)
       #all_lt[i1] <- tmp0 + sum(log(diag(tmp))) - 0.5*tcrossprod(tmp2, tmp2)
-    }
+
+      # THE CONDITIONAL COVARIANCE MATRICES SHOULD POSSIBLY ALSO BE CALCULATED IN RCPP? SEPARATE FUNCTION AS THEY ARE USED IN OTHER DENSITIES AS WELL?
+      # OR: just calculate it in the loop in each iteration?
+  #  }
   } else if(cond_dist == "Student") {
     # Entä RCCP toimiiko Studentille? Pitää vain koodata
     stop("Student's t cond_dist is not implemented yet!")

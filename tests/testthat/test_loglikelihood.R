@@ -66,6 +66,7 @@ theta_413relg <- c(0.5334, -0.036, 0.0065, 0.2421, 0.0198, -0.1067, -0.1501, 0.5
 
 # mvfast: medion 5.0-5.3ms (usein noin 5.1)
 # Oma: noin yhtä suuri.
+# Omacovmats Rcppllä: noin 1.2ms
 
 test_that("loglikelihood works correctly", {
   # Relative_dens Gausssian STVAR

@@ -7,23 +7,24 @@
 Gaussian_densities_const_Cpp(obs, mean, covmat)
 }
 \arguments{
-\item{obs}{a \eqn{(T \times dp)} such that the i:th row of the matrix contains
-the vector \eqn{(y_{i-1}',...,y_{i-p}') }\code{rep(all_mu[,m], times=p)}
-\eqn{((dp)x1)}, where \eqn{y_{i}=(y_{1i},...,y_{di})} \eqn{(dx1)}. That is, the initial values are
-included but the last observations not (used in relative dens transition weights).}
+\item{obs}{a \eqn{(T \times dp)} matrix such that the i:th row contains the vector
+\eqn{(y_{i-1}',...,y_{i-p}')} \eqn{((dp)x1)}, where \eqn{y_{i}=(y_{1i},...,y_{di})}
+\eqn{(dx1)}. That is, the initial values are included but the last observations not.}
 
 \item{mean}{the \eqn{((dp)x1)} mean vector, \code{rep(all_mu[,m], times=p)}, that is the same for
 all observations.}
 
-\item{covmat}{the \eqn{(dp \times dp)} covariance matrix that is the same for all
-observations.}
+\item{covmat}{the \eqn{(dp \times dp)} covariance matrix that is the same for all observations.}
 }
 \value{
 a numeric vector containing the multivariate Gaussian densities, excluding the constant term.
 }
 \description{
 Calculates logs of multivariate Gaussian densities with constant mean
-  and constant covariance matrix AND EXCLUDING the constant term of density
+  and constant covariance matrix AND EXCLUDING the constant term of the density
   (the constant is calculated and added in R code).
+}
+\details{
+This function is used in the relative density transition weights with Gaussian regimes.
 }
 \keyword{internal}

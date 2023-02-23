@@ -12,15 +12,15 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // Gaussian_densities_Cpp
-arma::vec Gaussian_densities_Cpp(arma::mat obs, arma::mat mean, arma::mat covmat);
-RcppExport SEXP _sstvars_Gaussian_densities_Cpp(SEXP obsSEXP, SEXP meanSEXP, SEXP covmatSEXP) {
+arma::vec Gaussian_densities_Cpp(arma::mat obs, arma::mat means, arma::cube covmats);
+RcppExport SEXP _sstvars_Gaussian_densities_Cpp(SEXP obsSEXP, SEXP meansSEXP, SEXP covmatsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat >::type obs(obsSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type mean(meanSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type covmat(covmatSEXP);
-    rcpp_result_gen = Rcpp::wrap(Gaussian_densities_Cpp(obs, mean, covmat));
+    Rcpp::traits::input_parameter< arma::mat >::type means(meansSEXP);
+    Rcpp::traits::input_parameter< arma::cube >::type covmats(covmatsSEXP);
+    rcpp_result_gen = Rcpp::wrap(Gaussian_densities_Cpp(obs, means, covmats));
     return rcpp_result_gen;
 END_RCPP
 }
