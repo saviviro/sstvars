@@ -120,8 +120,6 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   Y <- reform_data(data, p)
   Y2 <- Y[1:T_obs,] # Last row removed; not needed when calculating something based on lagged observations
 
-  # NOTE! IF parametrization == "intercept" && weight_function == "logit" WE DONT NEED TO CALCULATE all_mu
-  # THAT MIGHT SAVE COMPUTATION TIME IN GRADIENT BASED ESTIMATION!
   # Calculate unconditional regime-specific expected values (column per component) or phi0-parameters if using mean-parametrization
   Id <- diag(nrow=d)
   if(parametrization == "intercept") {
@@ -140,51 +138,40 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   # Calculate the conditional means mu_{m,t}
   # The dimensions of mu_mt will be: [t, p, m]
   all_A2 <- array(all_A, dim=c(d, d*p, M)) # cbind coefficient matrices of each component: m:th component is obtained at [, , m]
-  mu_mt <- array(vapply(1:M, function(m) t(all_phi0[, m] + tcrossprod(all_A2[, , m], Y2)), numeric(d*T_obs)), dim=c(T_obs, d, M)) # [, , m]
 
-  # Calculate the conditional means of the process mu_yt
-  mu_yt <- vapply(1:d, function(i1) rowSums(alpha_mt*mu_mt[,i1,]), numeric(T_obs)) # [T_obs, d]
+  mu_yt <- get_mu_yt_Cpp(obs=Y2, all_phi0=all_phi0, all_A=all_A2, alpha_mt=alpha_mt)
 
-  # Return conditional moments if those were to be returned
+  # R implementation saved below for speed comparisons
+  #mu_mt <- array(vapply(1:M, function(m) t(all_phi0[, m] + tcrossprod(all_A2[, , m], Y2)), numeric(d*T_obs)), dim=c(T_obs, d, M)) # [, , m]
+  #mu_yt <- vapply(1:d, function(i1) rowSums(alpha_mt*mu_mt[,i1,]), numeric(T_obs)) # [T_obs, d]
+
+  # Return conditional moments if those were to be returned (R implementation used, as computation speed is no issue here)
   if(to_return == "regime_cmeans") { # Regime-specific conditional menas
-    return(mu_mt)
+    return(array(vapply(1:M, function(m) t(all_phi0[, m] + tcrossprod(all_A2[, , m], Y2)), numeric(d*T_obs)), dim=c(T_obs, d, M))) # [, , m]
   } else if(to_return == "total_cmeans") { # Cond means of the process: weighted sum of regime-specific conditional means
     return(matrix(rowSums(vapply(1:M, function(m) alpha_mt[,m]*mu_mt[, , m], numeric(d*T_obs))), nrow=T_obs, ncol=d, byrow=FALSE))
-  } else { # Cond covariance matrices of the process: weighted sum of regime-specific cond cov mats
+  } else if(to_return == "total_ccovs") { # Cond covariance matrices of the process: weighted sum of regime-specific cond cov mats
     all_covmats <- array(rowSums(vapply(1:M, function(m) rep(alpha_mt[, m], each=d*d)*as.vector(all_Omegas[, , m]),
                                         numeric(d*d*T_obs))), dim=c(d, d, T_obs))
-    if(to_return == "total_ccovs") {
-      return(all_covmats)
-    }
+    return(all_covmats)
   }
 
-  # Calculate the conditional log-likelihood
-  obs_minus_cmean <- data[(p+1):nrow(data),] - mu_yt # The initial values are not used here
-  cond_covmats <- array(dim=c(d, d, M))
-  if(cond_dist == "Gaussian") { # Gaussian conditiona distribution
-    all_lt <- numeric(T_obs)
-    tmp0 <- -0.5*d*log(2*pi)
+  # Calculate the conditional log-likelihood; the initial values are not used here
+  if(cond_dist == "Gaussian") { # Gaussian conditional distribution
     all_lt <- -0.5*d*log(2*pi) + Gaussian_densities_Cpp(obs=data[(p+1):nrow(data),], means=mu_yt, covmats=all_Omegas, alpha_mt=alpha_mt)
-    # JÄIN TÄHÄN: all_covmats kanssa toimii, mutta nopeuttaa hieman jos laittaa all_Omegas ja laskee cond-covmatit Rcpp:llä.
-    # Nykyinen Rcpp-koodi ei kuitenkaan anna oikeaa tulosta; all_covmatsin kanssa antaa oikean tuloksen.
-    # Alla oleva R-looppi varmisti, että loopin kanssa toimii kyllä, Rcpp:llä looppi vain on väärin.
-    # ELI: katso Rcpp-koodin testisyötteellä mitä alla olevan oikean loopin pitäisi antaa; ja
-    # testaa mitä Rcpp-looppi laskee väärin ja korjaa se.
-    # Tämän jälkeen: mieti muutatko muita kohtia loglikistä myös Rcpp:lle nopeuttaaksesi koodia?
 
+    # BELOW IS THE R IMPLEMENTATION FOR SPEED COMPARISONS
+    #all_lt <- numeric(T_obs)
+    #tmp0 <- -0.5*d*log(2*pi)
     # for(i1 in 1:T_obs) {
     #    # Calculate the l_t multinormal density for each observation
     #   cond_covmat <- matrix(0, nrow=d, ncol=d)
     #   for(i2 in 1:M) {
-    #     #cond_covmats[, , i2] <- alpha_mt[i1, i2]*all_Omegas[, , i2]
-    #     cond_covmat <- cond_covmat + alpha_mt[i1, i2]*all_Omegas[, , i2]
+    #     cond_covmats[, , i2] <- alpha_mt[i1, i2]*all_Omegas[, , i2]
     #   }
-    # #  print(cond_covmat - all_Omegas[, , 1])
-    #   #cond_covmat <- apply(cond_covmats, MARGIN=1:2, sum)
+    #   cond_covmat <- apply(cond_covmats, MARGIN=1:2, sum)
     #   all_lt[i1] <- tmp0 - 0.5*log(det(cond_covmat)) - 0.5*crossprod(obs_minus_cmean[i1,],
     #                                                                          chol2inv(chol(cond_covmat))%*%(obs_minus_cmean[i1,]))
-    #   #all_lt[i1] <- tmp0 - 0.5*log(det(all_covmats[, , i1])) - 0.5*crossprod(obs_minus_cmean[i1,],
-    #   #                                                                       chol2inv(chol(all_covmats[, , i1]))%*%(obs_minus_cmean[i1,]))
     # }
   } else if(cond_dist == "Student") {
     stop("Student's t cond_dist is not implemented yet!")

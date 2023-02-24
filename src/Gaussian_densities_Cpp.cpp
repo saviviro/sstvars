@@ -6,34 +6,37 @@ using namespace Rcpp;
 //' @title Calculate log multivariate Gaussian densities
 //' @description Calculates logs of multivariate Gaussian densities with varying mean
 //'   and varying covariance matrix AND EXCLUDING the constant term of the density
-//'   (the constant is calculated and added in R code).
+//'   (the constant is calculated and added in R code). The varying conditional covariance
+//'   matrix is calculated within the function from the regime covariance matrices and
+//'   transition weights.
 //'
 //' @param obs a \eqn{(T \times d)} matrix such that the i:th row contains the vector
 //'  \eqn{y_{i}=(y_{1i},...,y_{di})} \eqn{(dx1)}. That is, the initial values are
 //'  excluded but the last observations is included.
-//' @param means a \eqn{(T \times d)} matrix such that the i:th row constraints the
+//' @param means a \eqn{(T \times d)} matrix such that the i:th row contains the
 //'   conditional mean of the process \eqn{\mu_{y,i}}.
-//' @param covmats a \eqn{(d \times d \times T)} array such that the slice \code{[, , t]}
-//'   contains the time t conditional covariance matrix.
+//' @param covmats a \eqn{(d \times d \times M)} array such that the slice \code{[, , m]}
+//'   contains the conditional covariance matrix of regime m.
+//' @param alpha_mt a \eqn{(T \times M)} matrix such that \code{[t, m]} contains the time t
+//'   transition weights of the m:th regime.
 //' @return a numeric vector containing the multivariate Gaussian densities, excluding the constant term.
 //' @keywords internal
 // [[Rcpp::export]]
-arma::vec Gaussian_densities_Cpp(arma::mat obs, arma::mat means, arma::cube covmats, arma::mat alpha_mt) {
+arma::mat Gaussian_densities_Cpp(arma::mat obs, arma::mat means, arma::cube covmats, arma::mat alpha_mt) {
   int T_obs = obs.n_rows; // The number of observations
   int d = obs.n_cols; // The dimension d
-  int M = alpha_mt.n_cols;
+  int M = alpha_mt.n_cols; // The number of regimes
   arma::vec vals(T_obs); // Contains the densities for each observation
   arma::mat tmp(d, 1);
   arma::mat tmp2(1, 1);
   arma::mat cholcovmat(d, d);
   arma::mat inv_cholcovmat(d, d);
-  arma::mat condcovmat(d, d, arma::fill::zeros);
 
   for(int i1 = 0; i1 < T_obs; i1++) {
-    for(int i2 = 0; i2 < M; i2++) {
-      condcovmat += alpha_mt(i1, i2)*covmats.slice(i2);
+    arma::mat condcovmat(d, d, arma::fill::zeros);
+     for(int i2 = 0; i2 < M; i2++) {
+       condcovmat += alpha_mt(i1, i2)*covmats.slice(i2);
     }
-    //cholcovmat = arma::chol(covmats.slice(i1));
     cholcovmat = arma::chol(condcovmat);
     inv_cholcovmat = arma::inv(trimatu(cholcovmat));
     tmp = (obs.row(i1) - means.row(i1))*inv_cholcovmat;
@@ -45,7 +48,3 @@ arma::vec Gaussian_densities_Cpp(arma::mat obs, arma::mat means, arma::cube covm
 }
 
 
-/*** R
-Gaussian_densities_Cpp(obs=matrix(c(1:6), nrow=3), means=matrix(0, nrow=3, ncol=2), covmats=array(rep(c(1, 0.1, 0.1, 1), times=2), dim=c(2, 2, 2)),
-                       alpha_mt=matrix(rep(0.5, times=2*3), nrow=3))
-*/

@@ -5,15 +5,19 @@
 #' @title Calculate log multivariate Gaussian densities
 #' @description Calculates logs of multivariate Gaussian densities with varying mean
 #'   and varying covariance matrix AND EXCLUDING the constant term of the density
-#'   (the constant is calculated and added in R code).
+#'   (the constant is calculated and added in R code). The varying conditional covariance
+#'   matrix is calculated within the function from the regime covariance matrices and
+#'   transition weights.
 #'
 #' @param obs a \eqn{(T \times d)} matrix such that the i:th row contains the vector
 #'  \eqn{y_{i}=(y_{1i},...,y_{di})} \eqn{(dx1)}. That is, the initial values are
 #'  excluded but the last observations is included.
-#' @param means a \eqn{(T \times d)} matrix such that the i:th row constraints the
+#' @param means a \eqn{(T \times d)} matrix such that the i:th row contains the
 #'   conditional mean of the process \eqn{\mu_{y,i}}.
-#' @param covmats a \eqn{(d \times d \times T)} array such that the slice \code{[, , t]}
-#'   contains the time t conditional covariance matrix.
+#' @param covmats a \eqn{(d \times d \times M)} array such that the slice \code{[, , m]}
+#'   contains the conditional covariance matrix of regime m.
+#' @param alpha_mt a \eqn{(T \times M)} matrix such that \code{[t, m]} contains the time t
+#'   transition weights of the m:th regime.
 #' @return a numeric vector containing the multivariate Gaussian densities, excluding the constant term.
 #' @keywords internal
 Gaussian_densities_Cpp <- function(obs, means, covmats, alpha_mt) {
@@ -37,5 +41,25 @@ Gaussian_densities_Cpp <- function(obs, means, covmats, alpha_mt) {
 #' @keywords internal
 Gaussian_densities_const_Cpp <- function(obs, mean, covmat) {
     .Call('_sstvars_Gaussian_densities_const_Cpp', PACKAGE = 'sstvars', obs, mean, covmat)
+}
+
+#' @name get_mu_yt_Cpp
+#' @title Calculate the conditional means of the process
+#' @description Calculates the conditional means \eqn{\mu_{y,t}} of the process
+#'
+#' @param obs a \eqn{(T \times dp)} matrix such that the i:th row contains the vector
+#'   \eqn{(y_{i-1}',...,y_{i-p}')} \eqn{((dp)x1)}, where \eqn{y_{i}=(y_{1i},...,y_{di})}
+#'   \eqn{(dx1)}. That is, the initial values are included but the last observations not.
+#' @param all_phi0 a \eqn{(d \times M)} matrix such that the m:th column contains the
+#'   intercept parameters of the m:th regime.
+#' @param all_A a \eqn{(d \times dp \times M)} array such that the slice \code{[, , m]}
+#'   contains the AR matrices of the m:th regime cbinded together: \eqn{[A_{m,1}:...:A_{m,p}]}.
+#' @param alpha_mt a \eqn{(T \times M)} matrix such that \code{[t, m]} contains the time t
+#'   transition weights of the m:th regime.
+#' @return a \eqn{(T \times d)} matrix such that the i:th row contains the conditional
+#'   mean of the process.
+#' @keywords internal
+get_mu_yt_Cpp <- function(obs, all_phi0, all_A, alpha_mt) {
+    .Call('_sstvars_get_mu_yt_Cpp', PACKAGE = 'sstvars', obs, all_phi0, all_A, alpha_mt)
 }
 

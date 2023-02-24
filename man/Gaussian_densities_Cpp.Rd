@@ -4,18 +4,21 @@
 \alias{Gaussian_densities_Cpp}
 \title{Calculate log multivariate Gaussian densities}
 \usage{
-Gaussian_densities_Cpp(obs, means, covmats)
+Gaussian_densities_Cpp(obs, means, covmats, alpha_mt)
 }
 \arguments{
 \item{obs}{a \eqn{(T \times d)} matrix such that the i:th row contains the vector
 \eqn{y_{i}=(y_{1i},...,y_{di})} \eqn{(dx1)}. That is, the initial values are
 excluded but the last observations is included.}
 
-\item{means}{a \eqn{(T \times d)} matrix such that the i:th row constraints the
+\item{means}{a \eqn{(T \times d)} matrix such that the i:th row contains the
 conditional mean of the process \eqn{\mu_{y,i}}.}
 
-\item{covmats}{a \eqn{(d \times d \times T)} array such that the slice \code{[, , t]}
-contains the time t conditional covariance matrix.}
+\item{covmats}{a \eqn{(d \times d \times M)} array such that the slice \code{[, , m]}
+contains the conditional covariance matrix of regime m.}
+
+\item{alpha_mt}{a \eqn{(T \times M)} matrix such that \code{[t, m]} contains the time t
+transition weights of the m:th regime.}
 }
 \value{
 a numeric vector containing the multivariate Gaussian densities, excluding the constant term.
@@ -23,6 +26,8 @@ a numeric vector containing the multivariate Gaussian densities, excluding the c
 \description{
 Calculates logs of multivariate Gaussian densities with varying mean
   and varying covariance matrix AND EXCLUDING the constant term of the density
-  (the constant is calculated and added in R code).
+  (the constant is calculated and added in R code). The varying conditional covariance
+  matrix is calculated within the function from the regime covariance matrices and
+  transition weights.
 }
 \keyword{internal}
