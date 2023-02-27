@@ -32,7 +32,6 @@ stab_conds_satisfied <- function(p, M, d, params, all_boldA=NULL, tolerance=1e-3
 }
 
 
-
 #' @title Determine whether the parameter vector is in the parameter space
 #'
 #' @description \code{in_paramspace} checks whether the parameter vector is in the parameter
@@ -110,10 +109,10 @@ in_paramspace <- function(p, M, d, weight_function, cond_dist, all_boldA, all_Om
 #' @export
 
 check_params <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
-                             parametrization=c("intercept", "mean"),
-                             identification=c("reduced_form", "recursive", "heteroskedasticity"),
-                             AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
-                             stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
+                         parametrization=c("intercept", "mean"),
+                         identification=c("reduced_form", "recursive", "heteroskedasticity"),
+                         AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
+                         stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
   check_pMd(p=p, M=M, d=d)
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -127,6 +126,12 @@ check_params <- function(p, M, d, params, weight_function=c("relative_dens", "lo
   weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist)
   all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
   df <- numeric(0) # FILL IN WHEN STUDENT IS IMPLEMENTED
+
+  if(n_params(p=p, M=M, d=d, weight_function=weight_function, cond_dist=cond_dist,
+              identification=identification, AR_constraints=AR_constraints,
+              mean_constraints=mean_constraints, B_constraints=B_constraints) != length(params)) {
+    stop("The parameter vector has wrong dimension!")
+  }
 
   if(!is.null(AR_constraints)) {
     stop("AR_constraints are not yet implemented!")
@@ -200,4 +205,78 @@ check_pMd <- function(p, M, d) {
       stop("The argument d, the number of columns in the data matrix, has to be a positive integer larger than one!")
     }
   }
+}
+
+
+#' @title Check the data is in the correct form
+#'
+#' @description \code{check_data} checks the data.
+#'
+#' @inheritParams loglikelihood
+#' @return Checks the data and tries to correct it. Throws an error if something is wrong and
+#'   returns the corrected data otherwise.
+#' @keywords internal
+
+check_data <- function(data, p) {
+  if(is.data.frame(data)) {
+    data <- as.matrix(data)
+  }
+  if(!is.matrix(data)) {
+    stop("The data must be numeric matrix (possibly a class 'ts' object)!")
+  } else {
+    if(anyNA(data)) stop("The data contains NA values!")
+    if(!is.numeric(data)) stop("The data must be numeric!")
+    if(ncol(data) < 2) stop("The data matrix must contain at least two columns!")
+    if(nrow(data) < p + 1) stop("The data must contain at least p+1 observations!")
+  }
+  data
+}
+
+
+#' @title Calculate the number of (freely estimaed) parameters in the model
+#'
+#' @description \code{n_params} calculates the number of (freely estimaed) parameters in the model.
+#'
+#' @inheritParams check_params
+#' @return Returns the number of parameters in the parameter vector of the specified model.
+#' @section Warning:
+#'  No argument checks!
+#' @inherit in_paramspace references
+#' @keywords internal
+
+n_params <- function(p, M, d, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
+                     identification=c("reduced_form", "recursive", "heteroskedasticity"),
+                     AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL) {
+  weight_function <- match.arg(weight_function)
+  cond_dist <- match.arg(cond_dist)
+  identification <- match.arg(identification)
+  if(identification != "reduced_form") stop("Only reduced form models are currently supported")
+  if(!is.null(AR_constraints) || !is.null(mean_constraints) || !is.null(B_constraints)) stop("Constrained models are not currently supported")
+
+  if(is.null(mean_constraints)) {
+    n_mean_pars <- M*d
+  } else { # Means constrained
+    n_mean_pars <- NULL
+  }
+  if(is.null(AR_constraints)) {
+    n_ar_pars <- M*p*d^2
+  } else { # AR matrices constrained
+    n_ar_pars <- NULL
+  }
+  if(is.null(B_constraints)) {
+    n_covmat_pars <- M*d*(d + 1)/2
+  } else { # Constraints on the impact matrix
+    n_covmat_pars <- NULL
+  }
+  if(weight_function == "relative_dens") {
+    n_weight_pars <- M - 1
+  } else { # weight_function == "logit"
+    n_weight_pars <- NULL
+  }
+  if(cond_dist == "Gaussian") {
+    n_dist_pars <- 0
+  } else { # cond_dist == "Student"
+    n_dist_pars <- 1 # degrees of freedom parmas
+  }
+  n_mean_pars + n_ar_pars + n_covmat_pars + n_weight_pars + n_dist_pars
 }

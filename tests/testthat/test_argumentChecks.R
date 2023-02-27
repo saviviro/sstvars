@@ -50,7 +50,6 @@ theta_122relg_notpd <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(
 
 theta_122relg_badalphas <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122_notpd), 1)
 
-
 # p=2, M=2, d=2
 phi10_222 <- c(0.36, 0.12)
 A11_222 <- matrix(c(0.22, 0.06, -0.15, 0.39), nrow=2, byrow=FALSE)
@@ -92,7 +91,6 @@ theta_132relg_badalphas <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(
 theta_132relg_badalphas2 <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132_stab),
                               vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), 0.6, -0.2)
 
-
 # p=1, M=1, d=3
 phi10_113 <- c(1, 2, 3)
 A11_113 <- matrix(c(0.1, 0.02, 0.12, 0.3, 0.21, 0.11, 0.05, 0.03, 0.09), nrow=3)
@@ -121,7 +119,6 @@ theta_123relg_notstab <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vec
                            vech(Omega2_123), alpha1_123)
 theta_123relg_notpd <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123_stab), vech(Omega1_123),
                            vech(Omega2_123_notpd), alpha1_123)
-
 
 Omegas_112 <- pick_Omegas(p=1, M=1, d=2, params=theta_112relg)
 Omegas_112_notpd <- pick_Omegas(p=1, M=1, d=2, params=theta_112relg_notpd)
@@ -303,11 +300,21 @@ test_that("all_pos_ints works correctly", {
   expect_true(all_pos_ints(c(1, 2, 3)))
   expect_true(all_pos_ints(1))
   expect_true(all_pos_ints(list(1, 3, 100)))
-
   expect_false(all_pos_ints(c(1, 2, 0)))
   expect_false(all_pos_ints(-1))
   expect_false(all_pos_ints(0.1))
   expect_false(all_pos_ints(1.1))
   expect_false(all_pos_ints(list(1, 2, 3, 0.1)))
+})
+
+test_that("n_params works correctly", {
+  expect_equal(n_params(p=1, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian"), 9)
+  expect_equal(n_params(p=2, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian"), 13)
+  expect_equal(n_params(p=3, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian"), 17)
+  expect_equal(n_params(p=1, M=2, d=2, weight_function="relative_dens", cond_dist="Gaussian"), 19)
+  expect_equal(n_params(p=1, M=3, d=2, weight_function="relative_dens", cond_dist="Gaussian"), 29)
+  expect_equal(n_params(p=1, M=1, d=3, weight_function="relative_dens", cond_dist="Gaussian"), 18)
+  expect_equal(n_params(p=2, M=1, d=3, weight_function="relative_dens", cond_dist="Gaussian"), 27)
+  expect_equal(n_params(p=1, M=2, d=3, weight_function="relative_dens", cond_dist="Gaussian"), 37)
 })
 
