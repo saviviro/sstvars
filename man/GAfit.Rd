@@ -33,6 +33,20 @@ GAfit(
 )
 }
 \arguments{
+\item{data}{data a matrix or class \code{'ts'} object with \code{d>1} columns. Each column is taken to represent
+a univariate time series. Missing values are not supported.}
+
+\item{p}{a positive integer specifying the autoregressive order}
+
+\item{M}{a positive integer specifying the number of regimes}
+
+\item{weight_function}{what type of transition weights should be used?}
+
+\item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"} or \eqn{"Student"}.}
+
+\item{parametrization}{\code{"intercept"} or \code{"mean"} determining whether the model is parametrized with intercept
+parameters \eqn{\phi_{m,0}} or regime means \eqn{\mu_{m}}, m=1,...,M.}
+
 \item{ngen}{a positive integer specifying the number of generations to be ran through in
 the genetic algorithm.}
 

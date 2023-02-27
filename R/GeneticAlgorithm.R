@@ -3,7 +3,7 @@
 #' @description \code{GAfit} estimates the specified GMVAR, StMVAR, or G-StMVAR model using a genetic algorithm.
 #'   It's designed to find starting values for gradient based methods.
 #'
-#' @inheritParams loglikelihood_int
+#' @inheritParams loglikelihood
 #' @inheritParams random_covmat
 #' @param ngen a positive integer specifying the number of generations to be ran through in
 #'   the genetic algorithm.
@@ -126,8 +126,56 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
   data <- check_data(data=data, p=p)
   d <- ncol(data)
   n_obs <- nrow(data)
+  n_pars <- n_params(p=p, M=M, d=d, weight_function=weight_function, cond_dist=cond_dist,
+                     identification=identification, AR_constraints=AR_constraints,
+                     mean_constraints=mean_constraints, B_constraints=B_constraints)
   # FILL IN ARGUMENT CHECKS FOR CONSTRAINTS
 
+  # Defaults and checks
+  if(!all_pos_ints(c(ngen, smart_mu))) stop("Arguments ngen and smart_mu have to be positive integers")
+  if(missing(popsize)) {
+    popsize <- 50*ceiling(sqrt(npars))
+  } else if(popsize < 2 | popsize %% 2 != 0) {
+    stop("The population size popsize must be even positive integer")
+  }
+  if(missing(minval)) {
+    minval <- get_minval(data)
+  } else if(!is.numeric(minval)) {
+    stop("Argument minval must be numeric")
+  }
+  if(missing(mu_scale)) {
+    mu_scale <- colMeans(data)
+  } else if(length(mu_scale) != d) {
+    stop("Argument mu_scale must be numeric vector with length d")
+  }
+  if(missing(mu_scale2)) {
+    mu_scale2 <- vapply(1:d, function(i1) 2*sd(data[,i1]), numeric(1))
+  } else if(length(mu_scale2) != d | any(mu_scale2 <= 0)) {
+    stop("Argument mu_scale2 must be strictly positive vector with length d")
+  }
+  if(missing(omega_scale)) {
+    omega_scale <- vapply(1:d, function(i1) var(stats::ar(data[,i1], order.max=10)$resid, na.rm=TRUE), numeric(1))
+  } else if(!(length(omega_scale) == d & all(omega_scale > 0))) {
+    stop("omega_scale must be numeric vector with length d and positive elements")
+  }
+  stopifnot(pre_smart_mu_prob >= 0 && pre_smart_mu_prob <= 1)
+  if(length(ar_scale) != 1 | ar_scale <= 0) {
+    stop("ar_scale must be positive and have length one")
+  }
+  if(length(ar_scale2) != 1 | ar_scale2 <= 0) {
+    stop("ar_scale2 must be positive and have length one")
+  } else if(ar_scale2 > 1.5) {
+    warning("Large ar_scale2 might lead to failure of the estimation process")
+  }
+  if(length(regime_force_scale) != 1 | regime_force_scale < 0) {
+    stop("regime_force_scale should be non-negative real number")
+  }
 
+  # The initial population
+  if(is.null(initpop)) {
+    # CONSTRUCT THE INITIAL POPULATION
+  } else {
+    # CHECK THE ARGUMENT INITPOP AND CONSTRUCT INITIAL POPULATION
+  }
 
 }
