@@ -57,10 +57,10 @@
 #'  this too high might lead to failure in proposing new parameters that are well enough inside the parameter space,
 #'  and especially with large \code{p} one might want to try smaller upper bound (e.g., 0.5).
 #' @param ar_scale2 a positive real number adjusting how large AR parameter values are typically proposed in some
-#'   random mutations (if AR constraints are employed, in all random mutations): larger value implies \strong{smaller} coefficients
-#'   (in absolute value). \strong{Values larger than 1 can be used if the AR coefficients are expected to be very small.
-#'   If set smaller than 1, be careful as it might lead to failure in the creation of parameter candidates that satisfy the
-#'   stability condition.}
+#'   random mutations (if AR constraints are employed, in all random mutations): larger value implies \strong{smaller}
+#'   coefficients (in absolute value). \strong{Values larger than 1 can be used if the AR coefficients are expected to
+#'   be very small. If set smaller than 1, be careful as it might lead to failure in the creation of parameter candidates
+#'   that satisfy the stability condition.}
 #' @param regime_force_scale a non-negative real number specifying how much should natural selection favor individuals
 #'   with less regimes that have almost all mixing weights (practically) at zero. Set to zero for no favoring or large
 #'   number for heavy favoring. Without any favoring the genetic algorithm gets more often stuck in an area of the
@@ -84,6 +84,8 @@
 #' @param seed a single value, interpreted as an integer, or NULL, that sets seed for the random number generator in the beginning of
 #'   the function call. If calling \code{GAfit} from \code{fitGSMVAR}, use the argument \code{seeds} instead of passing the argument \code{seed}.
 #' @details
+#'  Only reduced form models are supported!
+#'
 #'  The core of the genetic algorithm is mostly based on the description by \emph{Dorsey and Mayer (1995)}.
 #'  It utilizes a slightly modified version of the individually adaptive crossover and mutation rates described
 #'  by \emph{Patnaik and Srinivas (1994)} and employs (50\%) fitness inheritance discussed by
@@ -111,7 +113,7 @@
 #'  }
 
 GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
-                  parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
+                  parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL,
                   ngen=200, popsize, smart_mu=min(100, ceiling(0.5*ngen)), initpop=NULL, mu_scale, mu_scale2, omega_scale,
                   ar_scale=0.2, upper_ar_scale=1, ar_scale2=1, regime_force_scale=1, red_criteria=c(0.05, 0.01),
                   pre_smart_mu_prob=0, to_return=c("alt_ind", "best_ind"), minval, seed=NULL) {
@@ -174,6 +176,18 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
   # The initial population
   if(is.null(initpop)) {
     # CONSTRUCT THE INITIAL POPULATION
+    n_attempts <- 20
+    G <- numeric(0)
+    # Use argument not different function?
+
+    if(is.null(AR_constraints)) {
+      # Draw the individuals using the algorithm that guarantees satisfaction of the stab conds
+
+    } else {
+      # Draw the individuals without using the algorithm
+
+    }
+
   } else {
     # CHECK THE ARGUMENT INITPOP AND CONSTRUCT INITIAL POPULATION
   }

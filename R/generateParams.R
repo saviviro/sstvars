@@ -170,3 +170,119 @@ smart_df <- function(df, accuracy) {
   new_df <- rnorm(length(df), mean=df, sd=pmax(0.2, abs(df))/accuracy) # smart df
   pmax(2.01, new_df) # Make sure all df are above the strict lower bound 2
 }
+
+
+
+#' @title Create random transition weight parameter values
+#'
+#' @description \code{random_weightpars} generates random transition weight parameter values
+#'
+#' @inheritParams random_ind
+#' @return Returns a numeric vector ...
+#'   \describe{
+#'     \item{If \code{weight_function == "relative_dens"}:}{a length \code{M-1} vector \eqn{(\alpha_1,...,\alpha_{M-1})}.}
+#'     \item{If \code{weight_function == "logit"}:}{NOT YET IMPLEMENTED}
+#'   }
+#' @keywords internal
+
+random_weightpars <- function(M, weight_function, AR_constraints, mean_constraints) {
+  if(weight_function == "relative_dens") {
+    alphas <- runif(n=M)
+    # Sort and standardize alphas; don't sort if AR_constraints or mean_constraints are used
+    ret <- c(x, alphas[-M])
+  } else if(weight_function == "logit") {
+    stop("Logit weights not yer implemented in random_weightpars")
+  }
+  ret
+}
+
+
+
+#' @title Create random mean parametrized parameter vector
+#'
+#' @description \code{random_ind} generates random mean parametrized parameter vector.
+#'
+#' @inheritParams GAfit
+#' @inheritParams loglikelihood
+#' @param force_stability Should the algorithm proposed by Ansley and Kohn be used to generate
+#'   AR matrices that always satisfy the stability condition? Not supported if AR constraints are
+#'   employed.
+#' @details Structural models are not supported!
+#' @return Returns random mean parametrized parameter vector that has the same form as the argument \code{params}
+#'   in the other functions, for instance, in the function \code{loglikelihood}.
+#' @references
+#'  \itemize{
+#'    \item Ansley C.F., Kohn R. 1986. A note on reparameterizing a vector autoregressive
+#'       moving average model to enforce stationarity.
+#'       \emph{Journal of statistical computation and simulation}, \strong{24}:2, 99-106.
+#'  }
+#' @keywords internal
+
+random_ind <- function(p, M, d, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
+                       AR_constraints=NULL, mean_constraints=NULL, force_stability=is.null(AR_constraints),
+                       mu_scale, mu_scale2, omega_scale, ar_scale=1, ar_scale2=1) {
+  weight_function <- match.arg(weight_function)
+  cond_dist <- match.arg(cond_dist)
+  #g <- ifelse(is.null(same_means), M, length(same_means)) # Number of groups of regimes with the same mean parameters
+
+  # Generate mean params
+  if(is.null(mean_constraints)) {
+    mean_pars <- as.vector(replicate(n=M, expr=rnorm(d, mean=mu_scale, sd=mu_scale2)))
+  } else {
+    stop("mean_constraints not yet supported in random_ind")
+  }
+
+  # Generate AR params
+  if(is.null(AR_constraints) && force_stability) {
+    coefmat_pars <- as.vector(replicate(n=M, random_coefmats2(p=p, d=d, ar_scale=ar_scale)))
+  } else {
+    if(!is.null(AR_constraints)) stop("AR_constraints not yet supported in random_ind")
+    scale_A <- ar_scale2*ifelse(is.null(constraints),
+                                1 + log(2*mean(c((p - 0.2)^(1.25), d))),
+                                1 + (sum(constraints)/(M*d^2))^0.85)
+    coefmat_pars <- as.vector(replicate(n=M, expr=random_coefmats(d=d, how_many=p, scale=scale_A)))
+  }
+
+  # Generate covmat params
+  covmat_pars <- as.vector(replicate(n=M, expr=random_covmat(d=d, omega_scale=omega_scale)))
+
+  # Generate weight params
+
+  # Generate distribution params (df etc)
+
+  if(is.null(constraints)) {
+    if(is.null(structural_pars)) {
+      if(is.null(same_means)) { # No AR constraints, reduced form, no same_means
+        x <- as.vector(vapply(1:M, function(m) c(rnorm(d, mean=mu_scale, sd=mu_scale2),
+                                                 random_coefmats(d=d, how_many=p, scale=scale_A),
+                                                 random_covmat(d=d, omega_scale=omega_scale)), numeric(p*d^2 + d + d*(d+1)/2)))
+      } else { # No AR constraints, reduced form, same_means
+        x <- c(rnorm(d*g, mean=mu_scale, sd=mu_scale2),
+               replicate(n=M, expr=random_coefmats(d=d, how_many=p, scale=scale_A)),
+               replicate(n=M, expr=random_covmat(d=d, omega_scale=omega_scale)))
+      }
+    } else { # No AR constraints, structural model, possibly with same_means
+      x <- c(rnorm(d*g, mean=mu_scale, sd=mu_scale2),
+             replicate(n=M, random_coefmats(d=d, how_many=p, scale=scale_A)),
+             random_covmat(d=d, M=M, W_scale=W_scale, lambda_scale=lambda_scale, structural_pars=structural_pars))
+    }
+  } else { # AR constraints employed
+    q <- ncol(constraints)
+    psi <- rnorm(q, mean=0, sd=0.5/scale_A) # random psi
+    all_phi0 <- rnorm(d*g, mean=mu_scale, sd=mu_scale2)
+    if(is.null(structural_pars)) {
+      x <- c(all_phi0, psi, replicate(n=M, random_covmat(d=d, omega_scale=omega_scale)))
+    } else {
+      x <- c(all_phi0, psi, random_covmat(d=d, M=M, W_scale=W_scale, lambda_scale=lambda_scale, structural_pars=structural_pars))
+    }
+  }
+  if(M > 1) {
+    alphas <- runif(n=M)
+    alphas <- sort_and_standardize_alphas(alphas=alphas, constraints=constraints, same_means=same_means,
+                                          structural_pars=structural_pars)
+    ret <- c(x, alphas[-M])
+  } else {
+    ret <- x
+  }
+  c(ret, random_df(M=M_orig, model=model))
+}
