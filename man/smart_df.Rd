@@ -13,10 +13,10 @@ smart_df(df, accuracy)
 the returned df should be.}
 }
 \value{
-Returns a numeric vector of length \code{how_many} with random entries strictly larger than two.
+a numeric vector containing the degrees of freedom parameter values
 }
 \description{
-\code{random_df} generates random \code{M2} degrees of freedom parameter values
-  close to given values, where \code{M2} is number of StMVAR type regimes in the model.
+\code{smart_df} generates random degrees of freedom parameter values
+  close to given values.
 }
 \keyword{internal}

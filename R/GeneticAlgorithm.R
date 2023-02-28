@@ -14,7 +14,8 @@
 #'   close (or partially close) to the best fitting individual (which has the least regimes with time varying
 #'   mixing weights practically at zero) so far.
 #' @param initpop a list of parameter vectors from which the initial population of the genetic algorithm
-#'   will be generated from. The parameter vectors #'   Should have the form \eqn{\theta = (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\sigma,\alpha,\nu)},
+#'   will be generated from. The parameter vectors should have the form
+#'   \eqn{\theta = (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\sigma,\alpha,\nu)},
 #'   where
 #'   \itemize{
 #'     \item{\eqn{\phi_{m,0} = } the \eqn{(d \times 1)} intercept (or mean) vector of the \eqn{m}th regime.}
@@ -27,7 +28,8 @@
 #'     \item{For models with \code{weight_function="relative_dens"}:}{\eqn{\alpha = (\alpha_1,...,\alpha_{M-1})}
 #'           \eqn{(M - 1 \times 1)}, where \eqn{\alpha_m} \eqn{(1\times 1), m=1,...,M-1} are the transition weight parameters.}
 #'     \item{For models with \code{weight_function="logit"}:}{\eqn{\alpha = (\gamma_1,...,\gamma_M)} \eqn{((M-1)k\times 1)},
-#'           where \eqn{\gamma_m} \eqn{(k\times 1), m=1,...,M-1} contains the logit-regression coefficients of the \eqn{m}th regime.}
+#'           where \eqn{\gamma_m} \eqn{(k\times 1), m=1,...,M-1} contains the logit-regression coefficients of the \eqn{m}th
+#'            regime.}
 #'   }
 #'   Above, \eqn{\phi_{m,0}} is the intercept parameter, \eqn{A_{m,i}} denotes the \eqn{i}th coefficient matrix of the \eqn{m}th
 #'   mixture component, and \eqn{\Omega_{m}} denotes the error term covariance matrix of the \eqn{m}:th mixture component.
@@ -81,8 +83,9 @@
 #' @param minval a real number defining the minimum value of the log-likelihood function that will be considered.
 #'   Values smaller than this will be treated as they were \code{minval} and the corresponding individuals will
 #'   never survive. The default is \code{-(10^(ceiling(log10(n_obs)) + d) - 1)}.
-#' @param seed a single value, interpreted as an integer, or NULL, that sets seed for the random number generator in the beginning of
-#'   the function call. If calling \code{GAfit} from \code{fitGSMVAR}, use the argument \code{seeds} instead of passing the argument \code{seed}.
+#' @param seed a single value, interpreted as an integer, or NULL, that sets seed for the random number generator in
+#'   the beginning of the function call. If calling \code{GAfit} from \code{fitGSMVAR}, use the argument \code{seeds}
+#'   instead of passing the argument \code{seed}.
 #' @details
 #'  Only reduced form models are supported!
 #'
@@ -123,7 +126,9 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
-  if(!is.null(AR_constraints) || !is.null(mean_constraints) || !is.null(B_constraints)) stop("Constrained models are not currently supported")
+  if(!is.null(AR_constraints) || !is.null(mean_constraints) || !is.null(B_constraints)) {
+    stop("Constrained models are not currently supported")
+  }
   check_pMd(p=p, M=M)
   data <- check_data(data=data, p=p)
   d <- ncol(data)
@@ -178,18 +183,56 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
     # CONSTRUCT THE INITIAL POPULATION
     n_attempts <- 20
     G <- numeric(0)
-    # Use argument not different function?
-
-    if(is.null(AR_constraints)) {
-      # Draw the individuals using the algorithm that guarantees satisfaction of the stab conds
-
-    } else {
-      # Draw the individuals without using the algorithm
-
+    for(i1 in 1:n_attempts) {
+      inds <- replicate(popsize, random_ind(p=p, M=M, d=d, weight_function=weight_function,
+                                            cond_dist=cond_dist, AR_constraints=AR_constraints,
+                                            mean_constraints=mean_constraints,
+                                            force_stability=is.null(AR_constraints),
+                                            mu_scale=mu_scale, mu_scale2=mu_scale2,
+                                            omega_scale=omega_scale, ar_scale=ar_scale,
+                                            ar_scale2=ar_scale2))
+      ind_loks <- vapply(1:popsize, function(i2) loglikelihood(data=data, p=p, M=M, params=ind[,i2],
+                                                               weight_function=weight_function, cond_dist=cond_dist,
+                                                               parametrization="mean", identification="reduced_form",
+                                                               AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                                               B_constraints=NULL, to_return="loglik", check_params=TRUE,
+                                                               minval=minval), numeric(1))
+      G <- cbind(G, inds[, ind_loks > minval]) # Take good enough individuals
+      if(ncol(G) >= popsize) {
+        G <- G[, 1:popsize]
+        break
+      } else if(i1 == nattempts) {
+        if(length(G) == 0) {
+          stop("Failed to create initial population with good enough individuals. Scaling the individual series
+               so that the AR coefficients (of a VAR model) will not be very large (preferably less than one)
+               may solve the problem. If needed, another package may be used to fit linear VARs so see which
+               scalings produce relatively small AR coefficient estimates.")
+        } else {
+          G <- G[, sample.int(ncol(G), size=popsize, replace=TRUE)]
+        }
+      }
     }
+  } else {  # Initial population set by the user
+    stopifnot(is.list(initpop))
+    for(i1 in 1:length(initpop)) {
+      ind <- initpop[[i1]]
+      tryCatch(check_params(p=p, M=M, d=d, params=ind,  weight_function=weight_function, cond_dist=cond_dist,
+                            parametrization=parametrization, identification="reduced_form", AR_constraints=AR_constraints,
+                            mean_constraints=mean_constraints, B_constraints=NULL),
+               error=function(e) stop(paste("Problem with individual", i1, "in the initial population: "), e))
+      if(parametrization == "intercept") {
+        ind <- change_parametrization(p=p, M=M, d=d, params=ind, AR_constraints=AR_constraints,
+                                      mean_constraints=mean_constaints, change_to="mean")
+      }
+      # IMPLEMENT THE FUNCTION SORT_COMPONENTS!
+      #if(is.null(constraints) && is.null(structural_pars$C_lambda) && is.null(same_means)) {
+      #  initpop[[i1]] <- sort_components(p=p, M=M_orig, d=d, params=ind, model=model, structural_pars=structural_pars)
+      #} else {
+      #  initpop[[i1]] <- ind
+      #}
+    }
+    G <- replicate(popsize, initpop[[sample.int(length(initpop), size=1)]])
 
-  } else {
-    # CHECK THE ARGUMENT INITPOP AND CONSTRUCT INITIAL POPULATION
   }
 
 }

@@ -13,7 +13,6 @@ GAfit(
   parametrization = c("intercept", "mean"),
   AR_constraints = NULL,
   mean_constraints = NULL,
-  B_constraints = NULL,
   ngen = 200,
   popsize,
   smart_mu = min(100, ceiling(0.5 * ngen)),
@@ -59,7 +58,8 @@ close (or partially close) to the best fitting individual (which has the least r
 mixing weights practically at zero) so far.}
 
 \item{initpop}{a list of parameter vectors from which the initial population of the genetic algorithm
-will be generated from. The parameter vectors #'   Should have the form \eqn{\theta = (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\sigma,\alpha,\nu)},
+will be generated from. The parameter vectors should have the form
+\eqn{\theta = (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\sigma,\alpha,\nu)},
 where
 \itemize{
   \item{\eqn{\phi_{m,0} = } the \eqn{(d \times 1)} intercept (or mean) vector of the \eqn{m}th regime.}
@@ -72,7 +72,8 @@ where
   \item{For models with \code{weight_function="relative_dens"}:}{\eqn{\alpha = (\alpha_1,...,\alpha_{M-1})}
         \eqn{(M - 1 \times 1)}, where \eqn{\alpha_m} \eqn{(1\times 1), m=1,...,M-1} are the transition weight parameters.}
   \item{For models with \code{weight_function="logit"}:}{\eqn{\alpha = (\gamma_1,...,\gamma_M)} \eqn{((M-1)k\times 1)},
-        where \eqn{\gamma_m} \eqn{(k\times 1), m=1,...,M-1} contains the logit-regression coefficients of the \eqn{m}th regime.}
+        where \eqn{\gamma_m} \eqn{(k\times 1), m=1,...,M-1} contains the logit-regression coefficients of the \eqn{m}th
+         regime.}
 }
 Above, \eqn{\phi_{m,0}} is the intercept parameter, \eqn{A_{m,i}} denotes the \eqn{i}th coefficient matrix of the \eqn{m}th
 mixture component, and \eqn{\Omega_{m}} denotes the error term covariance matrix of the \eqn{m}:th mixture component.
@@ -107,10 +108,10 @@ this too high might lead to failure in proposing new parameters that are well en
 and especially with large \code{p} one might want to try smaller upper bound (e.g., 0.5).}
 
 \item{ar_scale2}{a positive real number adjusting how large AR parameter values are typically proposed in some
-random mutations (if AR constraints are employed, in all random mutations): larger value implies \strong{smaller} coefficients
-(in absolute value). \strong{Values larger than 1 can be used if the AR coefficients are expected to be very small.
-If set smaller than 1, be careful as it might lead to failure in the creation of parameter candidates that satisfy the
-stability condition.}}
+random mutations (if AR constraints are employed, in all random mutations): larger value implies \strong{smaller}
+coefficients (in absolute value). \strong{Values larger than 1 can be used if the AR coefficients are expected to
+be very small. If set smaller than 1, be careful as it might lead to failure in the creation of parameter candidates
+that satisfy the stability condition.}}
 
 \item{regime_force_scale}{a non-negative real number specifying how much should natural selection favor individuals
 with less regimes that have almost all mixing weights (practically) at zero. Set to zero for no favoring or large
@@ -137,8 +138,9 @@ in general (\code{"best_ind"}) but might have more wasted regimes?}
 Values smaller than this will be treated as they were \code{minval} and the corresponding individuals will
 never survive. The default is \code{-(10^(ceiling(log10(n_obs)) + d) - 1)}.}
 
-\item{seed}{a single value, interpreted as an integer, or NULL, that sets seed for the random number generator in the beginning of
-the function call. If calling \code{GAfit} from \code{fitGSMVAR}, use the argument \code{seeds} instead of passing the argument \code{seed}.}
+\item{seed}{a single value, interpreted as an integer, or NULL, that sets seed for the random number generator in
+the beginning of the function call. If calling \code{GAfit} from \code{fitGSMVAR}, use the argument \code{seeds}
+instead of passing the argument \code{seed}.}
 
 \item{conditional}{a logical argument specifying whether the conditional or exact log-likelihood function}
 }
@@ -150,7 +152,9 @@ Returns the estimated parameter vector which has the form described in \code{ini
   It's designed to find starting values for gradient based methods.
 }
 \details{
-The core of the genetic algorithm is mostly based on the description by \emph{Dorsey and Mayer (1995)}.
+Only reduced form models are supported!
+
+ The core of the genetic algorithm is mostly based on the description by \emph{Dorsey and Mayer (1995)}.
  It utilizes a slightly modified version of the individually adaptive crossover and mutation rates described
  by \emph{Patnaik and Srinivas (1994)} and employs (50\%) fitness inheritance discussed by
  \emph{Smith, Dike and Stegmann (1995)}.

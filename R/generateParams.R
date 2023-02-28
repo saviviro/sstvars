@@ -136,31 +136,36 @@ smart_covmat <- function(d, M, Omega, accuracy) {
 }
 
 
-#' @title Create random degrees of freedom parameter values
+#' @title Create random distribution parameter values
 #'
-#' @description \code{random_df} generates random degrees of freedom parameter values
+#' @description \code{random_distpars} generates random distribution parameter values
 #'
-#' @param how_many how many parameter values should be drawn?
-#' @return Returns a numeric vector of length \code{how_many} with random entries strictly larger than two.
+#' @inheritParams loglikelihood
+#' @return Returns a numeric vector ...
+#'   \decribe{
+#'     \item{If \code{cond_dist == "Gaussian"}:}{of length zero.}
+#'     \item{If \code{cond_dist == "Student"}:}{of length one containing a df param strictly larger than two.}
+#'   }
 #' @keywords internal
 
-random_df <- function(how_many) {
-  if(how_many == 0) {
+random_distpars <- function(cond_dist) {
+  if(weight_function == "Gaussian") {
     return(numeric(0))
+  } else if(weight_function == "Student") {
+    return(2.000001 + rgamma(1, shape=0.3, rate=0.007))
   }
-  2.000001 + rgamma(how_many, shape=0.3, rate=0.007)
 }
 
 
 #' @title Create random degrees of freedom parameter values close to given values
 #'
-#' @description \code{random_df} generates random \code{M2} degrees of freedom parameter values
-#'   close to given values, where \code{M2} is number of StMVAR type regimes in the model.
+#' @description \code{smart_df} generates random degrees of freedom parameter values
+#'   close to given values.
 #'
 #' @param df the old degrees of freedom parameters (of all regimes)
 #' @param accuracy a positive real number adjusting how close to the given degrees of freedom parameters
 #'   the returned df should be.
-#' @inherit random_df return
+#' @return a numeric vector containing the degrees of freedom parameter values
 #' @keywords internal
 
 smart_df <- function(df, accuracy) {
@@ -189,9 +194,13 @@ random_weightpars <- function(M, weight_function, AR_constraints, mean_constrain
   if(weight_function == "relative_dens") {
     alphas <- runif(n=M)
     # Sort and standardize alphas; don't sort if AR_constraints or mean_constraints are used
+    if(is.null(AR_constraints) && is.null(mean_constraints)) {
+      alphas <- sort(alphas, decreasing=TRUE)
+      alphas <- alphas/sum(alphas)
+    }
     ret <- c(x, alphas[-M])
   } else if(weight_function == "logit") {
-    stop("Logit weights not yer implemented in random_weightpars")
+    stop("Logit weights not yet implemented in random_weightpars")
   }
   ret
 }
@@ -247,42 +256,13 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logit"), con
   covmat_pars <- as.vector(replicate(n=M, expr=random_covmat(d=d, omega_scale=omega_scale)))
 
   # Generate weight params
+  weight_pars <- as.vector(replice(n=M, expr=random_weightpars(M=M, weight_function=weight_function,
+                                                               AR_constraints=AR_constraints,
+                                                               mean_constraints=mean_constraints)))
 
   # Generate distribution params (df etc)
+  dist_pars <- random_distpars(cond_dist=cond_dist)
 
-  if(is.null(constraints)) {
-    if(is.null(structural_pars)) {
-      if(is.null(same_means)) { # No AR constraints, reduced form, no same_means
-        x <- as.vector(vapply(1:M, function(m) c(rnorm(d, mean=mu_scale, sd=mu_scale2),
-                                                 random_coefmats(d=d, how_many=p, scale=scale_A),
-                                                 random_covmat(d=d, omega_scale=omega_scale)), numeric(p*d^2 + d + d*(d+1)/2)))
-      } else { # No AR constraints, reduced form, same_means
-        x <- c(rnorm(d*g, mean=mu_scale, sd=mu_scale2),
-               replicate(n=M, expr=random_coefmats(d=d, how_many=p, scale=scale_A)),
-               replicate(n=M, expr=random_covmat(d=d, omega_scale=omega_scale)))
-      }
-    } else { # No AR constraints, structural model, possibly with same_means
-      x <- c(rnorm(d*g, mean=mu_scale, sd=mu_scale2),
-             replicate(n=M, random_coefmats(d=d, how_many=p, scale=scale_A)),
-             random_covmat(d=d, M=M, W_scale=W_scale, lambda_scale=lambda_scale, structural_pars=structural_pars))
-    }
-  } else { # AR constraints employed
-    q <- ncol(constraints)
-    psi <- rnorm(q, mean=0, sd=0.5/scale_A) # random psi
-    all_phi0 <- rnorm(d*g, mean=mu_scale, sd=mu_scale2)
-    if(is.null(structural_pars)) {
-      x <- c(all_phi0, psi, replicate(n=M, random_covmat(d=d, omega_scale=omega_scale)))
-    } else {
-      x <- c(all_phi0, psi, random_covmat(d=d, M=M, W_scale=W_scale, lambda_scale=lambda_scale, structural_pars=structural_pars))
-    }
-  }
-  if(M > 1) {
-    alphas <- runif(n=M)
-    alphas <- sort_and_standardize_alphas(alphas=alphas, constraints=constraints, same_means=same_means,
-                                          structural_pars=structural_pars)
-    ret <- c(x, alphas[-M])
-  } else {
-    ret <- x
-  }
-  c(ret, random_df(M=M_orig, model=model))
+  # Return the parameter vector
+  c(mean_pars, coefmat_pars, covmat_pars, weight_pars, dist_pars)
 }

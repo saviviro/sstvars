@@ -42,3 +42,45 @@ form_boldA <- function(p, M, d, all_A) {
   ZER_all <- matrix(0, nrow=d*(p - 1), ncol=d)
   array(vapply(1:M, function(m) rbind(matrix(all_A[, , 1:p, m], nrow=d, byrow=FALSE), cbind(I_all, ZER_all)), numeric((d*p)^2)), dim=c(d*p, d*p, M))
 }
+
+
+#' @title Change parametrization of a parameter vector
+#'
+#' @description \code{change_parametrization} changes the parametrization of the given parameter
+#'   vector to \code{change_to}.
+#'
+#' @inheritParams loglikelihood
+#' @inheritParams form_boldA
+#' @param change_to either "intercept" or "mean" specifying to which parametrization it should be switched to.
+#'   If set to \code{"intercept"}, it's assumed that \code{params} is mean parametrized, and if set to \code{"mean"}
+#'   it's assumed that \code{params} is intercept parametrized.
+#' @return Returns parameter vector described in \code{params}, but with parametrization changed from intercept to mean
+#'   (when \code{change_to == "mean"}) or from mean to intercept (when \code{change_to == "intercept"}).
+#' @details Parametrization cannot be changed for models with mean constraints constraints!
+#' @section Warning:
+#'  No argument checks!
+#' @keywords internal
+
+change_parametrization <- function(p, M, d, params, AR_constraints=NULL, mean_constraints=NULL,
+                                   change_to=c("intercept", "mean")) {
+  stopifnot(is.null(mean_constraints))
+  change_to <- match.arg(change_to)
+  re_params <- params
+  if(!is.null(AR_constraints)) {
+    stop("AR_constraints not yet implemented to change_parametrization")
+    # Create reform_constrained pars and call if here
+  }
+  Id <- diag(nrow=d)
+  all_A <- pick_allA(p=p, M=M, d=d, params=params)
+  all_phi0_or_mu <- pick_phi0(M=M, d=d, params=params)
+
+  # Calculate means/intercepts and insert them to re_params
+  if(change_to == "mean") { # params has original parametrization with intercept
+    re_params[1:(M*d)] <- vapply(1:M, function(m) solve(Id - rowSums(all_A[, , , m, drop=FALSE], dims=2), all_phi0_or_mu[,m]),
+                                 numeric(d))
+  } else { # mean parameters instead of phi0
+    re_params[1:(M*d)] <- vapply(1:M, function(m) (Id - rowSums(all_A[, , , m, drop=FALSE], dims=2))%*%all_phi0_or_mu[,m],
+                                 numeric(d))
+  }
+  re_params
+}
