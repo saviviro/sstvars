@@ -224,15 +224,14 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
         ind <- change_parametrization(p=p, M=M, d=d, params=ind, AR_constraints=AR_constraints,
                                       mean_constraints=mean_constaints, change_to="mean")
       }
-      # IMPLEMENT THE FUNCTION SORT_COMPONENTS!
-      #if(is.null(constraints) && is.null(structural_pars$C_lambda) && is.null(same_means)) {
-      #  initpop[[i1]] <- sort_components(p=p, M=M_orig, d=d, params=ind, model=model, structural_pars=structural_pars)
-      #} else {
-      #  initpop[[i1]] <- ind
-      #}
+      if(is.null(AR_constraints) && is.null(mean_constraints)) {
+        initpop[[i1]] <- sort_components(p=p, M=M, d=d, params=ind, weight_function=weight_function,
+                                         cond_dist=cond_dist, identification="reduced_form")
+      } else {
+        initpop[[i1]] <- ind
+      }
     }
     G <- replicate(popsize, initpop[[sample.int(length(initpop), size=1)]])
-
   }
 
 }
