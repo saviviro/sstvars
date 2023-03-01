@@ -84,3 +84,44 @@ change_parametrization <- function(p, M, d, params, AR_constraints=NULL, mean_co
   }
   re_params
 }
+
+
+#' @title Sort components in parameter vector according to mixing weights into a decreasing order
+#'
+#' @description \code{sort_components} sorts regimes in the parameter vector according to
+#'   the transition weight parameters.
+#'
+#' @inheritParams loglikelihood
+#' @details Constrained parameter vectors are not supported. Currently only reduced form models
+#'   are supported.
+#' @return Returns sorted parameter vector of the form described for the argument \code{params},
+#'   with the regimes sorted so that...
+#'   \describe{
+#'     \item{If \code{weight_function == "relative_dens"}:}{\eqn{\alpha_{1}>...>\alpha_{M}}.}
+#'     \item{If \code{weight_function == "logit"}:}{NOT YET IMPLEMENTED}
+#'   }
+#' @keywords internal
+
+sort_components <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
+                            identification=c("reduced_form", "recursive", "heteroskedasticity")) {
+  if(M == 1) return(params) # Nothing to sort
+  weight_function <- match.arg(weight_function)
+  cond_dist <- match.arg(cond_dist)
+  identification <- match.arg(identification)
+  if(identification != "reduced form") stop("Structural models not yet implemented to sort_components!")
+  if(cond_dist != "Gaussian") stop("Only Gaussian cond_dist is implemented to sort_components")
+
+  all_phi0 <- pick_phi0(M=M, d=d, params=params)
+  all_A <- matrix(pick_allA(p=p, M=M, d=d, params=params), ncol=M) #matrix(params[(d*M + 1):(d*M + d^2*p*M)], ncol=M)
+  all_Omega <- matrix(pick_Omegas(p=p, M=M, d=d, params=params), ncol=M)
+  all_weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function,
+                                    cond_dist=cond_dist)
+
+  if(weight_function == "relative_dens") {
+    new_order <- order(all_weightpars, decreasing=TRUE)
+    new_weightpars <- all_weightpars[new_order][-M]
+  } else {
+    stop("Only relative_dens weight function is implementesd to sort_components!")
+  }
+  c(all_phi0[,new_order], all_A[,new_order], all_Omega[,new_order], new_weightpars) # new_distpars
+}
