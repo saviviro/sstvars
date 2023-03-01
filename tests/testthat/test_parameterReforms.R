@@ -66,6 +66,8 @@ Omega2_122 <- matrix(c(0.50, -0.01, -0.01, 0.20), nrow=2, byrow=FALSE)
 
 alpha1_122 <- 0.60
 theta_122relg <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), alpha1_122)
+alpha1_122_2 <- 0.40
+theta_122relg_2 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), alpha1_122_2)
 
 # p=2, M=2, d=2
 phi10_222 <- c(0.36, 0.12)
@@ -81,6 +83,11 @@ Omega2_222 <- matrix(c(1.10, 0.01, 0.01, 0.11), nrow=2, byrow=FALSE)
 alpha1_222 <- 0.37
 theta_222relg <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
                    vech(Omega1_222), vech(Omega2_222), alpha1_222)
+
+alpha1_222_2 <- 0.1
+theta_222relg_2 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                   vech(Omega1_222), vech(Omega2_222), alpha1_222_2)
+
 
 # p=1, M=3, d=2
 phi10_132 <- phi10_122
@@ -98,6 +105,19 @@ alpha2_132 <- 0.3
 
 theta_132relg <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
                    vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), alpha1_132, alpha2_132)
+
+alpha1_132_2 <- 0.3; alpha2_132_2 <- 0.5
+theta_132relg_2 <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                   vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), alpha1_132_2, alpha2_132_2)
+
+alpha1_132_3 <- 0.1; alpha2_132_3 <- 0.3
+theta_132relg_3 <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                     vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), alpha1_132_3, alpha2_132_3)
+
+alpha1_132_4 <- 0.6; alpha2_132_4 <- 0.1
+theta_132relg_4 <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                     vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), alpha1_132_4, alpha2_132_4)
+
 
 # p=1, M=1, d=3
 phi10_113 <- c(1, 2, 3)
@@ -118,6 +138,10 @@ Omega2_123 <- matrix(c(c(1.1, -0.2, -0.3, -0.2, 2.2, -0.4, -0.3, -0.4, 3.3)), nr
 alpha1_123 <- 0.6
 theta_123relg <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123),
                    vech(Omega2_123), alpha1_123)
+alpha1_123_2 <- 0.2
+theta_123relg_2 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123),
+                     vech(Omega2_123), alpha1_123_2)
+
 
 
 allA_112 <- pick_allA(p=1, M=1, d=2, params=theta_112relg)
@@ -192,4 +216,34 @@ test_that("change_parametrization works correctly", {
   expect_equal(change_parametrization(p=2, M=1, d=3, params=theta_213relg_mu, change_to="intercept"), theta_213relg)
   expect_equal(pick_phi0(M=2, d=3, params=theta_123relg_mu), calc_mu(p=1, M=2, d=3, params=theta_123relg))
   expect_equal(change_parametrization(p=1, M=2, d=3, params=theta_123relg_mu, change_to="intercept"), theta_123relg)
+})
+
+
+test_that("sort_regimes works correctly", {
+  expect_equal(sort_regimes(p=1, M=1, d=2, params=theta_112relg, weight_function="relative_dens"), theta_112relg)
+  expect_equal(sort_regimes(p=2, M=1, d=2, params=theta_212relg, weight_function="relative_dens"), theta_212relg)
+  expect_equal(sort_regimes(p=3, M=1, d=2, params=theta_312relg, weight_function="relative_dens"), theta_312relg)
+  expect_equal(sort_regimes(p=1, M=2, d=2, params=theta_122relg, weight_function="relative_dens"), theta_122relg)
+  expect_equal(sort_regimes(p=1, M=2, d=2, params=theta_122relg_2, weight_function="relative_dens"),
+               c(phi20_122, phi10_122, vec(A21_122), vec(A11_122), vech(Omega2_122), vech(Omega1_122), 1-alpha1_122_2))
+  expect_equal(sort_regimes(p=2, M=2, d=2, params=theta_222relg_2, weight_function="relative_dens"),
+               c(phi20_222, phi10_222, vec(A21_222), vec(A22_222), vec(A11_222), vec(A12_222),
+                 vech(Omega2_222), vech(Omega1_222), 1-alpha1_222_2))
+  expect_equal(sort_regimes(p=1, M=3, d=2, params=theta_132relg, weight_function="relative_dens"), theta_132relg)
+  expect_equal(sort_regimes(p=1, M=3, d=2, params=theta_132relg_2, weight_function="relative_dens"),
+              c(phi20_132, phi10_132, phi30_132, vec(A21_132), vec(A11_132), vec(A31_132),
+                vech(Omega2_132), vech(Omega1_132), vech(Omega3_132), alpha2_132_2, alpha1_132_2))
+  expect_equal(sort_regimes(p=1, M=3, d=2, params=theta_132relg_3, weight_function="relative_dens"),
+               c(phi30_132, phi20_132, phi10_132, vec(A31_132), vec(A21_132), vec(A11_132),
+                 vech(Omega3_132), vech(Omega2_132), vech(Omega1_132), 1-alpha1_132_3-alpha2_132_3, alpha2_132_3))
+  expect_equal(sort_regimes(p=1, M=3, d=2, params=theta_132relg_4, weight_function="relative_dens"),
+               c(phi10_132, phi30_132, phi20_132, vec(A11_132), vec(A31_132), vec(A21_132),
+                 vech(Omega1_132), vech(Omega3_132), vech(Omega2_132), alpha1_132_4, 1-alpha1_132_4-alpha2_132_4))
+
+  expect_equal(sort_regimes(p=1, M=1, d=3, params=theta_113relg, weight_function="relative_dens"), theta_113relg)
+  expect_equal(sort_regimes(p=2, M=1, d=3, params=theta_213relg, weight_function="relative_dens"), theta_213relg)
+  expect_equal(sort_regimes(p=1, M=2, d=3, params=theta_123relg, weight_function="relative_dens"), theta_123relg)
+  expect_equal(sort_regimes(p=1, M=2, d=3, params=theta_123relg_2, weight_function="relative_dens"),
+               c(phi20_123, phi10_123, vec(A21_123), vec(A11_123), vech(Omega2_123),
+                 vech(Omega1_123), 1-alpha1_123_2))
 })
