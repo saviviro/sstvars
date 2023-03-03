@@ -321,7 +321,125 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
     }
 
     # Take care of individuals that are not good enough + calculate the numbers redundant regimes
+    if(anyNA(logliks[i1,])) {
+      which_inds_na <- which(is.na(logliks[i1,]))
+      logliks[i1, which_inds_na] <- minval
+      warning(paste0("Removed NaNs from the logliks of inds ", which_inds_na, " in the GA round ", i1,
+                     " with the seed ", seed, "."))
+    }
+    logliks[i1, which(logliks[i1,] < minval)] <- minval
+    redundants[i1, which(logliks[i1,] <= minval)] <- M
+
+    ## Selection and the reproduction pool ##
+    if(length(unique(logliks[i1,])) == 1) {
+      choosing_probs <- rep(1, popsize) # If all individuals are the same, the surviving probability weight is 1.
+    } else {
+      T_values <- logliks[i1,] + abs(min(logliks[i1,])) # Function T as described by Dorsey R. E. ja Mayer W. J., 1995
+      T_values <- T_values/(1 + regime_force_scale*redundants[i1,]) # Favor individuals with least number of redundant regimes
+      choosing_probs <- T_values/sum(T_values) # The surviving probability weights
+    }
+
+    # Draw popsize individuals with replacement and form the reproduction pool H.
+    survivors <- sample(1:popsize, size=popsize, replace=TRUE, prob=choosing_probs)
+    H <- G[,survivors]
+
+    # Calculate mean and max log-likelihood of the survivors
+    survivor_liks <- logliks[i1, survivors]
+    survivor_redundants <- redundants[i1, survivors]
+    max_lik <- max(survivor_liks)
+    mean_lik <- mean(survivor_liks)
+    if(max_lik == mean_lik) mean_lik <- mean_lik + 0.1 # +0.1 to avoid dividing by zero when all the individuals are the same
+
+    ## Cross-overs ##
+    # Individually adaptive cross-over rates as described by Patnaik and Srinivas (1994) with the modification of
+    # setting the crossover rate to be at least 0.4 for all individuals (so that the best genes mix in the population too).
+    indeces <- seq(from=1, to=popsize - 1, by=2)
+    parent_max <- vapply(indeces, function(i2) max(survivor_liks[i2], survivor_liks[i2+1]), numeric(1))
+    co_rates <- vapply(1:length(indeces), function(i2) max(min((max_lik - parent_max[i2])/(max_lik - mean_lik), 1), 0.4), numeric(1))
+
+    # Do the crossovers
+    which_co <- rbinom(n=popsize/2, size=1, prob=co_rates)
+    I <- round(runif(n=popsize/2, min=0.5 + 1e-16, max=npars - 0.5 - 1e-16)) # Break points
+    H2 <- vapply(1:(popsize/2), function(i2) {
+      i3 <- indeces[i2]
+      if(which_co[i2] == 1) {
+        c(c(H[1:I[i2], i3], H[(I[i2]+1):npars, i3+1]), c(H[1:I[i2], i3+1], H[(I[i2]+1):npars, i3]))
+      } else {
+        c(H[,i3], H[,i3+1])
+      }
+    }, numeric(2*npars))
+    H2 <- matrix(H2, nrow=npars, byrow=FALSE)
+
+    # Get the best individual so far and check for reduntant regimes
+    best_index0 <- which(logliks == max(logliks), arr.ind=TRUE)
+    best_index <- best_index0[order(best_index0[,1], decreasing=FALSE)[1],] # First generation when the best loglik occurred
+    best_ind <- generations[, best_index[2], best_index[1]]
+    best_mw <- loglikelihood(data=data, p=p, M=M, params=G[,i2], weight_function=weight_function,
+                             cond_dist=cond_dist, parametrization="mean",
+                             identification="reduced_form", AR_constraints=AR_constraints,
+                             mean_constraints=mean_constraints, B_constraints=NULL,
+                             to_return="tw", check_params=FALSE, minval=minval)
+    # Which regimes are wasted:
+    which_redundant <- which(vapply(1:M, function(i2) sum(best_mw[,i2] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
+
+    # Keep track of "the alternative best individual" that has (weakly) less reduntant regimes than the current best one.
+    if(length(which_redundant) <= length(which_redundant_alt)) {
+      alt_ind <- best_ind
+      which_redundant_alt <- which_redundant
+    }
+
+    ## Mutations ##
+    which_not_co <- rep(1 - which_co, each=2)
+    if(abs(max_lik - mean_lik) <= abs(0.03*mean_lik)) {
+      mu_rates <- rep(0.7, popsize) # Massive mutations if converging
+    } else {
+      # Individually adaptive mutation rates, Patnaik and Srinivas (1994); we only mutate those who did not crossover.
+      mu_rates <- 0.5*vapply(1:popsize, function(i2) min(which_not_co[i2], (max_lik - survivor_liks[i2])/(max_lik - mean_lik)), numeric(1))
+    }
+
+    mutate <- rbinom(n=popsize, size=1, prob=mu_rates)
+    which_mutate <- which(mutate == 1)
+    pre_smart_mu <- runif(1, min=1e-6, max=1-1e-6) < pre_smart_mu_prob
+    ar_scale <- runif(1, min=1e-6, max=upper_ar_scale - 1e-6) # Random AR scale
+    if(i1 <= smart_mu & length(which_mutate) >= 1 & !pre_smart_mu) { # Random mutations
+      if(!is.null(AR_constraints) | runif(1, min=1e-6, max=1 - 1e-6) > 0.5) { # Does not always satisfy the stability conditions
+        stat_mu <- FALSE
+      } else { # For stationarity with algorithm (slower but can skip stationarity test), Ansley and Kohn (1986)
+        stat_mu <- TRUE
+      }
+      H2[,which_mutate] <- vapply(1:length(which_mutate), function(x) random_ind(p=p, M=M, d=d,
+                                                                                 weight_function=weight_function,
+                                                                                 cond_dist=cond_dist,
+                                                                                 AR_constraints=AR_constraints,
+                                                                                 mean_constraints=mean_constraints,
+                                                                                 force_stability=stat_mu,
+                                                                                 mu_scale=mu_scale,
+                                                                                 mu_scale2=mu_scale2,
+                                                                                 omega_scale=omega_scale,
+                                                                                 ar_scale=ar_scale,
+                                                                                 ar_scale2=ar_scale2), numeric(npars))
 
 
+    } else if(length(which_mutate) >= 1) { # Smart mutations
+      stat_mu <- FALSE
+
+      # If redundant regimes - smart mutate more
+      if(length(which_redundant) >= 1) {
+        mu_rates <- vapply(1:popsize, function(i2) which_not_co[i2]*max(0.1, mu_rates[i2]), numeric(1))
+        mutate0 <- rbinom(n=popsize, size=1, prob=mu_rates)
+        which_mutate0 <- which(mutate0 == 1)
+        if(length(which_mutate0) > length(which_mutate)) {
+          mutate <- mutate0
+          which_mutate <- which_mutate0
+        }
+      }
+
+      # Mutating accuracy
+      accuracy <- abs(rnorm(length(which_mutate), mean=10, sd=15))
+
+      # CONTINUE WITH SMART MUTATIONS HERE
+      # Functions to implement: pick_regime, change_regime, smart_ind.
+
+    }
   }
 }
