@@ -54,6 +54,8 @@
 #'     \item{If \code{to_return="loglik"}:}{the log-likelihood of the specified model.}
 #'     \item{If \code{to_return=="tw"}:}{a size \eqn{((n_obs-p)\times M)} matrix containing the transition weights: for m:th component
 #'       in m:th column.}
+#'     \item{If \code{to_return=="loglik_and_tw"}:}{a list of two elements. The first element (\code{$loglik}) contains the log-likelihood and the
+#'     second element (\code{$tw}) contains the transition weights.}
 #'     \item{If \code{to_return=="terms"}:}{a size \eqn{((n_obs-p)\times 1)} numeric vector containing the terms \eqn{l_{t}}.}
 #'     \item{If \code{to_return=="regime_cmeans"}:}{an \code{[n_obs-p, d, M]} array containing the regimewise conditional means.}
 #'     \item{If \code{to_return=="total_cmeans"}:}{a \code{[n_obs-p, d]} matrix containing the conditional means of the process.}
@@ -73,7 +75,7 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
                           parametrization=c("intercept", "mean"),
                           identification=c("reduced_form", "recursive", "heteroskedasticity"),
                           AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
-                          to_return=c("loglik", "tw", "terms", "regime_cmeans", "total_cmeans", "total_ccovs"),
+                          to_return=c("loglik", "tw", "loglik_and_tw", "terms", "regime_cmeans", "total_cmeans", "total_ccovs"),
                           check_params=TRUE, minval=NULL, stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
   # Match args
   weight_function <- match.arg(weight_function)
@@ -178,6 +180,9 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   }
   if(to_return == "terms") {
     return(all_lt)
+  } else if(to_return == "loglik_and_tw") {
+    return(list(loglik=sum(all_lt),
+                tw=alpha_mt))
   }
   sum(all_lt)
 }
