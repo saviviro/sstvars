@@ -254,4 +254,9 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
       redundants[i1, i2] <<- n_redundants(M=M, tw=lok_and_tw$tw) # Number of redundant regimes
     }
   }
+
+  # Run through the generations
+  for(i1 in 1:ngen) {
+
+  }
 }
