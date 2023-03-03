@@ -141,7 +141,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
   # Defaults and checks
   if(!all_pos_ints(c(ngen, smart_mu))) stop("Arguments ngen and smart_mu have to be positive integers")
   if(missing(popsize)) {
-    popsize <- 50*ceiling(sqrt(npars))
+    popsize <- 50*ceiling(sqrt(n_pars))
   } else if(popsize < 2 | popsize %% 2 != 0) {
     stop("The population size popsize must be even positive integer")
   }
@@ -240,7 +240,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
   }
 
   # Initial setup
-  generations <- array(NA, dim=c(npars, popsize, ngen))
+  generations <- array(NA, dim=c(n_pars, popsize, ngen))
   logliks <- matrix(minval, nrow=ngen, ncol=popsize)
   redundants <- matrix(M, nrow=ngen, ncol=popsize) # Store the number of redundant regimes of each individual
   which_redundant_alt <- 1:M
@@ -257,6 +257,71 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
 
   # Run through the generations
   for(i1 in 1:ngen) {
+    generazation[, , i1] <- G
+
+    # Calculate log-likelihoods and fitness inheritance
+    if(i1 == 1) {
+      # No fitness inheritance
+      for(i2 in 1:popsize) {
+        loks_and_tw <- loglikelihood(data=data, p=p, M=M, params=G[,i2], weight_function=weight_function,
+                                     cond_dist=cond_dist, parametrization="mean",
+                                     identification="reduced_form", AR_constraints=AR_constraints,
+                                     mean_constraints=mean_constraints, B_constraints=NULL,
+                                     to_return="loglik_and_tw", check_params=TRUE, minval=minval)
+        fill_lok_and_red(i1, i2, loks_and_tw)
+      }
+    } else {
+      # Proportional fitness inheritance: individual has 50% change to inherit fitness if it's a result of crossover.
+      # Variable "I" tells the proportions of parent material.
+      I2 <- rep(I, each=2)
+      which_did_co <- which(1 - which_not_co == 1)
+      if(length(which_did_co) > 0) {
+        which_inherit <- sample(x=which_did_co, size=round(0.5*length(which_did_co)), replace=FALSE)
+      } else {
+        which_inherit <- numeric(0)
+      }
+      # survivor_liks holds the parent loglikelihood values: for odd number they are (index, index+1) and for even (index-1, index)
+      if(length(which_inherit) > 0 & abs(max_lik - mean_lik) > abs(0.03*mean_lik)) { # No inheritance if massive mutations
+        for(i2 in which_inherit) {
+          if(i2 %% 2 == 0) {
+            logliks[i1, i2] <- ((n_pars - I2[i2])/n_pars)*survivor_liks[i2-1] + (I2[i2]/n_pars)*survivor_liks[i2]
+            redundants[i1, i2] <- max(c(survivor_redundants[i2-1], survivor_redundants[i2]))
+          } else {
+            logliks[i1, i2] <- (I2[i2]/n_pars)*survivor_liks[i2] + ((n_pars - I2[i2])/n_pars)*survivor_liks[i2+1]
+            redundants[i1, i2] <- max(c(survivor_redundants[i2], survivor_redundants[i2+1]))
+          }
+        }
+        which_no_inherit <- (1:popsize)[-which_inherit]
+      } else {
+        which_no_inherit <- 1:popsize
+      }
+      for(i2 in which_no_inherit) { # Calculate the rest log-likelihoods
+        if((mutate[i2] == 0 & which_not_co[i2] == 1) | all(H[,i2] == G[,i2])) { # If nothing changed
+          logliks[i1, i2] <- survivor_liks[i2]
+          redundants[i1, i2] <- survivor_redundants[i2]
+        } else {
+          if(stat_mu == TRUE & mutate[i2] == 1) { # Stability condition satisfied
+            loks_and_tw <- tryCatch(loglikelihood(data=data, p=p, M=M, params=G[,i2], weight_function=weight_function,
+                                                  cond_dist=cond_dist, parametrization="mean",
+                                                  identification="reduced_form", AR_constraints=AR_constraints,
+                                                  mean_constraints=mean_constraints, B_constraints=NULL,
+                                                  to_return="loglik_and_tw", check_params=FALSE, minval=minval),
+                                    error=function(e) minval)
+          } else {
+            loks_and_tw <- tryCatch(loglikelihood(data=data, p=p, M=M, params=G[,i2], weight_function=weight_function,
+                                                  cond_dist=cond_dist, parametrization="mean",
+                                                  identification="reduced_form", AR_constraints=AR_constraints,
+                                                  mean_constraints=mean_constraints, B_constraints=NULL,
+                                                  to_return="loglik_and_tw", check_params=TRUE, minval=minval),
+                                    error=function(e) minval)
+          }
+          fill_lok_and_red(i1, i2, loks_and_tw)
+        }
+      }
+    }
+
+    # Take care of individuals that are not good enough + calculate the numbers redundant regimes
+
 
   }
 }
