@@ -234,4 +234,24 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
     G <- replicate(popsize, initpop[[sample.int(length(initpop), size=1)]])
   }
 
+  # Calculates the number of redundant regimes
+  n_redundants <- function(M, tw) {
+    sum(vapply(1:M, function(m) sum(tw[,m] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
+  }
+
+  # Initial setup
+  generations <- array(NA, dim=c(npars, popsize, ngen))
+  logliks <- matrix(minval, nrow=ngen, ncol=popsize)
+  redundants <- matrix(M, nrow=ngen, ncol=popsize) # Store the number of redundant regimes of each individual
+  which_redundant_alt <- 1:M
+
+  fill_lok_and_red <- function(i1, i2, lok_and_tw) {
+    if(!is.list(lok_and_tw)) {
+      logliks[i1, i2] <<- minval
+      redundants[i1, i2] <<- M
+    } else {
+      logliks[i1, i2] <<- lok_and_tw$loglik
+      redundants[i1, i2] <<- n_redundants(M=M, tw=lok_and_tw$tw) # Number of redundant regimes
+    }
+  }
 }
