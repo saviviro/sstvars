@@ -247,3 +247,23 @@ test_that("sort_regimes works correctly", {
                c(phi20_123, phi10_123, vec(A21_123), vec(A11_123), vech(Omega2_123),
                  vech(Omega1_123), 1-alpha1_123_2))
 })
+
+
+rpars122_1 <-c(phi20_122, vec(A21_122))
+rpars122_2 <-c(phi10_122, vec(A11_122))
+
+rpars122t_1 <- c(rpars122_1, 1001)
+rpars122t_2 <- c(rpars122_2, 1010)
+
+rpars332_1 <- c(phi10_122, vec(A11_122), vec(A11_122), vec(A11_122))
+rpars332_2 <- c(phi20_222, vec(A21_222), vec(A22_222), vec(A22_222))
+
+rpars332t_1 <- c(rpars332_1, 3)
+rpars332t_2 <- c(rpars332_2, 13)
+
+test_that("regime_distance works correctly", {
+  expect_equal(regime_distance(regime_pars1=rpars122_1, regime_pars2=rpars122_2), 0.4049691, tol=1e-4)
+  expect_equal(regime_distance(regime_pars1=rpars122t_1, regime_pars2=rpars122t_2), 0.4049701, tol=1e-4)
+  expect_equal(regime_distance(regime_pars1=rpars332_1, regime_pars2=rpars332_2), 0.8523497, tol=1e-4)
+  expect_equal(regime_distance(regime_pars1=rpars332t_1, regime_pars2=rpars332t_2), 0.8691375, tol=1e-4)
+})

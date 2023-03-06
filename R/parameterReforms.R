@@ -15,7 +15,8 @@ reform_data <- function(data, p) {
   d <- ncol(data)
   n_obs <- nrow(data)
   T_obs <- n_obs - p
-  matrix(vapply(1:p, function(i1) as.vector(data[(p - i1 + 1):(T_obs + p - i1 + 1),]), numeric((n_obs - p + 1)*d)), nrow=n_obs - p + 1, byrow=FALSE)
+  matrix(vapply(1:p, function(i1) as.vector(data[(p - i1 + 1):(T_obs + p - i1 + 1),]),
+                numeric((n_obs - p + 1)*d)), nrow=n_obs - p + 1, byrow=FALSE)
 }
 
 
@@ -40,7 +41,8 @@ reform_data <- function(data, p) {
 form_boldA <- function(p, M, d, all_A) {
   I_all <- diag(nrow=d*(p - 1))
   ZER_all <- matrix(0, nrow=d*(p - 1), ncol=d)
-  array(vapply(1:M, function(m) rbind(matrix(all_A[, , 1:p, m], nrow=d, byrow=FALSE), cbind(I_all, ZER_all)), numeric((d*p)^2)), dim=c(d*p, d*p, M))
+  array(vapply(1:M, function(m) rbind(matrix(all_A[, , 1:p, m], nrow=d, byrow=FALSE),
+                                      cbind(I_all, ZER_all)), numeric((d*p)^2)), dim=c(d*p, d*p, M))
 }
 
 
@@ -131,4 +133,36 @@ sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "lo
                                     cond_dist=cond_dist)
 
   c(all_phi0[,new_order], all_A[,new_order], all_Omega[,new_order], new_weightpars) # new_distpars
+}
+
+
+
+#' @title Calculate "distance" between two (scaled) regimes
+#'  \strong{\eqn{\upsilon_{m}}}\eqn{ = (\phi_{m,0},}\strong{\eqn{\phi_{m}}}\eqn{,\sigma_{m})}
+#'
+#' @description \code{regime_distance} calculates "distance" between two scaled regimes.
+#'
+#' @param regime_pars1 a length \eqn{pd^2+d+d(d+1)/2} vector
+#'   \strong{\eqn{\upsilon_{m}}}\eqn{ = (\phi_{m,0},}\strong{\eqn{\phi_{m}}}\eqn{,\sigma_{m})}.
+#' @param regime_pars2 a length \eqn{pd^2+d+d(d+1)/2} vector
+#'   \strong{\eqn{\upsilon_{m}}}\eqn{ = (\phi_{m,0},}\strong{\eqn{\phi_{m}}}\eqn{,\sigma_{m})}.
+#' @return Returns "distance" between \code{regime_pars1} and \code{regime_pars2}. Values are scaled
+#'   before calculating the "distance". Read the source code for more details.
+#' @section Warning:
+#'  No argument checks!
+#' @inherit in_paramspace references
+#' @keywords internal
+
+regime_distance <- function(regime_pars1, regime_pars2) {
+  dist_fun <- function(x) {
+    x <- abs(x)
+    if(x < 1) {
+      return(1)
+    } else {
+      return(10^ceiling(abs(log10(x))))
+    }
+  }
+  scales1 <- vapply(regime_pars1, dist_fun, numeric(1))
+  scales2 <- vapply(regime_pars2, dist_fun, numeric(1))
+  c(sqrt(crossprod(regime_pars1/scales1 - regime_pars2/scales2)))
 }

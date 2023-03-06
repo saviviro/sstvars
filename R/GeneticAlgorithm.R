@@ -438,7 +438,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
       accuracy <- abs(rnorm(length(which_mutate), mean=10, sd=15))
 
       # CONTINUE WITH SMART MUTATIONS HERE
-      # Functions to implement: pick_regime, change_regime, smart_ind.
+      # Functions to implement: pick_regime, change_regime, regime_distance, smart_ind.
 
     }
   }
