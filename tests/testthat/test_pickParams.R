@@ -18,6 +18,7 @@ Omega1_212 <- matrix(c(0.58, 0.01, 0.01, 0.06), nrow=2, byrow=FALSE)
 
 theta_212relg <- c(phi10_212, vec(A11_212), vec(A12_212), vech(Omega1_212))
 
+
 # p=3, M=1, d=2
 phi10_312 <- phi10_212; A11_312 <- A11_212; A12_312 <- A12_212; Omega1_312 <- Omega1_212
 A13_312 <-  matrix(c(-0.15, -0.01, 0.06, -0.23), nrow=2, byrow=FALSE)
@@ -213,3 +214,20 @@ test_that("pick_weightpars work correctly", {
                c(alpha1_123, 1 - alpha1_123))
 })
 
+test_that("pick_regime work correctly", {
+  expect_equal(pick_regime(p=1, M=1, d=2, m=1, params=theta_112relg), c(phi10_112, vec(A11_112), vech(Omega1_112)))
+  expect_equal(pick_regime(p=2, M=1, d=2, m=1, params=theta_212relg), c(phi10_212, vec(A11_212), vec(A12_212), vech(Omega1_212)))
+  expect_equal(pick_regime(p=3, M=1, d=2, m=1, params=theta_312relg), c(phi10_312, vec(A11_312), vec(A12_312),
+                                                                        vec(A13_312), vech(Omega1_312)))
+  expect_equal(pick_regime(p=1, M=2, d=2, m=1, params=theta_122relg), c(phi10_122, vec(A11_122), vech(Omega1_122)))
+  expect_equal(pick_regime(p=1, M=2, d=2, m=2, params=theta_122relg), c(phi20_122, vec(A21_122), vech(Omega2_122)))
+  expect_equal(pick_regime(p=2, M=2, d=2, m=1, params=theta_222relg), c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222)))
+  expect_equal(pick_regime(p=2, M=2, d=2, m=2, params=theta_222relg), c(phi20_222, vec(A21_222), vec(A22_222), vech(Omega2_222)))
+  expect_equal(pick_regime(p=1, M=3, d=2, m=1, params=theta_132relg), c(phi10_132, vec(A11_132), vech(Omega1_132)))
+  expect_equal(pick_regime(p=1, M=3, d=2, m=2, params=theta_132relg), c(phi20_132, vec(A21_132), vech(Omega2_132)))
+  expect_equal(pick_regime(p=1, M=3, d=2, m=3, params=theta_132relg), c(phi30_132, vec(A31_132), vech(Omega3_132)))
+  expect_equal(pick_regime(p=1, M=1, d=3, m=1, params=theta_113relg), c(phi10_113, vec(A11_113), vech(Omega1_113)))
+  expect_equal(pick_regime(p=2, M=1, d=3, m=1, params=theta_213relg), c(phi10_213, vec(A11_213), vec(A12_213), vech(Omega1_213)))
+  expect_equal(pick_regime(p=1, M=2, d=3, m=1, params=theta_123relg), c(phi10_123, vec(A11_123), vech(Omega1_123)))
+  expect_equal(pick_regime(p=1, M=2, d=3, m=2, params=theta_123relg), c(phi20_123, vec(A21_123), vech(Omega2_123)))
+})

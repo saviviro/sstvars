@@ -136,6 +136,31 @@ sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "lo
 }
 
 
+#' @title Change regime parameters \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vech(\Omega_m))}
+#'   of the given parameter vector
+#'
+#' @description \code{change_regime} changes the regime parameters
+#'   \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vech(\Omega_m))} of the given regime
+#'   to the new given parameters.
+#'
+#' @inheritParams pick_regime
+#' @param regime_pars the \eqn{(dp + pd^2 + d(d+1)/2 \times 1)} vector
+#'   \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vech(\Omega_m))}
+#' @return Returns parameter vector with \code{m}:th regime changed to \code{regime_pars}.
+#' @details Does not support constrained models or structural models. Weight parameters nor distribution
+#'   parameters are not changed.
+#' @inherit in_paramspace references
+#' @keywords internal
+
+change_regime <- function(p, M, d, params, m, regime_pars) {
+  new_pars <- params
+  new_pars[((m - 1)*d + 1):(m*d)] <- regime_pars[1:d]
+  new_pars[(M*d + (m - 1)*p*d^2 + 1):(M*d + m*p*d^2)] <- regime_pars[(d + 1):(d + p*d^2)]
+  new_pars[(M*d + M*p*d^2 + (m - 1)*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + m*d*(d + 1)/2)] <- regime_pars[(d + p*d^2 + 1):length(regime_pars)]
+  new_pars
+}
+
+
 
 #' @title Calculate "distance" between two (scaled) regimes
 #'  \strong{\eqn{\upsilon_{m}}}\eqn{ = (\phi_{m,0},}\strong{\eqn{\phi_{m}}}\eqn{,\sigma_{m})}

@@ -159,3 +159,23 @@ pick_weightpars <- function(p, M, d, params, weight_function=c("relative_dens", 
     }
   }
 }
+
+
+#' @title Pick covariance matrices
+#'
+#' @description \code{pick_regime} picks the regime parameters
+#'   \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vech(\Omega_m))}
+#' @inheritParams pick_Am
+#' @details Constrained models nor structural models are supported.
+#' @return Returns the vector \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vech(\Omega_m))}.
+#'   Note that neither weight parameters or distribution parameters are picked.
+#' @inherit pick_Ami references
+#' @keywords internal
+
+pick_regime <- function(p, M, d, params, m) {
+  c(params[((m - 1)*d + 1):(m*d)],
+    params[(M*d + (m - 1)*p*d^2 + 1):(M*d + m*p*d^2)],
+    params[(M*d + M*p*d^2 + (m - 1)*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + m*d*(d + 1)/2)])
+}
+
+

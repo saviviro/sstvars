@@ -88,7 +88,6 @@ alpha1_222_2 <- 0.1
 theta_222relg_2 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
                    vech(Omega1_222), vech(Omega2_222), alpha1_222_2)
 
-
 # p=1, M=3, d=2
 phi10_132 <- phi10_122
 phi20_132 <- phi20_122
@@ -118,7 +117,6 @@ alpha1_132_4 <- 0.6; alpha2_132_4 <- 0.1
 theta_132relg_4 <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
                      vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), alpha1_132_4, alpha2_132_4)
 
-
 # p=1, M=1, d=3
 phi10_113 <- c(1, 2, 3)
 A11_113 <- matrix(c(0.1, 0.02, 0.12, 0.3, 0.21, 0.11, 0.05, 0.03, 0.09), nrow=3)
@@ -142,6 +140,34 @@ alpha1_123_2 <- 0.2
 theta_123relg_2 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123),
                      vech(Omega2_123), alpha1_123_2)
 
+test_that("change_regime works correctly", {
+  expect_equal(change_regime(p=1, M=1, d=2, params=theta_112relg, m=1, regime_pars=1:length(theta_112relg)), 1:length(theta_112relg))
+  expect_equal(change_regime(p=2, M=1, d=2, params=theta_212relg, m=1, regime_pars=1:length(theta_212relg)), 1:length(theta_212relg))
+  expect_equal(change_regime(p=3, M=1, d=2, params=theta_312relg, m=1, regime_pars=1:length(theta_312relg)), 1:length(theta_312relg))
+  expect_equal(change_regime(p=1, M=2, d=2, params=theta_122relg, m=1, regime_pars=c(phi10_112, A11_112, vech(Omega1_112))),
+               c(phi10_112, phi20_122, A11_112, A21_122, vech(Omega1_112), vech(Omega2_122), alpha1_122))
+  expect_equal(change_regime(p=1, M=2, d=2, params=theta_122relg, m=2, regime_pars=c(phi10_112, A11_112, vech(Omega1_112))),
+               c(phi10_122, phi10_112, A11_122, A11_112, vech(Omega1_122), vech(Omega1_112), alpha1_122))
+  expect_equal(change_regime(p=2, M=2, d=2, params=theta_222relg, m=1, regime_pars=c(phi10_112, A11_112, A11_122, vech(Omega1_112))),
+               c(phi10_112, phi20_222, A11_112, A11_122, A21_222, A22_222, vech(Omega1_112), vech(Omega2_222), alpha1_222))
+  expect_equal(change_regime(p=2, M=2, d=2, params=theta_222relg, m=2, regime_pars=c(phi10_112, A11_112, A11_122, vech(Omega1_112))),
+               c(phi10_222, phi10_112, A11_222, A12_222, A11_112, A11_122, vech(Omega1_222), vech(Omega1_112), alpha1_222))
+  expect_equal(change_regime(p=1, M=3, d=2, params=theta_132relg, m=1, regime_pars=c(phi10_112, A11_112, vech(Omega1_112))),
+               c(phi10_112, phi20_132, phi30_132, A11_112, A21_132, A31_132, vech(Omega1_112), vech(Omega2_132), vech(Omega3_132),
+                 alpha1_132, alpha2_132))
+  expect_equal(change_regime(p=1, M=3, d=2, params=theta_132relg, m=2, regime_pars=c(phi10_112, A11_112, vech(Omega1_112))),
+               c(phi10_132, phi10_112, phi30_132, A11_132, A11_112, A31_132, vech(Omega1_132), vech(Omega1_112), vech(Omega3_132),
+                 alpha1_132, alpha2_132))
+  expect_equal(change_regime(p=1, M=3, d=2, params=theta_132relg, m=3, regime_pars=c(phi10_112, A11_112, vech(Omega1_112))),
+               c(phi10_132, phi20_132, phi10_112, A11_132, A21_132, A11_112, vech(Omega1_132), vech(Omega2_132), vech(Omega1_112),
+                 alpha1_132, alpha2_132))
+  expect_equal(change_regime(p=1, M=1, d=3, params=theta_113relg, m=1, regime_pars=1:length(theta_113relg)), 1:length(theta_113relg))
+  expect_equal(change_regime(p=2, M=1, d=3, params=theta_113relg, m=1, regime_pars=1:length(theta_213relg)), 1:length(theta_213relg))
+  expect_equal(change_regime(p=1, M=2, d=3, params=theta_123relg, m=1, regime_pars=c(1:3, 3:11, 12:17)),
+               c(1:3, phi20_123, 3:11, A21_123, 12:17, vech(Omega2_123), alpha1_123))
+  expect_equal(change_regime(p=1, M=2, d=3, params=theta_123relg, m=2, regime_pars=c(1:3, 3:11, 12:17)),
+               c(phi10_123, 1:3, A11_123, 3:11, vech(Omega1_123), 12:17, alpha1_123))
+})
 
 
 allA_112 <- pick_allA(p=1, M=1, d=2, params=theta_112relg)
