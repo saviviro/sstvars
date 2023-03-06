@@ -198,7 +198,37 @@ random_weightpars <- function(M, weight_function, AR_constraints, mean_constrain
       alphas <- sort(alphas, decreasing=TRUE)
       alphas <- alphas/sum(alphas)
     }
-    ret <- c(x, alphas[-M])
+    ret <- alphas[-M]
+  } else if(weight_function == "logit") {
+    stop("Logit weights not yet implemented in random_weightpars")
+  }
+  ret
+}
+
+#' @title Create random transition weight parameter values
+#'
+#' @description \code{smart_weightpars} generates random transition weight parameter values
+#'  relatively close to the ones given in \code{weight_pars}
+#'
+#' @inheritParams smart_ind
+#' @param weight_pars a vector containing transition weight parameter values.
+#'   \describe{
+#'     \item{If \code{weight_function == "relative_dens"}:}{a length \code{M-1} vector \eqn{(\alpha_1,...,\alpha_{M-1})}.}
+#'     \item{If \code{weight_function == "logit"}:}{NOT YET IMPLEMENTED}
+#'   }
+#' @return Returns a numeric vector ...
+#'   \describe{
+#'     \item{If \code{weight_function == "relative_dens"}:}{a length \code{M-1} vector \eqn{(\alpha_1,...,\alpha_{M-1})}.}
+#'     \item{If \code{weight_function == "logit"}:}{NOT YET IMPLEMENTED}
+#'   }
+#' @keywords internal
+
+smart_weightpars <- function(M, weight_pars, weight_function, accuracy) {
+  weight_pars <- rnorm(n=length(weight_pars) + 1, mean=c(weight_pars, 1-sum(weight_pars)),
+                       sd=pmax(0.2, c(weight_pars, 1-sum(weight_pars)))/accuracy)
+  if(weight_function == "relative_dens") {
+    ret <- (weight_pars/sum(weight_pars))[-M]
+    # Sort and standardize alphas; don't sort if AR_constraints or mean_constraints are used
   } else if(weight_function == "logit") {
     stop("Logit weights not yet implemented in random_weightpars")
   }
@@ -265,4 +295,67 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logit"), con
 
   # Return the parameter vector
   c(mean_pars, coefmat_pars, covmat_pars, weight_pars, dist_pars)
+}
+
+
+#' @title Create random parameter vector that is fairly close to a given parameter vector
+#'
+#' @description \code{smart_ind} creates random mean parametrized parameter vector that is
+#'   model fairly close to a given parameter vector. The result may not be satisfy the stability
+#'   condition.
+#'
+#' @inheritParams loglikelihood
+#' @inheritParams GAfit
+#' @inheritParams random_coefmats2
+#' @param accuracy a positive real number adjusting how close to the given parameter vector the returned individual should be.
+#'   Larger number means larger accuracy. Read the source code for details.
+#' @param which_random a vector with length between 1 and M specifying the mixture components that should be random instead of
+#'   close to the given parameter vector. This does not consider constrained AR or lambda parameters.
+#' @details Structural models are not supported!
+#' @inherit random_ind return references
+#' @keywords internal
+
+smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
+                      AR_constraints=NULL, mean_constraints=NULL, accuracy=1, which_random=numeric(0), mu_scale, mu_scale2,
+                      omega_scale, ar_scale=1, ar_scale2=1) {
+  weight_function <- match.arg(weight_functions)
+  cond_dist <- match.arg(cond_dist)
+  if(!is.null(AR_constraints)) stop("AR_constraints not yet implemented to smart_ind!")
+  if(!is.null(mean_constraints)) stop("mean_constraints not yet implemented to smart_ind!")
+  if(cond_dist != "Gaussian") stop("Only Gaussian cond_dist is currently implemented to smart_ind!")
+  scale_A <- ar_scale2*(1 + log(2*mean(c((p - 0.2)^(1.25), d))))
+  # ? reform_constrained_pars here?
+  weight_pars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist)
+  # ? dist_pars <- pick_distpars
+  all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params)
+  new_pars <- numeric(length(params))
+  if(is.null(AR_constraints) || is.null(mean_constraints)) {
+    all_phi0_and_A <- params[1:(d*M + M*p*d^2)] # all mu + A if called from GAfit
+    new_pars[1:(d*M + M*p*d^2)] <- rnorm(n=length(all_phi0_and_A), mean=all_phi0_and_A, sd=pmax(0.2, abs(all_phi0_A)))
+    for(m in 1:M) {
+      if(any(which_random) == m) { # Not a smart regime
+        new_pars[((m - 1)*d + 1):(m*d)] <- rnorm(d, mean=mu_scale, sd=mu_scale2) # Random mean
+        if(runif(1) > 0.5) {
+          new_pars[(M*d + (m - 1)*p*d^2 + 1):(M*d + m*p*d^2)] <- random_coefmats(d=d, how_many=p, scale=scale_A) # Without algorithm
+        } else {
+          new_pars[(M*d + (m - 1)*p*d^2 + 1):(M*d + m*p*d^2)] <- random_coefmats2(p=p, d=d, ar_scale=ar_scale) # Use the algorithm
+        }
+        new_pars[(M*d + M*p*d^2 + (m - 1)*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + m*d*(d + 1)/2)] <- random_covmat(d=d, omega_scale=omega_scale)
+      } else { # Smart_regime
+        new_pars[(M*d + M*p*d^2 + (m - 1)*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + m*d*(d + 1)/2)] <- smart_covmat(d=d, omega_scale=omega_scale,
+                                                                                                            M=M, Omega=all_Omega[,m],
+                                                                                                            accuracy=accuracy)
+      }
+    }
+    new_pars[(M*d + M*p*d^2 + M*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + M*d*(d + 1)/2 + 1)] <- smart_weightpars(M=M, weight_pars=weight_pars,
+                                                                                                          weight_function=weight_function,
+                                                                                                          accuracy=accuracy)
+  } else {
+    # AR or mean constraints employed
+
+  }
+  if(cond_dist == "Student") {
+    # ADD DF PARAMETERS HERE
+  }
+  new_pars
 }
