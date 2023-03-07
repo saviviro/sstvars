@@ -56,5 +56,75 @@
 
 fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
                      parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL,
-                     ncalls=(M + 1)^5, ncores=2, maxit=1000, seeds=NULL, print_res=TRUE, ...) {
+                     nrounds=(M + 1)^5, ncores=2, maxit=1000, seeds=NULL, print_res=TRUE, ...) {
+  # Initial checks etc
+  weight_function <- match.arg(weight_functions)
+  cond_dist <- match.arg(cond_dist)
+  parametrization <- match.arg(parametrization)
+  check_pMd(p=p, M=M)
+  if(!all_pos_ints(c(nrounds, ncores, maxit))) stop("Arguments nrounds, ncores, and maxit must be positive integers")
+  stopifnot(length(nrounds) == 1)
+  if(!is.null(seeds) && length(seeds) != nrounds) stop("The argument 'seeds' should be NULL or a vector of length 'nrounds'")
+  data <- check_data(data=data, p=p)
+  d <- ncol(data)
+  n_obs <- nrow(data)
+  # Check AR_constraintsa and mean_constraints here
+  if(!is.null(AR_constraints) || !is.null(mean_constraints)) stop("Constraints are not yet implemented to fitSTVAR!")
+  n_pars <- n_params(p=p, M=M, d=d, weight_function=weight_function, cond_dist=cond_dist,
+                     AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                     B_constraints=NULL, identification="reduced_form")
+  if(n_pars >= d*nrow(data)) stop("There are at least as many parameters in the model as there are observations in the data")
+  dot_params <- list(...)
+  minval <- ifelse(is.null(dot_params$minval), get_minval(data), dot_params$minval)
+  red_criteria <- ifelse(rep(is.null(dot_params$red_criteria), 2), c(0.05, 0.01), dot_params$red_criteria)
+
+  if(ncores > parallel::detectCores()) {
+    ncores <- parallel::detectCores()
+    message("ncores was set to be larger than the number of cores detected")
+  }
+  if(ncores > nrounds) {
+    ncores <- nrounds
+    message("ncores was set to be larger than the number of estimation rounds")
+  }
+  cat(paste("Using", ncores, "cores for", nrounds, "estimations rounds..."), "\n")
+
+  ### Optimization with the genetic algorithm ###
+  cl <- parallel::makeCluster(ncores)
+  on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.
+  parallel::clusterExport(cl, ls(environment(fitSTVAR)), envir = environment(fitSTVAR)) # assign all variables from package:gmvarkit
+  parallel::clusterEvalQ(cl, c(library(pbapply)))
+
+  cat("Optimizing with a genetic algorithm...\n")
+  GAresults <- pbapply::pblapply(1:nrounds, function(i1) GAfit(data=data, p=p, M=M,
+                                                               weight_function=weight_function,
+                                                               cond_dist=cond_dist,
+                                                               parametrization=parametrization,
+                                                               AR_constraints=AR_constraints,
+                                                               mean_constraints=mean_constraints,
+                                                               seed=seeds[i1], ...), cl=cl)
+
+  loks <- vapply(1:nrounds, function(i1) loglikelihood(data=data, p=p, M=M,
+                                                       params=GAresults[[i1]],
+                                                       weight_function=weight_function,
+                                                       cond_dist=cond_dist,
+                                                       parametrization=parametrization,
+                                                       identification="reduced_form",
+                                                       AR_constraints=AR_constraints,
+                                                       mean_constraints=mean_constraints,
+                                                       B_constraints=NULL,
+                                                       to_return="loglik",
+                                                       check_params=TRUE,
+                                                       minval=minval), numeric(1))
+
+  if(print_res) {
+    print_loks <- function() {
+      printfun <- function(txt, FUN) cat(paste(txt, round(FUN(loks), 3)), "\n")
+      printfun("The lowest loglik: ", min)
+      printfun("The largest loglik:", max)
+    }
+    cat("Results from the genetic algorithm:\n")
+    print_loks()
+  }
+
+  ### Optimization with the variable metric algorithm ###
 }
