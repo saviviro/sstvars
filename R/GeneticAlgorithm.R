@@ -437,9 +437,90 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
       # Mutating accuracy
       accuracy <- abs(rnorm(length(which_mutate), mean=10, sd=15))
 
-      # CONTINUE WITH SMART MUTATIONS HERE
-      # Functions to implement: smart_ind.
+      ## 'Smart mutation': mutate close to a well fitting individual. We obviously don't mutate close to
+      # redundant regimes but draw them at random ('rand_to_use' in what follows).
+      if(!is.null(AR_constraints) | !is.null(mean_constraints) | length(which_redundant) <= length(which_redundant_alt) | runif(1) > 0.5) {
+        # The first option for smart mutations: smart mutate to 'alt_ind' which is the best fitting individual
+        # with the least redundant regimes.
+        # Note that best_ind == alt_ind when length(which_redundant) <= length(which_redundant_alt).
+        ind_to_use <- alt_ind
+        rand_to_use <- which_redundant_alt
+      } else {
+        # Alternatively, if there exists an alternative individual with strictly less redundant regimes
+        # than in the best_ind, a "regime combining procedure" might take place: take a redundant regime
+        # of the best_ind and replace it with a nonredundant regime taken from alt_ind. Then, do smart
+        # mutation close to this new individual. For simplicity, regime combining is not considered for
+        # models imposing constraints.
 
+        # We want to take such nonredundant regime from alt_ind that is not similar to the nonredundant
+        # regimes of best_ind. In order to choose such regime, we compare all nonredundant regimes of
+        # best_ind to all nonredundant regimes of alt_ind. Then, we choose the nonredundant regime of
+        # alt_ind which has the largest "distance" to the closest regime of best_ind. Note that weight
+        # nor distribution parameters are included the regime combination procedure.
+
+        # Choose regime of best_ind to be changed
+        which_to_change <- which_redundant[1]
+
+        # Pick the nonredundant regimes of best_ind and alt_ind
+        non_red_regs_best <- vapply((1:M)[-which_redundant], function(i2) pick_regime(p=p, M=M, d=d, params=best_ind, m=i2),
+                                    numeric(p*d^2 + d + d*(d+1)/2))
+
+        alt_regs_to_pick  <- 1:M
+        if(length(which_redundant_alt) != 0) { # Needed because (1:M)[-numeric(0)] = integer(0)
+          alt_regs_to_pick <- alt_regs_to_pick[-which_redundant_alt]
+        }
+        non_red_regs_alt <- vapply(alt_regs_to_pick, function(i2) pick_regime(p=p, M=M, d=d, params=alt_ind, m=i2),
+                                   numeric(p*d^2 + d + d*(d+1)/2))
+
+        # Which alt_ind regime, i.e. column should be used? Choose the one that with largest distance to the closest
+        # regime avoid duplicating similar regimes
+        which_reg_to_use <- which(apply(dist_to_regime, 2, min) == max(apply(dist_to_regime, 2, min)))[1]
+
+        # The obtain the regime of alt_ind that is used to replace a redundant regime in best_ind
+        reg_to_use <- non_red_regs_alt[,which_reg_to_use]
+
+        # Change the chosen regime of best_ind to be the one chosen from alt_ind
+        ind_to_use <- change_regime(p=p, M=M, d=d, params=best_ind, m=which_to_change, regime_pars=reg_to_use)
+
+        # Should some regimes still be random?
+        rand_to_use <- which_redundant[which_redundant != which_to_change]
+      }
+      # Do the smart mutations
+      H2[,which_mutate] <- vapply(1:length(which_mutate), function(i2) smart_ind(p=p, M=M, d=d,
+                                                                                 params=ind_to_use,
+                                                                                 weight_function=weight_functions,
+                                                                                 cond_dist=cond_dist,
+                                                                                 AR_constraints=AR_constraints,
+                                                                                 mean_constraints=mean_constraints,
+                                                                                 accuracy=accuracy[i2],
+                                                                                 which_random=rand_to_use,
+                                                                                 mu_scale=mu_scale,
+                                                                                 mu_scale2=mu_scale2,
+                                                                                 omega_scale=omega_scale,
+                                                                                 ar_scale=ar_scale,
+                                                                                 ar_scale2=ar_scale2), numeric(npars))
     }
+
+    # Sort components according to the transition weight parameters. No sorting if constraints are employed.
+    if(is.null(AR_constraints) && is.null(mean_constraints)) {
+      H2 <- vapply(1:popsize, function(i2) sort_regimes(p=p, M=M, d=d, params=H2[,i2], weight_functio=weight_functions,
+                                                        cond_dist=cond_dist, identification="reduced_form"), numeric(npars))
+    }
+
+    # Save the results and set up new generation
+    G <- H2
+  }
+
+  if(to_return == "best_ind") {
+    ret <- best_ind
+  } else {
+    ret <- alt_ind
+  }
+  # GA always optimizes with mean parametrization. Return intercept parametrized estimate if parametrization=="intercept".
+  if(parametrization == "mean") { # This is always the case with mean_constraints
+    return(ret)
+  } else {
+    return(change_parametrization(p=p, M=M, d=d, params=ret, model=model, AR_constraints=AR_constraints,
+                                  mean_constraints=mean_constraints, change_to="intercept"))
   }
 }
