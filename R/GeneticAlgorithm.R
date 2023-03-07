@@ -115,8 +115,6 @@
 #'          \emph{Proceedings of the 1995 ACM Symposium on Applied Computing}, 345-350.
 #'  }
 
-#tmp <- GAfit(data=gdpdef, p=1, M=1, weight_function="relative_dens", cond_dist="Gaussian", parametrization="mean")
-
 GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
                   parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL,
                   ngen=200, popsize, smart_mu=min(100, ceiling(0.5*ngen)), initpop=NULL, mu_scale, mu_scale2, omega_scale,
