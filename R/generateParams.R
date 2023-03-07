@@ -149,9 +149,9 @@ smart_covmat <- function(d, M, Omega, accuracy) {
 #' @keywords internal
 
 random_distpars <- function(cond_dist) {
-  if(weight_function == "Gaussian") {
+  if(cond_dist == "Gaussian") {
     return(numeric(0))
-  } else if(weight_function == "Student") {
+  } else if(cond_dist == "Student") {
     return(2.000001 + rgamma(1, shape=0.3, rate=0.007))
   }
 }
@@ -224,9 +224,9 @@ random_weightpars <- function(M, weight_function, AR_constraints, mean_constrain
 #' @keywords internal
 
 smart_weightpars <- function(M, weight_pars, weight_function, accuracy) {
-  weight_pars <- rnorm(n=length(weight_pars) + 1, mean=c(weight_pars, 1-sum(weight_pars)),
-                       sd=pmax(0.2, c(weight_pars, 1-sum(weight_pars)))/accuracy)
   if(weight_function == "relative_dens") {
+    weight_pars <- rnorm(n=length(weight_pars), mean=c(weight_pars, 1-sum(weight_pars)),
+                         sd=pmax(0.2, c(weight_pars, 1-sum(weight_pars)))/accuracy)
     ret <- (weight_pars/sum(weight_pars))[-M]
     # Sort and standardize alphas; don't sort if AR_constraints or mean_constraints are used
   } else if(weight_function == "logit") {
@@ -276,7 +276,7 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logit"), con
     coefmat_pars <- as.vector(replicate(n=M, random_coefmats2(p=p, d=d, ar_scale=ar_scale)))
   } else {
     if(!is.null(AR_constraints)) stop("AR_constraints not yet supported in random_ind")
-    scale_A <- ar_scale2*ifelse(is.null(constraints),
+    scale_A <- ar_scale2*ifelse(is.null(AR_constraints),
                                 1 + log(2*mean(c((p - 0.2)^(1.25), d))),
                                 1 + (sum(constraints)/(M*d^2))^0.85)
     coefmat_pars <- as.vector(replicate(n=M, expr=random_coefmats(d=d, how_many=p, scale=scale_A)))
@@ -286,9 +286,13 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logit"), con
   covmat_pars <- as.vector(replicate(n=M, expr=random_covmat(d=d, omega_scale=omega_scale)))
 
   # Generate weight params
-  weight_pars <- as.vector(replice(n=M, expr=random_weightpars(M=M, weight_function=weight_function,
-                                                               AR_constraints=AR_constraints,
-                                                               mean_constraints=mean_constraints)))
+  if(M > 1) {
+    weight_pars <- random_weightpars(M=M, weight_function=weight_function, AR_constraints=AR_constraints,
+                                     mean_constraints=mean_constraints)
+  } else {
+    weight_pars <- numeric(0) # Replicate returns a list if the value is numeric(0)
+  }
+
 
   # Generate distribution params (df etc)
   dist_pars <- random_distpars(cond_dist=cond_dist)
@@ -318,20 +322,19 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logit"), con
 smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
                       AR_constraints=NULL, mean_constraints=NULL, accuracy=1, which_random=numeric(0), mu_scale, mu_scale2,
                       omega_scale, ar_scale=1, ar_scale2=1) {
-  weight_function <- match.arg(weight_functions)
+  weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   if(!is.null(AR_constraints)) stop("AR_constraints not yet implemented to smart_ind!")
   if(!is.null(mean_constraints)) stop("mean_constraints not yet implemented to smart_ind!")
   if(cond_dist != "Gaussian") stop("Only Gaussian cond_dist is currently implemented to smart_ind!")
   scale_A <- ar_scale2*(1 + log(2*mean(c((p - 0.2)^(1.25), d))))
   # ? reform_constrained_pars here?
-  weight_pars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist)
   # ? dist_pars <- pick_distpars
   all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params)
   new_pars <- numeric(length(params))
   if(is.null(AR_constraints) || is.null(mean_constraints)) {
     all_phi0_and_A <- params[1:(d*M + M*p*d^2)] # all mu + A if called from GAfit
-    new_pars[1:(d*M + M*p*d^2)] <- rnorm(n=length(all_phi0_and_A), mean=all_phi0_and_A, sd=pmax(0.2, abs(all_phi0_A)))
+    new_pars[1:(d*M + M*p*d^2)] <- rnorm(n=length(all_phi0_and_A), mean=all_phi0_and_A, sd=pmax(0.2, abs(all_phi0_and_A)))
     for(m in 1:M) {
       if(any(which_random) == m) { # Not a smart regime
         new_pars[((m - 1)*d + 1):(m*d)] <- rnorm(d, mean=mu_scale, sd=mu_scale2) # Random mean
@@ -342,14 +345,18 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logit
         }
         new_pars[(M*d + M*p*d^2 + (m - 1)*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + m*d*(d + 1)/2)] <- random_covmat(d=d, omega_scale=omega_scale)
       } else { # Smart_regime
-        new_pars[(M*d + M*p*d^2 + (m - 1)*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + m*d*(d + 1)/2)] <- smart_covmat(d=d, omega_scale=omega_scale,
-                                                                                                            M=M, Omega=all_Omega[,m],
+        new_pars[(M*d + M*p*d^2 + (m - 1)*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + m*d*(d + 1)/2)] <- smart_covmat(d=d, M=M,
+                                                                                                            Omega=all_Omega[, , m],
                                                                                                             accuracy=accuracy)
       }
     }
-    new_pars[(M*d + M*p*d^2 + M*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + M*d*(d + 1)/2 + 1)] <- smart_weightpars(M=M, weight_pars=weight_pars,
-                                                                                                          weight_function=weight_function,
-                                                                                                          accuracy=accuracy)
+    if(M > 1) {
+      weight_pars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist)
+      new_pars[(M*d + M*p*d^2 + M*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + M*d*(d + 1)/2 + 1)] <- smart_weightpars(M=M, weight_pars=weight_pars,
+                                                                                                            weight_function=weight_function,
+                                                                                                            accuracy=accuracy)
+    }
+
   } else {
     # AR or mean constraints employed
 

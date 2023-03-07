@@ -115,6 +115,8 @@
 #'          \emph{Proceedings of the 1995 ACM Symposium on Applied Computing}, 345-350.
 #'  }
 
+#tmp <- GAfit(data=gdpdef, p=1, M=1, weight_function="relative_dens", cond_dist="Gaussian", parametrization="mean")
+
 GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
                   parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL,
                   ngen=200, popsize, smart_mu=min(100, ceiling(0.5*ngen)), initpop=NULL, mu_scale, mu_scale2, omega_scale,
@@ -126,7 +128,8 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
-  if(!is.null(AR_constraints) || !is.null(mean_constraints) || !is.null(B_constraints)) {
+  to_return <- match.arg(to_return)
+  if(!is.null(AR_constraints) || !is.null(mean_constraints)) {
     stop("Constrained models are not currently supported")
   }
   check_pMd(p=p, M=M)
@@ -134,8 +137,8 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
   d <- ncol(data)
   n_obs <- nrow(data)
   n_pars <- n_params(p=p, M=M, d=d, weight_function=weight_function, cond_dist=cond_dist,
-                     identification=identification, AR_constraints=AR_constraints,
-                     mean_constraints=mean_constraints, B_constraints=B_constraints)
+                     AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                     B_constraints=NULL, identification="reduced_form")
   # FILL IN ARGUMENT CHECKS FOR CONSTRAINTS
 
   # Defaults and checks
@@ -191,7 +194,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
                                             mu_scale=mu_scale, mu_scale2=mu_scale2,
                                             omega_scale=omega_scale, ar_scale=ar_scale,
                                             ar_scale2=ar_scale2))
-      ind_loks <- vapply(1:popsize, function(i2) loglikelihood(data=data, p=p, M=M, params=ind[,i2],
+      ind_loks <- vapply(1:popsize, function(i2) loglikelihood(data=data, p=p, M=M, params=inds[,i2],
                                                                weight_function=weight_function, cond_dist=cond_dist,
                                                                parametrization="mean", identification="reduced_form",
                                                                AR_constraints=AR_constraints, mean_constraints=mean_constraints,
@@ -201,7 +204,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
       if(ncol(G) >= popsize) {
         G <- G[, 1:popsize]
         break
-      } else if(i1 == nattempts) {
+      } else if(i1 == n_attempts) {
         if(length(G) == 0) {
           stop("Failed to create initial population with good enough individuals. Scaling the individual series
                so that the AR coefficients (of a VAR model) will not be very large (preferably less than one)
@@ -257,7 +260,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
 
   # Run through the generations
   for(i1 in 1:ngen) {
-    generazation[, , i1] <- G
+    generations[, , i1] <- G
 
     # Calculate log-likelihoods and fitness inheritance
     if(i1 == 1) {
@@ -359,22 +362,22 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
 
     # Do the crossovers
     which_co <- rbinom(n=popsize/2, size=1, prob=co_rates)
-    I <- round(runif(n=popsize/2, min=0.5 + 1e-16, max=npars - 0.5 - 1e-16)) # Break points
+    I <- round(runif(n=popsize/2, min=0.5 + 1e-16, max=n_pars - 0.5 - 1e-16)) # Break points
     H2 <- vapply(1:(popsize/2), function(i2) {
       i3 <- indeces[i2]
       if(which_co[i2] == 1) {
-        c(c(H[1:I[i2], i3], H[(I[i2]+1):npars, i3+1]), c(H[1:I[i2], i3+1], H[(I[i2]+1):npars, i3]))
+        c(c(H[1:I[i2], i3], H[(I[i2]+1):n_pars, i3+1]), c(H[1:I[i2], i3+1], H[(I[i2]+1):n_pars, i3]))
       } else {
         c(H[,i3], H[,i3+1])
       }
-    }, numeric(2*npars))
-    H2 <- matrix(H2, nrow=npars, byrow=FALSE)
+    }, numeric(2*n_pars))
+    H2 <- matrix(H2, nrow=n_pars, byrow=FALSE)
 
     # Get the best individual so far and check for reduntant regimes
     best_index0 <- which(logliks == max(logliks), arr.ind=TRUE)
     best_index <- best_index0[order(best_index0[,1], decreasing=FALSE)[1],] # First generation when the best loglik occurred
     best_ind <- generations[, best_index[2], best_index[1]]
-    best_mw <- loglikelihood(data=data, p=p, M=M, params=G[,i2], weight_function=weight_function,
+    best_mw <- loglikelihood(data=data, p=p, M=M, params=best_ind, weight_function=weight_function,
                              cond_dist=cond_dist, parametrization="mean",
                              identification="reduced_form", AR_constraints=AR_constraints,
                              mean_constraints=mean_constraints, B_constraints=NULL,
@@ -417,7 +420,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
                                                                                  mu_scale2=mu_scale2,
                                                                                  omega_scale=omega_scale,
                                                                                  ar_scale=ar_scale,
-                                                                                 ar_scale2=ar_scale2), numeric(npars))
+                                                                                 ar_scale2=ar_scale2), numeric(n_pars))
 
 
     } else if(length(which_mutate) >= 1) { # Smart mutations
@@ -488,7 +491,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
       # Do the smart mutations
       H2[,which_mutate] <- vapply(1:length(which_mutate), function(i2) smart_ind(p=p, M=M, d=d,
                                                                                  params=ind_to_use,
-                                                                                 weight_function=weight_functions,
+                                                                                 weight_function=weight_function,
                                                                                  cond_dist=cond_dist,
                                                                                  AR_constraints=AR_constraints,
                                                                                  mean_constraints=mean_constraints,
@@ -498,13 +501,13 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
                                                                                  mu_scale2=mu_scale2,
                                                                                  omega_scale=omega_scale,
                                                                                  ar_scale=ar_scale,
-                                                                                 ar_scale2=ar_scale2), numeric(npars))
+                                                                                 ar_scale2=ar_scale2), numeric(n_pars))
     }
 
     # Sort components according to the transition weight parameters. No sorting if constraints are employed.
     if(is.null(AR_constraints) && is.null(mean_constraints)) {
-      H2 <- vapply(1:popsize, function(i2) sort_regimes(p=p, M=M, d=d, params=H2[,i2], weight_functio=weight_functions,
-                                                        cond_dist=cond_dist, identification="reduced_form"), numeric(npars))
+      H2 <- vapply(1:popsize, function(i2) sort_regimes(p=p, M=M, d=d, params=H2[,i2], weight_functio=weight_function,
+                                                        cond_dist=cond_dist, identification="reduced_form"), numeric(n_pars))
     }
 
     # Save the results and set up new generation
