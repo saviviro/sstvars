@@ -10,7 +10,7 @@
 #'
 #' @docType package
 #' @author you <savi.virolainen@helsinki.fi>
-#' @import Rcpp parallel pbapply
+#' @import Rcpp RcppArmadillo parallel pbapply
 #' @importFrom Rcpp evalCpp
 #' @useDynLib sstvars
 #' @name sstvars

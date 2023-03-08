@@ -134,7 +134,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
   data <- check_data(data=data, p=p)
   d <- ncol(data)
   n_obs <- nrow(data)
-  n_pars <- n_params(p=p, M=M, d=d, weight_function=weight_function, cond_dist=cond_dist,
+  npars <- n_params(p=p, M=M, d=d, weight_function=weight_function, cond_dist=cond_dist,
                      AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                      B_constraints=NULL, identification="reduced_form")
   # FILL IN ARGUMENT CHECKS FOR CONSTRAINTS
@@ -142,7 +142,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
   # Defaults and checks
   if(!all_pos_ints(c(ngen, smart_mu))) stop("Arguments ngen and smart_mu have to be positive integers")
   if(missing(popsize)) {
-    popsize <- 50*ceiling(sqrt(n_pars))
+    popsize <- 50*ceiling(sqrt(npars))
   } else if(popsize < 2 | popsize %% 2 != 0) {
     stop("The population size popsize must be even positive integer")
   }
@@ -241,7 +241,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
   }
 
   # Initial setup
-  generations <- array(NA, dim=c(n_pars, popsize, ngen))
+  generations <- array(NA, dim=c(npars, popsize, ngen))
   logliks <- matrix(minval, nrow=ngen, ncol=popsize)
   redundants <- matrix(M, nrow=ngen, ncol=popsize) # Store the number of redundant regimes of each individual
   which_redundant_alt <- 1:M
@@ -285,10 +285,10 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
       if(length(which_inherit) > 0 & abs(max_lik - mean_lik) > abs(0.03*mean_lik)) { # No inheritance if massive mutations
         for(i2 in which_inherit) {
           if(i2 %% 2 == 0) {
-            logliks[i1, i2] <- ((n_pars - I2[i2])/n_pars)*survivor_liks[i2-1] + (I2[i2]/n_pars)*survivor_liks[i2]
+            logliks[i1, i2] <- ((npars - I2[i2])/npars)*survivor_liks[i2-1] + (I2[i2]/npars)*survivor_liks[i2]
             redundants[i1, i2] <- max(c(survivor_redundants[i2-1], survivor_redundants[i2]))
           } else {
-            logliks[i1, i2] <- (I2[i2]/n_pars)*survivor_liks[i2] + ((n_pars - I2[i2])/n_pars)*survivor_liks[i2+1]
+            logliks[i1, i2] <- (I2[i2]/npars)*survivor_liks[i2] + ((npars - I2[i2])/npars)*survivor_liks[i2+1]
             redundants[i1, i2] <- max(c(survivor_redundants[i2], survivor_redundants[i2+1]))
           }
         }
@@ -360,16 +360,16 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
 
     # Do the crossovers
     which_co <- rbinom(n=popsize/2, size=1, prob=co_rates)
-    I <- round(runif(n=popsize/2, min=0.5 + 1e-16, max=n_pars - 0.5 - 1e-16)) # Break points
+    I <- round(runif(n=popsize/2, min=0.5 + 1e-16, max=npars - 0.5 - 1e-16)) # Break points
     H2 <- vapply(1:(popsize/2), function(i2) {
       i3 <- indeces[i2]
       if(which_co[i2] == 1) {
-        c(c(H[1:I[i2], i3], H[(I[i2]+1):n_pars, i3+1]), c(H[1:I[i2], i3+1], H[(I[i2]+1):n_pars, i3]))
+        c(c(H[1:I[i2], i3], H[(I[i2]+1):npars, i3+1]), c(H[1:I[i2], i3+1], H[(I[i2]+1):npars, i3]))
       } else {
         c(H[,i3], H[,i3+1])
       }
-    }, numeric(2*n_pars))
-    H2 <- matrix(H2, nrow=n_pars, byrow=FALSE)
+    }, numeric(2*npars))
+    H2 <- matrix(H2, nrow=npars, byrow=FALSE)
 
     # Get the best individual so far and check for reduntant regimes
     best_index0 <- which(logliks == max(logliks), arr.ind=TRUE)
@@ -418,7 +418,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
                                                                                  mu_scale2=mu_scale2,
                                                                                  omega_scale=omega_scale,
                                                                                  ar_scale=ar_scale,
-                                                                                 ar_scale2=ar_scale2), numeric(n_pars))
+                                                                                 ar_scale2=ar_scale2), numeric(npars))
 
 
     } else if(length(which_mutate) >= 1) { # Smart mutations
@@ -473,6 +473,16 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
         non_red_regs_alt <- vapply(alt_regs_to_pick, function(i2) pick_regime(p=p, M=M, d=d, params=alt_ind, m=i2),
                                    numeric(p*d^2 + d + d*(d+1)/2))
 
+        # Calculate the "distances" between the nonredundant regimes
+        #  Row for each non-red-reg-best and column for each non-red-reg-al:
+        dist_to_regime <- matrix(nrow=ncol(non_red_regs_best), ncol=ncol(non_red_regs_alt))
+        for(i2 in 1:nrow(dist_to_regime)) {
+          dist_to_regime[i2,] <- vapply(1:ncol(non_red_regs_alt), function(i3) regime_distance(regime_pars1=non_red_regs_best[,i2],
+                                                                                               regime_pars2=non_red_regs_alt[,i3]),
+                                        numeric(1))
+        }
+
+
         # Which alt_ind regime, i.e. column should be used? Choose the one that with largest distance to the closest
         # regime avoid duplicating similar regimes
         which_reg_to_use <- which(apply(dist_to_regime, 2, min) == max(apply(dist_to_regime, 2, min)))[1]
@@ -499,13 +509,13 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
                                                                                  mu_scale2=mu_scale2,
                                                                                  omega_scale=omega_scale,
                                                                                  ar_scale=ar_scale,
-                                                                                 ar_scale2=ar_scale2), numeric(n_pars))
+                                                                                 ar_scale2=ar_scale2), numeric(npars))
     }
 
     # Sort components according to the transition weight parameters. No sorting if constraints are employed.
     if(is.null(AR_constraints) && is.null(mean_constraints)) {
       H2 <- vapply(1:popsize, function(i2) sort_regimes(p=p, M=M, d=d, params=H2[,i2], weight_functio=weight_function,
-                                                        cond_dist=cond_dist, identification="reduced_form"), numeric(n_pars))
+                                                        cond_dist=cond_dist, identification="reduced_form"), numeric(npars))
     }
 
     # Save the results and set up new generation
@@ -521,7 +531,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
   if(parametrization == "mean") { # This is always the case with mean_constraints
     return(ret)
   } else {
-    return(change_parametrization(p=p, M=M, d=d, params=ret, model=model, AR_constraints=AR_constraints,
+    return(change_parametrization(p=p, M=M, d=d, params=ret, AR_constraints=AR_constraints,
                                   mean_constraints=mean_constraints, change_to="intercept"))
   }
 }

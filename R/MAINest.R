@@ -58,7 +58,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
                      parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL,
                      nrounds=(M + 1)^5, ncores=2, maxit=1000, seeds=NULL, print_res=TRUE, ...) {
   # Initial checks etc
-  weight_function <- match.arg(weight_functions)
+  weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
   check_pMd(p=p, M=M)
@@ -70,10 +70,10 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
   n_obs <- nrow(data)
   # Check AR_constraintsa and mean_constraints here
   if(!is.null(AR_constraints) || !is.null(mean_constraints)) stop("Constraints are not yet implemented to fitSTVAR!")
-  n_pars <- n_params(p=p, M=M, d=d, weight_function=weight_function, cond_dist=cond_dist,
+  npars <- n_params(p=p, M=M, d=d, weight_function=weight_function, cond_dist=cond_dist,
                      AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                      B_constraints=NULL, identification="reduced_form")
-  if(n_pars >= d*nrow(data)) stop("There are at least as many parameters in the model as there are observations in the data")
+  if(npars >= d*nrow(data)) stop("There are at least as many parameters in the model as there are observations in the data")
   dot_params <- list(...)
   minval <- ifelse(is.null(dot_params$minval), get_minval(data), dot_params$minval)
   red_criteria <- ifelse(rep(is.null(dot_params$red_criteria), 2), c(0.05, 0.01), dot_params$red_criteria)
@@ -89,19 +89,33 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
   cat(paste("Using", ncores, "cores for", nrounds, "estimations rounds..."), "\n")
 
   ### Optimization with the genetic algorithm ###
-  cl <- parallel::makeCluster(ncores)
-  on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.
-  parallel::clusterExport(cl, ls(environment(fitSTVAR)), envir = environment(fitSTVAR)) # assign all variables from package:gmvarkit
-  parallel::clusterEvalQ(cl, c(library(pbapply)))
+   cl <- parallel::makeCluster(ncores)
+   on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.
+   parallel::clusterExport(cl, ls(environment(fitSTVAR)), envir=environment(fitSTVAR)) # assign all variables from package:fitSTVAR
+   parallel::clusterEvalQ(cl, c(library(pbapply), library(Rcpp), library(RcppArmadillo), library(sstvars)))
+
+   doParallel::registerDoParallel(cl)
+
+  tmpfunGA <- function(i1, ...) {
+    cat(i1, "/", nrounds, "\r")
+    GAfit(data=data, p=p, M=M,
+          weight_function=weight_function,
+          cond_dist=cond_dist,
+          parametrization=parametrization,
+          AR_constraints=AR_constraints,
+          mean_constraints=mean_constraints,
+          seed=seeds[i1], ...)
+  }
 
   cat("Optimizing with a genetic algorithm...\n")
   GAresults <- pbapply::pblapply(1:nrounds, function(i1) GAfit(data=data, p=p, M=M,
-                                                               weight_function=weight_function,
-                                                               cond_dist=cond_dist,
-                                                               parametrization=parametrization,
-                                                               AR_constraints=AR_constraints,
-                                                               mean_constraints=mean_constraints,
-                                                               seed=seeds[i1], ...), cl=cl)
+                                                              weight_function=weight_function,
+                                                              cond_dist=cond_dist,
+                                                              parametrization=parametrization,
+                                                              AR_constraints=AR_constraints,
+                                                              mean_constraints=mean_constraints,
+                                                              seed=seeds[i1], ...), cl=cl)
+  #GAresults <- lapply(1:nrounds, function(i1) tmpfunGA(i1, ...))
 
   loks <- vapply(1:nrounds, function(i1) loglikelihood(data=data, p=p, M=M,
                                                        params=GAresults[[i1]],
@@ -127,4 +141,70 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
   }
 
   ### Optimization with the variable metric algorithm ###
+  loglik_fn <- function(params) {
+    tryCatch(loglikelihood(data=data, p=p, M=M, params=params, weight_function=weight_function,
+                           cond_dist=cond_dist, parametrization=parametrization,
+                           identification="reduced_form", AR_constraints=AR_constraints,
+                           mean_constraints=mean_constraints, B_constraints=NULL,
+                           to_return="loglik", check_params=TRUE, minval=minval), error=function(e) minval)
+  }
+
+  # Gradient of the log-likelihood function using central difference approximation
+  h <- 6e-6
+  I <- diag(rep(1, npars))
+  loglik_grad <- function(params) {
+    vapply(1:npars, function(i1) (loglik_fn(params + I[i1,]*h) - loglik_fn(params - I[i1,]*h))/(2*h), numeric(1))
+  }
+
+  tmpfunNE <- function(i1) {
+    cat(i1, "/", nrounds, "\r")
+    optim(par=GAresults[[i1]], fn=loglik_fn, gr=loglik_grad, method="BFGS",
+          control=list(fnscale=-1, maxit=maxit))
+  }
+
+
+  cat("Optimizing with a variable metric algorithm...\n")
+  NEWTONresults <- pbapply::pblapply(1:nrounds, function(i1) optim(par=GAresults[[i1]], fn=loglik_fn, gr=loglik_grad, method="BFGS",
+                                                                   control=list(fnscale=-1, maxit=maxit)), cl=cl)
+  #NEWTONresults <- lapply(1:nrounds, function(i1) tmpfunNE(i1))
+  parallel::stopCluster(cl=cl)
+
+  if(print_res) {
+    cat("Results from the variable metric algorithm:\n")
+    print_loks()
+  }
+
+  ### Obtain estimates and standard errors, calculate IC ###
+  all_estimates <- lapply(NEWTONresults, function(x) x$par)
+  which_best_fit <- which(loks == max(loks))[1]
+  params <- all_estimates[[which_best_fit]]
+
+  # Sort regimes if no constraints are employed
+  if(is.null(AR_constraints) && is.null(mean_constraints)) {
+    params <- sort_regimes(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
+                           identification="reduced_form")
+    all_estimates <- lapply(all_estimates, function(pars) sort_regimes(p=p, M=M, d=d, params=pars,
+                                                                       weight_function=weight_function,
+                                                                       cond_dist=cond_dist,
+                                                                       identification="reduced_form"))
+  }
+
+  if(NEWTONresults[[which_best_fit]]$convergence == 1) {
+    message("Iteration limit was reached when estimating the best fitting individual!
+            Consider further estimation with the function 'iterate_more'")
+  }
+
+  transition_weights <- loglikelihood(data=data, p=p, M=M, params=params, weight_function=weight_function,
+                                      cond_dist=cond_dist, parametrization=parametrization,
+                                      identification="reduced_form", AR_constraints=AR_constraints,
+                                      mean_constraints=mean_constraints, B_constraints=NULL,
+                                      to_return="tw", check_params=TRUE, minval=minval)
+  if(any(vapply(1:sum(M), function(i1) sum(transition_weights[,i1] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))) {
+    message("At least one of the regimes in the estimated model seems to be wasted!")
+  }
+
+  ### Wrap up ###
+  params
 }
+
+
