@@ -53,13 +53,14 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
                     parametrization=parametrization, identification=identification, AR_constraints=AR_constraints,
                     mean_constraints=mean_constraints, B_constraints=B_constraints)
 
+  # Log-likelihood, transition weights, residuals, IC
   if(is.null(data)) {
     lok_and_tw <- list(loglik=NA, mw=NA)
     IC <- data.frame(AIC=NA, HQIC=NA, BIC=NA)
-    residuals <- NA
+    residuals_raw <- residuals_std <- NA
   } else {
     if(npars >= d*nrow(data)) warning("There are at least as many parameters in the model as there are observations in the data")
-    lok_and_ts <- loglikelihood(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
+    lok_and_tw <- loglikelihood(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
                                 parametrization=parametrization, identification=identification, AR_constraints=AR_constraints,
                                 mean_constraints=mean_constraints, B_constraints=B_constraints, to_return="loglik_and_tw",
                                 minval=NA)
@@ -69,6 +70,71 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
     residuals_std <- get_residuals(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
                                    parametrization=parametrization, identification=identification, AR_constraints=AR_constraints,
                                    mean_constraints=mean_constraints, B_constraints=B_constraints, standardize=TRUE)
-    IC <- NA # implement function get_IC (divide by the number of observatios)
+    IC <- get_IC(loglik=lok_and_ts$loglik, npars=npars, T_obs=nrow(data) - p)
   }
+
+  # Standard errors
+  if(calc_std_errors) {
+    if(is.null(data)) {
+      warning("Approximate standard errors can't be calculated without data")
+      std_errors <- rep(NA, npars)
+    } else {
+      std_errors <- tryCatch(standard_errors(data=data, p=p, M=M, params=params, weight_function=weight_function, cond_dist=cond_dist,
+                                             parametrization=parametrization, identification=identification, AR_constraints=AR_constraints,
+                                             mean_constraints=mean_constraints, B_constraints=B_constraints),
+                             error=function(e) {
+                               warning("Approximate standard errors can't be calculated:")
+                               warning(e)
+                               std_errors=rep(NA, npars)
+                             })
+    }
+  } else {
+    std_errors <- rep(NA, npars)
+  }
+
+  # Conditional moments
+  if(is.null(data)) {
+    regime_cmeans <- regime_ccovs <- total_cmeans <- total_ccovs <- NA
+  } else {
+    get_cm <- function(to_return) loglikelihood(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
+                                                parametrization=parametrization, identification=identification, AR_constraints=AR_constraints,
+                                                mean_constraints=mean_constraints, B_constraints=B_constraints, to_return=to_return,
+                                                check_params=TRUE, minval=NA)
+    regime_cmeans <- get_cm("regime_cmeans")
+    regime_ccovs <- get_cm("regime_ccovs")
+    total_cmeans <- get_cm("total_cmeans")
+    total_ccovs <- get_cm("total_ccovs")
+  }
+
+  # Return
+  structure(list(data=data,
+                 model=list(p=p,
+                            M=M,
+                            d=d,
+                            weight_function=weight_function,
+                            cond_dist=cond_dist,
+                            parametrization=parametrizaton,
+                            identification=identification,
+                            AR_constraints=AR_constraints,
+                            mean_constraints=mean_constraints,
+                            B_constraints),
+                 params=params,
+                 std_errors=std_errors,
+                 transition_weight=transition_weights,
+                 regime_cmeans=regime_cmeans,
+                 regime_ccovs=regime_ccovs,
+                 total_cmeans=total_cmeans,
+                 total_ccovs=total_ccovs,
+                 residuals_raw=residuals_raw,
+                 residual_std=residuals_std,
+                 loglik=structure(lok_and_tw$loglik,
+                                  class="loglik",
+                                  df=npars),
+                 IC=IC,
+                 all_estimates=NULL,
+                 all_logliks=NULL,
+                 which_converged=NULL,
+                 which_round=NULL),
+            class="stvar")
+
 }
