@@ -51,7 +51,7 @@
 #' ## These are long running examples that use parallel computing!
 #' # Running all the below examples will take approximately FILL IN HOW MANY minutes.
 #'
-#' # FILL IN EXAMPLES
+#' # FILL IN
 #' }
 #' @export
 
@@ -177,6 +177,9 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
     NEWTONresults <- lapply(1:nrounds, function(i1) tmpfunNE(i1))
   }
 
+  loks <- vapply(1:nrounds, function(i1) NEWTONresults[[i1]]$value, numeric(1)) # Log-likelihoods
+  converged <- vapply(1:nrounds, function(i1) NEWTONresults[[i1]]$convergence == 0, logical(1)) # Which coverged
+
   if(print_res) {
     cat("Results from the variable metric algorithm:\n")
     print_loks()
@@ -212,7 +215,22 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
   }
 
   ### Wrap up ###
-  params
+  cat("Calculating approximate standard errors...\n")
+  ret <- STVAR(data=data, p=p, M=M, d=d, params=params,
+               weight_function=weight_function,
+               cond_dist=cond_dist,
+               parametrization=parametrization,
+               identification="reduced_form",
+               AR_constraints=AR_constraints,
+               mean_constraints=mean_constraints,
+               B_constraints=NULL,
+               calc_std_errors=TRUE)
+  ret$all_estimates <- all_estimates
+  ret$all_logliks <- loks
+  ret$which_converged <- converged
+  ret$which_round <- which_best_fit # Which estimation round induced the largest log-likelihood?
+  cat("Finished!\n")
+  ret
 }
 
 

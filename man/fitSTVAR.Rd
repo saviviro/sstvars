@@ -95,7 +95,7 @@ If you wish to estimate a structural model, estimate first the reduced form mode
 ## These are long running examples that use parallel computing!
 # Running all the below examples will take approximately FILL IN HOW MANY minutes.
 
-# FILL IN EXAMPLES
+# FILL IN
 }
 }
 \references{
