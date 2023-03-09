@@ -12,6 +12,7 @@
 #' @param seeds a length \code{nrounds} vector containing the random number generator seed
 #'  for each call to the genetic algorithm, or \code{NULL} for not initializing the seed.
 #' @param print_res should summaries of estimation results be printed?
+#' @param use_parallel employ parallel computing?
 #' @param ... additional settings passed to the function \code{GAfit} employing the genetic algorithm.
 #' @details
 #'  If you wish to estimate a structural model, estimate first the reduced form model and then use the
@@ -56,7 +57,7 @@
 
 fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
                      parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL,
-                     nrounds=(M + 1)^5, ncores=2, maxit=1000, seeds=NULL, print_res=TRUE, ...) {
+                     nrounds=(M + 1)^5, ncores=2, maxit=1000, seeds=NULL, print_res=TRUE, use_parallel=TRUE, ...) {
   # Initial checks etc
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -78,44 +79,50 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
   minval <- ifelse(is.null(dot_params$minval), get_minval(data), dot_params$minval)
   red_criteria <- ifelse(rep(is.null(dot_params$red_criteria), 2), c(0.05, 0.01), dot_params$red_criteria)
 
-  if(ncores > parallel::detectCores()) {
-    ncores <- parallel::detectCores()
-    message("ncores was set to be larger than the number of cores detected")
+  if(use_parallel) {
+    if(ncores > parallel::detectCores()) {
+      ncores <- parallel::detectCores()
+      message("ncores was set to be larger than the number of cores detected")
+    }
+    if(ncores > nrounds) {
+      ncores <- nrounds
+      message("ncores was set to be larger than the number of estimation rounds")
+    }
+    cat(paste("Using", ncores, "cores for", nrounds, "estimations rounds..."), "\n")
+
+    ### Optimization with the genetic algorithm ###
+    cl <- parallel::makeCluster(ncores)
+    on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.
+    parallel::clusterExport(cl, ls(environment(fitSTVAR)), envir=environment(fitSTVAR)) # assign all variables from package:fitSTVAR
+    parallel::clusterEvalQ(cl, c(library(pbapply), library(Rcpp), library(RcppArmadillo), library(sstvars)))
+
+    doParallel::registerDoParallel(cl)
+
+
+
+    cat("Optimizing with a genetic algorithm...\n")
+    GAresults <- pbapply::pblapply(1:nrounds, function(i1) GAfit(data=data, p=p, M=M,
+                                                                 weight_function=weight_function,
+                                                                 cond_dist=cond_dist,
+                                                                 parametrization=parametrization,
+                                                                 AR_constraints=AR_constraints,
+                                                                 mean_constraints=mean_constraints,
+                                                                 seed=seeds[i1], ...), cl=cl)
+
+  } else {
+    tmpfunGA <- function(i1, ...) {
+      cat(i1, "/", nrounds, "\r")
+      GAfit(data=data, p=p, M=M,
+            weight_function=weight_function,
+            cond_dist=cond_dist,
+            parametrization=parametrization,
+            AR_constraints=AR_constraints,
+            mean_constraints=mean_constraints,
+            seed=seeds[i1], ...)
+    }
+    GAresults <- lapply(1:nrounds, function(i1) tmpfunGA(i1, ...))
   }
-  if(ncores > nrounds) {
-    ncores <- nrounds
-    message("ncores was set to be larger than the number of estimation rounds")
-  }
-  cat(paste("Using", ncores, "cores for", nrounds, "estimations rounds..."), "\n")
 
-  ### Optimization with the genetic algorithm ###
-   cl <- parallel::makeCluster(ncores)
-   on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.
-   parallel::clusterExport(cl, ls(environment(fitSTVAR)), envir=environment(fitSTVAR)) # assign all variables from package:fitSTVAR
-   parallel::clusterEvalQ(cl, c(library(pbapply), library(Rcpp), library(RcppArmadillo), library(sstvars)))
-
-   doParallel::registerDoParallel(cl)
-
-  tmpfunGA <- function(i1, ...) {
-    cat(i1, "/", nrounds, "\r")
-    GAfit(data=data, p=p, M=M,
-          weight_function=weight_function,
-          cond_dist=cond_dist,
-          parametrization=parametrization,
-          AR_constraints=AR_constraints,
-          mean_constraints=mean_constraints,
-          seed=seeds[i1], ...)
-  }
-
-  cat("Optimizing with a genetic algorithm...\n")
-  GAresults <- pbapply::pblapply(1:nrounds, function(i1) GAfit(data=data, p=p, M=M,
-                                                              weight_function=weight_function,
-                                                              cond_dist=cond_dist,
-                                                              parametrization=parametrization,
-                                                              AR_constraints=AR_constraints,
-                                                              mean_constraints=mean_constraints,
-                                                              seed=seeds[i1], ...), cl=cl)
-  #GAresults <- lapply(1:nrounds, function(i1) tmpfunGA(i1, ...))
 
   loks <- vapply(1:nrounds, function(i1) loglikelihood(data=data, p=p, M=M,
                                                        params=GAresults[[i1]],
@@ -156,18 +163,19 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
     vapply(1:npars, function(i1) (loglik_fn(params + I[i1,]*h) - loglik_fn(params - I[i1,]*h))/(2*h), numeric(1))
   }
 
-  tmpfunNE <- function(i1) {
-    cat(i1, "/", nrounds, "\r")
-    optim(par=GAresults[[i1]], fn=loglik_fn, gr=loglik_grad, method="BFGS",
-          control=list(fnscale=-1, maxit=maxit))
-  }
-
-
   cat("Optimizing with a variable metric algorithm...\n")
-  NEWTONresults <- pbapply::pblapply(1:nrounds, function(i1) optim(par=GAresults[[i1]], fn=loglik_fn, gr=loglik_grad, method="BFGS",
-                                                                   control=list(fnscale=-1, maxit=maxit)), cl=cl)
-  #NEWTONresults <- lapply(1:nrounds, function(i1) tmpfunNE(i1))
-  parallel::stopCluster(cl=cl)
+  if(use_parallel) {
+    NEWTONresults <- pbapply::pblapply(1:nrounds, function(i1) optim(par=GAresults[[i1]], fn=loglik_fn, gr=loglik_grad, method="BFGS",
+                                                                     control=list(fnscale=-1, maxit=maxit)), cl=cl)
+    parallel::stopCluster(cl=cl)
+  } else {
+    tmpfunNE <- function(i1) {
+      cat(i1, "/", nrounds, "\r")
+      optim(par=GAresults[[i1]], fn=loglik_fn, gr=loglik_grad, method="BFGS",
+            control=list(fnscale=-1, maxit=maxit))
+    }
+    NEWTONresults <- lapply(1:nrounds, function(i1) tmpfunNE(i1))
+  }
 
   if(print_res) {
     cat("Results from the variable metric algorithm:\n")

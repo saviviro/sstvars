@@ -18,6 +18,7 @@ fitSTVAR(
   maxit = 1000,
   seeds = NULL,
   print_res = TRUE,
+  use_parallel = TRUE,
   ...
 )
 }
@@ -46,6 +47,8 @@ parameters \eqn{\phi_{m,0}} or regime means \eqn{\mu_{m}}, m=1,...,M.}
 for each call to the genetic algorithm, or \code{NULL} for not initializing the seed.}
 
 \item{print_res}{should summaries of estimation results be printed?}
+
+\item{use_parallel}{employ parallel computing?}
 
 \item{...}{additional settings passed to the function \code{GAfit} employing the genetic algorithm.}
 }
