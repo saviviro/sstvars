@@ -14,7 +14,7 @@ theta_222relg <- c(0.356914, 0.107436, 0.356386, 0.08633, 0.13996, 0.035172, -0.
                    0.205831, 0.005157, 0.025877, 1.092094, -0.009327, 0.116449, 0.592446)
 
 
-test_that("loglikelihood works correctly", {
+test_that("standard_errors works correctly", {
   # Relative_dens Gausssian STVAR
   expect_equal(standard_errors(data=gdpdef, p=1, M=1, params=theta_112relg, weight_function="relative_dens"),
                c(0.10110444, 0.03379184, 0.06105941, 0.02040767, 0.08638925, 0.02887363, 0.05459461, 0.01290402, 0.00609869),

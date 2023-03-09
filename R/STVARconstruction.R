@@ -63,7 +63,12 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
                                 parametrization=parametrization, identification=identification, AR_constraints=AR_constraints,
                                 mean_constraints=mean_constraints, B_constraints=B_constraints, to_return="loglik_and_tw",
                                 minval=NA)
-    residuals <- NA # implement function get_residuals
+    residuals_raw <- get_residuals(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
+                                   parametrization=parametrization, identification=identification, AR_constraints=AR_constraints,
+                                   mean_constraints=mean_constraints, B_constraints=B_constraints, standardize=FALSE)
+    residuals_std <- get_residuals(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
+                                   parametrization=parametrization, identification=identification, AR_constraints=AR_constraints,
+                                   mean_constraints=mean_constraints, B_constraints=B_constraints, standardize=TRUE)
     IC <- NA # implement function get_IC (divide by the number of observatios)
   }
 }
