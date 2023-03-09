@@ -74,6 +74,17 @@ test_that("diag_Omegas works correctly", {
   expect_equal(W3%*%tcrossprod(Lambda3, W3), Omega2_3, tol=1e-6)
 })
 
+
+test_that("get_symmetric_sqrt works correctly", {
+  x2 <- get_symmetric_sqrt(Omega1_2)
+  W2 <- make_W(x2, d=2)
+  expect_equal(tcrossprod(W2), Omega1_2, tol=1e-6)
+
+  x3 <- get_symmetric_sqrt(Omega1_3)
+  W3 <- make_W(x3, d=3)
+  expect_equal(tcrossprod(W3), Omega1_3, tol=1e-6)
+})
+
 get_Omega <- function(M, d, W, lambdas, which, W_and_lambdas=NULL) {
   if(!is.null(W_and_lambdas)) {
     W <- W_and_lambdas[1:d^2]

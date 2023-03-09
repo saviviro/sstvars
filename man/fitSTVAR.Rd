@@ -18,7 +18,7 @@ fitSTVAR(
   maxit = 1000,
   seeds = NULL,
   print_res = TRUE,
-  use_parallel = TRUE,
+  use_parallel = FALSE,
   ...
 )
 }
