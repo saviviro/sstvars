@@ -42,6 +42,7 @@ params312 <- c(0.712, 4.819, -0.147, 0.365, -0.159, -0.055, 0.52, -0.257, -0.057
 all_A312 <- pick_allA(p=3, M=1, d=2, params=params312)
 all_Omegas312 <- pick_Omegas(p=3, M=1, d=2, params=params312)
 
+
 params714 <- c(2.211, 3.498, 5.362, 4.747, -0.114, -0.073, -0.138, 0.186, -0.062, -0.015, -0.102, -0.276, 0.203,
                0.084, 0.087, 0.049, 0.257, 0.262, 0.037, 0.087, 0.1, -0.243, -0.109, -0.275, 0.199, -0.125, -0.081,
                -0.129, 0.323, 0.426, -0.021, 0.323, 0.062, 0.057, 0.076, -0.045, -0.303, 0.093, 0.072, -0.209, 0.219,
@@ -151,4 +152,27 @@ test_that("get_Sigmas works correctly", {
 
   expect_equal(get_Sigmas(p=7, M=1, d=4, all_A=all_A714, all_Omegas=all_Omegas714, all_boldA=all_boldA714),
                array(alt_pcovmat(p=7, d=4, all_A=all_A714, all_Omegas=all_Omegas714), dim=c(28, 28, 1)), tolerance=1e-5)
+})
+
+
+# p=1, M=2, d=2
+theta_122relg <- c(0.734054, 0.225598, 0.705744, 0.187897, 0.259626, -0.000863, -0.3124, 0.505251, 0.298483, 0.030096,
+                   -0.176925, 0.838898, 0.310863, 0.007512, 0.018244, 0.949533, -0.016941, 0.121403, 0.573269)
+
+# p=2, M=2, d=2
+theta_222relg <- c(0.356914, 0.107436, 0.356386, 0.08633, 0.13996, 0.035172, -0.164575, 0.386816, 0.451675, 0.013086,
+                   0.227882, 0.336084, 0.239257, 0.024173, -0.021209, 0.707502, 0.063322, 0.027287, 0.009182, 0.197066,
+                   0.205831, 0.005157, 0.025877, 1.092094, -0.009327, 0.116449, 0.592446)
+
+test_that("get_regime_means works correctly", {
+  expect_equal(c(get_regime_means(p=1, M=1, d=2, params=params112, weight_function="relative_dens")),
+               c(-0.03835678, 6.03323402), tolerance=1e-3)
+  expect_equal(c(get_regime_means(p=1, M=1, d=5, params=params115, weight_function="relative_dens")),
+               c(2.5744586, 0.3398819, 3.7756708, 7.9074659, 0.3825098), tolerance=1e-3)
+  expect_equal(c(get_regime_means(p=2, M=1, d=3, params=params213, weight_function="relative_dens")),
+               c(0.2622567, 5.9641285, -1.6752983), tolerance=1e-3)
+  expect_equal(c(get_regime_means(p=1, M=2, d=2, params=theta_122relg, weight_function="relative_dens")),
+               c(0.7996501, 0.4545899, 0.6798440, 1.2933271), tolerance=1e-3)
+  expect_equal(c(get_regime_means(p=2, M=2, d=2, params=theta_222relg, weight_function="relative_dens")),
+               c(0.9600324, 0.5549088, 0.4908410, 1.1693004), tolerance=1e-3)
 })

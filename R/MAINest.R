@@ -98,8 +98,6 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
 
     doParallel::registerDoParallel(cl)
 
-
-
     cat("Optimizing with a genetic algorithm...\n")
     GAresults <- pbapply::pblapply(1:nrounds, function(i1) GAfit(data=data, p=p, M=M,
                                                                  weight_function=weight_function,
@@ -110,6 +108,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
                                                                  seed=seeds[i1], ...), cl=cl)
 
   } else {
+    cat("Optimizing with a genetic algorithm...\n")
+
     tmpfunGA <- function(i1, ...) {
       cat(i1, "/", nrounds, "\r")
       GAfit(data=data, p=p, M=M,

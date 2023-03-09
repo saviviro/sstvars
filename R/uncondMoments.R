@@ -150,3 +150,36 @@ get_Sigmas <- function(p, M, d, all_A, all_boldA, all_Omegas) {
   }
   Sigmas
 }
+
+
+#' @title Calculate regime means \eqn{\mu_{m}}
+#'
+#' @description \code{get_regime_means} calculates regime means \eqn{\mu_{m} = (I - \sum A)^(-1))}
+#'   from the given parameter vector.
+#'
+#' @inheritParams loglikelihood
+#' @inheritParams stab_conds_satisfied
+#' @return Returns a \eqn{(dxM)} matrix containing regime mean \eqn{\mu_{m}} in the m:th column, \eqn{m=1,..,M}.
+#' @section Warning:
+#'  No argument checks!
+#' @inherit stab_conds_satisfied references
+#' @keywords internal
+
+get_regime_means <- function(p, M, d, params,weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
+                             parametrization=c("intercept", "mean"), identification=c("reduced_form", "recursive", "heteroskedasticity"),
+                             AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL) {
+  weight_function <- match.arg(weight_function)
+  cond_dist <- match.arg(cond_dist)
+  parametrization <- match.arg(parametrization)
+  identification <- match.arg(identification)
+  # REFORM CONSTRAINED PARS HERE
+  if(!is.null(AR_constraints) || !is.null(mean_constraints) || !is.null(B_constraints)) {
+    stop("Constrained models are not yet implemented to get_regime_means")
+  }
+  if(identification != "reduced_form") stop("Structural models are not yet implemented to get_regime_means")
+
+  if(parametrization == "intercept") {
+    params <- change_parametrization(p=p, M=M, d=d, params=params, AR_constraints=NULL, mean_constraints=NULL, change_to="mean")
+  }
+  pick_phi0(M=M, d=d, params=params)
+}
