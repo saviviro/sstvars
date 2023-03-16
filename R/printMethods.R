@@ -38,9 +38,9 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   B_constraints <- stvar$model$B_constraints
   IC <- stvar$IC
   all_mu <- round(get_regime_means(p=p, M=M, d=d, params=params, weight_function=weight_function,
-                                   cond_dist=cond_dsit, parametrization=parametrization,
+                                   cond_dist=cond_dist, parametrization=parametrization,
                                    identification=identification, AR_constraints=AR_constraints,
-                                   mean_constraints=mean_constrains, B_constraints=B_constraints), digits)
+                                   mean_constraints=mean_constraints, B_constraints=B_constraints), digits)
   npars <- length(params)
   T_obs <- ifelse(is.null(stvar$data), NA, nrow(stvar$data))
   # REFORM CONSTRAINED PARS HERE
@@ -61,17 +61,16 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function,
                                 cond_dist=cond_dist)
   # pick dist_pars
-  cat(weight_function, cond_dist, "STVAR model, identification:", identification,"\n")
-  cat(paste0(" p = ", p, ", "))
+  cat(weight_function, cond_dist, "STVAR model,", paste0(identification, ","),
+      ifelse(is.null(AR_constraints), "no AR_constraints,", "AR_constraints used,"),
+      ifelse(is.null(mean_constraints), paste0("no mean_constraints", ifelse(is.null(B_constraints), "", ",")),
+             paste0("mean_constraints used", ifelse(is.null(B_constraints), "", ","))),
+      ifelse(identification == "reduced_form", "", ifelse(is.null(B_constraints), "no B_constraints", "B_constraints used")))
+  cat("\n", paste0(" p = ", p, ", "))
   cat(paste0("M = ", M, ", "))
   cat(paste0("d = ", d, ", #parameters = " , npars, ","),
-      ifelse(is.na(T_obs), "\n", paste0("#observations = ", T_obs, " x ", d, ",\n")),
-      "log-likelihood,", parametrization, "parametrization,",
-      ifelse(is.null(AR_constraints), "no AR param constraints,", "AR params constrained,"),
-      ifelse(is.null(mean_constraints), "no mean param constraints,", "mean params constrained,"),
-      ifelse(identification == "reduced_form", "", ifelse(is.null(B_constraints),
-                                                          "no B_constraints", "B_constraints employed")), "\n")
-  cat("\n")
+      ifelse(is.na(T_obs), "\n", paste0("#observations = ", T_obs, " x ", d, "")))
+  cat("\n\n")
 
   # IMPLEMENT GET BOLDA EIGEN AND GET OMEGA EIGENS (with para args?)
   if(summary_print) {
@@ -86,35 +85,28 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   }
 
   plus <- c("+", rep(" ", times=d-1))
-  arch_scalar <- c(rep(" ", times=d-1), "ARCH_mt")
   round_lbrackets <- rep("(", times=d)
   round_rbrackets <- rep(")", times=d)
   Y <- paste0("y", 1:d)
   tmp_names <- paste0("tmp", 1:(p*(d + 2) + d + 2))
 
+  if(cond_dist == "Student") { # Print degrees of freedom parameter
+    cat("PRINT DF PARAM ESTIMATE SOMEWHERE\n")
+  }
+
   for(m in seq_len(sum(M))) {
     count <- 1
-    if(model == "GMVAR") {
-      regime_type <- "GMVAR"
-    } else if(model == "StMVAR") {
-      regime_type <- "StMVAR"
-      M1 <- 0
-    } else {
-      M1 <- M[1]
-      regime_type <- ifelse(m <= M1, "GMVAR", "StMVAR")
-    }
-    cat(paste("Regime", m))
-    if(model == "G-StMVAR") cat(paste0(" (", regime_type, " type)"))
-    cat("\n")
+    cat(paste("Regime", m), "\n")
     if(summary_print) {
       cat(paste("Moduli of 'bold A' eigenvalues: ", paste0(format_value(all_boldA_eigens[,m]), collapse=", ")),"\n")
       cat(paste("Cov. matrix 'Omega' eigenvalues:", paste0(format_value(all_omega_eigens[,m]), collapse=", ")),"\n")
     }
-    cat(paste("Mixing weight:", format_value(alphas[m])), "\n")
-    cat("Regime means:", paste0(format_value(all_mu[,m]), collapse=", "))
-    if(regime_type == "StMVAR") { # Print degrees of freedom parameter for StMVAR type regimes
-      cat("\nDf parameter: ", format_value(all_df[m - M1]))
+    if(weight_function == "relative_dens") {
+      cat(paste("Weight param:", format_value(weightpars[m])), "\n")
+    } else if(weight_function == "logit") {
+      stop("logit weights not yet implemented to print.stvar")
     }
+    cat("Regime means:", paste0(format_value(all_mu[,m]), collapse=", "))
     cat("\n\n")
 
     left_brackets <- rep("[", times=d)
@@ -133,18 +125,12 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
       df[, tmp_names[count]] <- paste0(Y, ".", i1); count <- count + 1
       df <- cbind(df, plus)
     }
-    if(regime_type == "StMVAR") { # Time varying ARCH scalar multiplying the constant part of error term covariance matrix
-      df <- cbind(df, round_lbrackets, arch_scalar)
-    }
     df[, tmp_names[p*(d + 2) + 1]] <- left_brackets
     df[, c("Omega", tmp_names[(p*(d + 2) + 2):(p*(d + 2) + d)])] <- format_value(all_Omega[, , m])
     df[, tmp_names[p*(d + 2) + d + 1]] <- rep("]", times=d)
-    if(regime_type == "StMVAR") {
-      df <- cbind(df, round_rbrackets)
-    }
     df[, "1/2"] <- rep(" ", d)
     df[, tmp_names[p*(d + 2) + d + 2]] <- paste0("eps", 1:d)
-    names_to_omit <- unlist(lapply(c("plus", "eq", "arch_scalar", "round_lbrackets", "round_rbrackets", tmp_names),
+    names_to_omit <- unlist(lapply(c("plus", "eq", "round_lbrackets", "round_rbrackets", tmp_names),
                                    function(nam) grep(nam, colnames(df))))
     colnames(df)[names_to_omit] <- " "
     print(df)
@@ -155,7 +141,10 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
       cat("\n")
     }
   }
-  if(!is.null(structural_pars)) {
+  if(identification != "reduced_form") {
+    stop("STRUCTURAL MODELS NOT YET IMPLEMENTED TO PRINT.STVAR")
+    # Rekursiivisen voi vaan laittaa Omega square rootin tilalle?
+    # Alla oleva toiminee jos cond.h.sked identifiointi?
     cat("Structural parameters:\n")
     W <- format_value(pick_W(p=p, M=M, d=d, params=params, structural_pars=structural_pars))
 
