@@ -151,5 +151,4 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
                  which_converged=NULL,
                  which_round=NULL),
             class="stvar")
-
 }
