@@ -25,6 +25,7 @@ summary.stvar <- function(object, ..., digits=2) {
                  abs_boldA_eigens=get_boldA_eigens(stvar),
                  omega_eigens=get_omega_eigens(stvar),
                  regime_means=get_regime_means(p=stvar$model$p, M=stvar$model$M, d=stvar$model$d,
+                                               params=stvar$params,
                                                weight_function=stvar$model$weight_function,
                                                cond_dist=stvar$model$cond_dist,
                                                parametrization=stvar$model$parametrization,

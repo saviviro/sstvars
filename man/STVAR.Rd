@@ -5,6 +5,7 @@
 \alias{STVAR}
 \alias{logLik.stvar}
 \alias{residuals.stvar}
+\alias{summary.stvar}
 \alias{print.stvar}
 \title{Create a class 'stvar' object defining a reduced form or structural smooth transition VAR model}
 \usage{
@@ -27,6 +28,8 @@ STVAR(
 \method{logLik}{stvar}(object, ...)
 
 \method{residuals}{stvar}(object, ...)
+
+\method{summary}{stvar}(object, ..., digits = 2)
 
 \method{print}{stvar}(x, ..., digits = 2, summary_print = FALSE)
 }
@@ -78,9 +81,9 @@ parameters \eqn{\phi_{m,0}} or regime means \eqn{\mu_{m}}, m=1,...,M.}
 
 \item{...}{currently not used.}
 
-\item{x}{an object of class \code{'stvar'}.}
-
 \item{digits}{number of digits to be printed.}
+
+\item{x}{an object of class \code{'stvar'}.}
 
 \item{summary_print}{if set to \code{TRUE} then the print
 will include log-likelihood and information criteria values.}
@@ -101,6 +104,8 @@ If data is provided, then also residuals are computed and included in the return
 \item \code{logLik(stvar)}: Log-likelihood method
 
 \item \code{residuals(stvar)}: residuals method to extract Pearson residuals
+
+\item \code{summary(stvar)}: summary method
 
 \item \code{print(stvar)}: print method
 
