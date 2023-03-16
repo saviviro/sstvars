@@ -60,7 +60,7 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params)
   weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function,
                                 cond_dist=cond_dist)
-  # pick dist_pars
+  #### pick dist_pars
   cat(weight_function, cond_dist, "STVAR model,", paste0(identification, ","),
       ifelse(is.null(AR_constraints), "no AR_constraints,", "AR_constraints used,"),
       ifelse(is.null(mean_constraints), paste0("no mean_constraints", ifelse(is.null(B_constraints), "", ",")),
