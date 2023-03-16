@@ -14,6 +14,7 @@ get_boldA_eigens <- function(stvar) {
   p <- stvar$model$p
   M <- stvar$model$M
   d <- stvar$model$d
+  params <- stvar$params
   # REFORM CONSTRAINED PARS
   if(!is.null(stvar$model$AR_constraints) || !is.null(stvar$model$mean_constraints)) {
     stop("Constrained models are not yet implemented to get_boldA_eigens")
@@ -41,6 +42,7 @@ get_omega_eigens <- function(stvar) {
   p <- stvar$model$p
   M <- stvar$model$M
   d <- stvar$model$d
+  params <- stvar$params
   # REFORM CONSTRAINED PARS
   if(!is.null(stvar$model$AR_constraints) || !is.null(stvar$model$mean_constraints)) {
     stop("Constrained models are not yet implemented to get_boldA_eigens")
