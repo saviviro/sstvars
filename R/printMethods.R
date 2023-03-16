@@ -42,7 +42,7 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
                                    identification=identification, AR_constraints=AR_constraints,
                                    mean_constraints=mean_constraints, B_constraints=B_constraints), digits)
   npars <- length(params)
-  T_obs <- ifelse(is.null(stvar$data), NA, nrow(stvar$data))
+  T_obs <- ifelse(is.null(stvar$data), NA, nrow(stvar$data) - p)
   # REFORM CONSTRAINED PARS HERE
   if(!is.null(AR_constraints) || !is.null(mean_constraints) || !is.null(B_constraints)) {
     print("Constrained models are not yet implemented to get_regime_means")
@@ -77,7 +77,7 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
     all_boldA_eigens <- get_boldA_eigens(stvar)
     all_omega_eigens <- get_omega_eigens(stvar)
     form_val2 <- function(txt, val) paste(txt, format_value(val))
-    cat(paste(form_val2(" log-likelihood:", stvar$loglik),
+    cat(paste(form_val2("loglik/T:", stvar$loglik/T_obs),
               form_val2("AIC:", IC$AIC),
               form_val2("HQIC:", IC$HQIC),
               form_val2("BIC:", IC$BIC),
