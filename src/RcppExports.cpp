@@ -26,15 +26,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // Gaussian_densities_const_Cpp
-arma::vec Gaussian_densities_const_Cpp(arma::mat obs, arma::mat mean, arma::mat covmat);
-RcppExport SEXP _sstvars_Gaussian_densities_const_Cpp(SEXP obsSEXP, SEXP meanSEXP, SEXP covmatSEXP) {
+arma::vec Gaussian_densities_const_Cpp(arma::mat obs, arma::mat mean, arma::mat cholcovmat);
+RcppExport SEXP _sstvars_Gaussian_densities_const_Cpp(SEXP obsSEXP, SEXP meanSEXP, SEXP cholcovmatSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat >::type obs(obsSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type mean(meanSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type covmat(covmatSEXP);
-    rcpp_result_gen = Rcpp::wrap(Gaussian_densities_const_Cpp(obs, mean, covmat));
+    Rcpp::traits::input_parameter< arma::mat >::type cholcovmat(cholcovmatSEXP);
+    rcpp_result_gen = Rcpp::wrap(Gaussian_densities_const_Cpp(obs, mean, cholcovmat));
     return rcpp_result_gen;
 END_RCPP
 }

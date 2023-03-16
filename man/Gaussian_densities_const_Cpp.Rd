@@ -4,7 +4,7 @@
 \alias{Gaussian_densities_const_Cpp}
 \title{Calculate log multivariate Gaussian densities}
 \usage{
-Gaussian_densities_const_Cpp(obs, mean, covmat)
+Gaussian_densities_const_Cpp(obs, mean, cholcovmat)
 }
 \arguments{
 \item{obs}{a \eqn{(T \times dp)} matrix such that the i:th row contains the vector
@@ -14,7 +14,7 @@ Gaussian_densities_const_Cpp(obs, mean, covmat)
 \item{mean}{the \eqn{((dp)x1)} mean vector, \code{rep(all_mu[,m], times=p)}, that is the same for
 all observations.}
 
-\item{covmat}{the \eqn{(dp \times dp)} covariance matrix that is the same for all observations.}
+\item{cholcovmat}{the \eqn{(dp \times dp)} covariance matrix that is the same for all observations.}
 }
 \value{
 a numeric vector containing the multivariate Gaussian densities, excluding the constant term.

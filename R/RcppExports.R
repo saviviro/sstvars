@@ -35,12 +35,12 @@ Gaussian_densities_Cpp <- function(obs, means, covmats, alpha_mt) {
 #'  \eqn{(dx1)}. That is, the initial values are included but the last observations not.
 #' @param mean the \eqn{((dp)x1)} mean vector, \code{rep(all_mu[,m], times=p)}, that is the same for
 #'  all observations.
-#' @param covmat the \eqn{(dp \times dp)} covariance matrix that is the same for all observations.
+#' @param cholcovmat the \eqn{(dp \times dp)} covariance matrix that is the same for all observations.
 #' @details This function is used in the relative density transition weights with Gaussian regimes.
 #' @return a numeric vector containing the multivariate Gaussian densities, excluding the constant term.
 #' @keywords internal
-Gaussian_densities_const_Cpp <- function(obs, mean, covmat) {
-    .Call('_sstvars_Gaussian_densities_const_Cpp', PACKAGE = 'sstvars', obs, mean, covmat)
+Gaussian_densities_const_Cpp <- function(obs, mean, cholcovmat) {
+    .Call('_sstvars_Gaussian_densities_const_Cpp', PACKAGE = 'sstvars', obs, mean, cholcovmat)
 }
 
 #' @name get_mu_yt_Cpp

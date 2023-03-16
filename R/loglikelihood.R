@@ -249,8 +249,11 @@ get_alpha_mt <- function(data, Y2, p, M, d, weight_function, all_A, all_boldA, a
     #  -0.5*d*log(2*pi) - 0.5*log(det(Sigmas[, , m]))
     #-sum(log(diag(chol(Sigmas[, , m]))))
 
-    log_mvdvalues <- -0.5*d*log(2*pi) + vapply(1:M, function(m) Gaussian_densities_const_Cpp(obs=Y2, mean=matrix(rep(all_mu[,m], times=p), nrow=1),
-                                                                                   covmat=Sigmas[, , m]),
+    # Cholesky decomposition is taken in R to avoid unnecessary warnings that caused by numerical error
+    # that makes the matrices to be not exactly symmetric but only up to numerical tolerance.
+    log_mvdvalues <- -0.5*d*log(2*pi) + vapply(1:M, function(m) Gaussian_densities_const_Cpp(obs=Y2,
+                                                                                             mean=matrix(rep(all_mu[,m], times=p), nrow=1),
+                                                                                             cholcovmat=chol(Sigmas[, , m])),
                             numeric(T_obs)) # [T_obs, M] removes the period T+1 weights
 
     #log_mvdvalues <- log_mvdvalues0

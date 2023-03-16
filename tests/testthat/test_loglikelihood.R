@@ -59,6 +59,20 @@ theta_413relg <- c(0.5334, -0.036, 0.0065, 0.2421, 0.0198, -0.1067, -0.1501, 0.5
                    -0.0024, -0.0356, 0.0582, -7e-04, 0.8796)
 
 
+# p=3, M=1, d=3, usamone
+theta_313relg <- c(0.14652, 0.07905, -0.06877, 0.85178, -0.0212, 0.15671, -0.05778, 0.49156, 0.12683,
+                   0.04203, 0.06951, 1.19613, 0.08181, 0.02087, -0.03947, 0.1369, 0.31143, 0.52774,
+                   -0.29614, -0.05912, -0.48768, -0.13135, -0.0019, 0.04491, -0.1174, 0.10878, -0.27825,
+                   0.22554, -0.0108, 0.24196, 0.78022, 0.03763, 0.11717, 0.07114, 0.01935, 0.57962)
+
+# p=1, M=2, d=3, usamone
+theta_123relg <- c(0.10741, 0.13813, -0.12092, 3.48957, 0.60615, 0.45646, 0.87227, -0.01595, 0.14124,
+                   -0.08611, 0.61865, 0.34311, -0.02047, 0.025, 0.97548, 0.74976, 0.02187, 0.29213,
+                   -1.55165, 0.58245, -0.00696, -0.07261, 0.02021, 0.96883, 0.66149, 0.02279, 0.09207,
+                   0.05544, 0.00212, 0.12708, 0.78618, 0.00922, 0.42627, 0.23765, 0.25386, 3.40834, 0.77357)
+
+
+
 # ADD MORE M>1 TESTS WHEN SOME KIND OF ESTIMATES CAN BE OBTAINED!
 # microbenchmark::microbenchmark(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222relg), times=10000)
 # p=2, M=2, d=2: alle 1 millisekuntti menee kaikkeen muuhun + reilu 4 millisekunttia menee multivariate normal arvoihin; vapply ei nopeuta.
@@ -78,4 +92,8 @@ test_that("loglikelihood works correctly", {
 
   expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122relg, weight_function="relative_dens"), -314.6693, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222relg, weight_function="relative_dens"), -239.3485, tolerance=1e-3)
+
+  expect_equal(loglikelihood(data=usamone, p=3, M=1, params=theta_313relg, weight_function="relative_dens"), -669.5716, tolerance=1e-3)
+  expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123relg, weight_function="relative_dens"), -570.019, tolerance=1e-3)
+
 })

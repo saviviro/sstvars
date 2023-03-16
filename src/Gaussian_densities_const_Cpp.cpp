@@ -13,17 +13,17 @@ using namespace Rcpp;
 //'  \eqn{(dx1)}. That is, the initial values are included but the last observations not.
 //' @param mean the \eqn{((dp)x1)} mean vector, \code{rep(all_mu[,m], times=p)}, that is the same for
 //'  all observations.
-//' @param covmat the \eqn{(dp \times dp)} covariance matrix that is the same for all observations.
+//' @param cholcovmat the \eqn{(dp \times dp)} covariance matrix that is the same for all observations.
 //' @details This function is used in the relative density transition weights with Gaussian regimes.
 //' @return a numeric vector containing the multivariate Gaussian densities, excluding the constant term.
 //' @keywords internal
 // [[Rcpp::export]]
-arma::vec Gaussian_densities_const_Cpp(arma::mat obs, arma::mat mean, arma::mat covmat) {
+arma::vec Gaussian_densities_const_Cpp(arma::mat obs, arma::mat mean, arma::mat cholcovmat) {
   int T_obs = obs.n_rows; // The number of observations
   arma::vec vals(T_obs); // Contains the densities for each observation
   arma::mat tmp(obs.n_cols, 1);
   arma::mat tmp2(1, 1);
-  arma::mat cholcovmat = arma::chol(covmat);
+  // arma::mat cholcovmat = arma::chol(covmat); // Cholesky is taken in R to avoid redundant warnings
   arma::mat inv_cholcovmat = arma::inv(trimatu(cholcovmat));
   double det_term = -arma::accu(arma::log(cholcovmat.diag()));
 
