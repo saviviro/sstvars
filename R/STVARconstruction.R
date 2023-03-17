@@ -22,7 +22,7 @@
 #'    \item TO BE FILLED IN
 #'  }
 #' @examples
-#' # p=1, M=1, d=2, relative dens weight function
+#' # p=1, M=1, d=2, linear VAR
 #' theta_112relg <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103,
 #'   0.601786, -0.002945, 0.067224)
 #' mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112relg)

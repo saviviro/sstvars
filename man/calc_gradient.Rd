@@ -13,13 +13,13 @@ calc_gradient(x, fn, h = 6e-06, ...)
 
 calc_hessian(x, fn, h = 6e-06, ...)
 
-get_gradient(FILL_IN_OBJECT)
+get_gradient(stvar)
 
-get_hessian(FILL_IN_OBJECT)
+get_hessian(stvar)
 
-get_foc(FILL_IN_OBJECT)
+get_foc(stvar)
 
-get_soc(FILL_IN_OBJECT)
+get_soc(stvar)
 }
 \arguments{
 \item{x}{a numeric vector specifying the point where the gradient or Hessian should be calculated.}
@@ -29,6 +29,8 @@ get_soc(FILL_IN_OBJECT)
 \item{h}{difference used to approximate the derivatives.}
 
 \item{...}{other arguments passed to \code{fn}}
+
+\item{stvar}{object of class \code{"stvar"}}
 }
 \value{
 Gradient functions return numerical approximation of the gradient and Hessian functions return
@@ -38,15 +40,14 @@ Gradient functions return numerical approximation of the gradient and Hessian fu
 \code{calc_gradient} or \code{calc_hessian} calculates the gradient or Hessian matrix
   of the given function at the given point using central difference numerical approximation.
   \code{get_gradient} or \code{get_hessian} calculates the gradient or Hessian matrix of the
-  log-likelihood function at the parameter estimates of a class \code{'FILL IN'} object. \code{get_soc}
+  log-likelihood function at the parameter estimates of a class \code{'stvar'} object. \code{get_soc}
   returns eigenvalues of the Hessian matrix, and \code{get_foc} is the same as \code{get_gradient}
   but named conveniently.
 }
 \details{
 In particular, the functions \code{get_foc} and \code{get_soc} can be used to check whether
   the found estimates denote a (local) maximum point, a saddle point, or something else. Note that
-  profile log-likelihood functions can be conveniently plotted with the function \code{profile_logliks}
-  PROFILE_LOGLIKS IS NOT YET IMPLEMENTED.
+  profile log-likelihood functions can be conveniently plotted with the function \code{profile_logliks}.
 }
 \section{Warning}{
 
@@ -62,4 +63,10 @@ In particular, the functions \code{get_foc} and \code{get_soc} can be used to ch
   # More complicated function
   foo <- function(x, a, b) a*x[1]^2 - b*x[2]^2
   calc_gradient(x=c(1, 2), fn=foo, a=0.3, b=0.1)
+
+  theta_112 <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103,
+    0.601786, -0.002945, 0.067224)
+  mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112)
+  get_foc(mod112)
+  get_soc(mod112)
 }
