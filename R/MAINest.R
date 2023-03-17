@@ -194,9 +194,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
 
   if(filter_estimates) {
     cat("Filtering inappropriate estimates...\n")
-
     ord_by_loks <- order(loks, decreasing=TRUE) # Ordering from largest loglik to smaller
-#    all_est_in_order <- all_estimates[ord_by_loks] # Estimates ordered according to logliks
 
     # Go through estimates, take the estimate that yield the higher likelihood
     # among estimates that are do not include wasted regimes or near-singular
@@ -204,7 +202,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
     for(i1 in 1:length(all_estimates)) {
        which_round <- ord_by_loks[i1] # Est round with i1:th largest loglik
        pars <- all_estimates[[which_round]]
-       Omega_eigens <- get_omega_eigens_par(p=p, M=M, d=d, params=params, identiciation="reduced_form",
+       Omega_eigens <- get_omega_eigens_par(p=p, M=M, d=d, params=params, identification="reduced_form",
                                             AR_constraints=AR_constraints, mean_constraints=mean_constraints)
        Omegas_ok <- any(Omega_eigens < 0.002)
        tweights <- loglikelihood(data=data, p=p, M=M, params=pars, weight_function=weight_function,
@@ -212,11 +210,12 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
                                  identification="reduced_form", AR_constraints=AR_constraints,
                                  mean_constraints=mean_constraints, B_constraints=NULL,
                                  to_return="tw", check_params=TRUE, minval=matrix(0, nrow=n_obs-p, ncol=M))
-       tweights_ok <- any(vapply(1:M, function(i1) sum(transition_weights[,i1] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
+       tweights_ok <- !any(vapply(1:M, function(i1) sum(tweights[,i1] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
        if(Omegas_ok && tweights_ok) {
          which_best_fit <- i1 # The estimation round of the appropriate estimate with the largest loglik
-         break;
-       } else if(i1 == length(all_estimates)) {
+         break
+       }
+       if(i1 == length(all_estimates)) {
          message("No 'appropriate' estimates were found!
                  Check that all the variables are scaled to vary in similar magninutes, also not very small or large magnitudes.
                  Consider more running estimation rounds or study the obtained estimates one-by-one with the function alt_STVAR.")
@@ -271,6 +270,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
   ret$all_logliks <- loks
   ret$which_converged <- converged
   ret$which_round <- which_best_fit # Which estimation round induced the largest log-likelihood?
+  warn_eigens(ret)
   cat("Finished!\n")
   ret
 }
