@@ -31,7 +31,7 @@
 #' theta_122relg <- c(0.734054, 0.225598, 0.705744, 0.187897, 0.259626, -0.000863,
 #'   -0.3124, 0.505251, 0.298483, 0.030096, -0.176925, 0.838898, 0.310863, 0.007512,
 #'   0.018244, 0.949533, -0.016941, 0.121403, 0.573269)
-#' mod112 <- STVAR(data=gdpdef, p=1, M=2, params=theta_122relg)
+#' mod122 <- STVAR(data=gdpdef, p=1, M=2, params=theta_122relg)
 #' @export
 
 STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
