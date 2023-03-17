@@ -1,4 +1,4 @@
-context("getEigens")
+context("eigens")
 library(sstvars)
 
 ## A(M)(p)_(p)(M)(d)
