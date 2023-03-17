@@ -142,5 +142,5 @@ mod112 <- STVAR(data=gdpdef, p=1, M=2, params=theta_122relg)
  }
 }
 \seealso{
-\code{\link{fitSTVAR}}, \code{\link{add_data}}, \code{\link{swap_parametrization}}, \code{\link{GIRF}}
+\code{\link{fitSTVAR}}, \code{\link{swap_parametrization}}, \code{\link{GIRF}}
 }

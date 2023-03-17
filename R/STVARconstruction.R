@@ -16,7 +16,7 @@
 #'   If data is not provided, only the \code{print} and \code{simulate} methods are available.
 #'   If data is provided, then in addition to the ones listed above, \code{predict} method is also available.
 #'   See \code{?simulate.stvar} and \code{?predict.stvar} for details about the usage.
-#' @seealso \code{\link{fitSTVAR}}, \code{\link{add_data}}, \code{\link{swap_parametrization}}, \code{\link{GIRF}}
+#' @seealso \code{\link{fitSTVAR}}, \code{\link{swap_parametrization}}, \code{\link{GIRF}}
 #' @references
 #'  \itemize{
 #'    \item TO BE FILLED IN
@@ -151,4 +151,61 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
                  which_converged=NULL,
                  which_round=NULL),
             class="stvar")
+}
+
+
+
+#' @title Construct a STVAR model based on results from an arbitrary estimation round of \code{fitSTVAR}
+#'
+#' @description \code{alt_stvar} constructs a STVAR model based on results from an arbitrary estimation
+#'   round of \code{fitSTVAR}
+#'
+#' @inheritParams get_boldA_eigens
+#' @inheritParams STVAR
+#' @param which_largest based on estimation round with which largest log-likelihood should the model be constructed?
+#'   An integer value in 1,...,\code{nrounds}. For example, \code{which_largest=2} would take the second largest log-likelihood
+#'   and construct the model based on the corresponding estimates.
+#' @param which_round based on which estimation round should the model be constructed? An integer value in 1,...,\code{nrounds}.
+#'   If specified, then \code{which_largest} is ignored.
+#' @details It's sometimes useful to examine other estimates than the one with the highest log-likelihood. This function
+#'   is wrapper around \code{STVAR} that picks the correct estimates from an object returned by \code{fitSTVAR}.
+#' @inherit STVAR references return
+#' @examples
+#' \donttest{
+#' # STVAR p=1, M=2 model
+#' fit12 <- fitSTVAR(gdpdef, p=1, M=2, nrounds=2, seeds=1:2, ngen=20)
+#' fit12
+#' fit12_alt <- alt_stvar(fit12, which_largest=2, calc_std_errors=FALSE)
+#' fit12_alt # Estimate from an alternative local maximum
+#' }
+#' @export
+
+alt_stvar <- function(stvar, which_largest=1, which_round, calc_std_errors=TRUE) {
+  stopifnot(!is.null(stvar$all_estimates))
+  if(missing(which_round)) {
+    stopifnot(which_largest >= 1 && which_largest <= length(stvar$all_estimates))
+    which_round <- order(stvar$all_logliks, decreasing=TRUE)[which_largest]
+  } else {
+    stopifnot(which_round >= 1 && which_round <= length(stvar$all_estimates))
+  }
+  ret <- STVAR(data=stvar$data, p=stvar$model$p, M=stvar$model$M, d=stvar$model$d,
+               params=stvar$all_estimates[[which_round]],
+               weight_function=stvar$model$weight_function,
+               cond_dist=stvar$model$cond_dist,
+               parametrization=stvar$model$parametrization,
+               identification=stvar$model$identification,
+               AR_constraints=stvar$model$AR_constraints,
+               mean_constraints=stvar$model$mean_constraints,
+               B_constraints=stvar$model$B_constraints,
+               calc_std_errors=calc_std_errors)
+
+  # Pass the estimation results to the new object
+  ret$all_estimates <- stvar$all_estimates
+  ret$all_logliks <- stvar$all_logliks
+  ret$which_converged <- stvar$which_converged
+  if(!is.null(stvar$which_round)) {
+    ret$which_round <- which_round
+  }
+  warn_eigens(ret)
+  ret
 }

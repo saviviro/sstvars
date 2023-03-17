@@ -43,7 +43,7 @@
 #'  Specifically, solutions that incorporate a near-singular error term covariance matrix (any eigenvalue less than \eqn{0.002})
 #'  or transition weights such that they are close to zero for almost all \eqn{t} for at least one regime.
 #'  You are welcome to set \code{filter_estimates=FALSE} and find the solutions of interest yourself by using the
-#'  function \code{alt_STVAR}.
+#'  function \code{alt_stvar}.
 #' @return Returns an object of class \code{'stvar'} defining the estimated reduced form smooth transition VAR model.
 #' @section S3 methods:
 #'   The following S3 methods are supported for class \code{'stvar'}: \code{logLik}, \code{residuals}, \code{print}, \code{summary},
@@ -222,7 +222,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
        if(i1 == length(all_estimates)) {
          message("No 'appropriate' estimates were found!
                  Check that all the variables are scaled to vary in similar magninutes, also not very small or large magnitudes.
-                 Consider more running estimation rounds or study the obtained estimates one-by-one with the function alt_STVAR.")
+                 Consider more running estimation rounds or study the obtained estimates one-by-one with the function alt_stvar.")
          if(M > 2) {
            message("Consider also using smaller M. Too large M leads to identification problems.")
          }
