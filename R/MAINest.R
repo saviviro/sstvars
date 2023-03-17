@@ -38,8 +38,12 @@
 #'  estimation algorithm works better with relatively small AR coefficients. If needed, another package can be used
 #'  to fit linear VARs to the series to see which scaling of the series results in relatively small AR coefficients.
 #'
-#'  FILL IN HERE DETAILS ABOUT FILTERING INAPPROPRIATE ESTIMATES
-#'
+#'  \strong{Filtering inappropriate estimates:} If \code{filter_estimates == TRUE}, the code will automatically filter
+#'  through estimates that it deems "inappropriate". That is, estimates that are not likely solutions of interest.
+#'  Specifically, solutions that incorporate a near-singular error term covariance matrix (any eigenvalue less than \eqn{0.002})
+#'  or transition weights such that they are close to zero for almost all \eqn{t} for at least one regime.
+#'  You are welcome to set \code{filter_estimates=FALSE} and find the solutions of interest yourself by using the
+#'  function \code{alt_STVAR}.
 #' @return Returns an object of class \code{'stvar'} defining the estimated reduced form smooth transition VAR model.
 #' @section S3 methods:
 #'   The following S3 methods are supported for class \code{'stvar'}: \code{logLik}, \code{residuals}, \code{print}, \code{summary},
