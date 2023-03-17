@@ -105,3 +105,42 @@ get_omega_eigens_par <- function(p, M, d, params, identification=c("reduced_form
   matrix(vapply(1:M, function(m) eigen(all_Omega[, , m], symmetric=TRUE, only.values=TRUE)$'values', numeric(d)),
          nrow=d, ncol=M, byrow=FALSE)
 }
+
+
+#' @title Warn about near-unit-roots in some regimes
+#'
+#' @description \code{warn_eigens} warns if the model contains near-unit-roots in some regimes
+#'
+#' @inheritParams get_boldA_eigens
+#' @param tol if eigenvalue is closer than \code{tol} to its bound, a warning is thrown
+#' @details Warns if, for some regime, some moduli of "bold A" eigenvalues are larger than \code{1 - tol} or
+#'  some eigenvalue of the error term covariance matrix is smaller than \code{tol}.
+#' @return Doesn't return anything.
+#' @keywords internal
+
+warn_eigens <- function(stvar, tol=0.002) {
+  boldA_eigens <- get_boldA_eigens(stvar)
+  omega_eigens <- get_omega_eigens(stvar)
+  M <- stvar$model$M
+  near_nonstat <- vapply(1:M, function(i1) any(abs(boldA_eigens[,i1]) > 1 - tol), logical(1))
+  near_singular <- vapply(1:M, function(i1) any(abs(omega_eigens[,i1]) < tol), logical(1))
+  if(any(near_nonstat)) {
+    my_string1 <- ifelse(sum(near_nonstat) == 1,
+                         paste("Regime", which(near_nonstat),"has near-unit-roots! "),
+                         paste("Regimes", paste(which(near_nonstat), collapse=" and ") ,"have near-unit-roots! "))
+  } else {
+    my_string1 <- NULL
+  }
+  if(any(near_singular)) {
+    my_string2 <- ifelse(sum(near_singular) == 1,
+                         paste("Regime", which(near_singular),"has near-singular error term covariance matrix! "),
+                         paste("Regimes", paste(which(near_singular), collapse=" and ") ,"have near-singular error term covariance matrices! "))
+  } else {
+    my_string2 <- NULL
+  }
+  if(any(near_nonstat) || any(near_singular)) {
+    warning(paste0(my_string1, my_string2, "Consider building a model from the next-largest local maximum with the function 'alt_stvar'",
+                   "by adjusting its argument 'which_largest'."))
+  }
+}
+

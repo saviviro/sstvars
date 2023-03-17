@@ -13,6 +13,7 @@
 #'  for each call to the genetic algorithm, or \code{NULL} for not initializing the seed.
 #' @param print_res should summaries of estimation results be printed?
 #' @param use_parallel employ parallel computing?
+#' @param filter_estimates should the likely inappropriate estimates be filtered? See details.
 #' @param ... additional settings passed to the function \code{GAfit} employing the genetic algorithm.
 #' @details
 #'  If you wish to estimate a structural model, estimate first the reduced form model and then use the
@@ -37,6 +38,8 @@
 #'  estimation algorithm works better with relatively small AR coefficients. If needed, another package can be used
 #'  to fit linear VARs to the series to see which scaling of the series results in relatively small AR coefficients.
 #'
+#'  FILL IN HERE DETAILS ABOUT FILTERING INAPPROPRIATE ESTIMATES
+#'
 #' @return Returns an object of class \code{'stvar'} defining the estimated reduced form smooth transition VAR model.
 #' @section S3 methods:
 #'   The following S3 methods are supported for class \code{'stvar'}: \code{logLik}, \code{residuals}, \code{print}, \code{summary},
@@ -57,7 +60,8 @@
 
 fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
                      parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL,
-                     nrounds=(M + 1)^5, ncores=2, maxit=1000, seeds=NULL, print_res=TRUE, use_parallel=FALSE, ...) {
+                     nrounds=(M + 1)^5, ncores=2, maxit=1000, seeds=NULL, print_res=TRUE,
+                     use_parallel=FALSE, filter_estimates=TRUE, ...) {
   # Initial checks etc
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -185,11 +189,49 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
     print_loks()
   }
 
-  ### Obtain estimates and standard errors, calculate IC ###
+  ### Obtain estimates and filter the inapproriate estimates
   all_estimates <- lapply(NEWTONresults, function(x) x$par)
-  which_best_fit <- which(loks == max(loks))[1]
-  params <- all_estimates[[which_best_fit]]
 
+  if(filter_estimates) {
+    cat("Filtering inappropriate estimates...\n")
+
+    ord_by_loks <- order(loks, decreasing=TRUE) # Ordering from largest loglik to smaller
+#    all_est_in_order <- all_estimates[ord_by_loks] # Estimates ordered according to logliks
+
+    # Go through estimates, take the estimate that yield the higher likelihood
+    # among estimates that are do not include wasted regimes or near-singular
+    # error term covariance matrices.
+    for(i1 in 1:length(all_estimates)) {
+       which_round <- ord_by_loks[i1] # Est round with i1:th largest loglik
+       pars <- all_estimates[[which_round]]
+       Omega_eigens <- get_omega_eigens_par(p=p, M=M, d=d, params=params, identiciation="reduced_form",
+                                            AR_constraints=AR_constraints, mean_constraints=mean_constraints)
+       Omegas_ok <- any(Omega_eigens < 0.002)
+       tweights <- loglikelihood(data=data, p=p, M=M, params=pars, weight_function=weight_function,
+                                 cond_dist=cond_dist, parametrization=parametrization,
+                                 identification="reduced_form", AR_constraints=AR_constraints,
+                                 mean_constraints=mean_constraints, B_constraints=NULL,
+                                 to_return="tw", check_params=TRUE, minval=matrix(0, nrow=n_obs-p, ncol=M))
+       tweights_ok <- any(vapply(1:M, function(i1) sum(transition_weights[,i1] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
+       if(Omegas_ok && tweights_ok) {
+         which_best_fit <- i1 # The estimation round of the appropriate estimate with the largest loglik
+         break;
+       } else if(i1 == length(all_estimates)) {
+         message("No 'appropriate' estimates were found!
+                 Check that all the variables are scaled to vary in similar magninutes, also not very small or large magnitudes.
+                 Consider more running estimation rounds or study the obtained estimates one-by-one with the function alt_STVAR.")
+         if(M > 2) {
+           message("Consider also using smaller M. Too large M leads to identification problems.")
+         }
+         which_best_fit <- which(loks == max(loks))[1]
+       }
+    }
+  } else {
+    which_best_fit <- which(loks == max(loks))[1]
+  }
+  params <- all_estimates[[which_best_fit]] # The params to return
+
+  ### Obtain standard errors, calculate IC ###
   # Sort regimes if no constraints are employed
   if(is.null(AR_constraints) && is.null(mean_constraints)) {
     params <- sort_regimes(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
@@ -210,8 +252,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
                                       identification="reduced_form", AR_constraints=AR_constraints,
                                       mean_constraints=mean_constraints, B_constraints=NULL,
                                       to_return="tw", check_params=TRUE, minval=minval)
-  if(any(vapply(1:sum(M), function(i1) sum(transition_weights[,i1] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))) {
-    message("At least one of the regimes in the estimated model seems to be wasted!")
+  if(any(vapply(1:M, function(i1) sum(transition_weights[,i1] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))) {
+    message("At least one of the regimes in the estimated model seems to be wasted in the best fitting individual!")
   }
 
   ### Wrap up ###

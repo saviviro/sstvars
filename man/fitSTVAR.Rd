@@ -19,6 +19,7 @@ fitSTVAR(
   seeds = NULL,
   print_res = TRUE,
   use_parallel = FALSE,
+  filter_estimates = TRUE,
   ...
 )
 }
@@ -49,6 +50,8 @@ for each call to the genetic algorithm, or \code{NULL} for not initializing the 
 \item{print_res}{should summaries of estimation results be printed?}
 
 \item{use_parallel}{employ parallel computing?}
+
+\item{filter_estimates}{should the likely inappropriate estimates be filtered? See details.}
 
 \item{...}{additional settings passed to the function \code{GAfit} employing the genetic algorithm.}
 }
@@ -83,6 +86,8 @@ If you wish to estimate a structural model, estimate first the reduced form mode
  be preferred to scale the series so that most of the AR coefficients will not be very large, as the
  estimation algorithm works better with relatively small AR coefficients. If needed, another package can be used
  to fit linear VARs to the series to see which scaling of the series results in relatively small AR coefficients.
+
+ FILL IN HERE DETAILS ABOUT FILTERING INAPPROPRIATE ESTIMATES
 }
 \section{S3 methods}{
 
