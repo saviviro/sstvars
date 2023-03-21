@@ -15,6 +15,7 @@
 #'     \item{\code{"ch"} the squared residual autocorrelation and cross-correlation functions.}
 #'     \item{\code{"dist"} the residual histogram with theoretical density (dashed line) and QQ-plots.}
 #'   }
+#' @param resid_type should standardized or raw residuals be used?
 #' @param maxlag the maximum lag considered in types \code{"ac"} and \code{"ch"}.
 #' @details Auto- and cross-correlations (types \code{"ac"} and \code{"ch"}) are calculated with the function
 #'  \code{acf} from the package \code{stats} and the plot method for class \code{'acf'} objects is employed.
@@ -37,11 +38,17 @@
 #' diagnostic_plot(mod122, type="ch")
 #' @export
 
-diagnostic_plot <- function(stvar, type=c("all", "series", "ac", "ch", "dist"), maxlag=12) {
+diagnostic_plot <- function(stvar, type=c("all", "series", "ac", "ch", "dist"), resid_type=c("standardized", "raw"),
+                            maxlag=12) {
 
   if(is.null(stvar$data)) stop("The model needs to contain data!")
   type <- match.arg(type)
-  res <- stvar$residuals_std
+  redid_type <- match.arg(resid_type)
+  if(resid_type == "standardized") {
+    res <- stvar$residuals_std
+  } else {
+    res <- stvar$residuals_raw
+  }
   d <- stvar$model$d
   names_ts <- colnames(as.ts(stvar$data))
   colnames(res) <- names_ts
@@ -67,7 +74,7 @@ diagnostic_plot <- function(stvar, type=c("all", "series", "ac", "ch", "dist"), 
       }
       yaxt1 <- round(min(res[,d1]))
       yaxt2 <- round(max(res[,d1]))
-      main <- ifelse(all.equal(d1, 1), "Quantile residual time series", "")
+      main <- ifelse(all.equal(d1, 1), "Residual time series", "")
       plot(res[,d1], yaxt="n", xaxt=xaxt, type="l", col=grDevices::rgb(0, 0, 0, 1), ylab="", xlab="", main=main)
       axis(2, at=yaxt1:yaxt2, labels=yaxt1:yaxt2)
       abline(h=0, col=grDevices::rgb(1, 0, 0, 0.3), lwd=2)

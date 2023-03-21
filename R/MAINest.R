@@ -218,6 +218,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
        if(Omegas_ok && tweights_ok) {
          which_best_fit <- i1 # The estimation round of the appropriate estimate with the largest loglik
          break
+         print("Mentiin breaking ohi lol")
        }
        if(i1 == length(all_estimates)) {
          message("No 'appropriate' estimates were found!

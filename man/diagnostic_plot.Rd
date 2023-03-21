@@ -7,6 +7,7 @@
 diagnostic_plot(
   stvar,
   type = c("all", "series", "ac", "ch", "dist"),
+  resid_type = c("standardized", "raw"),
   maxlag = 12
 )
 }
@@ -22,6 +23,8 @@ diagnostic_plot(
   \item{\code{"dist"} the residual histogram with theoretical density (dashed line) and QQ-plots.}
 }}
 
+\item{resid_type}{should standardized or raw residuals be used?}
+
 \item{maxlag}{the maximum lag considered in types \code{"ac"} and \code{"ch"}.}
 }
 \description{
@@ -34,7 +37,19 @@ Auto- and cross-correlations (types \code{"ac"} and \code{"ch"}) are calculated 
  \code{acf} from the package \code{stats} and the plot method for class \code{'acf'} objects is employed.
 }
 \examples{
-# FILL IN EXAMPLS
+# p=1, M=1, d=2, linear VAR
+theta_112 <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103,
+  0.601786, -0.002945, 0.067224)
+mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112)
+diagnostic_plot(mod112)
+
+# p=1, M=2, d=2, relative dens weight function
+theta_122relg <- c(0.734054, 0.225598, 0.705744, 0.187897, 0.259626, -0.000863,
+  -0.3124, 0.505251, 0.298483, 0.030096, -0.176925, 0.838898, 0.310863, 0.007512,
+  0.018244, 0.949533, -0.016941, 0.121403, 0.573269)
+mod122 <- STVAR(data=gdpdef, p=1, M=2, params=theta_122relg)
+diagnostic_plot(mod122, type="ac")
+diagnostic_plot(mod122, type="ch")
 }
 \references{
 \itemize{
