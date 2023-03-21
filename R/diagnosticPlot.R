@@ -43,7 +43,7 @@ diagnostic_plot <- function(stvar, type=c("all", "series", "ac", "ch", "dist"), 
 
   if(is.null(stvar$data)) stop("The model needs to contain data!")
   type <- match.arg(type)
-  redid_type <- match.arg(resid_type)
+  resid_type <- match.arg(resid_type)
   if(resid_type == "standardized") {
     res <- stvar$residuals_std
   } else {

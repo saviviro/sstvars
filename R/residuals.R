@@ -27,7 +27,7 @@ get_residuals <- function(data, p, M, params, weight_function=c("relative_dens",
                         AR_constraints=AR_constraints, mean_constraints=mean_constraints, B_constraints,
                         check_params=TRUE, to_return="total_cmeans")
 
-  y_minus_mu <- data[(p + 1):nrow(data)] - mu_t # nonstandardized residuals [T_obs, d]
+  y_minus_mu <- data[(p + 1):nrow(data),] - mu_t # nonstandardized residuals [T_obs, d]
   if(!standardize) {
     return(y_minus_mu) # Nonstandardized residuals
   }
