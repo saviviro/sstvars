@@ -105,8 +105,10 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
 
   # Set/generate initial values
   if(is.null(init_values)) {
-    # Generate the initial values from the stationary distribution of init_regime
-
+    # Generate the initial values from the stationary distribution of init_regime; Gaussian dist
+    mu <- rep(all_mu[, init_regime], p)
+    L <- t(chol_Sigmas[, , init_regime]) # Lower triangle
+    init_values <- matrix(mu + L%*%rnorm(d*p), nrow=p, ncol=d, byrow=TRUE) # i:th row for the i:th length d random vector
   } else {
     # Initial values given as argument
     init_values <- init_values[(nrow(init_values) - p + 1):nrow(init_values), , drop=FALSE]
@@ -122,11 +124,26 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   component <- matrix(nrow=nsim, ncol=ntimes)
   mixing_weights <- array(dim=c(nsim, M, ntimes))
 
-  # B_t, alpha_mt, mu_mt, etc, needs to be calculated in the iterations
+  # B_t, alpha_mt, mu_mt etc, needs to be calculated in the iterations
   # Create functons here to avoid repetition
+
+  # Some functions to be used
+  if(weight_function == "relative_dens") {
+    # Get log multivariate normal densities for calculating the transition weights
+    get_logmvdvalues <- function(Y) {
+      vapply(1:M,
+             function(m) -0.5*d*p*log(2*pi) - 0.5*log(det_Sigmas[m]) - 0.5*(crossprod(Y[i1,] - rep(all_mu[, m], p),
+                                                                                      inv_Sigmas[, , m])%*%(Y[i1,] - rep(all_mu[, m], p))),
+             numeric(1))
+    }
+    # ONKO TÄMÄ EDES NOPEAMPAA KUIN ANTAA VAIN CHOL_SIGMAS? LUULTAVASTI
+  }
 
   for(j1 in 1:seq_len(ntimes)) {
     for(i1 in seq_len(nsim)) {
+      # TEHTÄVÄ: tee get_alpha_mt-versio, jossa voi antaa log_mvdvalues valmiina ja se laskee sen perusteella?
+      # Vai pitääkö matprodit laskea erikseen joka iteraatiolle?
+      # OLISI HYVÄ JOS OLISI YKSIKKÖTESTIT SEN TESTAAMISEEN
 
     }
   }

@@ -203,68 +203,46 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
 #' @param all_mu an \eqn{(d \times M)} matrix containing the unconditional regime-specific means
 #' @param epsilon the smallest number such that its exponent is wont classified as numerically zero
 #'   (around \code{-698} is used).
+#' @param log_mvdvalues FILL IN !!!!!!
 #' @details Note that we index the time series as \eqn{-p+1,...,0,1,...,T}.
 #' @return Returns the mixing weights a \eqn{(T x M)} matrix, so that the t:th row is for the time point t
 #'   and m:th column is for the regime m.
 #' @inherit in_paramspace references
 #' @keywords internal
 
-get_alpha_mt <- function(data, Y2, p, M, d, weight_function, all_A, all_boldA, all_Omegas, weightpars, all_mu, epsilon) {
+get_alpha_mt <- function(data, Y2, p, M, d, weight_function, all_A, all_boldA, all_Omegas, weightpars, all_mu, epsilon,
+                         log_mvdvalues=NULL) {
   T_obs <- nrow(data) - p
   if(M == 1) {
     return(as.matrix(rep(1, times=T_obs)))
   }
   if(weight_function == "relative_dens") {
-    # Calculate the covariance matrices Sigma_{m,p} (Lutkepohl 2005, eq. (2.1.39) or the algorithm proposed by McElroy 2017)
-    Sigmas <- get_Sigmas(p=p, M=M, d=d, all_A=all_A, all_boldA=all_boldA, all_Omegas=all_Omegas) # Store the (dpxdp) covariance matrices
-    #chol_Sigmas <- array(dim=c(d*p, d*p, M))
-    #for(m in 1:M) {
-    #  chol_Sigmas[, , m] <- chol(Sigmas[, , m]) # Take Cholesky here to avoid unnecessary warnings from mvnfast::dmvn
-    #}
+    if(is.null(log_mvdvalues)) {
+      # Calculate the covariance matrices Sigma_{m,p} (Lutkepohl 2005, eq. (2.1.39) or the algorithm proposed by McElroy 2017)
+      Sigmas <- get_Sigmas(p=p, M=M, d=d, all_A=all_A, all_boldA=all_boldA, all_Omegas=all_Omegas) # Store the (dpxdp) covariance matrices
 
-    # Calculate the dp-dimensional multinormal densities in logarithm with the package mvnfast:
-    # i:th row for index i-1 etc, m:th column for m:th component.
-    # We calculate in logarithm because the non-log values may be too close to zero for machine accuracy (if they are too close to zero
-    # for all regimes and computer handles them as zero, we would divide by zero when calculating the transition weights).
-    #log_mvdvalues <- vapply(1:M, function(m) mvnfast::dmvn(X=Y2, mu=rep(all_mu[,m], p), sigma=chol_Sigmas[, , m],
-    #                                                               log=TRUE, ncores=1, isChol=TRUE),
-    #                        numeric(T_obs)) # [T_obs, M] removes the period T+1 weights
-
-    #obs_minus_mean <- Y2 - rep(all_mu[,m], times=p)
-    #const_term <- -0.5*d*log(2*pi) - 0.5*log(det(Sigmas))
-    #inv_cholcovmat = solve(chol(Sigmas[, , m]))
-    #log_mvdvalues <- vapply(1:M, function(m) -0.5*d*log(2*pi) - 0.5*log(det(Sigmas[, , m])) - 0.5*solve(chol(Sigmas[, , m])), numeric(T_obs))
-    # log_mvdvalues_test0 <- matrix(nrow=T_obs, ncol=M)
-    # for(m in 1:M) {
-    #   obs_minus_mean <- t(t(Y2) - rep(all_mu[,m], times=p))
-    #   for(i1 in 1:T_obs) {
-    #     log_mvdvalues_test0[i1, m] <-  -0.5*d*log(2*pi) - 0.5*log(det(Sigmas[, , m])) - 0.5*t(obs_minus_mean[i1,])%*%solve(Sigmas[, , m])%*%obs_minus_mean[i1,]
-    #   }
-    # }
-    #log_mvdvalues[2,]
-    #log_mvdvalues_test0[2,]
-     #
-    #log_mvdvalues - log_mvdvalues_test0
-    #log_mvdvalues - log_mvdvalues0
-    #  -0.5*d*log(2*pi) - 0.5*log(det(Sigmas[, , m]))
-    #-sum(log(diag(chol(Sigmas[, , m]))))
-
-    # Cholesky decomposition is taken in R to avoid unnecessary warnings that caused by numerical error
-    # that makes the matrices to be not exactly symmetric but only up to numerical tolerance.
-    log_mvdvalues <- -0.5*d*log(2*pi) + vapply(1:M, function(m) Gaussian_densities_const_Cpp(obs=Y2,
-                                                                                             mean=matrix(rep(all_mu[,m], times=p), nrow=1),
-                                                                                             cholcovmat=chol(Sigmas[, , m])),
-                            numeric(T_obs)) # [T_obs, M] removes the period T+1 weights
-
-    #log_mvdvalues <- log_mvdvalues0
-
-    #microbenchmark::microbenchmark(t(t(Y2) - rep(all_mu[,m], times=p)), times=10000L)
-    #microbenchmark::microbenchmark(GaussianDensities2(obs_minus_mean=t(t(Y2) - rep(all_mu[,m], times=p)), covmat=Sigmas[, , m]), times=10000L)
-    #microbenchmark::microbenchmark(GaussianDensities2(obs=Y2, mean=matrix(rep(all_mu[,m], times=p), nrow=1), covmat=Sigmas[, , m]), times=100000L)
-
-    #microbenchmark::microbenchmark(mvnfast::dmvn(X=Y2, mu=rep(all_mu[,m], p), sigma=Sigmas[, , m], log=TRUE, ncores=1, isChol=FALSE), times=10000L)
-    #microbenchmark::microbenchmark(tmpfun(X=Y2, mu=rep(all_mu[,m], p), Sigma=Sigmas[, , m]), times=500L)
-
+      #obs_minus_mean <- Y2 - rep(all_mu[,m], times=p)
+      #const_term <- -0.5*d*log(2*pi) - 0.5*log(det(Sigmas))
+      #inv_cholcovmat = solve(chol(Sigmas[, , m]))
+      #log_mvdvalues <- vapply(1:M, function(m) -0.5*d*log(2*pi) - 0.5*log(det(Sigmas[, , m])) - 0.5*solve(chol(Sigmas[, , m])), numeric(T_obs))
+      # log_mvdvalues_test0 <- matrix(nrow=T_obs, ncol=M)
+      # for(m in 1:M) {
+      #   obs_minus_mean <- t(t(Y2) - rep(all_mu[,m], times=p))
+      #   for(i1 in 1:T_obs) {
+      #     log_mvdvalues_test0[i1, m] <-  -0.5*d*log(2*pi) - 0.5*log(det(Sigmas[, , m])) - 0.5*t(obs_minus_mean[i1,])%*%solve(Sigmas[, , m])%*%obs_minus_mean[i1,]
+      #   }
+      # }
+      # Calculate the dp-dimensional multinormal densities in logarithm with the package mvnfast:
+      # i:th row for index i-1 etc, m:th column for m:th component.
+      # We calculate in logarithm because the non-log values may be too close to zero for machine accuracy (if they are too close to zero
+      # for all regimes and computer handles them as zero, we would divide by zero when calculating the transition weights).
+      # Cholesky decomposition is taken in R to avoid unnecessary warnings that caused by numerical error
+      # that makes the matrices to be not exactly symmetric but only up to numerical tolerance.
+      log_mvdvalues <- -0.5*d*log(2*pi) + vapply(1:M, function(m) Gaussian_densities_const_Cpp(obs=Y2,
+                                                                                               mean=matrix(rep(all_mu[,m], times=p), nrow=1),
+                                                                                               cholcovmat=chol(Sigmas[, , m])),
+                                                 numeric(T_obs)) # [T_obs, M] removes the period T+1 weights
+    }
 
     # Calculate the transition weights based on the log-multivariate density values
     if(!is.matrix(log_mvdvalues)) log_mvdvalues <- t(as.matrix(log_mvdvalues)) # Only one time point but multiple regimes
