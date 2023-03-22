@@ -25,11 +25,9 @@
 #'     \item{\code{$sample}}{a size (\code{nsim}\eqn{ x d x }\code{ntimes}) array containing the samples: the dimension \code{[t, , ]} is
 #'      the time index, the dimension \code{[, d, ]} indicates the marginal time series, and the dimension \code{[, , i]} indicates
 #'      the i:th set of simulations.}
-#'     \item{\code{$component}}{a size (\code{nsim}\eqn{ x }\code{ntimes}) matrix containing the information from which mixture component each
-#'      value was generated from.}
-#'     \item{\code{$transition_weights}}{a size (\code{nsim}\eqn{ x M x }\code{ntimes}) array containing the mixing weights corresponding to the
-#'      sample: the dimension \code{[t, , ]} is the time index, the dimension \code{[, m, ]} indicates the regime, and the dimension
-#'      \code{[, , i]} indicates the i:th set of simulations.}
+#'     \item{\code{$transition_weights}}{a size (\code{nsim}\eqn{ x M x }\code{ntimes}) array containing the transition weights
+#'      corresponding to the sample: the dimension \code{[t, , ]} is the time index, the dimension \code{[, m, ]} indicates the regime,
+#'      and the dimension \code{[, , i]} indicates the i:th set of simulations.}
 #'   }
 #' @seealso \code{\link{fitSTVAR}}, \code{\link{STVAR}}, \code{\link{predict.stvar}}
 #' @inherit loglikelihood references
@@ -41,6 +39,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
                             ntimes=1, drop=TRUE) {
   # Checks etc
   if(!is.null(seed)) set.seed(seed)
+  epsilon <- round(log(.Machine$double.xmin) + 10)
   stvar <- object
   p <- stvar$model$p
   M <- stvar$model$M
@@ -122,29 +121,68 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   # Initialize data structures
   sample <- array(dim=c(nsim, d, ntimes))
   component <- matrix(nrow=nsim, ncol=ntimes)
-  mixing_weights <- array(dim=c(nsim, M, ntimes))
-
-  # B_t, alpha_mt, mu_mt etc, needs to be calculated in the iterations
-  # Create functons here to avoid repetition
+  transition_weights <- array(dim=c(nsim, M, ntimes))
 
   # Some functions to be used
   if(weight_function == "relative_dens") {
     # Get log multivariate normal densities for calculating the transition weights
-    get_logmvdvalues <- function(Y) {
+    get_logmvdvalues <- function(Y, i1) {
       vapply(1:M,
              function(m) -0.5*d*p*log(2*pi) - 0.5*log(det_Sigmas[m]) - 0.5*(crossprod(Y[i1,] - rep(all_mu[, m], p),
                                                                                       inv_Sigmas[, , m])%*%(Y[i1,] - rep(all_mu[, m], p))),
              numeric(1))
-    }
-    # ONKO TÄMÄ EDES NOPEAMPAA KUIN ANTAA VAIN CHOL_SIGMAS? LUULTAVASTI
+    } # Returns M x 1 vector; transformed into a matrix in get_alpha_mt
   }
 
+  # Run through the time periods and repetitions
   for(j1 in 1:seq_len(ntimes)) {
     for(i1 in seq_len(nsim)) {
-      # TEHTÄVÄ: tee get_alpha_mt-versio, jossa voi antaa log_mvdvalues valmiina ja se laskee sen perusteella?
-      # Vai pitääkö matprodit laskea erikseen joka iteraatiolle?
-      # OLISI HYVÄ JOS OLISI YKSIKKÖTESTIT SEN TESTAAMISEEN
+      # Calculate transition weights
+      if(weight_function == "relative_dens") {
+        log_mvdvalues <- get_logmvdvalues(Y=Y, i1=i1)
+        alpha_mt <- get_alpha_mt(M=M, log_mvdvalues=log_mvdvalues, epsilon=epsilon)
+      } else {
+        stop("Only relative_dens weight function is implemented to simulate.stvar")
+      }
+      transition_weights[i1, , j1] <- alpha_mt
 
+      # Calculate conditional mean
+      mu_yt <- get_mu_yt_Cpp(obs=Y[,i1], all_phi0=all_phi0, all_A=all_A, alpha_mt=alpha_mt)
+
+      # Calculate conditional covariance matrix
+      Omega_yt <- matrix(rowSums(vapply(1:M, function(m) alpha_mt[, m]*as.vector(all_Omegas[, , m]),
+                                        numeric(d*d))), nrow=d, ncol=d)
+      # Calculate B_t
+      if(identification == "reduced_form") {
+        B_t <- get_symmetric_sqrt(Omega_yt)
+      } else {
+        stop("Structural models are not yet implemented to simulate.stvar")
+      }
+
+      # Draw the structural error
+      if(cond_dist == "Gaussian") {
+        e_t <- rnorm(d)
+      } else {
+        stop("Other than Gaussian models are not yet implemented to simulat.stvar")
+      }
+
+      # Calculate the current observation
+      sample[i1, , j1] <- mu_yt + B_t%*%e_t
+
+      # Update storage matrix Y (overwrites when ntimes > 1)
+      if(p == 1) {
+        Y[i1 + 1,] <- sample[i1, , j1]
+      } else {
+        Y[i1 + 1,] <- c(sample[i1, , j1], Y[i1, 1:(d*p - d)])
+      }
     }
   }
+
+  if(ntimes == 1 & drop) {
+    sample <- matrix(sample, nrow=nsim, ncol=d)
+    transition_weights <- matrix(transition_weights, nrow=nsim, ncol=M)
+  }
+
+  list(sample=sample,
+       transition_weights=transition_weights)
 }

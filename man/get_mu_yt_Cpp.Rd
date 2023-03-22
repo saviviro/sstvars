@@ -8,7 +8,7 @@ get_mu_yt_Cpp(obs, all_phi0, all_A, alpha_mt)
 }
 \arguments{
 \item{obs}{a \eqn{(T \times dp)} matrix such that the i:th row contains the vector
-\eqn{(y_{i-1}',...,y_{i-p}')} \eqn{((dp)x1)}, where \eqn{y_{i}=(y_{1i},...,y_{di})}
+\eqn{(y_{i-1},...,y_{i-p})} \eqn{((dp)x1)}, where \eqn{y_{i}=(y_{1i},...,y_{di})}
 \eqn{(dx1)}. That is, the initial values are included but the last observations not.}
 
 \item{all_phi0}{a \eqn{(d \times M)} matrix such that the m:th column contains the

@@ -47,11 +47,9 @@ If \code{drop==TRUE} and \code{ntimes==1} (default): \code{$sample}, \code{$comp
     \item{\code{$sample}}{a size (\code{nsim}\eqn{ x d x }\code{ntimes}) array containing the samples: the dimension \code{[t, , ]} is
      the time index, the dimension \code{[, d, ]} indicates the marginal time series, and the dimension \code{[, , i]} indicates
      the i:th set of simulations.}
-    \item{\code{$component}}{a size (\code{nsim}\eqn{ x }\code{ntimes}) matrix containing the information from which mixture component each
-     value was generated from.}
-    \item{\code{$transition_weights}}{a size (\code{nsim}\eqn{ x M x }\code{ntimes}) array containing the mixing weights corresponding to the
-     sample: the dimension \code{[t, , ]} is the time index, the dimension \code{[, m, ]} indicates the regime, and the dimension
-     \code{[, , i]} indicates the i:th set of simulations.}
+    \item{\code{$transition_weights}}{a size (\code{nsim}\eqn{ x M x }\code{ntimes}) array containing the transition weights
+     corresponding to the sample: the dimension \code{[t, , ]} is the time index, the dimension \code{[, m, ]} indicates the regime,
+     and the dimension \code{[, , i]} indicates the i:th set of simulations.}
   }
 }
 \description{

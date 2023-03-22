@@ -125,7 +125,7 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   # Calculate unconditional regime-specific expected values (column per component) or phi0-parameters if using mean-parametrization
   Id <- diag(nrow=d)
   if(parametrization == "intercept") {
-    all_mu <- vapply(1:M, function(m) solve(Id - rowSums(all_A[, , , m, drop=FALSE], dims=2), all_phi0[,m]), numeric(d)) # rowSums: sum over dims+1=3
+    all_mu <- vapply(1:M, function(m) solve(Id - rowSums(all_A[, , , m, drop=FALSE], dims=2), all_phi0[,m]), numeric(d)) # sum over dims+1=3
   } else {
     all_phi0 <- vapply(1:M, function(m) (Id - rowSums(all_A[, , , m, drop=FALSE], dims=2))%*%all_mu[,m], numeric(d))
   }
@@ -203,7 +203,8 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
 #' @param all_mu an \eqn{(d \times M)} matrix containing the unconditional regime-specific means
 #' @param epsilon the smallest number such that its exponent is wont classified as numerically zero
 #'   (around \code{-698} is used).
-#' @param log_mvdvalues FILL IN !!!!!!
+#' @param log_mvdvalues a \eqn{T x M} matrix containing log multivariate normal densities (can be used with
+#'   relative dens weight function only)
 #' @details Note that we index the time series as \eqn{-p+1,...,0,1,...,T}.
 #' @return Returns the mixing weights a \eqn{(T x M)} matrix, so that the t:th row is for the time point t
 #'   and m:th column is for the regime m.
@@ -212,9 +213,19 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
 
 get_alpha_mt <- function(data, Y2, p, M, d, weight_function, all_A, all_boldA, all_Omegas, weightpars, all_mu, epsilon,
                          log_mvdvalues=NULL) {
-  T_obs <- nrow(data) - p
-  if(M == 1) {
-    return(as.matrix(rep(1, times=T_obs)))
+  if(is.null(log_mvdvalues)) {
+    T_obs <- nrow(data) - p
+    if(M == 1) {
+      return(as.matrix(rep(1, times=T_obs)))
+    }
+  } else {
+    if(M == 1) {
+      if(!is.matrix(log_mvdvalues)) { # Only one observation
+        return(as.matrix(1)) # Only one observation and one regime
+      } else {
+        return(as.matrix(rep(1, times=nrow(log_mvdvalues)))) # Multiple observations but only one regime
+      }
+    }
   }
   if(weight_function == "relative_dens") {
     if(is.null(log_mvdvalues)) {
@@ -229,7 +240,8 @@ get_alpha_mt <- function(data, Y2, p, M, d, weight_function, all_A, all_boldA, a
       # for(m in 1:M) {
       #   obs_minus_mean <- t(t(Y2) - rep(all_mu[,m], times=p))
       #   for(i1 in 1:T_obs) {
-      #     log_mvdvalues_test0[i1, m] <-  -0.5*d*log(2*pi) - 0.5*log(det(Sigmas[, , m])) - 0.5*t(obs_minus_mean[i1,])%*%solve(Sigmas[, , m])%*%obs_minus_mean[i1,]
+      #     log_mvdvalues_test0[i1, m] <-  -0.5*d*log(2*pi) - 0.5*log(det(Sigmas[, , m])) -
+      #       0.5*t(obs_minus_mean[i1,])%*%solve(Sigmas[, , m])%*%obs_minus_mean[i1,]
       #   }
       # }
       # Calculate the dp-dimensional multinormal densities in logarithm with the package mvnfast:
