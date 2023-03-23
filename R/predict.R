@@ -19,7 +19,24 @@
 #' @seealso \code{\link{simulate.stvar}}
 #' @inherit simulate.stvar references
 #' @examples
-#' # FILL IN EXAMPLES
+#'  # p=2, M=2, d=2, Gaussian relative dens weights
+#'  theta_222relg <- c(0.356914, 0.107436, 0.356386, 0.08633, 0.13996, 0.035172,
+#'    -0.164575, 0.386816, 0.451675, 0.013086, 0.227882, 0.336084, 0.239257, 0.024173,
+#'    -0.021209, 0.707502, 0.063322, 0.027287, 0.009182, 0.197066, 0.205831, 0.005157,
+#'    0.025877, 1.092094, -0.009327, 0.116449, 0.592446)
+#'  mod222relg <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222relg,
+#'    weight_function="relative_dens")
+#'
+#'  # Predict 10 steps ahead, point forecast based on the conditional
+#'  # mean and 90% prediction intervals; prediction based on 100 sample paths:
+#'  pred1 <- predict(mod222relg, nsteps=10, nsim=100, pi=0.9, pred_type="mean")
+#'  pred1 # plot(pred1)
+#'
+#'  # Predict 7 steps ahead, point forecast based on median and  90%, 80%,
+#'  # and 70% prediction intervals; prediction based on 80 sample paths:
+#'  pred2 <- predict(mod222relg, nsteps=7, nsim=80, pi=c(0.9, 0.8, 0.7),
+#'   pred_type="median")
+#'  pred2 # plot(pred2)
 #' @export
 
 predict.stvar <- function(object, ..., nsteps, nsim=1000, pi=c(0.95, 0.80), pred_type=c("mean", "median")) {
