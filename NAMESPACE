@@ -2,6 +2,7 @@
 
 S3method(logLik,stvar)
 S3method(plot,stvar)
+S3method(predict,stvar)
 S3method(print,stvar)
 S3method(print,stvarsum)
 S3method(residuals,stvar)
