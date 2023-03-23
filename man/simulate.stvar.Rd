@@ -59,7 +59,24 @@ If \code{drop==TRUE} and \code{ntimes==1} (default): \code{$sample}, \code{$comp
 The argument \code{ntimes} is intended for forecasting, which is used by the predict method (see \code{?predict.stvar}).
 }
 \examples{
- # FILL IN EXAMPLES
+ # p=2, M=2, d=2, Gaussian relative dens weights
+ theta_222relg <- c(0.356914, 0.107436, 0.356386, 0.08633, 0.13996, 0.035172,
+   -0.164575, 0.386816, 0.451675, 0.013086, 0.227882, 0.336084, 0.239257, 0.024173,
+   -0.021209, 0.707502, 0.063322, 0.027287, 0.009182, 0.197066, 0.205831, 0.005157,
+   0.025877, 1.092094, -0.009327, 0.116449, 0.592446)
+ mod222relg <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222relg,
+   weight_function="relative_dens")
+
+ # Simulate T=200 observations using initial values:
+ init_vals <- matrix(c(0.5, 1.0, 0.5, 1), nrow=2)
+ sim1 <- simulate(mod222relg, nsim=200, seed=1, init_values=init_vals)
+ plot.ts(sim1$sample) # Sample
+ plot.ts(sim1$transition_weights) # Transition weights
+
+ # Simulate T=100 observations, with initial values from the 1st regime:
+ sim2 <- simulate(mod222relg, nsim=200, seed=1, init_regime=1)
+ plot.ts(sim2$sample) # Sample
+ plot.ts(sim2$transition_weights) # Transition weights
 }
 \references{
 \itemize{
