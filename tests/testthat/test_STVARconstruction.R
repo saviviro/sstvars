@@ -15,6 +15,6 @@ theta_222relg <- c(0.356914, 0.107436, 0.356386, 0.08633, 0.13996, 0.035172, -0.
 
 
 test_that("NOTHING works correctly", {
-  # Relative_dens Gausssian STVAR
+  # Relative_dens Gaussian STVAR
   expect_true(TRUE)
 })
