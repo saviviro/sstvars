@@ -12,9 +12,9 @@
 #' @return Returns a class '\code{stvarpred}' object containing, among the specifications,...
 #'  \describe{
 #'    \item{$pred}{Point forecasts}
-#'    \item{$pred_int}{Prediction intervals, as \code{[, , d]}.}
+#'    \item{$pred_ints}{Prediction intervals, as \code{[, , d]}.}
 #'    \item{$trans_pred}{Point forecasts for the transition weights}
-#'    \item{$trans_pred_int}{Individual prediction intervals for transition weights, as \code{[, , m]}, m=1,..,M.}
+#'    \item{$trans_pred_ints}{Individual prediction intervals for transition weights, as \code{[, , m]}, m=1,..,M.}
 #'  }
 #' @seealso \code{\link{simulate.stvar}}
 #' @inherit simulate.stvar references
@@ -28,10 +28,10 @@ predict.stvar <- function(object, ..., nsteps, nsim=1000, pi=c(0.95, 0.80), pred
   stopifnot(all(pi > 0 & pi < 1))
   dat <- stvar$data
   pred_type <- match.arg(pred_type)
-  if(!all_pos_ints(nsim, nsteps)) stop("nsim and n_ahaed should be positive integers")
+  if(!all_pos_ints(c(nsim, nsteps))) stop("nsim and n_ahaed should be positive integers")
 
   # Simulations
-  simulations <- simulate(stvar, nsim=nsteps, init_values=dat, ntimes=nsim)
+  simulations <- simulate(stvar, nsim=nsteps, init_values=dat, ntimes=nsim, drop=FALSE)
   sample <- simulations$sample
   alpha_mt <- simulations$transition_weights
   colnames(sample) <- colnames(dat)
@@ -57,12 +57,15 @@ predict.stvar <- function(object, ..., nsteps, nsim=1000, pi=c(0.95, 0.80), pred
   upper <- rev(1 - lower)
   q_tocalc <- c(lower, upper)
   pred_ints <- dim3_quantiles(sample, q_tocalc)
-  mix_pred_ints <- dim3_quantiles(alpha_mt, q_tocalc)
+  trans_pred_ints <- dim3_quantiles(alpha_mt, q_tocalc)
+  pred_ints <- aperm(pred_ints, perm=c(2, 1, 3))
+  trans_pred_ints <- aperm(trans_pred_ints, perm=c(2, 1, 3))
+  colnames(pred_ints) <- colnames(trans_pred_ints) <- q_tocalc
 
   # Return the results
   structure(list(stvar=stvar,
                  pred=pred,
-                 pred_int=pred_ints,
+                 pred_ints=pred_ints,
                  trans_pred=trans_pred,
                  trans_pred_ints=trans_pred_ints,
                  nsteps=nsteps,

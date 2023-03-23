@@ -148,14 +148,14 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
     # Get log multivariate normal densities for calculating the transition weights
     get_logmvdvalues <- function(Y, i1) {
       vapply(1:M,
-             function(m) -0.5*d*p*log(2*pi) - 0.5*log(det_Sigmas[m]) - 0.5*(crossprod(Y[i1,] - rep(all_mu[, m], p),
+             function(m) -0.5*d*p*log(2*base::pi) - 0.5*log(det_Sigmas[m]) - 0.5*(crossprod(Y[i1,] - rep(all_mu[, m], p),
                                                                                       inv_Sigmas[, , m])%*%(Y[i1,] - rep(all_mu[, m], p))),
              numeric(1))
     } # Returns M x 1 vector; transformed into a matrix in get_alpha_mt
   }
 
   # Run through the time periods and repetitions
-  for(j1 in 1:seq_len(ntimes)) {
+  for(j1 in seq_len(ntimes)) {
     for(i1 in seq_len(nsim)) {
       # Calculate transition weights
       if(weight_function == "relative_dens") {

@@ -30,9 +30,9 @@
 Returns a class '\code{stvarpred}' object containing, among the specifications,...
  \describe{
    \item{$pred}{Point forecasts}
-   \item{$pred_int}{Prediction intervals, as \code{[, , d]}.}
+   \item{$pred_ints}{Prediction intervals, as \code{[, , d]}.}
    \item{$trans_pred}{Point forecasts for the transition weights}
-   \item{$trans_pred_int}{Individual prediction intervals for transition weights, as \code{[, , m]}, m=1,..,M.}
+   \item{$trans_pred_ints}{Individual prediction intervals for transition weights, as \code{[, , m]}, m=1,..,M.}
  }
 }
 \description{

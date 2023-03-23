@@ -42,11 +42,15 @@ get_omega_eigens <- function(stvar) {
   M <- stvar$model$M
   d <- stvar$model$d
   params <- stvar$params
+  identification <- stvar$model$identification
+  AR_constraints <- stvar$model$AR_constraints
+  mean_constraints <- stvar$model$mean_constraints
+  B_constraints <- stvar$model$B_constraints
   # REFORM CONSTRAINED PARS
-  if(!is.null(stvar$model$AR_constraints) || !is.null(stvar$model$mean_constraints)) {
+  if(!is.null(stvar$model$AR_constraints) || !is.null(stvar$model$mean_constraints) || !is.null(B_constraints)) {
     stop("Constrained models are not yet implemented to get_omega_eigens")
   }
-  if(stvar$model$identification != "reduced_form") {
+  if(identification != "reduced_form") {
     stop("Structural models not yet implemented to get_omega_eigens")
   }
   get_omega_eigens_par(p=p, M=M, d=d, params=params, identification=identification,
