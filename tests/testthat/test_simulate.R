@@ -1,4 +1,4 @@
-context("STVARconstruction")
+context("simulate.stvar")
 library(sstvars)
 
 # p=1, M=1, d=2
@@ -23,11 +23,29 @@ theta_123relg <- c(0.10741, 0.13813, -0.12092, 3.48957, 0.60615, 0.45646, 0.8722
                    0.05544, 0.00212, 0.12708, 0.78618, 0.00922, 0.42627, 0.23765, 0.25386, 3.40834, 0.77357)
 mod123relg <- STVAR(data=usamone, p=1, M=2, params=theta_123relg, weight_function="relative_dens")
 
+s112 <- simulate(mod112relg, nsim=1, seed=1, init_regime=1)
+s112_2 <- simulate(mod112relg, nsim=2, seed=1, init_regime=1)
+s122 <- simulate(mod122relg, nsim=5, seed=2, init_values=gdpdef)
+s222 <- simulate(mod222relg, nsim=3, seed=3, init_regime=2)
+s123 <- simulate(mod123relg, nsim=3, seed=4, init_regime=1)
+s123_2 <- simulate(mod123relg, nsim=1, seed=5, init_values=usamone)
 
-test_that("STVAR works correctly", {
+
+test_that("simulate.stvar works correctly", {
   # Relative_dens Gaussian STVAR
-  expect_equal(mod112relg$params, theta_112relg)
-  expect_equal(mod122relg$params, theta_122relg)
-  expect_equal(mod222relg$params, theta_222relg)
-  expect_equal(mod123relg$params, theta_123relg)
+  expect_equal(s112$sample[1,], c(-0.07206511, 1.343205), tol=1e-4)
+  expect_equal(s112$transition_weights, as.matrix(1), tol=1e-4)
+  expect_equal(s112_2$sample[1,], c(-0.07206511, 1.343205), tol=1e-4)
+  expect_equal(s112_2$sample[2,], c(0.6932277, 1.0562789), tol=1e-4)
+  expect_equal(s112_2$sample[2,], c(0.6932277, 1.0562789), tol=1e-4)
+  expect_equal(s112_2$transition_weights, as.matrix(c(1, 1)), tol=1e-4)
+  expect_equal(s122$sample[5,], c(2.1049174, 0.4326244), tol=1e-4)
+  expect_equal(s122$transition_weights[5,], c(0.94892269, 0.05107731), tol=1e-4)
+  expect_equal(s222$sample[3,], c(0.1541768, 0.8947292), tol=1e-4)
+  expect_equal(s222$transition_weights[1,], c(0.07983494, 0.92016506), tol=1e-4)
+  expect_equal(s123$sample[3,], c(1.346929, 0.875446, 5.316535), tol=1e-4)
+  expect_equal(s123$transition_weights[3,], c(0.98754515, 0.01245485), tol=1e-4)
+  expect_equal(s123_2$sample[1,], c(1.684557, 2.126412, -2.721774), tol=1e-4)
+  expect_equal(s123_2$transition_weights[1,], c(0.0001666309, 0.9998333691), tol=1e-4)
 })
+

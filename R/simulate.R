@@ -76,12 +76,15 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   params <- stvar$params
   ## REFORM CONSTRAINED PARS
   if(stvar$model$parametrization == "mean") {
-    params <- change_parametrization(p=p, M=M, d=d, param=params, AR_onstraints=NULL,
+    params <- change_parametrization(p=p, M=M, d=d, params=params, AR_onstraints=NULL,
                                      mean_constraints=NULL, change_to="intercept")
   }
-  all_mu <- get_regime_means(stvar)
+  all_mu <- get_regime_means(p=p, M=M, d=d, params=params, weight_function=weight_function,
+                             cond_dist=cond_dist, parametrization="intercept", identification=identification,
+                             AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL)
   all_phi0 <- pick_phi0(M=M, d=d, params=params)
   all_A <- pick_allA(p=p, M=M, d=d, params=params)
+  all_A2 <- array(all_A, dim=c(d, d*p, M)) # cbind coefficient matrices of each component: m:th component is obtained at [, , m]
   all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params) # Note that structural models not implemented here
   all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
   weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist)
@@ -140,21 +143,21 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
       # Calculate transition weights
       if(weight_function == "relative_dens") {
         log_mvdvalues <- get_logmvdvalues(Y=Y, i1=i1)
-        alpha_mt <- get_alpha_mt(M=M, log_mvdvalues=log_mvdvalues, epsilon=epsilon)
+        alpha_mt <- get_alpha_mt(M=M, weight_function=weight_function, weightpars=weightpars, log_mvdvalues=log_mvdvalues, epsilon=epsilon)
       } else {
         stop("Only relative_dens weight function is implemented to simulate.stvar")
       }
       transition_weights[i1, , j1] <- alpha_mt
 
       # Calculate conditional mean
-      mu_yt <- get_mu_yt_Cpp(obs=Y[,i1], all_phi0=all_phi0, all_A=all_A, alpha_mt=alpha_mt)
+      mu_yt <- get_mu_yt_Cpp(obs=matrix(Y[i1,], nrow=1), all_phi0=all_phi0, all_A=all_A2, alpha_mt=alpha_mt)
 
       # Calculate conditional covariance matrix
       Omega_yt <- matrix(rowSums(vapply(1:M, function(m) alpha_mt[, m]*as.vector(all_Omegas[, , m]),
                                         numeric(d*d))), nrow=d, ncol=d)
       # Calculate B_t
       if(identification == "reduced_form") {
-        B_t <- get_symmetric_sqrt(Omega_yt)
+        B_t <- matrix(get_symmetric_sqrt(Omega_yt), nrow=d, ncol=d)
       } else {
         stop("Structural models are not yet implemented to simulate.stvar")
       }
@@ -167,7 +170,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
       }
 
       # Calculate the current observation
-      sample[i1, , j1] <- mu_yt + B_t%*%e_t
+      sample[i1, , j1] <- t(mu_yt) + B_t%*%e_t
 
       # Update storage matrix Y (overwrites when ntimes > 1)
       if(p == 1) {
