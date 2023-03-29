@@ -57,8 +57,16 @@
 #' \donttest{
 #' ## These are long running examples that use parallel computing!
 #' # Running all the below examples will take approximately FILL IN HOW MANY minutes.
+#' # SET SEEDS/ROUNDS
 #'
-#' # FILL IN
+#' # p=3, M=2, d=2 relative_dens Gaussian STVAR
+#' fit32 <- fitSTVAR(gdpdef, p=3, M=2, nrounds=20, seeds=1:20)
+#' fit32
+#'
+#' # # p=3, M=2, d=3
+#' # fit32 <- fitSTVAR(usamone, p=3, M=2, nrounds=20, seeds=61:80, use_parallel=TRUE)
+#' testi32 <- fitSTVAR(usamone, p=3, M=2, nrounds=6, seeds=c(11, 12, 13, 14, 15, 64), use_parallel=FALSE)
+#' # seed=13 antaa oudon parhaan estimaatin, seed=64 antaa parhaan järkevän estimaatin, mutta tw-parametria ei oltu suodatettu
 #' }
 #' @export
 
@@ -206,23 +214,30 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
     for(i1 in 1:length(all_estimates)) {
        which_round <- ord_by_loks[i1] # Est round with i1:th largest loglik
        pars <- all_estimates[[which_round]]
-       Omega_eigens <- get_omega_eigens_par(p=p, M=M, d=d, params=params, identification="reduced_form",
+       Omega_eigens <- get_omega_eigens_par(p=p, M=M, d=d, params=pars, identification="reduced_form",
                                             AR_constraints=AR_constraints, mean_constraints=mean_constraints)
-       Omegas_ok <- any(Omega_eigens < 0.002)
+       Omegas_ok <- !any(Omega_eigens < 0.002)
+       if(weight_function == "relative_dens") {
+         alphas <- pick_weightpars(p=p, M=M, d=d, params=pars, weight_function=weight_function, cond_dist=cond_dist)
+         weightpars_ok <- !any(alphas < 0.01)
+       } else {
+         weightpars_ok <- TRUE
+       }
+
        tweights <- loglikelihood(data=data, p=p, M=M, params=pars, weight_function=weight_function,
                                  cond_dist=cond_dist, parametrization=parametrization,
                                  identification="reduced_form", AR_constraints=AR_constraints,
                                  mean_constraints=mean_constraints, B_constraints=NULL,
                                  to_return="tw", check_params=TRUE, minval=matrix(0, nrow=n_obs-p, ncol=M))
-       tweights_ok <- !any(vapply(1:M, function(i1) sum(tweights[,i1] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
-       if(Omegas_ok && tweights_ok) {
-         which_best_fit <- i1 # The estimation round of the appropriate estimate with the largest loglik
+       tweights_ok <- !any(vapply(1:M, function(m) sum(tweights[,m] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
+       if(Omegas_ok && tweights_ok && weightpars_ok) {
+         which_best_fit <- which_round # The estimation round of the appropriate estimate with the largest loglik
          break
        }
        if(i1 == length(all_estimates)) {
          message("No 'appropriate' estimates were found!
                  Check that all the variables are scaled to vary in similar magninutes, also not very small or large magnitudes.
-                 Consider more running estimation rounds or study the obtained estimates one-by-one with the function alt_stvar.")
+                 Consider running more estimation rounds or study the obtained estimates one-by-one with the function alt_stvar.")
          if(M > 2) {
            message("Consider also using smaller M. Too large M leads to identification problems.")
          }
