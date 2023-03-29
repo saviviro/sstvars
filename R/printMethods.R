@@ -202,3 +202,40 @@ print.stvarsum <- function(x, ..., digits) {
   print.stvar(stvarsum$stvar, ..., digits=digits, summary_print=TRUE)
   invisible(stvarsum)
 }
+
+
+
+#' @describeIn predict.stvar print method
+#'
+#' @param x object of class \code{'stvarpred'}
+#' @param digits the number of decimals to print
+#' @param ... currently not used.
+#' @export
+
+print.stvarpred <- function(x, ..., digits=2) {
+  stvarpred <- x
+  stopifnot(digits >= 0 & digits%%1 == 0)
+  format_value <- format_valuef(digits)
+
+  cat(paste0("Point forecast by ", stvarpred$pred_type, ", ",
+             "two-sided prediction intervals with levels ", paste(stvarpred$pi, collapse=", "), "."), "\n")
+  cat(paste0("Forecast ", stvarpred$nsteps, " steps ahead, based on ", stvarpred$nsim, " simulations.\n"))
+
+  cat("\n")
+  q <- stvarpred$q
+  pred_ints <- stvarpred$pred_ints
+  pred <- stvarpred$pred
+  pred_type <- stvarpred$pred_type
+  series_names <- colnames(stvarpred$pred)
+  for(i1 in seq_len(stvarpred$stvar$model$d)) {
+    cat(paste0(series_names[i1], ":"), "\n")
+    df <- as.data.frame(lapply(1:length(stvarpred$q), function(i2) format_value(pred_ints[, i2, i1])))
+    names(df) <- q
+    df[, pred_type] <- format_value(pred[,i1])
+    new_order <- as.character(c(q[1:(length(q)/2)], pred_type, q[(length(q)/2 + 1):length(q)]))
+    print(df[, new_order])
+    cat("\n")
+  }
+  cat("Point forecasts and prediction intervals for transition weights can be obtained with $trans_pred and $trans_pred_ints, respectively.\n")
+  invisible(stvarpred)
+}
