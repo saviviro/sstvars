@@ -32,3 +32,44 @@ test_that("get_IC works correctly", {
   expect_equal(get_IC(loglik=-1013, npars=23, T_obs=240)$HQIC, 8.767734, tolerance=1e-3)
   expect_equal(get_IC(loglik=-1013, npars=23, T_obs=240)$BIC, 8.966895, tolerance=1e-3)
 })
+
+
+# p=1, M=2, d=2
+phi10_122 <- c(0.55, 0.11)
+A11_122 <- matrix(c(0.34, 0.05, -0.01, 0.72), nrow=2, byrow=FALSE)
+Omega1_122 <- matrix(c(0.58, 0.01, 0.01, 0.06), nrow=2, byrow=FALSE)
+
+phi20_122 <- c(0.17, 0.25)
+A21_122 <- A11_122
+Omega2_122 <- matrix(c(0.50, -0.01, -0.01, 0.20), nrow=2, byrow=FALSE)
+
+# p=2, M=2, d=2
+phi10_222 <- c(0.36, 0.12)
+A11_222 <- matrix(c(0.22, 0.06, -0.15, 0.39), nrow=2, byrow=FALSE)
+A12_222 <- matrix(c(0.41, -0.01, 0.08, 0.3), nrow=2, byrow=FALSE)
+Omega1_222 <- matrix(c(0.21, 0.01, 0.01, 0.03), nrow=2, byrow=FALSE)
+
+phi20_222 <- c(0.48, 0.07)
+A21_222 <- matrix(c(0.22, 0.02, -0.12, 0.72), nrow=2, byrow=FALSE)
+A22_222 <- matrix(c(0.09, 0.03, 0.04, 0.19), nrow=2, byrow=FALSE)
+Omega2_222 <- matrix(c(1.10, 0.01, 0.01, 0.11), nrow=2, byrow=FALSE)
+
+rpars122_1 <-c(phi20_122, vec(A21_122))
+rpars122_2 <-c(phi10_122, vec(A11_122))
+
+rpars122t_1 <- c(rpars122_1, 1001)
+rpars122t_2 <- c(rpars122_2, 1010)
+
+rpars332_1 <- c(phi10_122, vec(A11_122), vec(A11_122), vec(A11_122))
+rpars332_2 <- c(phi20_222, vec(A21_222), vec(A22_222), vec(A22_222))
+
+rpars332t_1 <- c(rpars332_1, 3)
+rpars332t_2 <- c(rpars332_2, 13)
+
+test_that("regime_distance works correctly", {
+  expect_equal(regime_distance(regime_pars1=rpars122_1, regime_pars2=rpars122_2), 0.4049691, tol=1e-4)
+  expect_equal(regime_distance(regime_pars1=rpars122t_1, regime_pars2=rpars122t_2), 0.4049701, tol=1e-4)
+  expect_equal(regime_distance(regime_pars1=rpars332_1, regime_pars2=rpars332_2), 0.8523497, tol=1e-4)
+  expect_equal(regime_distance(regime_pars1=rpars332t_1, regime_pars2=rpars332t_2), 0.8691375, tol=1e-4)
+})
+

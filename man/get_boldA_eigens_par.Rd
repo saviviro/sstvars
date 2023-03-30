@@ -28,17 +28,35 @@ where
   \item{\eqn{\alpha} contains the transition weights parameters}
   \item{\eqn{\nu > 2} is the degrees of freedom parameter that is included only if \code{cond_dist="Student"}.}
 }
+For models with...
 \describe{
-  \item{For models with \code{weight_function="relative_dens"}:}{\eqn{\alpha = (\alpha_1,...,\alpha_{M-1})}
+  \item{\code{weight_function="relative_dens"}:}{\eqn{\alpha = (\alpha_1,...,\alpha_{M-1})}
         \eqn{(M - 1 \times 1)}, where \eqn{\alpha_m} \eqn{(1\times 1), m=1,...,M-1} are the transition weight parameters.}
-  \item{For models with \code{weight_function="logit"}:}{\eqn{\alpha = (\gamma_1,...,\gamma_M)} \eqn{((M-1)k\times 1)},
+  \item{\code{weight_function="logit"}:}{\eqn{\alpha = (\gamma_1,...,\gamma_M)} \eqn{((M-1)k\times 1)},
         where \eqn{\gamma_m} \eqn{(k\times 1), m=1,...,M-1} contains the logit-regression coefficients of the \eqn{m}th regime.}
+  \item{AR_constraints:}{Replace \eqn{\varphi_1,...,\varphi_M} with \eqn{\psi} as described in the argument \code{AR_constraints}.}
+  \item{mean_constraints:}{Replace \eqn{\phi_{1,0},...,\phi_{M,0}} with \eqn{(\mu_{1},...,\mu_{g})} where
+        \eqn{\mu_i, \ (d\times 1)} is the mean parameter for group \eqn{i} and \eqn{g} is the number of groups.}
 }
 Above, \eqn{\phi_{m,0}} is the intercept parameter, \eqn{A_{m,i}} denotes the \eqn{i}th coefficient matrix of the \eqn{m}th
 mixture component, and \eqn{\Omega_{m}} denotes the error term covariance matrix of the \eqn{m}:th mixture component.
 If \code{parametrization=="mean"}, just replace each \eqn{\phi_{m,0}} with regimewise mean \eqn{\mu_{m}}.
 \eqn{vec()} is vectorization operator that stacks columns of a given matrix into a vector. \eqn{vech()} stacks columns
 of a given matrix from the principal diagonal downwards (including elements on the diagonal) into a vector.}
+
+\item{AR_constraints}{a size \eqn{(Mpd^2 x q)} constraint matrix \eqn{C} specifying general linear constraints
+to the autoregressive parameters. The constraints are of the form
+\eqn{(\varphi_{1},...,\varphi_{M}) = C\psi}, where \eqn{\varphi_{m} = (vec(A_{m,1}),...,vec(A_{m,p})) \ (pd^2 x 1),\ m=1,...,M},
+contains the coefficient matrices and \eqn{\psi} \eqn{(q x 1)} contains the related parameters.
+For example, to restrict the AR-parameters to be the identical across the regimes, set \eqn{C =}
+[\code{I:...:I}]' \eqn{(Mpd^2 x pd^2)} where \code{I = diag(p*d^2)}.}
+
+\item{mean_constraints}{Restrict the mean parameters of some regimes to be identical? Provide a list of numeric vectors
+such that each numeric vector contains the regimes that should share the common mean parameters. For instance, if
+\code{M=3}, the argument \code{list(1, 2:3)} restricts the mean parameters of the second and third regime to be
+identical but the first regime has freely estimated (unconditional) mean. Ignore or set to \code{NULL} if mean parameters
+should not be restricted to be the same among any regimes. \strong{This constraint is available only for mean parametrized models;
+that is, when \code{parametrization="mean"}.}}
 }
 \value{
 Returns a matrix with \eqn{d*p} rows and \eqn{M} columns - one column for each regime.

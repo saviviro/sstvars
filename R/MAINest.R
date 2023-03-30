@@ -62,11 +62,13 @@
 #' # p=3, M=2, d=2 relative_dens Gaussian STVAR
 #' fit32 <- fitSTVAR(gdpdef, p=3, M=2, nrounds=20, seeds=1:20)
 #' fit32
+#' summary(fit32)
+#' plot(fit32)
 #'
-#' # # p=3, M=2, d=3
-#' # fit32 <- fitSTVAR(usamone, p=3, M=2, nrounds=20, seeds=61:80, use_parallel=TRUE)
-#' testi32 <- fitSTVAR(usamone, p=3, M=2, nrounds=6, seeds=c(11, 12, 13, 14, 15, 64), use_parallel=FALSE)
-#' # seed=13 antaa oudon parhaan estimaatin, seed=64 antaa parhaan järkevän estimaatin, mutta tw-parametria ei oltu suodatettu
+#' # p=3, M=2, d=3
+#' f32 <- fitSTVAR(usamone, p=3, M=2, nrounds=20, seeds=61:80, use_parallel=TRUE)
+#' summary(f32)
+#' plot(f32)
 #' }
 #' @export
 

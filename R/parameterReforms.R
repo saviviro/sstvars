@@ -161,33 +161,105 @@ change_regime <- function(p, M, d, params, m, regime_pars) {
 }
 
 
-
-#' @title Calculate "distance" between two (scaled) regimes
-#'  \strong{\eqn{\upsilon_{m}}}\eqn{ = (\phi_{m,0},}\strong{\eqn{\phi_{m}}}\eqn{,\sigma_{m})}
+#' @title Reform constrained parameter vector into the "standard" form
 #'
-#' @description \code{regime_distance} calculates "distance" between two scaled regimes.
+#' @description \code{reform_constrained_pars} reforms constrained parameter vector
+#'   into the form that corresponds to unconstrained parameter vectors.
 #'
-#' @param regime_pars1 a length \eqn{pd^2+d+d(d+1)/2} vector
-#'   \strong{\eqn{\upsilon_{m}}}\eqn{ = (\phi_{m,0},}\strong{\eqn{\phi_{m}}}\eqn{,\sigma_{m})}.
-#' @param regime_pars2 a length \eqn{pd^2+d+d(d+1)/2} vector
-#'   \strong{\eqn{\upsilon_{m}}}\eqn{ = (\phi_{m,0},}\strong{\eqn{\phi_{m}}}\eqn{,\sigma_{m})}.
-#' @return Returns "distance" between \code{regime_pars1} and \code{regime_pars2}. Values are scaled
-#'   before calculating the "distance". Read the source code for more details.
+#' @inheritParams loglikelihood
+#' @param change_na change NA parameter values of constrained models to -9.999?
+#' @return Returns "regular model" parameter vector corresponding to the constraints.
 #' @section Warning:
 #'  No argument checks!
 #' @inherit in_paramspace references
 #' @keywords internal
 
-regime_distance <- function(regime_pars1, regime_pars2) {
-  dist_fun <- function(x) {
-    x <- abs(x)
-    if(x < 1) {
-      return(1)
-    } else {
-      return(10^ceiling(abs(log10(x))))
+reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative_dens", "logit"),
+                                    cond_dist=c("Gaussian", "Student"),
+                                    identification=c("reduced_form", "recursive", "heteroskedasticity", "custom", "other"),
+                                    AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
+                                    change_na=FALSE) {
+  weight_function <- match.arg(weight_function)
+
+  if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(B_constraints)) {
+    return(params)
+  }
+  if(!is.null(B_constraints)) {
+    stop("B_constraints are not yet implemented to reform_constrained_pars")
+  }
+
+  if(is.null(mean_constraints)) {
+    less_pars <- 0 # Number of parameters less compared to models without same mean constraints
+  } else {
+    g <- length(mean_constraints) # Number groups with the same mean parameters
+    less_pars <- d*(M - g) # Number of parameters less compared to models without same mean constraints
+  }
+
+  # Obtain the AR coefficients from the constraints
+  if(is.null(AR_constraints)) { # For structural model with constrained structural parameters but no AR constraints
+    q <- M*p*d^2
+    psi_expanded <- params[(d*M + 1 - less_pars):(d*M + d^2*p*M - less_pars)] # AR coefficients (without constraints)
+    psiNA <- FALSE
+  } else {
+    q <- ncol(AR_constraints)
+    psi <- params[(M*d + 1 - less_pars):(M*d + q - less_pars)]
+    if(change_na) {
+      if(anyNA(psi)) {
+        warning("Replaced some NA values with -9.999")
+        psiNA <- TRUE
+      } else {
+        psiNA <- FALSE
+      }
+      psi[is.na(psi)] <- -9.999
+    }
+    psi_expanded <- constraints%*%psi
+  }
+
+  # Obtain the mean parameters from the constrained parameter vector
+  if(is.null(mean_constraints)) {
+    all_phi0 <- matrix(params[1:(d*M)], nrow=d, ncol=M) # params[((m - 1)*d + 1):(m*d)]
+  } else { # mean_constraints employed
+    group_phi0 <- matrix(params[1:(d*g)], nrow=d, ncol=g) # Column for each group
+    all_phi0 <- matrix(NA, nrow=d, ncol=M) # Storage for all phi0 (=mean parameters in this case)
+    for(i1 in 1:g) {
+      all_phi0[,mean_constraints[[i1]]] <- group_phi0[,i1]
     }
   }
-  scales1 <- vapply(regime_pars1, dist_fun, numeric(1))
-  scales2 <- vapply(regime_pars2, dist_fun, numeric(1))
-  c(sqrt(crossprod(regime_pars1/scales1 - regime_pars2/scales2)))
+
+  # Obtain the covariance matrix parameters
+  if(identification == "reduced_form") {
+    covmatpars <- params[(d*M - less_pars + q + 1):(d*M - less_pars + q + M*d*(d + 1)/2)]
+   } else {
+    if(is.null(B_constraints)) {
+      # Somehting
+
+      # W <- structural_pars$W # Obtain the indices with zero constraints (the zeros don't exist in params)
+      # n_zeros <- sum(W == 0, na.rm=TRUE)
+      # new_W <- numeric(d^2)
+      # W_pars <- params[(d*M + q + 1 - less_pars):(d*M + q + d^2 - n_zeros - less_pars)]
+      # new_W[W != 0 | is.na(W)] <- W_pars
+    } else {
+      # Reform B_constraints
+    }
+    stop("Structural model are not yet implemented to reform_constraints_pars")
+   }
+  n_covmatspars <- lenght(covmatpars)
+
+  if(cond_dist == "Gaussian") {
+    distpars <- numeric(0)
+  } else { # cond_dist == Student
+    distpars <- params[length(params)]
+  }
+
+  if(weight_function == "relative_dens") {
+    weightpars <- params[(d*M - less_pars + q + n_covmatspars + 1):(d*M - less_pars + q + n_covmatspars + M - 1)]
+  } else if(weight_function == "logit") {
+    stop("Logit weight function is not yet implemented to reform_constraints_pars")
+  }
+
+  if(M == 1) {
+    return(c(all_phi0, psi_expanded, covmatpars, distpars))
+  } else {
+    return(c(all_phi0, psi_expanded, covmatpars, weightpars, distpars))
+  }
 }

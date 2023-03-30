@@ -74,13 +74,15 @@ Returns a class '\code{stvarpred}' object containing, among the specifications,.
  # Predict 10 steps ahead, point forecast based on the conditional
  # mean and 90\% prediction intervals; prediction based on 100 sample paths:
  pred1 <- predict(mod222relg, nsteps=10, nsim=100, pi=0.9, pred_type="mean")
- pred1 # plot(pred1)
+ pred1
+ plot(pred1)
 
  # Predict 7 steps ahead, point forecast based on median and  90\%, 80\%,
  # and 70\% prediction intervals; prediction based on 80 sample paths:
  pred2 <- predict(mod222relg, nsteps=7, nsim=80, pi=c(0.9, 0.8, 0.7),
   pred_type="median")
- pred2 # plot(pred2)
+ pred2
+ plot(pred2)
 }
 \references{
 \itemize{

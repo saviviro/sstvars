@@ -29,3 +29,35 @@ get_IC <- function(loglik, npars, T_obs) {
   BIC <- (-2*loglik + npars*log(T_obs))/T_obs
   data.frame(AIC=AIC, HQIC=HQIC, BIC=BIC)
 }
+
+
+
+#' @title Calculate "distance" between two (scaled) regimes
+#'  \strong{\eqn{\upsilon_{m}}}\eqn{ = (\phi_{m,0},}\strong{\eqn{\phi_{m}}}\eqn{,\sigma_{m})}
+#'
+#' @description \code{regime_distance} calculates "distance" between two scaled regimes.
+#'
+#' @param regime_pars1 a length \eqn{pd^2+d+d(d+1)/2} vector
+#'   \strong{\eqn{\upsilon_{m}}}\eqn{ = (\phi_{m,0},}\strong{\eqn{\phi_{m}}}\eqn{,\sigma_{m})}.
+#' @param regime_pars2 a length \eqn{pd^2+d+d(d+1)/2} vector
+#'   \strong{\eqn{\upsilon_{m}}}\eqn{ = (\phi_{m,0},}\strong{\eqn{\phi_{m}}}\eqn{,\sigma_{m})}.
+#' @return Returns "distance" between \code{regime_pars1} and \code{regime_pars2}. Values are scaled
+#'   before calculating the "distance". Read the source code for more details.
+#' @section Warning:
+#'  No argument checks!
+#' @inherit in_paramspace references
+#' @keywords internal
+
+regime_distance <- function(regime_pars1, regime_pars2) {
+  dist_fun <- function(x) {
+    x <- abs(x)
+    if(x < 1) {
+      return(1)
+    } else {
+      return(10^ceiling(abs(log10(x))))
+    }
+  }
+  scales1 <- vapply(regime_pars1, dist_fun, numeric(1))
+  scales2 <- vapply(regime_pars2, dist_fun, numeric(1))
+  c(sqrt(crossprod(regime_pars1/scales1 - regime_pars2/scales2)))
+}

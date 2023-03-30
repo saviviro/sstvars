@@ -10,6 +10,20 @@ random_weightpars(M, weight_function, AR_constraints, mean_constraints)
 \item{M}{a positive integer specifying the number of regimes}
 
 \item{weight_function}{what type of transition weights should be used?}
+
+\item{AR_constraints}{a size \eqn{(Mpd^2 x q)} constraint matrix \eqn{C} specifying general linear constraints
+to the autoregressive parameters. The constraints are of the form
+\eqn{(\varphi_{1},...,\varphi_{M}) = C\psi}, where \eqn{\varphi_{m} = (vec(A_{m,1}),...,vec(A_{m,p})) \ (pd^2 x 1),\ m=1,...,M},
+contains the coefficient matrices and \eqn{\psi} \eqn{(q x 1)} contains the related parameters.
+For example, to restrict the AR-parameters to be the identical across the regimes, set \eqn{C =}
+[\code{I:...:I}]' \eqn{(Mpd^2 x pd^2)} where \code{I = diag(p*d^2)}.}
+
+\item{mean_constraints}{Restrict the mean parameters of some regimes to be identical? Provide a list of numeric vectors
+such that each numeric vector contains the regimes that should share the common mean parameters. For instance, if
+\code{M=3}, the argument \code{list(1, 2:3)} restricts the mean parameters of the second and third regime to be
+identical but the first regime has freely estimated (unconditional) mean. Ignore or set to \code{NULL} if mean parameters
+should not be restricted to be the same among any regimes. \strong{This constraint is available only for mean parametrized models;
+that is, when \code{parametrization="mean"}.}}
 }
 \value{
 Returns a numeric vector ...
