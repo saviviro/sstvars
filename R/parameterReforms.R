@@ -58,20 +58,25 @@ form_boldA <- function(p, M, d, all_A) {
 #'   it's assumed that \code{params} is intercept parametrized.
 #' @return Returns parameter vector described in \code{params}, but with parametrization changed from intercept to mean
 #'   (when \code{change_to == "mean"}) or from mean to intercept (when \code{change_to == "intercept"}).
-#' @details Parametrization cannot be changed for models with mean constraints constraints!
+#' @details Parametrization cannot be changed for models with mean constraints!
 #' @section Warning:
 #'  No argument checks!
 #' @keywords internal
 
-change_parametrization <- function(p, M, d, params, AR_constraints=NULL, mean_constraints=NULL,
+change_parametrization <- function(p, M, d, params, weight_function=c("relative_dens", "logit"),
+                                   cond_dist=c("Gaussian", "Student"),
+                                   identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
+                                   AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
                                    change_to=c("intercept", "mean")) {
-  stopifnot(is.null(mean_constraints))
+  weight_function <- match.arg(weight_function)
+  cond_dist <- match.arg(cond_dist)
+  identification <- match.arg(identification)
   change_to <- match.arg(change_to)
+  stopifnot(is.null(mean_constraints))
   re_params <- params
-  if(!is.null(AR_constraints)) {
-    stop("AR_constraints not yet implemented to change_parametrization")
-    # Create reform_constrained pars and call if here
-  }
+  params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
+                                    identification=identification, AR_constraints=AR_constraints,
+                                    mean_constraints=mean_constraints, B_constraints=B_constraints)
   Id <- diag(nrow=d)
   all_A <- pick_allA(p=p, M=M, d=d, params=params)
   all_phi0_or_mu <- pick_phi0(M=M, d=d, params=params)
@@ -176,12 +181,12 @@ change_regime <- function(p, M, d, params, m, regime_pars) {
 
 reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative_dens", "logit"),
                                     cond_dist=c("Gaussian", "Student"),
-                                    identification=c("reduced_form", "recursive", "heteroskedasticity", "custom_B", "other"),
+                                    identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
                                     AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
                                     change_na=FALSE) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
-  identification=match.arg(identification)
+  identification <- match.arg(identification)
 
   if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(B_constraints)) {
     return(params)

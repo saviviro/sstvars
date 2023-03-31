@@ -392,10 +392,15 @@ test_that("form_boldA works correctly", {
 })
 
 
-calc_mu <- function(p, M, d, params, AR_constraints=NULL) {
-  stopifnot(is.null(AR_constraints))
-  #params <- reform_constrained_pars(p, M, d, params, model=model, constraints=constraints, same_means=NULL,
-  #                                  structural_pars=structural_pars)
+calc_mu <- function(p, M, d, params, weight_function = c("relative_dens", "logit"), cond_dist = c("Gaussian", "Student"),
+                    identification = c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
+                    AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL) {
+  weight_function <- match.arg(weight_function)
+  cond_dist <- match.arg(cond_dist)
+  identification <- match.arg(identification)
+  params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
+                                    identification=identification, AR_constraints=AR_constraints,
+                                    mean_constraints=mean_constraints, B_constraints=B_constraints)
   all_A <- pick_allA(p=p, M=M, d=d, params=params)
   all_phi0 <- pick_phi0(M=M, d=d, params=params)
   vapply(1:M, function(m) solve(diag(d) - rowSums(all_A[, , , m, drop=FALSE], dims=2), all_phi0[,m]), numeric(d))
@@ -410,6 +415,11 @@ theta_132relg_mu <- change_parametrization(p=1, M=3, d=2, params=theta_132relg, 
 theta_113relg_mu <- change_parametrization(p=1, M=1, d=3, params=theta_113relg, change_to="mean")
 theta_213relg_mu <- change_parametrization(p=2, M=1, d=3, params=theta_213relg, change_to="mean")
 theta_123relg_mu <- change_parametrization(p=1, M=2, d=3, params=theta_123relg, change_to="mean")
+
+theta_112relgc_mu <- change_parametrization(p=1, M=1, d=2, params=theta_112relgc, AR_constraints=C_112, change_to="mean")
+theta_222relgc2_mu <- change_parametrization(p=2, M=2, d=2, params=theta_222relgc2, AR_constraints=C_222_2, change_to="mean")
+theta_132relgc_mu <- change_parametrization(p=1, M=3, d=2, params=theta_132relgc, AR_constraints=C_132, change_to="mean")
+theta_123relgc_mu <- change_parametrization(p=1, M=2, d=3, params=theta_123relgc, AR_constraints=C_123, change_to="mean")
 
 test_that("change_parametrization works correctly", {
   expect_equal(pick_phi0(M=1, d=2, params=theta_112relg_mu), calc_mu(p=1, M=1, d=2, params=theta_112relg))
@@ -430,6 +440,19 @@ test_that("change_parametrization works correctly", {
   expect_equal(change_parametrization(p=2, M=1, d=3, params=theta_213relg_mu, change_to="intercept"), theta_213relg)
   expect_equal(pick_phi0(M=2, d=3, params=theta_123relg_mu), calc_mu(p=1, M=2, d=3, params=theta_123relg))
   expect_equal(change_parametrization(p=1, M=2, d=3, params=theta_123relg_mu, change_to="intercept"), theta_123relg)
+
+  expect_equal(pick_phi0(M=1, d=2, params=theta_112relgc_mu), calc_mu(p=1, M=1, d=2, params=theta_112relgc, AR_constraints=C_112))
+  expect_equal(change_parametrization(p=1, M=1, d=2, params=theta_112relgc_mu, AR_constraints=C_112, change_to="intercept"),
+               theta_112relgc)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_222relgc2_mu), calc_mu(p=2, M=2, d=2, params=theta_222relgc2, AR_constraints=C_222_2))
+  expect_equal(change_parametrization(p=2, M=2, d=2, params=theta_222relgc2_mu, AR_constraints=C_222_2, change_to="intercept"),
+               theta_222relgc2)
+  expect_equal(pick_phi0(M=3, d=2, params=theta_132relgc_mu), calc_mu(p=1, M=3, d=2, params=theta_132relgc, AR_constraints=C_132))
+  expect_equal(change_parametrization(p=1, M=3, d=2, params=theta_132relgc_mu, AR_constraints=C_132, change_to="intercept"),
+               theta_132relgc)
+  expect_equal(pick_phi0(M=2, d=3, params=theta_123relgc_mu), calc_mu(p=1, M=2, d=3, params=theta_123relgc, AR_constraints=C_123))
+  expect_equal(change_parametrization(p=1, M=2, d=3, params=theta_123relgc_mu, AR_constraints=C_123, change_to="intercept"),
+               theta_123relgc)
 })
 
 
