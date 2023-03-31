@@ -383,6 +383,16 @@ test_that("check_params work correctly", {
   expect_error(check_params(p=2, M=1, d=3, params=theta_213relg_notstab, weight_function="relative_dens", cond_dist="Gaussian"))
   expect_error(check_params(p=1, M=2, d=3, params=theta_123relg_notstab, weight_function="relative_dens", cond_dist="Gaussian"))
 
+  # Check with AR_constraints (reform params used inside so just checks that the function goes through)
+  check_params(p=1, M=1, d=2, params=theta_112relgc, weight_function="relative_dens", cond_dist="Gaussian",
+               AR_constraints=C_112)
+  check_params(p=2, M=2, d=2, params=theta_222relgc, weight_function="relative_dens", cond_dist="Gaussian",
+               AR_constraints=C_222)
+  check_params(p=2, M=2, d=2, params=theta_222relgcm, weight_function="relative_dens", cond_dist="Gaussian",
+               AR_constraints=C_222, mean_constraints=list(1:2))
+
+
+
   # Check Omegas
   check_params(p=1, M=1, d=2, params=theta_112relg, weight_function="relative_dens", cond_dist="Gaussian")
   check_params(p=2, M=1, d=2, params=theta_212relg, weight_function="relative_dens", cond_dist="Gaussian")
