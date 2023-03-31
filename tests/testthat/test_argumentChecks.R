@@ -120,6 +120,133 @@ theta_123relg_notstab <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vec
 theta_123relg_notpd <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123_stab), vech(Omega1_123),
                            vech(Omega2_123_notpd), alpha1_123)
 
+# p=1, M=1, d=2 AR_constraints
+C_112 <- matrix(c(1, 0, -0.5, 0, 0, 0.35, 0, -1), nrow=4, ncol=2)
+psi_112 <- c(0.3, 0.15)
+theta_112relgc <- c(phi10_112, psi_112, vech(Omega1_112))
+theta_112relgc_expanded <- c(phi10_112, C_112%*%psi_112, vech(Omega1_112))
+
+# p=1, M=2, d=2 AR matrices identical in both regimes
+C_122 <- rbind_diags(p=1, M=2, d=2)
+theta_122relgc <- c(phi10_122, phi20_122, vec(A11_122), vech(Omega1_122), vech(Omega2_122), alpha1_122)
+theta_122relgc_expanded <- c(phi10_122, phi20_122, vec(A11_122), vec(A11_122), vech(Omega1_122), vech(Omega2_122), alpha1_122)
+
+# p=2, M=2, d=2 AR matrices identical in both regimes
+C_222 <- rbind_diags(p=2, M=2, d=2)
+theta_222relgc <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), alpha1_222)
+theta_222relgc_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                             vech(Omega1_222), vech(Omega2_222), alpha1_222)
+
+# p=2, M=2, d=2, constrain AR-parameters to be the same for all regimes
+# and constrain the of-diagonal elements of AR-matrices to be zero.
+mat0 <- matrix(c(1, rep(0, 10), 1, rep(0, 8), 1, rep(0, 10), 1), nrow=2*2^2, byrow=FALSE)
+C_222_2 <- rbind(mat0, mat0)
+A21_222_c2 <- A11_222_c2 <- matrix(c(1.26, 0, 0, 1.34), nrow=2, byrow=FALSE)
+A22_222_c2 <- A12_222_c2 <- matrix(c(-0.29, 0, 0, -0.36), nrow=2, byrow=FALSE)
+phi10_222_c2 <- c(-0.11, 2.83)
+phi20_222_c2 <- c(0.36, 3.19)
+Omega1_222_c2 <- matrix(c(0.98, -0.33, -0.33, 5.24), nrow=2, byrow=FALSE)
+Omega2_222_c2 <- matrix(c(5.60, 3.46, 3.46, 9.62), nrow=2, byrow=FALSE)
+alpha1_222_c2 <- 0.35
+theta_222relgc2 <- c(phi10_222_c2, phi20_222_c2, 1.26, 1.34, -0.29, -0.36, vech(Omega1_222_c2),
+                     vech(Omega2_222_c2), alpha1_222_c2)
+theta_222relgc2_expanded <- c(phi10_222_c2, phi20_222_c2, vec(A11_222_c2), vec(A12_222_c2), vec(A21_222_c2), vec(A22_222_c2),
+                              vech(Omega1_222_c2), vech(Omega2_222_c2), alpha1_222_c2)
+
+# p=1, M=3, d=2, AR matrices identical across the regimes
+C_132 <- rbind_diags(p=1, M=3, d=2)
+theta_132relgc <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vech(Omega1_132), vech(Omega2_132),
+                    vech(Omega3_132), alpha1_132, alpha2_132)
+theta_132relgc_expanded <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A11_132), vec(A11_132),
+                             vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), alpha1_132, alpha2_132)
+
+# p=1, M=1, d=3, AR_constraints
+C_113 <- matrix(c(1, 0, -0.3, 0, 0.1, 0.35, 0, -1, 0.14, 0, -0.2, 0, 0.17, 0.12, -0.13, 0, 1, 0.2,
+                  0.2, 0.1, 0, 0, -0.11, 0.32, 0.04, 0, 0.1), nrow=9, ncol=3)
+psi_113 <- c(0.11, 0.17, -0.3)
+theta_113relgc <- c(phi10_113, psi_113, vech(Omega1_113))
+theta_113relgc_expanded <- c(phi10_113, C_113%*%psi_113, vech(Omega1_113))
+
+# p=2, M=1, p=3, AR_constraints
+C_213 <- matrix(c(0.2, 0.1, 1, 0, -0.1, -0.12, 0, 0, 3, -0.17, 0, 1.1, 0, -0.12, 0, 0.16, -0.3, 1), nrow=18, ncol=1)
+psi_213 <- 0.7
+theta_213relgc <- c(phi10_213, psi_213, vech(Omega1_213))
+theta_213relgc_expanded <- c(phi10_213, C_213%*%psi_213, vech(Omega1_213))
+
+# p=1, M=2, p=3, AR_constraints
+C_123 <- rbind_diags(p=1, M=2, d=3)
+theta_123relgc <- c(phi10_123, phi20_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
+theta_123relgc_expanded <- c(phi10_123, phi20_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
+
+## Models with mean_constraints
+
+# p=1, M=1, p=2, same_means=list(1)
+theta_112relgm <- theta_112relg
+theta_112relgm_expanded <- theta_112relgm
+
+# p=1, M=1, p=2, same_means=list(1), C_112
+theta_112relgcm <- theta_112relgc
+theta_112relgcm_expanded <- theta_112relgc_expanded
+
+# p=1, M=2, d=2, same_means=list(1:2)
+theta_122relgm <- c(phi10_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), alpha1_122)
+theta_122relgm_expanded <- c(phi10_122, phi10_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), alpha1_122)
+
+# p=1, M=2, d=2, same_means=list(1, 2)
+theta_122relgm2 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), alpha1_122)
+theta_122relgm2_expanded <- theta_122relgm2
+
+# p=1, M=2, d=2, same_means=list(1:2), C_122
+theta_122relgcm <- c(phi10_122, vec(A11_122), vech(Omega1_122), vech(Omega2_122), alpha1_122)
+theta_122relgcm_expanded <- c(phi10_122, phi10_122, vec(A11_122), vec(A11_122), vech(Omega1_122), vech(Omega2_122), alpha1_122)
+
+# p=2, M=2, d=2, same_means=list(1:2), C_222
+theta_222relgcm <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), alpha1_222)
+theta_222relgcm_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                              vech(Omega1_222), vech(Omega2_222), alpha1_222)
+
+# p=1, M=3, d=2, same_means=list(1, 2:3)
+theta_132relgm1 <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
+                     vech(Omega2_132), vech(Omega3_132), alpha1_132, alpha2_132)
+theta_132relgm1_expanded <- c(phi10_132, phi20_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
+                              vech(Omega2_132), vech(Omega3_132), alpha1_132, alpha2_132)
+
+# p=1, M=3, d=2, same_means=list(1:2, 3)
+theta_132relgm2 <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
+                     vech(Omega2_132), vech(Omega3_132), alpha1_132, alpha2_132)
+theta_132relgm2_expanded <- c(phi10_132, phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
+                              vech(Omega2_132), vech(Omega3_132), alpha1_132, alpha2_132)
+
+# p=1, M=3, d=2, same_means=list(c(1, 3), 2)
+theta_132relgm3 <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
+                     vech(Omega2_132), vech(Omega3_132), alpha1_132, alpha2_132)
+theta_132relgm3_expanded <- c(phi10_132, phi20_132, phi10_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
+                              vech(Omega2_132), vech(Omega3_132), alpha1_132, alpha2_132)
+
+# p=1, M=3, d=2, same_means=list(2, c(1, 3))
+theta_132relgm4 <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
+                     vech(Omega2_132), vech(Omega3_132), alpha1_132, alpha2_132)
+theta_132relgm4_expanded <- c(phi20_132, phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
+                              vech(Omega2_132), vech(Omega3_132), alpha1_132, alpha2_132)
+
+# p=1, M=3, d=2, same_means=list(1:3), C_132
+theta_132relgcm <- c(phi10_132, vec(A11_132), vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), alpha1_132, alpha2_132)
+theta_132relgcm_expanded <- c(phi10_132, phi10_132, phi10_132, vec(A11_132), vec(A11_132), vec(A11_132),
+                              vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), alpha1_132, alpha2_132)
+
+# p=1, M=1, p=3, same_means=list(1)
+theta_113relgm <- theta_113relg
+theta_113relgm_expanded <- theta_113relgm
+
+# p=1, M=2, p=3, same_means=list(1:2)
+theta_123relgm <- c(phi10_123, vec(A11_123), vec(A21_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
+theta_123relgm_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A21_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
+
+# p=1, M=2, p=3, same_means=list(1:2), C_123
+theta_123relgcm <- c(phi10_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
+theta_123relgcm_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
+
+
 Omegas_112 <- pick_Omegas(p=1, M=1, d=2, params=theta_112relg)
 Omegas_112_notpd <- pick_Omegas(p=1, M=1, d=2, params=theta_112relg_notpd)
 Omegas_212 <- pick_Omegas(p=2, M=1, d=2, params=theta_212relg_notstab)
@@ -316,5 +443,32 @@ test_that("n_params works correctly", {
   expect_equal(n_params(p=1, M=1, d=3, weight_function="relative_dens", cond_dist="Gaussian"), 18)
   expect_equal(n_params(p=2, M=1, d=3, weight_function="relative_dens", cond_dist="Gaussian"), 27)
   expect_equal(n_params(p=1, M=2, d=3, weight_function="relative_dens", cond_dist="Gaussian"), 37)
+
+  expect_equal(n_params(p=1, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                        AR_constraints=C_112), 7)
+  expect_equal(n_params(p=1, M=2, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                        AR_constraints=C_122), 15)
+  expect_equal(n_params(p=2, M=2, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                        AR_constraints=C_222_2), 15)
+  expect_equal(n_params(p=1, M=3, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                        AR_constraints=C_132), 21)
+  expect_equal(n_params(p=1, M=1, d=3, weight_function="relative_dens", cond_dist="Gaussian",
+                        AR_constraints=C_113), 12)
+  expect_equal(n_params(p=2, M=1, d=3, weight_function="relative_dens", cond_dist="Gaussian",
+                        AR_constraints=C_213), 10)
+  expect_equal(n_params(p=1, M=2, d=3, weight_function="relative_dens", cond_dist="Gaussian",
+                        AR_constraints=C_123), 28)
+  expect_equal(n_params(p=1, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                        AR_constraints=C_112, mean_constraints=list(1)), 7)
+  expect_equal(n_params(p=1, M=2, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                        mean_constraints=list(1:2)), 17)
+  expect_equal(n_params(p=2, M=2, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                        AR_constraints=C_222, mean_constraints=list(1:2)), 17)
+  expect_equal(n_params(p=1, M=3, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                        AR_constraints=C_132, mean_constraints=list(1:3)), 17)
+  expect_equal(n_params(p=1, M=2, d=3, weight_function="relative_dens", cond_dist="Gaussian",
+                        mean_constraints=list(1:2)), 34)
+  expect_equal(n_params(p=1, M=2, d=3, weight_function="relative_dens", cond_dist="Gaussian",
+                        AR_constraints=C_123, mean_constraints=list(1:2)), 25)
 })
 

@@ -118,6 +118,14 @@ check_params <- function(p, M, d, params, weight_function=c("relative_dens", "lo
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
   identification <- match.arg(identification)
+  if(n_params(p=p, M=M, d=d, weight_function=weight_function, cond_dist=cond_dist,
+              identification=identification, AR_constraints=AR_constraints,
+              mean_constraints=mean_constraints, B_constraints=B_constraints) != length(params)) {
+    stop("The parameter vector has wrong dimension!")
+  }
+  params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
+                                    identification=identification, AR_constraints=AR_constraints,
+                                    mean_constraints=mean_constraints, B_constraints=B_constraints)
 
   # Pick params
   all_phi0 <- pick_phi0(M=M, d=d, params=params) # phi0 or mean parameters
@@ -126,28 +134,15 @@ check_params <- function(p, M, d, params, weight_function=c("relative_dens", "lo
   weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist)
   all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
   df <- numeric(0) # FILL IN WHEN STUDENT IS IMPLEMENTED
-
-  if(n_params(p=p, M=M, d=d, weight_function=weight_function, cond_dist=cond_dist,
-              identification=identification, AR_constraints=AR_constraints,
-              mean_constraints=mean_constraints, B_constraints=B_constraints) != length(params)) {
-    stop("The parameter vector has wrong dimension!")
-  }
-
-  if(!is.null(AR_constraints)) {
-    stop("AR_constraints are not yet implemented!")
-  }
-  if(!is.null(mean_constraints)) {
-    stop("mean_constraints are not yet implemented!")
-  }
   if(!is.null(B_constraints)) {
-    stop("B_constraints are not yet implemented!")
+    stop("B_constraints are not yet implemented to check_params!")
   }
   if(identification != "reduced_form") {
-    stop("Only reduced form models are currently implemented!")
+    stop("Only reduced form models are currently implemented to check_params!")
   }
 
   if(cond_dist == "Student") { # Check degrees of freedom parameter
-    stop("cond_dist = Student is not yet implented!")
+    stop("cond_dist = Student is not yet implented to check_params!")
     if(df <= 2 + df_tol) {
       stop("The degrees of freedom parameter needs to be strictly larger than two (with large enough numerical tolerance)!")
     }
@@ -251,32 +246,33 @@ n_params <- function(p, M, d, weight_function=c("relative_dens", "logit"), cond_
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
   if(identification != "reduced_form") stop("Only reduced form models are currently supported")
-  if(!is.null(AR_constraints) || !is.null(mean_constraints) || !is.null(B_constraints)) stop("Constrained models are not currently supported")
 
   if(is.null(mean_constraints)) {
     n_mean_pars <- M*d
   } else { # Means constrained
-    n_mean_pars <- NULL
+    n_mean_pars <- d*length(mean_constraints)
   }
   if(is.null(AR_constraints)) {
     n_ar_pars <- M*p*d^2
   } else { # AR matrices constrained
-    n_ar_pars <- NULL
+    n_ar_pars <- ncol(AR_constraints)
   }
   if(is.null(B_constraints)) {
     n_covmat_pars <- M*d*(d + 1)/2
   } else { # Constraints on the impact matrix
+    stop("B_constraints not yet implemented to n_parms")
     n_covmat_pars <- NULL
   }
   if(weight_function == "relative_dens") {
     n_weight_pars <- M - 1
   } else { # weight_function == "logit"
+    stop("only relative_dens weight fn is implemented to n_params")
     n_weight_pars <- NULL
   }
   if(cond_dist == "Gaussian") {
     n_dist_pars <- 0
   } else { # cond_dist == "Student"
-    n_dist_pars <- 1 # degrees of freedom parmas
+    n_dist_pars <- 1 # degrees of freedom param
   }
   n_mean_pars + n_ar_pars + n_covmat_pars + n_weight_pars + n_dist_pars
 }
