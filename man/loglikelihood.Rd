@@ -12,7 +12,7 @@ loglikelihood(
   weight_function = c("relative_dens", "logit"),
   cond_dist = c("Gaussian", "Student"),
   parametrization = c("intercept", "mean"),
-  identification = c("reduced_form", "recursive", "heteroskedasticity", "custom",
+  identification = c("reduced_form", "recursive", "heteroskedasticity", "custom_B",
     "other"),
   AR_constraints = NULL,
   mean_constraints = NULL,

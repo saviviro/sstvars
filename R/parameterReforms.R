@@ -176,10 +176,12 @@ change_regime <- function(p, M, d, params, m, regime_pars) {
 
 reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative_dens", "logit"),
                                     cond_dist=c("Gaussian", "Student"),
-                                    identification=c("reduced_form", "recursive", "heteroskedasticity", "custom", "other"),
+                                    identification=c("reduced_form", "recursive", "heteroskedasticity", "custom_B", "other"),
                                     AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
                                     change_na=FALSE) {
   weight_function <- match.arg(weight_function)
+  cond_dist <- match.arg(cond_dist)
+  identification=match.arg(identification)
 
   if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(B_constraints)) {
     return(params)
@@ -212,7 +214,7 @@ reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative
       }
       psi[is.na(psi)] <- -9.999
     }
-    psi_expanded <- constraints%*%psi
+    psi_expanded <- AR_constraints%*%psi
   }
 
   # Obtain the mean parameters from the constrained parameter vector
@@ -243,7 +245,7 @@ reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative
     }
     stop("Structural model are not yet implemented to reform_constraints_pars")
    }
-  n_covmatspars <- lenght(covmatpars)
+  n_covmatspars <- length(covmatpars)
 
   if(cond_dist == "Gaussian") {
     distpars <- numeric(0)

@@ -91,7 +91,7 @@
 
 loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
                           parametrization=c("intercept", "mean"),
-                          identification=c("reduced_form", "recursive", "heteroskedasticity", "custom", "other"),
+                          identification=c("reduced_form", "recursive", "heteroskedasticity", "custom_B", "other"),
                           AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
                           to_return=c("loglik", "tw", "loglik_and_tw", "terms", "regime_cmeans", "total_cmeans", "total_ccovs"),
                           check_params=TRUE, minval=NULL, stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
