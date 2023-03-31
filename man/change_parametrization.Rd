@@ -9,8 +9,12 @@ change_parametrization(
   M,
   d,
   params,
+  weight_function = c("relative_dens", "logit"),
+  cond_dist = c("Gaussian", "Student"),
+  identification = c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
   AR_constraints = NULL,
   mean_constraints = NULL,
+  B_constraints = NULL,
   change_to = c("intercept", "mean")
 )
 }
@@ -47,6 +51,12 @@ If \code{parametrization=="mean"}, just replace each \eqn{\phi_{m,0}} with regim
 \eqn{vec()} is vectorization operator that stacks columns of a given matrix into a vector. \eqn{vech()} stacks columns
 of a given matrix from the principal diagonal downwards (including elements on the diagonal) into a vector.}
 
+\item{weight_function}{what type of transition weights should be used?}
+
+\item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"} or \eqn{"Student"}.}
+
+\item{identification}{is it reduced form model or an identified structural model; if the latter, how is it identified?}
+
 \item{AR_constraints}{a size \eqn{(Mpd^2 x q)} constraint matrix \eqn{C} specifying general linear constraints
 to the autoregressive parameters. The constraints are of the form
 \eqn{(\varphi_{1},...,\varphi_{M}) = C\psi}, where \eqn{\varphi_{m} = (vec(A_{m,1}),...,vec(A_{m,p})) \ (pd^2 x 1),\ m=1,...,M},
@@ -61,6 +71,8 @@ identical but the first regime has freely estimated (unconditional) mean. Ignore
 should not be restricted to be the same among any regimes. \strong{This constraint is available only for mean parametrized models;
 that is, when \code{parametrization="mean"}.}}
 
+\item{B_constraints}{NOT YET IMPLEMENTED!}
+
 \item{change_to}{either "intercept" or "mean" specifying to which parametrization it should be switched to.
 If set to \code{"intercept"}, it's assumed that \code{params} is mean parametrized, and if set to \code{"mean"}
 it's assumed that \code{params} is intercept parametrized.}
@@ -74,7 +86,7 @@ Returns parameter vector described in \code{params}, but with parametrization ch
   vector to \code{change_to}.
 }
 \details{
-Parametrization cannot be changed for models with mean constraints constraints!
+Parametrization cannot be changed for models with mean constraints!
 }
 \section{Warning}{
 
