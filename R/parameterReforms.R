@@ -251,15 +251,14 @@ reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative
     distpars <- params[length(params)]
   }
 
-  if(weight_function == "relative_dens") {
-    weightpars <- params[(d*M - less_pars + q + n_covmatspars + 1):(d*M - less_pars + q + n_covmatspars + M - 1)]
-  } else if(weight_function == "logit") {
-    stop("Logit weight function is not yet implemented to reform_constraints_pars")
+  if( M > 1) {
+    if(weight_function == "relative_dens") {
+      weightpars <- params[(d*M - less_pars + q + n_covmatspars + 1):(d*M - less_pars + q + n_covmatspars + M - 1)]
+    } else if(weight_function == "logit") {
+      stop("Logit weight function is not yet implemented to reform_constraints_pars")
+    }
+  } else { # No weightpars if M == 1
+    weightpars <- numeric(0)
   }
-
-  if(M == 1) {
-    return(c(all_phi0, psi_expanded, covmatpars, distpars))
-  } else {
-    return(c(all_phi0, psi_expanded, covmatpars, weightpars, distpars))
-  }
+  c(all_phi0, psi_expanded, covmatpars, weightpars, distpars)
 }
