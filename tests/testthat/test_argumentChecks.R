@@ -120,6 +120,14 @@ theta_123relg_notstab <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vec
 theta_123relg_notpd <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123_stab), vech(Omega1_123),
                            vech(Omega2_123_notpd), alpha1_123)
 
+## Constrained models
+
+## A(M)(p)_(p)(M)(d)
+rbind_diags <- function(p, M, d) {
+  I <- diag(p*d^2)
+  Reduce(rbind, replicate(M, I, simplify=FALSE))
+}
+
 # p=1, M=1, d=2 AR_constraints
 C_112 <- matrix(c(1, 0, -0.5, 0, 0, 0.35, 0, -1), nrow=4, ncol=2)
 psi_112 <- c(0.3, 0.15)
