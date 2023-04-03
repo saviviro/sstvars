@@ -172,9 +172,11 @@ get_regime_means <- function(p, M, d, params,weight_function=c("relative_dens", 
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
   identification <- match.arg(identification)
-  # REFORM CONSTRAINED PARS HERE
-  if(!is.null(AR_constraints) || !is.null(mean_constraints) || !is.null(B_constraints)) {
-    stop("Constrained models are not yet implemented to get_regime_means")
+  params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
+                                    identification=identification, AR_constraints=AR_constraints,
+                                    mean_constraints=mean_constraints, B_constraints=B_constraints)
+  if(!is.null(B_constraints)) {
+    stop("B_constraints are not yet implemented to get_regime_means")
   }
   if(identification != "reduced_form") stop("Structural models are not yet implemented to get_regime_means")
 
