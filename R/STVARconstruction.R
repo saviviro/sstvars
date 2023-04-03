@@ -54,7 +54,7 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
     }
   }
   check_pMd(p=p, M=M, d=d)
-  # CHECK CONSTRAINTS HERE
+  check_constraints(p=p, M=M, d=d, AR_constraints=AR_constraints, mean_constraints=mean_constraints, B_constraints=B_constraints)
   check_params(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
                parametrization=parametrization, identification=identification, AR_constraints=AR_constraints,
                mean_constraints=mean_constraints, B_constraints=B_constraints)

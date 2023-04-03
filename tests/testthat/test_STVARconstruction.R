@@ -23,6 +23,29 @@ theta_123relg <- c(0.10741, 0.13813, -0.12092, 3.48957, 0.60615, 0.45646, 0.8722
                    0.05544, 0.00212, 0.12708, 0.78618, 0.00922, 0.42627, 0.23765, 0.25386, 3.40834, 0.77357)
 mod123relg <- STVAR(data=usamone, p=1, M=2, params=theta_123relg, weight_function="relative_dens")
 
+# p=3, M=2, d=3, usamone
+theta_323relg <- c(0.98249, 0.66144, -1.17552, 0.50289, 0.17399, -0.01771, 0.96105, -0.11406, 0.41223,
+                   -0.31217, 0.49067, 0.3958, 0.04185, 0.08454, 1.0977, -0.03208, 0.06398, -0.12298,
+                   0.13382, 0.20166, 0.87613, -0.34591, -0.06254, -0.47386, -0.09049, 0.03109, 0.0347,
+                   -0.16531, 0.0427, -0.31646, 0.25299, -0.04865, 0.33893, 0.69963, -0.02912, 0.03398,
+                   -0.24344, 0.20815, 0.22566, 0.20582, 0.14774, 1.69008, 0.04375, -0.01018, -0.00947,
+                   -0.19371, 0.26341, 0.22082, -0.08841, -0.18303, -0.86488, -0.06031, 0.00634, 0.00181,
+                   -0.5559, 0.10249, -0.25146, -0.11875, 0.05153, 0.15267, 0.58151, -0.01903, 0.12236, 0.09327,
+                   0.10245, 1.81845, 0.72719, 0.03235, 0.09857, 0.04826, 0.00908, 0.09761, 0.72127)
+mod323relg <- STVAR(data=usamone, p=3, M=2, params=theta_323relg, weight_function="relative_dens")
+
+## Constrained models
+rbind_diags <- function(p, M, d) {
+  I <- diag(p*d^2)
+  Reduce(rbind, replicate(M, I, simplify=FALSE))
+}
+
+# p=2, M=2, d=2, mean_constraints=list(1:2), AR_constraints=C_222
+C_222 <- rbind_diags(p=2, M=2, d=2)
+theta_222relgcm <- c(0.7209658, 0.810858, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01, 0.08, 0.3, 0.21, 0.01,
+                     0.03, 1.1, 0.01, 0.11, 0.37)
+mod222relgcm <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222relgcm, weight_function="relative_dens",
+                      AR_constraints=C_222, mean_constraints=list(1:2))
 
 test_that("STVAR works correctly", {
   # Relative_dens Gaussian STVAR
@@ -30,4 +53,6 @@ test_that("STVAR works correctly", {
   expect_equal(mod122relg$params, theta_122relg)
   expect_equal(mod222relg$params, theta_222relg)
   expect_equal(mod123relg$params, theta_123relg)
+  expect_equal(mod323relg$params, theta_323relg)
+  expect_equal(mod222relgcm$params, theta_222relgcm)
 })
