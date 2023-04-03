@@ -58,7 +58,6 @@ theta_413relg <- c(0.5334, -0.036, 0.0065, 0.2421, 0.0198, -0.1067, -0.1501, 0.5
                    0.0405, 0.0421, 0.1274, 0.1589, 0.1201, 0.1134, -0.0358, 0.0028, 0.0502, 0.5676,
                    -0.0024, -0.0356, 0.0582, -7e-04, 0.8796)
 
-
 # p=3, M=1, d=3, usamone
 theta_313relg <- c(0.14652, 0.07905, -0.06877, 0.85178, -0.0212, 0.15671, -0.05778, 0.49156, 0.12683,
                    0.04203, 0.06951, 1.19613, 0.08181, 0.02087, -0.03947, 0.1369, 0.31143, 0.52774,
@@ -71,20 +70,80 @@ theta_123relg <- c(0.10741, 0.13813, -0.12092, 3.48957, 0.60615, 0.45646, 0.8722
                    -1.55165, 0.58245, -0.00696, -0.07261, 0.02021, 0.96883, 0.66149, 0.02279, 0.09207,
                    0.05544, 0.00212, 0.12708, 0.78618, 0.00922, 0.42627, 0.23765, 0.25386, 3.40834, 0.77357)
 
+# p=3, M=2, d=3, usamone
+theta_323relg <- c(0.98249, 0.66144, -1.17552, 0.50289, 0.17399, -0.01771, 0.96105, -0.11406, 0.41223,
+                   -0.31217, 0.49067, 0.3958, 0.04185, 0.08454, 1.0977, -0.03208, 0.06398, -0.12298,
+                   0.13382, 0.20166, 0.87613, -0.34591, -0.06254, -0.47386, -0.09049, 0.03109, 0.0347,
+                   -0.16531, 0.0427, -0.31646, 0.25299, -0.04865, 0.33893, 0.69963, -0.02912, 0.03398,
+                   -0.24344, 0.20815, 0.22566, 0.20582, 0.14774, 1.69008, 0.04375, -0.01018, -0.00947,
+                   -0.19371, 0.26341, 0.22082, -0.08841, -0.18303, -0.86488, -0.06031, 0.00634, 0.00181,
+                   -0.5559, 0.10249, -0.25146, -0.11875, 0.05153, 0.15267, 0.58151, -0.01903, 0.12236, 0.09327,
+                   0.10245, 1.81845, 0.72719, 0.03235, 0.09857, 0.04826, 0.00908, 0.09761, 0.72127)
 
+## Constrained models
 
-# ADD MORE M>1 TESTS WHEN SOME KIND OF ESTIMATES CAN BE OBTAINED!
-# microbenchmark::microbenchmark(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222relg), times=10000)
-# p=2, M=2, d=2: alle 1 millisekuntti menee kaikkeen muuhun + reilu 4 millisekunttia menee multivariate normal arvoihin; vapply ei nopeuta.
-# chol2inv on hieman nopeampi kuin backsolve
+## A(M)(p)_(p)(M)(d)
+rbind_diags <- function(p, M, d) {
+  I <- diag(p*d^2)
+  Reduce(rbind, replicate(M, I, simplify=FALSE))
+}
 
-# mvfast: medion 5.0-5.3ms (usein noin 5.1)
-# Oma: noin yhtä suuri.
-# Omacovmats Rcppllä: noin 0.96ms kun condcovmatsit lasketaan densitiessissä; 1.1 ms kun lasketaan erikseen -> pidetään densitiessissä.
-# mu_yt rcpp:llä hidastaa marginaalisesti p=2,d=2,M=2 tapauksessa; pitää testata muilla asteilla.
+# p=1, M=1, d=2 AR_constraints
+C_112 <- matrix(c(1, 0, -0.5, 0, 0, 0.35, 0, -1), nrow=4, ncol=2)
+psi_112 <- c(0.3, 0.15)
+theta_112relgc <- c(phi10_112, psi_112, vech(Omega1_112))
+theta_112relgc_expanded <- c(phi10_112, C_112%*%psi_112, vech(Omega1_112))
+
+# p=1, M=2, d=2 AR matrices identical in both regimes
+C_122 <- rbind_diags(p=1, M=2, d=2)
+theta_122relgc <- c(phi10_122, phi20_122, vec(A11_122), vech(Omega1_122), vech(Omega2_122), alpha1_122)
+theta_122relgc_expanded <- c(phi10_122, phi20_122, vec(A11_122), vec(A11_122), vech(Omega1_122), vech(Omega2_122), alpha1_122)
+
+# p=2, M=2, d=2 AR matrices identical in both regimes
+C_222 <- rbind_diags(p=2, M=2, d=2)
+theta_222relgc <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), alpha1_222)
+theta_222relgc_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                             vech(Omega1_222), vech(Omega2_222), alpha1_222)
+
+# p=2, M=2, d=2, constrain AR-parameters to be the same for all regimes
+# and constrain the of-diagonal elements of AR-matrices to be zero.
+mat0 <- matrix(c(1, rep(0, 10), 1, rep(0, 8), 1, rep(0, 10), 1), nrow=2*2^2, byrow=FALSE)
+C_222_2 <- rbind(mat0, mat0)
+A21_222_c2 <- A11_222_c2 <- matrix(c(1.26, 0, 0, 1.34), nrow=2, byrow=FALSE)
+A22_222_c2 <- A12_222_c2 <- matrix(c(-0.29, 0, 0, -0.36), nrow=2, byrow=FALSE)
+phi10_222_c2 <- c(-0.11, 2.83)
+phi20_222_c2 <- c(0.36, 3.19)
+Omega1_222_c2 <- matrix(c(0.98, -0.33, -0.33, 5.24), nrow=2, byrow=FALSE)
+Omega2_222_c2 <- matrix(c(5.60, 3.46, 3.46, 9.62), nrow=2, byrow=FALSE)
+alpha1_222_c2 <- 0.35
+theta_222relgc2 <- c(phi10_222_c2, phi20_222_c2, 1.26, 1.34, -0.29, -0.36, vech(Omega1_222_c2),
+                     vech(Omega2_222_c2), alpha1_222_c2)
+theta_222relgc2_expanded <- c(phi10_222_c2, phi20_222_c2, vec(A11_222_c2), vec(A12_222_c2), vec(A21_222_c2), vec(A22_222_c2),
+                              vech(Omega1_222_c2), vech(Omega2_222_c2), alpha1_222_c2)
+
+# p=1, M=2, p=3, AR_constraints
+C_123 <- rbind_diags(p=1, M=2, d=3)
+theta_123relgc <- c(phi10_123, phi20_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
+theta_123relgc_expanded <- c(phi10_123, phi20_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
+
+## Models with mean_constraints
+
+# p=1, M=1, p=2, mean_constraints=list(1)
+theta_112relgm <- theta_112relg
+
+# p=1, M=2, d=2, mean_constraints=list(1:2)
+mu_122relgm <- c(0.5342688, 0.7382623)
+theta_122relgm <- c(mu_122relgm, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), alpha1_122)
+theta_122relgm_expanded <- c(mu_122relgm, mu_122relgm, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), alpha1_122)
+
+# p=2, M=2, d=2, mean_constraints=list(1:2), C_222
+mu_222relgcm <- c(0.7209658, 0.8108580)
+theta_222relgcm <- c(mu_222relgcm, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), alpha1_222)
+theta_222relgcm_expanded <- c(mu_222relgcm, mu_222relgcm, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                              vech(Omega1_222), vech(Omega2_222), alpha1_222)
 
 test_that("loglikelihood works correctly", {
-  # Relative_dens Gausssian STVAR
+  # Relative_dens Gaussian STVAR
   expect_equal(loglikelihood(data=gdpdef, p=1, M=1, params=theta_112relg, weight_function="relative_dens"), -1000.653, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=2, M=1, params=theta_212relg, weight_function="relative_dens"), -286.5474, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=8, M=1, params=theta_812relg, weight_function="relative_dens"), -257.0505, tolerance=1e-3)
@@ -95,5 +154,24 @@ test_that("loglikelihood works correctly", {
 
   expect_equal(loglikelihood(data=usamone, p=3, M=1, params=theta_313relg, weight_function="relative_dens"), -669.5716, tolerance=1e-3)
   expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123relg, weight_function="relative_dens"), -570.019, tolerance=1e-3)
+  expect_equal(loglikelihood(data=usamone, p=3, M=2, params=theta_323relg, weight_function="relative_dens"), -490.9401, tolerance=1e-3)
 
+  # Constrained models
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=1, params=theta_112relgc, weight_function="relative_dens",
+                             AR_constraints=C_112), -1008.678, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122relgc, weight_function="relative_dens",
+                             AR_constraints=C_122), -314.6693, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222relgc, weight_function="relative_dens",
+                             AR_constraints=C_222), -299.1835, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222relgc2, weight_function="relative_dens",
+                             AR_constraints=C_222_2), -1077.319, tolerance=1e-3)
+  expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123relgc, weight_function="relative_dens",
+                             AR_constraints=C_123), -2171.694, tolerance=1e-3)
+
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=1, params=theta_112relgm, weight_function="relative_dens",
+                             mean_constraints=list(1)), -1000.653, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122relgm, weight_function="relative_dens",
+                             mean_constraints=list(1:2)), -548.8989, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222relgcm, weight_function="relative_dens",
+                             AR_constraints=C_222, mean_constraints=list(1:2)), -762.0473, tolerance=1e-3)
 })

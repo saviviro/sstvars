@@ -65,7 +65,7 @@
 #'   log-likelihood might fail and cause error.
 #' @param df_tol the parameter vector is considered to be outside the parameter space if the degrees of
 #'   freedom parameters is not larger than \code{2 + df_tol} (applies only if \code{cond_dist="Student"}).
-#' @details FILL IN
+#' @details Calculates the log-likelihood of the specified model.
 #' @return
 #'   \describe{
 #'     \item{If \code{to_return="loglik"}:}{the log-likelihood of the specified model.}
@@ -101,9 +101,8 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   parametrization <- match.arg(parametrization)
   identification <- match.arg(identification)
   to_return <- match.arg(to_return)
-  if(identification != "reduced_form") stop("Only reduced form models are currently supported")
-  if(!is.null(AR_constraints) || !is.null(mean_constraints) || !is.null(B_constraints)) stop("Constrained models are not
-                                                                                             currently supported")
+  if(identification != "reduced_form") stop("Structural models are not yet implemented to loglikelihood")
+  if(!is.null(B_constraints)) stop("B_constrained models are not yet implemented to loglikelihood")
 
   # Compute some required statistics
   epsilon <- round(log(.Machine$double.xmin) + 10) # Logarithm of the smallest value that can be handled normally
@@ -112,7 +111,10 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   T_obs <- n_obs - p
 
   # Collect the parameter values
-  # First remove all constraints, if any; also switch to reduced form parameter vector; TO BE IMPLEMENTED
+  # First remove all constraints, if any; also switch to reduced form parameter vector;
+  params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
+                                    identification=identification, AR_constraints=AR_constraints,
+                                    mean_constraints=mean_constraints, B_constraints=B_constraints)
 
   # Pick params
   if(parametrization == "intercept") { # [d, M]

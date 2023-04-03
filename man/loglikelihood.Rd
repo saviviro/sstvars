@@ -123,7 +123,7 @@ Note that if tolerance is too small, numerical evaluation of the log-likelihood 
 \code{loglikelihood} log-likelihood function of a smooth transition VAR model
 }
 \details{
-FILL IN
+Calculates the log-likelihood of the specified model.
 }
 \references{
 \itemize{
