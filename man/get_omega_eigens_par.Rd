@@ -9,9 +9,12 @@ get_omega_eigens_par(
   M,
   d,
   params,
-  identification = c("reduced_form", "recursive", "heteroskedasticity"),
+  weight_function = c("relative_dens", "logit"),
+  cond_dist = c("Gaussian", "Student"),
+  identification = c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
   AR_constraints = NULL,
-  mean_constraints = NULL
+  mean_constraints = NULL,
+  B_constraints = NULL
 )
 }
 \arguments{
@@ -45,6 +48,10 @@ If \code{parametrization=="mean"}, just replace each \eqn{\phi_{m,0}} with regim
 \eqn{vec()} is vectorization operator that stacks columns of a given matrix into a vector. \eqn{vech()} stacks columns
 of a given matrix from the principal diagonal downwards (including elements on the diagonal) into a vector.}
 
+\item{weight_function}{what type of transition weights should be used?}
+
+\item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"} or \eqn{"Student"}.}
+
 \item{identification}{is it reduced form model or an identified structural model; if the latter, how is it identified?}
 
 \item{AR_constraints}{a size \eqn{(Mpd^2 x q)} constraint matrix \eqn{C} specifying general linear constraints
@@ -60,6 +67,8 @@ such that each numeric vector contains the regimes that should share the common 
 identical but the first regime has freely estimated (unconditional) mean. Ignore or set to \code{NULL} if mean parameters
 should not be restricted to be the same among any regimes. \strong{This constraint is available only for mean parametrized models;
 that is, when \code{parametrization="mean"}.}}
+
+\item{B_constraints}{NOT YET IMPLEMENTED!}
 }
 \value{
 Returns a matrix with \eqn{d} rows and \eqn{M} columns - one column for each regime.

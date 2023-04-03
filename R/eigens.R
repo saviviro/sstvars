@@ -11,17 +11,10 @@
 #' @keywords internal
 
 get_boldA_eigens <- function(stvar) {
-  p <- stvar$model$p
-  M <- stvar$model$M
-  d <- stvar$model$d
-  params <- stvar$params
-  AR_constraints <- stvar$model$AR_constraints
-  mean_constraints <- stvar$model$mean_constraints
-  # REFORM CONSTRAINED PARS OR IN _PAR-FUNCTION MAYBE
-  if(!is.null(AR_constraints) || !is.null(mean_constraints)) {
-    stop("Constrained models are not yet implemented to get_boldA_eigens")
-  }
-  get_boldA_eigens_par(p=p, M=M, d=d, params=params, AR_constraints=AR_constraints, mean_constraints=mean_constraints)
+  get_boldA_eigens_par(p=stvar$model$p, M=stvar$model$M, d=stvar$model$d, params=stvar$params,
+                       weight_function=stvar$model$weight_function, cond_dist=stvar$model$cond_dist,
+                       identification=stvar$model$identification, AR_constraints=stvar$model$AR_constraints,
+                       mean_constraints=stvar$model$mean_constraints, B_constraints=stvar$model$B_constraints)
 }
 
 
@@ -38,23 +31,10 @@ get_boldA_eigens <- function(stvar) {
 #' @keywords internal
 
 get_omega_eigens <- function(stvar) {
-  p <- stvar$model$p
-  M <- stvar$model$M
-  d <- stvar$model$d
-  params <- stvar$params
-  identification <- stvar$model$identification
-  AR_constraints <- stvar$model$AR_constraints
-  mean_constraints <- stvar$model$mean_constraints
-  B_constraints <- stvar$model$B_constraints
-  # REFORM CONSTRAINED PARS
-  if(!is.null(stvar$model$AR_constraints) || !is.null(stvar$model$mean_constraints) || !is.null(B_constraints)) {
-    stop("Constrained models are not yet implemented to get_omega_eigens")
-  }
-  if(identification != "reduced_form") {
-    stop("Structural models not yet implemented to get_omega_eigens")
-  }
-  get_omega_eigens_par(p=p, M=M, d=d, params=params, identification=identification,
-                       AR_constraints=AR_constraints, mean_constraints=mean_constraints)
+  get_omega_eigens_par(p=stvar$model$p, M=stvar$model$M, d=stvar$model$d, params=stvar$params,
+                       weight_function=stvar$model$weight_function, cond_dist=stvar$model$cond_dist,
+                       identification=stvar$model$identification, AR_constraints=stvar$model$AR_constraints,
+                       mean_constraints=stvar$model$mean_constraints, B_constraints=stvar$model$B_constraints)
 }
 
 
@@ -66,15 +46,19 @@ get_omega_eigens <- function(stvar) {
 #' @inheritParams loglikelihood
 #' @return Returns a matrix with \eqn{d*p} rows and \eqn{M} columns - one column for each regime.
 #'  The \eqn{m}th column contains the absolute values (or modulus) of the eigenvalues of the "bold A" matrix containing
-#'  the AR coefficients correspinding to regime \eqn{m}.
+#'  the AR coefficients corresponding to regime \eqn{m}.
 #' @inherit stab_conds_satisfied references
 #' @keywords internal
 
-get_boldA_eigens_par <- function(p, M, d, params, AR_constraints=NULL, mean_constraints=NULL) {
-  # REFORM CONSTRAINED PARS
-  if(!is.null(AR_constraints) || !is.null(mean_constraints)) {
-    stop("Constrained models are not yet implemented to get_boldA_eigens_par")
-  }
+get_boldA_eigens_par <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
+                                 identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
+                                 AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL) {
+  weight_function <- match.arg(weight_function)
+  cond_dist <- match.arg(cond_dist)
+  identification <- match.arg(identification)
+  params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
+                                    identification=identification, AR_constraints=AR_constraints,
+                                    mean_constraints=mean_constraints, B_constraints=B_constraints)
   all_A <- pick_allA(p=p, M=M, d=d, params=params)
   all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
   matrix(vapply(1:M, function(m) abs(eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$'values'), numeric(d*p)),
@@ -95,13 +79,15 @@ get_boldA_eigens_par <- function(p, M, d, params, AR_constraints=NULL, mean_cons
 #' @inherit get_boldA_eigens references
 #' @keywords internal
 
-get_omega_eigens_par <- function(p, M, d, params, identification=c("reduced_form", "recursive", "heteroskedasticity"),
-                                 AR_constraints=NULL, mean_constraints=NULL) {
+get_omega_eigens_par <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
+                                 identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
+                                 AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL) {
+  weight_function <- match.arg(weight_function)
+  cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
-  # REFORM CONSTRAINED PARS
-  if(!is.null(AR_constraints) || !is.null(mean_constraints)) {
-    stop("Constrained models are not yet implemented to get_omega_eigens_par")
-  }
+  params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
+                                    identification=identification, AR_constraints=AR_constraints,
+                                    mean_constraints=mean_constraints, B_constraints=B_constraints)
   if(identification != "reduced_form") {
     stop("Structural models not yet implemented to get_omega_eigens_par")
   }

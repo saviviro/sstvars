@@ -102,6 +102,25 @@ theta_123relg <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1
 stvar123 <- STVAR(p=1, M=2, d=3, params=theta_123relg, weight_function="relative_dens")
 
 
+## Constrained models
+rbind_diags <- function(p, M, d) {
+  I <- diag(p*d^2)
+  Reduce(rbind, replicate(M, I, simplify=FALSE))
+}
+
+# p=2, M=2, d=2, C_222
+C_222 <- rbind_diags(p=2, M=2, d=2)
+theta_222relgc <- c(0.36, 0.12, 0.48, 0.07, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01, 0.08, 0.3, 0.21, 0.01, 0.03, 1.1, 0.01, 0.11, 0.37)
+stvar222relgc <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222relgc, weight_function="relative_dens",
+                       AR_constraints=C_222)
+
+# p=2, M=2, d=2, mean_constraints=list(1:2), AR_constraints=C_222
+theta_222relgcm <- c(0.7209658, 0.810858, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01, 0.08, 0.3, 0.21, 0.01,
+                     0.03, 1.1, 0.01, 0.11, 0.37)
+stvar222relgcm <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222relgcm, weight_function="relative_dens",
+                        AR_constraints=C_222, mean_constraints=list(1:2))
+
+
 test_that("get_boldA_eigens work correctly", {
   expect_equal(get_boldA_eigens(stvar112), as.matrix(c(0.8953748, 0.2946252)), tol=1e-3)
   expect_equal(get_boldA_eigens(stvar312), as.matrix(c(0.6367684, 0.6367684, 0.5731850, 0.5466223, 0.5256310, 0.5256310)), tol=1e-3)
@@ -113,6 +132,11 @@ test_that("get_boldA_eigens work correctly", {
   expect_equal(get_boldA_eigens(stvar113), as.matrix(c(0.29792217, 0.05646904, 0.05646904)), tol=1e-3)
   expect_equal(get_boldA_eigens(stvar123)[,1], c(0.29792217, 0.05646904, 0.05646904), tol=1e-3)
   expect_equal(get_boldA_eigens(stvar123)[,2], c(0.28054283, 0.10466989, 0.03521272), tol=1e-3)
+
+  expect_equal(get_boldA_eigens(stvar222relgc)[,1], c(0.7667397, 0.7667397, 0.5076821, 0.4147943), tol=1e-3)
+  expect_equal(get_boldA_eigens(stvar222relgc)[,2], c(0.7667397, 0.7667397, 0.5076821, 0.4147943), tol=1e-3)
+  expect_equal(get_boldA_eigens(stvar222relgcm)[,1], c(0.7667397, 0.7667397, 0.5076821, 0.4147943), tol=1e-3)
+  expect_equal(get_boldA_eigens(stvar222relgcm)[,2], c(0.7667397, 0.7667397, 0.5076821, 0.4147943), tol=1e-3)
 })
 
 
@@ -127,4 +151,9 @@ test_that("get_omega_eigens work correctly", {
   expect_equal(get_omega_eigens(stvar113), as.matrix(c(3.1960208, 1.8679839, 0.9359953)), tol=1e-3)
   expect_equal(get_omega_eigens(stvar123)[,1], c(3.1960208, 1.8679839, 0.9359953), tol=1e-3)
   expect_equal(get_omega_eigens(stvar123)[,2], c(3.451839, 2.143882, 1.004279), tol=1e-3)
+
+  expect_equal(get_omega_eigens(stvar222relgc)[,1], c(0.21055385, 0.02944615), tol=1e-3)
+  expect_equal(get_omega_eigens(stvar222relgc)[,2], c(1.100101, 0.109899), tol=1e-3)
+  expect_equal(get_omega_eigens(stvar222relgcm)[,1], c(0.21055385, 0.02944615), tol=1e-3)
+  expect_equal(get_omega_eigens(stvar222relgcm)[,2], c(1.100101, 0.109899), tol=1e-3)
 })
