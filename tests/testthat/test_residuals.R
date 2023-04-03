@@ -13,6 +13,26 @@ theta_222relg <- c(0.356914, 0.107436, 0.356386, 0.08633, 0.13996, 0.035172, -0.
                    0.227882, 0.336084, 0.239257, 0.024173, -0.021209, 0.707502, 0.063322, 0.027287, 0.009182, 0.197066,
                    0.205831, 0.005157, 0.025877, 1.092094, -0.009327, 0.116449, 0.592446)
 
+# p=3, M=2, d=3, usamone
+theta_323relg <- c(0.98249, 0.66144, -1.17552, 0.50289, 0.17399, -0.01771, 0.96105, -0.11406, 0.41223,
+                   -0.31217, 0.49067, 0.3958, 0.04185, 0.08454, 1.0977, -0.03208, 0.06398, -0.12298,
+                   0.13382, 0.20166, 0.87613, -0.34591, -0.06254, -0.47386, -0.09049, 0.03109, 0.0347,
+                   -0.16531, 0.0427, -0.31646, 0.25299, -0.04865, 0.33893, 0.69963, -0.02912, 0.03398,
+                   -0.24344, 0.20815, 0.22566, 0.20582, 0.14774, 1.69008, 0.04375, -0.01018, -0.00947,
+                   -0.19371, 0.26341, 0.22082, -0.08841, -0.18303, -0.86488, -0.06031, 0.00634, 0.00181,
+                   -0.5559, 0.10249, -0.25146, -0.11875, 0.05153, 0.15267, 0.58151, -0.01903, 0.12236, 0.09327,
+                   0.10245, 1.81845, 0.72719, 0.03235, 0.09857, 0.04826, 0.00908, 0.09761, 0.72127)
+
+## Constrained models
+rbind_diags <- function(p, M, d) {
+  I <- diag(p*d^2)
+  Reduce(rbind, replicate(M, I, simplify=FALSE))
+}
+
+# p=2, M=2, d=2, mean_constraints=list(1:2), AR_constraints=C_222
+C_222 <- rbind_diags(p=2, M=2, d=2)
+theta_222relgcm <- c(0.7209658, 0.810858, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01, 0.08, 0.3, 0.21, 0.01,
+                     0.03, 1.1, 0.01, 0.11, 0.37)
 
 test_that("get_residuals works correctly", {
   # Relative_dens Gausssian STVAR
@@ -39,5 +59,23 @@ test_that("get_residuals works correctly", {
   expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222relg, weight_function="relative_dens",
                                standardize=FALSE)[c(1, 54, 150, 242),]),
                c(-1.14633078, 0.48463608, -0.21489690, -0.40965919, 0.03689022, 0.43521031, 0.10575989, -0.05058704),
+               tolerance=1e-3)
+
+  expect_equal(c(get_residuals(data=usamone, p=3, M=2, params=theta_323relg, weight_function="relative_dens",
+                               standardize=TRUE)[c(1, 2, 120, 267),]),
+               c(0.19617354, -0.10410342, 0.45792505, 0.06508034, -0.02659528, 1.28507226, 0.66641418, 0.20628137,
+                 -0.71537249, 0.93914017, -0.32550858, -0.72564548), tolerance=1e-3)
+  expect_equal(c(get_residuals(data=usamone, p=3, M=2, params=theta_323relg, weight_function="relative_dens",
+                               standardize=FALSE)[c(1, 3, 141, 267),]),
+               c(0.104542201, -0.342051868, -0.093341863, 0.002395015, -0.009236036, 0.457097339, 0.309139979, 0.014297527,
+                 -0.201011975, 0.034911801, 0.195203026, -0.959691787), tolerance=1e-3)
+
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222relgcm, weight_function="relative_dens",
+                               AR_constraints=C_222, mean_constraints=list(1:2), standardize=TRUE)[c(1, 2, 111, 242),]),
+               c(-1.8258029, -1.2566449, -0.4063410, -0.6758498, -1.9853812, -1.7605275, -1.5997944, -2.1955479),
+               tolerance=1e-3)
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222relgcm, weight_function="relative_dens",
+                               AR_constraints=C_222, mean_constraints=list(1:2), standardize=FALSE)[c(1, 2, 113, 242),]),
+               c(-1.9292555, -1.3307029, -0.3430104, -0.7247259, -0.6715463, -0.5928653, -0.5735814, -0.7329033),
                tolerance=1e-3)
 })
