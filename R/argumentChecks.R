@@ -276,3 +276,47 @@ n_params <- function(p, M, d, weight_function=c("relative_dens", "logit"), cond_
   }
   n_mean_pars + n_ar_pars + n_covmat_pars + n_weight_pars + n_dist_pars
 }
+
+
+#' @title Check the constraint matrix has the correct form
+#'
+#' @description \code{check_constraints} checks that the constraints are correctly set.
+#'
+#' @inheritParams loglikelihood
+#' @inheritParams stab_conds_satisfied
+#' @return Does return anything but checks the constraints and throws an error if something is wrong.
+#' @keywords internal
+
+check_constraints <- function(p, M, d, AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL) {
+  if(!is.null(B_constraints)) {
+    stop("B_constraints are not yet implemented to check_constraints")
+  }
+
+  if(!is.null(AR_constraints)) {
+    if(!is.matrix(AR_constraints) | !is.numeric(AR_constraints)) {
+      stop("The argument AR_constraints should be a numeric matrix (or NULL if no constraints should be employed)")
+    } else if(nrow(AR_constraints) != M*p*d^2) {
+      stop("The AR constraint matrix should have M*p*d^2 rows")
+    } else if(ncol(AR_constraints) > nrow(AR_constraints)) {
+      stop("The AR constraint matrix has more columns than rows! What are you doing??")
+    } else if(qr(AR_constraints)$rank != ncol(AR_constraints)) {
+      stop("The AR constraint matrix should have full column rank")
+    }
+  }
+  if(!is.null(mean_constraints)) {
+    if(!is.list(mean_constraints)) {
+      stop("The argument mean_constraints should a list (or null if mean parameters are not constrained)")
+    } else if(length(mean_constraints) == 0) {
+      stop("The argument mean_constraints should not of length zero")
+    }
+    for(i1 in 1:length(mean_constraints)) {
+      if(!is.numeric(mean_constraints[[i1]]) || length(mean_constraints[[i1]]) == 0) {
+        stop("The elements of mean_constraints should be numeric vectors with strictly positive length")
+      }
+    }
+    tmp <- sort(unlist(mean_constraints), decreasing=FALSE)
+    if(length(tmp) != M || !all(tmp == 1:M)) {
+      stop("The argument mean_constraints should contains all regimes in some group exactly once")
+    }
+  }
+}

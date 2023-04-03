@@ -188,69 +188,69 @@ theta_123relgc_expanded <- c(phi10_123, phi20_123, vec(A11_123), vec(A11_123), v
 
 ## Models with mean_constraints
 
-# p=1, M=1, p=2, same_means=list(1)
+# p=1, M=1, p=2, mean_constraints=list(1)
 theta_112relgm <- theta_112relg
 theta_112relgm_expanded <- theta_112relgm
 
-# p=1, M=1, p=2, same_means=list(1), C_112
+# p=1, M=1, p=2, mean_constraints=list(1), C_112
 theta_112relgcm <- theta_112relgc
 theta_112relgcm_expanded <- theta_112relgc_expanded
 
-# p=1, M=2, d=2, same_means=list(1:2)
+# p=1, M=2, d=2, mean_constraints=list(1:2)
 theta_122relgm <- c(phi10_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), alpha1_122)
 theta_122relgm_expanded <- c(phi10_122, phi10_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), alpha1_122)
 
-# p=1, M=2, d=2, same_means=list(1, 2)
+# p=1, M=2, d=2, mean_constraints=list(1, 2)
 theta_122relgm2 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), alpha1_122)
 theta_122relgm2_expanded <- theta_122relgm2
 
-# p=1, M=2, d=2, same_means=list(1:2), C_122
+# p=1, M=2, d=2, mean_constraints=list(1:2), C_122
 theta_122relgcm <- c(phi10_122, vec(A11_122), vech(Omega1_122), vech(Omega2_122), alpha1_122)
 theta_122relgcm_expanded <- c(phi10_122, phi10_122, vec(A11_122), vec(A11_122), vech(Omega1_122), vech(Omega2_122), alpha1_122)
 
-# p=2, M=2, d=2, same_means=list(1:2), C_222
+# p=2, M=2, d=2, mean_constraints=list(1:2), C_222
 theta_222relgcm <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), alpha1_222)
 theta_222relgcm_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
                               vech(Omega1_222), vech(Omega2_222), alpha1_222)
 
-# p=1, M=3, d=2, same_means=list(1, 2:3)
+# p=1, M=3, d=2, mean_constraints=list(1, 2:3)
 theta_132relgm1 <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
                      vech(Omega2_132), vech(Omega3_132), alpha1_132, alpha2_132)
 theta_132relgm1_expanded <- c(phi10_132, phi20_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
                               vech(Omega2_132), vech(Omega3_132), alpha1_132, alpha2_132)
 
-# p=1, M=3, d=2, same_means=list(1:2, 3)
+# p=1, M=3, d=2, mean_constraints=list(1:2, 3)
 theta_132relgm2 <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
                      vech(Omega2_132), vech(Omega3_132), alpha1_132, alpha2_132)
 theta_132relgm2_expanded <- c(phi10_132, phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
                               vech(Omega2_132), vech(Omega3_132), alpha1_132, alpha2_132)
 
-# p=1, M=3, d=2, same_means=list(c(1, 3), 2)
+# p=1, M=3, d=2, mean_constraints=list(c(1, 3), 2)
 theta_132relgm3 <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
                      vech(Omega2_132), vech(Omega3_132), alpha1_132, alpha2_132)
 theta_132relgm3_expanded <- c(phi10_132, phi20_132, phi10_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
                               vech(Omega2_132), vech(Omega3_132), alpha1_132, alpha2_132)
 
-# p=1, M=3, d=2, same_means=list(2, c(1, 3))
+# p=1, M=3, d=2, mean_constraints=list(2, c(1, 3))
 theta_132relgm4 <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
                      vech(Omega2_132), vech(Omega3_132), alpha1_132, alpha2_132)
 theta_132relgm4_expanded <- c(phi20_132, phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
                               vech(Omega2_132), vech(Omega3_132), alpha1_132, alpha2_132)
 
-# p=1, M=3, d=2, same_means=list(1:3), C_132
+# p=1, M=3, d=2, mean_constraints=list(1:3), C_132
 theta_132relgcm <- c(phi10_132, vec(A11_132), vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), alpha1_132, alpha2_132)
 theta_132relgcm_expanded <- c(phi10_132, phi10_132, phi10_132, vec(A11_132), vec(A11_132), vec(A11_132),
                               vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), alpha1_132, alpha2_132)
 
-# p=1, M=1, p=3, same_means=list(1)
+# p=1, M=1, p=3, mean_constraints=list(1)
 theta_113relgm <- theta_113relg
 theta_113relgm_expanded <- theta_113relgm
 
-# p=1, M=2, p=3, same_means=list(1:2)
+# p=1, M=2, p=3, mean_constraints=list(1:2)
 theta_123relgm <- c(phi10_123, vec(A11_123), vec(A21_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
 theta_123relgm_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A21_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
 
-# p=1, M=2, p=3, same_means=list(1:2), C_123
+# p=1, M=2, p=3, mean_constraints=list(1:2), C_123
 theta_123relgcm <- c(phi10_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
 theta_123relgcm_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
 
@@ -490,3 +490,25 @@ test_that("n_params works correctly", {
                         AR_constraints=C_123, mean_constraints=list(1:2)), 25)
 })
 
+
+test_that("check_constraints works correctly", {
+  expect_error(check_constraints(p=1, M=1, d=2, AR_constraints=cbind(C_112, C_112)))
+  expect_error(check_constraints(p=1, M=1, d=2, AR_constraints=rbind(C_112, C_112)))
+  expect_error(check_constraints(p=1, M=2, d=2, AR_constraints=cbind(C_122[,1:3], rep(0, 8))))
+  expect_error(check_constraints(p=1, M=2, d=2, AR_constraints=as.data.frame(C_122)))
+  expect_error(check_constraints(p=2, M=2, d=2, AR_constraints=C_222[-1,]))
+  expect_error(check_constraints(p=2, M=2, d=2, AR_constraints=C_222_2[-16,]))
+  expect_error(check_constraints(p=1, M=2, d=3, AR_constraints=cbind(C_123[,1:8], C_123[,8])))
+  expect_error(check_constraints(p=2, M=1, d=3, AR_constraints=as.vector(C_213)))
+
+  expect_error(check_constraints(p=2, M=2, d=2, mean_constraints=1:2))
+  expect_error(check_constraints(p=2, M=2, d=2, mean_constraints=1:2))
+  expect_error(check_constraints(p=1, M=1, d=2, mean_constraints=1:2))
+  expect_error(check_constraints(p=2, M=2, d=2, mean_constraints=list(1)))
+  expect_error(check_constraints(p=2, M=2, d=2, mean_constraints=list(1, "2")))
+  expect_error(check_constraints(p=2, M=3, d=2, mean_constraints=list(2:3)))
+  expect_error(check_constraints(p=3, M=2, d=2, mean_constraints=list(1, 1:2)))
+  expect_error(check_constraints(p=3, M=2, d=2, mean_constraints=list(1, 1:2)))
+  expect_error(check_constraints(p=1, M=1, d=2, mean_constraints=list()))
+  expect_error(check_constraints(p=1, M=1, d=2, mean_constraints=list(1:2)))
+})
