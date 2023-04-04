@@ -126,7 +126,7 @@ random_covmat <- function(d, omega_scale) {
 #' @inherit random_covmat return
 #' @keywords internal
 
-smart_covmat <- function(d, M, Omega, accuracy) {
+smart_covmat <- function(d, Omega, accuracy) {
   if(accuracy <= d/2) {
     covmat <- rWishart(n=1, df=d, Sigma=Omega/d)[, , 1]
   } else {
@@ -262,24 +262,27 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logit"), con
                        mu_scale, mu_scale2, omega_scale, ar_scale=1, ar_scale2=1) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
-  #g <- ifelse(is.null(same_means), M, length(same_means)) # Number of groups of regimes with the same mean parameters
+  g <- ifelse(is.null(same_means), M, length(same_means)) # Number of groups of regimes with the same mean parameters
 
   # Generate mean params
   if(is.null(mean_constraints)) {
     mean_pars <- as.vector(replicate(n=M, expr=rnorm(d, mean=mu_scale, sd=mu_scale2)))
-  } else {
-    stop("mean_constraints not yet supported in random_ind")
+  } else { # mean_constraints used
+    mean_pars <- rnorm(d*g, mean=mu_scale, sd=mu_scale2)
   }
 
   # Generate AR params
   if(is.null(AR_constraints) && force_stability) {
     coefmat_pars <- as.vector(replicate(n=M, random_coefmats2(p=p, d=d, ar_scale=ar_scale)))
   } else {
-    if(!is.null(AR_constraints)) stop("AR_constraints not yet supported in random_ind")
     scale_A <- ar_scale2*ifelse(is.null(AR_constraints),
                                 1 + log(2*mean(c((p - 0.2)^(1.25), d))),
-                                1 + (sum(constraints)/(M*d^2))^0.85)
-    coefmat_pars <- as.vector(replicate(n=M, expr=random_coefmats(d=d, how_many=p, scale=scale_A)))
+                                1 + (sum(AR_constraints)/(M*d^2))^0.85)
+    if(is.null(AR_constraints)) {
+      coefmat_pars <- as.vector(replicate(n=M, expr=random_coefmats(d=d, how_many=p, scale=scale_A)))
+    } else { # AR_constraints employed
+      coefmat_pars <- rnorm(ncol(AR_constraints), mean=0, sd=0.5/scale_A) # random psi
+    }
   }
 
   # Generate covmat params
@@ -324,17 +327,17 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logit
                       omega_scale, ar_scale=1, ar_scale2=1) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
-  if(!is.null(AR_constraints)) stop("AR_constraints not yet implemented to smart_ind!")
-  if(!is.null(mean_constraints)) stop("mean_constraints not yet implemented to smart_ind!")
   if(cond_dist != "Gaussian") stop("Only Gaussian cond_dist is currently implemented to smart_ind!")
   scale_A <- ar_scale2*(1 + log(2*mean(c((p - 0.2)^(1.25), d))))
-  # ? reform_constrained_pars here?
+  params_std <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
+                                        identification="reduced_form", AR_constraints=AR_constraints,
+                                        mean_constraints=mean_constraints, B_constraints=NULL) # Used so that pick_pars-functions works
   # ? dist_pars <- pick_distpars
-  all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params)
+  all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params_std)
   new_pars <- numeric(length(params))
   if(is.null(AR_constraints) || is.null(mean_constraints)) {
-    all_phi0_and_A <- params[1:(d*M + M*p*d^2)] # all mu + A if called from GAfit
-    new_pars[1:(d*M + M*p*d^2)] <- rnorm(n=length(all_phi0_and_A), mean=all_phi0_and_A, sd=pmax(0.2, abs(all_phi0_and_A)))
+    all_means_and_A <- params[1:(d*M + M*p*d^2)] # all mu + A if called from GAfit
+    new_pars[1:(d*M + M*p*d^2)] <- rnorm(n=length(all_means_and_A), mean=all_means_and_A, sd=pmax(0.2, abs(all_means_and_A)))
     for(m in 1:M) {
       if(any(which_random) == m) { # Not a smart regime
         new_pars[((m - 1)*d + 1):(m*d)] <- rnorm(d, mean=mu_scale, sd=mu_scale2) # Random mean
@@ -357,9 +360,63 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logit
                                                                                                             accuracy=accuracy)
     }
 
-  } else {
-    # AR or mean constraints employed
+  } else { # AR or mean constraints employed
+    # mean parameters
+    g <- ifelse(is.null(mean_constraints), M, length(mean_constraints)) # Number of groups of regimes with the same mean parameters
+    if(length(which_random) == 0) {
+      smart_regs <- 1:M
+    } else {
+      smart_regs <- (1:M)[-which_random]
+    }
+    all_means <- matrix(params[1:(d*g)], nrow=d, ncol=g, byrow=FALSE)
+    mean_pars <- as.vector(vapply(1:g, function(m) {
+      which_reg <- ifelse(is.null(mean_constraints), m, mean_constraints[[m]]) # Can be many if mean_constraints used
+      if(any(which_reg %in% smart_regs)) { # Smart parameters
+        rnorm(d, mean=all_means[,m], sd=abs(all_phi0[,m]/accuracy))
+      } else { # Random parameters
+        rnorm(d, mean=mu_scale, sd=mu_scale2)
+      }
+    }, numeric(d)))
+    # AR parameters
+    if(is.null(AR_constraints)) {
+      q <- M*p*d^2
+      all_A <- pick_allA(p=p, M=M, d=d, params=params_std)
+      AR_pars <- vapply(1:M, function(m) {
+        if(any(which_random) == m) { # Random AR matrix
+          if(runif(1) > 0.5) { # Use algorithm to force stability of coefficient matrices
+            random_coefmats2(p=p, d=d, ar_scale=ar_scale)
+          } else {
+            random_coefmats(d=d, how_many=p, scale=scale_A)
+          }
+        } else { # Smart AR matrix
+          all_Am <- as.vector(all_A[, , , m])
+          rnorm(n=length(all_Am), mean=all_Am, sd=pmax(0.2, abs(all_Am))/accuracy)
+        }
+      })
+    } else {
+      q <- ncol(AR_constraints)
+      psi <- params[(g*d + 1):(g*d + q)]
+      AR_pars <- rnorm(q, mean=psi, sd=pmax(0.2, abs(psi))/accuracy)
+    }
 
+    # Covariance matrix parameters
+    covmat_pars <- as.vector(vapply(1:M, function(m) {
+      if(any(which_random == m)) {
+        random_covmat(d=d, omega_scale=omega_scale)
+      } else {
+        smart_covmat(d=d, Omega=all_Omega[, , m], accuracy=accuracy)
+      }
+    }, numeric(d*(d + 1)/2)))
+
+    # Weight function parameters
+    if(M > 1) {
+      weight_pars <- pick_weightpars(p=p, M=M, d=d, params=params_std, weight_function=weight_function, cond_dist=cond_dist)
+      weight_pars <- smart_weightpars(M=M, weight_pars=weight_pars, weight_function=weight_function, accuracy=accuracy)
+    } else {
+      weight_pars <- numeric(0)
+    }
+
+    new_pars[1:(M*g + q + M*d*(d + 1)/2 + length(weight_pars))] <- c(mean_pars, AR_pars, covmat_pars, weight_pars)
   }
   if(cond_dist == "Student") {
     # ADD DF PARAMETERS HERE
