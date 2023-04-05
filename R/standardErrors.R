@@ -80,11 +80,15 @@ print_std_errors <- function(stvar, digits=3) {
   d <- stvar$model$d
   weight_function <- stvar$model$weight_function
   cond_dist <- stvar$model$cond_dist
+  parametrization <- stvar$model$parametrization
+  identification <- stvar$model$identification
+  AR_constraints <- stvar$model$AR_constraints
+  mean_constraints <- stvar$model$mean_constraints
+  B_constraints <- stvar$model$B_constraints
   pars <- stvar$std_errors
-  # REFORM_CONSTRAINEDPARS HERE
-  if(!is.null(AR_constraints) || !is.null(mean_constraints)) {
-    stop("Constrained models are not yet implemented to print_std_errors")
-  }
+  pars <- reform_constrained_pars(p=p, M=M, d=d, params=pars, weight_function=weight_function, cond_dist=cond_dist,
+                                  identification=identification, AR_constraints=AR_constraints,
+                                  mean_constraints=mean_constraints, B_constraints=B_constraints)
   all_phi0_or_mu <- pick_phi0(M=M, d=d, params=pars)
   all_A <- pick_allA(p=p, M=M, d=d, params=pars)
   if(identification == "reduced_form") {
