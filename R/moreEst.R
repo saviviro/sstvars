@@ -33,6 +33,7 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
   p <- stvar$model$p
   M <- stvar$model$M
   d <- stvar$model$d
+  data <- stvar$data
   weight_function <- stvar$model$weight_function
   cond_dist <- stvar$model$cond_dist
   parametrization <- stvar$model$parametrization
@@ -62,7 +63,7 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
   res <- optim(par=stvar$params, fn=loglik_fn, gr=loglik_grad, method=c("BFGS"), control=list(fnscale=-1, maxit=maxit))
   if(res$convergence == 1) message("The maximum number of iterations was reached! Consired iterating more.")
 
-  ret <- STVAR(data=stvar$data, p=p, M=M, d=d, params=res$par,
+  ret <- STVAR(data=data, p=p, M=M, d=d, params=res$par,
                weight_function=weight_function,
                cond_dist=cond_dist,
                parametrization=parametrization,

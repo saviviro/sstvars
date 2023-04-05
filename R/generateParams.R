@@ -371,7 +371,7 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logit
     mean_pars <- as.vector(vapply(1:g, function(m) {
       which_reg <- ifelse(is.null(mean_constraints), m, mean_constraints[[m]]) # Can be many if mean_constraints used
       if(any(which_reg %in% smart_regs)) { # Smart parameters
-        rnorm(d, mean=all_means[,m], sd=abs(all_phi0[,m]/accuracy))
+        rnorm(d, mean=all_means[,m], sd=abs(all_means[,m]/accuracy))
       } else { # Random parameters
         rnorm(d, mean=mu_scale, sd=mu_scale2)
       }
