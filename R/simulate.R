@@ -94,7 +94,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
                                     identification=identification, AR_constraints=AR_constraints,
                                     mean_constraints=mean_constraints, B_constraints=B_constraints)
   if(stvar$model$parametrization == "mean") {
-    params <- change_parametrization(p=p, M=M, d=d, params=params, AR_onstraints=NULL,
+    params <- change_parametrization(p=p, M=M, d=d, params=params, AR_constraints=NULL,
                                      mean_constraints=NULL, change_to="intercept")
   }
   all_mu <- get_regime_means(p=p, M=M, d=d, params=params, weight_function=weight_function,
