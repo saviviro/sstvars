@@ -68,8 +68,8 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   AR_constraints <- stvar$model$AR_constraints
   mean_constraints <- stvar$model$mean_constraints
   B_constraints <- stvar$model$B_constraints
-  if(!is.null(AR_constraints) || !is.null(mean_constraints) || !is.null(B_constraints)) {
-    stop("Constained models are not yet implemented to simulate.stvar")
+  if(!is.null(B_constraints)) {
+    stop("B_constained models are not yet implemented to simulate.stvar")
   }
   if(cond_dist != "Gaussian") stop("Other that Gaussian models are not yet implemented to simulate.stvar")
   if(is.null(init_values) & missing(init_regime)) {
@@ -77,8 +77,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   }
   if(!missing(init_regime)) {
     if(cond_dist != "Gaussian") {
-      stop("init_regime is currently implemented for Gaussian models only.
-           Please specify init_values instead.")
+      stop("init_regime is currently implemented for Gaussian models only. Please specify init_values instead.")
     }
     stopifnot(init_regime %in% 1:M)
   }
@@ -91,7 +90,9 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
 
   # Collect parameter values
   params <- stvar$params
-  ## REFORM CONSTRAINED PARS
+  params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
+                                    identification=identification, AR_constraints=AR_constraints,
+                                    mean_constraints=mean_constraints, B_constraints=B_constraints)
   if(stvar$model$parametrization == "mean") {
     params <- change_parametrization(p=p, M=M, d=d, params=params, AR_onstraints=NULL,
                                      mean_constraints=NULL, change_to="intercept")
