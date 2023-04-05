@@ -262,7 +262,7 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logit"), con
                        mu_scale, mu_scale2, omega_scale, ar_scale=1, ar_scale2=1) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
-  g <- ifelse(is.null(same_means), M, length(same_means)) # Number of groups of regimes with the same mean parameters
+  g <- ifelse(is.null(mean_constraints), M, length(mean_constraints)) # Number of groups of regimes with the same mean parameters
 
   # Generate mean params
   if(is.null(mean_constraints)) {
@@ -335,7 +335,7 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logit
   # ? dist_pars <- pick_distpars
   all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params_std)
   new_pars <- numeric(length(params))
-  if(is.null(AR_constraints) || is.null(mean_constraints)) {
+  if(is.null(AR_constraints) && is.null(mean_constraints)) {
     all_means_and_A <- params[1:(d*M + M*p*d^2)] # all mu + A if called from GAfit
     new_pars[1:(d*M + M*p*d^2)] <- rnorm(n=length(all_means_and_A), mean=all_means_and_A, sd=pmax(0.2, abs(all_means_and_A)))
     for(m in 1:M) {
@@ -348,8 +348,7 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logit
         }
         new_pars[(M*d + M*p*d^2 + (m - 1)*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + m*d*(d + 1)/2)] <- random_covmat(d=d, omega_scale=omega_scale)
       } else { # Smart_regime
-        new_pars[(M*d + M*p*d^2 + (m - 1)*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + m*d*(d + 1)/2)] <- smart_covmat(d=d, M=M,
-                                                                                                            Omega=all_Omega[, , m],
+        new_pars[(M*d + M*p*d^2 + (m - 1)*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + m*d*(d + 1)/2)] <- smart_covmat(d=d, Omega=all_Omega[, , m],
                                                                                                             accuracy=accuracy)
       }
     }
@@ -392,7 +391,7 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logit
           all_Am <- as.vector(all_A[, , , m])
           rnorm(n=length(all_Am), mean=all_Am, sd=pmax(0.2, abs(all_Am))/accuracy)
         }
-      })
+      }, numeric(p*d^2))
     } else {
       q <- ncol(AR_constraints)
       psi <- params[(g*d + 1):(g*d + q)]

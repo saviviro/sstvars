@@ -18,7 +18,7 @@ fitSTVAR(
   maxit = 1000,
   seeds = NULL,
   print_res = TRUE,
-  use_parallel = FALSE,
+  use_parallel = TRUE,
   filter_estimates = TRUE,
   ...
 )
@@ -80,7 +80,7 @@ Returns an object of class \code{'stvar'} defining the estimated reduced form sm
 }
 \details{
 If you wish to estimate a structural model, estimate first the reduced form model and then use the
- use the function FILL IN to estimate the structural model based on the estimated reduced form model.
+ use the function \code{fitSSTVAR} to estimate the structural model based on the estimated reduced form model.
 
  Because of complexity and high multimodality of the log-likelihood function, it is \strong{not certain}
  that the estimation algorithm will end up in the global maximum point. It is expected that most of the
@@ -126,10 +126,35 @@ fit32
 summary(fit32)
 plot(fit32)
 
+# p=1, M=2, d=2 relative_dens Gaussian STVAR with the AR matrices
+# constrained to be identical in both regimes
+C_122 <- rbind(diag(1*2^2), diag(1*2^2))
+fit12c <- fitSTVAR(gdpdef, p=1, M=2, AR_constraints=C_122, nrounds=1, seeds=1, use_parallel=FALSE)
+
+# p=1, M=2, d=2 relative_dens Gaussian STVAR with the means constrained
+# to be identical in both regimes
+fit12m <- fitSTVAR(gdpdef, p=1, M=2, mean_constraints=list(1:2), nrounds=1, seeds=1, use_parallel=FALSE)
+
+# p=1, M=2, d=2 relative_dens Gaussian STVAR with the means and AR matrices constrained
+# to be identical in both regimes
+fit12cm <- fitSTVAR(gdpdef, p=1, M=2, AR_constraints=C_122, mean_constraints=list(1:2), nrounds=1, seeds=1, use_parallel=FALSE)
+
+# p=2, M=2, d=2, relative_dens Gaussian STVAR; constrain AR-parameters to be the same for all regimes
+# and constrain the of-diagonal elements of AR-matrices to be zero.
+mat0 <- matrix(c(1, rep(0, 10), 1, rep(0, 8), 1, rep(0, 10), 1), nrow=2*2^2, byrow=FALSE)
+C_222 <- rbind(mat0, mat0)
+fit22c <- fitSTVAR(gdpdef, p=2, M=2, AR_constraints=C_222, nrounds=1, seeds=1, use_parallel=FALSE)
+
+# p=2, M=2, d=2, constrain AR-parameters to be the same for all regimes
+# and constrain the of-diagonal elements of AR-matrices to be zero. Moreover,
+# constrain the means identical in both regimes.
+fit22cm <- fitSTVAR(gdpdef, p=2, M=2, AR_constraints=C_222, mean_constraints=list(1:2), nrounds=1, seeds=1, use_parallel=FALSE)
+
 # p=3, M=2, d=3
-f32 <- fitSTVAR(usamone, p=3, M=2, nrounds=20, seeds=61:80, use_parallel=TRUE)
+f32 <- fitSTVAR(usamone, p=3, M=2, nrounds=20, seeds=61:80)
 summary(f32)
 plot(f32)
+
 }
 }
 \references{

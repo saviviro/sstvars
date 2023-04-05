@@ -99,7 +99,7 @@
 #'  the redundant regimes and there is no purpose to have redundant regimes in a model.
 #'
 #'  Structural models are not supported here, as they are best estimated based on reduced form parameter estimates
-#'  using the function FILL IN THE FUNCTION WHEN IT HAS BEEN CREATED.
+#'  using the function \code{fitSSTVAR}.
 #' @return Returns the estimated parameter vector which has the form described in \code{initpop}.
 #' @references
 #'  \itemize{
@@ -127,9 +127,6 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
   to_return <- match.arg(to_return)
-  if(!is.null(AR_constraints) || !is.null(mean_constraints)) {
-    stop("Constrained models are not currently supported")
-  }
   check_pMd(p=p, M=M)
   data <- check_data(data=data, p=p)
   d <- ncol(data)
@@ -137,7 +134,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
   npars <- n_params(p=p, M=M, d=d, weight_function=weight_function, cond_dist=cond_dist,
                      AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                      B_constraints=NULL, identification="reduced_form")
-  # FILL IN ARGUMENT CHECKS FOR CONSTRAINTS
+  check_constraints(p=p, M=M, d=d, AR_constraints=AR_constraints, mean_constraints=mean_constraints, B_constraints=NULL)
 
   # Defaults and checks
   if(!all_pos_ints(c(ngen, smart_mu))) stop("Arguments ngen and smart_mu have to be positive integers")
@@ -181,7 +178,6 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_
 
   # The initial population
   if(is.null(initpop)) {
-    # CONSTRUCT THE INITIAL POPULATION
     n_attempts <- 20
     G <- numeric(0)
     for(i1 in 1:n_attempts) {

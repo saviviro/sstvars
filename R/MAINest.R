@@ -17,7 +17,7 @@
 #' @param ... additional settings passed to the function \code{GAfit} employing the genetic algorithm.
 #' @details
 #'  If you wish to estimate a structural model, estimate first the reduced form model and then use the
-#'  use the function FILL IN to estimate the structural model based on the estimated reduced form model.
+#'  use the function \code{fitSSTVAR} to estimate the structural model based on the estimated reduced form model.
 #'
 #'  Because of complexity and high multimodality of the log-likelihood function, it is \strong{not certain}
 #'  that the estimation algorithm will end up in the global maximum point. It is expected that most of the
@@ -65,17 +65,42 @@
 #' summary(fit32)
 #' plot(fit32)
 #'
+#' # p=1, M=2, d=2 relative_dens Gaussian STVAR with the AR matrices
+#' # constrained to be identical in both regimes
+#' C_122 <- rbind(diag(1*2^2), diag(1*2^2))
+#' fit12c <- fitSTVAR(gdpdef, p=1, M=2, AR_constraints=C_122, nrounds=1, seeds=1, use_parallel=FALSE)
+#'
+#' # p=1, M=2, d=2 relative_dens Gaussian STVAR with the means constrained
+#' # to be identical in both regimes
+#' fit12m <- fitSTVAR(gdpdef, p=1, M=2, mean_constraints=list(1:2), nrounds=1, seeds=1, use_parallel=FALSE)
+#'
+#' # p=1, M=2, d=2 relative_dens Gaussian STVAR with the means and AR matrices constrained
+#' # to be identical in both regimes
+#' fit12cm <- fitSTVAR(gdpdef, p=1, M=2, AR_constraints=C_122, mean_constraints=list(1:2), nrounds=1, seeds=1, use_parallel=FALSE)
+#'
+#' # p=2, M=2, d=2, relative_dens Gaussian STVAR; constrain AR-parameters to be the same for all regimes
+#' # and constrain the of-diagonal elements of AR-matrices to be zero.
+#' mat0 <- matrix(c(1, rep(0, 10), 1, rep(0, 8), 1, rep(0, 10), 1), nrow=2*2^2, byrow=FALSE)
+#' C_222 <- rbind(mat0, mat0)
+#' fit22c <- fitSTVAR(gdpdef, p=2, M=2, AR_constraints=C_222, nrounds=1, seeds=1, use_parallel=FALSE)
+#'
+#' # p=2, M=2, d=2, constrain AR-parameters to be the same for all regimes
+#' # and constrain the of-diagonal elements of AR-matrices to be zero. Moreover,
+#' # constrain the means identical in both regimes.
+#' fit22cm <- fitSTVAR(gdpdef, p=2, M=2, AR_constraints=C_222, mean_constraints=list(1:2), nrounds=1, seeds=1, use_parallel=FALSE)
+#'
 #' # p=3, M=2, d=3
-#' f32 <- fitSTVAR(usamone, p=3, M=2, nrounds=20, seeds=61:80, use_parallel=TRUE)
+#' f32 <- fitSTVAR(usamone, p=3, M=2, nrounds=20, seeds=61:80)
 #' summary(f32)
 #' plot(f32)
+#'
 #' }
 #' @export
 
 fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
                      parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL,
                      nrounds=(M + 1)^5, ncores=2, maxit=1000, seeds=NULL, print_res=TRUE,
-                     use_parallel=FALSE, filter_estimates=TRUE, ...) {
+                     use_parallel=TRUE, filter_estimates=TRUE, ...) {
   # Initial checks etc
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -87,12 +112,16 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
   data <- check_data(data=data, p=p)
   d <- ncol(data)
   n_obs <- nrow(data)
-  # Check AR_constraintsa and mean_constraints here
-  if(!is.null(AR_constraints) || !is.null(mean_constraints)) stop("Constraints are not yet implemented to fitSTVAR!")
+  check_constraints(p=p, M=M, d=d, AR_constraints=AR_constraints, mean_constraints=mean_constraints, B_constraints=NULL)
+  if(!is.null(mean_constraints) && parametrization == "intercept") {
+    cat("mean_constraints can be applied for mean-parametrized models only. Switching to parametrization = 'mean'.\n")
+    parametrization <- "mean"
+  }
   npars <- n_params(p=p, M=M, d=d, weight_function=weight_function, cond_dist=cond_dist,
                      AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                      B_constraints=NULL, identification="reduced_form")
-  if(npars >= d*nrow(data)) stop("There are at least as many parameters in the model as there are observations in the data")
+  if(npars >= d*nrow(data)) stop("There are at least as many parameters in the model as there are observations in the data,
+                                 so you should use smaller p or M.")
   dot_params <- list(...)
   minval <- ifelse(is.null(dot_params$minval), get_minval(data), dot_params$minval)
   red_criteria <- ifelse(rep(is.null(dot_params$red_criteria), 2), c(0.05, 0.01), dot_params$red_criteria)
@@ -216,20 +245,23 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
     for(i1 in 1:length(all_estimates)) {
        which_round <- ord_by_loks[i1] # Est round with i1:th largest loglik
        pars <- all_estimates[[which_round]]
-       Omega_eigens <- get_omega_eigens_par(p=p, M=M, d=d, params=pars, identification="reduced_form",
-                                            AR_constraints=AR_constraints, mean_constraints=mean_constraints)
+       pars_std <- reform_constrained_pars(p=p, M=M, d=d, params=pars, weight_function=weight_function, cond_dist=cond_dist,
+                                           identification="reduced_form", AR_constraints=AR_constraints,
+                                           mean_constraints=mean_constraints, B_constraints=NULL) # Pars in standard form for pick pars fns
+       Omega_eigens <- get_omega_eigens_par(p=p, M=M, d=d, params=pars_std, weight_function=weight_function,
+                                            cond_dist=cond_dist, identification="reduced_form",
+                                            AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL)
        Omegas_ok <- !any(Omega_eigens < 0.002)
        if(weight_function == "relative_dens") {
-         alphas <- pick_weightpars(p=p, M=M, d=d, params=pars, weight_function=weight_function, cond_dist=cond_dist)
+         alphas <- pick_weightpars(p=p, M=M, d=d, params=pars_std, weight_function=weight_function, cond_dist=cond_dist)
          weightpars_ok <- !any(alphas < 0.01)
        } else {
          weightpars_ok <- TRUE
        }
-
-       tweights <- loglikelihood(data=data, p=p, M=M, params=pars, weight_function=weight_function,
+       tweights <- loglikelihood(data=data, p=p, M=M, params=pars_std, weight_function=weight_function,
                                  cond_dist=cond_dist, parametrization=parametrization,
-                                 identification="reduced_form", AR_constraints=AR_constraints,
-                                 mean_constraints=mean_constraints, B_constraints=NULL,
+                                 identification="reduced_form", AR_constraints=NULL,
+                                 mean_constraints=NULL, B_constraints=NULL,
                                  to_return="tw", check_params=TRUE, minval=matrix(0, nrow=n_obs-p, ncol=M))
        tweights_ok <- !any(vapply(1:M, function(m) sum(tweights[,m] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
        if(Omegas_ok && tweights_ok && weightpars_ok) {

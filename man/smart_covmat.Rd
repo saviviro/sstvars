@@ -6,11 +6,9 @@
   fairly close to a given \strong{positive definite} covariance matrix using (scaled)
   Wishart distribution}
 \usage{
-smart_covmat(d, M, Omega, accuracy)
+smart_covmat(d, Omega, accuracy)
 }
 \arguments{
-\item{M}{a positive integer specifying the number of regimes}
-
 \item{Omega}{a symmetric positive definite \eqn{(dxd)} covariance matrix specifying
 expected value of the matrix to be generated.}
 

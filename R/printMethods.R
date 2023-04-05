@@ -43,12 +43,11 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
                                    mean_constraints=mean_constraints, B_constraints=B_constraints), digits)
   npars <- length(params)
   T_obs <- ifelse(is.null(stvar$data), NA, nrow(stvar$data) - p)
-  # REFORM CONSTRAINED PARS HERE
-  if(!is.null(AR_constraints) || !is.null(mean_constraints) || !is.null(B_constraints)) {
-    print("Constrained models are not yet implemented to get_regime_means")
-    return(invisible(stvar))
-  } else if(identification != "reduced_form") {
-    print("Structural models are not yet implemented to get_regime_means")
+  params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
+                                    identification=identification, AR_constraints=AR_constraints,
+                                    mean_constraints=mean_constraints, B_constraints=B_constraints)
+  if(identification != "reduced_form") {
+    print("Structural models are not yet implemented to print.stvar")
     return(invisible(stvar))
   }
   if(stvar$model$parametrization == "mean") {
@@ -72,7 +71,6 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
       ifelse(is.na(T_obs), "\n", paste0("#observations = ", T_obs, " x ", d, "")))
   cat("\n\n")
 
-  # IMPLEMENT GET BOLDA EIGEN AND GET OMEGA EIGENS (with para args?)
   if(summary_print) {
     all_boldA_eigens <- get_boldA_eigens(stvar)
     all_omega_eigens <- get_omega_eigens(stvar)

@@ -178,7 +178,7 @@ Only reduced form models are supported!
  the redundant regimes and there is no purpose to have redundant regimes in a model.
 
  Structural models are not supported here, as they are best estimated based on reduced form parameter estimates
- using the function FILL IN THE FUNCTION WHEN IT HAS BEEN CREATED.
+ using the function \code{fitSSTVAR}.
 }
 \references{
 \itemize{
