@@ -79,3 +79,15 @@ get_multisets_Cpp <- function(n, d, N) {
     .Call('_sstvars_get_multisets_Cpp', PACKAGE = 'sstvars', n, d, N)
 }
 
+#' @name get_permanent_Cpp
+#' @title Calculate the permanent of a matrix
+#' @description Calculates the permanent of a square matrix using the Ryser's formula.
+#'
+#' @param A a square matrix
+#' @details Calculates the permanent of a square matrix using Ryser's formula.
+#' @return Returns the permanent of the matrix A (a real number)
+#' @keywords internal
+get_permanent_Cpp <- function(A) {
+    .Call('_sstvars_get_permanent_Cpp', PACKAGE = 'sstvars', A)
+}
+
