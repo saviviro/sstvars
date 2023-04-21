@@ -63,3 +63,19 @@ get_mu_yt_Cpp <- function(obs, all_phi0, all_A, alpha_mt) {
     .Call('_sstvars_get_mu_yt_Cpp', PACKAGE = 'sstvars', obs, all_phi0, all_A, alpha_mt)
 }
 
+#' @name get_multisets_Cpp
+#' @title Generate all d-element multisets
+#' @description Generates all d-element multisets in \eqn{\lbrace 1,...,n \rbrace}
+#'   ordered in a lexicographic order.
+#'
+#' @param n positive integer specifying the value n in \eqn{\lbrace 1,...,n \rbrace}.
+#' @param d positive integer specifying the size of the multisets.
+#' @param N the binomial coefficient \code{choose(n + d - 1, d)} (calculated in R wrapper)
+#' @details This function is used in approximation of the joint spectral radius.
+#' @return a numeric matrix with N rows and d columns, containing each multiset in each row, ordered
+#'   lexicographically from top to bottom.
+#' @keywords internal
+get_multisets_Cpp <- function(n, d, N) {
+    .Call('_sstvars_get_multisets_Cpp', PACKAGE = 'sstvars', n, d, N)
+}
+
