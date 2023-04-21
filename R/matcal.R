@@ -249,17 +249,3 @@ get_symmetric_sqrt <- function(Omega) {
   diag_Omegas(Omega1=Omega)
 }
 
-
-#' @title Calculate the dth induced matrix of a square matrix
-#'
-#' @description \code{d_lift} the dth induced matrix of a square matrix
-#'  by so-called d-lifting.
-#'
-#' @param Omega a positive definite covariance matrix
-#' @return a vectorized symmetric square root matrix of the matrix \code{Omega}.
-#' @references reference
-#' @keywords internal
-
-d_lift <- function(A) {
-  diag_Omegas(Omega1=Omega)
-}
