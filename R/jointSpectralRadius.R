@@ -68,7 +68,7 @@ d_lift <- function(A, d) {
 
 #' @title Calculate upper bound for the joint spectral radius of the "bold A" matrices
 #'
-#' @description \code{bound_JSR} calculates an upper bound for the joint spectral radius of the "bold A" matrices
+#' @description \code{bound_jsr} calculates an upper bound for the joint spectral radius of the "bold A" matrices
 #' as described in Parrilo and Jadbabaie (2008), Theorems 4.2 and 4.3 and Equations (8) and (11).
 #'
 #' @param all_boldA all \eqn{((dp)x(dp))} "bold A" (companion form) matrices in a 3D array,
@@ -76,11 +76,21 @@ d_lift <- function(A, d) {
 #' @param accuracy what should the relative accuracy of the bounds be? Note only upper bound is used
 #'  and that the bound holds with any accuracy (but the bounds get tighter with increased accuracy).
 #' @details Upper bound calculated the formula presented in Parrilo and Jadbabaie (2008), Equation~(11),
-#'  whereas the accuracies are based on  Parrilo and Jadbabaie (2008), Table~1.
-#' @return Returns the dth induced matrix of A: a square matrix with \code{choose(nrow(A) + d - 1, d)}
-#'   rows and columns.
+#'  whereas the accuracy is based on  Parrilo and Jadbabaie (2008), Table~1. Kheifets and Saikkonen (2020)
+#'  show that if the joint spectral radius is smaller than one, the STVAR process is ergodic stationary.
+#'  Therefore, if the upper bound is smaller than one, the process is stationary ergodic. However, as the condition
+#'  is not necessary but sufficient and also because the bound might be too conservative, upper bound larger than
+#'  one does not imply that the process is not ergodic stationary. You can try larger accuracy, and if the bound
+#'  is still larger than one, the result does not tell whether the process is ergodic stationary or not.
+#'
+#'  Note that due to the extremely large dimenions required in the calculation of the bound, using large accuracy
+#'  might not be feasible for other than very small models (small p*d^2). You can also try other implementations
+#'  for bounding the joint spectral radius, for instance, the JSR toolbox in Matlab (Jungers 2023).
+#' @return Returns an upper bound for the joint spectral radius of the "companion form AR matrices" of the regimes.
 #' @references
 #'  \itemize{
+#'    \item I.L. Kheifets, P.J. Saikkonen. 2020. Stationarity and ergodicity of Vector STAR models.
+#'      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
 #'    \item P.A. Parrilo, A. Jadbabaie. 2008. Approximation of the joint spectral
 #'       radius using sum of squares. \emph{Linear Algebra and its Applications},
 #'       \strong{428}, 2385-2402.
@@ -124,3 +134,21 @@ bound_jsr <- function(all_boldA, accuracy=c("0.707", "0.840", "0.917", "0.957", 
   max(eigen(sum_of_d_lifted)$values)^(1/d) # Upper bound for the JSR as in Parrilo & Jadbabaie (2008), Equation (11)
 }
 
+
+#' @title Calculate upper bound for the joint spectral radius of the "companion form AR matrices" of the regimes
+#'
+#' @description \code{bound_joint_spectral_radius} calculates an upper bound for the joint spectral radius of the
+#'  "companion form AR matrices" matrices of the regimes as described in Parrilo and Jadbabaie (2008),
+#'   Theorems 4.2 and 4.3 and Equations (8) and (11).
+#'
+#' @inheritParams diagnostic_plot
+#' @inheritParams bound_jsr
+#' @inherit bound_jsr details references return
+#' @examples
+#' FILL IN EXAMPLES
+#' @export
+
+
+bound_joint_spectral_radius <- function(stvar, accuracy=c("0.707", "0.840", "0.917", "0.957", "0.978")) {
+  accuracy <- match.arg(accuracy)
+}
