@@ -1,12 +1,3 @@
-#
-wrap_multisets <- function(n, d) {
-  # Laita kaksi accuracy vaihtoehtoa ja selvitä järkevä max dim?
-  N <- choose(n + d - 1, d)
-  if(N > 1e+8) {
-    stop("Aborted since the large dimension required in the calculations may cause memory issues and likely take very long!")
-  }
-  get_multisets_Cpp(n=n, d=d, N=N)
-}
 
 #' @title Calculate the dth induced matrix of a square matrix
 #'
@@ -14,7 +5,9 @@ wrap_multisets <- function(n, d) {
 #'  by so-called d-lifting as described in Parrilo and Jadbabaie (2008).
 #'
 #' @param A a real square matrix
-#' @param d a striclty positive integer specifying the order of the lift.
+#' @param d a strictly positive integer specifying the order of the lift.
+#' @param multisets all \eqn{d}-element multisets in \eqn{\lbrace 1,...,nrow(A) \rbrace} in
+#'   a lexicographic order (obtained with get_multisets_Cpp).
 #' @details Calculated the d-lifting using the formula presented in Parrilo and Jadbabaie (2008),
 #'   Equation~(8).
 #' @return Returns the dth induced matrix of A: a square matrix with \code{choose(nrow(A) + d - 1, d)}
@@ -28,13 +21,11 @@ wrap_multisets <- function(n, d) {
 #' @keywords internal
 
 d_lift <- function(A, d) {
-  # MODIFY THIS SO THAT THE MULTISETS ARE CREATED OUTSIDE, SINCE THE SAME MULTISETS ARE USED FOR MANY MATRICES?
-
   stopifnot(all_pos_ints(d))
   stopifnot(nrow(A) == ncol(A))
   n <- nrow(A)
   N <- choose(n + d - 1, d)
-  if(N > 1e+8) {
+  if(N > 1e+6) {
     stop("Aborted since the large dimension required in the calculations may cause memory issues and likely take very long!")
   }
   all_multisets <- get_multisets_Cpp(n=n, d=d, N=N) # Each row is one multiset
@@ -71,5 +62,65 @@ d_lift <- function(A, d) {
   # }
 
   A_lifted
+}
+
+
+
+#' @title Calculate upper bound for the joint spectral radius of the "bold A" matrices
+#'
+#' @description \code{bound_JSR} calculates an upper bound for the joint spectral radius of the "bold A" matrices
+#' as described in Parrilo and Jadbabaie (2008), Theorems 4.2 and 4.3 and Equations (8) and (11).
+#'
+#' @param all_boldA all \eqn{((dp)x(dp))} "bold A" (companion form) matrices in a 3D array,
+#'  so that \code{[, , m]} gives the matrix the regime \code{m}.
+#' @param accuracy what should the relative accuracy of the bounds be? Note only upper bound is used
+#'  and that the bound holds with any accuracy (but the bounds get tighter with increased accuracy).
+#' @details Upper bound calculated the formula presented in Parrilo and Jadbabaie (2008), Equation~(11),
+#'  whereas the accuracies are based on  Parrilo and Jadbabaie (2008), Table~1.
+#' @return Returns the dth induced matrix of A: a square matrix with \code{choose(nrow(A) + d - 1, d)}
+#'   rows and columns.
+#' @references
+#'  \itemize{
+#'    \item P.A. Parrilo, A. Jadbabaie. 2008. Approximation of the joint spectral
+#'       radius using sum of squares. \emph{Linear Algebra and its Applications},
+#'       \strong{428}, 2385-2402.
+#'    \item R. Jungers (2023). The JSR toolbox (https://www.mathworks.com/matlabcentral/fileexchange/33202-the-jsr-toolbox),
+#'       MATLAB Central File Exchange.
+#'  }
+#' @keywords internal
+
+bound_jsr <- function(all_boldA, accuracy=c("0.707", "0.840", "0.917", "0.957", "0.978")) {
+  # Determine "2d" (here d) based on the givas accuracy as in Parrilo & Jadbabaie (2008), Table 1.
+  # Note that the upper bound holds at all accuracies; it just becomes tighter when accuracy is increased.
+  accuracy <- match.arg(accuracy)
+  if(accuracy == "0.707") {
+    d <- 2
+  } else if(accuracy == "0.840") {
+    d <- 4
+  } else if(accuracy == "0.917") {
+    d <- 8
+  } else if(accuracy == "0.957") {
+    d <- 16
+  } else { # accuracy == "0.978"
+    d <- 32
+  }
+  n <- nrow(all_boldA[, , 1])
+  N <- choose(n + d - 1, d)
+  if(N > 1500) {
+    cat("The calculations likely take relatively long due to the large dimension required!\n")
+    cat("If it takes too long, you can try first a smaller accuracy.\n")
+    cat("You may also try other implementations, e.g., the JSR toolbox in Matlab (Jungers 2023).")
+  } else if(N > 3000) {
+    cat("The large dimension required in the calculations may cause memory issues and likely take very long!\n")
+    cat("You should probably try smaller accuracy or other implementations, e.g., the JSR toolbox in Matlab (Jungers 2023).")
+  }
+  all_multisets <- get_multisets_Cpp(n=n, d=d, N=N)
+
+  M <- dim(all_boldA)[3]
+  sum_of_d_lifted <- matrix(0, nrow=N, ncol=N)
+  for(i1 in 1:M) {
+    sum_of_d_lifted <- sum_of_d_lifted + d_lift(A=all_boldA[, , i1], d=d)
+  }
+  max(eigen(sum_of_d_lifted)$values)^(1/d) # Upper bound for the JSR as in Parrilo & Jadbabaie (2008), Equation (11)
 }
 

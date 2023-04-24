@@ -9,7 +9,10 @@ d_lift(A, d)
 \arguments{
 \item{A}{a real square matrix}
 
-\item{d}{a striclty positive integer specifying the order of the lift.}
+\item{d}{a strictly positive integer specifying the order of the lift.}
+
+\item{multisets}{all \eqn{d}-element multisets in \eqn{\lbrace 1,...,nrow(A) \rbrace} in
+a lexicographic order (obtained with get_multisets_Cpp).}
 }
 \value{
 Returns the dth induced matrix of A: a square matrix with \code{choose(nrow(A) + d - 1, d)}
