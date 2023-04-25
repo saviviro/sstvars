@@ -533,4 +533,5 @@ test_that("check_weightfun_pars works correctly", {
   expect_error(check_weightfun_pars(p=1, d=5, weight_function="logit", weightfun_pars=weightfun_pars4))
   expect_equal(check_weightfun_pars(p=2, d=4, weight_function="logit", weightfun_pars=weightfun_pars4),
                list(vars=3:4, lags=1:2))
+  expect_equal(check_weightfun_pars(p=1, d=2, weight_function="relative_dens", weightfun_pars=1:3), 1:3)
 })
