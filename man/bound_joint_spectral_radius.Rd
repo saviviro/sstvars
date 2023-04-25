@@ -25,19 +25,48 @@ Returns an upper bound for the joint spectral radius of the "companion form AR m
 }
 \details{
 Upper bound calculated the formula presented in Parrilo and Jadbabaie (2008), Equation~(11),
- whereas the accuracy is based on  Parrilo and Jadbabaie (2008), Table~1. Kheifets and Saikkonen (2020)
- show that if the joint spectral radius is smaller than one, the STVAR process is ergodic stationary.
- Therefore, if the upper bound is smaller than one, the process is stationary ergodic. However, as the condition
- is not necessary but sufficient and also because the bound might be too conservative, upper bound larger than
- one does not imply that the process is not ergodic stationary. You can try larger accuracy, and if the bound
- is still larger than one, the result does not tell whether the process is ergodic stationary or not.
+ whereas the accuracy is based on  Parrilo and Jadbabaie (2008), Table 1. Note that the accuracy is
+ for the bounds including the lower bound which we do not calculate, as only upper bound used in practice.
+ Specifically, Kheifets and Saikkonen (2020) show that if the joint spectral radius is smaller than one,
+ the STVAR process is ergodic stationary. Therefore, if the upper bound is smaller than one,
+ the process is stationary ergodic. However, as the condition is not necessary but sufficient and also because
+ the bound might be too conservative, upper bound larger than one does not imply that the process is not ergodic
+ stationary. You can try higher accuracy, and if the bound is still larger than one, the result does not tell
+ whether the process is ergodic stationary or not.
 
- Note that due to the extremely large dimenions required in the calculation of the bound, using large accuracy
- might not be feasible for other than very small models (small p*d^2). You can also try other implementations
- for bounding the joint spectral radius, for instance, the JSR toolbox in Matlab (Jungers 2023).
+ Note that due to the extremely large dimenions required in the calculation of the bound, using high accuracy
+ might not be feasible for other than very small models (small p*d^2), as one may run out of memory or the
+ computations just take very long. \strong{That is, it is advisable to start with low accuracy,
+ and only increase it if the sufficient condition for ergodic stationarity is not satisfied in the upper bound,
+ i.e., if the bound is larger than one.}
+ You can also try other implementations for bounding the joint spectral radius, for instance,
+ the JSR toolbox in Matlab (Jungers 2023).
 }
 \examples{
-FILL IN EXAMPLES
+# p=1, M=2, d=2, relative dens weight function
+theta_122relg <- c(0.734054, 0.225598, 0.705744, 0.187897, 0.259626, -0.000863,
+  -0.3124, 0.505251, 0.298483, 0.030096, -0.176925, 0.838898, 0.310863, 0.007512,
+  0.018244, 0.949533, -0.016941, 0.121403, 0.573269)
+mod122 <- STVAR(data=gdpdef, p=1, M=2, params=theta_122relg)
+# Absolute values of the eigenvalues of the "companion form AR matrices":
+summary(mod122)$abs_boldA_eigens
+# It is a necessary (but not sufficient!) condition for ergodic stationary that
+# the spectral radius of the "companion form AR matrices" are smaller than one
+# for all of the regimes. A sufficient (but not necessary) condition for
+# ergodic stationary is that the joint spectral radius of the #companion form
+# AR matrices" of the regimes is smaller than one. Therefore, we calculate
+# upper bounds for the joint spectral radius.
+
+# Upper bound for the joint spectral radius of the "companion form AR matrices":
+bound_joint_spectral_radius(mod122, accuracy="0.707")
+# accuracy "0.707" gives a rough approximation, but the upper bound is already
+# smaller than one, so the sufficient condition for ergodic stationarity is satisfied.
+
+# Higher accuracy gives tighter upper bound:
+bound_joint_spectral_radius(mod122, accuracy="0.840")
+bound_joint_spectral_radius(mod122, accuracy="0.917")
+# bound_joint_spectral_radius(mod122, accuracy="0.957") # Takes a while to compute!
+# bound_joint_spectral_radius(mod122, accuracy="0.978") # Takes much longer to compute!
 }
 \references{
 \itemize{

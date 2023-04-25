@@ -22,16 +22,22 @@ as described in Parrilo and Jadbabaie (2008), Theorems 4.2 and 4.3 and Equations
 }
 \details{
 Upper bound calculated the formula presented in Parrilo and Jadbabaie (2008), Equation~(11),
- whereas the accuracy is based on  Parrilo and Jadbabaie (2008), Table~1. Kheifets and Saikkonen (2020)
- show that if the joint spectral radius is smaller than one, the STVAR process is ergodic stationary.
- Therefore, if the upper bound is smaller than one, the process is stationary ergodic. However, as the condition
- is not necessary but sufficient and also because the bound might be too conservative, upper bound larger than
- one does not imply that the process is not ergodic stationary. You can try larger accuracy, and if the bound
- is still larger than one, the result does not tell whether the process is ergodic stationary or not.
+ whereas the accuracy is based on  Parrilo and Jadbabaie (2008), Table 1. Note that the accuracy is
+ for the bounds including the lower bound which we do not calculate, as only upper bound used in practice.
+ Specifically, Kheifets and Saikkonen (2020) show that if the joint spectral radius is smaller than one,
+ the STVAR process is ergodic stationary. Therefore, if the upper bound is smaller than one,
+ the process is stationary ergodic. However, as the condition is not necessary but sufficient and also because
+ the bound might be too conservative, upper bound larger than one does not imply that the process is not ergodic
+ stationary. You can try higher accuracy, and if the bound is still larger than one, the result does not tell
+ whether the process is ergodic stationary or not.
 
- Note that due to the extremely large dimenions required in the calculation of the bound, using large accuracy
- might not be feasible for other than very small models (small p*d^2). You can also try other implementations
- for bounding the joint spectral radius, for instance, the JSR toolbox in Matlab (Jungers 2023).
+ Note that due to the extremely large dimenions required in the calculation of the bound, using high accuracy
+ might not be feasible for other than very small models (small p*d^2), as one may run out of memory or the
+ computations just take very long. \strong{That is, it is advisable to start with low accuracy,
+ and only increase it if the sufficient condition for ergodic stationarity is not satisfied in the upper bound,
+ i.e., if the bound is larger than one.}
+ You can also try other implementations for bounding the joint spectral radius, for instance,
+ the JSR toolbox in Matlab (Jungers 2023).
 }
 \references{
 \itemize{

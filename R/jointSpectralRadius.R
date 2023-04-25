@@ -25,8 +25,8 @@ d_lift <- function(A, d) {
   stopifnot(nrow(A) == ncol(A))
   n <- nrow(A)
   N <- choose(n + d - 1, d)
-  if(N > 1e+6) {
-    stop("Aborted since the large dimension required in the calculations may cause memory issues and likely take very long!")
+  if(N > 10000) {
+    stop("Aborted since the large dimension required in the calculations may cause memory issues and they likely take very long!")
   }
   all_multisets <- get_multisets_Cpp(n=n, d=d, N=N) # Each row is one multiset
 
@@ -35,7 +35,6 @@ d_lift <- function(A, d) {
     prod(vapply(unique(multiset), function(elem) factorial(sum(multiset == elem)), numeric(1)))
   }
   all_mu_multisets <- apply(all_multisets, MARGIN=1, FUN=get_mu_multiset) # mu(multiset) calculated for all multisets
-
   A_lifted <- matrix(nrow=N, ncol=N) # Initialize A_lifted
 
   get_elements <- Vectorize(function(i, j) { # Used in obtaining "submatrices" A(alpha, beta) with alpha and beta multisets
@@ -48,7 +47,7 @@ d_lift <- function(A, d) {
        alpha <- all_multisets[i1,] # get_element uses this
        beta <- all_multisets[i2,] # get_elements uses this
        A_submat <- outer(seq_len(d), seq_len(d), get_elements) # "Submatrix" A(alpha,beta)
-       A_lifted[i1, i2] <-  get_permanent_Cpp(A_submat)/sqrt(all_mu_multisets[i1]*all_mu_multisets[i2]) # Equation (8)
+       A_lifted[i1, i2] <- get_permanent_Cpp(A_submat)/sqrt(all_mu_multisets[i1]*all_mu_multisets[i2]) # Equation (8)
     }
   }
 
@@ -76,16 +75,22 @@ d_lift <- function(A, d) {
 #' @param accuracy what should the relative accuracy of the bounds be? Note only upper bound is used
 #'  and that the bound holds with any accuracy (but the bounds get tighter with increased accuracy).
 #' @details Upper bound calculated the formula presented in Parrilo and Jadbabaie (2008), Equation~(11),
-#'  whereas the accuracy is based on  Parrilo and Jadbabaie (2008), Table~1. Kheifets and Saikkonen (2020)
-#'  show that if the joint spectral radius is smaller than one, the STVAR process is ergodic stationary.
-#'  Therefore, if the upper bound is smaller than one, the process is stationary ergodic. However, as the condition
-#'  is not necessary but sufficient and also because the bound might be too conservative, upper bound larger than
-#'  one does not imply that the process is not ergodic stationary. You can try larger accuracy, and if the bound
-#'  is still larger than one, the result does not tell whether the process is ergodic stationary or not.
+#'  whereas the accuracy is based on  Parrilo and Jadbabaie (2008), Table 1. Note that the accuracy is
+#'  for the bounds including the lower bound which we do not calculate, as only upper bound used in practice.
+#'  Specifically, Kheifets and Saikkonen (2020) show that if the joint spectral radius is smaller than one,
+#'  the STVAR process is ergodic stationary. Therefore, if the upper bound is smaller than one,
+#'  the process is stationary ergodic. However, as the condition is not necessary but sufficient and also because
+#'  the bound might be too conservative, upper bound larger than one does not imply that the process is not ergodic
+#'  stationary. You can try higher accuracy, and if the bound is still larger than one, the result does not tell
+#'  whether the process is ergodic stationary or not.
 #'
-#'  Note that due to the extremely large dimenions required in the calculation of the bound, using large accuracy
-#'  might not be feasible for other than very small models (small p*d^2). You can also try other implementations
-#'  for bounding the joint spectral radius, for instance, the JSR toolbox in Matlab (Jungers 2023).
+#'  Note that due to the extremely large dimenions required in the calculation of the bound, using high accuracy
+#'  might not be feasible for other than very small models (small p*d^2), as one may run out of memory or the
+#'  computations just take very long. \strong{That is, it is advisable to start with low accuracy,
+#'  and only increase it if the sufficient condition for ergodic stationarity is not satisfied in the upper bound,
+#'  i.e., if the bound is larger than one.}
+#'  You can also try other implementations for bounding the joint spectral radius, for instance,
+#'  the JSR toolbox in Matlab (Jungers 2023).
 #' @return Returns an upper bound for the joint spectral radius of the "companion form AR matrices" of the regimes.
 #' @references
 #'  \itemize{
@@ -116,21 +121,22 @@ bound_jsr <- function(all_boldA, accuracy=c("0.707", "0.840", "0.917", "0.957", 
   }
   n <- nrow(all_boldA[, , 1])
   N <- choose(n + d - 1, d)
-  if(N > 1500) {
+  if(N > 26) {
     cat("The calculations likely take relatively long due to the large dimension required!\n")
-    cat("If it takes too long, you can try first a smaller accuracy.\n")
+    cat("If it takes too long, you can try first a lower accuracy.\n")
     cat("You may also try other implementations, e.g., the JSR toolbox in Matlab (Jungers 2023).")
-  } else if(N > 3000) {
-    cat("The large dimension required in the calculations may cause memory issues and likely take very long!\n")
-    cat("You should probably try smaller accuracy or other implementations, e.g., the JSR toolbox in Matlab (Jungers 2023).")
+  } else if(N > 30) {
+    cat("The large dimension required in the calculations takes very long and migh cause memory issues!\n")
+    cat("You should probably try lower accuracy or other implementations, e.g., the JSR toolbox in Matlab (Jungers 2023).")
   }
   all_multisets <- get_multisets_Cpp(n=n, d=d, N=N)
 
   M <- dim(all_boldA)[3]
-  sum_of_d_lifted <- matrix(0, nrow=N, ncol=N)
+  all_d_lifted <- array(NA, dim=c(N, N, M))
   for(i1 in 1:M) {
-    sum_of_d_lifted <- sum_of_d_lifted + d_lift(A=all_boldA[, , i1], d=d)
+    all_d_lifted[, , i1] <- d_lift(A=all_boldA[, , i1], d=d) # SUM OF D-LIFTED COPIED MULTIPLE TIMES = MEMORY PROBLEM?
   }
+  sum_of_d_lifted <- apply(all_d_lifted, MARGIN=1:2, FUN=sum)
   max(eigen(sum_of_d_lifted)$values)^(1/d) # Upper bound for the JSR as in Parrilo & Jadbabaie (2008), Equation (11)
 }
 
@@ -145,10 +151,35 @@ bound_jsr <- function(all_boldA, accuracy=c("0.707", "0.840", "0.917", "0.957", 
 #' @inheritParams bound_jsr
 #' @inherit bound_jsr details references return
 #' @examples
-#' FILL IN EXAMPLES
+#' # p=1, M=2, d=2, relative dens weight function
+#' theta_122relg <- c(0.734054, 0.225598, 0.705744, 0.187897, 0.259626, -0.000863,
+#'   -0.3124, 0.505251, 0.298483, 0.030096, -0.176925, 0.838898, 0.310863, 0.007512,
+#'   0.018244, 0.949533, -0.016941, 0.121403, 0.573269)
+#' mod122 <- STVAR(data=gdpdef, p=1, M=2, params=theta_122relg)
+#' # Absolute values of the eigenvalues of the "companion form AR matrices":
+#' summary(mod122)$abs_boldA_eigens
+#' # It is a necessary (but not sufficient!) condition for ergodic stationary that
+#' # the spectral radius of the "companion form AR matrices" are smaller than one
+#' # for all of the regimes. A sufficient (but not necessary) condition for
+#' # ergodic stationary is that the joint spectral radius of the #companion form
+#' # AR matrices" of the regimes is smaller than one. Therefore, we calculate
+#' # upper bounds for the joint spectral radius.
+#'
+#' # Upper bound for the joint spectral radius of the "companion form AR matrices":
+#' bound_joint_spectral_radius(mod122, accuracy="0.707")
+#' # accuracy "0.707" gives a rough approximation, but the upper bound is already
+#' # smaller than one, so the sufficient condition for ergodic stationarity is satisfied.
+#'
+#' # Higher accuracy gives tighter upper bound:
+#' bound_joint_spectral_radius(mod122, accuracy="0.840")
+#' bound_joint_spectral_radius(mod122, accuracy="0.917")
+#' # bound_joint_spectral_radius(mod122, accuracy="0.957") # Takes a while to compute!
+#' # bound_joint_spectral_radius(mod122, accuracy="0.978") # Takes much longer to compute!
 #' @export
-
 
 bound_joint_spectral_radius <- function(stvar, accuracy=c("0.707", "0.840", "0.917", "0.957", "0.978")) {
   accuracy <- match.arg(accuracy)
+  all_A <- pick_allA(p=stvar$model$p, M=stvar$model$M, d=stvar$model$d, params=stvar$params)
+  all_boldA <- form_boldA(p=stvar$model$p, M=stvar$model$M, d=stvar$model$d, all_A=all_A)
+  bound_jsr(all_boldA=all_boldA, accuracy=accuracy)
 }

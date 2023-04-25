@@ -17,5 +17,10 @@ Calculates the permanent of a square matrix using the Ryser's formula.
 }
 \details{
 Calculates the permanent of a square matrix using Ryser's formula.
+  This function is an Rcpp implementation of the C++ code written by "hanzzoid"
+  on the "Code Project" website
+  \url{https://www.codeproject.com/Articles/21282/Compute-Permanent-of-a-Matrix-with-Ryser-s-Algorit}.
+  Modified code reproduced under The Code Project Open licence
+  (\url{https://www.codeproject.com/info/cpol10.aspx}).
 }
 \keyword{internal}

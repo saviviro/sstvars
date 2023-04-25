@@ -79,12 +79,36 @@ get_multisets_Cpp <- function(n, d, N) {
     .Call('_sstvars_get_multisets_Cpp', PACKAGE = 'sstvars', n, d, N)
 }
 
+#' @name dec2binar
+#' @title Transform a decimal to a binary array
+#' @description Transforms a decimal to a binary array with an additional
+#'   element saving the number of ones in the array. Helper function for
+#'   \code{get_permanent_Cpp}.
+#'
+#' @param n the index determining the submatrix of the square matrix A the permanent is calculated for.
+#' @param dim the number of rows (or columns) in the square matrix A the permanent is calculated for.
+#' @details Helper function for \code{get_permanent_Cpp}, which calculates the
+#'   permanent of a square matrix using the Ryser's formula.
+#'   This function is an Rcpp implementation of the C++ code written by "hanzzoid"
+#'   on the "Code Project" website
+#'   \url{https://www.codeproject.com/Articles/21282/Compute-Permanent-of-a-Matrix-with-Ryser-s-Algorit}.
+#'   Modified code reproduced under The Code Project Open licence
+#'   (\url{https://www.codeproject.com/info/cpol10.aspx}).
+#' @return Returns a characteric string that allows to select the submatrix.
+#' @keywords internal
+NULL
+
 #' @name get_permanent_Cpp
 #' @title Calculate the permanent of a matrix
 #' @description Calculates the permanent of a square matrix using the Ryser's formula.
 #'
 #' @param A a square matrix
 #' @details Calculates the permanent of a square matrix using Ryser's formula.
+#'   This function is an Rcpp implementation of the C++ code written by "hanzzoid"
+#'   on the "Code Project" website
+#'   \url{https://www.codeproject.com/Articles/21282/Compute-Permanent-of-a-Matrix-with-Ryser-s-Algorit}.
+#'   Modified code reproduced under The Code Project Open licence
+#'   (\url{https://www.codeproject.com/info/cpol10.aspx}).
 #' @return Returns the permanent of the matrix A (a real number)
 #' @keywords internal
 get_permanent_Cpp <- function(A) {
