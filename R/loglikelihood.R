@@ -55,8 +55,8 @@
 #'   \item{If \code{weight_function == "logit"}:}{a list of two elements: \describe{
 #'     \item{The first element \code{$vars}:}{a numeric vector containing the variables that should used as switching variables
 #'       in the weight function, i.e., a vector with unique elements in \eqn{\lbrace 1,...,d \rbrace}.}
-#'     \item{The second element \code{$lags}:}{a numeric vector containing the lags that should be used in the weight function, i.e.,
-#'       a vector with unique elements in \eqn{\lbrace 1,...,p \rbrace}.}
+#'     \item{The second element \code{$lags}:}{an integer in \eqn{\lbrace 0,1,...,p \rbrace} specifying the number of lags to be
+#'.      used in the weight function.}
 #'   }}
 #' }
 #' @param to_return should the returned object be the log-likelihood, which is the default, or something else?

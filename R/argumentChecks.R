@@ -344,10 +344,9 @@ check_weightfun_pars <- function(p, d, weight_function=c("relative_dens", "logit
            vector containing the switching variables, i.e., it should have unique elements in 1,...,d where d is
            the number of variables in the data.")
     }
-    if(!is.numeric(weightfun_pars[[2]]) || !all(weightfun_pars[[2]] %in% 1:p) ||
-       length(unique(weightfun_pars[[2]])) != length(weightfun_pars[[2]]) ) {
-      stop("When weight_function == 'logit', the second element of the argument weightfun_pars should be a numeric
-           vector containing the lags used in the transition weights, i.e., it should have unique elements in 1,...,p.")
+    if(!is.numeric(weightfun_pars[[2]]) || !all(weightfun_pars[[2]] %in% 0:p) || length(weightfun_pars[[2]]) != 1) {
+      stop("When weight_function == 'logit', the second element of the argument weightfun_pars should be an integer
+            in 0,1,...,p determining the number of lags to be used in the weight function.")
     }
     if(is.null(names(weightfun_pars))) {
       names(weightfun_pars) <- c("vars", "lags")

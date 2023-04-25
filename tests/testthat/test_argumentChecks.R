@@ -514,7 +514,9 @@ test_that("check_constraints works correctly", {
 weightfun_pars1 <- list(3, 4)
 weightfun_pars2 <- list(tmp1=4, tmp2=5)
 weightfun_pars3 <- list(vars=2:3, lags=2:3)
-weightfun_pars4 <- list(3:4, lags=1:2)
+weightfun_pars4 <- list(3:4, lags=2)
+weightfun_pars5 <- list(vars=1:4, lags=3)
+
 
 test_that("check_weightfun_pars works correctly", {
   expect_error(check_weightfun_pars(p=5, d=2, weight_function="logit", weightfun_pars=weightfun_pars1))
@@ -527,11 +529,13 @@ test_that("check_weightfun_pars works correctly", {
                list(vars=4, lags=5))
   expect_error(check_weightfun_pars(p=3, d=2, weight_function="logit", weightfun_pars=weightfun_pars3))
   expect_error(check_weightfun_pars(p=2, d=3, weight_function="logit", weightfun_pars=weightfun_pars3))
-  expect_equal(check_weightfun_pars(p=3, d=3, weight_function="logit", weightfun_pars=weightfun_pars3),
-               weightfun_pars3)
   expect_error(check_weightfun_pars(p=5, d=3, weight_function="logit", weightfun_pars=weightfun_pars4))
   expect_error(check_weightfun_pars(p=1, d=5, weight_function="logit", weightfun_pars=weightfun_pars4))
   expect_equal(check_weightfun_pars(p=2, d=4, weight_function="logit", weightfun_pars=weightfun_pars4),
-               list(vars=3:4, lags=1:2))
+               list(vars=3:4, lags=2))
+  expect_error(check_weightfun_pars(p=2, d=5, weight_function="logit", weightfun_pars=weightfun_pars5))
+  expect_error(check_weightfun_pars(p=3, d=2, weight_function="logit", weightfun_pars=weightfun_pars5))
+  expect_equal(check_weightfun_pars(p=3, d=4, weight_function="logit", weightfun_pars=weightfun_pars5),
+               weightfun_pars5)
   expect_equal(check_weightfun_pars(p=1, d=2, weight_function="relative_dens", weightfun_pars=1:3), 1:3)
 })
