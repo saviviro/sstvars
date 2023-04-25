@@ -324,7 +324,7 @@ check_constraints <- function(p, M, d, AR_constraints=NULL, mean_constraints=NUL
 
 #' @title Check the argument \code{weightfun_pars}
 #'
-#' @description \code{check_and_correct_weightfun_pars} checks that the argument \code{weightfun_pars}.
+#' @description \code{check_weightfun_pars} checks that the argument \code{weightfun_pars}.
 #'   is correctly set, if not, tries to correct them.
 #'
 #' @inheritParams loglikelihood
@@ -332,7 +332,7 @@ check_constraints <- function(p, M, d, AR_constraints=NULL, mean_constraints=NUL
 #'   a corrected version of the argument if possible.
 #' @keywords internal
 
-check_and_correct_weightfun_pars <- function(p, d, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL) {
+check_weightfun_pars <- function(p, d, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL) {
   weight.function <- match.arg(weight_function)
   if(weight_function == "logit") {
     if(!is.list(weightfun_pars) || length(weightfun_pars) != 2) {
