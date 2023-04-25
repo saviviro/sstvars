@@ -16,6 +16,7 @@ loglikelihood(
   AR_constraints = NULL,
   mean_constraints = NULL,
   B_constraints = NULL,
+  weightfun_pars = NULL,
   to_return = c("loglik", "tw", "loglik_and_tw", "terms", "regime_cmeans",
     "total_cmeans", "total_ccovs"),
   check_params = TRUE,
@@ -83,6 +84,16 @@ should not be restricted to be the same among any regimes. \strong{This constrai
 that is, when \code{parametrization="mean"}.}}
 
 \item{B_constraints}{NOT YET IMPLEMENTED!}
+
+\item{weightfun_pars}{\describe{
+  \item{If \code{weight_function == "relative_dens"}:}{Not used.}
+  \item{If \code{weight_function == "logit"}:}{a list of two elements: \describe{
+    \item{The first element \code{$vars}:}{a numeric vector containing the variables that should used as switching variables
+      in the weight function, i.e., a vector with unique elements in \eqn{\lbrace 1,...,d \rbrace}.}
+    \item{The second element \code{$lags}:}{a numeric vector containing the lags that should be used in the weight function, i.e.,
+      a vector with unique elements in \eqn{\lbrace 1,...,p \rbrace}.}
+  }}
+}}
 
 \item{to_return}{should the returned object be the log-likelihood, which is the default, or something else?
 See the section "Return" for all the options.}

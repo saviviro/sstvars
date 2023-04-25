@@ -320,3 +320,41 @@ check_constraints <- function(p, M, d, AR_constraints=NULL, mean_constraints=NUL
     }
   }
 }
+
+
+#' @title Check the argument \code{weightfun_pars}
+#'
+#' @description \code{check_and_correct_weightfun_pars} checks that the argument \code{weightfun_pars}.
+#'   is correctly set, if not, tries to correct them.
+#'
+#' @inheritParams loglikelihood
+#' @return Does checks the argument \code{weightfun_pars} and throws an error if something is wrong; returns
+#'   a corrected version of the argument if possible.
+#' @keywords internal
+
+check_and_correct_weightfun_pars <- function(p, d, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL) {
+  weight.function <- match.arg(weight_function)
+  if(weight_function == "logit") {
+    if(!is.list(weightfun_pars) || length(weightfun_pars) != 2) {
+      stop("The argument weightfun_pars be a list of length two, when weight_function == 'logit'.")
+    }
+    if(!is.numeric(weightfun_pars[[1]]) || !all(weightfun_pars[[1]] %in% 1:d) ||
+       length(unique(weightfun_pars[[1]])) != length(weightfun_pars[[1]]) ) {
+      stop("When weight_function == 'logit', the first element of the argument weightfun_pars should be a numeric
+           vector containing the switching variables, i.e., it should have unique elements in 1,...,d where d is
+           the number of variables in the data.")
+    }
+    if(!is.numeric(weightfun_pars[[2]]) || !all(weightfun_pars[[2]] %in% 1:p) ||
+       length(unique(weightfun_pars[[2]])) != length(weightfun_pars[[2]]) ) {
+      stop("When weight_function == 'logit', the second element of the argument weightfun_pars should be a numeric
+           vector containing the lags used in the transition weights, i.e., it should have unique elements in 1,...,p.")
+    }
+    if(is.null(names(weightfun_pars))) {
+      names(weightfun_pars) <- c("vars", "lags")
+    } else if(!all(names(weightfun_pars) == c("vars", "lags"))) {
+      names(weightfun_pars) <- c("vars", "lags")
+    }
+  }
+  # weightfun_pars are not used in weight_function == "relative_dens"
+  weightfun_pars
+}
