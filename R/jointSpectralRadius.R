@@ -97,8 +97,7 @@ d_lift <- function(A, d) {
 #'    \item I.L. Kheifets, P.J. Saikkonen. 2020. Stationarity and ergodicity of Vector STAR models.
 #'      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
 #'    \item P.A. Parrilo, A. Jadbabaie. 2008. Approximation of the joint spectral
-#'       radius using sum of squares. \emph{Linear Algebra and its Applications},
-#'       \strong{428}, 2385-2402.
+#'       radius using sum of squares. \emph{Linear Algebra and its Applications}, \strong{428}, 2385-2402.
 #'    \item R. Jungers (2023). The JSR toolbox (https://www.mathworks.com/matlabcentral/fileexchange/33202-the-jsr-toolbox),
 #'       MATLAB Central File Exchange.
 #'  }
