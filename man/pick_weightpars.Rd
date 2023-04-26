@@ -10,7 +10,8 @@ pick_weightpars(
   d,
   params,
   weight_function = c("relative_dens", "logit"),
-  cond_dist = c("Gaussian", "Student")
+  cond_dist = c("Gaussian", "Student"),
+  weightfun_pars = NULL
 )
 }
 \arguments{
@@ -45,12 +46,28 @@ of a given matrix from the principal diagonal downwards (including elements on t
 \item{weight_function}{what type of transition weights should be used? See the vignette for details about the weight functions.}
 
 \item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"} or \eqn{"Student"}.}
+
+\item{weightfun_pars}{\describe{
+  \item{If \code{weight_function == "relative_dens"}:}{Not used.}
+  \item{If \code{weight_function == "logit"}:}{a list of two elements: \describe{
+    \item{The first element \code{$vars}:}{a numeric vector containing the variables that should used as switching variables
+      in the weight function, i.e., a vector with unique elements in \eqn{\lbrace 1,...,d \rbrace}.}
+    \item{The second element \code{$lags}:}{an integer in \eqn{\lbrace 1,...,p \rbrace} specifying the number of lags to be
+.      used in the weight function.}
+  }}
+}}
 }
 \value{
 \describe{
-    \item{If \code{weight_function = "relative_dens"}:}{Returns a length M vector containing the transition weight
+    \item{If \code{weight_function = "relative_dens"}:}{Returns a length \eqn{M} vector containing the transition weight
           parameters \eqn{\alpha_{m}, m=1,...,M}, including the non-parametrized \eqn{\alpha_{M}}.}
-    \item{If \code{weight_function = "logit"}:}{NOT YET IMPLEMENTED}
+    \item{If \code{weight_function = "logit"}:}{Returns a length \eqn{(M-1)k} vector \eqn{(\gamma_1,...,\gamma_M)},
+          where \eqn{\gamma_m} \eqn{(k\times 1)}, \eqn{m=1,...,M-1} contains the logit-regression coefficients of the \eqn{m}th regime.
+          Specifically, for switching variables with indices in \eqn{J\subset\lbrace 1,...,d\rbrace}, and with
+         \eqn{\tilde{p}\in\lbrace 1,...,p\rbrace} lags included, \eqn{\gamma_m} contains the coefficients for the vector
+         \eqn{z_{t-1} = (\tilde{z}_{\min\lbrace J\rbrace},...,\tilde{z}_{\max\lbrace J\rbrace})}, where
+         \eqn{\tilde{z}_{j} =(1,y_{j,t-1},...,y_{j,t-\tilde{p}})}, \eqn{j\in J}. So \eqn{k=|J|(1 + \tilde{p})}
+         where \eqn{|J|} denotes the number of elements in \eqn{J}.}
   }
 }
 \description{

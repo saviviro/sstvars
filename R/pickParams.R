@@ -135,9 +135,15 @@ pick_Omegas <- function(p, M, d, params) {
 #' @inheritParams loglikelihood
 #' @return
 #'   \describe{
-#'     \item{If \code{weight_function = "relative_dens"}:}{Returns a length M vector containing the transition weight
+#'     \item{If \code{weight_function = "relative_dens"}:}{Returns a length \eqn{M} vector containing the transition weight
 #'           parameters \eqn{\alpha_{m}, m=1,...,M}, including the non-parametrized \eqn{\alpha_{M}}.}
-#'     \item{If \code{weight_function = "logit"}:}{NOT YET IMPLEMENTED}
+#'     \item{If \code{weight_function = "logit"}:}{Returns a length \eqn{(M-1)k} vector \eqn{(\gamma_1,...,\gamma_M)},
+#'           where \eqn{\gamma_m} \eqn{(k\times 1)}, \eqn{m=1,...,M-1} contains the logit-regression coefficients of the \eqn{m}th regime.
+#'           Specifically, for switching variables with indices in \eqn{J\subset\lbrace 1,...,d\rbrace}, and with
+#'          \eqn{\tilde{p}\in\lbrace 1,...,p\rbrace} lags included, \eqn{\gamma_m} contains the coefficients for the vector
+#'          \eqn{z_{t-1} = (\tilde{z}_{\min\lbrace J\rbrace},...,\tilde{z}_{\max\lbrace J\rbrace})}, where
+#'          \eqn{\tilde{z}_{j} =(1,y_{j,t-1},...,y_{j,t-\tilde{p}})}, \eqn{j\in J}. So \eqn{k=|J|(1 + \tilde{p})}
+#'          where \eqn{|J|} denotes the number of elements in \eqn{J}.}
 #'   }
 
 #' @inheritSection pick_Ami Warning
@@ -145,10 +151,9 @@ pick_Omegas <- function(p, M, d, params) {
 #' @keywords internal
 
 pick_weightpars <- function(p, M, d, params, weight_function=c("relative_dens", "logit"),
-                            cond_dist=c("Gaussian", "Student")) {
+                            cond_dist=c("Gaussian", "Student"), weightfun_pars=NULL) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
-  stopifnot(weight_function == "relative_dens") # Only this weight function is currently implement
   n_dfs <- ifelse(cond_dist == "Student", 1, 0)
   if(weight_function == "relative_dens") {
     if(M == 1) {
@@ -156,6 +161,13 @@ pick_weightpars <- function(p, M, d, params, weight_function=c("relative_dens", 
     } else {
       alphas <- params[(length(params) - M - n_dfs + 2):(length(params) - n_dfs)]
       return(c(alphas, 1 - sum(alphas)))
+    }
+  } else if(weight_function == "logit") {
+    if(M == 1) {
+      return(numeric(0))
+    } else {
+      # (M-1)*k = (M-1)*|J|\tilde{p} pars to return
+      return(params[(length(params) - (M - 1)*length(weightfun_pars[[1]])*(1 + weightfun_pars[[2]]) - n_dfs + 1):(length(params) - n_dfs)])
     }
   }
 }
