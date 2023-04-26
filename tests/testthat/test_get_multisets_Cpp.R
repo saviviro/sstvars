@@ -1,4 +1,4 @@
-context("get_permanent_Cpp")
+context("get_multisets_Cpp")
 library(sstvars)
 
 mat1 <- matrix(c(1, 1,
