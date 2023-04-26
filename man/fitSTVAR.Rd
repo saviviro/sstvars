@@ -31,7 +31,7 @@ a univariate time series. Missing values are not supported.}
 
 \item{M}{a positive integer specifying the number of regimes}
 
-\item{weight_function}{what type of transition weights should be used?}
+\item{weight_function}{what type of transition weights should be used? See the vignette for details about the weight functions.}
 
 \item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"} or \eqn{"Student"}.}
 

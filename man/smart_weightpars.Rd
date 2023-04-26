@@ -15,7 +15,7 @@ smart_weightpars(M, weight_pars, weight_function, accuracy)
   \item{If \code{weight_function == "logit"}:}{NOT YET IMPLEMENTED}
 }}
 
-\item{weight_function}{what type of transition weights should be used?}
+\item{weight_function}{what type of transition weights should be used? See the vignette for details about the weight functions.}
 
 \item{accuracy}{a positive real number adjusting how close to the given parameter vector the returned individual should be.
 Larger number means larger accuracy. Read the source code for details.}

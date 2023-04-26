@@ -32,7 +32,7 @@ a univariate time series. Missing values are not supported.}
 
 \item{d}{the number of time series in the system, i.e., the dimension}
 
-\item{weight_function}{what type of transition weights should be used?}
+\item{weight_function}{what type of transition weights should be used? See the vignette for details about the weight functions.}
 
 \item{all_A}{4D array containing all coefficient matrices \eqn{A_{m,i}}, obtained from \code{pick_allA}.}
 

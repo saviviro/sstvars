@@ -23,7 +23,7 @@ n_params(
 
 \item{d}{the number of time series in the system, i.e., the dimension}
 
-\item{weight_function}{what type of transition weights should be used?}
+\item{weight_function}{what type of transition weights should be used? See the vignette for details about the weight functions.}
 
 \item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"} or \eqn{"Student"}.}
 

@@ -9,7 +9,7 @@ random_weightpars(M, weight_function, AR_constraints, mean_constraints)
 \arguments{
 \item{M}{a positive integer specifying the number of regimes}
 
-\item{weight_function}{what type of transition weights should be used?}
+\item{weight_function}{what type of transition weights should be used? See the vignette for details about the weight functions.}
 
 \item{AR_constraints}{a size \eqn{(Mpd^2 x q)} constraint matrix \eqn{C} specifying general linear constraints
 to the autoregressive parameters. The constraints are of the form

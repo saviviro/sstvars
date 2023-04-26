@@ -14,7 +14,7 @@ check_weightfun_pars(
 \arguments{
 \item{p}{a positive integer specifying the autoregressive order}
 
-\item{weight_function}{what type of transition weights should be used?}
+\item{weight_function}{what type of transition weights should be used? See the vignette for details about the weight functions.}
 
 \item{weightfun_pars}{\describe{
   \item{If \code{weight_function == "relative_dens"}:}{Not used.}
