@@ -334,7 +334,9 @@ check_constraints <- function(p, M, d, AR_constraints=NULL, mean_constraints=NUL
 
 check_weightfun_pars <- function(p, d, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL) {
   weight.function <- match.arg(weight_function)
-  if(weight_function == "logit") {
+  if(weight_function == "relative_dens") {   # weightfun_pars are not used in weight_function == "relative_dens"
+    weightfun_pars <- NULL
+  } else if(weight_function == "logit") {
     if(!is.list(weightfun_pars) || length(weightfun_pars) != 2) {
       stop("The argument weightfun_pars be a list of length two, when weight_function == 'logit'.")
     }
@@ -348,12 +350,13 @@ check_weightfun_pars <- function(p, d, weight_function=c("relative_dens", "logit
       stop("When weight_function == 'logit', the second element of the argument weightfun_pars should be an integer
             in 0,1,...,p determining the number of lags to be used in the weight function.")
     }
+    weightfun_pars[[1]] <- sort(weightfun_pars[[1]], decreasing=FALSE)
+
     if(is.null(names(weightfun_pars))) {
       names(weightfun_pars) <- c("vars", "lags")
     } else if(!all(names(weightfun_pars) == c("vars", "lags"))) {
       names(weightfun_pars) <- c("vars", "lags")
     }
   }
-  # weightfun_pars are not used in weight_function == "relative_dens"
   weightfun_pars
 }
