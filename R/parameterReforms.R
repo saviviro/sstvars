@@ -182,7 +182,7 @@ change_regime <- function(p, M, d, params, m, regime_pars) {
 reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative_dens", "logit"),
                                     cond_dist=c("Gaussian", "Student"),
                                     identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
-                                    AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL, weight_constraints=NULL,
+                                    AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
                                     change_na=FALSE) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -193,9 +193,6 @@ reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative
   }
   if(!is.null(B_constraints)) {
     stop("B_constraints are not yet implemented to reform_constrained_pars")
-  }
-  if(!is.null(weight_constraints)) {
-    stop("weight_constraints are not yet implemented to reform_constrained pars")
   }
 
   if(is.null(mean_constraints)) {
