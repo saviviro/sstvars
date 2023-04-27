@@ -120,13 +120,13 @@ bound_jsr <- function(all_boldA, accuracy=c("0.707", "0.840", "0.917", "0.957", 
   }
   n <- nrow(all_boldA[, , 1])
   N <- choose(n + d - 1, d)
-  if(N > 26) {
+  if(N > 28) {
     cat("The calculations likely take relatively long due to the large dimension required!\n")
     cat("If it takes too long, you can try first a lower accuracy.\n")
-    cat("You may also try other implementations, e.g., the JSR toolbox in Matlab (Jungers 2023).")
-  } else if(N > 30) {
+    cat("You may also try other implementations, e.g., the JSR toolbox in Matlab (Jungers 2023).\n")
+  } else if(N > 34) {
     cat("The large dimension required in the calculations takes very long and migh cause memory issues!\n")
-    cat("You should probably try lower accuracy or other implementations, e.g., the JSR toolbox in Matlab (Jungers 2023).")
+    cat("You should probably try lower accuracy or other implementations, e.g., the JSR toolbox in Matlab (Jungers 2023).\n")
   }
   all_multisets <- get_multisets_Cpp(n=n, d=d, N=N)
 
@@ -136,7 +136,7 @@ bound_jsr <- function(all_boldA, accuracy=c("0.707", "0.840", "0.917", "0.957", 
     all_d_lifted[, , i1] <- d_lift(A=all_boldA[, , i1], d=d) # SUM OF D-LIFTED COPIED MULTIPLE TIMES = MEMORY PROBLEM?
   }
   sum_of_d_lifted <- apply(all_d_lifted, MARGIN=1:2, FUN=sum)
-  max(eigen(sum_of_d_lifted)$values)^(1/d) # Upper bound for the JSR as in Parrilo & Jadbabaie (2008), Equation (11)
+  max(abs(eigen(sum_of_d_lifted)$values))^(1/d) # Upper bound for the JSR as in Parrilo & Jadbabaie (2008), Equation (11)
 }
 
 
