@@ -206,6 +206,47 @@ C_123 <- rbind_diags(p=1, M=2, d=3)
 theta_123relgc <- c(phi10_123, phi20_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
 theta_123relgc_expanded <- c(phi10_123, phi20_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
 
+
+## weight_function = "logit"
+
+# p=1, M=2, d=2, weightfun_pars=list(vars=1, lags=1), C_122
+gamma1_122_1_1 <- c(0.1, 0.2)
+theta_122logc_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vech(Omega1_122), vech(Omega2_122), gamma1_122_1_1)
+theta_122logc_1_1_expanded <- c(phi10_122, phi20_122, vec(A11_122), vec(A11_122), vech(Omega1_122), vech(Omega2_122), gamma1_122_1_1)
+
+# p=1, M=2, d=2, weightfun_pars=list(vars=1:2, lags=1), C_122
+gamma1_122_12_1 <- c(0.1, 0.2, 0.3)
+theta_122logc_12_1 <- c(phi10_122, phi20_122, vec(A11_122), vech(Omega1_122), vech(Omega2_122), gamma1_122_12_1)
+theta_122logc_12_1_expanded <- c(phi10_122, phi20_122, vec(A11_122), vec(A11_122), vech(Omega1_122), vech(Omega2_122), gamma1_122_12_1)
+
+# p=2, M=2, d=2, weightfun_pars=list(vars=2, lags=1), C_222
+gamma1_222_2_1 <- c(0.1, 0.2)
+theta_222logc_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), gamma1_222_2_1)
+theta_222logc_2_1_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                vech(Omega1_222), vech(Omega2_222), gamma1_222_2_1)
+
+# p=2, M=2, d=2, weightfun_pars=list(vars=1:2, lags=2), C_222
+gamma1_222_12_2 <- c(0.1, 0.2, 0.11, 0.22, 0.33)
+theta_222logc_12_2 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), gamma1_222_12_2)
+theta_222logc_12_2_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                 vech(Omega1_222), vech(Omega2_222), gamma1_222_12_2)
+
+# p=1, M=2, d=3, weightfun_pars=list(vars=1, lags=1), C_123
+gamma1_123_1_1 <- c(0.1, 0.2)
+theta_123logc_1_1 <- c(phi10_123, phi20_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), gamma1_123_1_1)
+theta_123logc_1_1_expanded <- c(phi10_123, phi20_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), gamma1_123_1_1)
+
+# p=1, M=2, d=3, weightfun_pars=list(vars=2:3, lags=1), C_123
+gamma1_123_23_1 <- c(0.1, 0.2, 0.3)
+theta_123logc_23_1 <- c(phi10_123, phi20_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), gamma1_123_23_1)
+theta_123logc_23_1_expanded <- c(phi10_123, phi20_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), gamma1_123_23_1)
+
+# p=1, M=2, d=3, weightfun_pars=list(vars=1:3, lags=1), AR matrices identical in both regimes
+gamma1_123_123_1 <- c(0.1, 0.2, 0.3, 0.4)
+theta_123logc_123_1 <- c(phi10_123, phi20_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), gamma1_123_123_1)
+theta_123logc_123_1_expanded <- c(phi10_123, phi20_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), gamma1_123_123_1)
+
+
 ## Models with mean_constraints
 
 # p=1, M=1, p=2, mean_constraints=list(1)
@@ -274,6 +315,20 @@ theta_123relgm_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A21_123), v
 theta_123relgcm <- c(phi10_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
 theta_123relgcm_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
 
+## weight_function == "logit"
+
+# p=1, M=2, d=2, weigthfun_pars=list(vars=1, lags=1), mean_constraints=list(1:2)
+theta_122logm_1_1 <- c(phi10_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), gamma1_122_1_1)
+theta_122logm_1_1_expanded <- c(phi10_122, phi10_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), gamma1_122_1_1)
+
+# p=2, M=2, d=2, weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), C_222
+theta_222logcm_12_2 <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), gamma1_222_12_2)
+theta_222logcm_12_2_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                 vech(Omega1_222), vech(Omega2_222), gamma1_222_12_2)
+
+# p=1, M=2, p=3, weightfun_pars=list(vars=1:3, lags=1), mean_constraints=list(1:2), C_123
+theta_123logcm_123_1 <- c(phi10_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), gamma1_123_123_1)
+theta_123logcm_123_1_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), gamma1_123_123_1)
 
 test_that("reform_constrained_pars works correctly", {
   # Models with mean_constraints
@@ -306,6 +361,15 @@ test_that("reform_constrained_pars works correctly", {
   expect_equal(reform_constrained_pars(p=1, M=2, d=3, params=theta_123relgcm, weight_function="relative_dens",
                                        AR_constraints=C_123, mean_constraints=list(1:2)), theta_123relgcm_expanded)
 
+  expect_equal(reform_constrained_pars(p=1, M=2, d=2, params=theta_122logm_1_1, weight_function="logit",
+                                       weightfun_pars=list(vars=1, lags=1), mean_constraints=list(1:2)), theta_122logm_1_1_expanded)
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222logcm_12_2, weight_function="logit",
+                                       weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222),
+               theta_222logcm_12_2_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=2, d=3, params=theta_123logcm_123_1, weight_function="logit",
+                                       weightfun_pars=list(vars=1:3, lags=1), mean_constraints=list(1:2), AR_constraints=C_123),
+               theta_123logcm_123_1_expanded)
+
   # Models with AR_constraints
   expect_equal(reform_constrained_pars(p=1, M=1, d=2, params=theta_112relgc, weight_function="relative_dens",
                                        AR_constraints=C_112), theta_112relgc_expanded)
@@ -323,6 +387,23 @@ test_that("reform_constrained_pars works correctly", {
                                        AR_constraints=C_213), theta_213relgc_expanded)
   expect_equal(reform_constrained_pars(p=1, M=2, d=3, params=theta_123relgc, weight_function="relative_dens",
                                        AR_constraints=C_123), theta_123relgc_expanded)
+
+  expect_equal(reform_constrained_pars(p=1, M=2, d=2, params=theta_122logc_1_1, weight_function="logit",
+                                       weightfun_pars=list(vars=1, lags=1), AR_constraints=C_122), theta_122logc_1_1_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=2, d=2, params=theta_122logc_12_1, weight_function="logit",
+                                       weightfun_pars=list(vars=1:2, lags=1), AR_constraints=C_122), theta_122logc_12_1_expanded)
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222logc_2_1, weight_function="logit",
+                                       weightfun_pars=list(vars=2, lags=1), AR_constraints=C_222), theta_222logc_2_1_expanded)
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222logc_12_2, weight_function="logit",
+                                       weightfun_pars=list(vars=1:2, lags=2), AR_constraints=C_222), theta_222logc_12_2_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=2, d=3, params=theta_123logc_1_1, weight_function="logit",
+                                       weightfun_pars=list(vars=1, lags=1), AR_constraints=C_123), theta_123logc_1_1_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=2, d=3, params=theta_123logc_23_1, weight_function="logit",
+                                       weightfun_pars=list(vars=2:3, lags=1), AR_constraints=C_123), theta_123logc_23_1_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=2, d=3, params=theta_123logc_123_1, weight_function="logit",
+                                       weightfun_pars=list(vars=1:3, lags=1), AR_constraints=C_123), theta_123logc_123_1_expanded)
+
+
 })
 
 

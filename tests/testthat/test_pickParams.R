@@ -201,8 +201,8 @@ test_that("pick_Ami work correctly", {
   expect_equal(pick_Ami(p=1, M=2, d=3, m=1, i=1, params=theta_123relg), A11_123)
   expect_equal(pick_Ami(p=1, M=2, d=3, m=2, i=1, params=theta_123relg), A21_123)
 
-  expect_equal(pick_Ami(p=1, M=2, d=2, m=1, i=1, params=theta_122log_2_1), A11_122)
-  expect_equal(pick_Ami(p=1, M=2, d=2, m=2, i=1, params=theta_122log_2_1), A21_122)
+  expect_equal(pick_Ami(p=1, M=2, d=2, m=1, i=1, params=theta_122log_1_1), A11_122)
+  expect_equal(pick_Ami(p=1, M=2, d=2, m=2, i=1, params=theta_122log_1_1), A21_122)
   expect_equal(pick_Ami(p=2, M=2, d=2, m=1, i=1, params=theta_222log_12_2), A11_222)
   expect_equal(pick_Ami(p=2, M=2, d=2, m=1, i=2, params=theta_222log_12_2), A12_222)
   expect_equal(pick_Ami(p=2, M=2, d=2, m=2, i=1, params=theta_222log_12_2), A21_222)

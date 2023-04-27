@@ -183,7 +183,7 @@ reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative
                                     cond_dist=c("Gaussian", "Student"),
                                     identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
                                     AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
-                                    change_na=FALSE) {
+                                    weightfun_pars=NULL, change_na=FALSE) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
@@ -262,7 +262,8 @@ reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative
     if(weight_function == "relative_dens") {
       weightpars <- params[(d*M - less_pars + q + n_covmatspars + 1):(d*M - less_pars + q + n_covmatspars + M - 1)]
     } else if(weight_function == "logit") {
-      stop("Logit weight function is not yet implemented to reform_constraints_pars")
+      weightpars <- params[(d*M - less_pars + q + n_covmatspars + 1):(d*M - less_pars + q + n_covmatspars +
+                                                                        (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]]))]
     }
   } else { # No weightpars if M == 1
     weightpars <- numeric(0)
