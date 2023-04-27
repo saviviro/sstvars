@@ -65,8 +65,8 @@ of a given matrix from the principal diagonal downwards (including elements on t
           where \eqn{\gamma_m} \eqn{(k\times 1)}, \eqn{m=1,...,M-1} contains the logit-regression coefficients of the \eqn{m}th regime.
           Specifically, for switching variables with indices in \eqn{J\subset\lbrace 1,...,d\rbrace}, and with
          \eqn{\tilde{p}\in\lbrace 1,...,p\rbrace} lags included, \eqn{\gamma_m} contains the coefficients for the vector
-         \eqn{z_{t-1} = (\tilde{z}_{\min\lbrace J\rbrace},...,\tilde{z}_{\max\lbrace J\rbrace})}, where
-         \eqn{\tilde{z}_{j} =(1,y_{j,t-1},...,y_{j,t-\tilde{p}})}, \eqn{j\in J}. So \eqn{k=|J|(1 + \tilde{p})}
+         \eqn{z_{t-1} = (1,\tilde{z}_{\min\lbrace J\rbrace},...,\tilde{z}_{\max\lbrace J\rbrace})}, where
+         \eqn{\tilde{z}_{j} =(y_{j,t-1},...,y_{j,t-\tilde{p}})}, \eqn{j\in J}. So \eqn{k=1+|J|\tilde{p}}
          where \eqn{|J|} denotes the number of elements in \eqn{J}.}
   }
 }

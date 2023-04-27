@@ -95,16 +95,18 @@ gamma1_122_1_1 <- c(0.1, 0.2)
 theta_122log_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), gamma1_122_1_1)
 
 # p=1, M=2, d=2, weightfun_pars=list(vars=1:2, lags=1)
-gamma1_122_12_1 <- c(0.1, 0.2, 0.3, 0.4)
+gamma1_122_12_1 <- c(0.1, 0.2, 0.3)
 theta_122log_12_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), gamma1_122_12_1)
 
 # p=2, M=2, d=2, weightfun_pars=list(vars=2, lags=1)
 gamma1_222_2_1 <- c(0.1, 0.2)
-theta_222log_2_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), gamma1_222_2_1)
+theta_222log_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                      vech(Omega1_222), vech(Omega2_222), gamma1_222_2_1)
 
 # p=2, M=2, d=2, weightfun_pars=list(vars=1:2, lags=2)
-gamma1_222_12_2 <- c(0.1, 0.2, 0.3, 0.11, 0.22, 0.33)
-theta_222log_12_2 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), gamma1_222_12_2)
+gamma1_222_12_2 <- c(0.1, 0.2, 0.11, 0.22, 0.33)
+theta_222log_12_2 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                       vech(Omega1_222), vech(Omega2_222),gamma1_222_12_2)
 
 # p=2, M=3, d=2, weightfun_pars=list(vars=1, lags=1)
 phi10_232 <- phi10_132; phi20_232 <- phi20_132; phi30_232 <- phi30_132
@@ -118,7 +120,7 @@ theta_232log_1_1 <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232
                       gamma1_232_1_1, gamma2_232_1_1)
 
 # p=2, M=3, d=2, weightfun_pars=list(vars=1:2, lags=1)
-gamma1_232_12_1 <- c(0.1, 0.2, 0.101, 0.202); gamma2_232_12_1 <- c(0.11, 0.22, 0.111, 0.222)
+gamma1_232_12_1 <- c(0.1, 0.2, 0.202); gamma2_232_12_1 <- c(0.11, 0.111, 0.222)
 theta_232log_12_1 <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232), vec(A22_232),
                        vec(A31_232), vec(A32_232), vech(Omega1_232), vech(Omega2_232), vech(Omega3_232),
                        gamma1_232_12_1, gamma2_232_12_1)
@@ -130,55 +132,25 @@ theta_232log_2_2 <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232
                        gamma1_232_2_2, gamma2_232_2_2)
 
 # p=2, M=3, d=2, weightfun_pars=list(vars=1:2, lags=2)
-gamma1_232_12_2 <- c(0.1, 0.2, 0.3, 0.101, 0.202, 0.303); gamma2_232_12_2 <- c(0.11, 0.22, 0.33, 0.111, 0.222, 0.333)
+gamma1_232_12_2 <- c(0.1, 0.2, 0.101, 0.202, 0.303); gamma2_232_12_2 <- c(0.11, 0.22, 0.111, 0.222, 0.333)
 theta_232log_12_2 <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232), vec(A22_232),
                       vec(A31_232), vec(A32_232), vech(Omega1_232), vech(Omega2_232), vech(Omega3_232),
                       gamma1_232_12_2, gamma2_232_12_2)
 
 # p=1, M=2, d=3, weightfun_pars=list(vars=1, lags=1)
-
-# CONTINUE HERE
+gamma1_123_1_1 <- c(0.1, 0.2)
+theta_123log_1_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123),
+                      vech(Omega2_123), gamma1_123_1_1)
 
 # p=1, M=2, d=3, weightfun_pars=list(vars=2:3, lags=1)
+gamma1_123_23_1 <- c(0.1, 0.2, 0.3)
+theta_123log_23_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123),
+                      vech(Omega2_123), gamma1_123_23_1)
 
 # p=1, M=2, d=3, weightfun_pars=list(vars=1:3, lags=1)
-
-
-test_that("pick_weightpars work correctly", {
-  # logit, Gaussian
-  expect_equal(pick_weightpars(p=1, M=2, d=2, params=theta_122log_1_1, weight_function="logit", cond_dist="Gaussian",
-                               weightfun_pars=list(vars=1, lags=1)), gamma1_122_1_1)
-  expect_equal(pick_weightpars(p=1, M=2, d=2, params=theta_122log_12_1, weight_function="logit", cond_dist="Gaussian",
-                               weightfun_pars=list(vars=1:2, lags=1)), gamma1_122_12_1)
-  expect_equal(pick_weightpars(p=2, M=2, d=2, params=theta_222log_2_1, weight_function="logit", cond_dist="Gaussian",
-                               weightfun_pars=list(vars=2, lags=1)), gamma1_222_2_1)
-  expect_equal(pick_weightpars(p=2, M=2, d=2, params=theta_222log_12_2, weight_function="logit", cond_dist="Gaussian",
-                               weightfun_pars=list(vars=1:2, lags=2)), gamma1_222_12_2)
-  expect_equal(pick_weightpars(p=2, M=3, d=2, params=theta_232log_1_1, weight_function="logit", cond_dist="Gaussian",
-                               weightfun_pars=list(vars=1, lags=1)), c(gamma1_232_1_1, gamma2_232_1_1))
-  expect_equal(pick_weightpars(p=2, M=3, d=2, params=theta_232log_12_1, weight_function="logit", cond_dist="Gaussian",
-                               weightfun_pars=list(vars=1:2, lags=1)), c(gamma1_232_12_1, gamma2_232_12_1))
-  expect_equal(pick_weightpars(p=2, M=3, d=2, params=theta_232log_2_2, weight_function="logit", cond_dist="Gaussian",
-                               weightfun_pars=list(vars=2, lags=2)), c(gamma1_232_2_2, gamma2_232_2_2))
-  expect_equal(pick_weightpars(p=2, M=3, d=2, params=theta_232log_12_2, weight_function="logit", cond_dist="Gaussian",
-                               weightfun_pars=list(vars=1:2, lags=2)), c(gamma1_232_12_2, gamma2_232_12_2))
-
-  # relative_dens
-  expect_equal(pick_weightpars(p=1, M=1, d=2, params=theta_112relg, weight_function="relative_dens", cond_dist="Gaussian"), 1)
-  expect_equal(pick_weightpars(p=2, M=1, d=2, params=theta_212relg, weight_function="relative_dens", cond_dist="Gaussian"), 1)
-  expect_equal(pick_weightpars(p=3, M=1, d=2, params=theta_312relg, weight_function="relative_dens", cond_dist="Gaussian"), 1)
-  expect_equal(pick_weightpars(p=1, M=2, d=2, params=theta_122relg, weight_function="relative_dens", cond_dist="Gaussian"),
-               c(alpha1_122, 1 - alpha1_122))
-  expect_equal(pick_weightpars(p=2, M=2, d=2, params=theta_222relg, weight_function="relative_dens", cond_dist="Gaussian"),
-               c(alpha1_222, 1 - alpha1_222))
-  expect_equal(pick_weightpars(p=1, M=3, d=2, params=theta_132relg, weight_function="relative_dens", cond_dist="Gaussian"),
-               c(alpha1_132, alpha2_132, 1 - alpha1_132 - alpha2_132))
-  expect_equal(pick_weightpars(p=1, M=1, d=3, params=theta_113relg, weight_function="relative_dens", cond_dist="Gaussian"), 1)
-  expect_equal(pick_weightpars(p=2, M=1, d=3, params=theta_213relg, weight_function="relative_dens", cond_dist="Gaussian"), 1)
-  expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123relg, weight_function="relative_dens", cond_dist="Gaussian"),
-               c(alpha1_123, 1 - alpha1_123))
-
-})
+gamma1_123_123_1 <- c(0.1, 0.2, 0.3, 0.4)
+theta_123log_123_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123),
+                       vech(Omega2_123), gamma1_123_123_1)
 
 test_that("pick_phi0 work correctly", {
   expect_equal(pick_phi0(M=1, d=2, params=theta_112relg), as.matrix(phi10_112))
@@ -195,6 +167,16 @@ test_that("pick_phi0 work correctly", {
   expect_equal(pick_phi0(M=1, d=3, params=theta_213relg), as.matrix(phi10_213))
   expect_equal(pick_phi0(M=2, d=3, params=theta_123relg)[,1], phi10_123)
   expect_equal(pick_phi0(M=2, d=3, params=theta_123relg)[,2], phi20_123)
+
+  expect_equal(pick_phi0(M=2, d=2, params=theta_122log_12_1)[,1], phi10_122)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_122log_12_1)[,2], phi20_122)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_222log_2_1)[,1], phi10_222)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_222log_2_1)[,2], phi20_222)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_222log_12_2)[,1], phi10_222)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_222log_12_2)[,2], phi20_222)
+  expect_equal(pick_phi0(M=3, d=2, params=theta_232log_12_2)[,1], phi10_232)
+  expect_equal(pick_phi0(M=3, d=2, params=theta_232log_12_2)[,2], phi20_232)
+  expect_equal(pick_phi0(M=3, d=2, params=theta_232log_12_2)[,3], phi30_232)
 })
 
 test_that("pick_Ami work correctly", {
@@ -218,6 +200,13 @@ test_that("pick_Ami work correctly", {
   expect_equal(pick_Ami(p=2, M=1, d=3, m=1, i=2, params=theta_213relg), A12_213)
   expect_equal(pick_Ami(p=1, M=2, d=3, m=1, i=1, params=theta_123relg), A11_123)
   expect_equal(pick_Ami(p=1, M=2, d=3, m=2, i=1, params=theta_123relg), A21_123)
+
+  expect_equal(pick_Ami(p=1, M=2, d=2, m=1, i=1, params=theta_122log_2_1), A11_122)
+  expect_equal(pick_Ami(p=1, M=2, d=2, m=2, i=1, params=theta_122log_2_1), A21_122)
+  expect_equal(pick_Ami(p=2, M=2, d=2, m=1, i=1, params=theta_222log_12_2), A11_222)
+  expect_equal(pick_Ami(p=2, M=2, d=2, m=1, i=2, params=theta_222log_12_2), A12_222)
+  expect_equal(pick_Ami(p=2, M=2, d=2, m=2, i=1, params=theta_222log_12_2), A21_222)
+  expect_equal(pick_Ami(p=2, M=2, d=2, m=2, i=2, params=theta_222log_12_2), A22_222)
 
   # unvec=FALSE
   expect_equal(pick_Ami(p=1, M=1, d=2, m=1, i=1, params=theta_112relg, unvec=FALSE), vec(A11_112))
@@ -247,6 +236,13 @@ test_that("pick_Am work correctly", {
   expect_equal(pick_Am(p=2, M=1, d=3, m=1, params=theta_213relg)[, , 2], A12_213)
   expect_equal(pick_Am(p=1, M=2, d=3, m=1, params=theta_123relg)[, , 1], A11_123)
   expect_equal(pick_Am(p=1, M=2, d=3, m=2, params=theta_123relg)[, , 1], A21_123)
+
+  expect_equal(pick_Am(p=1, M=2, d=2, m=1, params=theta_122log_12_1)[, , 1], A11_122)
+  expect_equal(pick_Am(p=1, M=2, d=2, m=2, params=theta_122log_12_1)[, , 1], A21_122)
+  expect_equal(pick_Am(p=2, M=2, d=2, m=1, params=theta_222log_2_1)[, , 1], A11_222)
+  expect_equal(pick_Am(p=2, M=2, d=2, m=1, params=theta_222log_2_1)[, , 2], A12_222)
+  expect_equal(pick_Am(p=2, M=2, d=2, m=2, params=theta_222log_2_1)[, , 1], A21_222)
+  expect_equal(pick_Am(p=2, M=2, d=2, m=2, params=theta_222log_2_1)[, , 2], A22_222)
 })
 
 test_that("pick_allA work correctly", {
@@ -270,6 +266,13 @@ test_that("pick_allA work correctly", {
   expect_equal(pick_allA(p=2, M=1, d=3, params=theta_213relg)[, , 2, 1], A12_213)
   expect_equal(pick_allA(p=1, M=2, d=3, params=theta_123relg)[, , 1, 1], A11_123)
   expect_equal(pick_allA(p=1, M=2, d=3, params=theta_123relg)[, , 1, 2], A21_123)
+
+  expect_equal(pick_allA(p=1, M=2, d=2, params=theta_122log_1_1)[, , 1, 1], A11_122)
+  expect_equal(pick_allA(p=1, M=2, d=2, params=theta_122log_1_1)[, , 1, 2], A21_122)
+  expect_equal(pick_allA(p=2, M=2, d=2, params=theta_222log_12_2)[, , 1, 1], A11_222)
+  expect_equal(pick_allA(p=2, M=2, d=2, params=theta_222log_12_2)[, , 2, 1], A12_222)
+  expect_equal(pick_allA(p=2, M=2, d=2, params=theta_222log_12_2)[, , 1, 2], A21_222)
+  expect_equal(pick_allA(p=2, M=2, d=2, params=theta_222log_12_2)[, , 2, 2], A22_222)
 })
 
 test_that("pick_Omegas work correctly", {
@@ -287,9 +290,54 @@ test_that("pick_Omegas work correctly", {
   expect_equal(pick_Omegas(p=2, M=1, d=3, params=theta_213relg)[, , 1], Omega1_213)
   expect_equal(pick_Omegas(p=1, M=2, d=3, params=theta_123relg)[, , 1], Omega1_123)
   expect_equal(pick_Omegas(p=1, M=2, d=3, params=theta_123relg)[, , 2], Omega2_123)
+
+  expect_equal(pick_Omegas(p=1, M=2, d=2, params=theta_122log_12_1)[, , 1], Omega1_122)
+  expect_equal(pick_Omegas(p=1, M=2, d=2, params=theta_122log_12_1)[, , 2], Omega2_122)
+  expect_equal(pick_Omegas(p=2, M=2, d=2, params=theta_222log_2_1)[, , 1], Omega1_222)
+  expect_equal(pick_Omegas(p=2, M=2, d=2, params=theta_222log_2_1)[, , 2], Omega2_222)
 })
 
+test_that("pick_weightpars work correctly", {
+  # logit, Gaussian
+  expect_equal(pick_weightpars(p=1, M=2, d=2, params=theta_122log_1_1, weight_function="logit", cond_dist="Gaussian",
+                               weightfun_pars=list(vars=1, lags=1)), gamma1_122_1_1)
+  expect_equal(pick_weightpars(p=1, M=2, d=2, params=theta_122log_12_1, weight_function="logit", cond_dist="Gaussian",
+                               weightfun_pars=list(vars=1:2, lags=1)), gamma1_122_12_1)
+  expect_equal(pick_weightpars(p=2, M=2, d=2, params=theta_222log_2_1, weight_function="logit", cond_dist="Gaussian",
+                               weightfun_pars=list(vars=2, lags=1)), gamma1_222_2_1)
+  expect_equal(pick_weightpars(p=2, M=2, d=2, params=theta_222log_12_2, weight_function="logit", cond_dist="Gaussian",
+                               weightfun_pars=list(vars=1:2, lags=2)), gamma1_222_12_2)
+  expect_equal(pick_weightpars(p=2, M=3, d=2, params=theta_232log_1_1, weight_function="logit", cond_dist="Gaussian",
+                               weightfun_pars=list(vars=1, lags=1)), c(gamma1_232_1_1, gamma2_232_1_1))
+  expect_equal(pick_weightpars(p=2, M=3, d=2, params=theta_232log_12_1, weight_function="logit", cond_dist="Gaussian",
+                               weightfun_pars=list(vars=1:2, lags=1)), c(gamma1_232_12_1, gamma2_232_12_1))
+  expect_equal(pick_weightpars(p=2, M=3, d=2, params=theta_232log_2_2, weight_function="logit", cond_dist="Gaussian",
+                               weightfun_pars=list(vars=2, lags=2)), c(gamma1_232_2_2, gamma2_232_2_2))
+  expect_equal(pick_weightpars(p=2, M=3, d=2, params=theta_232log_12_2, weight_function="logit", cond_dist="Gaussian",
+                               weightfun_pars=list(vars=1:2, lags=2)), c(gamma1_232_12_2, gamma2_232_12_2))
+  expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123log_1_1, weight_function="logit", cond_dist="Gaussian",
+                               weightfun_pars=list(vars=1, lags=1)), gamma1_123_1_1)
+  expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123log_23_1, weight_function="logit", cond_dist="Gaussian",
+                               weightfun_pars=list(vars=2:3, lags=1)), gamma1_123_23_1)
+  expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123log_123_1, weight_function="logit", cond_dist="Gaussian",
+                               weightfun_pars=list(vars=1:3, lags=1)), gamma1_123_123_1)
 
+  # relative_dens
+  expect_equal(pick_weightpars(p=1, M=1, d=2, params=theta_112relg, weight_function="relative_dens", cond_dist="Gaussian"), 1)
+  expect_equal(pick_weightpars(p=2, M=1, d=2, params=theta_212relg, weight_function="relative_dens", cond_dist="Gaussian"), 1)
+  expect_equal(pick_weightpars(p=3, M=1, d=2, params=theta_312relg, weight_function="relative_dens", cond_dist="Gaussian"), 1)
+  expect_equal(pick_weightpars(p=1, M=2, d=2, params=theta_122relg, weight_function="relative_dens", cond_dist="Gaussian"),
+               c(alpha1_122, 1 - alpha1_122))
+  expect_equal(pick_weightpars(p=2, M=2, d=2, params=theta_222relg, weight_function="relative_dens", cond_dist="Gaussian"),
+               c(alpha1_222, 1 - alpha1_222))
+  expect_equal(pick_weightpars(p=1, M=3, d=2, params=theta_132relg, weight_function="relative_dens", cond_dist="Gaussian"),
+               c(alpha1_132, alpha2_132, 1 - alpha1_132 - alpha2_132))
+  expect_equal(pick_weightpars(p=1, M=1, d=3, params=theta_113relg, weight_function="relative_dens", cond_dist="Gaussian"), 1)
+  expect_equal(pick_weightpars(p=2, M=1, d=3, params=theta_213relg, weight_function="relative_dens", cond_dist="Gaussian"), 1)
+  expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123relg, weight_function="relative_dens", cond_dist="Gaussian"),
+               c(alpha1_123, 1 - alpha1_123))
+
+})
 
 test_that("pick_regime work correctly", {
   expect_equal(pick_regime(p=1, M=1, d=2, m=1, params=theta_112relg), c(phi10_112, vec(A11_112), vech(Omega1_112)))
@@ -307,4 +355,11 @@ test_that("pick_regime work correctly", {
   expect_equal(pick_regime(p=2, M=1, d=3, m=1, params=theta_213relg), c(phi10_213, vec(A11_213), vec(A12_213), vech(Omega1_213)))
   expect_equal(pick_regime(p=1, M=2, d=3, m=1, params=theta_123relg), c(phi10_123, vec(A11_123), vech(Omega1_123)))
   expect_equal(pick_regime(p=1, M=2, d=3, m=2, params=theta_123relg), c(phi20_123, vec(A21_123), vech(Omega2_123)))
+
+  expect_equal(pick_regime(p=1, M=2, d=2, m=1, params=theta_122log_1_1), c(phi10_122, vec(A11_122), vech(Omega1_122)))
+  expect_equal(pick_regime(p=1, M=2, d=2, m=2, params=theta_122log_1_1), c(phi20_122, vec(A21_122), vech(Omega2_122)))
+  expect_equal(pick_regime(p=2, M=2, d=2, m=1, params=theta_222log_12_2), c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222)))
+  expect_equal(pick_regime(p=2, M=2, d=2, m=2, params=theta_222log_12_2), c(phi20_222, vec(A21_222), vec(A22_222), vech(Omega2_222)))
 })
+
+
