@@ -55,6 +55,7 @@
 #'   should not be restricted to be the same among any regimes. \strong{This constraint is available only for mean parametrized models;
 #'   that is, when \code{parametrization="mean"}.}
 #' @param B_constraints NOT YET IMPLEMENTED!
+#' @param weight_constraints NOT YET IMPLEMENTED!
 #' @param weightfun_pars \describe{
 #'   \item{If \code{weight_function == "relative_dens"}:}{Not used.}
 #'   \item{If \code{weight_function == "logit"}:}{a list of two elements: \describe{
@@ -106,7 +107,7 @@
 loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
                           parametrization=c("intercept", "mean"),
                           identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
-                          AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
+                          AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL, weight_constraints=NULL,
                           weightfun_pars=NULL,
                           to_return=c("loglik", "tw", "loglik_and_tw", "terms", "regime_cmeans", "total_cmeans", "total_ccovs"),
                           check_params=TRUE, minval=NULL, stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {

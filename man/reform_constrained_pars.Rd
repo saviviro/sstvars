@@ -15,6 +15,7 @@ reform_constrained_pars(
   AR_constraints = NULL,
   mean_constraints = NULL,
   B_constraints = NULL,
+  weight_constraints = NULL,
   change_na = FALSE
 )
 }
@@ -75,6 +76,8 @@ should not be restricted to be the same among any regimes. \strong{This constrai
 that is, when \code{parametrization="mean"}.}}
 
 \item{B_constraints}{NOT YET IMPLEMENTED!}
+
+\item{weight_constraints}{NOT YET IMPLEMENTED!}
 
 \item{change_na}{change NA parameter values of constrained models to -9.999?}
 }

@@ -16,6 +16,7 @@ loglikelihood(
   AR_constraints = NULL,
   mean_constraints = NULL,
   B_constraints = NULL,
+  weight_constraints = NULL,
   weightfun_pars = NULL,
   to_return = c("loglik", "tw", "loglik_and_tw", "terms", "regime_cmeans",
     "total_cmeans", "total_ccovs"),
@@ -89,6 +90,8 @@ should not be restricted to be the same among any regimes. \strong{This constrai
 that is, when \code{parametrization="mean"}.}}
 
 \item{B_constraints}{NOT YET IMPLEMENTED!}
+
+\item{weight_constraints}{NOT YET IMPLEMENTED!}
 
 \item{weightfun_pars}{\describe{
   \item{If \code{weight_function == "relative_dens"}:}{Not used.}
