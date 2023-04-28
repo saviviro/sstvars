@@ -14,6 +14,7 @@ in_paramspace(
   all_Omegas,
   weightpars,
   df,
+  weigthfun_pars = NULL,
   stab_tol = 0.001,
   posdef_tol = 1e-08,
   df_tol = 1e-08

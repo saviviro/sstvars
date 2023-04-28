@@ -60,7 +60,7 @@ stab_conds_satisfied <- function(p, M, d, params, all_boldA=NULL, tolerance=1e-3
 #'  @keywords internal
 
 in_paramspace <- function(p, M, d, weight_function, cond_dist, all_boldA, all_Omegas, weightpars, df,
-                          stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
+                          weigthfun_pars=NULL, stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
   # in_paramspace is internal function that always takes in non-constrained reduced form parameter vector
   # Reform the parameter vectors before checking with in_paramspace
 
@@ -75,8 +75,10 @@ in_paramspace <- function(p, M, d, weight_function, cond_dist, all_boldA, all_Om
     } else if(any(weightpars <= 0)) {
       return(FALSE)
     }
+  } else if(weight_function == "logit") {
+    # All real numbers are ok, so nothing to check
   } else {
-    stop("Other weight functions are not yet implemented!")
+    stop("Other weight functions that relative_dens and logit are not yet implemented to in_paramspace!")
   }
   if(!stab_conds_satisfied(p=p, M=M, d=d, all_boldA=all_boldA, tolerance=stab_tol)) {
     return(FALSE)
