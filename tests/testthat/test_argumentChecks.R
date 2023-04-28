@@ -531,32 +531,38 @@ test_that("n_params works correctly", {
   expect_equal(n_params(p=2, M=1, d=3, weight_function="relative_dens", cond_dist="Gaussian"), 27)
   expect_equal(n_params(p=1, M=2, d=3, weight_function="relative_dens", cond_dist="Gaussian"), 37)
 
-  expect_equal(n_params(p=1, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian",
-                        AR_constraints=C_112), 7)
-  expect_equal(n_params(p=1, M=2, d=2, weight_function="relative_dens", cond_dist="Gaussian",
-                        AR_constraints=C_122), 15)
-  expect_equal(n_params(p=2, M=2, d=2, weight_function="relative_dens", cond_dist="Gaussian",
-                        AR_constraints=C_222_2), 15)
-  expect_equal(n_params(p=1, M=3, d=2, weight_function="relative_dens", cond_dist="Gaussian",
-                        AR_constraints=C_132), 21)
-  expect_equal(n_params(p=1, M=1, d=3, weight_function="relative_dens", cond_dist="Gaussian",
-                        AR_constraints=C_113), 12)
-  expect_equal(n_params(p=2, M=1, d=3, weight_function="relative_dens", cond_dist="Gaussian",
-                        AR_constraints=C_213), 10)
-  expect_equal(n_params(p=1, M=2, d=3, weight_function="relative_dens", cond_dist="Gaussian",
-                        AR_constraints=C_123), 28)
-  expect_equal(n_params(p=1, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian",
-                        AR_constraints=C_112, mean_constraints=list(1)), 7)
-  expect_equal(n_params(p=1, M=2, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+  expect_equal(n_params(p=1, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=1, lags=1), cond_dist="Gaussian"), 20)
+  expect_equal(n_params(p=1, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=1:2, lags=1), cond_dist="Gaussian"), 21)
+  expect_equal(n_params(p=2, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=2, lags=1), cond_dist="Gaussian"), 28)
+  expect_equal(n_params(p=2, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=1:2, lags=2), cond_dist="Gaussian"), 31)
+
+  expect_equal(n_params(p=1, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian", AR_constraints=C_112), 7)
+  expect_equal(n_params(p=1, M=2, d=2, weight_function="relative_dens", cond_dist="Gaussian", AR_constraints=C_122), 15)
+  expect_equal(n_params(p=2, M=2, d=2, weight_function="relative_dens", cond_dist="Gaussian", AR_constraints=C_222_2), 15)
+  expect_equal(n_params(p=1, M=3, d=2, weight_function="relative_dens", cond_dist="Gaussian", AR_constraints=C_132), 21)
+  expect_equal(n_params(p=1, M=1, d=3, weight_function="relative_dens", cond_dist="Gaussian", AR_constraints=C_113), 12)
+  expect_equal(n_params(p=2, M=1, d=3, weight_function="relative_dens", cond_dist="Gaussian", AR_constraints=C_213), 10)
+  expect_equal(n_params(p=1, M=2, d=3, weight_function="relative_dens", cond_dist="Gaussian", AR_constraints=C_123), 28)
+  expect_equal(n_params(p=1, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian", AR_constraints=C_112,
+                        mean_constraints=list(1)), 7)
+  expect_equal(n_params(p=1, M=2, d=2, weight_function="relative_dens", cond_dist="Gaussian", mean_constraints=list(1:2)), 17)
+  expect_equal(n_params(p=2, M=2, d=2, weight_function="relative_dens", cond_dist="Gaussian", AR_constraints=C_222,
                         mean_constraints=list(1:2)), 17)
-  expect_equal(n_params(p=2, M=2, d=2, weight_function="relative_dens", cond_dist="Gaussian",
-                        AR_constraints=C_222, mean_constraints=list(1:2)), 17)
-  expect_equal(n_params(p=1, M=3, d=2, weight_function="relative_dens", cond_dist="Gaussian",
-                        AR_constraints=C_132, mean_constraints=list(1:3)), 17)
-  expect_equal(n_params(p=1, M=2, d=3, weight_function="relative_dens", cond_dist="Gaussian",
-                        mean_constraints=list(1:2)), 34)
-  expect_equal(n_params(p=1, M=2, d=3, weight_function="relative_dens", cond_dist="Gaussian",
-                        AR_constraints=C_123, mean_constraints=list(1:2)), 25)
+  expect_equal(n_params(p=1, M=3, d=2, weight_function="relative_dens", cond_dist="Gaussian", AR_constraints=C_132,
+                        mean_constraints=list(1:3)), 17)
+  expect_equal(n_params(p=1, M=2, d=3, weight_function="relative_dens", cond_dist="Gaussian", mean_constraints=list(1:2)), 34)
+  expect_equal(n_params(p=1, M=2, d=3, weight_function="relative_dens", cond_dist="Gaussian", AR_constraints=C_123,
+                        mean_constraints=list(1:2)), 25)
+
+  expect_equal(n_params(p=2, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=2, lags=1), cond_dist="Gaussian",
+                        AR_constraints=C_222), 20)
+  expect_equal(n_params(p=2, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=1:2, lags=2), cond_dist="Gaussian",
+                        AR_constraints=C_222), 23)
+  expect_equal(n_params(p=1, M=2, d=3, weight_function="logit", weightfun_pars=list(vars=2:3, lags=1), cond_dist="Gaussian",
+                        AR_constraints=C_123), 30)
+  expect_equal(n_params(p=1, M=2, d=3, weight_function="logit", weightfun_pars=list(vars=1:3, lags=1), cond_dist="Gaussian",
+                        AR_constraints=C_123, mean_constraints=list(1:2)), 28)
+
 })
 
 

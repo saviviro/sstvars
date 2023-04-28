@@ -114,6 +114,7 @@ check_params <- function(p, M, d, params, weight_function=c("relative_dens", "lo
                          parametrization=c("intercept", "mean"),
                          identification=c("reduced_form", "recursive", "heteroskedasticity"),
                          AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
+                         weightfun_pars=NULL,
                          stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
   check_pMd(p=p, M=M, d=d)
   weight_function <- match.arg(weight_function)
@@ -243,7 +244,8 @@ check_data <- function(data, p) {
 
 n_params <- function(p, M, d, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
                      identification=c("reduced_form", "recursive", "heteroskedasticity"),
-                     AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL) {
+                     AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
+                     weightfun_pars=NULL) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
@@ -267,8 +269,10 @@ n_params <- function(p, M, d, weight_function=c("relative_dens", "logit"), cond_
   }
   if(weight_function == "relative_dens") {
     n_weight_pars <- M - 1
+  } else if(weight_function == "logit") {
+    n_weight_pars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
   } else { # weight_function == "logit"
-    stop("only relative_dens weight fn is implemented to n_params")
+    stop("only relative_dens and logit weight fn is implemented to n_params")
     n_weight_pars <- NULL
   }
   if(cond_dist == "Gaussian") {
