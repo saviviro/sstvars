@@ -140,6 +140,26 @@ alpha1_123_2 <- 0.2
 theta_123relg_2 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123),
                      vech(Omega2_123), alpha1_123_2)
 
+## weight_function = "logit"
+
+# p=1, M=2, d=2, weightfun_pars=list(vars=1, lags=1)
+gamma1_122_1_1 <- c(0.1, 0.2)
+theta_122log_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), gamma1_122_1_1)
+
+# p=1, M=2, d=2, weightfun_pars=list(vars=1:2, lags=1)
+gamma1_122_12_1 <- c(0.1, 0.2, 0.3)
+theta_122log_12_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), gamma1_122_12_1)
+
+# p=2, M=2, d=2, weightfun_pars=list(vars=2, lags=1)
+gamma1_222_2_1 <- c(0.1, 0.2)
+theta_222log_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                      vech(Omega1_222), vech(Omega2_222), gamma1_222_2_1)
+
+# p=2, M=2, d=2, weightfun_pars=list(vars=1:2, lags=2)
+gamma1_222_12_2 <- c(0.1, 0.2, 0.11, 0.22, 0.33)
+theta_222log_12_2 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                       vech(Omega1_222), vech(Omega2_222),gamma1_222_12_2)
+
 ### Constrained models
 
 ## A(M)(p)_(p)(M)(d)
@@ -475,13 +495,14 @@ test_that("form_boldA works correctly", {
 
 calc_mu <- function(p, M, d, params, weight_function = c("relative_dens", "logit"), cond_dist = c("Gaussian", "Student"),
                     identification = c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
-                    AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL) {
+                    AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL, weightfun_pars=NULL) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
   params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
                                     identification=identification, AR_constraints=AR_constraints,
-                                    mean_constraints=mean_constraints, B_constraints=B_constraints)
+                                    mean_constraints=mean_constraints, B_constraints=B_constraints,
+                                    weightfun_pars=weightfun_pars)
   all_A <- pick_allA(p=p, M=M, d=d, params=params)
   all_phi0 <- pick_phi0(M=M, d=d, params=params)
   vapply(1:M, function(m) solve(diag(d) - rowSums(all_A[, , , m, drop=FALSE], dims=2), all_phi0[,m]), numeric(d))
@@ -501,6 +522,14 @@ theta_112relgc_mu <- change_parametrization(p=1, M=1, d=2, params=theta_112relgc
 theta_222relgc2_mu <- change_parametrization(p=2, M=2, d=2, params=theta_222relgc2, AR_constraints=C_222_2, change_to="mean")
 theta_132relgc_mu <- change_parametrization(p=1, M=3, d=2, params=theta_132relgc, AR_constraints=C_132, change_to="mean")
 theta_123relgc_mu <- change_parametrization(p=1, M=2, d=3, params=theta_123relgc, AR_constraints=C_123, change_to="mean")
+
+theta_122log_1_1_mu <- change_parametrization(p=1, M=2, d=2, params=theta_122log_1_1, weight_function="logit",
+                                              weightfun_pars=list(vars=1, lags=1), change_to="mean")
+theta_222logc_12_2_mu <- change_parametrization(p=2, M=2, d=2, params=theta_222logc_12_2, weight_function="logit",
+                                                weightfun_pars=list(vars=1:2, lags=2), AR_constraints=C_222, change_to="mean")
+theta_123logc_123_1_mu <- change_parametrization(p=1, M=2, d=3, params=theta_123logc_123_1, weight_function="logit",
+                                                 weightfun_pars=list(vars=1:3, lags=1), AR_constraints=C_123, change_to="mean")
+
 
 test_that("change_parametrization works correctly", {
   expect_equal(pick_phi0(M=1, d=2, params=theta_112relg_mu), calc_mu(p=1, M=1, d=2, params=theta_112relg))
@@ -534,6 +563,24 @@ test_that("change_parametrization works correctly", {
   expect_equal(pick_phi0(M=2, d=3, params=theta_123relgc_mu), calc_mu(p=1, M=2, d=3, params=theta_123relgc, AR_constraints=C_123))
   expect_equal(change_parametrization(p=1, M=2, d=3, params=theta_123relgc_mu, AR_constraints=C_123, change_to="intercept"),
                theta_123relgc)
+
+  expect_equal(pick_phi0(M=2, d=2, params=theta_122log_1_1_mu),
+               calc_mu(p=1, M=2, d=2, params=theta_122log_1_1, weight_function="logit", weightfun_pars=list(vars=1, lags=1)))
+  expect_equal(change_parametrization(p=1, M=2, d=2, params=theta_122log_1_1_mu, weight_function="logit",
+                                      weightfun_pars=list(vars=1, lags=1), change_to="intercept"), theta_122log_1_1)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_222logc_12_2_mu),
+               calc_mu(p=2, M=2, d=2, params=theta_222logc_12_2, weight_function="logit", weightfun_pars=list(vars=1:2, lags=2),
+                       AR_constraints=C_222))
+  expect_equal(change_parametrization(p=2, M=2, d=2, params=theta_222logc_12_2_mu, weight_function="logit",
+                                      weightfun_pars=list(vars=1:2, lags=2), AR_constraints=C_222,
+                                      change_to="intercept"), theta_222logc_12_2)
+  expect_equal(pick_phi0(M=2, d=3, params=theta_123logc_123_1_mu),
+               calc_mu(p=1, M=2, d=3, params=theta_123logc_123_1, weight_function="logit", weightfun_pars=list(vars=1:3, lags=1),
+                       AR_constraints=C_123))
+  expect_equal(change_parametrization(p=1, M=2, d=3, params=theta_123logc_123_1_mu, weight_function="logit",
+                                      weightfun_pars=list(vars=1:3, lags=1), AR_constraints=C_123,
+                                      change_to="intercept"), theta_123logc_123_1)
+
 })
 
 

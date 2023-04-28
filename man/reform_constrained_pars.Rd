@@ -15,6 +15,7 @@ reform_constrained_pars(
   AR_constraints = NULL,
   mean_constraints = NULL,
   B_constraints = NULL,
+  weightfun_pars = NULL,
   change_na = FALSE
 )
 }
@@ -75,6 +76,16 @@ should not be restricted to be the same among any regimes. \strong{This constrai
 that is, when \code{parametrization="mean"}.}}
 
 \item{B_constraints}{NOT YET IMPLEMENTED!}
+
+\item{weightfun_pars}{\describe{
+  \item{If \code{weight_function == "relative_dens"}:}{Not used.}
+  \item{If \code{weight_function == "logit"}:}{a list of two elements: \describe{
+    \item{The first element \code{$vars}:}{a numeric vector containing the variables that should used as switching variables
+      in the weight function, i.e., a vector with unique elements in \eqn{\lbrace 1,...,d \rbrace}.}
+    \item{The second element \code{$lags}:}{an integer in \eqn{\lbrace 1,...,p \rbrace} specifying the number of lags to be
+.      used in the weight function.}
+  }}
+}}
 
 \item{change_na}{change NA parameter values of constrained models to -9.999?}
 }
