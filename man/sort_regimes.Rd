@@ -61,7 +61,7 @@ Returns sorted parameter vector of the form described for the argument \code{par
   with the regimes sorted so that...
   \describe{
     \item{If \code{weight_function == "relative_dens"}:}{\eqn{\alpha_{1}>...>\alpha_{M}}.}
-    \item{If \code{weight_function == "logit"}:}{NOT YET IMPLEMENTED}
+    \item{If \code{weight_function == "logit"}:}{Does not currently sort, so returns the original parameter vector given in \code{param}.}
   }
 }
 \description{

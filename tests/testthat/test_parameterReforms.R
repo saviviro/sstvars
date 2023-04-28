@@ -611,5 +611,7 @@ test_that("sort_regimes works correctly", {
   expect_equal(sort_regimes(p=1, M=2, d=3, params=theta_123relg_2, weight_function="relative_dens"),
                c(phi20_123, phi10_123, vec(A21_123), vec(A11_123), vech(Omega2_123),
                  vech(Omega1_123), 1-alpha1_123_2))
+
+  expect_equal(sort_regimes(p=1, M=2, d=2, params=theta_122log_1_1, weight_function="logit"), theta_122log_1_1) # Does not sort with logit
 })
 

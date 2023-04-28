@@ -106,7 +106,7 @@ change_parametrization <- function(p, M, d, params, weight_function=c("relative_
 #'   with the regimes sorted so that...
 #'   \describe{
 #'     \item{If \code{weight_function == "relative_dens"}:}{\eqn{\alpha_{1}>...>\alpha_{M}}.}
-#'     \item{If \code{weight_function == "logit"}:}{NOT YET IMPLEMENTED}
+#'     \item{If \code{weight_function == "logit"}:}{Does not currently sort, so returns the original parameter vector given in \code{param}.}
 #'   }
 #' @keywords internal
 
@@ -114,6 +114,7 @@ sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "lo
                          identification=c("reduced_form", "recursive", "heteroskedasticity")) {
   if(M == 1) return(params) # Nothing to sort
   weight_function <- match.arg(weight_function)
+  if(weight_function == "logit") return(params) # Does not sort
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
   if(identification != "reduced_form") stop("Structural models not yet implemented to sort_regimes!")
