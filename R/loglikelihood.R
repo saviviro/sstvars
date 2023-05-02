@@ -115,7 +115,6 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   parametrization <- match.arg(parametrization)
   identification <- match.arg(identification)
   to_return <- match.arg(to_return)
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars)
   if(identification != "reduced_form") stop("Structural models are not yet implemented to loglikelihood")
   if(!is.null(B_constraints)) stop("B_constrained models are not yet implemented to loglikelihood")
 
@@ -124,6 +123,9 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   d <- ncol(data)
   n_obs <- nrow(data)
   T_obs <- n_obs - p
+
+  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars)
+
 
   # Collect the parameter values
   # First remove all constraints, if any; also switch to reduced form parameter vector;

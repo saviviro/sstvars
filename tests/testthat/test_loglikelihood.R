@@ -80,6 +80,87 @@ theta_323relg <- c(0.98249, 0.66144, -1.17552, 0.50289, 0.17399, -0.01771, 0.961
                    -0.5559, 0.10249, -0.25146, -0.11875, 0.05153, 0.15267, 0.58151, -0.01903, 0.12236, 0.09327,
                    0.10245, 1.81845, 0.72719, 0.03235, 0.09857, 0.04826, 0.00908, 0.09761, 0.72127)
 
+# p=1, M=3, d=2 (not tested atm)
+phi10_132 <- phi10_122
+phi20_132 <- phi20_122
+phi30_132 <- c(12, 13)
+
+A11_132 <- A11_122
+A21_132 <- A21_122
+A31_132 <- matrix(c(0.1, 0.2, 0.3, 0.4), nrow=2)
+Omega1_132 <- Omega1_122
+Omega2_132 <- Omega2_122
+Omega3_132 <- matrix(c(1, 0.5, 0.5, 1), nrow=2)
+alpha1_132 <- 0.5
+alpha2_132 <- 0.3
+
+theta_132relg <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                   vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), alpha1_132, alpha2_132)
+
+## weight_function = "logit"
+
+# p=1, M=2, d=2, weightfun_pars=list(vars=1, lags=1)
+gamma1_122_1_1 <- c(0.1, 0.2)
+theta_122log_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), gamma1_122_1_1)
+
+# p=1, M=2, d=2, weightfun_pars=list(vars=1:2, lags=1)
+gamma1_122_12_1 <- c(0.1, 0.2, 0.3)
+theta_122log_12_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), gamma1_122_12_1)
+
+# p=2, M=2, d=2, weightfun_pars=list(vars=2, lags=1)
+gamma1_222_2_1 <- c(0.1, 0.2)
+theta_222log_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                      vech(Omega1_222), vech(Omega2_222), gamma1_222_2_1)
+
+# p=2, M=2, d=2, weightfun_pars=list(vars=1:2, lags=2)
+gamma1_222_12_2 <- c(0.1, 0.2, 0.11, 0.22, 0.33)
+theta_222log_12_2 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                       vech(Omega1_222), vech(Omega2_222),gamma1_222_12_2)
+
+# p=2, M=3, d=2, weightfun_pars=list(vars=1, lags=1)
+phi10_232 <- phi10_132; phi20_232 <- phi20_132; phi30_232 <- phi30_132
+A11_232 <- A11_132; A12_232 <- -A11_132
+A21_232 <- A21_132; A22_232 <- -A21_132
+A31_232 <- A31_132; A32_232 <- -A31_132
+Omega1_232 <- Omega1_132; Omega2_232 <- Omega1_132; Omega3_232 <- Omega3_132
+gamma1_232_1_1 <- c(0.1, 0.2); gamma2_232_1_1 <- c(0.11, 0.22)
+theta_232log_1_1 <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232), vec(A22_232),
+                      vec(A31_232), vec(A32_232), vech(Omega1_232), vech(Omega2_232), vech(Omega3_232),
+                      gamma1_232_1_1, gamma2_232_1_1)
+
+# p=2, M=3, d=2, weightfun_pars=list(vars=1:2, lags=1)
+gamma1_232_12_1 <- c(0.1, 0.2, 0.202); gamma2_232_12_1 <- c(0.11, 0.111, 0.222)
+theta_232log_12_1 <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232), vec(A22_232),
+                       vec(A31_232), vec(A32_232), vech(Omega1_232), vech(Omega2_232), vech(Omega3_232),
+                       gamma1_232_12_1, gamma2_232_12_1)
+
+# p=2, M=3, d=2, weightfun_pars=list(vars=2, lags=2)
+gamma1_232_2_2 <- c(0.1, 0.2, 0.3); gamma2_232_2_2 <- c(0.11, 0.22, 0.33)
+theta_232log_2_2 <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232), vec(A22_232),
+                      vec(A31_232), vec(A32_232), vech(Omega1_232), vech(Omega2_232), vech(Omega3_232),
+                      gamma1_232_2_2, gamma2_232_2_2)
+
+# p=2, M=3, d=2, weightfun_pars=list(vars=1:2, lags=2)
+gamma1_232_12_2 <- c(0.1, 0.2, 0.101, 0.202, 0.303); gamma2_232_12_2 <- c(0.11, 0.22, 0.111, 0.222, 0.333)
+theta_232log_12_2 <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232), vec(A22_232),
+                       vec(A31_232), vec(A32_232), vech(Omega1_232), vech(Omega2_232), vech(Omega3_232),
+                       gamma1_232_12_2, gamma2_232_12_2)
+
+
+# p=1, M=2, d=3, weightfun_pars=list(vars=1, lags=1), usamone
+theta_123log_noweightpars <- theta_123relg[-length(theta_123relg)]
+gamma1_123_1_1 <- c(0.1, 0.2)
+theta_123log_1_1 <- c(theta_123log_noweightpars, gamma1_123_1_1)
+
+# p=1, M=2, d=3, weightfun_pars=list(vars=2:3, lags=1), usamone
+gamma1_123_23_1 <- c(0.1, 0.2, 0.3)
+theta_123log_23_1 <- c(theta_123log_noweightpars, gamma1_123_23_1)
+
+# p=1, M=2, d=3, weightfun_pars=list(vars=1:3, lags=1), usamone
+gamma1_123_123_1 <- c(0.1, 0.2, 0.3, 0.4)
+theta_123log_123_1 <- c(theta_123log_noweightpars, gamma1_123_123_1)
+
+
 ## Constrained models
 
 ## A(M)(p)_(p)(M)(d)
@@ -131,6 +212,21 @@ alpha1_123 <- 0.6
 theta_123relgc <- c(phi10_123, phi20_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
 theta_123relgc_expanded <- c(phi10_123, phi20_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
 
+
+# weight_function == "logit"
+
+# p=1, M=2, d=2, weightfun_pars=list(vars=1:2, lags=1), C_122
+gamma1_122_12_1 <- c(0.1, 0.2, 0.3)
+theta_122logc_12_1 <- c(phi10_122, phi20_122, vec(A11_122), vech(Omega1_122), vech(Omega2_122), gamma1_122_12_1)
+theta_122logc_12_1_expanded <- c(phi10_122, phi20_122, vec(A11_122), vec(A11_122), vech(Omega1_122), vech(Omega2_122), gamma1_122_12_1)
+
+# p=2, M=2, d=2, weightfun_pars=list(vars=2, lags=1), C_222
+gamma1_222_2_1 <- c(0.1, 0.2)
+theta_222logc_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), gamma1_222_2_1)
+theta_222logc_2_1_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                vech(Omega1_222), vech(Omega2_222), gamma1_222_2_1)
+
+
 ## Models with mean_constraints
 
 # p=1, M=1, p=2, mean_constraints=list(1)
@@ -147,6 +243,18 @@ theta_222relgcm <- c(mu_222relgcm, vec(A11_222), vec(A12_222), vech(Omega1_222),
 theta_222relgcm_expanded <- c(mu_222relgcm, mu_222relgcm, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
                               vech(Omega1_222), vech(Omega2_222), alpha1_222)
 
+# weightfunction == "logit"
+
+# p=1, M=2, d=2, weigthfun_pars=list(vars=1, lags=1), mean_constraints=list(1:2)
+theta_122logm_1_1 <- c(phi10_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), gamma1_122_1_1)
+theta_122logm_1_1_expanded <- c(phi10_122, phi10_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), gamma1_122_1_1)
+
+# p=2, M=2, d=2, weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), C_222
+theta_222logcm_12_2 <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), gamma1_222_12_2)
+theta_222logcm_12_2_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                  vech(Omega1_222), vech(Omega2_222), gamma1_222_12_2)
+
+
 test_that("loglikelihood works correctly", {
   # Relative_dens Gaussian STVAR
   expect_equal(loglikelihood(data=gdpdef, p=1, M=1, params=theta_112relg, weight_function="relative_dens"), -1000.653, tolerance=1e-3)
@@ -161,6 +269,31 @@ test_that("loglikelihood works correctly", {
   expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123relg, weight_function="relative_dens"), -570.019, tolerance=1e-3)
   expect_equal(loglikelihood(data=usamone, p=3, M=2, params=theta_323relg, weight_function="relative_dens"), -490.9401, tolerance=1e-3)
 
+  # logit STVAR
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122log_1_1, weight_function="logit",
+                             weightfun_pars=list(vars=1, lags=1)), -334.0843, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122log_12_1, weight_function="logit",
+                             weightfun_pars=list(vars=1:2, lags=1)), -335.5687, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222log_2_1, weight_function="logit",
+                             weightfun_pars=list(vars=2, lags=1)), -315.326, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222log_12_2, weight_function="logit",
+                             weightfun_pars=list(vars=1:2, lags=2)), -344.0656, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=3, params=theta_232log_1_1, weight_function="logit",
+                             weightfun_pars=list(vars=1, lags=1)), -4260.053, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=3, params=theta_232log_12_1, weight_function="logit",
+                             weightfun_pars=list(vars=1:2, lags=1)), -3756.747, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=3, params=theta_232log_2_2, weight_function="logit",
+                             weightfun_pars=list(vars=2, lags=2)), -3450.811, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=3, params=theta_232log_12_2, weight_function="logit",
+                             weightfun_pars=list(vars=1:2, lags=2)), -2695.943, tolerance=1e-3)
+  expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123log_1_1, weight_function="logit",
+                             weightfun_pars=list(vars=1, lags=1)), -998.6099, tolerance=1e-3)
+  expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123log_23_1, weight_function="logit",
+                             weightfun_pars=list(vars=2:3, lags=1)), -1100.063, tolerance=1e-3)
+  expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123log_123_1, weight_function="logit",
+                             weightfun_pars=list(vars=1:3, lags=1)), -1155.278, tolerance=1e-3)
+
+
   # Constrained models
   expect_equal(loglikelihood(data=gdpdef, p=1, M=1, params=theta_112relgc, weight_function="relative_dens",
                              AR_constraints=C_112), -1008.678, tolerance=1e-3)
@@ -172,11 +305,20 @@ test_that("loglikelihood works correctly", {
                              AR_constraints=C_222_2), -1077.319, tolerance=1e-3)
   expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123relgc, weight_function="relative_dens",
                              AR_constraints=C_123), -2171.694, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122logc_12_1, weight_function="logit",
+                             weightfun_pars=list(vars=1:2, lags=1), AR_constraints=C_122), -335.5687, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222logc_2_1, weight_function="logit",
+                             weightfun_pars=list(vars=2, lags=1), AR_constraints=C_222), -369.6914, tolerance=1e-3)
 
-  expect_equal(loglikelihood(data=gdpdef, p=1, M=1, params=theta_112relgm, weight_function="relative_dens",
-                             mean_constraints=list(1)), -1000.653, tolerance=1e-3)
-  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122relgm, weight_function="relative_dens",
-                             mean_constraints=list(1:2)), -548.8989, tolerance=1e-3)
-  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222relgcm, weight_function="relative_dens",
-                             AR_constraints=C_222, mean_constraints=list(1:2)), -762.0473, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=1, params=theta_112relgm, weight_function="relative_dens", parametrization="mean",
+                             mean_constraints=list(1)), -302.0188, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122relgm, weight_function="relative_dens", parametrization="mean",
+                             mean_constraints=list(1:2)), -326.8462, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222relgcm, weight_function="relative_dens", parametrization="mean",
+                             AR_constraints=C_222, mean_constraints=list(1:2)), -301.0143, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122logm_1_1, weight_function="logit", parametrization="mean",
+                             weightfun_pars=list(vars=1, lags=1), mean_constraints=list(1:2)), -368.2033, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222logcm_12_2, weight_function="logit", parametrization="mean",
+                             weightfun_pars=list(vars=1:2, lags=2), AR_constraints=C_222, mean_constraints=list(1:2)),
+               -453.5176, tolerance=1e-3)
 })
