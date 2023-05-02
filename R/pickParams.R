@@ -151,7 +151,7 @@ pick_Omegas <- function(p, M, d, params) {
 #' @keywords internal
 
 pick_weightpars <- function(p, M, d, params, weight_function=c("relative_dens", "logit"),
-                            cond_dist=c("Gaussian", "Student"), weightfun_pars=NULL) {
+                            weightfun_pars=NULL, cond_dist=c("Gaussian", "Student")) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   n_dfs <- ifelse(cond_dist == "Student", 1, 0)

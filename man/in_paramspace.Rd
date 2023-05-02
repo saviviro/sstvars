@@ -9,12 +9,12 @@ in_paramspace(
   M,
   d,
   weight_function,
+  weightfun_pars = NULL,
   cond_dist,
   all_boldA,
   all_Omegas,
   weightpars,
   df,
-  weightfun_pars = NULL,
   stab_tol = 0.001,
   posdef_tol = 1e-08,
   df_tol = 1e-08
@@ -29,22 +29,22 @@ in_paramspace(
 
 \item{weight_function}{what type of transition weights should be used? See the vignette for details about the weight functions.}
 
+\item{weightfun_pars}{\describe{
+  \item{If \code{weight_function == "relative_dens"}:}{Not used.}
+  \item{If \code{weight_function == "logit"}:}{a list of two elements: \describe{
+    \item{The first element \code{$vars}:}{a numeric vector containing the variables that should used as switching variables
+      in the weight function in an increasing order, i.e., a vector with unique elements in \eqn{\lbrace 1,...,d \rbrace}.}
+    \item{The second element \code{$lags}:}{an integer in \eqn{\lbrace 1,...,p \rbrace} specifying the number of lags to be
+     used in the weight function.}
+  }}
+}}
+
 \item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"} or \eqn{"Student"}.}
 
 \item{all_boldA}{3D array containing the \eqn{((dp)x(dp))} "bold A" (companion form) matrices of each regime,
 obtained from \code{form_boldA}. Will be computed if not given.}
 
 \item{weightpars}{numerical vector containing the transition weight parameters, obtained from \code{pick_weightpars}.}
-
-\item{weightfun_pars}{\describe{
-  \item{If \code{weight_function == "relative_dens"}:}{Not used.}
-  \item{If \code{weight_function == "logit"}:}{a list of two elements: \describe{
-    \item{The first element \code{$vars}:}{a numeric vector containing the variables that should used as switching variables
-      in the weight function, i.e., a vector with unique elements in \eqn{\lbrace 1,...,d \rbrace}.}
-    \item{The second element \code{$lags}:}{an integer in \eqn{\lbrace 1,...,p \rbrace} specifying the number of lags to be
-.      used in the weight function.}
-  }}
-}}
 
 \item{stab_tol}{numerical tolerance for the stability condition of each regime: if the "bold A" matrix of any regime
 has eigenvalues larger that \code{1 - stab_tol} the parameter vector will be labeled as not in the parameter space.

@@ -9,12 +9,12 @@ n_params(
   M,
   d,
   weight_function = c("relative_dens", "logit"),
+  weightfun_pars = NULL,
   cond_dist = c("Gaussian", "Student"),
   identification = c("reduced_form", "recursive", "heteroskedasticity"),
   AR_constraints = NULL,
   mean_constraints = NULL,
-  B_constraints = NULL,
-  weightfun_pars = NULL
+  B_constraints = NULL
 )
 }
 \arguments{
@@ -25,6 +25,16 @@ n_params(
 \item{d}{the number of time series in the system, i.e., the dimension}
 
 \item{weight_function}{what type of transition weights should be used? See the vignette for details about the weight functions.}
+
+\item{weightfun_pars}{\describe{
+  \item{If \code{weight_function == "relative_dens"}:}{Not used.}
+  \item{If \code{weight_function == "logit"}:}{a list of two elements: \describe{
+    \item{The first element \code{$vars}:}{a numeric vector containing the variables that should used as switching variables
+      in the weight function in an increasing order, i.e., a vector with unique elements in \eqn{\lbrace 1,...,d \rbrace}.}
+    \item{The second element \code{$lags}:}{an integer in \eqn{\lbrace 1,...,p \rbrace} specifying the number of lags to be
+     used in the weight function.}
+  }}
+}}
 
 \item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"} or \eqn{"Student"}.}
 
@@ -45,16 +55,6 @@ should not be restricted to be the same among any regimes. \strong{This constrai
 that is, when \code{parametrization="mean"}.}}
 
 \item{B_constraints}{NOT YET IMPLEMENTED!}
-
-\item{weightfun_pars}{\describe{
-  \item{If \code{weight_function == "relative_dens"}:}{Not used.}
-  \item{If \code{weight_function == "logit"}:}{a list of two elements: \describe{
-    \item{The first element \code{$vars}:}{a numeric vector containing the variables that should used as switching variables
-      in the weight function, i.e., a vector with unique elements in \eqn{\lbrace 1,...,d \rbrace}.}
-    \item{The second element \code{$lags}:}{an integer in \eqn{\lbrace 1,...,p \rbrace} specifying the number of lags to be
-.      used in the weight function.}
-  }}
-}}
 }
 \value{
 Returns the number of parameters in the parameter vector of the specified model.

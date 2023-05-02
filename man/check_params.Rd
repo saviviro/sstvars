@@ -10,13 +10,13 @@ check_params(
   d,
   params,
   weight_function = c("relative_dens", "logit"),
+  weightfun_pars = NULL,
   cond_dist = c("Gaussian", "Student"),
   parametrization = c("intercept", "mean"),
   identification = c("reduced_form", "recursive", "heteroskedasticity"),
   AR_constraints = NULL,
   mean_constraints = NULL,
   B_constraints = NULL,
-  weightfun_pars = NULL,
   stab_tol = 0.001,
   posdef_tol = 1e-08,
   df_tol = 1e-08
@@ -62,6 +62,16 @@ of a given matrix from the principal diagonal downwards (including elements on t
 
 \item{weight_function}{what type of transition weights should be used? See the vignette for details about the weight functions.}
 
+\item{weightfun_pars}{\describe{
+  \item{If \code{weight_function == "relative_dens"}:}{Not used.}
+  \item{If \code{weight_function == "logit"}:}{a list of two elements: \describe{
+    \item{The first element \code{$vars}:}{a numeric vector containing the variables that should used as switching variables
+      in the weight function in an increasing order, i.e., a vector with unique elements in \eqn{\lbrace 1,...,d \rbrace}.}
+    \item{The second element \code{$lags}:}{an integer in \eqn{\lbrace 1,...,p \rbrace} specifying the number of lags to be
+     used in the weight function.}
+  }}
+}}
+
 \item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"} or \eqn{"Student"}.}
 
 \item{parametrization}{\code{"intercept"} or \code{"mean"} determining whether the model is parametrized with intercept
@@ -84,16 +94,6 @@ should not be restricted to be the same among any regimes. \strong{This constrai
 that is, when \code{parametrization="mean"}.}}
 
 \item{B_constraints}{NOT YET IMPLEMENTED!}
-
-\item{weightfun_pars}{\describe{
-  \item{If \code{weight_function == "relative_dens"}:}{Not used.}
-  \item{If \code{weight_function == "logit"}:}{a list of two elements: \describe{
-    \item{The first element \code{$vars}:}{a numeric vector containing the variables that should used as switching variables
-      in the weight function, i.e., a vector with unique elements in \eqn{\lbrace 1,...,d \rbrace}.}
-    \item{The second element \code{$lags}:}{an integer in \eqn{\lbrace 1,...,p \rbrace} specifying the number of lags to be
-.      used in the weight function.}
-  }}
-}}
 
 \item{stab_tol}{numerical tolerance for the stability condition of each regime: if the "bold A" matrix of any regime
 has eigenvalues larger that \code{1 - stab_tol} the parameter vector will be labeled as not in the parameter space.

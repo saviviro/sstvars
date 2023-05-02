@@ -64,10 +64,10 @@ form_boldA <- function(p, M, d, all_A) {
 #' @keywords internal
 
 change_parametrization <- function(p, M, d, params, weight_function=c("relative_dens", "logit"),
-                                   cond_dist=c("Gaussian", "Student"),
+                                   weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"),
                                    identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
                                    AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
-                                   weightfun_pars=NULL, change_to=c("intercept", "mean")) {
+                                   change_to=c("intercept", "mean")) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
@@ -110,8 +110,8 @@ change_parametrization <- function(p, M, d, params, weight_function=c("relative_
 #'   }
 #' @keywords internal
 
-sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
-                         identification=c("reduced_form", "recursive", "heteroskedasticity")) {
+sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
+                         cond_dist=c("Gaussian", "Student"), identification=c("reduced_form", "recursive", "heteroskedasticity")) {
   if(M == 1) return(params) # Nothing to sort
   weight_function <- match.arg(weight_function)
   if(weight_function == "logit") return(params) # Does not sort
@@ -182,10 +182,10 @@ change_regime <- function(p, M, d, params, m, regime_pars) {
 #' @keywords internal
 
 reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative_dens", "logit"),
-                                    cond_dist=c("Gaussian", "Student"),
+                                    weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"),
                                     identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
                                     AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
-                                    weightfun_pars=NULL, change_na=FALSE) {
+                                    change_na=FALSE) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)

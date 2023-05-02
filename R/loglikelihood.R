@@ -38,6 +38,15 @@
 #'   \eqn{vec()} is vectorization operator that stacks columns of a given matrix into a vector. \eqn{vech()} stacks columns
 #'   of a given matrix from the principal diagonal downwards (including elements on the diagonal) into a vector.
 #' @param weight_function what type of transition weights should be used? See the vignette for details about the weight functions.
+#' @param weightfun_pars \describe{
+#'   \item{If \code{weight_function == "relative_dens"}:}{Not used.}
+#'   \item{If \code{weight_function == "logit"}:}{a list of two elements: \describe{
+#'     \item{The first element \code{$vars}:}{a numeric vector containing the variables that should used as switching variables
+#'       in the weight function in an increasing order, i.e., a vector with unique elements in \eqn{\lbrace 1,...,d \rbrace}.}
+#'     \item{The second element \code{$lags}:}{an integer in \eqn{\lbrace 1,...,p \rbrace} specifying the number of lags to be
+#'      used in the weight function.}
+#'   }}
+#' }
 #' @param cond_dist specifies the conditional distribution of the model as \code{"Gaussian"} or \eqn{"Student"}.
 #' @param parametrization \code{"intercept"} or \code{"mean"} determining whether the model is parametrized with intercept
 #'   parameters \eqn{\phi_{m,0}} or regime means \eqn{\mu_{m}}, m=1,...,M.
@@ -55,15 +64,6 @@
 #'   should not be restricted to be the same among any regimes. \strong{This constraint is available only for mean parametrized models;
 #'   that is, when \code{parametrization="mean"}.}
 #' @param B_constraints NOT YET IMPLEMENTED!
-#' @param weightfun_pars \describe{
-#'   \item{If \code{weight_function == "relative_dens"}:}{Not used.}
-#'   \item{If \code{weight_function == "logit"}:}{a list of two elements: \describe{
-#'     \item{The first element \code{$vars}:}{a numeric vector containing the variables that should used as switching variables
-#'       in the weight function, i.e., a vector with unique elements in \eqn{\lbrace 1,...,d \rbrace}.}
-#'     \item{The second element \code{$lags}:}{an integer in \eqn{\lbrace 1,...,p \rbrace} specifying the number of lags to be
-#'.      used in the weight function.}
-#'   }}
-#' }
 #' @param to_return should the returned object be the log-likelihood, which is the default, or something else?
 #'   See the section "Return" for all the options.
 #' @param check_params should it be checked that the parameter vector satisfies the model assumptions? Can be skipped to save
@@ -103,11 +103,10 @@
 #'  }
 #' @keywords internal
 
-loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
-                          parametrization=c("intercept", "mean"),
+loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
+                          cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
                           identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
                           AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
-                          weightfun_pars=NULL,
                           to_return=c("loglik", "tw", "loglik_and_tw", "terms", "regime_cmeans", "total_cmeans", "total_ccovs"),
                           check_params=TRUE, minval=NULL, stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
   # Match args
@@ -171,7 +170,7 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
 
   # Calculate the transition weights [T_obs, M] with [t,m] indexing (nothing for the initial values here)
   alpha_mt <- get_alpha_mt(data=data, Y2=Y2, p=p, M=M, d=d, weight_function=weight_function, all_A=all_A, all_boldA=all_boldA,
-                           all_Omegas=all_Omegas, weightpars=weightpars, all_mu=all_mu, epsilon=epsilon)
+                           all_Omegas=all_Omegas, weightpars=weightpars, weightfun_pars=weightfun_pars, all_mu=all_mu, epsilon=epsilon)
   if(to_return == "tw") {
     return(alpha_mt)
   }
@@ -250,8 +249,8 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
 #' @inherit in_paramspace references
 #' @keywords internal
 
-get_alpha_mt <- function(data, Y2, p, M, d, weight_function, all_A, all_boldA, all_Omegas, weightpars, all_mu, epsilon,
-                         log_mvdvalues=NULL) {
+get_alpha_mt <- function(data, Y2, p, M, d, weight_function, all_A, all_boldA, all_Omegas, weightpars, weightfun_pars,
+                         all_mu, epsilon, log_mvdvalues=NULL) {
   if(is.null(log_mvdvalues)) {
     T_obs <- nrow(data) - p
     if(M == 1) {
@@ -266,7 +265,59 @@ get_alpha_mt <- function(data, Y2, p, M, d, weight_function, all_A, all_boldA, a
       }
     }
   }
-  if(weight_function == "relative_dens") {
+
+  if(weight_function == "logit") {
+    # M-1 vectors gamma_m, since gamma_M = 0.
+    all_gamma_m <- matrix(weightpars, ncol=M-1) # Column per gamma_m, m=1,...,M-1
+    #all_gamma_m <- cbind(all_gamma_m, 0) # Add gamma_M = 0 as the M:th column
+
+    # To get the regressor matrix, we need matrix such that i:th row=(1,z_{min(J)},...,z_{max(J)})
+
+    # Subset columns of Y2 according to vars and lags in weightfun_pars
+    vars <- weightfun_pars[[1]]
+    lags <- weightfun_pars[[2]]
+
+    # According to "lags" in weightfun_pars[[2]], only the columns 1,...,d*lags are used
+    subY2 <- Y2[,1:(d*lags)]
+
+    # Then, take only the columns related to the chosen switching-variables
+    # y_{i-j}, j=1,...,lags, has the length d, and each y_{i-j} only uses the cols in weightfun_pars[[1]]
+
+    #   vars <- 2
+    #    1:(d*weightfun_pars[[2]])
+    # in each repetition in 1...lags, we take the elements given by vars
+    # For instance, if vars=2, lags=2 and d=2, we take the elements 2,4
+
+    # If vars=1,3, lags=2, d=3, we take the elements 1,3,4,6
+    #    vars <- c(1,3); lags <- 2; d <- 3
+    # Define the starting indices - 1 for each lag in 1,...,lags, add vars to obtain the indices.
+    # e.g., starts=0,3, then 0 + c(1,3) = 1,3 and 3 + c(1,3) = 4,6 --> 1,3,4,6
+    # Use matrices to calculate all additions without loops at the same time
+
+    lowers <- (1:lags - 1)*d # We want add vars to each of these
+    tmp <- matrix(lowers, nrow=length(vars), ncol=length(lowers), byrow=TRUE) # rep lowers as the rows
+    subY2 <- subY2[,as.vector(tmp + vars)]  # add vars to each column, and obtain the columns to subset
+    all_z_tilde <- cbind(1, subY2)  # i:th row=(1,z_{min(J)},...,z_{max(J)})
+
+    # Calculate the regressions gamma_m'z_{t-1} based on all_gamma_m and all_z_tilde
+    regressions_mt <- matrix(0, nrow=nrow(Y2), ncol=M) # The last column is a column of zeros
+    for(i1 in 1:ncol(all_gamma_m)) { # i1=1,...,M-1
+      #for(i2 in 1:nrow(Y2)) {
+      #  regressions_mt[i2, i1] <- crossprod(all_gamma_m[,i1], all_z_tilde[i2,])
+      #}
+      regressions_mt[,i1] <- t(all_gamma_m[,i1])%*%t(all_z_tilde)
+    }
+
+    # Note that if abs(regressions_mt) > epsilon, there will be infs when taking exponent. Therefore, similar
+    # procedure to the relative_dens weights that handle too large values correctly but computationally fast is required.
+    # We can directly make use of the code for relative_dens weights, because the rest of the the calculations are identical
+    # to relative_dens weight functions with log_mvdvalues <- regressions_mt; weightpars <- rep(1, times=M)
+    # i.e., we regressions instead of log_mvdvalues, and we do not weight the exponents of the regressions.
+    log_mvdvalues <- regressions_mt
+    weightpars <- rep(1, times=M) # Overwrites weightpars; the original ones are not needed here anymore
+  }
+
+  if(weight_function == "relative_dens" || weight_function == "logit") { # logit defines log_mvdvalues and weightpars above
     if(is.null(log_mvdvalues)) {
       # Calculate the covariance matrices Sigma_{m,p} (Lutkepohl 2005, eq. (2.1.39) or the algorithm proposed by McElroy 2017)
       Sigmas <- get_Sigmas(p=p, M=M, d=d, all_A=all_A, all_boldA=all_boldA, all_Omegas=all_Omegas) # Store the (dpxdp) covariance matrices
@@ -304,7 +355,7 @@ get_alpha_mt <- function(data, Y2, p, M, d, weight_function, all_A, all_boldA, a
       # If too small or large non-log-density values are present (i.e., that would yield -Inf or Inf),
       # we replace them with ones that are not too small or large but imply the same mixing weights
       # up to negligible numerical tolerance (tested in gmvarkit).
-      which_change <- rowSums(small_logmvns) > 0 # Which rows contain too small  values
+      which_change <- rowSums(small_logmvns) > 0 # Which rows contain too small values
       to_change <- log_mvdvalues[which_change, , drop=FALSE]
       largest_vals <- do.call(pmax, split(to_change, f=rep(1:ncol(to_change), each=nrow(to_change)))) # The largest values of those rows
       diff_to_largest <- to_change - largest_vals # Differences to the largest value of the row
@@ -320,8 +371,6 @@ get_alpha_mt <- function(data, Y2, p, M, d, weight_function, all_A, all_boldA, a
     mvnvalues <- exp(log_mvdvalues)
     denominator <- as.vector(mvnvalues%*%weightpars)
     alpha_mt <- (mvnvalues/denominator)%*%diag(weightpars)
-  } else if(weight_function == "logit") {
-    stop("Logit weight function is not yet implemented to get_alpha_mt")
   } else {
     stop("Only relative_dens and logit weight functions are currently implemented to get_alpha_mt")
   }
