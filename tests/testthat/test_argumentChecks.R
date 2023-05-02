@@ -304,7 +304,7 @@ theta_123relgcm_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), 
 
 ## weight_function == "logit"
 
-# p=1, M=2, d=2, weigthfun_pars=list(vars=1, lags=1), mean_constraints=list(1:2)
+# p=1, M=2, d=2, weightfun_pars=list(vars=1, lags=1), mean_constraints=list(1:2)
 theta_122logm_1_1 <- c(phi10_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), gamma1_122_1_1)
 theta_122logm_1_1_expanded <- c(phi10_122, phi10_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), gamma1_122_1_1)
 
@@ -493,8 +493,9 @@ test_that("check_params work correctly", {
   # Checks df
   # TO BE FILLED IN
 
-  # Check weight pars with other weight functions
-  # TO BE FILLED IN
+  # logit (nothing to check in weightpars, so just checks that the function runs)
+  check_params(p=2, M=2, d=2, params=theta_222log_12_2, weight_function="logit", weightfun_pars=list(vars=1:2, lags=2),
+               cond_dist="Gaussian")
 })
 
 

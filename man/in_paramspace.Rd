@@ -14,7 +14,7 @@ in_paramspace(
   all_Omegas,
   weightpars,
   df,
-  weigthfun_pars = NULL,
+  weightfun_pars = NULL,
   stab_tol = 0.001,
   posdef_tol = 1e-08,
   df_tol = 1e-08
@@ -35,6 +35,16 @@ in_paramspace(
 obtained from \code{form_boldA}. Will be computed if not given.}
 
 \item{weightpars}{numerical vector containing the transition weight parameters, obtained from \code{pick_weightpars}.}
+
+\item{weightfun_pars}{\describe{
+  \item{If \code{weight_function == "relative_dens"}:}{Not used.}
+  \item{If \code{weight_function == "logit"}:}{a list of two elements: \describe{
+    \item{The first element \code{$vars}:}{a numeric vector containing the variables that should used as switching variables
+      in the weight function, i.e., a vector with unique elements in \eqn{\lbrace 1,...,d \rbrace}.}
+    \item{The second element \code{$lags}:}{an integer in \eqn{\lbrace 1,...,p \rbrace} specifying the number of lags to be
+.      used in the weight function.}
+  }}
+}}
 
 \item{stab_tol}{numerical tolerance for the stability condition of each regime: if the "bold A" matrix of any regime
 has eigenvalues larger that \code{1 - stab_tol} the parameter vector will be labeled as not in the parameter space.

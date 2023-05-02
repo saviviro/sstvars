@@ -60,7 +60,7 @@ stab_conds_satisfied <- function(p, M, d, params, all_boldA=NULL, tolerance=1e-3
 #'  @keywords internal
 
 in_paramspace <- function(p, M, d, weight_function, cond_dist, all_boldA, all_Omegas, weightpars, df,
-                          weigthfun_pars=NULL, stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
+                          weightfun_pars=NULL, stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
   # in_paramspace is internal function that always takes in non-constrained reduced form parameter vector
   # Reform the parameter vectors before checking with in_paramspace
 
@@ -114,8 +114,7 @@ check_params <- function(p, M, d, params, weight_function=c("relative_dens", "lo
                          parametrization=c("intercept", "mean"),
                          identification=c("reduced_form", "recursive", "heteroskedasticity"),
                          AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
-                         weightfun_pars=NULL,
-                         stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
+                         weightfun_pars=NULL, stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
   check_pMd(p=p, M=M, d=d)
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -123,18 +122,21 @@ check_params <- function(p, M, d, params, weight_function=c("relative_dens", "lo
   identification <- match.arg(identification)
   if(n_params(p=p, M=M, d=d, weight_function=weight_function, cond_dist=cond_dist,
               identification=identification, AR_constraints=AR_constraints,
-              mean_constraints=mean_constraints, B_constraints=B_constraints) != length(params)) {
+              mean_constraints=mean_constraints, B_constraints=B_constraints,
+              weightfun_pars=weightfun_pars) != length(params)) {
     stop("The parameter vector has wrong dimension!")
   }
   params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
                                     identification=identification, AR_constraints=AR_constraints,
-                                    mean_constraints=mean_constraints, B_constraints=B_constraints)
+                                    mean_constraints=mean_constraints, B_constraints=B_constraints,
+                                    weightfun_pars=weightfun_pars)
 
   # Pick params
   all_phi0 <- pick_phi0(M=M, d=d, params=params) # phi0 or mean parameters
   all_A <- pick_allA(p=p, M=M, d=d, params=params) # [d, d, p, M]
   all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params) # [d, d, M]
-  weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist)
+  weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
+                                weightfun_pars=weightfun_pars)
   all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
   df <- numeric(0) # FILL IN WHEN STUDENT IS IMPLEMENTED
   if(!is.null(B_constraints)) {
@@ -156,8 +158,10 @@ check_params <- function(p, M, d, params, weight_function=c("relative_dens", "lo
     } else if(any(weightpars <= 0)) {
       stop("The transition weight parameter alphas must be strictly larger than zero!")
     }
+  } else if(weight_function == "logit") {
+    if(!is.numeric(weightpars)) stop("Transition weight parameters need to be numeric") # All real numbers are ok
   } else {
-    stop("Other weight functions are not yet implemented!")
+    stop("Weight functions other than relative_dens and logit are not yet implemented to check_params!")
   }
   if(!stab_conds_satisfied(p=p, M=M, d=d, all_boldA=all_boldA, tolerance=stab_tol)) {
     stop("At least one of the regimes does not satisfy the stability condition (with large enough numerical tolerance)!")

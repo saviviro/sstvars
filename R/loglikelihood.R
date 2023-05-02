@@ -130,7 +130,8 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   # First remove all constraints, if any; also switch to reduced form parameter vector;
   params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
                                     identification=identification, AR_constraints=AR_constraints,
-                                    mean_constraints=mean_constraints, B_constraints=B_constraints)
+                                    mean_constraints=mean_constraints, B_constraints=B_constraints,
+                                    weightfun_pars=weightfun_pars)
 
   # Pick params
   if(parametrization == "intercept") { # [d, M]
@@ -140,7 +141,8 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   }
   all_A <- pick_allA(p=p, M=M, d=d, params=params) # [d, d, p, M]
   all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params) # [d, d, M]
-  weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist)
+  weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function,
+                                cond_dist=cond_dist, weightfun_pars=weightfun_pars)
   all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
   df <- numeric(0) # FILL IN WHEN STUDENT IS IMPLEMENTED
 
@@ -148,7 +150,8 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   if(check_params) {
     if(!in_paramspace(p=p, M=M, d=d, weight_function=weight_function, cond_dist=cond_dist,
                       all_boldA=all_boldA, all_Omegas=all_Omegas, weightpars=weightpars, df=df,
-                      stab_tol=stab_tol, posdef_tol=posdef_tol, df_tol=df_tol)) {
+                      weightfun_pars=weightfun_pars, stab_tol=stab_tol, posdef_tol=posdef_tol,
+                      df_tol=df_tol)) {
       return(minval)
     }
   }
@@ -319,6 +322,8 @@ get_alpha_mt <- function(data, Y2, p, M, d, weight_function, all_A, all_boldA, a
     alpha_mt <- (mvnvalues/denominator)%*%diag(weightpars)
   } else if(weight_function == "logit") {
     stop("Logit weight function is not yet implemented to get_alpha_mt")
+  } else {
+    stop("Only relative_dens and logit weight functions are currently implemented to get_alpha_mt")
   }
   alpha_mt
 }
