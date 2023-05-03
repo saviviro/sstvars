@@ -256,17 +256,20 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), we
                                            cond_dist=cond_dist, identification="reduced_form",
                                            AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                                            B_constraints=NULL) # Pars in standard form for pick pars fns
-       Omega_eigens <- get_omega_eigens_par(p=p, M=M, d=d, params=pars_std, weight_function=weight_function,
+       Omega_eigens <- get_omega_eigens_par(p=p, M=M, d=d, params=pars_std,
+                                            weight_function=weight_function, weightfun_pars=weightfun_pars,
                                             cond_dist=cond_dist, identification="reduced_form",
                                             AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL)
        Omegas_ok <- !any(Omega_eigens < 0.002)
        if(weight_function == "relative_dens") {
-         alphas <- pick_weightpars(p=p, M=M, d=d, params=pars_std, weight_function=weight_function, cond_dist=cond_dist)
+         alphas <- pick_weightpars(p=p, M=M, d=d, params=pars_std, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                   cond_dist=cond_dist)
          weightpars_ok <- !any(alphas < 0.01)
        } else {
          weightpars_ok <- TRUE
        }
-       tweights <- loglikelihood(data=data, p=p, M=M, params=pars_std, weight_function=weight_function,
+       tweights <- loglikelihood(data=data, p=p, M=M, params=pars_std,
+                                 weight_function=weight_function, weightfun_pars=weightfun_pars,
                                  cond_dist=cond_dist, parametrization=parametrization,
                                  identification="reduced_form", AR_constraints=NULL,
                                  mean_constraints=NULL, B_constraints=NULL,
@@ -294,10 +297,11 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), we
   ### Obtain standard errors, calculate IC ###
   # Sort regimes if no constraints are employed
   if(is.null(AR_constraints) && is.null(mean_constraints)) {
-    params <- sort_regimes(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
-                           identification="reduced_form")
+    params <- sort_regimes(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                           cond_dist=cond_dist, identification="reduced_form")
     all_estimates <- lapply(all_estimates, function(pars) sort_regimes(p=p, M=M, d=d, params=pars,
                                                                        weight_function=weight_function,
+                                                                       weightfun_pars=weightfun_pars,
                                                                        cond_dist=cond_dist,
                                                                        identification="reduced_form"))
   }
@@ -307,7 +311,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), we
             Consider further estimation with the function 'iterate_more'")
   }
 
-  transition_weights <- loglikelihood(data=data, p=p, M=M, params=params, weight_function=weight_function,
+  transition_weights <- loglikelihood(data=data, p=p, M=M, params=params,
+                                      weight_function=weight_function, weightfun_pars=weightfun_pars,
                                       cond_dist=cond_dist, parametrization=parametrization,
                                       identification="reduced_form", AR_constraints=AR_constraints,
                                       mean_constraints=mean_constraints, B_constraints=NULL,
@@ -320,6 +325,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), we
   cat("Calculating approximate standard errors...\n")
   ret <- STVAR(data=data, p=p, M=M, d=d, params=params,
                weight_function=weight_function,
+               weightfun_pars=weightfun_pars,
                cond_dist=cond_dist,
                parametrization=parametrization,
                identification="reduced_form",
