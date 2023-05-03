@@ -97,10 +97,11 @@
 #' }
 #' @export
 
-fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
-                     parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL,
-                     nrounds=(M + 1)^5, ncores=2, maxit=1000, seeds=NULL, print_res=TRUE,
-                     use_parallel=TRUE, filter_estimates=TRUE, ...) {
+fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
+                     cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
+                     AR_constraints=NULL, mean_constraints=NULL,
+                     nrounds=(M + 1)^5, ncores=2, maxit=1000,
+                     seeds=NULL, print_res=TRUE, use_parallel=TRUE, filter_estimates=TRUE, ...) {
   # Initial checks etc
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -112,12 +113,13 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
   data <- check_data(data=data, p=p)
   d <- ncol(data)
   n_obs <- nrow(data)
+  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars)
   check_constraints(p=p, M=M, d=d, AR_constraints=AR_constraints, mean_constraints=mean_constraints, B_constraints=NULL)
   if(!is.null(mean_constraints) && parametrization == "intercept") {
     cat("mean_constraints can be applied for mean-parametrized models only. Switching to parametrization = 'mean'.\n")
     parametrization <- "mean"
   }
-  npars <- n_params(p=p, M=M, d=d, weight_function=weight_function, cond_dist=cond_dist,
+  npars <- n_params(p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars, cond_dist=cond_dist,
                      AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                      B_constraints=NULL, identification="reduced_form")
   if(npars >= d*nrow(data)) stop("There are at least as many parameters in the model as there are observations in the data,
@@ -148,6 +150,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
     cat("Optimizing with a genetic algorithm...\n")
     GAresults <- pbapply::pblapply(1:nrounds, function(i1) GAfit(data=data, p=p, M=M,
                                                                  weight_function=weight_function,
+                                                                 weightfun_pars=weightfun_pars,
                                                                  cond_dist=cond_dist,
                                                                  parametrization=parametrization,
                                                                  AR_constraints=AR_constraints,
@@ -161,6 +164,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
       cat(i1, "/", nrounds, "\r")
       GAfit(data=data, p=p, M=M,
             weight_function=weight_function,
+            weightfun_pars=weightfun_pars,
             cond_dist=cond_dist,
             parametrization=parametrization,
             AR_constraints=AR_constraints,
@@ -174,6 +178,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
   loks <- vapply(1:nrounds, function(i1) loglikelihood(data=data, p=p, M=M,
                                                        params=GAresults[[i1]],
                                                        weight_function=weight_function,
+                                                       weightfun_pars=weightfun_pars,
                                                        cond_dist=cond_dist,
                                                        parametrization=parametrization,
                                                        identification="reduced_form",
@@ -196,7 +201,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
 
   ### Optimization with the variable metric algorithm ###
   loglik_fn <- function(params) {
-    tryCatch(loglikelihood(data=data, p=p, M=M, params=params, weight_function=weight_function,
+    tryCatch(loglikelihood(data=data, p=p, M=M, params=params,
+                           weight_function=weight_function, weightfun_pars=weightfun_pars,
                            cond_dist=cond_dist, parametrization=parametrization,
                            identification="reduced_form", AR_constraints=AR_constraints,
                            mean_constraints=mean_constraints, B_constraints=NULL,
@@ -245,9 +251,11 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), co
     for(i1 in 1:length(all_estimates)) {
        which_round <- ord_by_loks[i1] # Est round with i1:th largest loglik
        pars <- all_estimates[[which_round]]
-       pars_std <- reform_constrained_pars(p=p, M=M, d=d, params=pars, weight_function=weight_function, cond_dist=cond_dist,
-                                           identification="reduced_form", AR_constraints=AR_constraints,
-                                           mean_constraints=mean_constraints, B_constraints=NULL) # Pars in standard form for pick pars fns
+       pars_std <- reform_constrained_pars(p=p, M=M, d=d, params=pars,
+                                           weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                           cond_dist=cond_dist, identification="reduced_form",
+                                           AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                           B_constraints=NULL) # Pars in standard form for pick pars fns
        Omega_eigens <- get_omega_eigens_par(p=p, M=M, d=d, params=pars_std, weight_function=weight_function,
                                             cond_dist=cond_dist, identification="reduced_form",
                                             AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL)

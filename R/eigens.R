@@ -12,9 +12,10 @@
 
 get_boldA_eigens <- function(stvar) {
   get_boldA_eigens_par(p=stvar$model$p, M=stvar$model$M, d=stvar$model$d, params=stvar$params,
-                       weight_function=stvar$model$weight_function, cond_dist=stvar$model$cond_dist,
-                       identification=stvar$model$identification, AR_constraints=stvar$model$AR_constraints,
-                       mean_constraints=stvar$model$mean_constraints, B_constraints=stvar$model$B_constraints)
+                       weight_function=stvar$model$weight_function, weightfun_pars=stvar$model$weightfun_pars,
+                       cond_dist=stvar$model$cond_dist, identification=stvar$model$identification,
+                       AR_constraints=stvar$model$AR_constraints, mean_constraints=stvar$model$mean_constraints,
+                       B_constraints=stvar$model$B_constraints)
 }
 
 
@@ -32,9 +33,10 @@ get_boldA_eigens <- function(stvar) {
 
 get_omega_eigens <- function(stvar) {
   get_omega_eigens_par(p=stvar$model$p, M=stvar$model$M, d=stvar$model$d, params=stvar$params,
-                       weight_function=stvar$model$weight_function, cond_dist=stvar$model$cond_dist,
-                       identification=stvar$model$identification, AR_constraints=stvar$model$AR_constraints,
-                       mean_constraints=stvar$model$mean_constraints, B_constraints=stvar$model$B_constraints)
+                       weight_function=stvar$model$weight_function, weightfun_pars=stvar$model$weightfun_pars,
+                       cond_dist=stvar$model$cond_dist, identification=stvar$model$identification,
+                       AR_constraints=stvar$model$AR_constraints, mean_constraints=stvar$model$mean_constraints,
+                       B_constraints=stvar$model$B_constraints)
 }
 
 
@@ -50,15 +52,19 @@ get_omega_eigens <- function(stvar) {
 #' @inherit stab_conds_satisfied references
 #' @keywords internal
 
-get_boldA_eigens_par <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
+get_boldA_eigens_par <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
+                                 cond_dist=c("Gaussian", "Student"),
                                  identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
                                  AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
-  params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
-                                    identification=identification, AR_constraints=AR_constraints,
-                                    mean_constraints=mean_constraints, B_constraints=B_constraints)
+  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars)
+  params <- reform_constrained_pars(p=p, M=M, d=d, params=params,
+                                    weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                    cond_dist=cond_dist, identification=identification,
+                                    AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                    B_constraints=B_constraints)
   all_A <- pick_allA(p=p, M=M, d=d, params=params)
   all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
   matrix(vapply(1:M, function(m) abs(eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$'values'), numeric(d*p)),
@@ -79,15 +85,19 @@ get_boldA_eigens_par <- function(p, M, d, params, weight_function=c("relative_de
 #' @inherit get_boldA_eigens references
 #' @keywords internal
 
-get_omega_eigens_par <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
+get_omega_eigens_par <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
+                                 cond_dist=c("Gaussian", "Student"),
                                  identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
                                  AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
-  params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
-                                    identification=identification, AR_constraints=AR_constraints,
-                                    mean_constraints=mean_constraints, B_constraints=B_constraints)
+  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars)
+  params <- reform_constrained_pars(p=p, M=M, d=d, params=params,
+                                    weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                    cond_dist=cond_dist, identification=identification,
+                                    AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                    B_constraints=B_constraints)
   if(identification != "reduced_form") {
     stop("Structural models not yet implemented to get_omega_eigens_par")
   }
