@@ -13,7 +13,6 @@ theta_222relg <- c(0.356914, 0.107436, 0.356386, 0.08633, 0.13996, 0.035172, -0.
                    0.227882, 0.336084, 0.239257, 0.024173, -0.021209, 0.707502, 0.063322, 0.027287, 0.009182, 0.197066,
                    0.205831, 0.005157, 0.025877, 1.092094, -0.009327, 0.116449, 0.592446)
 
-
 test_that("standard_errors works correctly", {
   # Relative_dens Gausssian STVAR
   expect_equal(standard_errors(data=gdpdef, p=1, M=1, params=theta_112relg, weight_function="relative_dens"),

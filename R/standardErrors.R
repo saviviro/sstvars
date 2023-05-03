@@ -10,20 +10,24 @@
 #' @inherit in_paramspace references
 #' @keywords internal
 
-standard_errors <- function(data, p, M, params, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
-                            parametrization=c("intercept", "mean"), identification=c("reduced_form", "recursive", "heteroskedasticity"),
+standard_errors <- function(data, p, M, params, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
+                            cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
+                            identification=c("reduced_form", "recursive", "heteroskedasticity"),
                             AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL, minval) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
   identification <- match.arg(identification)
+  d <- ncol(data)
+  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weighfun_pars=weightfun_pars)
   if(missing(minval)) {
     minval <- get_minval(data)
   }
 
   # The log-likelihood function to differentiate
   loglik_fn <- function(params) {
-    tryCatch(loglikelihood(data=data, p=p, M=M, params=params, weight_function=weight_function,
+    tryCatch(loglikelihood(data=data, p=p, M=M, params=params,
+                           weight_function=weight_function, weighfun_pars=weightfun_pars,
                            cond_dist=cond_dist, parametrization=parametrization,
                            identification=identification, AR_constraints=AR_constraints,
                            mean_constraints=mean_constraints, B_constraints=B_constraints,
@@ -85,8 +89,10 @@ print_std_errors <- function(stvar, digits=3) {
   AR_constraints <- stvar$model$AR_constraints
   mean_constraints <- stvar$model$mean_constraints
   B_constraints <- stvar$model$B_constraints
+  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weighfun_pars=weightfun_pars)
   pars <- stvar$std_errors
-  pars <- reform_constrained_pars(p=p, M=M, d=d, params=pars, weight_function=weight_function, cond_dist=cond_dist,
+  pars <- reform_constrained_pars(p=p, M=M, d=d, params=pars, weight_function=weight_function,
+                                  weighfun_pars=weightfun_pars, cond_dist=cond_dist,
                                   identification=identification, AR_constraints=AR_constraints,
                                   mean_constraints=mean_constraints, B_constraints=B_constraints)
   all_phi0_or_mu <- pick_phi0(M=M, d=d, params=pars)
