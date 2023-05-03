@@ -10,6 +10,7 @@ smart_ind(
   d,
   params,
   weight_function = c("relative_dens", "logit"),
+  weighfun_pars = NULL,
   cond_dist = c("Gaussian", "Student"),
   AR_constraints = NULL,
   mean_constraints = NULL,

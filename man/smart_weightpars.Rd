@@ -12,7 +12,13 @@ smart_weightpars(M, weight_pars, weight_function, accuracy)
 \item{weight_pars}{a vector containing transition weight parameter values.
 \describe{
   \item{If \code{weight_function == "relative_dens"}:}{a length \code{M-1} vector \eqn{(\alpha_1,...,\alpha_{M-1})}.}
-  \item{If \code{weight_function == "logit"}:}{NOT YET IMPLEMENTED}
+  \item{If \code{weight_function == "logit"}:}{a length \eqn{((M-1)k\times 1)} vector \eqn{(\gamma_1,...,\gamma_M)},
+        where \eqn{\gamma_m} \eqn{(k\times 1)}, \eqn{m=1,...,M-1} contains the logit-regression coefficients of the \eqn{m}th regime.
+        Specifically, for switching variables with indices in \eqn{J\subset\lbrace 1,...,d\rbrace}, and with
+       \eqn{\tilde{p}\in\lbrace 1,...,p\rbrace} lags included, \eqn{\gamma_m} contains the coefficients for the vector
+       \eqn{z_{t-1} = (1,\tilde{z}_{\min\lbrace J\rbrace},...,\tilde{z}_{\max\lbrace J\rbrace})}, where
+       \eqn{\tilde{z}_{j} =(y_{j,t-1},...,y_{j,t-\tilde{p}})}, \eqn{j\in J}. So \eqn{k=1+|J|\tilde{p}}
+       where \eqn{|J|} denotes the number of elements in \eqn{J}.}
 }}
 
 \item{weight_function}{what type of transition weights should be used? See the vignette for details about the weight functions.}
@@ -24,7 +30,13 @@ Larger number means larger accuracy. Read the source code for details.}
 Returns a numeric vector ...
   \describe{
     \item{If \code{weight_function == "relative_dens"}:}{a length \code{M-1} vector \eqn{(\alpha_1,...,\alpha_{M-1})}.}
-    \item{If \code{weight_function == "logit"}:}{NOT YET IMPLEMENTED}
+    \item{If \code{weight_function == "logit"}:}{a length \eqn{((M-1)k\times 1)} vector \eqn{(\gamma_1,...,\gamma_M)},
+          where \eqn{\gamma_m} \eqn{(k\times 1)}, \eqn{m=1,...,M-1} contains the logit-regression coefficients of the \eqn{m}th regime.
+          Specifically, for switching variables with indices in \eqn{J\subset\lbrace 1,...,d\rbrace}, and with
+         \eqn{\tilde{p}\in\lbrace 1,...,p\rbrace} lags included, \eqn{\gamma_m} contains the coefficients for the vector
+         \eqn{z_{t-1} = (1,\tilde{z}_{\min\lbrace J\rbrace},...,\tilde{z}_{\max\lbrace J\rbrace})}, where
+         \eqn{\tilde{z}_{j} =(y_{j,t-1},...,y_{j,t-\tilde{p}})}, \eqn{j\in J}. So \eqn{k=1+|J|\tilde{p}}
+         where \eqn{|J|} denotes the number of elements in \eqn{J}.}
   }
 }
 \description{

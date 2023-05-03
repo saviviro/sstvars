@@ -186,11 +186,17 @@ smart_df <- function(df, accuracy) {
 #' @return Returns a numeric vector ...
 #'   \describe{
 #'     \item{If \code{weight_function == "relative_dens"}:}{a length \code{M-1} vector \eqn{(\alpha_1,...,\alpha_{M-1})}.}
-#'     \item{If \code{weight_function == "logit"}:}{NOT YET IMPLEMENTED}
+#'     \item{If \code{weight_function == "logit"}:}{a length \eqn{((M-1)k\times 1)} vector \eqn{(\gamma_1,...,\gamma_M)},
+#'           where \eqn{\gamma_m} \eqn{(k\times 1)}, \eqn{m=1,...,M-1} contains the logit-regression coefficients of the \eqn{m}th regime.
+#'           Specifically, for switching variables with indices in \eqn{J\subset\lbrace 1,...,d\rbrace}, and with
+#'          \eqn{\tilde{p}\in\lbrace 1,...,p\rbrace} lags included, \eqn{\gamma_m} contains the coefficients for the vector
+#'          \eqn{z_{t-1} = (1,\tilde{z}_{\min\lbrace J\rbrace},...,\tilde{z}_{\max\lbrace J\rbrace})}, where
+#'          \eqn{\tilde{z}_{j} =(y_{j,t-1},...,y_{j,t-\tilde{p}})}, \eqn{j\in J}. So \eqn{k=1+|J|\tilde{p}}
+#'          where \eqn{|J|} denotes the number of elements in \eqn{J}.}
 #'   }
 #' @keywords internal
 
-random_weightpars <- function(M, weight_function, AR_constraints, mean_constraints) {
+random_weightpars <- function(M, weight_function, weightfun_pars=NULL, AR_constraints=NULL, mean_constraints=NULL) {
   if(weight_function == "relative_dens") {
     alphas <- runif(n=M)
     # Sort and standardize alphas; don't sort if AR_constraints or mean_constraints are used
@@ -200,7 +206,9 @@ random_weightpars <- function(M, weight_function, AR_constraints, mean_constrain
     }
     ret <- alphas[-M]
   } else if(weight_function == "logit") {
-    stop("Logit weights not yet implemented in random_weightpars")
+    ret <- rnorm((M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]]), mean=0, sd=1)
+  } else {
+    stop("Only relative dens and logit weights are currently implemented in random_weightpars")
   }
   ret
 }
@@ -214,23 +222,28 @@ random_weightpars <- function(M, weight_function, AR_constraints, mean_constrain
 #' @param weight_pars a vector containing transition weight parameter values.
 #'   \describe{
 #'     \item{If \code{weight_function == "relative_dens"}:}{a length \code{M-1} vector \eqn{(\alpha_1,...,\alpha_{M-1})}.}
-#'     \item{If \code{weight_function == "logit"}:}{NOT YET IMPLEMENTED}
+#'     \item{If \code{weight_function == "logit"}:}{a length \eqn{((M-1)k\times 1)} vector \eqn{(\gamma_1,...,\gamma_M)},
+#'           where \eqn{\gamma_m} \eqn{(k\times 1)}, \eqn{m=1,...,M-1} contains the logit-regression coefficients of the \eqn{m}th regime.
+#'           Specifically, for switching variables with indices in \eqn{J\subset\lbrace 1,...,d\rbrace}, and with
+#'          \eqn{\tilde{p}\in\lbrace 1,...,p\rbrace} lags included, \eqn{\gamma_m} contains the coefficients for the vector
+#'          \eqn{z_{t-1} = (1,\tilde{z}_{\min\lbrace J\rbrace},...,\tilde{z}_{\max\lbrace J\rbrace})}, where
+#'          \eqn{\tilde{z}_{j} =(y_{j,t-1},...,y_{j,t-\tilde{p}})}, \eqn{j\in J}. So \eqn{k=1+|J|\tilde{p}}
+#'          where \eqn{|J|} denotes the number of elements in \eqn{J}.}
 #'   }
-#' @return Returns a numeric vector ...
-#'   \describe{
-#'     \item{If \code{weight_function == "relative_dens"}:}{a length \code{M-1} vector \eqn{(\alpha_1,...,\alpha_{M-1})}.}
-#'     \item{If \code{weight_function == "logit"}:}{NOT YET IMPLEMENTED}
-#'   }
+#' @inherit random_weightpars return
 #' @keywords internal
 
 smart_weightpars <- function(M, weight_pars, weight_function, accuracy) {
   if(weight_function == "relative_dens") {
-    weight_pars <- rnorm(n=length(weight_pars), mean=c(weight_pars, 1-sum(weight_pars)),
-                         sd=pmax(0.2, c(weight_pars, 1-sum(weight_pars)))/accuracy)
+    weight_pars <- rnorm(n=length(weight_pars)+1, mean=c(weight_pars, 1-sum(weight_pars)),
+                         sd=pmax(0.2, c(weight_pars, 1-sum(weight_pars))/accuracy))
     ret <- (weight_pars/sum(weight_pars))[-M]
     # Sort and standardize alphas; don't sort if AR_constraints or mean_constraints are used
   } else if(weight_function == "logit") {
-    stop("Logit weights not yet implemented in random_weightpars")
+    ret <- rnorm(n=length(weight_pars), mean=weight_pars,
+                 sd=pmax(0.2, weight_pars/accuracy))
+  } else {
+    stop("Only relative dens and logit weights are currently implemented in smart_weightpars")
   }
   ret
 }
@@ -257,8 +270,9 @@ smart_weightpars <- function(M, weight_pars, weight_function, accuracy) {
 #'  }
 #' @keywords internal
 
-random_ind <- function(p, M, d, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
-                       AR_constraints=NULL, mean_constraints=NULL, force_stability=is.null(AR_constraints),
+random_ind <- function(p, M, d, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
+                       cond_dist=c("Gaussian", "Student"), AR_constraints=NULL, mean_constraints=NULL,
+                       force_stability=is.null(AR_constraints),
                        mu_scale, mu_scale2, omega_scale, ar_scale=1, ar_scale2=1) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -290,8 +304,8 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logit"), con
 
   # Generate weight params
   if(M > 1) {
-    weight_pars <- random_weightpars(M=M, weight_function=weight_function, AR_constraints=AR_constraints,
-                                     mean_constraints=mean_constraints)
+    weight_pars <- random_weightpars(M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                     AR_constraints=AR_constraints, mean_constraints=mean_constraints)
   } else {
     weight_pars <- numeric(0) # Replicate returns a list if the value is numeric(0)
   }
@@ -322,15 +336,16 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logit"), con
 #' @inherit random_ind return references
 #' @keywords internal
 
-smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
-                      AR_constraints=NULL, mean_constraints=NULL, accuracy=1, which_random=numeric(0), mu_scale, mu_scale2,
-                      omega_scale, ar_scale=1, ar_scale2=1) {
+smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), weighfun_pars=NULL,
+                      cond_dist=c("Gaussian", "Student"), AR_constraints=NULL, mean_constraints=NULL,
+                      accuracy=1, which_random=numeric(0), mu_scale, mu_scale2, omega_scale,
+                      ar_scale=1, ar_scale2=1) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   if(cond_dist != "Gaussian") stop("Only Gaussian cond_dist is currently implemented to smart_ind!")
   scale_A <- ar_scale2*(1 + log(2*mean(c((p - 0.2)^(1.25), d))))
-  params_std <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
-                                        identification="reduced_form", AR_constraints=AR_constraints,
+  params_std <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                        cond_dist=cond_dist, identification="reduced_form", AR_constraints=AR_constraints,
                                         mean_constraints=mean_constraints, B_constraints=NULL) # Used so that pick_pars-functions works
   # ? dist_pars <- pick_distpars
   all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params_std)
@@ -353,7 +368,8 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logit
       }
     }
     if(M > 1) {
-      weight_pars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist)
+      weight_pars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weigthfun_pars,
+                                     cond_dist=cond_dist)
       new_pars[(M*d + M*p*d^2 + M*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + M*d*(d + 1)/2 + 1)] <- smart_weightpars(M=M, weight_pars=weight_pars,
                                                                                                             weight_function=weight_function,
                                                                                                             accuracy=accuracy)
@@ -409,7 +425,8 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logit
 
     # Weight function parameters
     if(M > 1) {
-      weight_pars <- pick_weightpars(p=p, M=M, d=d, params=params_std, weight_function=weight_function, cond_dist=cond_dist)
+      weight_pars <- pick_weightpars(p=p, M=M, d=d, params=params_std, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                     cond_dist=cond_dist)
       weight_pars <- smart_weightpars(M=M, weight_pars=weight_pars, weight_function=weight_function, accuracy=accuracy)
     } else {
       weight_pars <- numeric(0)

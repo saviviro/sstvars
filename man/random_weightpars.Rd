@@ -4,12 +4,28 @@
 \alias{random_weightpars}
 \title{Create random transition weight parameter values}
 \usage{
-random_weightpars(M, weight_function, AR_constraints, mean_constraints)
+random_weightpars(
+  M,
+  weight_function,
+  weightfun_pars = NULL,
+  AR_constraints = NULL,
+  mean_constraints = NULL
+)
 }
 \arguments{
 \item{M}{a positive integer specifying the number of regimes}
 
 \item{weight_function}{what type of transition weights should be used? See the vignette for details about the weight functions.}
+
+\item{weightfun_pars}{\describe{
+  \item{If \code{weight_function == "relative_dens"}:}{Not used.}
+  \item{If \code{weight_function == "logit"}:}{a list of two elements: \describe{
+    \item{The first element \code{$vars}:}{a numeric vector containing the variables that should used as switching variables
+      in the weight function in an increasing order, i.e., a vector with unique elements in \eqn{\lbrace 1,...,d \rbrace}.}
+    \item{The second element \code{$lags}:}{an integer in \eqn{\lbrace 1,...,p \rbrace} specifying the number of lags to be
+     used in the weight function.}
+  }}
+}}
 
 \item{AR_constraints}{a size \eqn{(Mpd^2 x q)} constraint matrix \eqn{C} specifying general linear constraints
 to the autoregressive parameters. The constraints are of the form
@@ -29,7 +45,13 @@ that is, when \code{parametrization="mean"}.}}
 Returns a numeric vector ...
   \describe{
     \item{If \code{weight_function == "relative_dens"}:}{a length \code{M-1} vector \eqn{(\alpha_1,...,\alpha_{M-1})}.}
-    \item{If \code{weight_function == "logit"}:}{NOT YET IMPLEMENTED}
+    \item{If \code{weight_function == "logit"}:}{a length \eqn{((M-1)k\times 1)} vector \eqn{(\gamma_1,...,\gamma_M)},
+          where \eqn{\gamma_m} \eqn{(k\times 1)}, \eqn{m=1,...,M-1} contains the logit-regression coefficients of the \eqn{m}th regime.
+          Specifically, for switching variables with indices in \eqn{J\subset\lbrace 1,...,d\rbrace}, and with
+         \eqn{\tilde{p}\in\lbrace 1,...,p\rbrace} lags included, \eqn{\gamma_m} contains the coefficients for the vector
+         \eqn{z_{t-1} = (1,\tilde{z}_{\min\lbrace J\rbrace},...,\tilde{z}_{\max\lbrace J\rbrace})}, where
+         \eqn{\tilde{z}_{j} =(y_{j,t-1},...,y_{j,t-\tilde{p}})}, \eqn{j\in J}. So \eqn{k=1+|J|\tilde{p}}
+         where \eqn{|J|} denotes the number of elements in \eqn{J}.}
   }
 }
 \description{
