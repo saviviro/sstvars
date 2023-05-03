@@ -166,6 +166,9 @@ f32 <- fitSTVAR(usamone, p=3, M=2, nrounds=20, seeds=61:80)
 summary(f32)
 plot(f32)
 
+# logit STVAR, p=1, M=2, d=2
+fitlogit12 <- fitSTVAR(gdpdef, p=1, M=2, weight_function="logit", weightfun_pars=list(vars=1, lags=1),
+ nrounds=1, seeds=1, use_parallel=FALSE)
 }
 }
 \references{

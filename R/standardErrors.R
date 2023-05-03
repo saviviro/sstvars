@@ -19,7 +19,7 @@ standard_errors <- function(data, p, M, params, weight_function=c("relative_dens
   parametrization <- match.arg(parametrization)
   identification <- match.arg(identification)
   d <- ncol(data)
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weighfun_pars=weightfun_pars)
+  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars)
   if(missing(minval)) {
     minval <- get_minval(data)
   }
@@ -27,7 +27,7 @@ standard_errors <- function(data, p, M, params, weight_function=c("relative_dens
   # The log-likelihood function to differentiate
   loglik_fn <- function(params) {
     tryCatch(loglikelihood(data=data, p=p, M=M, params=params,
-                           weight_function=weight_function, weighfun_pars=weightfun_pars,
+                           weight_function=weight_function, weightfun_pars=weightfun_pars,
                            cond_dist=cond_dist, parametrization=parametrization,
                            identification=identification, AR_constraints=AR_constraints,
                            mean_constraints=mean_constraints, B_constraints=B_constraints,

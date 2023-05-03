@@ -98,7 +98,8 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
       warning("Approximate standard errors can't be calculated without data")
       std_errors <- rep(NA, npars)
     } else {
-      std_errors <- tryCatch(standard_errors(data=data, p=p, M=M, params=params, weight_function=weight_function, cond_dist=cond_dist,
+      std_errors <- tryCatch(standard_errors(data=data, p=p, M=M, params=params, weight_function=weight_function,
+                                             weightfun_pars=weightfun_pars, cond_dist=cond_dist,
                                              parametrization=parametrization, identification=identification, AR_constraints=AR_constraints,
                                              mean_constraints=mean_constraints, B_constraints=B_constraints),
                              error=function(e) {
@@ -116,9 +117,10 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
     regime_cmeans <- total_cmeans <- total_ccovs <- NA
   } else {
     get_cm <- function(to_return) loglikelihood(data=data, p=p, M=M, params=params,
-                                                weight_function=weight_function, cond_dist=cond_dist,
-                                                parametrization=parametrization, identification=identification,
-                                                AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                                weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                                cond_dist=cond_dist, parametrization=parametrization,
+                                                identification=identification, AR_constraints=AR_constraints,
+                                                mean_constraints=mean_constraints,
                                                 B_constraints=B_constraints, to_return=to_return,
                                                 check_params=TRUE, minval=NA)
     regime_cmeans <- get_cm("regime_cmeans")
@@ -132,6 +134,7 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
                             M=M,
                             d=d,
                             weight_function=weight_function,
+                            weightfun_pars=weightfun_pars,
                             cond_dist=cond_dist,
                             parametrization=parametrization,
                             identification=identification,
@@ -195,6 +198,7 @@ alt_stvar <- function(stvar, which_largest=1, which_round, calc_std_errors=TRUE)
   ret <- STVAR(data=stvar$data, p=stvar$model$p, M=stvar$model$M, d=stvar$model$d,
                params=stvar$all_estimates[[which_round]],
                weight_function=stvar$model$weight_function,
+               weightfun_pars=stvar$model$weightfun_pars,
                cond_dist=stvar$model$cond_dist,
                parametrization=stvar$model$parametrization,
                identification=stvar$model$identification,

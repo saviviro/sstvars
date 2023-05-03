@@ -535,6 +535,6 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), weigh
   } else {
     return(change_parametrization(p=p, M=M, d=d, params=ret, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                   cond_dist=cond_dist, identification="reduced_form", AR_constraints=AR_constraints,
-                                  mean_constraints=mean_constraints, B_constraints=B_constraints, change_to="intercept"))
+                                  mean_constraints=mean_constraints, B_constraints=NULL, change_to="intercept"))
   }
 }

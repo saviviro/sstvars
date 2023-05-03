@@ -336,7 +336,7 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logit"), wei
 #' @inherit random_ind return references
 #' @keywords internal
 
-smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), weighfun_pars=NULL,
+smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
                       cond_dist=c("Gaussian", "Student"), AR_constraints=NULL, mean_constraints=NULL,
                       accuracy=1, which_random=numeric(0), mu_scale, mu_scale2, omega_scale,
                       ar_scale=1, ar_scale2=1) {
@@ -368,11 +368,13 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logit
       }
     }
     if(M > 1) {
-      weight_pars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weigthfun_pars,
+      weight_pars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                      cond_dist=cond_dist)
-      new_pars[(M*d + M*p*d^2 + M*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + M*d*(d + 1)/2 + 1)] <- smart_weightpars(M=M, weight_pars=weight_pars,
-                                                                                                            weight_function=weight_function,
-                                                                                                            accuracy=accuracy)
+      new_pars[(M*d + M*p*d^2 + M*d*(d + 1)/2 + 1):
+                 (M*d + M*p*d^2 + M*d*(d + 1)/2 + length(weight_pars))] <- smart_weightpars(M=M,
+                                                                                            weight_pars=weight_pars,
+                                                                                            weight_function=weight_function,
+                                                                                            accuracy=accuracy)
     }
 
   } else { # AR or mean constraints employed
