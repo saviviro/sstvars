@@ -34,8 +34,9 @@
 #' mod122 <- STVAR(data=gdpdef, p=1, M=2, params=theta_122relg)
 #' @export
 
-STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
-                  parametrization=c("intercept", "mean"), identification=c("reduced_form", "recursive", "heteroskedasticity"),
+STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
+                  cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
+                  identification=c("reduced_form", "recursive", "heteroskedasticity"),
                   AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL, calc_std_errors=FALSE) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -54,12 +55,13 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
     }
   }
   check_pMd(p=p, M=M, d=d)
+  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars)
   check_constraints(p=p, M=M, d=d, AR_constraints=AR_constraints, mean_constraints=mean_constraints, B_constraints=B_constraints)
-  check_params(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
-               parametrization=parametrization, identification=identification, AR_constraints=AR_constraints,
-               mean_constraints=mean_constraints, B_constraints=B_constraints)
-  npars <- n_params(p=p, M=M, d=d, weight_function=weight_function, cond_dist=cond_dist,
-                    identification=identification, AR_constraints=AR_constraints,
+  check_params(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
+               cond_dist=cond_dist, parametrization=parametrization, identification=identification,
+               AR_constraints=AR_constraints, mean_constraints=mean_constraints, B_constraints=B_constraints)
+  npars <- n_params(p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                    cond_dist=cond_dist, identification=identification, AR_constraints=AR_constraints,
                     mean_constraints=mean_constraints, B_constraints=B_constraints)
 
   # Log-likelihood, transition weights, residuals, IC
@@ -70,20 +72,22 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
   } else {
     if(npars >= d*nrow(data)) warning("There are at least as many parameters in the model as there are observations in the data")
     lok_and_tw <- loglikelihood(data=data, p=p, M=M, params=params,
-                                weight_function=weight_function, cond_dist=cond_dist,
-                                parametrization=parametrization, identification=identification,
-                                AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                                B_constraints=B_constraints, to_return="loglik_and_tw", check_params=TRUE,
-                                minval=NA)
+                                weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                cond_dist=cond_dist, parametrization=parametrization,
+                                identification=identification, AR_constraints=AR_constraints,
+                                mean_constraints=mean_constraints, B_constraints=B_constraints,
+                                to_return="loglik_and_tw", check_params=TRUE, minval=NA)
     residuals_raw <- get_residuals(data=data, p=p, M=M, params=params,
-                                   weight_function=weight_function, cond_dist=cond_dist,
-                                   parametrization=parametrization, identification=identification,
-                                   AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                   weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                   cond_dist=cond_dist, parametrization=parametrization,
+                                   identification=identification, AR_constraints=AR_constraints,
+                                   mean_constraints=mean_constraints,
                                    B_constraints=B_constraints, standardize=FALSE)
     residuals_std <- get_residuals(data=data, p=p, M=M, params=params,
-                                   weight_function=weight_function, cond_dist=cond_dist,
-                                   parametrization=parametrization, identification=identification,
-                                   AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                   weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                   cond_dist=cond_dist, parametrization=parametrization,
+                                   identification=identification, AR_constraints=AR_constraints,
+                                   mean_constraints=mean_constraints,
                                    B_constraints=B_constraints, standardize=TRUE)
     IC <- get_IC(loglik=lok_and_tw$loglik, npars=npars, T_obs=nrow(data) - p)
   }

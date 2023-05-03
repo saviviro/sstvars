@@ -14,16 +14,20 @@
 #' @inherit loglikelihood references
 #' @keywords internal
 
-get_residuals <- function(data, p, M, params, weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
-                          parametrization=c("intercept", "mean"), identification=c("reduced_form", "recursive", "heteroskedasticity"),
+get_residuals <- function(data, p, M, params, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
+                          cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
+                          identification=c("reduced_form", "recursive", "heteroskedasticity"),
                           AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL, standardize=TRUE) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
   identification <- match.arg(identification)
+  T_obs <- nrow(data) - p
+  d <- ncol(data)
+  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars)
 
-  mu_t <- loglikelihood(data=data, p=p, M=M, params=params, weight_function=weight_function, cond_dist=cond_dist,
-                        parametrization=parametrization, identification=identification,
+  mu_t <- loglikelihood(data=data, p=p, M=M, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                        cond_dist=cond_dist, parametrization=parametrization, identification=identification,
                         AR_constraints=AR_constraints, mean_constraints=mean_constraints, B_constraints,
                         check_params=TRUE, to_return="total_cmeans")
 
@@ -32,14 +36,11 @@ get_residuals <- function(data, p, M, params, weight_function=c("relative_dens",
     return(y_minus_mu) # Nonstandardized residuals
   }
 
-  Omega_t <- loglikelihood(data=data, p=p, M=M, params=params, weight_function=weight_function, cond_dist=cond_dist,
-                           parametrization=parametrization, identification=identification,
+  Omega_t <- loglikelihood(data=data, p=p, M=M, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                           cond_dist=cond_dist, parametrization=parametrization, identification=identification,
                            AR_constraints=AR_constraints, mean_constraints=mean_constraints, B_constraints,
                            check_params=TRUE, to_return="total_ccovs")
 
-
-  T_obs <- nrow(data) - p
-  d <- ncol(data)
   all_residuals <- matrix(nrow=T_obs, ncol=d)
 
   # Calculate the Pearson residuals
