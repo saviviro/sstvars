@@ -164,6 +164,10 @@ theta_222relg <- c(0.356914, 0.107436, 0.356386, 0.08633, 0.13996, 0.035172, -0.
                    0.227882, 0.336084, 0.239257, 0.024173, -0.021209, 0.707502, 0.063322, 0.027287, 0.009182, 0.197066,
                    0.205831, 0.005157, 0.025877, 1.092094, -0.009327, 0.116449, 0.592446)
 
+# p=2, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=1:2, lags=2)
+gamma1_222_12_2 <- c(0.1, 0.2, 0.11, 0.22, 0.33)
+theta_222log_12_2 <- c(theta_222relg[-length(theta_222relg)], gamma1_222_12_2)
+
 ## Constrained models
 rbind_diags <- function(p, M, d) {
   I <- diag(p*d^2)
@@ -177,6 +181,9 @@ theta_222relgc <- c(0.36, 0.12, 0.48, 0.07, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01
 # p=2, M=2, d=2, mean_constraints=list(1:2), AR_constraints=C_222
 theta_222relgcm <- c(0.7209658, 0.810858, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01, 0.08, 0.3, 0.21, 0.01,
                      0.03, 1.1, 0.01, 0.11, 0.37)
+
+# p=2, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222
+theta_222logcm_12_2 <- c(theta_222relgcm[-length(theta_222relgcm)], gamma1_222_12_2)
 
 test_that("get_regime_means works correctly", {
   expect_equal(c(get_regime_means(p=1, M=1, d=2, params=params112, weight_function="relative_dens")),
@@ -193,5 +200,11 @@ test_that("get_regime_means works correctly", {
                c(0.8730964, 0.5279188, 1.2174281, 0.4221658), tolerance=1e-3)
   expect_equal(c(get_regime_means(p=2, M=2, d=2, params=theta_222relgcm, weight_function="relative_dens", parametrization="mean",
                                   AR_constraints=C_222, mean_constraints=list(1:2))),
+               c(0.7209658, 0.8108580, 0.7209658, 0.8108580), tolerance=1e-3)
+
+  expect_equal(c(get_regime_means(p=2, M=2, d=2, params=theta_222log_12_2, weight_function="logit", weightfun_pars=list(vars=1:2, lags=2))),
+               c(0.9600324, 0.5549088, 0.4908410, 1.1693004), tolerance=1e-3)
+  expect_equal(c(get_regime_means(p=2, M=2, d=2, params=theta_222relgcm, weight_function="logit", weightfun_pars=list(vars=1:2, lags=2),
+                                  parametrization="mean", AR_constraints=C_222, mean_constraints=list(1:2))),
                c(0.7209658, 0.8108580, 0.7209658, 0.8108580), tolerance=1e-3)
 })

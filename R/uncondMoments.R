@@ -165,14 +165,18 @@ get_Sigmas <- function(p, M, d, all_A, all_boldA, all_Omegas) {
 #' @inherit stab_conds_satisfied references
 #' @keywords internal
 
-get_regime_means <- function(p, M, d, params,weight_function=c("relative_dens", "logit"), cond_dist=c("Gaussian", "Student"),
-                             parametrization=c("intercept", "mean"), identification=c("reduced_form", "recursive", "heteroskedasticity"),
+get_regime_means <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
+                             cond_dist=c("Gaussian", "Student"),
+                             parametrization=c("intercept", "mean"),
+                             identification=c("reduced_form", "recursive", "heteroskedasticity"),
                              AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
   identification <- match.arg(identification)
-  params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
+  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars)
+  params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function,
+                                    weightfun_pars=weightfun_pars, cond_dist=cond_dist,
                                     identification=identification, AR_constraints=AR_constraints,
                                     mean_constraints=mean_constraints, B_constraints=B_constraints)
   if(!is.null(B_constraints)) {
@@ -181,7 +185,10 @@ get_regime_means <- function(p, M, d, params,weight_function=c("relative_dens", 
   if(identification != "reduced_form") stop("Structural models are not yet implemented to get_regime_means")
 
   if(parametrization == "intercept") {
-    params <- change_parametrization(p=p, M=M, d=d, params=params, AR_constraints=NULL, mean_constraints=NULL, change_to="mean")
+    params <- change_parametrization(p=p, M=M, d=d, params=params, weight_function=weight_function,
+                                     weightfun_pars=weightfun_pars,
+                                     AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
+                                     change_to="mean")
   }
   pick_phi0(M=M, d=d, params=params)
 }
