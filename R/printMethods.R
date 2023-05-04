@@ -30,6 +30,7 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   d <- stvar$model$d
   params <- stvar$params
   weight_function <- stvar$model$weight_function
+  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=stvar$model$weightfun_pars)
   cond_dist <- stvar$model$cond_dist
   parametrization <- stvar$model$parametrization
   identification <- stvar$model$identification
@@ -37,14 +38,17 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   mean_constraints <- stvar$model$mean_constraints
   B_constraints <- stvar$model$B_constraints
   IC <- stvar$IC
-  all_mu <- round(get_regime_means(p=p, M=M, d=d, params=params, weight_function=weight_function,
+  var_names <- colnames(stvar$data)
+  all_mu <- round(get_regime_means(p=p, M=M, d=d, params=params,
+                                   weight_function=weight_function, weightfun_pars=weightfun_pars,
                                    cond_dist=cond_dist, parametrization=parametrization,
                                    identification=identification, AR_constraints=AR_constraints,
                                    mean_constraints=mean_constraints, B_constraints=B_constraints), digits)
   npars <- length(params)
   T_obs <- ifelse(is.null(stvar$data), NA, nrow(stvar$data) - p)
-  params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
-                                    identification=identification, AR_constraints=AR_constraints,
+  params <- reform_constrained_pars(p=p, M=M, d=d, params=params,
+                                    weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                    cond_dist=cond_dist, identification=identification, AR_constraints=AR_constraints,
                                     mean_constraints=mean_constraints, B_constraints=B_constraints)
   if(identification != "reduced_form") {
     print("Structural models are not yet implemented to print.stvar")
@@ -57,8 +61,12 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   all_phi0 <- pick_phi0(M=M, d=d, params=params)
   all_A <- pick_allA(p=p, M=M, d=d, params=params)
   all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params)
-  weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function,
+  weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                 cond_dist=cond_dist)
+  if(weight_function == "logit") {
+    all_gamma_m <- cbind(matrix(weightpars, ncol=M-1), 0) # Column per gamma_m, m=1,...,M-1, gamma_M=0.
+  }
+
   #### pick dist_pars
   cat(weight_function, cond_dist, "STVAR model,", paste0(identification, ","),
       ifelse(is.null(AR_constraints), "no AR_constraints,", "AR_constraints used,"),
@@ -69,6 +77,10 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   cat(paste0("M = ", M, ", "))
   cat(paste0("d = ", d, ", #parameters = " , npars, ","),
       ifelse(is.na(T_obs), "\n", paste0("#observations = ", T_obs, " x ", d, "")))
+  if(weight_function == "logit") {
+    cat("\n ", paste0("Switching variables: ", paste0(var_names[weightfun_pars[[1]]], collapse=", "), " with ",
+                     weightfun_pars[[2]], ifelse(weightfun_pars[[2]] == 1, " lag.", " lags.")))
+  }
   cat("\n\n")
 
   if(summary_print) {
@@ -102,7 +114,11 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
     if(weight_function == "relative_dens") {
       cat(paste("Weight param:", format_value(weightpars[m])), "\n")
     } else if(weight_function == "logit") {
-      stop("logit weights not yet implemented to print.stvar")
+      cat(paste("Weight params:", paste0(format_value(all_gamma_m[,m]), collapse=", ")))
+      if(m == M) {
+        cat(" (by normalization)")
+      }
+      cat("\n")
     }
     cat("Regime means:", paste0(format_value(all_mu[,m]), collapse=", "))
     cat("\n\n")
