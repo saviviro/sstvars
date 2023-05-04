@@ -101,6 +101,8 @@
 #' summary(f32)
 #' plot(f32)
 #'
+#' tmp <- fitSTVAR(gdpdef, p=1, M=2, weight_function="logit", weightfun_pars=list(vars=1, lags=1), nrounds=1, seeds=6, use_parallel=FALSE)
+#'
 #' # logit STVAR, p=3, M=2, d=2, the second variable is the switching variable with one lag.
 #' fitlogit32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logit", weightfun_pars=list(vars=2, lags=1),
 #'  nrounds=20, seeds=1:20, use_parallel=FALSE)

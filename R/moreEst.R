@@ -41,12 +41,14 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
   AR_constraints <- stvar$model$AR_constraints
   mean_constraints <- stvar$model$mean_constraints
   B_constraints <- stvar$model$B_constraints
+  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=stvar$model$weightfun_pars)
   minval <- get_minval(stvar$data)
   npars <- length(stvar$params)
 
   # Function to optimize
   loglik_fn <- function(params) {
-    tryCatch(loglikelihood(data=data, p=p, M=M, params=params, weight_function=weight_function,
+    tryCatch(loglikelihood(data=data, p=p, M=M, params=params,
+                           weight_function=weight_function, weightfun_pars=weightfun_pars,
                            cond_dist=cond_dist, parametrization=parametrization,
                            identification=identification, AR_constraints=AR_constraints,
                            mean_constraints=mean_constraints, B_constraints=B_constraints,
@@ -65,6 +67,7 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
 
   ret <- STVAR(data=data, p=p, M=M, d=d, params=res$par,
                weight_function=weight_function,
+               weightfun_pars=weightfun_pars,
                cond_dist=cond_dist,
                parametrization=parametrization,
                identification=identification,

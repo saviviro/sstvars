@@ -74,6 +74,7 @@ get_gradient <- function(stvar) {
     # Log-likelihood function as a function of the parameter
     loglikelihood(data=stvar$data, p=stvar$model$p, M=stvar$model$M, params=x,
                   weight_function=stvar$model$weight_function,
+                  weightfun_pars=stvar$model$weightfun_pars,
                   cond_dist=stvar$model$cond_dist,
                   parametrization=stvar$model$parametrization,
                   identification=stvar$model$identification,
@@ -95,6 +96,7 @@ get_hessian <- function(stvar) {
     # Log-likelihood function as a function of the parameter
     loglikelihood(data=stvar$data, p=stvar$model$p, M=stvar$model$M, params=x,
                   weight_function=stvar$model$weight_function,
+                  weightfun_pars=stvar$model$weightfun_pars,
                   cond_dist=stvar$model$cond_dist,
                   parametrization=stvar$model$parametrization,
                   identification=stvar$model$identification,

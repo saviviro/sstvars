@@ -62,6 +62,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   M <- stvar$model$M
   d <- stvar$model$d
   weight_function <- stvar$model$weight_function
+  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=stvar$model$weightfun_pars)
   cond_dist <- stvar$model$cond_dist
   identification <- stvar$model$identification
   if(identification != "reduced_form") stop("Structural models are not yet implemented to simulate.stvar")
@@ -90,22 +91,31 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
 
   # Collect parameter values
   params <- stvar$params
-  params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
-                                    identification=identification, AR_constraints=AR_constraints,
-                                    mean_constraints=mean_constraints, B_constraints=B_constraints)
+  params <- reform_constrained_pars(p=p, M=M, d=d, params=params,
+                                    weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                    cond_dist=cond_dist, identification=identification,
+                                    AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                    B_constraints=B_constraints)
   if(stvar$model$parametrization == "mean") {
-    params <- change_parametrization(p=p, M=M, d=d, params=params, AR_constraints=NULL,
-                                     mean_constraints=NULL, change_to="intercept")
+    params <- change_parametrization(p=p, M=M, d=d, params=params,
+                                     weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                     identification=identification, cond_dist=cond_dist,
+                                     AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
+                                     change_to="intercept")
   }
-  all_mu <- get_regime_means(p=p, M=M, d=d, params=params, weight_function=weight_function,
-                             cond_dist=cond_dist, parametrization="intercept", identification=identification,
+  all_mu <- get_regime_means(p=p, M=M, d=d, params=params,
+                             weight_function=weight_function, weightfun_pars=weightfun_pars,
+                             cond_dist=cond_dist, parametrization="intercept",
+                             identification=identification,
                              AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL)
   all_phi0 <- pick_phi0(M=M, d=d, params=params)
   all_A <- pick_allA(p=p, M=M, d=d, params=params)
   all_A2 <- array(all_A, dim=c(d, d*p, M)) # cbind coefficient matrices of each component: m:th component is obtained at [, , m]
   all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params) # Note that structural models not implemented here
   all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
-  weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist)
+  weightpars <- pick_weightpars(p=p, M=M, d=d, params=params,
+                                weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                cond_dist=cond_dist)
   # pick_distpars
 
   # Calculate statistics that remain constant through the iterations
@@ -119,8 +129,15 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
        inv_Sigmas[, , m] <- chol2inv(chol_Sigmas[, , m]) # Faster inverse
        det_Sigmas[m] <- prod(diag(chol_Sigmas[, , m]))^2 # Faster determinant
      }
+  } else if(weight_function == "logit") {
+    all_gamma_m <- matrix(weightpars, ncol=M-1)
+    vars <- weightfun_pars[[1]]
+    lags <- weightfun_pars[[2]]
+    lowers <- (1:lags - 1)*d # We want add vars to each of these
+    tmp <- matrix(lowers, nrow=length(vars), ncol=length(lowers), byrow=TRUE) # rep lowers as the rows
+    # CONTINUE HERE!!!
   } else {
-    stop("Other than relative_dens weight functions are not yet implemented to simulate.stvar")
+    stop("Other than relative_dens and logit weight functions are not yet implemented to simulate.stvar")
   }
 
   # Set/generate initial values
