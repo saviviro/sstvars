@@ -27,6 +27,7 @@ summary.stvar <- function(object, ..., digits=2) {
                  regime_means=get_regime_means(p=stvar$model$p, M=stvar$model$M, d=stvar$model$d,
                                                params=stvar$params,
                                                weight_function=stvar$model$weight_function,
+                                               weightfun_pars=stvar$model$weightfun_pars,
                                                cond_dist=stvar$model$cond_dist,
                                                parametrization=stvar$model$parametrization,
                                                identification=stvar$model$identification,
