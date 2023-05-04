@@ -39,6 +39,7 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   B_constraints <- stvar$model$B_constraints
   IC <- stvar$IC
   var_names <- colnames(stvar$data)
+  if(is.null(var_names)) var_names <- paste0("Var.", 1:d)
   all_mu <- round(get_regime_means(p=p, M=M, d=d, params=params,
                                    weight_function=weight_function, weightfun_pars=weightfun_pars,
                                    cond_dist=cond_dist, parametrization=parametrization,

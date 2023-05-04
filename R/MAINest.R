@@ -96,7 +96,11 @@
 #'
 #' # logit STVAR, p=1, M=2, d=2
 #' fitlogit12 <- fitSTVAR(gdpdef, p=1, M=2, weight_function="logit", weightfun_pars=list(vars=1, lags=1),
-#'  nrounds=1, seeds=2, use_parallel=FALSE)
+#'  nrounds=20, seeds=1:20, use_parallel=FALSE) # Seed=6 tai 7 tulee warning chol given matrix is not symmetric
+#'
+#' # logit STVAR, p=3, M=2, d=2
+#' fitlogit32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logit", weightfun_pars=list(vars=2, lags=1),
+#'  nrounds=20, seeds=1:20, use_parallel=FALSE) # all_loglik täynnä erilaisia lokaaleja maxeja!
 #' }
 #' @export
 

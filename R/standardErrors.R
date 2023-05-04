@@ -82,6 +82,8 @@ print_std_errors <- function(stvar, digits=3) {
   p <- stvar$model$p
   M <- stvar$model$M
   d <- stvar$model$d
+  var_names <- colnames(stvar$data)
+  if(is.null(var_names)) var_names <- paste0("Var.", 1:d)
   weight_function <- stvar$model$weight_function
   cond_dist <- stvar$model$cond_dist
   parametrization <- stvar$model$parametrization
@@ -89,10 +91,11 @@ print_std_errors <- function(stvar, digits=3) {
   AR_constraints <- stvar$model$AR_constraints
   mean_constraints <- stvar$model$mean_constraints
   B_constraints <- stvar$model$B_constraints
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weighfun_pars=weightfun_pars)
+  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=stvar$model$weightfun_pars)
+  npars <- length(stvar$params)
   pars <- stvar$std_errors
   pars <- reform_constrained_pars(p=p, M=M, d=d, params=pars, weight_function=weight_function,
-                                  weighfun_pars=weightfun_pars, cond_dist=cond_dist,
+                                  weightfun_pars=weightfun_pars, cond_dist=cond_dist,
                                   identification=identification, AR_constraints=AR_constraints,
                                   mean_constraints=mean_constraints, B_constraints=B_constraints)
   all_phi0_or_mu <- pick_phi0(M=M, d=d, params=pars)
@@ -104,13 +107,16 @@ print_std_errors <- function(stvar, digits=3) {
     all_Omega <- array(" ", dim=c(d, d, M))
     stop("Structural models are not yet implemented to print_std_errors")
   }
-  weightpars <- pick_weightpars(p=p, M=M, d=d, params=pars, weight_function=weight_function)
+  weightpars <- pick_weightpars(p=p, M=M, d=d, params=pars, weight_function=weight_function, weightfun_pars=weightfun_pars)
   if(cond_dist != "Gaussian") stop("Only Gaussian models are implemented to print_std_errors")
   if(weight_function == "relative_dens") {
     weightpars[M] <- NA # No standard error for the last alpha
+  } else if(weight_function == "logit") {
+    all_gamma_m <- matrix(weightpars, ncol=M-1) # Column per gamma_m, m=1,...,M-1, gamma_M=0.
   } else {
-    stop("Only relative_dens weight function is implemented to print_std_errors")
+    stop("only relative dens and logit weigghtfunctions are implemented to print_std_errors")
   }
+
   if(parametrization == "mean") {
     all_mu <- all_phi0_or_mu
     all_phi0 <- matrix(" ", nrow=d, ncol=M)
@@ -141,6 +147,10 @@ print_std_errors <- function(stvar, digits=3) {
   cat("\n", paste0(" p = ", p, ", "))
   cat(paste0("M = ", M, ", "))
   cat(paste0("d = ", d, ", #parameters = " , npars, ","))
+  if(weight_function == "logit") {
+    cat("\n ", paste0("Switching variables: ", paste0(var_names[weightfun_pars[[1]]], collapse=", "), " with ",
+                      weightfun_pars[[2]], ifelse(weightfun_pars[[2]] == 1, " lag.", " lags.")))
+  }
   cat("\n\n")
   cat("APPROXIMATE STANDARD ERRORS\n\n")
 
@@ -160,6 +170,8 @@ print_std_errors <- function(stvar, digits=3) {
     cat("\n")
     if(weight_function == "relative_dens") {
       if(m < M) cat(paste("Weight param:", format_value(weightpars[m])), "\n")
+    } else if(weight_function == "logit") {
+      if(m < M) cat(paste("Weight params:", paste0(format_value(all_gamma_m[,m]), collapse=", ")), "\n")
     }
     if(parametrization == "mean") cat("Regime means:", paste0(format_value(all_mu[,m]), collapse=", "), "\n")
     cat("\n")
