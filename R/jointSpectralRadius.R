@@ -133,7 +133,7 @@ bound_jsr <- function(all_boldA, accuracy=c("0.707", "0.840", "0.917", "0.957", 
   M <- dim(all_boldA)[3]
   all_d_lifted <- array(NA, dim=c(N, N, M))
   for(i1 in 1:M) {
-    all_d_lifted[, , i1] <- d_lift(A=all_boldA[, , i1], d=d) # SUM OF D-LIFTED COPIED MULTIPLE TIMES = MEMORY PROBLEM?
+    all_d_lifted[, , i1] <- d_lift(A=all_boldA[, , i1], d=d)
   }
   sum_of_d_lifted <- apply(all_d_lifted, MARGIN=1:2, FUN=sum)
   max(abs(eigen(sum_of_d_lifted)$values))^(1/d) # Upper bound for the JSR as in Parrilo & Jadbabaie (2008), Equation (11)
