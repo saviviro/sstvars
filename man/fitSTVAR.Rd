@@ -181,13 +181,13 @@ tmp <- fitSTVAR(gdpdef, p=1, M=2, weight_function="logit", weightfun_pars=list(v
 
 # logit STVAR, p=3, M=2, d=2, the second variable is the switching variable with one lag.
 fitlogit32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logit", weightfun_pars=list(vars=2, lags=1),
- nrounds=20, seeds=1:20, use_parallel=FALSE)
+ nrounds=20, seeds=1:20)
 
 # logit STVAR, p=3, M=2, d=2, the second variable is the switching variable with one lag,
 # constrain AR matrices equal across the regimes.
 C_322 <- rbind(diag(3*2^2), diag(3*2^2))
 fitlogit32c <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logit", weightfun_pars=list(vars=2, lags=1),
- AR_constraints=C_322, nrounds=10, seeds=1:10, use_parallel=FALSE)
+ AR_constraints=C_322, nrounds=10, seeds=1:10)
 }
 }
 \references{
