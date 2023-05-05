@@ -23,13 +23,22 @@ theta_123relg <- c(0.10741, 0.13813, -0.12092, 3.48957, 0.60615, 0.45646, 0.8722
                    0.05544, 0.00212, 0.12708, 0.78618, 0.00922, 0.42627, 0.23765, 0.25386, 3.40834, 0.77357)
 mod123relg <- STVAR(data=usamone, p=1, M=2, params=theta_123relg, weight_function="relative_dens")
 
+# logit weights, gdpdef, weightfun_pars=list(vars=2, lags=1)
+theta_322log_2_1 <- c(2.746765, 0.297951, 0.57546, 0.039418, 0.173881, -0.028861, -1.123912, 0.652867, -0.046741,
+                      0.003972, 0.610594, 0.089587, -0.066095, 0.045594, -0.651105, 0.066679, 0.268968, 0.055636,
+                      -0.284343, 0.368566, 0.321876, 0.026181, -0.134247, 0.128348, -0.063424, 0.012676, -0.043061,
+                      0.296153, 1.158639, -0.039743, 0.153417, 0.356729, 0.005054, 0.031869, -8.970684, 7.518877)
+mod322log <- STVAR(data=gdpdef, p=3, M=2, d=2, params=theta_322log_2_1, weight_function="logit", weightfun_pars=list(vars=2, lags=1))
+
+
 s112 <- simulate(mod112relg, nsim=1, seed=1, init_regime=1)
 s112_2 <- simulate(mod112relg, nsim=2, seed=1, init_regime=1)
 s122 <- simulate(mod122relg, nsim=5, seed=2, init_values=gdpdef)
 s222 <- simulate(mod222relg, nsim=3, seed=3, init_regime=2)
 s123 <- simulate(mod123relg, nsim=3, seed=4, init_regime=1)
 s123_2 <- simulate(mod123relg, nsim=1, seed=5, init_values=usamone)
-
+s322 <- simulate(mod322log, nsim=3, seed=3, init_regime=1)
+s322_2 <- simulate(mod322log, nsim=3, seed=3, init_values=gdpdef)
 
 test_that("simulate.stvar works correctly", {
   # Relative_dens Gaussian STVAR
@@ -47,5 +56,13 @@ test_that("simulate.stvar works correctly", {
   expect_equal(s123$transition_weights[3,], c(0.98754515, 0.01245485), tol=1e-4)
   expect_equal(s123_2$sample[1,], c(1.684557, 2.126412, -2.721774), tol=1e-4)
   expect_equal(s123_2$transition_weights[1,], c(0.0001666309, 0.9998333691), tol=1e-4)
+
+  # Logit
+  expect_equal(s322$sample[3,], c(-0.6565136, 1.7113249), tol=1e-4)
+  expect_equal(s322$transition_weights[1,], c(0.8947074, 0.1052926), tol=1e-4)
+
+  expect_equal(s322_2$sample[3,], c(0.7678891, 0.3236954), tol=1e-4)
+  expect_equal(s322_2$transition_weights[2,], c(0.002522048, 0.997477952), tol=1e-4)
+
 })
 

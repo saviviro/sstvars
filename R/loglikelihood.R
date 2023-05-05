@@ -251,7 +251,7 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
 #' @inherit in_paramspace references
 #' @keywords internal
 
-get_alpha_mt <- function(data, Y2, p, M, d, weight_function, all_A, all_boldA, all_Omegas, weightpars, weightfun_pars,
+get_alpha_mt <- function(data, Y2, p, M, d, weight_function, weightfun_pars, all_A, all_boldA, all_Omegas, weightpars,
                          all_mu, epsilon, log_mvdvalues=NULL) {
   if(is.null(log_mvdvalues)) {
     T_obs <- nrow(data) - p
@@ -268,7 +268,8 @@ get_alpha_mt <- function(data, Y2, p, M, d, weight_function, all_A, all_boldA, a
     }
   }
 
-  if(weight_function == "logit") {
+  if(weight_function == "logit" & is.null(log_mvdvalues)) {
+
     # M-1 vectors gamma_m, since gamma_M = 0.
     all_gamma_m <- matrix(weightpars, ncol=M-1) # Column per gamma_m, m=1,...,M-1
     #all_gamma_m <- cbind(all_gamma_m, 0) # Add gamma_M = 0 as the M:th column

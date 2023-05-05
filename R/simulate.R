@@ -52,8 +52,7 @@
 #'  plot.ts(sim2$transition_weights) # Transition weights
 #' @export
 
-simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, init_regime,
-                            ntimes=1, drop=TRUE) {
+simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, init_regime, ntimes=1, drop=TRUE) {
   # Checks etc
   if(!is.null(seed)) set.seed(seed)
   epsilon <- round(log(.Machine$double.xmin) + 10)
@@ -119,7 +118,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   # pick_distpars
 
   # Calculate statistics that remain constant through the iterations
-  if(weight_function == "relative_dens") {
+  if(cond_dist == "Gaussian") { # Initial regime Gaussian stat dist simu + relative_dens weight function uses this; latter only has Gaussian
      Sigmas <- get_Sigmas(p=p, M=M, d=d, all_A=all_A, all_boldA=all_boldA, all_Omegas=all_Omegas)
      inv_Sigmas <- array(NA, dim=c(d*p, d*p, M)) # Store inverses of the (dpxdp) covariance matrices
      det_Sigmas <- numeric(M) # Store determinants of the (dpxdp) covariance matrices
@@ -129,14 +128,17 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
        inv_Sigmas[, , m] <- chol2inv(chol_Sigmas[, , m]) # Faster inverse
        det_Sigmas[m] <- prod(diag(chol_Sigmas[, , m]))^2 # Faster determinant
      }
-  } else if(weight_function == "logit") {
+  }
+  if(weight_function == "logit") {
     all_gamma_m <- matrix(weightpars, ncol=M-1)
     vars <- weightfun_pars[[1]]
     lags <- weightfun_pars[[2]]
     lowers <- (1:lags - 1)*d # We want add vars to each of these
-    tmp <- matrix(lowers, nrow=length(vars), ncol=length(lowers), byrow=TRUE) # rep lowers as the rows
-    # CONTINUE HERE!!!
-  } else {
+    # Indices of switchign variables in cbind(1, Y): we add +1 to the indices since the column of ones on the left,
+    # and then the index is added to always account for the constant term.
+    inds_of_switching_vars <- c(1, as.vector(matrix(lowers, nrow=length(vars), ncol=length(lowers), byrow=TRUE) + vars + 1))
+  }
+  if(!weight_function %in% c("relative_dens", "logit")) {
     stop("Other than relative_dens and logit weight functions are not yet implemented to simulate.stvar")
   }
 
@@ -170,6 +172,15 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
                                                                                       inv_Sigmas[, , m])%*%(Y[i1,] - rep(all_mu[, m], p))),
              numeric(1))
     } # Returns M x 1 vector; transformed into a matrix in get_alpha_mt
+  } else if(weight_function == "logit") {
+     # Calculate the sub model regressions for calculating the transition weights
+     get_regression_values <- function(Y, i1) {
+        regressions_mt <- numeric(M) # Vector of zeros
+        for(i2 in 1:ncol(all_gamma_m)) {
+          regressions_mt[i2] <- crossprod(all_gamma_m[,i2], cbind(1, Y)[i1, inds_of_switching_vars])
+        }
+        regressions_mt
+     }
   }
 
   # Run through the time periods and repetitions
@@ -178,9 +189,14 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
       # Calculate transition weights
       if(weight_function == "relative_dens") {
         log_mvdvalues <- get_logmvdvalues(Y=Y, i1=i1)
-        alpha_mt <- get_alpha_mt(M=M, weight_function=weight_function, weightpars=weightpars, log_mvdvalues=log_mvdvalues, epsilon=epsilon)
+        alpha_mt <- get_alpha_mt(M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                 weightpars=weightpars, log_mvdvalues=log_mvdvalues, epsilon=epsilon)
+      } else if(weight_function == "logit") {
+        regression_values <- get_regression_values(Y=Y, i1=i1)
+        alpha_mt <- get_alpha_mt(M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                 weightpars=rep(1, times=M), log_mvdvalues=regression_values, epsilon=epsilon)
       } else {
-        stop("Only relative_dens weight function is implemented to simulate.stvar")
+        stop("Only relative_dens and logit weight functions are implemented to simulate.stvar")
       }
       transition_weights[i1, , j1] <- alpha_mt
 

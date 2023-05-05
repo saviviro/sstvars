@@ -45,15 +45,17 @@
 #'  You are welcome to set \code{filter_estimates=FALSE} and find the solutions of interest yourself by using the
 #'  function \code{alt_stvar}.
 #'
-#'  Sometimes the function produces warnings "chol(): given matrix is not symmetric" because sometimes the underlying C++ code
-#'  calculating conditional covariance matrices notices that due to numerical error in the float-point representation the matrix
-#'  is not symmetric (although it is up to negligible numerical error). It is necessary to take the decomposition in C++ for computational
-#'  efficiency in order to calculate its inverse for each t in each evaluation of the log-likelihood function. These warnings can be ignored.
-#'
 #' @return Returns an object of class \code{'stvar'} defining the estimated reduced form smooth transition VAR model.
 #' @section S3 methods:
 #'   The following S3 methods are supported for class \code{'stvar'}: \code{logLik}, \code{residuals}, \code{print}, \code{summary},
 #'    \code{predict}, \code{simulate}, and \code{plot}. NONE OF THESE IS IMPLEMENTED YET!
+#' @section About the warning "chol(): given matrix is not symmetric":
+#'  Sometimes the function produces warnings "chol(): given matrix is not symmetric" because sometimes the underlying C++ code
+#'  calculating conditional covariance matrices notices that due to numerical error in the float-point representation, the matrix
+#'  is not symmetric. The warning is produces even if symmetricity is forced with arma::symmatu() (and .eval()), so there seems to be some
+#'  issue with the LAPACK library that arma::chol uses to check that the matrix is symmetric. It is necessary to take the decomposition
+#'  in C++ for computational efficiency in order to calculate its inverse for each t in each evaluation of the log-likelihood function.
+#'  These warnings can be ignored.
 #' @seealso \code{\link{GAfit}}
 #' @references
 #'  \itemize{

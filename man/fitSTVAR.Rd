@@ -118,16 +118,21 @@ If you wish to estimate a structural model, estimate first the reduced form mode
  or transition weights such that they are close to zero for almost all \eqn{t} for at least one regime.
  You are welcome to set \code{filter_estimates=FALSE} and find the solutions of interest yourself by using the
  function \code{alt_stvar}.
-
- Sometimes the function produces warnings "chol(): given matrix is not symmetric" because sometimes the underlying C++ code
- calculating conditional covariance matrices notices that due to numerical error in the float-point representation the matrix
- is not symmetric (although it is up to negligible numerical error). It is necessary to take the decomposition in C++ for computational
- efficiency in order to calculate its inverse for each t in each evaluation of the log-likelihood function. These warnings can be ignored.
 }
 \section{S3 methods}{
 
   The following S3 methods are supported for class \code{'stvar'}: \code{logLik}, \code{residuals}, \code{print}, \code{summary},
    \code{predict}, \code{simulate}, and \code{plot}. NONE OF THESE IS IMPLEMENTED YET!
+}
+
+\section{About the warning "chol()}{
+ given matrix is not symmetric":
+ Sometimes the function produces warnings "chol(): given matrix is not symmetric" because sometimes the underlying C++ code
+ calculating conditional covariance matrices notices that due to numerical error in the float-point representation, the matrix
+ is not symmetric. The warning is produces even if symmetricity is forced with arma::symmatu() (and .eval()), so there seems to be some
+ issue with the LAPACK library that arma::chol uses to check that the matrix is symmetric. It is necessary to take the decomposition
+ in C++ for computational efficiency in order to calculate its inverse for each t in each evaluation of the log-likelihood function.
+ These warnings can be ignored.
 }
 
 \examples{
@@ -171,6 +176,8 @@ fit22cm <- fitSTVAR(gdpdef, p=2, M=2, AR_constraints=C_222, mean_constraints=lis
 f32 <- fitSTVAR(usamone, p=3, M=2, nrounds=20, seeds=61:80)
 summary(f32)
 plot(f32)
+
+tmp <- fitSTVAR(gdpdef, p=1, M=2, weight_function="logit", weightfun_pars=list(vars=1, lags=1), nrounds=1, seeds=6, use_parallel=FALSE)
 
 # logit STVAR, p=3, M=2, d=2, the second variable is the switching variable with one lag.
 fitlogit32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logit", weightfun_pars=list(vars=2, lags=1),

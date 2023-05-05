@@ -11,11 +11,11 @@ get_alpha_mt(
   M,
   d,
   weight_function,
+  weightfun_pars,
   all_A,
   all_boldA,
   all_Omegas,
   weightpars,
-  weightfun_pars,
   all_mu,
   epsilon,
   log_mvdvalues = NULL
@@ -35,13 +35,6 @@ a univariate time series. Missing values are not supported.}
 
 \item{weight_function}{what type of transition weights should be used? See the vignette for details about the weight functions.}
 
-\item{all_A}{4D array containing all coefficient matrices \eqn{A_{m,i}}, obtained from \code{pick_allA}.}
-
-\item{all_boldA}{3D array containing the \eqn{((dp)x(dp))} "bold A" (companion form) matrices of each regime,
-obtained from \code{form_boldA}. Will be computed if not given.}
-
-\item{weightpars}{numerical vector containing the transition weight parameters, obtained from \code{pick_weightpars}.}
-
 \item{weightfun_pars}{\describe{
   \item{If \code{weight_function == "relative_dens"}:}{Not used.}
   \item{If \code{weight_function == "logit"}:}{a list of two elements: \describe{
@@ -51,6 +44,13 @@ obtained from \code{form_boldA}. Will be computed if not given.}
      used in the weight function.}
   }}
 }}
+
+\item{all_A}{4D array containing all coefficient matrices \eqn{A_{m,i}}, obtained from \code{pick_allA}.}
+
+\item{all_boldA}{3D array containing the \eqn{((dp)x(dp))} "bold A" (companion form) matrices of each regime,
+obtained from \code{form_boldA}. Will be computed if not given.}
+
+\item{weightpars}{numerical vector containing the transition weight parameters, obtained from \code{pick_weightpars}.}
 
 \item{all_mu}{an \eqn{(d \times M)} matrix containing the unconditional regime-specific means}
 
