@@ -202,6 +202,7 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
 
   # Calculate the conditional log-likelihood; the initial values are not used here
   if(cond_dist == "Gaussian") { # Gaussian conditional distribution
+    #all_Omegas <- lapply(1:M, function(i1) all_Omegas[, , i1])
     all_lt <- -0.5*d*log(2*pi) + Gaussian_densities_Cpp(obs=data[(p+1):nrow(data),], means=mu_yt, covmats=all_Omegas, alpha_mt=alpha_mt)
 
     # BELOW IS THE R IMPLEMENTATION FOR SPEED COMPARISONS

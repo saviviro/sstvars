@@ -2,7 +2,6 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 using namespace Rcpp;
 
-
 //' @name Gaussian_densities_Cpp
 //' @title Calculate log multivariate Gaussian densities
 //' @description Calculates logs of multivariate Gaussian densities with varying mean
@@ -30,14 +29,8 @@ arma::mat Gaussian_densities_Cpp(arma::mat obs, arma::mat means, arma::cube covm
   arma::vec vals(T_obs); // Contains the densities for each observation
   arma::mat tmp(d, 1);
   arma::mat tmp2(1, 1);
-  //arma::mat tmp3(d, 1);
   arma::mat cholcovmat(d, d);
   arma::mat inv_cholcovmat(d, d);
-  //arma::mat inv_condcovmat(d, d);
-
-  std::streambuf* original_cerr = std::cerr.rdbuf(); // keep original cerr buffer
-  std::ostringstream str_cerr;
-  std::cerr.rdbuf(str_cerr.rdbuf()); // redirect cerr to a stringstream
 
   for(int i1 = 0; i1 < T_obs; i1++) {
     arma::mat condcovmat(d, d, arma::fill::zeros);
@@ -53,15 +46,7 @@ arma::mat Gaussian_densities_Cpp(arma::mat obs, arma::mat means, arma::cube covm
     tmp = (obs.row(i1) - means.row(i1))*inv_cholcovmat;
     tmp2 = dot(tmp, tmp);
     vals[i1] = -arma::accu(arma::log(cholcovmat.diag())) - 0.5*tmp2(0, 0); // The first index is zero in C++
-
-    // Code below is slower but does not fix chol warning, similar warning persists in inv_sympd
-    // inv_condcovmat = arma::inv_sympd(arma::symmatu(condcovmat));
-    // tmp3 = (obs.row(i1) - means.row(i1));
-    // tmp = tmp3*inv_condcovmat*arma::trans(tmp3);
-    // vals[i1] = -0.5*arma::log_det_sympd(arma::symmatu(condcovmat)) - 0.5*tmp(0, 0);
   }
-
-  std::cerr.rdbuf(original_cerr); // reset cerr to original buffer
 
   return vals;
 }
