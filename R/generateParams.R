@@ -206,7 +206,7 @@ random_weightpars <- function(M, weight_function, weightfun_pars=NULL, AR_constr
     }
     ret <- alphas[-M]
   } else if(weight_function == "logit") {
-    ret <- rnorm((M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]]), mean=0, sd=1)
+    ret <- rt(n=(M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]]), df=4)
   } else {
     stop("Only relative dens and logit weights are currently implemented in random_weightpars")
   }
@@ -370,6 +370,9 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logit
     if(M > 1) {
       weight_pars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                      cond_dist=cond_dist)
+      if(weight_function == "relative_dens") {
+        weight_pars <- weight_pars[-length(weight_pars)] # Remove alpha_M
+      }
       new_pars[(M*d + M*p*d^2 + M*d*(d + 1)/2 + 1):
                  (M*d + M*p*d^2 + M*d*(d + 1)/2 + length(weight_pars))] <- smart_weightpars(M=M,
                                                                                             weight_pars=weight_pars,
