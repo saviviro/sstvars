@@ -265,9 +265,13 @@ reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative
     if(is.null(weight_constraints)) {
       weightpars <- params[(d*M - less_pars + q + n_covmatspars + 1):(d*M - less_pars + q + n_covmatspars + n_nonconstr_weightpars)]
     } else { # Obtain unconstrained weightpars
-      l <- ncol(weight_constraints[[1]])
-      xi <- params[(d*M - less_pars + q + n_covmatspars + 1):(d*M - less_pars + q + n_covmatspars + l)]
-      weightpars <- weight_constraints[[1]]%*%xi + weight_constraints[[2]] # alpha = R%*%xi + r
+      if(all(weight_constraints[[1]] == 0)) {
+        weightpars <- weight_constraints[[2]] # alpha = r if R=0
+      } else {
+        l <- ncol(weight_constraints[[1]])
+        xi <- params[(d*M - less_pars + q + n_covmatspars + 1):(d*M - less_pars + q + n_covmatspars + l)]
+        weightpars <- weight_constraints[[1]]%*%xi + weight_constraints[[2]] # alpha = R%*%xi + r
+      }
     }
   } else { # No weightpars if M == 1
     weightpars <- numeric(0)

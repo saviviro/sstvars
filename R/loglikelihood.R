@@ -14,7 +14,7 @@
 #'     \item{\eqn{\phi_{m,0} = } the \eqn{(d \times 1)} intercept (or mean) vector of the \eqn{m}th regime.}
 #'     \item{\eqn{\varphi_m = (vec(A_{m,1}),...,vec(A_{m,p}))} \eqn{(pd^2 \times 1)}.}
 #'     \item{\eqn{\sigma = (vech(\Omega_1),...,vech(\Omega_M)} \eqn{(Md(d + 1)/2 \times 1)}.}
-#'     \item{\eqn{\alpha} contains the transition weights parameters}
+#'     \item{\eqn{\alpha = } the \eqn{(a\times 1)} vector containing the transition weight parameters.}
 #'     \item{\eqn{\nu > 2} is the degrees of freedom parameter that is included only if \code{cond_dist="Student"}.}
 #'   }
 #'   For models with...
@@ -78,9 +78,10 @@
 #'   that is, when \code{parametrization="mean"}.}
 #' @param weight_constraints a list of two elements, \eqn{R} in the first element and \eqn{r} in the second element,
 #'   specifying linear constraints on the transition weight parameters \eqn{\alpha}.
-#'   The constraints are of the form \eqn{\alpha = R\xi + r}, where \eqn{R} is a known \eqn{((M-1)k\times l)}
-#'   constraints matrix, \eqn{r} is a known \eqn{((M-1)k\times 1)} constant, and \eqn{\xi} is an unknown \eqn{(l\times 1)} parameter.
-#'   For instance, by assuming that \eqn{R} is a matrix of zeros, the weight parameter can be constrained to the constant \eqn{r}.
+#'   The constraints are of the form \eqn{\alpha = R\xi + r}, where \eqn{R} is a known \eqn{(a\times l)}
+#'   constraint matrix of full column rank (\eqn{a} is the dimension of \eqn{\alpha}), \eqn{r} is a known \eqn{(a\times 1)} constant,
+#'   and \eqn{\xi} is an unknown \eqn{(l\times 1)} parameter. \strong{Alternatively}, set \eqn{R=0} in order to constrain the
+#'   the weight parameter to the constant \eqn{r} (in this case, \eqn{\alpha} is dropped from the constrained parameter vector).
 #' @param B_constraints NOT YET IMPLEMENTED!
 #' @param to_return should the returned object be the log-likelihood, which is the default, or something else?
 #'   See the section "Return" for all the options.

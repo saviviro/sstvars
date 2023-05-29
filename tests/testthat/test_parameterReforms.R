@@ -350,7 +350,52 @@ theta_222logcm_12_2_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_22
 theta_123logcm_123_1 <- c(phi10_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), gamma1_123_123_1)
 theta_123logcm_123_1_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), gamma1_123_123_1)
 
+## Models with weight_constraints
+
+# p=1, M=3, d=2, weight_function="relative_dens", weight_constraints=list(R=matrix(c(0.9, 0.5), nrow=2), r=0.13)
+xi_132relgw <- 0.4
+theta_132relgw <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                   vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), xi_132relgw)
+theta_132relgw_expanded <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                             vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), matrix(c(0.9, 0.5), nrow=2)%*%xi_132relgw + 0.13)
+
+# p=2, M=2, d=2, weight_function="relative_dens", mean_constraints=list(1:2), AR_constraints=C_222,
+# weight_constraints=list(R=0, r=0.6)
+theta_222relgcmw <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222)) # No weight param since replaced with r
+theta_222relgcmw_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                              vech(Omega1_222), vech(Omega2_222), 0.6)
+
+
+# p=1, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=1, lags=1), weight_constraints=list(R=0, r=c(0.12, 0.13))
+theta_122logw_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122))
+theta_122logw_1_1_expanded <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), c(0.12, 0.13))
+
+# p=2, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
+# weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0))
+xi_222logcmw_12_2 <- c(0.22, 0.33)
+theta_222logcmw_12_2 <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), xi_222logcmw_12_2 )
+theta_222logcmw_12_2_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                  vech(Omega1_222), vech(Omega2_222), c(0.22, 0.11, 0.12, 0.13, 0.33))
+
+matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5)%*%xi_222logcmw_12_2  + c(0, 0.11, 0.12, 0.13, 0)
+
+
 test_that("reform_constrained_pars works correctly", {
+  # Models with weight_constraints
+  expect_equal(reform_constrained_pars(p=1, M=3, d=2, params=theta_132relgw, weight_function="relative_dens",
+                                       weight_constraints=list(R=matrix(c(0.9, 0.5), nrow=2), r=0.13)), theta_132relgw_expanded)
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222relgcmw, weight_function="relative_dens",
+                                       mean_constraints=list(1:2), AR_constraints=C_222, weight_constraints=list(R=0, r=0.6)),
+               theta_222relgcmw_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=2, d=2, params=theta_122logw_1_1, weight_function="logit",
+                                       weightfun_pars=list(vars=1, lags=1), weight_constraints=list(R=0, r=c(0.12, 0.13))),
+               theta_122logw_1_1_expanded)
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222logcmw_12_2, weight_function="logit",
+                                       weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
+                                       weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5),
+                                                               r=c(0, 0.11, 0.12, 0.13, 0))),
+               theta_222logcmw_12_2_expanded)
+
   # Models with mean_constraints
   expect_equal(reform_constrained_pars(p=1, M=1, d=2, params=theta_112relgm, weight_function="relative_dens",
                                        mean_constraints=list(1)), theta_112relgm_expanded)
