@@ -184,27 +184,37 @@ change_regime <- function(p, M, d, params, m, regime_pars) {
 reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative_dens", "logit"),
                                     weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"),
                                     identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
-                                    AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
+                                    AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                                     change_na=FALSE) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
 
-  if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(B_constraints)) {
+  if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(weight_constraints) && is.null(B_constraints)) {
     return(params)
   }
   if(!is.null(B_constraints)) {
     stop("B_constraints are not yet implemented to reform_constrained_pars")
   }
 
+  ## Obtain the mean parameters ##
   if(is.null(mean_constraints)) {
     less_pars <- 0 # Number of parameters less compared to models without same mean constraints
   } else {
     g <- length(mean_constraints) # Number groups with the same mean parameters
     less_pars <- d*(M - g) # Number of parameters less compared to models without same mean constraints
   }
+  if(is.null(mean_constraints)) {
+    all_phi0 <- matrix(params[1:(d*M)], nrow=d, ncol=M) # params[((m - 1)*d + 1):(m*d)]
+  } else { # mean_constraints employed
+    group_phi0 <- matrix(params[1:(d*g)], nrow=d, ncol=g) # Column for each group
+    all_phi0 <- matrix(NA, nrow=d, ncol=M) # Storage for all phi0 (=mean parameters in this case)
+    for(i1 in 1:g) {
+      all_phi0[,mean_constraints[[i1]]] <- group_phi0[,i1]
+    }
+  }
 
-  # Obtain the AR coefficients from the constraints
+  ## Obtain the AR matrix parameters ##
   if(is.null(AR_constraints)) { # For structural model with constrained structural parameters but no AR constraints
     q <- M*p*d^2
     psi_expanded <- params[(d*M + 1 - less_pars):(d*M + d^2*p*M - less_pars)] # AR coefficients (without constraints)
@@ -224,23 +234,12 @@ reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative
     psi_expanded <- AR_constraints%*%psi
   }
 
-  # Obtain the mean parameters from the constrained parameter vector
-  if(is.null(mean_constraints)) {
-    all_phi0 <- matrix(params[1:(d*M)], nrow=d, ncol=M) # params[((m - 1)*d + 1):(m*d)]
-  } else { # mean_constraints employed
-    group_phi0 <- matrix(params[1:(d*g)], nrow=d, ncol=g) # Column for each group
-    all_phi0 <- matrix(NA, nrow=d, ncol=M) # Storage for all phi0 (=mean parameters in this case)
-    for(i1 in 1:g) {
-      all_phi0[,mean_constraints[[i1]]] <- group_phi0[,i1]
-    }
-  }
-
-  # Obtain the covariance matrix parameters
+  ## Obtain the covariance matrix parameters ##
   if(identification == "reduced_form") {
     covmatpars <- params[(d*M - less_pars + q + 1):(d*M - less_pars + q + M*d*(d + 1)/2)]
    } else {
     if(is.null(B_constraints)) {
-      # Somehting
+      # Something
 
       # W <- structural_pars$W # Obtain the indices with zero constraints (the zeros don't exist in params)
       # n_zeros <- sum(W == 0, na.rm=TRUE)
@@ -254,21 +253,32 @@ reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative
    }
   n_covmatspars <- length(covmatpars)
 
+  ## Obtain the weight parameters ##
+  if(M > 1) {
+    if(weight_function == "relative_dens") {
+      n_nonconstr_weightpars <- M - 1
+    } else if(weight_function == "logit") {
+      n_nonconstr_weightpars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
+    } else {
+      stop("Unknown weight_function in reform_constrained_pars")
+    }
+    if(is.null(weight_constraints)) {
+      weightpars <- params[(d*M - less_pars + q + n_covmatspars + 1):(d*M - less_pars + q + n_covmatspars + n_nonconstr_weightpars)]
+    } else { # Obtain unconstrained weightpars
+      l <- ncol(weight_constraints[[1]])
+      xi <- params[(d*M - less_pars + q + n_covmatspars + 1):(d*M - less_pars + q + n_covmatspars + l)]
+      weightpars <- weight_constraints[[1]]%*%xi + weight_constraints[[2]] # alpha = R%*%xi + r
+    }
+  } else { # No weightpars if M == 1
+    weightpars <- numeric(0)
+  }
+
+  ## Obtain the distribution parameters ##
   if(cond_dist == "Gaussian") {
     distpars <- numeric(0)
   } else { # cond_dist == Student
     distpars <- params[length(params)]
   }
 
-  if( M > 1) {
-    if(weight_function == "relative_dens") {
-      weightpars <- params[(d*M - less_pars + q + n_covmatspars + 1):(d*M - less_pars + q + n_covmatspars + M - 1)]
-    } else if(weight_function == "logit") {
-      weightpars <- params[(d*M - less_pars + q + n_covmatspars + 1):(d*M - less_pars + q + n_covmatspars +
-                                                                        (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]]))]
-    }
-  } else { # No weightpars if M == 1
-    weightpars <- numeric(0)
-  }
   c(all_phi0, psi_expanded, covmatpars, weightpars, distpars)
 }
