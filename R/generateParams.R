@@ -196,17 +196,34 @@ smart_df <- function(df, accuracy) {
 #'   }
 #' @keywords internal
 
-random_weightpars <- function(M, weight_function, weightfun_pars=NULL, AR_constraints=NULL, mean_constraints=NULL) {
+random_weightpars <- function(M, weight_function, weightfun_pars=NULL, AR_constraints=NULL, mean_constraints=NULL,
+                              weight_constraints=NULL) {
   if(weight_function == "relative_dens") {
-    alphas <- runif(n=M)
-    # Sort and standardize alphas; don't sort if AR_constraints or mean_constraints are used
-    if(is.null(AR_constraints) && is.null(mean_constraints)) {
-      alphas <- sort(alphas, decreasing=TRUE)
-      alphas <- alphas/sum(alphas)
+    if(is.null(weight_constraints)) {
+      alphas <- runif(n=M)
+      # Sort and standardize alphas; don't sort if AR_constraints or mean_constraints are used
+      if(is.null(AR_constraints) && is.null(mean_constraints)) {
+        alphas <- sort(alphas, decreasing=TRUE)
+        alphas <- alphas/sum(alphas)
+      }
+      ret <- alphas[-M]
+    } else {
+      if(all(weight_constraints[[1]] == 0)) {
+        ret <- numeric(0) # alpha = r constant, so it is not parametrized
+      } else {
+        ret <- sort(runif(n=ncol(weight_constraints[[1]]), min=0, max=0.8), decreasing=TRUE)
+      }
     }
-    ret <- alphas[-M]
   } else if(weight_function == "logit") {
-    ret <- rt(n=(M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]]), df=4)
+    if(is.null(weight_constraints)) {
+      ret <- rt(n=(M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]]), df=4)
+    } else {
+      if(all(weight_constraints[[1]] == 0)) {
+        ret <- numeric(0) # alpha = r constant, so it is not parametrized
+      } else {
+        ret <- rt(n=ncol(weight_constraints[[1]]), df=4)
+      }
+    }
   } else {
     stop("Only relative dens and logit weights are currently implemented in random_weightpars")
   }
