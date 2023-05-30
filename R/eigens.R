@@ -55,7 +55,7 @@ get_omega_eigens <- function(stvar) {
 get_boldA_eigens_par <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
                                  cond_dist=c("Gaussian", "Student"),
                                  identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
-                                 AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL) {
+                                 AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
@@ -64,7 +64,7 @@ get_boldA_eigens_par <- function(p, M, d, params, weight_function=c("relative_de
                                     weight_function=weight_function, weightfun_pars=weightfun_pars,
                                     cond_dist=cond_dist, identification=identification,
                                     AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                                    B_constraints=B_constraints)
+                                    weight_constraints=weight_constraints, B_constraints=B_constraints)
   all_A <- pick_allA(p=p, M=M, d=d, params=params)
   all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
   matrix(vapply(1:M, function(m) abs(eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$'values'), numeric(d*p)),
