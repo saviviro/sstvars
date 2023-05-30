@@ -17,7 +17,8 @@
 get_residuals <- function(data, p, M, params, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
                           cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
                           identification=c("reduced_form", "recursive", "heteroskedasticity"),
-                          AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL, standardize=TRUE) {
+                          AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
+                          standardize=TRUE) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
@@ -28,7 +29,8 @@ get_residuals <- function(data, p, M, params, weight_function=c("relative_dens",
 
   mu_t <- loglikelihood(data=data, p=p, M=M, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
                         cond_dist=cond_dist, parametrization=parametrization, identification=identification,
-                        AR_constraints=AR_constraints, mean_constraints=mean_constraints, B_constraints,
+                        AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                        weight_constraints=weight_constraints, B_constraints=B_constraints,
                         check_params=TRUE, to_return="total_cmeans")
 
   y_minus_mu <- data[(p + 1):nrow(data),] - mu_t # nonstandardized residuals [T_obs, d]
@@ -38,7 +40,8 @@ get_residuals <- function(data, p, M, params, weight_function=c("relative_dens",
 
   Omega_t <- loglikelihood(data=data, p=p, M=M, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
                            cond_dist=cond_dist, parametrization=parametrization, identification=identification,
-                           AR_constraints=AR_constraints, mean_constraints=mean_constraints, B_constraints,
+                           AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                           weight_constraints=weight_constraints, B_constraints=B_constraints,
                            check_params=TRUE, to_return="total_ccovs")
 
   all_residuals <- matrix(nrow=T_obs, ncol=d)

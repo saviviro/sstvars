@@ -48,8 +48,29 @@ theta_222relgcm <- c(0.7209658, 0.810858, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01, 
 # p=2, M=2, d=2, weigh_function="logit", weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), C_222
 theta_222logcm_12_2 <- c(theta_222relgcm[-length(theta_222relgcm)], gamma1_222_12_2)
 
+# p=2, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
+# weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0))
+xi_222logcmw_12_2 <- c(0.002, 1.33)
+theta_222logcmw_12_2 <-  c(theta_222relgcm[-length(theta_222relgcm)], xi_222logcmw_12_2)
+
+loglikelihood(data=gdpdef, p=2, M=2, params=theta_222logcmw_12_2, weight_function="logit",
+              weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
+              weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0)), to_return="tw")
+
 
 test_that("get_residuals works correctly", {
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222logcmw_12_2, weight_function="logit",
+                               weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
+                               weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0)),
+                               standardize=FALSE)[c(1, 2, 131, 242),]),
+               c(-1.9292555, -1.3307029, 0.2188449, -0.7247259, -0.6715463, -0.5928653, -0.9207879, -0.7329033), tolerance=1e-3)
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222logcmw_12_2, weight_function="logit",
+                               weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
+                               weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0)),
+                               standardize=TRUE)[c(1, 2, 131, 242),]),
+               c(-2.7402663, -1.7862155, 0.4164804, -1.0247764, -2.7572364, -2.3630465, -4.2180631, -3.1732240))
+
+
   # Relative_dens Gausssian STVAR
   expect_equal(c(get_residuals(data=gdpdef, p=1, M=1, params=theta_112relg, weight_function="relative_dens",
                                standardize=TRUE)[c(1, 2, 113, 243),]),
