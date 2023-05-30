@@ -550,6 +550,16 @@ test_that("all_pos_ints works correctly", {
 })
 
 test_that("n_params works correctly", {
+  expect_equal(n_params(p=1, M=3, d=2, weight_function="relative_dens", cond_dist="Gaussian",
+                        weight_constraints=list(R=matrix(c(0.9, 0.5), nrow=2), r=c(0.13, 0.13))), 28)
+  expect_equal(n_params(p=2, M=2, d=2, weight_function="relative_dens", cond_dist="Gaussian", mean_constraints=list(1:2),
+                        AR_constraints=C_222, weight_constraints=list(R=0, r=0.6)), 16)
+  expect_equal(n_params(p=1, M=2, d=2, weight_function="logit", cond_dist="Gaussian",
+                        weightfun_pars=list(vars=1, lags=1), weight_constraints=list(R=0, r=c(0.12, 0.13))), 18)
+  expect_equal(n_params(p=2, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2),
+                        AR_constraints=C_222, weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5),
+                                                                      r=c(0, 0.11, 0.12, 0.13, 0))), 18)
+
   expect_equal(n_params(p=1, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian"), 9)
   expect_equal(n_params(p=2, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian"), 13)
   expect_equal(n_params(p=3, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian"), 17)
@@ -613,7 +623,6 @@ test_that("check_constraints works correctly", {
                                  weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(1, 0, 0.11, 0.12, 0.13, 0))))
   expect_error(check_constraints(p=2, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=1:2, lags=2),
                                  weight_constraints=list(r=c(0, 0.11, 0.12, 0.13, 0))))
-
 
   expect_error(check_constraints(p=1, M=1, d=2, AR_constraints=cbind(C_112, C_112)))
   expect_error(check_constraints(p=1, M=1, d=2, AR_constraints=rbind(C_112, C_112)))
