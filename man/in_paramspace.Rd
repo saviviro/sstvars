@@ -74,7 +74,7 @@ freedom parameters is not larger than \code{2 + df_tol}.}
 }
 \value{
 Returns \code{TRUE} if the given parameter values are in the parameter space and \code{FALSE} otherwise.
-  This function does NOT consider the identifiability condition!
+  This function does NOT consider identification conditions!
 }
 \description{
 \code{in_paramspace} checks whether the parameter vector is in the parameter
@@ -85,7 +85,7 @@ The parameter vector in the argument \code{params} should be unconstrained and r
 }
 \references{
 \itemize{
-   \item TO BE FILLED IN
+   \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis, \emph{Springer}.
  }
  @keywords internal
 }

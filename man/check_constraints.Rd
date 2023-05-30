@@ -8,8 +8,11 @@ check_constraints(
   p,
   M,
   d,
+  weight_function = c("relative_dens", "logit"),
+  weightfun_pars = NULL,
   AR_constraints = NULL,
   mean_constraints = NULL,
+  weight_constraints = NULL,
   B_constraints = NULL
 )
 }
@@ -19,6 +22,30 @@ check_constraints(
 \item{M}{a positive integer specifying the number of regimes}
 
 \item{d}{the number of time series in the system, i.e., the dimension}
+
+\item{weight_function}{What type of transition weights \eqn{\alpha_{m,t}} should be used?
+\describe{
+  \item{\code{"relative_dens"}:}{\eqn{\alpha_{m,t}=
+    \frac{\alpha_mf_{m,dp}(y_{t-1},...,y_{t-p+1})}{\sum_{n=1}^M\alpha_nf_{n,dp}(y_{t-1},...,y_{t-p+1})}}, where
+    \eqn{\alpha_m\in (0,1)} are weight parameters that satisfy \eqn{\sum_{m=1}^M\alpha_m=1} and
+    \eqn{f_{m,dp}(\cdot)} is the \eqn{dp}-dimensional stationary density of the \eqn{m}th regime corresponding to \eqn{p}
+    consecutive observations. Available for Gaussian conditional distribution only.}
+  \item{\code{"logit"}:}{\eqn{\alpha_{m,t}=\frac{\exp\lbrace \gamma_m'z_{t-1} \rbrace}
+    {\sum_{n=1}^M\exp\lbrace \gamma_n'z_{t-1} \rbrace}}, where \eqn{\gamma_m} are coefficient vectors and
+    \eqn{z_{t-1}} \eqn{(k\times 1)} is the \eqn{\mathcal{F}_{t-1}}-measurable vector containing a constant and
+    the (lagged) switching variables.}
+}
+See the vignette for more details about the weight functions.}
+
+\item{weightfun_pars}{\describe{
+  \item{If \code{weight_function == "relative_dens"}:}{Not used.}
+  \item{If \code{weight_function == "logit"}:}{a list of two elements: \describe{
+    \item{The first element \code{$vars}:}{a numeric vector containing the variables that should used as switching variables
+      in the weight function in an increasing order, i.e., a vector with unique elements in \eqn{\lbrace 1,...,d \rbrace}.}
+    \item{The second element \code{$lags}:}{an integer in \eqn{\lbrace 1,...,p \rbrace} specifying the number of lags to be
+     used in the weight function.}
+  }}
+}}
 
 \item{AR_constraints}{a size \eqn{(Mpd^2 x q)} constraint matrix \eqn{C} specifying linear constraints
 to the autoregressive parameters. The constraints are of the form
@@ -33,6 +60,13 @@ such that each numeric vector contains the regimes that should share the common 
 identical but the first regime has freely estimated (unconditional) mean. Ignore or set to \code{NULL} if mean parameters
 should not be restricted to be the same among any regimes. \strong{This constraint is available only for mean parametrized models;
 that is, when \code{parametrization="mean"}.}}
+
+\item{weight_constraints}{a list of two elements, \eqn{R} in the first element and \eqn{r} in the second element,
+specifying linear constraints on the transition weight parameters \eqn{\alpha}.
+The constraints are of the form \eqn{\alpha = R\xi + r}, where \eqn{R} is a known \eqn{(a\times l)}
+constraint matrix of full column rank (\eqn{a} is the dimension of \eqn{\alpha}), \eqn{r} is a known \eqn{(a\times 1)} constant,
+and \eqn{\xi} is an unknown \eqn{(l\times 1)} parameter. \strong{Alternatively}, set \eqn{R=0} in order to constrain the
+the weight parameter to the constant \eqn{r} (in this case, \eqn{\alpha} is dropped from the constrained parameter vector).}
 
 \item{B_constraints}{NOT YET IMPLEMENTED!}
 }

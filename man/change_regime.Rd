@@ -55,7 +55,7 @@ Does not support constrained models or structural models. Weight parameters nor 
 }
 \references{
 \itemize{
-   \item TO BE FILLED IN
+   \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis, \emph{Springer}.
  }
  @keywords internal
 }

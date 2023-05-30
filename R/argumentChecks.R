@@ -52,10 +52,10 @@ stab_conds_satisfied <- function(p, M, d, params, all_boldA=NULL, tolerance=1e-3
 #'   freedom parameters is not larger than \code{2 + df_tol}.
 #' @details The parameter vector in the argument \code{params} should be unconstrained and reduced form.
 #' @return Returns \code{TRUE} if the given parameter values are in the parameter space and \code{FALSE} otherwise.
-#'   This function does NOT consider the identifiability condition!
+#'   This function does NOT consider identification conditions!
 #' @references
 #'  \itemize{
-#'    \item TO BE FILLED IN
+#'    \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis, \emph{Springer}.
 #'  }
 #'  @keywords internal
 
@@ -113,7 +113,7 @@ in_paramspace <- function(p, M, d, weight_function, weightfun_pars=NULL, cond_di
 check_params <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
                          cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
                          identification=c("reduced_form", "recursive", "heteroskedasticity"),
-                         AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
+                         AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                          stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
   check_pMd(p=p, M=M, d=d)
   weight_function <- match.arg(weight_function)
@@ -248,7 +248,7 @@ check_data <- function(data, p) {
 
 n_params <- function(p, M, d, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
                      cond_dist=c("Gaussian", "Student"), identification=c("reduced_form", "recursive", "heteroskedasticity"),
-                     AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL) {
+                     AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
@@ -270,14 +270,23 @@ n_params <- function(p, M, d, weight_function=c("relative_dens", "logit"), weigh
     stop("B_constraints not yet implemented to n_parms")
     n_covmat_pars <- NULL
   }
-  if(weight_function == "relative_dens") {
-    n_weight_pars <- M - 1
-  } else if(weight_function == "logit") {
-    n_weight_pars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
-  } else { # weight_function == "logit"
-    stop("only relative_dens and logit weight fn is implemented to n_params")
-    n_weight_pars <- NULL
+  if(is.null(weight_constraints)) {
+    if(weight_function == "relative_dens") {
+      n_weight_pars <- M - 1
+    } else if(weight_function == "logit") {
+      n_weight_pars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
+    } else { # weight_function == "logit"
+      stop("only relative_dens and logit weight fn is implemented to n_params")
+      n_weight_pars <- NULL
+    }
+  } else { # Constraints on the weight parameters
+    if(all(weight_constraints[[1]] == 0)) {
+      n_weight_pars <- 0 # alpha = r, not in the parameter vector
+    } else {
+      n_weight_pars <- ncol(weight_constraints[[1]]) # The dimension of xi
+    }
   }
+
   if(cond_dist == "Gaussian") {
     n_dist_pars <- 0
   } else { # cond_dist == "Student"
@@ -296,11 +305,12 @@ n_params <- function(p, M, d, weight_function=c("relative_dens", "logit"), weigh
 #' @return Does return anything but checks the constraints and throws an error if something is wrong.
 #' @keywords internal
 
-check_constraints <- function(p, M, d, AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL) {
-  if(!is.null(B_constraints)) {
-    stop("B_constraints are not yet implemented to check_constraints")
-  }
+check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
+                              AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
+  weight_function <- match.arg(weight_function)
+  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars)
 
+  # Check AR_constraints
   if(!is.null(AR_constraints)) {
     if(!is.matrix(AR_constraints) | !is.numeric(AR_constraints)) {
       stop("The argument AR_constraints should be a numeric matrix (or NULL if no constraints should be employed)")
@@ -312,6 +322,8 @@ check_constraints <- function(p, M, d, AR_constraints=NULL, mean_constraints=NUL
       stop("The AR constraint matrix should have full column rank")
     }
   }
+
+  # Check mean_constraints
   if(!is.null(mean_constraints)) {
     if(!is.list(mean_constraints)) {
       stop("The argument mean_constraints should a list (or null if mean parameters are not constrained)")
@@ -327,6 +339,45 @@ check_constraints <- function(p, M, d, AR_constraints=NULL, mean_constraints=NUL
     if(length(tmp) != M || !all(tmp == 1:M)) {
       stop("The argument mean_constraints should contains all regimes in some group exactly once")
     }
+  }
+
+  # Check weight_constraints
+  if(!is.null(weight_constraints)) {
+    if(M == 1) {
+      stop("weight_constraints cannot be employed for models with M=1 (because there are no weight parameters)")
+    }
+    if(!is.list(weight_constraints) || length(weight_constraints) != 2) {
+      stop("The argument weight_constraints should be a list of length two")
+    }
+    if(weight_function == "relative_dens") {
+      n_nonconstr_weightpars <- M - 1
+    } else if(weight_function == "logit") {
+      n_nonconstr_weightpars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
+    } else {
+      stop("Unknown weight_function in check_constraints")
+    }
+    if(!all(weight_constraints[[1]] == 0)) { # R != 0
+      if(!is.matrix(weight_constraints[[1]]) || !is.numeric(weight_constraints[[1]])) {
+        stop("The first element of the argument weight_constraints should be a numeric matrix R (or 0 or NULL)")
+      } else if(nrow(weight_constraints[[1]]) != n_nonconstr_weightpars) {
+        stop("The first element of weight_constraints (matrix R) has incorrect number of rows")
+      } else if(ncol(weight_constraints[[1]]) > nrow(weight_constraints[[1]])) {
+        stop("The first element of weight_constraints (matrix R) has more columns than rows! What are you doing??")
+      } else if(qr(weight_constraints[[1]])$rank != ncol(weight_constraints[[1]])) {
+        stop("The first element of weight_constraints (matrix R) should have full column rank (or it should equal to zero)")
+      }
+    }
+    # Check r
+    if(!is.numeric(weight_constraints[[2]]) || !is.vector(weight_constraints[[2]])) {
+      stop("The second element of the argument weight_constraints should be a numeric vector r")
+    } else if(length(weight_constraints[[2]]) != n_nonconstr_weightpars) {
+      stop("The second element of the argument weight_constraints (vector r) has wrong dimension")
+    }
+  }
+
+  # Check B_constraints
+  if(!is.null(B_constraints)) {
+    stop("B_constraints are not yet implemented to check_constraints")
   }
 }
 
@@ -347,7 +398,7 @@ check_weightfun_pars <- function(p, d, weight_function=c("relative_dens", "logit
     weightfun_pars <- NULL
   } else if(weight_function == "logit") {
     if(!is.list(weightfun_pars) || length(weightfun_pars) != 2) {
-      stop("The argument weightfun_pars be a list of length two, when weight_function == 'logit'.")
+      stop("The argument weightfun_pars should be be a list of length two, when weight_function == 'logit'.")
     }
     if(!is.numeric(weightfun_pars[[1]]) || !all(weightfun_pars[[1]] %in% 1:d) ||
        length(unique(weightfun_pars[[1]])) != length(weightfun_pars[[1]]) ) {

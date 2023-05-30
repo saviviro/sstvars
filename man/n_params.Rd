@@ -14,6 +14,7 @@ n_params(
   identification = c("reduced_form", "recursive", "heteroskedasticity"),
   AR_constraints = NULL,
   mean_constraints = NULL,
+  weight_constraints = NULL,
   B_constraints = NULL
 )
 }
@@ -66,6 +67,13 @@ identical but the first regime has freely estimated (unconditional) mean. Ignore
 should not be restricted to be the same among any regimes. \strong{This constraint is available only for mean parametrized models;
 that is, when \code{parametrization="mean"}.}}
 
+\item{weight_constraints}{a list of two elements, \eqn{R} in the first element and \eqn{r} in the second element,
+specifying linear constraints on the transition weight parameters \eqn{\alpha}.
+The constraints are of the form \eqn{\alpha = R\xi + r}, where \eqn{R} is a known \eqn{(a\times l)}
+constraint matrix of full column rank (\eqn{a} is the dimension of \eqn{\alpha}), \eqn{r} is a known \eqn{(a\times 1)} constant,
+and \eqn{\xi} is an unknown \eqn{(l\times 1)} parameter. \strong{Alternatively}, set \eqn{R=0} in order to constrain the
+the weight parameter to the constant \eqn{r} (in this case, \eqn{\alpha} is dropped from the constrained parameter vector).}
+
 \item{B_constraints}{NOT YET IMPLEMENTED!}
 }
 \value{
@@ -81,7 +89,7 @@ Returns the number of parameters in the parameter vector of the specified model.
 
 \references{
 \itemize{
-   \item TO BE FILLED IN
+   \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis, \emph{Springer}.
  }
  @keywords internal
 }

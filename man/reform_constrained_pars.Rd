@@ -124,7 +124,7 @@ Returns "regular model" parameter vector corresponding to the constraints.
 
 \references{
 \itemize{
-   \item TO BE FILLED IN
+   \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis, \emph{Springer}.
  }
  @keywords internal
 }

@@ -28,7 +28,7 @@ Returns "distance" between \code{regime_pars1} and \code{regime_pars2}. Values a
 
 \references{
 \itemize{
-   \item TO BE FILLED IN
+   \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis, \emph{Springer}.
  }
  @keywords internal
 }

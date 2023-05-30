@@ -84,7 +84,7 @@ Note that we index the time series as \eqn{-p+1,...,0,1,...,T}.
 }
 \references{
 \itemize{
-   \item TO BE FILLED IN
+   \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis, \emph{Springer}.
  }
  @keywords internal
 }
