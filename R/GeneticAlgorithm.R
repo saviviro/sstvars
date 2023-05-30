@@ -187,6 +187,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), weigh
       inds <- replicate(popsize, random_ind(p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                             cond_dist=cond_dist, AR_constraints=AR_constraints,
                                             mean_constraints=mean_constraints,
+                                            weight_constraints=weight_constraints,
                                             force_stability=is.null(AR_constraints),
                                             mu_scale=mu_scale, mu_scale2=mu_scale2,
                                             omega_scale=omega_scale, ar_scale=ar_scale,
@@ -195,7 +196,8 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), weigh
                                                                weight_function=weight_function, weightfun_pars=weightfun_pars,
                                                                cond_dist=cond_dist, parametrization="mean", identification="reduced_form",
                                                                AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                                                               B_constraints=NULL, to_return="loglik", check_params=TRUE,
+                                                               weight_constraints=weight_constraints, B_constraints=NULL,
+                                                               to_return="loglik", check_params=TRUE,
                                                                minval=minval), numeric(1))
       G <- cbind(G, inds[, ind_loks > minval]) # Take good enough individuals
       if(ncol(G) >= popsize) {
@@ -218,14 +220,16 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), weigh
       ind <- initpop[[i1]]
       tryCatch(check_params(p=p, M=M, d=d, params=ind, weight_function=weight_function, weightfun_pars=weightfun_pars,
                             cond_dist=cond_dist, parametrization=parametrization, identification="reduced_form",
-                            AR_constraints=AR_constraints, mean_constraints=mean_constraints, B_constraints=NULL),
+                            AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                            weight_constraints=weight_constraints, B_constraints=NULL),
                error=function(e) stop(paste("Problem with individual", i1, "in the initial population: "), e))
       if(parametrization == "intercept") {
         ind <- change_parametrization(p=p, M=M, d=d, params=ind, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                       cond_dist=cond_dist, identification="reduced_form", AR_constraints=AR_constraints,
-                                      mean_constraints=mean_constaints, B_constraints=NULL, change_to="mean")
+                                      mean_constraints=mean_constaints, weight_constraints=weight_constraints,
+                                      B_constraints=NULL, change_to="mean")
       }
-      if(is.null(AR_constraints) && is.null(mean_constraints)) {
+      if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(weight_constraints)) {
         initpop[[i1]] <- sort_regimes(p=p, M=M, d=d, params=ind, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                       cond_dist=cond_dist, identification="reduced_form")
       } else {
@@ -266,7 +270,8 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), weigh
       for(i2 in 1:popsize) {
         loks_and_tw <- loglikelihood(data=data, p=p, M=M, params=G[,i2], weight_function=weight_function, weightfun_pars=weightfun_pars,
                                      cond_dist=cond_dist, parametrization="mean", identification="reduced_form",
-                                     AR_constraints=AR_constraints, mean_constraints=mean_constraints, B_constraints=NULL,
+                                     AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                     weight_constraints=weight_constraints, B_constraints=NULL,
                                      to_return="loglik_and_tw", check_params=TRUE, minval=minval)
         fill_lok_and_red(i1, i2, loks_and_tw)
       }
@@ -305,7 +310,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), weigh
                                                   weightfun_pars=weightfun_pars, cond_dist=cond_dist,
                                                   parametrization="mean", identification="reduced_form",
                                                   AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                                                  B_constraints=NULL,
+                                                  weight_constraints=weight_constraints, B_constraints=NULL,
                                                   to_return="loglik_and_tw", check_params=FALSE, minval=minval),
                                     error=function(e) minval)
           } else {
@@ -313,7 +318,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), weigh
                                                   weightfun_pars=weightfun_pars, cond_dist=cond_dist,
                                                   parametrization="mean", identification="reduced_form",
                                                   AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                                                  B_constraints=NULL,
+                                                  weight_constraints=weight_constraints, B_constraints=NULL,
                                                   to_return="loglik_and_tw", check_params=TRUE, minval=minval),
                                     error=function(e) minval)
           }
@@ -378,7 +383,8 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), weigh
     best_ind <- generations[, best_index[2], best_index[1]]
     best_mw <- loglikelihood(data=data, p=p, M=M, params=best_ind, weight_function=weight_function, weightfun_pars=weightfun_pars,
                              cond_dist=cond_dist, parametrization="mean", identification="reduced_form",
-                             AR_constraints=AR_constraints, mean_constraints=mean_constraints, B_constraints=NULL,
+                             AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                             weight_constraints=weight_constraints, B_constraints=NULL,
                              to_return="tw", check_params=FALSE, minval=minval)
     # Which regimes are wasted:
     which_redundant <- which(vapply(1:M, function(i2) sum(best_mw[,i2] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
@@ -414,6 +420,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), weigh
                                                                                  cond_dist=cond_dist,
                                                                                  AR_constraints=AR_constraints,
                                                                                  mean_constraints=mean_constraints,
+                                                                                 weight_constraints=weight_constraints,
                                                                                  force_stability=stat_mu,
                                                                                  mu_scale=mu_scale,
                                                                                  mu_scale2=mu_scale2,
@@ -441,7 +448,8 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), weigh
 
       ## 'Smart mutation': mutate close to a well fitting individual. We obviously don't mutate close to
       # redundant regimes but draw them at random ('rand_to_use' in what follows).
-      if(!is.null(AR_constraints) | !is.null(mean_constraints) | length(which_redundant) <= length(which_redundant_alt) | runif(1) > 0.5) {
+      if(!is.null(AR_constraints) | !is.null(mean_constraints) | !is.null(weight_constraints) |
+         length(which_redundant) <= length(which_redundant_alt) | runif(1) > 0.5) {
         # The first option for smart mutations: smart mutate to 'alt_ind' which is the best fitting individual
         # with the least redundant regimes.
         # Note that best_ind == alt_ind when length(which_redundant) <= length(which_redundant_alt).
@@ -505,6 +513,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), weigh
                                                                                  cond_dist=cond_dist,
                                                                                  AR_constraints=AR_constraints,
                                                                                  mean_constraints=mean_constraints,
+                                                                                 weight_constraints=weight_constraints,
                                                                                  accuracy=accuracy[i2],
                                                                                  which_random=rand_to_use,
                                                                                  mu_scale=mu_scale,
@@ -515,7 +524,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), weigh
     }
 
     # Sort components according to the transition weight parameters. No sorting if constraints are employed.
-    if(is.null(AR_constraints) && is.null(mean_constraints)) {
+    if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(weight_constraints)) {
       H2 <- vapply(1:popsize, function(i2) sort_regimes(p=p, M=M, d=d, params=H2[,i2], weight_functio=weight_function,
                                                         weightfun_pars=weightfun_pars, cond_dist=cond_dist,
                                                         identification="reduced_form"), numeric(npars))
@@ -536,6 +545,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), weigh
   } else {
     return(change_parametrization(p=p, M=M, d=d, params=ret, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                   cond_dist=cond_dist, identification="reduced_form", AR_constraints=AR_constraints,
-                                  mean_constraints=mean_constraints, B_constraints=NULL, change_to="intercept"))
+                                  mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                                  B_constraints=NULL, change_to="intercept"))
   }
 }
