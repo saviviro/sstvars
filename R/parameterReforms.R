@@ -66,7 +66,7 @@ form_boldA <- function(p, M, d, all_A) {
 change_parametrization <- function(p, M, d, params, weight_function=c("relative_dens", "logit"),
                                    weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"),
                                    identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
-                                   AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
+                                   AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                                    change_to=c("intercept", "mean")) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -76,8 +76,8 @@ change_parametrization <- function(p, M, d, params, weight_function=c("relative_
   re_params <- params
   params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
                                     identification=identification, AR_constraints=AR_constraints,
-                                    mean_constraints=mean_constraints, B_constraints=B_constraints,
-                                    weightfun_pars=weightfun_pars)
+                                    mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                                    B_constraints=B_constraints, weightfun_pars=weightfun_pars)
   Id <- diag(nrow=d)
   all_A <- pick_allA(p=p, M=M, d=d, params=params)
   all_phi0_or_mu <- pick_phi0(M=M, d=d, params=params)
