@@ -124,12 +124,18 @@ If you wish to estimate a structural model, estimate first the reduced form mode
  estimation algorithm works better with relatively small AR coefficients. If needed, another package can be used
  to fit linear VARs to the series to see which scaling of the series results in relatively small AR coefficients.
 
+ \strong{weight_constraints:} If you are using weight constraints other than restricting some of the weight parameters to known
+ constants, make sure the constraints are sensible. Otherwise, the estimation may fail due to the estimation algorithm not being
+ able to generate reasonable random guesses for the values of the constrained weight parameters.
+
  \strong{Filtering inappropriate estimates:} If \code{filter_estimates == TRUE}, the code will automatically filter
  through estimates that it deems "inappropriate". That is, estimates that are not likely solutions of interest.
  Specifically, solutions that incorporate a near-singular error term covariance matrix (any eigenvalue less than \eqn{0.002})
  or transition weights such that they are close to zero for almost all \eqn{t} for at least one regime.
  You are welcome to set \code{filter_estimates=FALSE} and find the solutions of interest yourself by using the
  function \code{alt_stvar}.
+
+ \strong{weight_constraints}
 }
 \section{S3 methods}{
 

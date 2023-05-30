@@ -4,7 +4,13 @@
 \alias{smart_weightpars}
 \title{Create random transition weight parameter values}
 \usage{
-smart_weightpars(M, weight_pars, weight_function, accuracy)
+smart_weightpars(
+  M,
+  weight_pars,
+  weight_function,
+  weight_constraints = NULL,
+  accuracy
+)
 }
 \arguments{
 \item{M}{a positive integer specifying the number of regimes}

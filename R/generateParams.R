@@ -294,7 +294,7 @@ smart_weightpars <- function(M, weight_pars, weight_function, weight_constraints
 
 random_ind <- function(p, M, d, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
                        cond_dist=c("Gaussian", "Student"), AR_constraints=NULL, mean_constraints=NULL,
-                       force_stability=is.null(AR_constraints),
+                       weight_constraints=NULL, force_stability=is.null(AR_constraints),
                        mu_scale, mu_scale2, omega_scale, ar_scale=1, ar_scale2=1) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -327,7 +327,8 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logit"), wei
   # Generate weight params
   if(M > 1) {
     weight_pars <- random_weightpars(M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                     AR_constraints=AR_constraints, mean_constraints=mean_constraints)
+                                     AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                     weight_constraints=weight_constraints)
   } else {
     weight_pars <- numeric(0) # Replicate returns a list if the value is numeric(0)
   }

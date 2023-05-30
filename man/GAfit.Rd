@@ -14,6 +14,7 @@ GAfit(
   parametrization = c("intercept", "mean"),
   AR_constraints = NULL,
   mean_constraints = NULL,
+  weight_constraints = NULL,
   ngen = 200,
   popsize,
   smart_mu = min(100, ceiling(0.5 * ngen)),
@@ -82,6 +83,13 @@ such that each numeric vector contains the regimes that should share the common 
 identical but the first regime has freely estimated (unconditional) mean. Ignore or set to \code{NULL} if mean parameters
 should not be restricted to be the same among any regimes. \strong{This constraint is available only for mean parametrized models;
 that is, when \code{parametrization="mean"}.}}
+
+\item{weight_constraints}{a list of two elements, \eqn{R} in the first element and \eqn{r} in the second element,
+specifying linear constraints on the transition weight parameters \eqn{\alpha}.
+The constraints are of the form \eqn{\alpha = R\xi + r}, where \eqn{R} is a known \eqn{(a\times l)}
+constraint matrix of full column rank (\eqn{a} is the dimension of \eqn{\alpha}), \eqn{r} is a known \eqn{(a\times 1)} constant,
+and \eqn{\xi} is an unknown \eqn{(l\times 1)} parameter. \strong{Alternatively}, set \eqn{R=0} in order to constrain the
+the weight parameter to the constant \eqn{r} (in this case, \eqn{\alpha} is dropped from the constrained parameter vector).}
 
 \item{ngen}{a positive integer specifying the number of generations to be ran through in
 the genetic algorithm.}
