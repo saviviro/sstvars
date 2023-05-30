@@ -80,6 +80,7 @@ get_gradient <- function(stvar) {
                   identification=stvar$model$identification,
                   AR_constraints=stvar$model$AR_constraints,
                   mean_constraints=stvar$model$mean_constraints,
+                  weight_constraints=stvar$model$weight_constraints,
                   B_constraints=stvar$model$B_constraints,
                   to_return="loglik", minval=NA)
   }
@@ -102,6 +103,7 @@ get_hessian <- function(stvar) {
                   identification=stvar$model$identification,
                   AR_constraints=stvar$model$AR_constraints,
                   mean_constraints=stvar$model$mean_constraints,
+                  weight_constraints=stvar$model$weight_constraints,
                   B_constraints=stvar$model$B_constraints,
                   to_return="loglik", minval=NA)
   }
