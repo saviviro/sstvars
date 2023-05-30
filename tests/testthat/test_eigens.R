@@ -148,6 +148,10 @@ theta_132relgw <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132),
 theta_132relgw_expanded <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
                              vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), matrix(c(0.9, 0.5), nrow=2)%*%xi_132relgw + 0.13)
 
+mod132relgw <- STVAR(data=gdpdef, p=1, M=3, d=2, params=theta_132relgw,  weight_function="relative_dens",
+                     weight_constraints=list(R=matrix(c(0.9, 0.5), nrow=2), r=c(0.13, 0.13)))
+
+
 # p=2, M=2, d=2, weight_function="relative_dens", mean_constraints=list(1:2), AR_constraints=C_222,
 # weight_constraints=list(R=0, r=0.6)
 theta_222relgcmw <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222)) # No weight param since replaced with r
@@ -165,6 +169,9 @@ xi_222logcmw_12_2 <- c(0.22, 0.33)
 theta_222logcmw_12_2 <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), xi_222logcmw_12_2 )
 theta_222logcmw_12_2_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
                                    vech(Omega1_222), vech(Omega2_222), c(0.22, 0.11, 0.12, 0.13, 0.33))
+mod222logcmw_12_2 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logcmw_12_2, weight_function="logit",
+                           weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
+                           weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0)))
 
 
 test_that("get_boldA_eigens work correctly", {
@@ -189,6 +196,12 @@ test_that("get_boldA_eigens work correctly", {
 
   expect_equal(get_boldA_eigens(stvar222logitcm)[,1], c(0.7667397, 0.7667397, 0.5076821, 0.4147943), tol=1e-3)
   expect_equal(get_boldA_eigens(stvar222logitcm)[,2], c(0.7667397, 0.7667397, 0.5076821, 0.4147943), tol=1e-3)
+
+  expect_equal(get_boldA_eigens(mod132relgw)[1,], c(0.7186796, 0.7186796, 0.5372281), tol=1e-3)
+  expect_equal(get_boldA_eigens(mod132relgw)[2,], c(0.34132038, 0.34132038, 0.03722813), tol=1e-3)
+
+  expect_equal(get_boldA_eigens(mod222logcmw_12_2)[,1], c(0.7667397, 0.7667397, 0.5076821, 0.41479431), tol=1e-3)
+  expect_equal(get_boldA_eigens(mod222logcmw_12_2)[,2], c(0.7667397, 0.7667397, 0.5076821, 0.4147943), tol=1e-3)
 })
 
 
@@ -214,4 +227,10 @@ test_that("get_omega_eigens work correctly", {
 
   expect_equal(get_omega_eigens(stvar222logitcm)[,1], c(0.21055385, 0.02944615), tol=1e-3)
   expect_equal(get_omega_eigens(stvar222logitcm)[,2], c(1.100101, 0.109899), tol=1e-3)
+
+  expect_equal(get_omega_eigens(mod132relgw)[1,], c(0.5801922, 0.5003330, 1.5000000), tol=1e-3)
+  expect_equal(get_omega_eigens(mod132relgw)[2,], c(0.05980776, 0.19966704, 0.50000000), tol=1e-3)
+
+  expect_equal(get_omega_eigens(mod222logcmw_12_2)[,1], c(0.21055385, 0.02944615), tol=1e-3)
+  expect_equal(get_omega_eigens(mod222logcmw_12_2)[,2], c(1.100101, 0.109899), tol=1e-3)
 })

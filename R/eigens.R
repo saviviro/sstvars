@@ -15,7 +15,7 @@ get_boldA_eigens <- function(stvar) {
                        weight_function=stvar$model$weight_function, weightfun_pars=stvar$model$weightfun_pars,
                        cond_dist=stvar$model$cond_dist, identification=stvar$model$identification,
                        AR_constraints=stvar$model$AR_constraints, mean_constraints=stvar$model$mean_constraints,
-                       B_constraints=stvar$model$B_constraints)
+                       weight_constraints=stvar$model$weight_constraints, B_constraints=stvar$model$B_constraints)
 }
 
 
@@ -36,7 +36,7 @@ get_omega_eigens <- function(stvar) {
                        weight_function=stvar$model$weight_function, weightfun_pars=stvar$model$weightfun_pars,
                        cond_dist=stvar$model$cond_dist, identification=stvar$model$identification,
                        AR_constraints=stvar$model$AR_constraints, mean_constraints=stvar$model$mean_constraints,
-                       B_constraints=stvar$model$B_constraints)
+                       weight_constraints=stvar$model$weight_constraints, B_constraints=stvar$model$B_constraints)
 }
 
 
