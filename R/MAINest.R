@@ -123,7 +123,7 @@
 
 fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
                      cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
-                     AR_constraints=NULL, mean_constraints=NULL,
+                     AR_constraints=NULL, mean_constraints=NULL, weight_constraitns=NULL,
                      nrounds=(M + 1)^5, ncores=2, maxit=1000,
                      seeds=NULL, print_res=TRUE, use_parallel=TRUE, filter_estimates=TRUE, ...) {
   # Initial checks etc
@@ -138,14 +138,16 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), we
   d <- ncol(data)
   n_obs <- nrow(data)
   weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars)
-  check_constraints(p=p, M=M, d=d, AR_constraints=AR_constraints, mean_constraints=mean_constraints, B_constraints=NULL)
+  check_constraints(p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                    AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                    weight_constraints=weight_constraints, B_constraints=NULL)
   if(!is.null(mean_constraints) && parametrization == "intercept") {
     cat("mean_constraints can be applied for mean-parametrized models only. Switching to parametrization = 'mean'.\n")
     parametrization <- "mean"
   }
   npars <- n_params(p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars, cond_dist=cond_dist,
-                     AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                     B_constraints=NULL, identification="reduced_form")
+                    AR_constraints=AR_constraints, mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                    B_constraints=NULL, identification="reduced_form")
   if(npars >= d*nrow(data)) stop("There are at least as many parameters in the model as there are observations in the data,
                                  so you should use smaller p or M.")
   dot_params <- list(...)
@@ -179,6 +181,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), we
                                                                  parametrization=parametrization,
                                                                  AR_constraints=AR_constraints,
                                                                  mean_constraints=mean_constraints,
+                                                                 weight_constraints=weight_constraints,
                                                                  seed=seeds[i1], ...), cl=cl)
 
   } else {
@@ -193,6 +196,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), we
             parametrization=parametrization,
             AR_constraints=AR_constraints,
             mean_constraints=mean_constraints,
+            weight_constraints=weight_constraints,
             seed=seeds[i1], ...)
     }
     GAresults <- lapply(1:nrounds, function(i1) tmpfunGA(i1, ...))
@@ -208,6 +212,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), we
                                                        identification="reduced_form",
                                                        AR_constraints=AR_constraints,
                                                        mean_constraints=mean_constraints,
+                                                       weight_constraints=weight_constraints,
                                                        B_constraints=NULL,
                                                        to_return="loglik",
                                                        check_params=TRUE,
@@ -229,8 +234,9 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), we
                            weight_function=weight_function, weightfun_pars=weightfun_pars,
                            cond_dist=cond_dist, parametrization=parametrization,
                            identification="reduced_form", AR_constraints=AR_constraints,
-                           mean_constraints=mean_constraints, B_constraints=NULL,
-                           to_return="loglik", check_params=TRUE, minval=minval), error=function(e) minval)
+                           mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                           B_constraints=NULL, to_return="loglik", check_params=TRUE, minval=minval),
+             error=function(e) minval)
   }
 
   # Gradient of the log-likelihood function using central difference approximation
@@ -279,11 +285,12 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), we
                                            weight_function=weight_function, weightfun_pars=weightfun_pars,
                                            cond_dist=cond_dist, identification="reduced_form",
                                            AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                                           B_constraints=NULL) # Pars in standard form for pick pars fns
+                                           weight_constraints=weight_constraints, B_constraints=NULL) # Pars in standard form for pick pars fns
        Omega_eigens <- get_omega_eigens_par(p=p, M=M, d=d, params=pars_std,
                                             weight_function=weight_function, weightfun_pars=weightfun_pars,
                                             cond_dist=cond_dist, identification="reduced_form",
-                                            AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL)
+                                            AR_constraints=NULL, mean_constraints=NULL,
+                                            weight_constraints=NULL, B_constraints=NULL)
        Omegas_ok <- !any(Omega_eigens < 0.002)
        if(weight_function == "relative_dens") {
          alphas <- pick_weightpars(p=p, M=M, d=d, params=pars_std, weight_function=weight_function, weightfun_pars=weightfun_pars,
@@ -296,7 +303,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), we
                                  weight_function=weight_function, weightfun_pars=weightfun_pars,
                                  cond_dist=cond_dist, parametrization=parametrization,
                                  identification="reduced_form", AR_constraints=NULL,
-                                 mean_constraints=NULL, B_constraints=NULL,
+                                 mean_constraints=NULL, B_constraints=NULL, weight_constraints=NULL,
                                  to_return="tw", check_params=TRUE, minval=matrix(0, nrow=n_obs-p, ncol=M))
        tweights_ok <- !any(vapply(1:M, function(m) sum(tweights[,m] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
        if(Omegas_ok && tweights_ok && weightpars_ok) {
@@ -320,7 +327,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), we
 
   ### Obtain standard errors, calculate IC ###
   # Sort regimes if no constraints are employed
-  if(is.null(AR_constraints) && is.null(mean_constraints)) {
+  if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(weight_constraints)) {
     params <- sort_regimes(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
                            cond_dist=cond_dist, identification="reduced_form")
     all_estimates <- lapply(all_estimates, function(pars) sort_regimes(p=p, M=M, d=d, params=pars,
@@ -339,8 +346,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), we
                                       weight_function=weight_function, weightfun_pars=weightfun_pars,
                                       cond_dist=cond_dist, parametrization=parametrization,
                                       identification="reduced_form", AR_constraints=AR_constraints,
-                                      mean_constraints=mean_constraints, B_constraints=NULL,
-                                      to_return="tw", check_params=TRUE, minval=minval)
+                                      mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                                      B_constraints=NULL, to_return="tw", check_params=TRUE, minval=minval)
   if(any(vapply(1:M, function(i1) sum(transition_weights[,i1] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))) {
     message("At least one of the regimes in the estimated model seems to be wasted in the best fitting individual!")
   }
@@ -355,6 +362,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), we
                identification="reduced_form",
                AR_constraints=AR_constraints,
                mean_constraints=mean_constraints,
+               weight_constraints=weight_constraints,
                B_constraints=NULL,
                calc_std_errors=TRUE)
   ret$all_estimates <- all_estimates

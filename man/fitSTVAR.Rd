@@ -14,6 +14,7 @@ fitSTVAR(
   parametrization = c("intercept", "mean"),
   AR_constraints = NULL,
   mean_constraints = NULL,
+  weight_constraitns = NULL,
   nrounds = (M + 1)^5,
   ncores = 2,
   maxit = 1000,
