@@ -33,6 +33,7 @@ summary.stvar <- function(object, ..., digits=2) {
                                                identification=stvar$model$identification,
                                                AR_constraints=stvar$model$AR_constraints,
                                                mean_constraints=stvar$model$mean_constraints,
+                                               weight_constraints=stvar$model$weight_constraints,
                                                B_constraints=stvar$model$B_constraints),
                  digits=digits),
             class="stvarsum")
