@@ -185,7 +185,22 @@ theta_222relgcm <- c(0.7209658, 0.810858, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01, 
 # p=2, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222
 theta_222logcm_12_2 <- c(theta_222relgcm[-length(theta_222relgcm)], gamma1_222_12_2)
 
+# p=2, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
+# weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0))
+xi_222logcmw_12_2 <- c(0.22, 0.33)
+theta_222logcmw_12_2 <-  c(theta_222relgcm[-length(theta_222relgcm)], xi_222logcmw_12_2)
+
+
 test_that("get_regime_means works correctly", {
+  expect_equal(c(get_regime_means(p=2, M=2, d=2, params=theta_222logcm_12_2, weight_function="logit",
+                                  weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222)),
+               c(1.410654, 2.843196, 1.410654, 2.843196), tolerance=1e-3)
+  expect_equal(c(get_regime_means(p=2, M=2, d=2, params=theta_222logcmw_12_2, weight_function="logit",
+                                  weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
+                                  weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5),
+                                                          r=c(0, 0.11, 0.12, 0.13, 0)))),
+               c(1.410654, 2.843196, 1.410654, 2.843196), tolerance=1e-3)
+
   expect_equal(c(get_regime_means(p=1, M=1, d=2, params=params112, weight_function="relative_dens")),
                c(-0.03835678, 6.03323402), tolerance=1e-3)
   expect_equal(c(get_regime_means(p=1, M=1, d=5, params=params115, weight_function="relative_dens")),

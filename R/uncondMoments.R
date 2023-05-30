@@ -169,7 +169,7 @@ get_regime_means <- function(p, M, d, params, weight_function=c("relative_dens",
                              cond_dist=c("Gaussian", "Student"),
                              parametrization=c("intercept", "mean"),
                              identification=c("reduced_form", "recursive", "heteroskedasticity"),
-                             AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL) {
+                             AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
@@ -178,7 +178,8 @@ get_regime_means <- function(p, M, d, params, weight_function=c("relative_dens",
   params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function,
                                     weightfun_pars=weightfun_pars, cond_dist=cond_dist,
                                     identification=identification, AR_constraints=AR_constraints,
-                                    mean_constraints=mean_constraints, B_constraints=B_constraints)
+                                    mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                                    B_constraints=B_constraints)
   if(!is.null(B_constraints)) {
     stop("B_constraints are not yet implemented to get_regime_means")
   }
@@ -186,9 +187,9 @@ get_regime_means <- function(p, M, d, params, weight_function=c("relative_dens",
 
   if(parametrization == "intercept") {
     params <- change_parametrization(p=p, M=M, d=d, params=params, weight_function=weight_function,
-                                     weightfun_pars=weightfun_pars,
-                                     AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
-                                     change_to="mean")
+                                     weightfun_pars=weightfun_pars, AR_constraints=NULL,
+                                     mean_constraints=NULL, weight_constraints=NULL,
+                                     B_constraints=NULL, change_to="mean")
   }
   pick_phi0(M=M, d=d, params=params)
 }
