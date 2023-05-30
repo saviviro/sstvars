@@ -106,8 +106,9 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
     } else {
       std_errors <- tryCatch(standard_errors(data=data, p=p, M=M, params=params, weight_function=weight_function,
                                              weightfun_pars=weightfun_pars, cond_dist=cond_dist,
-                                             parametrization=parametrization, identification=identification, AR_constraints=AR_constraints,
-                                             mean_constraints=mean_constraints, B_constraints=B_constraints),
+                                             parametrization=parametrization, identification=identification,
+                                             AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                             weight_constraints=weight_constraints, B_constraints=B_constraints),
                              error=function(e) {
                                warning("Approximate standard errors can't be calculated:")
                                warning(e)
@@ -126,7 +127,7 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
                                                 weight_function=weight_function, weightfun_pars=weightfun_pars,
                                                 cond_dist=cond_dist, parametrization=parametrization,
                                                 identification=identification, AR_constraints=AR_constraints,
-                                                mean_constraints=mean_constraints,
+                                                mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                                                 B_constraints=B_constraints, to_return=to_return,
                                                 check_params=TRUE, minval=NA)
     regime_cmeans <- get_cm("regime_cmeans")
@@ -146,6 +147,7 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
                             identification=identification,
                             AR_constraints=AR_constraints,
                             mean_constraints=mean_constraints,
+                            weight_constraints=weight_constraints,
                             B_constraints),
                  params=params,
                  std_errors=std_errors,
