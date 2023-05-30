@@ -250,7 +250,12 @@ random_weightpars <- function(M, weight_function, weightfun_pars=NULL, AR_constr
 #' @inherit random_weightpars return
 #' @keywords internal
 
-smart_weightpars <- function(M, weight_pars, weight_function, accuracy) {
+smart_weightpars <- function(M, weight_pars, weight_function, weight_constraints=NULL, accuracy) {
+  if(!is.null(weight_constraints)) {
+    if(all(weight_constraints[[1]] == 0)) {
+      return(numeric(0)) # alpha = r constant, so it is not parametrized
+    }
+  }
   if(weight_function == "relative_dens") {
     weight_pars <- rnorm(n=length(weight_pars)+1, mean=c(weight_pars, 1-sum(weight_pars)),
                          sd=pmax(0.2, c(weight_pars, 1-sum(weight_pars))/accuracy))
