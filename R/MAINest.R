@@ -118,12 +118,19 @@
 #' C_322 <- rbind(diag(3*2^2), diag(3*2^2))
 #' fitlogit32c <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logit", weightfun_pars=list(vars=2, lags=1),
 #'  AR_constraints=C_322, nrounds=10, seeds=1:10)
+#'
+#' # relative_dens STVAR, p=1, M=2, d=2, with the weight parameter fixed to the constant r=0.8.
+#' fit12w <- fitSTVAR(gdpdef, p=1, M=2, weight_constraints=list(R=0, r=0.8), nrounds=1, seeds=10, use_parallel=FALSE)
+#'
+#' # logit STVAR, p=1, M=2, d=2, second variable as switching variable with one lag such that the constant term is -5.
+#' fitlogit12w <- fitSTVAR(gdpdef, p=1, M=2, weight_function="logit", weightfun_pars=list(vars=2, lags=1),
+#'   weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(-5, 0)), nrounds=20, seeds=1:20, use_parallel=FALSE)
 #' }
 #' @export
 
 fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
                      cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
-                     AR_constraints=NULL, mean_constraints=NULL, weight_constraitns=NULL,
+                     AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
                      nrounds=(M + 1)^5, ncores=2, maxit=1000,
                      seeds=NULL, print_res=TRUE, use_parallel=TRUE, filter_estimates=TRUE, ...) {
   # Initial checks etc

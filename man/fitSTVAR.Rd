@@ -14,7 +14,7 @@ fitSTVAR(
   parametrization = c("intercept", "mean"),
   AR_constraints = NULL,
   mean_constraints = NULL,
-  weight_constraitns = NULL,
+  weight_constraints = NULL,
   nrounds = (M + 1)^5,
   ncores = 2,
   maxit = 1000,
@@ -75,6 +75,13 @@ such that each numeric vector contains the regimes that should share the common 
 identical but the first regime has freely estimated (unconditional) mean. Ignore or set to \code{NULL} if mean parameters
 should not be restricted to be the same among any regimes. \strong{This constraint is available only for mean parametrized models;
 that is, when \code{parametrization="mean"}.}}
+
+\item{weight_constraints}{a list of two elements, \eqn{R} in the first element and \eqn{r} in the second element,
+specifying linear constraints on the transition weight parameters \eqn{\alpha}.
+The constraints are of the form \eqn{\alpha = R\xi + r}, where \eqn{R} is a known \eqn{(a\times l)}
+constraint matrix of full column rank (\eqn{a} is the dimension of \eqn{\alpha}), \eqn{r} is a known \eqn{(a\times 1)} constant,
+and \eqn{\xi} is an unknown \eqn{(l\times 1)} parameter. \strong{Alternatively}, set \eqn{R=0} in order to constrain the
+the weight parameter to the constant \eqn{r} (in this case, \eqn{\alpha} is dropped from the constrained parameter vector).}
 
 \item{nrounds}{the number of estimation rounds that should be performed.}
 
@@ -205,6 +212,13 @@ fitlogit32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logit", weightfun_pars
 C_322 <- rbind(diag(3*2^2), diag(3*2^2))
 fitlogit32c <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logit", weightfun_pars=list(vars=2, lags=1),
  AR_constraints=C_322, nrounds=10, seeds=1:10)
+
+# relative_dens STVAR, p=1, M=2, d=2, with the weight parameter fixed to the constant r=0.8.
+fit12w <- fitSTVAR(gdpdef, p=1, M=2, weight_constraints=list(R=0, r=0.8), nrounds=1, seeds=10, use_parallel=FALSE)
+
+# logit STVAR, p=1, M=2, d=2, second variable as switching variable with one lag such that the constant term is -5.
+fitlogit12w <- fitSTVAR(gdpdef, p=1, M=2, weight_function="logit", weightfun_pars=list(vars=2, lags=1),
+  weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(-5, 0)), nrounds=20, seeds=1:20, use_parallel=FALSE)
 }
 }
 \references{

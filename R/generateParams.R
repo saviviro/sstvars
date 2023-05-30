@@ -374,7 +374,7 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logit
   # ? dist_pars <- pick_distpars
   all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params_std)
   new_pars <- numeric(length(params))
-  if(is.null(AR_constraints) && is.null(mean_constraints && is.nulL(weight_constraints))) {
+  if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(weight_constraints)) {
     all_means_and_A <- params[1:(d*M + M*p*d^2)] # all mu + A if called from GAfit
     new_pars[1:(d*M + M*p*d^2)] <- rnorm(n=length(all_means_and_A), mean=all_means_and_A, sd=pmax(0.2, abs(all_means_and_A)))
     for(m in 1:M) {
