@@ -13,7 +13,8 @@
 standard_errors <- function(data, p, M, params, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
                             cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
                             identification=c("reduced_form", "recursive", "heteroskedasticity"),
-                            AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL, minval) {
+                            AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
+                            minval) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
@@ -30,8 +31,9 @@ standard_errors <- function(data, p, M, params, weight_function=c("relative_dens
                            weight_function=weight_function, weightfun_pars=weightfun_pars,
                            cond_dist=cond_dist, parametrization=parametrization,
                            identification=identification, AR_constraints=AR_constraints,
-                           mean_constraints=mean_constraints, B_constraints=B_constraints,
-                           check_params=TRUE, to_return="loglik", minval=minval),
+                           mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                           B_constraints=B_constraints, check_params=TRUE, to_return="loglik",
+                           minval=minval),
              error=function(e) NA)
   }
 
@@ -90,6 +92,7 @@ print_std_errors <- function(stvar, digits=3) {
   identification <- stvar$model$identification
   AR_constraints <- stvar$model$AR_constraints
   mean_constraints <- stvar$model$mean_constraints
+  weight_constraints <- stvar$model$weight_constraints
   B_constraints <- stvar$model$B_constraints
   weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=stvar$model$weightfun_pars)
   npars <- length(stvar$params)
@@ -97,7 +100,8 @@ print_std_errors <- function(stvar, digits=3) {
   pars <- reform_constrained_pars(p=p, M=M, d=d, params=pars, weight_function=weight_function,
                                   weightfun_pars=weightfun_pars, cond_dist=cond_dist,
                                   identification=identification, AR_constraints=AR_constraints,
-                                  mean_constraints=mean_constraints, B_constraints=B_constraints)
+                                  mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                                  B_constraints=B_constraints)
   all_phi0_or_mu <- pick_phi0(M=M, d=d, params=pars)
   all_A <- pick_allA(p=p, M=M, d=d, params=pars)
   if(identification == "reduced_form") {
