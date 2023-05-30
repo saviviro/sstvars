@@ -326,6 +326,10 @@ theta_132relgw <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132),
 theta_132relgw_expanded <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
                              vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), matrix(c(0.9, 0.5), nrow=2)%*%xi_132relgw + 0.13)
 
+theta_132relgw_notpd  <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132_stab),
+                           vech(Omega1_132), vech(Omega2_132), vech(Omega3_132_notpd), xi_132relgw)
+
+
 # p=2, M=2, d=2, weight_function="relative_dens", mean_constraints=list(1:2), AR_constraints=C_222,
 # weight_constraints=list(R=0, r=0.6)
 theta_222relgcmw <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222)) # No weight param since replaced with r
@@ -479,6 +483,16 @@ test_that("in_paramspace work correctly", {
 })
 
 test_that("check_params work correctly", {
+  # Check that no errors when all is fine
+  check_params(p=2, M=2, d=2, params=theta_222relgcmw, weight_function="relative_dens", mean_constraints=list(1:2),
+               AR_constraints=C_222, weight_constraints=list(R=0, r=0.6), cond_dist="Gaussian")
+  check_params(p=1, M=2, d=2, params=theta_122logw_1_1, weight_function="logit",
+               weightfun_pars=list(vars=1, lags=1), weight_constraints=list(R=0, r=c(0.12, 0.13)), cond_dist="Gaussian")
+  check_params(p=2, M=2, d=2, params=theta_222logcmw_12_2, weight_function="logit",
+               weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
+               weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0)),
+               cond_dist="Gaussian")
+
   # Checks stability conditions
   check_params(p=1, M=1, d=2, params=theta_112relg, weight_function="relative_dens", cond_dist="Gaussian")
   check_params(p=1, M=2, d=2, params=theta_122relg, weight_function="relative_dens", cond_dist="Gaussian")
@@ -489,6 +503,8 @@ test_that("check_params work correctly", {
   expect_error(check_params(p=1, M=3, d=2, params=theta_132relg_notstab, weight_function="relative_dens", cond_dist="Gaussian"))
   expect_error(check_params(p=2, M=1, d=3, params=theta_213relg_notstab, weight_function="relative_dens", cond_dist="Gaussian"))
   expect_error(check_params(p=1, M=2, d=3, params=theta_123relg_notstab, weight_function="relative_dens", cond_dist="Gaussian"))
+  expect_error(check_params(p=1, M=3, d=2, params=theta_132relgw, weight_function="relative_dens",
+                            weight_constraints=list(R=matrix(c(0.9, 0.5), nrow=2), r=c(0.13, 0.13)), cond_dist="Gaussian"))
 
   # Check with AR_constraints (reform params used inside so just checks that the function goes through)
   check_params(p=1, M=1, d=2, params=theta_112relgc, weight_function="relative_dens", cond_dist="Gaussian",
@@ -511,6 +527,9 @@ test_that("check_params work correctly", {
   expect_error(check_params(p=1, M=3, d=2, params=theta_132relg_notpd, weight_function="relative_dens", cond_dist="Gaussian"))
   expect_error(check_params(p=1, M=1, d=3, params=theta_113relg_notpd, weight_function="relative_dens", cond_dist="Gaussian"))
   expect_error(check_params(p=1, M=2, d=3, params=theta_123relg_notpd, weight_function="relative_dens", cond_dist="Gaussian"))
+  expect_error(check_params(p=1, M=3, d=2, params=theta_132relgw_notpd, weight_function="relative_dens",
+                            weight_constraints=list(R=matrix(c(0.9, 0.5), nrow=2), r=c(0.13, 0.13)), cond_dist="Gaussian"))
+
 
   # Check weightpars
   expect_error(check_params(p=1, M=2, d=2, params=theta_122relg_badalphas, weight_function="relative_dens", cond_dist="Gaussian"))

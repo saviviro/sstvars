@@ -122,14 +122,14 @@ check_params <- function(p, M, d, params, weight_function=c("relative_dens", "lo
   identification <- match.arg(identification)
   if(n_params(p=p, M=M, d=d, weight_function=weight_function, cond_dist=cond_dist,
               identification=identification, AR_constraints=AR_constraints,
-              mean_constraints=mean_constraints, B_constraints=B_constraints,
-              weightfun_pars=weightfun_pars) != length(params)) {
+              mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+              B_constraints=B_constraints, weightfun_pars=weightfun_pars) != length(params)) {
     stop("The parameter vector has wrong dimension!")
   }
   params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
                                     identification=identification, AR_constraints=AR_constraints,
-                                    mean_constraints=mean_constraints, B_constraints=B_constraints,
-                                    weightfun_pars=weightfun_pars)
+                                    mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                                    B_constraints=B_constraints, weightfun_pars=weightfun_pars)
 
   # Pick params
   all_phi0 <- pick_phi0(M=M, d=d, params=params) # phi0 or mean parameters
