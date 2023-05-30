@@ -36,6 +36,7 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   identification <- stvar$model$identification
   AR_constraints <- stvar$model$AR_constraints
   mean_constraints <- stvar$model$mean_constraints
+  weight_constraints <- stvar$model$weight_constraints
   B_constraints <- stvar$model$B_constraints
   IC <- stvar$IC
   var_names <- colnames(stvar$data)
@@ -44,13 +45,15 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
                                    weight_function=weight_function, weightfun_pars=weightfun_pars,
                                    cond_dist=cond_dist, parametrization=parametrization,
                                    identification=identification, AR_constraints=AR_constraints,
-                                   mean_constraints=mean_constraints, B_constraints=B_constraints), digits)
+                                   mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                                   B_constraints=B_constraints), digits)
   npars <- length(params)
   T_obs <- ifelse(is.null(stvar$data), NA, nrow(stvar$data) - p)
   params <- reform_constrained_pars(p=p, M=M, d=d, params=params,
                                     weight_function=weight_function, weightfun_pars=weightfun_pars,
                                     cond_dist=cond_dist, identification=identification, AR_constraints=AR_constraints,
-                                    mean_constraints=mean_constraints, B_constraints=B_constraints)
+                                    mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                                    B_constraints=B_constraints)
   if(identification != "reduced_form") {
     print("Structural models are not yet implemented to print.stvar")
     return(invisible(stvar))
