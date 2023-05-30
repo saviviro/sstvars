@@ -361,19 +361,20 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logit"), wei
 
 smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
                       cond_dist=c("Gaussian", "Student"), AR_constraints=NULL, mean_constraints=NULL,
-                      accuracy=1, which_random=numeric(0), mu_scale, mu_scale2, omega_scale,
-                      ar_scale=1, ar_scale2=1) {
+                      weight_constraints=NULL,  accuracy=1, which_random=numeric(0),
+                      mu_scale, mu_scale2, omega_scale, ar_scale=1, ar_scale2=1) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   if(cond_dist != "Gaussian") stop("Only Gaussian cond_dist is currently implemented to smart_ind!")
   scale_A <- ar_scale2*(1 + log(2*mean(c((p - 0.2)^(1.25), d))))
   params_std <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                         cond_dist=cond_dist, identification="reduced_form", AR_constraints=AR_constraints,
-                                        mean_constraints=mean_constraints, B_constraints=NULL) # Used so that pick_pars-functions works
+                                        mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                                        B_constraints=NULL) # Used so that pick_pars-functions works
   # ? dist_pars <- pick_distpars
   all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params_std)
   new_pars <- numeric(length(params))
-  if(is.null(AR_constraints) && is.null(mean_constraints)) {
+  if(is.null(AR_constraints) && is.null(mean_constraints && is.nulL(weight_constraints))) {
     all_means_and_A <- params[1:(d*M + M*p*d^2)] # all mu + A if called from GAfit
     new_pars[1:(d*M + M*p*d^2)] <- rnorm(n=length(all_means_and_A), mean=all_means_and_A, sd=pmax(0.2, abs(all_means_and_A)))
     for(m in 1:M) {
@@ -400,10 +401,11 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logit
                  (M*d + M*p*d^2 + M*d*(d + 1)/2 + length(weight_pars))] <- smart_weightpars(M=M,
                                                                                             weight_pars=weight_pars,
                                                                                             weight_function=weight_function,
+                                                                                            weight_constraints=weight_constraints,
                                                                                             accuracy=accuracy)
     }
 
-  } else { # AR or mean constraints employed
+  } else { # AR, mean, or weight constraints employed
     # mean parameters
     g <- ifelse(is.null(mean_constraints), M, length(mean_constraints)) # Number of groups of regimes with the same mean parameters
     if(length(which_random) == 0) {
@@ -453,9 +455,22 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logit
 
     # Weight function parameters
     if(M > 1) {
-      weight_pars <- pick_weightpars(p=p, M=M, d=d, params=params_std, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                     cond_dist=cond_dist)
-      weight_pars <- smart_weightpars(M=M, weight_pars=weight_pars, weight_function=weight_function, accuracy=accuracy)
+      if(is.null(weight_constraints)) {
+        weight_pars <- pick_weightpars(p=p, M=M, d=d, params=params_std, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                       cond_dist=cond_dist)
+        weight_pars <- smart_weightpars(M=M, weight_pars=weight_pars, weight_function=weight_function,
+                                        weight_constraints=weight_constraints, accuracy=accuracy)
+      } else {
+        if(all(weight_constraints[[1]] == 0)) {
+          weight_pars <- numeric(0) # alpha = r known constant so it is not parametrized here
+        } else {
+          weight_pars <- smart_weightpars(M=M,
+                                          weight_pars=params[(M*g + q + M*d*(d + 1)/2 + 1):(M*g + q + M*d*(d + 1)/2 + ncol(weight_constraints[[1]]))],
+                                          weight_function=weight_function,
+                                          weight_constraints=weight_constraints, accuracy=accuracy)
+        }
+      }
+
     } else {
       weight_pars <- numeric(0)
     }
