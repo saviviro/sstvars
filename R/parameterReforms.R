@@ -182,7 +182,7 @@ change_regime <- function(p, M, d, params, m, regime_pars) {
 #' @inherit in_paramspace references
 #' @keywords internal
 
-reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative_dens", "mlogit"),
+reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit"),
                                     weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"),
                                     identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
                                     AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
@@ -258,6 +258,8 @@ reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative
   if(M > 1) {
     if(weight_function == "relative_dens") {
       n_nonconstr_weightpars <- M - 1
+    } else if(weight_function == "logistic") {
+      n_nonconstr_weightpars <- 2
     } else if(weight_function == "mlogit") {
       n_nonconstr_weightpars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
     } else {
