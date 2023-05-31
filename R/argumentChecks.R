@@ -392,13 +392,24 @@ check_constraints <- function(p, M, d, weight_function=c("relative_dens", "mlogi
 #'   a corrected version of the argument if possible.
 #' @keywords internal
 
-check_weightfun_pars <- function(p, d, weight_function=c("relative_dens", "mlogit"), weightfun_pars=NULL) {
+check_weightfun_pars <- function(p, d, weight_function=c("relative_dens", "logistic", "mlogit"), weightfun_pars=NULL) {
   weight.function <- match.arg(weight_function)
   if(weight_function == "relative_dens") {   # weightfun_pars are not used in weight_function == "relative_dens"
     weightfun_pars <- NULL
+  } else if(weight_function == "logistic") {
+    if(!is.numeric(weightfun_pars) || !is.vector(weightfun_pars) || length(weightfun_pars) != 2) {
+      stop("When weight_function == 'logistic', the argument weightfun_pars should be be a length two numeric vector.")
+    }
+    if(!weightfun_pars[1] %in% 1:d) {
+      stop("When weight_function == 'logistic', the first element of argument weightfun_pars, i.e., the switching variable,
+           should be an integer in 1,...,ncol(data).")
+    } else if(!weightfun_pars[2] %in% 1:p) {
+      stop("When weight_function == 'logistic', the second element of argument weightfun_pars, i.e., the lag of the switching variable,
+           should be an integer in 1,...,p.")
+    }
   } else if(weight_function == "mlogit") {
     if(!is.list(weightfun_pars) || length(weightfun_pars) != 2) {
-      stop("The argument weightfun_pars should be be a list of length two, when weight_function == 'mlogit'.")
+      stop("When weight_function == 'mlogit', the argument weightfun_pars should be be a list of length two..")
     }
     if(!is.numeric(weightfun_pars[[1]]) || !all(weightfun_pars[[1]] %in% 1:d) ||
        length(unique(weightfun_pars[[1]])) != length(weightfun_pars[[1]]) ) {

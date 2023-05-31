@@ -677,6 +677,12 @@ test_that("check_weightfun_pars works correctly", {
   # relative_dens
   expect_equal(check_weightfun_pars(p=1, d=2, weight_function="relative_dens", weightfun_pars="testobj"), NULL)
 
+  # logistic
+  expect_error(check_weightfun_pars(p=5, d=4, weight_function="logistic", weightfun_pars=list(1, 1)))
+  expect_error(check_weightfun_pars(p=2, d=2, weight_function="logistic", weightfun_pars=c(1, 1, 1)))
+  expect_error(check_weightfun_pars(p=2, d=2, weight_function="logistic", weightfun_pars=c(3, 1)))
+  expect_error(check_weightfun_pars(p=2, d=2, weight_function="logistic", weightfun_pars=c(1, 3)))
+
   # mlogit
   expect_error(check_weightfun_pars(p=5, d=2, weight_function="mlogit", weightfun_pars=weightfun_pars1))
   expect_error(check_weightfun_pars(p=3, d=3, weight_function="mlogit", weightfun_pars=weightfun_pars1))

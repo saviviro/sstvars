@@ -40,15 +40,20 @@ a univariate time series. Missing values are not supported.}
     \eqn{\alpha_m\in (0,1)} are weight parameters that satisfy \eqn{\sum_{m=1}^M\alpha_m=1} and
     \eqn{f_{m,dp}(\cdot)} is the \eqn{dp}-dimensional stationary density of the \eqn{m}th regime corresponding to \eqn{p}
     consecutive observations. Available for Gaussian conditional distribution only.}
+  \item{\code{"logistic"}:}{\eqn{M=2}, \eqn{\alpha_{1,t}=1-\alpha_{2,t}},
+    and \eqn{\alpha_{2,t}=[1+\exp\lbrace -\gamma(y_{it-j}-c) \rbrace]^{-1}}, where \eqn{y_{it-j}} is the lag \eqn{j}
+    observation of the \eqn{i}th variable, \eqn{c} is a location parameter, and \eqn{\gamma > 0} is a scale parameter.}
   \item{\code{"mlogit"}:}{\eqn{\alpha_{m,t}=\frac{\exp\lbrace \gamma_m'z_{t-1} \rbrace}
-    {\sum_{n=1}^M\exp\lbrace \gamma_n'z_{t-1} \rbrace}}, where \eqn{\gamma_m} are coefficient vectors and
-    \eqn{z_{t-1}} \eqn{(k\times 1)} is the \eqn{\mathcal{F}_{t-1}}-measurable vector containing a constant and
+    {\sum_{n=1}^M\exp\lbrace \gamma_n'z_{t-1} \rbrace}}, where \eqn{\gamma_m} are coefficient vectors, \eqn{\gamma_M=0},
+    and \eqn{z_{t-1}} \eqn{(k\times 1)} is the \eqn{\mathcal{F}_{t-1}}-measurable vector containing a constant and
     the (lagged) switching variables.}
 }
 See the vignette for more details about the weight functions.}
 
 \item{weightfun_pars}{\describe{
   \item{If \code{weight_function == "relative_dens"}:}{Not used.}
+  \item{If \code{weight_function == "relative_dens"}:}{a numeric vector with the switching variable \eqn{i\in\lbrace 1,...,d \rbrace}
+    in the first and the lag \eqn{j\in\lbrace 1,...,p \rbrace} in the second element.}
   \item{If \code{weight_function == "mlogit"}:}{a list of two elements: \describe{
     \item{The first element \code{$vars}:}{a numeric vector containing the variables that should used as switching variables
       in the weight function in an increasing order, i.e., a vector with unique elements in \eqn{\lbrace 1,...,d \rbrace}.}
