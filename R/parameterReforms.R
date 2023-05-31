@@ -63,7 +63,7 @@ form_boldA <- function(p, M, d, all_A) {
 #'  No argument checks!
 #' @keywords internal
 
-change_parametrization <- function(p, M, d, params, weight_function=c("relative_dens", "mlogit"),
+change_parametrization <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit"),
                                    weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"),
                                    identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
                                    AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
