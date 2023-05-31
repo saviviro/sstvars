@@ -131,9 +131,8 @@ sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "lo
     }
     new_weightpars <- all_weightpars[new_order][-M]
   } else {
-    stop("Only relative_dens weight function is implementesd to sort_regimes!")
+    return(params) # Other weight functions do not have sorting implemented
   }
-
 
   all_phi0 <- pick_phi0(M=M, d=d, params=params)
   all_A <- matrix(pick_allA(p=p, M=M, d=d, params=params), ncol=M) #matrix(params[(d*M + 1):(d*M + d^2*p*M)], ncol=M)
