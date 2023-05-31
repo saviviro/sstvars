@@ -596,6 +596,11 @@ test_that("change_regime works correctly", {
                c(phi10_112, phi20_122, A11_112, A21_122, vech(Omega1_112), vech(Omega2_122), gamma1_122_1_1))
   expect_equal(change_regime(p=2, M=2, d=2, params=theta_222log_12_2, m=2, regime_pars=c(phi10_112, A11_112, A11_122, vech(Omega1_112))),
                c(phi10_222, phi10_112, A11_222, A12_222, A11_112, A11_122, vech(Omega1_222), vech(Omega1_112), gamma1_222_12_2))
+
+  expect_equal(change_regime(p=1, M=2, d=2, params=theta_122logistic_1_1, m=1, regime_pars=c(phi10_112, A11_112, vech(Omega1_112))),
+               c(phi10_112, phi20_122, A11_112, A21_122, vech(Omega1_112), vech(Omega2_122), c_and_gamma_122_1_1))
+  expect_equal(change_regime(p=2, M=2, d=2, params=theta_222logistic_2_1, m=2, regime_pars=c(phi10_112, A11_112, A11_122, vech(Omega1_112))),
+               c(phi10_222, phi10_112, A11_222, A12_222, A11_112, A11_122, vech(Omega1_222), vech(Omega1_112), c_and_gamma_222_2_1))
 })
 
 
