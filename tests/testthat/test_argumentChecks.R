@@ -120,7 +120,7 @@ theta_123relg_notstab <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vec
 theta_123relg_notpd <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123_stab), vech(Omega1_123),
                            vech(Omega2_123_notpd), alpha1_123)
 
-## weight_function = "logit"
+## weight_function = "mlogit"
 
 # p=1, M=2, d=2, weightfun_pars=list(vars=1, lags=1)
 gamma1_122_1_1 <- c(0.1, 0.2)
@@ -209,7 +209,7 @@ theta_123relgc <- c(phi10_123, phi20_123, vec(A11_123), vech(Omega1_123), vech(O
 theta_123relgc_expanded <- c(phi10_123, phi20_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
 
 
-## weight_function = "logit"
+## weight_function = "mlogit"
 
 # p=2, M=2, d=2, weightfun_pars=list(vars=2, lags=1), C_222
 gamma1_222_2_1 <- c(0.1, 0.2)
@@ -302,7 +302,7 @@ theta_123relgm_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A21_123), v
 theta_123relgcm <- c(phi10_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
 theta_123relgcm_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
 
-## weight_function == "logit"
+## weight_function == "mlogit"
 
 # p=1, M=2, d=2, weightfun_pars=list(vars=1, lags=1), mean_constraints=list(1:2)
 theta_122logm_1_1 <- c(phi10_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), gamma1_122_1_1)
@@ -337,11 +337,11 @@ theta_222relgcmw_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222),
                                vech(Omega1_222), vech(Omega2_222), 0.6)
 
 
-# p=1, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=1, lags=1), weight_constraints=list(R=0, r=c(0.12, 0.13))
+# p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1, lags=1), weight_constraints=list(R=0, r=c(0.12, 0.13))
 theta_122logw_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122))
 theta_122logw_1_1_expanded <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), c(0.12, 0.13))
 
-# p=2, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
+# p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
 # weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0))
 xi_222logcmw_12_2 <- c(0.22, 0.33)
 theta_222logcmw_12_2 <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), xi_222logcmw_12_2 )
@@ -391,7 +391,7 @@ weightpars_123rel <- pick_weightpars(p=1, M=2, d=3, params=theta_123relg_notpd, 
 
 Omegas_222log_12_2 <- pick_Omegas(p=2, M=2, d=2, params=theta_222log_12_2)
 boldA_222log_12_2 <- form_boldA(p=2, M=2, d=2, all_A=pick_allA(p=2, M=2, d=2, params=theta_222log_12_2))
-weightpars_222log_12_2 <- pick_weightpars(p=2, M=2, d=2, params=theta_222log_12_2, weight_function="logit",
+weightpars_222log_12_2 <- pick_weightpars(p=2, M=2, d=2, params=theta_222log_12_2, weight_function="mlogit",
                                           weightfun_pars=list(vars=1:2, lags=2), cond_dist="Gaussian")
 
 
@@ -477,8 +477,8 @@ test_that("in_paramspace work correctly", {
   # Checks df
   # TO BE FILLED IN
 
-  # logit (nothing to check in weightpars, so just checks that the function runs)
-  expect_true(in_paramspace(p=2, M=2, d=2, weight_function="logit", cond_dist="Gaussian",
+  # mlogit (nothing to check in weightpars, so just checks that the function runs)
+  expect_true(in_paramspace(p=2, M=2, d=2, weight_function="mlogit", cond_dist="Gaussian",
                             all_boldA=boldA_222log_12_2, all_Omegas=Omegas_222log_12_2, weightpars=weightpars_222log_12_2))
 })
 
@@ -486,9 +486,9 @@ test_that("check_params work correctly", {
   # Check that no errors when all is fine
   check_params(p=2, M=2, d=2, params=theta_222relgcmw, weight_function="relative_dens", mean_constraints=list(1:2),
                AR_constraints=C_222, weight_constraints=list(R=0, r=0.6), cond_dist="Gaussian")
-  check_params(p=1, M=2, d=2, params=theta_122logw_1_1, weight_function="logit",
+  check_params(p=1, M=2, d=2, params=theta_122logw_1_1, weight_function="mlogit",
                weightfun_pars=list(vars=1, lags=1), weight_constraints=list(R=0, r=c(0.12, 0.13)), cond_dist="Gaussian")
-  check_params(p=2, M=2, d=2, params=theta_222logcmw_12_2, weight_function="logit",
+  check_params(p=2, M=2, d=2, params=theta_222logcmw_12_2, weight_function="mlogit",
                weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
                weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0)),
                cond_dist="Gaussian")
@@ -539,8 +539,8 @@ test_that("check_params work correctly", {
   # Checks df
   # TO BE FILLED IN
 
-  # logit (nothing to check in weightpars, so just checks that the function runs)
-  check_params(p=2, M=2, d=2, params=theta_222log_12_2, weight_function="logit", weightfun_pars=list(vars=1:2, lags=2),
+  # mlogit (nothing to check in weightpars, so just checks that the function runs)
+  check_params(p=2, M=2, d=2, params=theta_222log_12_2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=2),
                cond_dist="Gaussian")
 })
 
@@ -573,9 +573,9 @@ test_that("n_params works correctly", {
                         weight_constraints=list(R=matrix(c(0.9, 0.5), nrow=2), r=c(0.13, 0.13))), 28)
   expect_equal(n_params(p=2, M=2, d=2, weight_function="relative_dens", cond_dist="Gaussian", mean_constraints=list(1:2),
                         AR_constraints=C_222, weight_constraints=list(R=0, r=0.6)), 16)
-  expect_equal(n_params(p=1, M=2, d=2, weight_function="logit", cond_dist="Gaussian",
+  expect_equal(n_params(p=1, M=2, d=2, weight_function="mlogit", cond_dist="Gaussian",
                         weightfun_pars=list(vars=1, lags=1), weight_constraints=list(R=0, r=c(0.12, 0.13))), 18)
-  expect_equal(n_params(p=2, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2),
+  expect_equal(n_params(p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2),
                         AR_constraints=C_222, weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5),
                                                                       r=c(0, 0.11, 0.12, 0.13, 0))), 18)
 
@@ -588,10 +588,10 @@ test_that("n_params works correctly", {
   expect_equal(n_params(p=2, M=1, d=3, weight_function="relative_dens", cond_dist="Gaussian"), 27)
   expect_equal(n_params(p=1, M=2, d=3, weight_function="relative_dens", cond_dist="Gaussian"), 37)
 
-  expect_equal(n_params(p=1, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=1, lags=1), cond_dist="Gaussian"), 20)
-  expect_equal(n_params(p=1, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=1:2, lags=1), cond_dist="Gaussian"), 21)
-  expect_equal(n_params(p=2, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=2, lags=1), cond_dist="Gaussian"), 28)
-  expect_equal(n_params(p=2, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=1:2, lags=2), cond_dist="Gaussian"), 31)
+  expect_equal(n_params(p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1, lags=1), cond_dist="Gaussian"), 20)
+  expect_equal(n_params(p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=1), cond_dist="Gaussian"), 21)
+  expect_equal(n_params(p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1), cond_dist="Gaussian"), 28)
+  expect_equal(n_params(p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=2), cond_dist="Gaussian"), 31)
 
   expect_equal(n_params(p=1, M=1, d=2, weight_function="relative_dens", cond_dist="Gaussian", AR_constraints=C_112), 7)
   expect_equal(n_params(p=1, M=2, d=2, weight_function="relative_dens", cond_dist="Gaussian", AR_constraints=C_122), 15)
@@ -611,13 +611,13 @@ test_that("n_params works correctly", {
   expect_equal(n_params(p=1, M=2, d=3, weight_function="relative_dens", cond_dist="Gaussian", AR_constraints=C_123,
                         mean_constraints=list(1:2)), 25)
 
-  expect_equal(n_params(p=2, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=2, lags=1), cond_dist="Gaussian",
+  expect_equal(n_params(p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1), cond_dist="Gaussian",
                         AR_constraints=C_222), 20)
-  expect_equal(n_params(p=2, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=1:2, lags=2), cond_dist="Gaussian",
+  expect_equal(n_params(p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=2), cond_dist="Gaussian",
                         AR_constraints=C_222), 23)
-  expect_equal(n_params(p=1, M=2, d=3, weight_function="logit", weightfun_pars=list(vars=2:3, lags=1), cond_dist="Gaussian",
+  expect_equal(n_params(p=1, M=2, d=3, weight_function="mlogit", weightfun_pars=list(vars=2:3, lags=1), cond_dist="Gaussian",
                         AR_constraints=C_123), 30)
-  expect_equal(n_params(p=1, M=2, d=3, weight_function="logit", weightfun_pars=list(vars=1:3, lags=1), cond_dist="Gaussian",
+  expect_equal(n_params(p=1, M=2, d=3, weight_function="mlogit", weightfun_pars=list(vars=1:3, lags=1), cond_dist="Gaussian",
                         AR_constraints=C_123, mean_constraints=list(1:2)), 28)
 
 })
@@ -632,15 +632,15 @@ test_that("check_constraints works correctly", {
                                  weight_constraints=list(R=matrix(c(0.9, 0.5, 1, 2, 3, 4), nrow=2), r=c(0.13, 0.13))))
   expect_error(check_constraints(p=1, M=3, d=2, weight_function="relative_dens",
                                  weight_constraints=list(R=matrix(c(0.9, 0.5), nrow=2), r=0.13)))
-  expect_error(check_constraints(p=1, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=1, lags=1),
+  expect_error(check_constraints(p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1, lags=1),
                                  weight_constraints=list(R=0, r=c(0.12, 0.13, 0.14))))
-  expect_error(check_constraints(p=1, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=1, lags=1),
+  expect_error(check_constraints(p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1, lags=1),
                                  weight_constraints=list(R=0)))
-  expect_error(check_constraints(p=2, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=1:2, lags=2),
+  expect_error(check_constraints(p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=2),
                                  weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=2), r=c(0, 0.11, 0.12, 0.13, 0))))
-  expect_error(check_constraints(p=2, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=1:2, lags=2),
+  expect_error(check_constraints(p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=2),
                                  weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(1, 0, 0.11, 0.12, 0.13, 0))))
-  expect_error(check_constraints(p=2, M=2, d=2, weight_function="logit", weightfun_pars=list(vars=1:2, lags=2),
+  expect_error(check_constraints(p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=2),
                                  weight_constraints=list(r=c(0, 0.11, 0.12, 0.13, 0))))
 
   expect_error(check_constraints(p=1, M=1, d=2, AR_constraints=cbind(C_112, C_112)))
@@ -677,25 +677,25 @@ test_that("check_weightfun_pars works correctly", {
   # relative_dens
   expect_equal(check_weightfun_pars(p=1, d=2, weight_function="relative_dens", weightfun_pars="testobj"), NULL)
 
-  # logit
-  expect_error(check_weightfun_pars(p=5, d=2, weight_function="logit", weightfun_pars=weightfun_pars1))
-  expect_error(check_weightfun_pars(p=3, d=3, weight_function="logit", weightfun_pars=weightfun_pars1))
-  expect_equal(check_weightfun_pars(p=4, d=3, weight_function="logit", weightfun_pars=weightfun_pars1),
+  # mlogit
+  expect_error(check_weightfun_pars(p=5, d=2, weight_function="mlogit", weightfun_pars=weightfun_pars1))
+  expect_error(check_weightfun_pars(p=3, d=3, weight_function="mlogit", weightfun_pars=weightfun_pars1))
+  expect_equal(check_weightfun_pars(p=4, d=3, weight_function="mlogit", weightfun_pars=weightfun_pars1),
                list(vars=3, lags=4))
-  expect_error(check_weightfun_pars(p=4, d=5, weight_function="logit", weightfun_pars=weightfun_pars2))
-  expect_error(check_weightfun_pars(p=10, d=3, weight_function="logit", weightfun_pars=weightfun_pars2))
-  expect_equal(check_weightfun_pars(p=5, d=4, weight_function="logit", weightfun_pars=weightfun_pars2),
+  expect_error(check_weightfun_pars(p=4, d=5, weight_function="mlogit", weightfun_pars=weightfun_pars2))
+  expect_error(check_weightfun_pars(p=10, d=3, weight_function="mlogit", weightfun_pars=weightfun_pars2))
+  expect_equal(check_weightfun_pars(p=5, d=4, weight_function="mlogit", weightfun_pars=weightfun_pars2),
                list(vars=4, lags=5))
-  expect_error(check_weightfun_pars(p=3, d=2, weight_function="logit", weightfun_pars=weightfun_pars3))
-  expect_error(check_weightfun_pars(p=2, d=3, weight_function="logit", weightfun_pars=weightfun_pars3))
-  expect_error(check_weightfun_pars(p=5, d=3, weight_function="logit", weightfun_pars=weightfun_pars4))
-  expect_error(check_weightfun_pars(p=1, d=5, weight_function="logit", weightfun_pars=weightfun_pars4))
-  expect_equal(check_weightfun_pars(p=2, d=4, weight_function="logit", weightfun_pars=weightfun_pars4),
+  expect_error(check_weightfun_pars(p=3, d=2, weight_function="mlogit", weightfun_pars=weightfun_pars3))
+  expect_error(check_weightfun_pars(p=2, d=3, weight_function="mlogit", weightfun_pars=weightfun_pars3))
+  expect_error(check_weightfun_pars(p=5, d=3, weight_function="mlogit", weightfun_pars=weightfun_pars4))
+  expect_error(check_weightfun_pars(p=1, d=5, weight_function="mlogit", weightfun_pars=weightfun_pars4))
+  expect_equal(check_weightfun_pars(p=2, d=4, weight_function="mlogit", weightfun_pars=weightfun_pars4),
                list(vars=3:4, lags=2))
-  expect_error(check_weightfun_pars(p=2, d=5, weight_function="logit", weightfun_pars=weightfun_pars5))
-  expect_error(check_weightfun_pars(p=3, d=2, weight_function="logit", weightfun_pars=weightfun_pars5))
-  expect_equal(check_weightfun_pars(p=3, d=4, weight_function="logit", weightfun_pars=weightfun_pars5),
+  expect_error(check_weightfun_pars(p=2, d=5, weight_function="mlogit", weightfun_pars=weightfun_pars5))
+  expect_error(check_weightfun_pars(p=3, d=2, weight_function="mlogit", weightfun_pars=weightfun_pars5))
+  expect_equal(check_weightfun_pars(p=3, d=4, weight_function="mlogit", weightfun_pars=weightfun_pars5),
                weightfun_pars5)
-  expect_equal(check_weightfun_pars(p=2, d=3, weight_function="logit", weightfun_pars=weightfun_pars6),
+  expect_equal(check_weightfun_pars(p=2, d=3, weight_function="mlogit", weightfun_pars=weightfun_pars6),
                list(vars=c(1, 3), lags=1))
 })

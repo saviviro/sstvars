@@ -8,7 +8,7 @@ fitSTVAR(
   data,
   p,
   M,
-  weight_function = c("relative_dens", "logit"),
+  weight_function = c("relative_dens", "mlogit"),
   weightfun_pars = NULL,
   cond_dist = c("Gaussian", "Student"),
   parametrization = c("intercept", "mean"),
@@ -40,7 +40,7 @@ a univariate time series. Missing values are not supported.}
     \eqn{\alpha_m\in (0,1)} are weight parameters that satisfy \eqn{\sum_{m=1}^M\alpha_m=1} and
     \eqn{f_{m,dp}(\cdot)} is the \eqn{dp}-dimensional stationary density of the \eqn{m}th regime corresponding to \eqn{p}
     consecutive observations. Available for Gaussian conditional distribution only.}
-  \item{\code{"logit"}:}{\eqn{\alpha_{m,t}=\frac{\exp\lbrace \gamma_m'z_{t-1} \rbrace}
+  \item{\code{"mlogit"}:}{\eqn{\alpha_{m,t}=\frac{\exp\lbrace \gamma_m'z_{t-1} \rbrace}
     {\sum_{n=1}^M\exp\lbrace \gamma_n'z_{t-1} \rbrace}}, where \eqn{\gamma_m} are coefficient vectors and
     \eqn{z_{t-1}} \eqn{(k\times 1)} is the \eqn{\mathcal{F}_{t-1}}-measurable vector containing a constant and
     the (lagged) switching variables.}
@@ -49,7 +49,7 @@ See the vignette for more details about the weight functions.}
 
 \item{weightfun_pars}{\describe{
   \item{If \code{weight_function == "relative_dens"}:}{Not used.}
-  \item{If \code{weight_function == "logit"}:}{a list of two elements: \describe{
+  \item{If \code{weight_function == "mlogit"}:}{a list of two elements: \describe{
     \item{The first element \code{$vars}:}{a numeric vector containing the variables that should used as switching variables
       in the weight function in an increasing order, i.e., a vector with unique elements in \eqn{\lbrace 1,...,d \rbrace}.}
     \item{The second element \code{$lags}:}{an integer in \eqn{\lbrace 1,...,p \rbrace} specifying the number of lags to be
@@ -203,21 +203,21 @@ f32 <- fitSTVAR(usamone, p=3, M=2, nrounds=20, seeds=61:80)
 summary(f32)
 plot(f32)
 
-# logit STVAR, p=3, M=2, d=2, the second variable is the switching variable with one lag.
-fitlogit32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logit", weightfun_pars=list(vars=2, lags=1),
+# mlogit STVAR, p=3, M=2, d=2, the second variable is the switching variable with one lag.
+fitmlogit32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1),
  nrounds=20, seeds=1:20)
 
-# logit STVAR, p=3, M=2, d=2, the second variable is the switching variable with one lag,
+# mlogit STVAR, p=3, M=2, d=2, the second variable is the switching variable with one lag,
 # constrain AR matrices equal across the regimes.
 C_322 <- rbind(diag(3*2^2), diag(3*2^2))
-fitlogit32c <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logit", weightfun_pars=list(vars=2, lags=1),
+fitmlogit32c <- fitSTVAR(gdpdef, p=3, M=2, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1),
  AR_constraints=C_322, nrounds=10, seeds=1:10)
 
 # relative_dens STVAR, p=1, M=2, d=2, with the weight parameter fixed to the constant r=0.8.
 fit12w <- fitSTVAR(gdpdef, p=1, M=2, weight_constraints=list(R=0, r=0.8), nrounds=1, seeds=10, use_parallel=FALSE)
 
-# logit STVAR, p=1, M=2, d=2, second variable as switching variable with one lag such that the constant term is -5.
-fitlogit12w <- fitSTVAR(gdpdef, p=1, M=2, weight_function="logit", weightfun_pars=list(vars=2, lags=1),
+# mlogit STVAR, p=1, M=2, d=2, second variable as switching variable with one lag such that the constant term is -5.
+fitmlogit12w <- fitSTVAR(gdpdef, p=1, M=2, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1),
   weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(-5, 0)), nrounds=20, seeds=1:20, use_parallel=FALSE)
 }
 }

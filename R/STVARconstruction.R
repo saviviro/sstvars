@@ -34,7 +34,7 @@
 #' mod122 <- STVAR(data=gdpdef, p=1, M=2, params=theta_122relg)
 #' @export
 
-STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
+STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "mlogit"), weightfun_pars=NULL,
                   cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
                   identification=c("reduced_form", "recursive", "heteroskedasticity"),
                   AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,

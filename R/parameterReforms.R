@@ -63,7 +63,7 @@ form_boldA <- function(p, M, d, all_A) {
 #'  No argument checks!
 #' @keywords internal
 
-change_parametrization <- function(p, M, d, params, weight_function=c("relative_dens", "logit"),
+change_parametrization <- function(p, M, d, params, weight_function=c("relative_dens", "mlogit"),
                                    weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"),
                                    identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
                                    AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
@@ -106,15 +106,15 @@ change_parametrization <- function(p, M, d, params, weight_function=c("relative_
 #'   with the regimes sorted so that...
 #'   \describe{
 #'     \item{If \code{weight_function == "relative_dens"}:}{\eqn{\alpha_{1}>...>\alpha_{M}}.}
-#'     \item{If \code{weight_function == "logit"}:}{Does not currently sort, so returns the original parameter vector given in \code{param}.}
+#'     \item{If \code{weight_function == "mlogit"}:}{Does not currently sort, so returns the original parameter vector given in \code{param}.}
 #'   }
 #' @keywords internal
 
-sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
+sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "mlogit"), weightfun_pars=NULL,
                          cond_dist=c("Gaussian", "Student"), identification=c("reduced_form", "recursive", "heteroskedasticity")) {
   if(M == 1) return(params) # Nothing to sort
   weight_function <- match.arg(weight_function)
-  if(weight_function == "logit") return(params) # Does not sort
+  if(weight_function == "mlogit") return(params) # Does not sort
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
   if(identification != "reduced_form") stop("Structural models not yet implemented to sort_regimes!")
@@ -181,7 +181,7 @@ change_regime <- function(p, M, d, params, m, regime_pars) {
 #' @inherit in_paramspace references
 #' @keywords internal
 
-reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative_dens", "logit"),
+reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative_dens", "mlogit"),
                                     weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"),
                                     identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
                                     AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
@@ -257,7 +257,7 @@ reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative
   if(M > 1) {
     if(weight_function == "relative_dens") {
       n_nonconstr_weightpars <- M - 1
-    } else if(weight_function == "logit") {
+    } else if(weight_function == "mlogit") {
       n_nonconstr_weightpars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
     } else {
       stop("Unknown weight_function in reform_constrained_pars")

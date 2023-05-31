@@ -21,9 +21,9 @@
 #'   \describe{
 #'     \item{\code{weight_function="relative_dens"}:}{\eqn{\alpha = (\alpha_1,...,\alpha_{M-1})}
 #'           \eqn{(M - 1 \times 1)}, where \eqn{\alpha_m} \eqn{(1\times 1), m=1,...,M-1} are the transition weight parameters.}
-#'     \item{\code{weight_function="logit"}:}{\eqn{\alpha = (\gamma_1,...,\gamma_M)} \eqn{((M-1)k\times 1)},
-#'           where \eqn{\gamma_m} \eqn{(k\times 1)}, \eqn{m=1,...,M-1} contains the logit-regression coefficients of the \eqn{m}th regime.
-#'           Specifically, for switching variables with indices in \eqn{I\subset\lbrace 1,...,d\rbrace}, and with
+#'     \item{\code{weight_function="mlogit"}:}{\eqn{\alpha = (\gamma_1,...,\gamma_M)} \eqn{((M-1)k\times 1)},
+#'           where \eqn{\gamma_m} \eqn{(k\times 1)}, \eqn{m=1,...,M-1} contains the multinomial logit-regression coefficients
+#'           of the \eqn{m}th regime. Specifically, for switching variables with indices in \eqn{I\subset\lbrace 1,...,d\rbrace}, and with
 #'          \eqn{\tilde{p}\in\lbrace 1,...,p\rbrace} lags included, \eqn{\gamma_m} contains the coefficients for the vector
 #'          \eqn{z_{t-1} = (1,\tilde{z}_{\min\lbrace I\rbrace},...,\tilde{z}_{\max\lbrace I\rbrace})}, where
 #'          \eqn{\tilde{z}_{j} =(y_{it-1},...,y_{it-\tilde{p}})}, \eqn{i\in I}. So \eqn{k=1+|I|\tilde{p}}
@@ -45,7 +45,7 @@
 #'      \eqn{\alpha_m\in (0,1)} are weight parameters that satisfy \eqn{\sum_{m=1}^M\alpha_m=1} and
 #'      \eqn{f_{m,dp}(\cdot)} is the \eqn{dp}-dimensional stationary density of the \eqn{m}th regime corresponding to \eqn{p}
 #'      consecutive observations. Available for Gaussian conditional distribution only.}
-#'    \item{\code{"logit"}:}{\eqn{\alpha_{m,t}=\frac{\exp\lbrace \gamma_m'z_{t-1} \rbrace}
+#'    \item{\code{"mlogit"}:}{\eqn{\alpha_{m,t}=\frac{\exp\lbrace \gamma_m'z_{t-1} \rbrace}
 #'      {\sum_{n=1}^M\exp\lbrace \gamma_n'z_{t-1} \rbrace}}, where \eqn{\gamma_m} are coefficient vectors and
 #'      \eqn{z_{t-1}} \eqn{(k\times 1)} is the \eqn{\mathcal{F}_{t-1}}-measurable vector containing a constant and
 #'      the (lagged) switching variables.}
@@ -53,7 +53,7 @@
 #'  See the vignette for more details about the weight functions.
 #' @param weightfun_pars \describe{
 #'   \item{If \code{weight_function == "relative_dens"}:}{Not used.}
-#'   \item{If \code{weight_function == "logit"}:}{a list of two elements: \describe{
+#'   \item{If \code{weight_function == "mlogit"}:}{a list of two elements: \describe{
 #'     \item{The first element \code{$vars}:}{a numeric vector containing the variables that should used as switching variables
 #'       in the weight function in an increasing order, i.e., a vector with unique elements in \eqn{\lbrace 1,...,d \rbrace}.}
 #'     \item{The second element \code{$lags}:}{an integer in \eqn{\lbrace 1,...,p \rbrace} specifying the number of lags to be
@@ -123,7 +123,7 @@
 #'  }
 #' @keywords internal
 
-loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
+loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens", "mlogit"), weightfun_pars=NULL,
                           cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
                           identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
                           AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
@@ -290,7 +290,7 @@ get_alpha_mt <- function(data, Y2, p, M, d, weight_function, weightfun_pars, all
     }
   }
 
-  if(weight_function == "logit" & is.null(log_mvdvalues)) {
+  if(weight_function == "mlogit" & is.null(log_mvdvalues)) {
 
     # M-1 vectors gamma_m, since gamma_M = 0.
     all_gamma_m <- matrix(weightpars, ncol=M-1) # Column per gamma_m, m=1,...,M-1
@@ -342,7 +342,7 @@ get_alpha_mt <- function(data, Y2, p, M, d, weight_function, weightfun_pars, all
     weightpars <- rep(1, times=M) # Overwrites weightpars; the original ones are not needed here anymore
   }
 
-  if(weight_function == "relative_dens" || weight_function == "logit") { # logit defines log_mvdvalues and weightpars above
+  if(weight_function == "relative_dens" || weight_function == "mlogit") { # mlogit defines log_mvdvalues and weightpars above
     if(is.null(log_mvdvalues)) {
       # Calculate the covariance matrices Sigma_{m,p} (Lutkepohl 2005, eq. (2.1.39) or the algorithm proposed by McElroy 2017)
       Sigmas <- get_Sigmas(p=p, M=M, d=d, all_A=all_A, all_boldA=all_boldA, all_Omegas=all_Omegas) # Store the (dpxdp) covariance matrices
@@ -397,7 +397,7 @@ get_alpha_mt <- function(data, Y2, p, M, d, weight_function, weightfun_pars, all
     denominator <- as.vector(mvnvalues%*%weightpars)
     alpha_mt <- (mvnvalues/denominator)%*%diag(weightpars)
   } else {
-    stop("Only relative_dens and logit weight functions are currently implemented to get_alpha_mt")
+    stop("Only relative_dens and mlogit weight functions are currently implemented to get_alpha_mt")
   }
   alpha_mt
 }

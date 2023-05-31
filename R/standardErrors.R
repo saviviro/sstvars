@@ -10,7 +10,7 @@
 #' @inherit in_paramspace references
 #' @keywords internal
 
-standard_errors <- function(data, p, M, params, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
+standard_errors <- function(data, p, M, params, weight_function=c("relative_dens", "mlogit"), weightfun_pars=NULL,
                             cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
                             identification=c("reduced_form", "recursive", "heteroskedasticity"),
                             AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
@@ -101,7 +101,7 @@ print_std_errors <- function(stvar, digits=3) {
                                   weightfun_pars=weightfun_pars, cond_dist=cond_dist,
                                   identification=identification, AR_constraints=AR_constraints,
                                   mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                                  B_constraints=B_constraints)
+                                  xB_constraints=B_constraints)
   all_phi0_or_mu <- pick_phi0(M=M, d=d, params=pars)
   all_A <- pick_allA(p=p, M=M, d=d, params=pars)
   if(identification == "reduced_form") {
@@ -115,10 +115,10 @@ print_std_errors <- function(stvar, digits=3) {
   if(cond_dist != "Gaussian") stop("Only Gaussian models are implemented to print_std_errors")
   if(weight_function == "relative_dens") {
     weightpars[M] <- NA # No standard error for the last alpha
-  } else if(weight_function == "logit") {
+  } else if(weight_function == "mlogit") {
     all_gamma_m <- matrix(weightpars, ncol=M-1) # Column per gamma_m, m=1,...,M-1, gamma_M=0.
   } else {
-    stop("only relative dens and logit weigghtfunctions are implemented to print_std_errors")
+    stop("only relative dens and mlogit weigghtfunctions are implemented to print_std_errors")
   }
 
   if(parametrization == "mean") {
@@ -151,7 +151,7 @@ print_std_errors <- function(stvar, digits=3) {
   cat("\n", paste0(" p = ", p, ", "))
   cat(paste0("M = ", M, ", "))
   cat(paste0("d = ", d, ", #parameters = " , npars, ","))
-  if(weight_function == "logit") {
+  if(weight_function == "mlogit") {
     cat("\n ", paste0("Switching variables: ", paste0(var_names[weightfun_pars[[1]]], collapse=", "), " with ",
                       weightfun_pars[[2]], ifelse(weightfun_pars[[2]] == 1, " lag.", " lags.")))
   }
@@ -174,7 +174,7 @@ print_std_errors <- function(stvar, digits=3) {
     cat("\n")
     if(weight_function == "relative_dens") {
       if(m < M) cat(paste("Weight param:", format_value(weightpars[m])), "\n")
-    } else if(weight_function == "logit") {
+    } else if(weight_function == "mlogit") {
       if(m < M) cat(paste("Weight params:", paste0(format_value(all_gamma_m[,m]), collapse=", ")), "\n")
     }
     if(parametrization == "mean") cat("Regime means:", paste0(format_value(all_mu[,m]), collapse=", "), "\n")

@@ -75,10 +75,10 @@ in_paramspace <- function(p, M, d, weight_function, weightfun_pars=NULL, cond_di
     } else if(any(weightpars <= 0)) {
       return(FALSE)
     }
-  } else if(weight_function == "logit") {
+  } else if(weight_function == "mlogit") {
     # All real numbers are ok, so nothing to check
   } else {
-    stop("Other weight functions that relative_dens and logit are not yet implemented to in_paramspace!")
+    stop("Other weight functions that relative_dens and mlogit are not yet implemented to in_paramspace!")
   }
   if(!stab_conds_satisfied(p=p, M=M, d=d, all_boldA=all_boldA, tolerance=stab_tol)) {
     return(FALSE)
@@ -110,7 +110,7 @@ in_paramspace <- function(p, M, d, weight_function, weightfun_pars=NULL, cond_di
 #'  }
 #' @export
 
-check_params <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
+check_params <- function(p, M, d, params, weight_function=c("relative_dens", "mlogit"), weightfun_pars=NULL,
                          cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
                          identification=c("reduced_form", "recursive", "heteroskedasticity"),
                          AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
@@ -158,10 +158,10 @@ check_params <- function(p, M, d, params, weight_function=c("relative_dens", "lo
     } else if(any(weightpars <= 0)) {
       stop("The transition weight parameter alphas must be strictly larger than zero!")
     }
-  } else if(weight_function == "logit") {
+  } else if(weight_function == "mlogit") {
     if(!is.numeric(weightpars)) stop("Transition weight parameters need to be numeric") # All real numbers are ok
   } else {
-    stop("Weight functions other than relative_dens and logit are not yet implemented to check_params!")
+    stop("Weight functions other than relative_dens and mlogit are not yet implemented to check_params!")
   }
   if(!stab_conds_satisfied(p=p, M=M, d=d, all_boldA=all_boldA, tolerance=stab_tol)) {
     stop("At least one of the regimes does not satisfy the stability condition (with large enough numerical tolerance)!")
@@ -246,7 +246,7 @@ check_data <- function(data, p) {
 #' @inherit in_paramspace references
 #' @keywords internal
 
-n_params <- function(p, M, d, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
+n_params <- function(p, M, d, weight_function=c("relative_dens", "mlogit"), weightfun_pars=NULL,
                      cond_dist=c("Gaussian", "Student"), identification=c("reduced_form", "recursive", "heteroskedasticity"),
                      AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
   weight_function <- match.arg(weight_function)
@@ -273,10 +273,10 @@ n_params <- function(p, M, d, weight_function=c("relative_dens", "logit"), weigh
   if(is.null(weight_constraints)) {
     if(weight_function == "relative_dens") {
       n_weight_pars <- M - 1
-    } else if(weight_function == "logit") {
+    } else if(weight_function == "mlogit") {
       n_weight_pars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
-    } else { # weight_function == "logit"
-      stop("only relative_dens and logit weight fn is implemented to n_params")
+    } else { # weight_function == "mlogit"
+      stop("only relative_dens and mlogit weight fn is implemented to n_params")
       n_weight_pars <- NULL
     }
   } else { # Constraints on the weight parameters
@@ -305,7 +305,7 @@ n_params <- function(p, M, d, weight_function=c("relative_dens", "logit"), weigh
 #' @return Does return anything but checks the constraints and throws an error if something is wrong.
 #' @keywords internal
 
-check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
+check_constraints <- function(p, M, d, weight_function=c("relative_dens", "mlogit"), weightfun_pars=NULL,
                               AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
   weight_function <- match.arg(weight_function)
   weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars)
@@ -351,7 +351,7 @@ check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logit
     }
     if(weight_function == "relative_dens") {
       n_nonconstr_weightpars <- M - 1
-    } else if(weight_function == "logit") {
+    } else if(weight_function == "mlogit") {
       n_nonconstr_weightpars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
     } else {
       stop("Unknown weight_function in check_constraints")
@@ -392,22 +392,22 @@ check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logit
 #'   a corrected version of the argument if possible.
 #' @keywords internal
 
-check_weightfun_pars <- function(p, d, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL) {
+check_weightfun_pars <- function(p, d, weight_function=c("relative_dens", "mlogit"), weightfun_pars=NULL) {
   weight.function <- match.arg(weight_function)
   if(weight_function == "relative_dens") {   # weightfun_pars are not used in weight_function == "relative_dens"
     weightfun_pars <- NULL
-  } else if(weight_function == "logit") {
+  } else if(weight_function == "mlogit") {
     if(!is.list(weightfun_pars) || length(weightfun_pars) != 2) {
-      stop("The argument weightfun_pars should be be a list of length two, when weight_function == 'logit'.")
+      stop("The argument weightfun_pars should be be a list of length two, when weight_function == 'mlogit'.")
     }
     if(!is.numeric(weightfun_pars[[1]]) || !all(weightfun_pars[[1]] %in% 1:d) ||
        length(unique(weightfun_pars[[1]])) != length(weightfun_pars[[1]]) ) {
-      stop("When weight_function == 'logit', the first element of the argument weightfun_pars should be a numeric
+      stop("When weight_function == 'mlogit', the first element of the argument weightfun_pars should be a numeric
            vector containing the switching variables, i.e., it should have unique elements in 1,...,d where d is
            the number of variables in the data.")
     }
     if(!is.numeric(weightfun_pars[[2]]) || !all(weightfun_pars[[2]] %in% 0:p) || length(weightfun_pars[[2]]) != 1) {
-      stop("When weight_function == 'logit', the second element of the argument weightfun_pars should be an integer
+      stop("When weight_function == 'mlogit', the second element of the argument weightfun_pars should be an integer
             in 0,1,...,p determining the number of lags to be used in the weight function.")
     }
     weightfun_pars[[1]] <- sort(weightfun_pars[[1]], decreasing=FALSE)

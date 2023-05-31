@@ -186,8 +186,8 @@ smart_df <- function(df, accuracy) {
 #' @return Returns a numeric vector ...
 #'   \describe{
 #'     \item{If \code{weight_function == "relative_dens"}:}{a length \code{M-1} vector \eqn{(\alpha_1,...,\alpha_{M-1})}.}
-#'     \item{If \code{weight_function == "logit"}:}{a length \eqn{((M-1)k\times 1)} vector \eqn{(\gamma_1,...,\gamma_M)},
-#'           where \eqn{\gamma_m} \eqn{(k\times 1)}, \eqn{m=1,...,M-1} contains the logit-regression coefficients of the \eqn{m}th regime.
+#'     \item{If \code{weight_function == "mlogit"}:}{a length \eqn{((M-1)k\times 1)} vector \eqn{(\gamma_1,...,\gamma_M)},
+#'           where \eqn{\gamma_m} \eqn{(k\times 1)}, \eqn{m=1,...,M-1} contains the mlogit-regression coefficients of the \eqn{m}th regime.
 #'           Specifically, for switching variables with indices in \eqn{J\subset\lbrace 1,...,d\rbrace}, and with
 #'          \eqn{\tilde{p}\in\lbrace 1,...,p\rbrace} lags included, \eqn{\gamma_m} contains the coefficients for the vector
 #'          \eqn{z_{t-1} = (1,\tilde{z}_{\min\lbrace J\rbrace},...,\tilde{z}_{\max\lbrace J\rbrace})}, where
@@ -214,7 +214,7 @@ random_weightpars <- function(M, weight_function, weightfun_pars=NULL, AR_constr
         ret <- sort(runif(n=ncol(weight_constraints[[1]]), min=0, max=0.8), decreasing=TRUE)
       }
     }
-  } else if(weight_function == "logit") {
+  } else if(weight_function == "mlogit") {
     if(is.null(weight_constraints)) {
       ret <- rt(n=(M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]]), df=4)
     } else {
@@ -225,7 +225,7 @@ random_weightpars <- function(M, weight_function, weightfun_pars=NULL, AR_constr
       }
     }
   } else {
-    stop("Only relative dens and logit weights are currently implemented in random_weightpars")
+    stop("Only relative dens and mlogit weights are currently implemented in random_weightpars")
   }
   ret
 }
@@ -239,8 +239,8 @@ random_weightpars <- function(M, weight_function, weightfun_pars=NULL, AR_constr
 #' @param weight_pars a vector containing transition weight parameter values.
 #'   \describe{
 #'     \item{If \code{weight_function == "relative_dens"}:}{a length \code{M-1} vector \eqn{(\alpha_1,...,\alpha_{M-1})}.}
-#'     \item{If \code{weight_function == "logit"}:}{a length \eqn{((M-1)k\times 1)} vector \eqn{(\gamma_1,...,\gamma_M)},
-#'           where \eqn{\gamma_m} \eqn{(k\times 1)}, \eqn{m=1,...,M-1} contains the logit-regression coefficients of the \eqn{m}th regime.
+#'     \item{If \code{weight_function == "mlogit"}:}{a length \eqn{((M-1)k\times 1)} vector \eqn{(\gamma_1,...,\gamma_M)},
+#'           where \eqn{\gamma_m} \eqn{(k\times 1)}, \eqn{m=1,...,M-1} contains the mlogit-regression coefficients of the \eqn{m}th regime.
 #'           Specifically, for switching variables with indices in \eqn{J\subset\lbrace 1,...,d\rbrace}, and with
 #'          \eqn{\tilde{p}\in\lbrace 1,...,p\rbrace} lags included, \eqn{\gamma_m} contains the coefficients for the vector
 #'          \eqn{z_{t-1} = (1,\tilde{z}_{\min\lbrace J\rbrace},...,\tilde{z}_{\max\lbrace J\rbrace})}, where
@@ -261,11 +261,11 @@ smart_weightpars <- function(M, weight_pars, weight_function, weight_constraints
                          sd=pmax(0.2, c(weight_pars, 1-sum(weight_pars))/accuracy))
     ret <- (weight_pars/sum(weight_pars))[-M]
     # Sort and standardize alphas; don't sort if AR_constraints or mean_constraints are used
-  } else if(weight_function == "logit") {
+  } else if(weight_function == "mlogit") {
     ret <- rnorm(n=length(weight_pars), mean=weight_pars,
                  sd=pmax(0.2, weight_pars/accuracy))
   } else {
-    stop("Only relative dens and logit weights are currently implemented in smart_weightpars")
+    stop("Only relative dens and mlogit weights are currently implemented in smart_weightpars")
   }
   ret
 }
@@ -292,7 +292,7 @@ smart_weightpars <- function(M, weight_pars, weight_function, weight_constraints
 #'  }
 #' @keywords internal
 
-random_ind <- function(p, M, d, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
+random_ind <- function(p, M, d, weight_function=c("relative_dens", "mlogit"), weightfun_pars=NULL,
                        cond_dist=c("Gaussian", "Student"), AR_constraints=NULL, mean_constraints=NULL,
                        weight_constraints=NULL, force_stability=is.null(AR_constraints),
                        mu_scale, mu_scale2, omega_scale, ar_scale=1, ar_scale2=1) {
@@ -359,7 +359,7 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logit"), wei
 #' @inherit random_ind return references
 #' @keywords internal
 
-smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
+smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "mlogit"), weightfun_pars=NULL,
                       cond_dist=c("Gaussian", "Student"), AR_constraints=NULL, mean_constraints=NULL,
                       weight_constraints=NULL,  accuracy=1, which_random=numeric(0),
                       mu_scale, mu_scale2, omega_scale, ar_scale=1, ar_scale2=1) {

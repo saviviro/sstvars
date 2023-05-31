@@ -23,12 +23,12 @@ theta_123relg <- c(0.10741, 0.13813, -0.12092, 3.48957, 0.60615, 0.45646, 0.8722
                    0.05544, 0.00212, 0.12708, 0.78618, 0.00922, 0.42627, 0.23765, 0.25386, 3.40834, 0.77357)
 mod123relg <- STVAR(data=usamone, p=1, M=2, params=theta_123relg, weight_function="relative_dens")
 
-# logit weights, gdpdef, weightfun_pars=list(vars=2, lags=1)
+# mlogit weights, gdpdef, weightfun_pars=list(vars=2, lags=1)
 theta_322log_2_1 <- c(2.746765, 0.297951, 0.57546, 0.039418, 0.173881, -0.028861, -1.123912, 0.652867, -0.046741,
                       0.003972, 0.610594, 0.089587, -0.066095, 0.045594, -0.651105, 0.066679, 0.268968, 0.055636,
                       -0.284343, 0.368566, 0.321876, 0.026181, -0.134247, 0.128348, -0.063424, 0.012676, -0.043061,
                       0.296153, 1.158639, -0.039743, 0.153417, 0.356729, 0.005054, 0.031869, -8.970684, 7.518877)
-mod322log <- STVAR(data=gdpdef, p=3, M=2, d=2, params=theta_322log_2_1, weight_function="logit", weightfun_pars=list(vars=2, lags=1))
+mod322log <- STVAR(data=gdpdef, p=3, M=2, d=2, params=theta_322log_2_1, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1))
 
 
 s112 <- simulate(mod112relg, nsim=1, seed=1, init_regime=1)

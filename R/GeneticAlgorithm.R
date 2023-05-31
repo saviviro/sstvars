@@ -27,8 +27,8 @@
 #'   \describe{
 #'     \item{For models with \code{weight_function="relative_dens"}:}{\eqn{\alpha = (\alpha_1,...,\alpha_{M-1})}
 #'           \eqn{(M - 1 \times 1)}, where \eqn{\alpha_m} \eqn{(1\times 1), m=1,...,M-1} are the transition weight parameters.}
-#'     \item{For models with \code{weight_function="logit"}:}{\eqn{\alpha = (\gamma_1,...,\gamma_M)} \eqn{((M-1)k\times 1)},
-#'           where \eqn{\gamma_m} \eqn{(k\times 1), m=1,...,M-1} contains the logit-regression coefficients of the \eqn{m}th
+#'     \item{For models with \code{weight_function="mlogit"}:}{\eqn{\alpha = (\gamma_1,...,\gamma_M)} \eqn{((M-1)k\times 1)},
+#'           where \eqn{\gamma_m} \eqn{(k\times 1), m=1,...,M-1} contains the mlogit-regression coefficients of the \eqn{m}th
 #'            regime.}
 #'   }
 #'   Above, \eqn{\phi_{m,0}} is the intercept parameter, \eqn{A_{m,i}} denotes the \eqn{i}th coefficient matrix of the \eqn{m}th
@@ -115,7 +115,7 @@
 #'          \emph{Proceedings of the 1995 ACM Symposium on Applied Computing}, 345-350.
 #'  }
 
-GAfit <- function(data, p, M, weight_function=c("relative_dens", "logit"), weightfun_pars=NULL,
+GAfit <- function(data, p, M, weight_function=c("relative_dens", "mlogit"), weightfun_pars=NULL,
                   cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
                   AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
                   ngen=200, popsize, smart_mu=min(100, ceiling(0.5*ngen)), initpop=NULL, mu_scale, mu_scale2, omega_scale,

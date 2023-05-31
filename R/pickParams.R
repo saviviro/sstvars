@@ -17,8 +17,8 @@
 #'   \describe{
 #'     \item{For models with \code{weight_function="relative_dens"}:}{\eqn{\alpha = (\alpha_1,...,\alpha_{M-1})}
 #'           \eqn{(M - 1 \times 1)}, where \eqn{\alpha_m} \eqn{(1\times 1), m=1,...,M-1} are the transition weight parameters.}
-#'     \item{For models with \code{weight_function="logit"}:}{\eqn{\alpha = (\gamma_1,...,\gamma_M)} \eqn{((M-1)k\times 1)},
-#'           where \eqn{\gamma_m} \eqn{(k\times 1), m=1,...,M-1} contains the logit-regression coefficients of the \eqn{m}th regime.}
+#'     \item{For models with \code{weight_function="mlogit"}:}{\eqn{\alpha = (\gamma_1,...,\gamma_M)} \eqn{((M-1)k\times 1)},
+#'           where \eqn{\gamma_m} \eqn{(k\times 1), m=1,...,M-1} contains the mlogit-regression coefficients of the \eqn{m}th regime.}
 #'   }
 #'   Above, \eqn{\phi_{m,0}} is the intercept parameter, \eqn{A_{m,i}} denotes the \eqn{i}th coefficient matrix of the \eqn{m}th
 #'   mixture component, and \eqn{\Omega_{m}} denotes the error term covariance matrix of the \eqn{m}:th mixture component.
@@ -137,8 +137,8 @@ pick_Omegas <- function(p, M, d, params) {
 #'   \describe{
 #'     \item{If \code{weight_function = "relative_dens"}:}{Returns a length \eqn{M} vector containing the transition weight
 #'           parameters \eqn{\alpha_{m}, m=1,...,M}, including the non-parametrized \eqn{\alpha_{M}}.}
-#'     \item{If \code{weight_function = "logit"}:}{Returns a length \eqn{(M-1)k} vector \eqn{(\gamma_1,...,\gamma_M)},
-#'           where \eqn{\gamma_m} \eqn{(k\times 1)}, \eqn{m=1,...,M-1} contains the logit-regression coefficients of the \eqn{m}th regime.
+#'     \item{If \code{weight_function = "mlogit"}:}{Returns a length \eqn{(M-1)k} vector \eqn{(\gamma_1,...,\gamma_M)},
+#'           where \eqn{\gamma_m} \eqn{(k\times 1)}, \eqn{m=1,...,M-1} contains the mlogit-regression coefficients of the \eqn{m}th regime.
 #'           Specifically, for switching variables with indices in \eqn{J\subset\lbrace 1,...,d\rbrace}, and with
 #'          \eqn{\tilde{p}\in\lbrace 1,...,p\rbrace} lags included, \eqn{\gamma_m} contains the coefficients for the vector
 #'          \eqn{z_{t-1} = (1,\tilde{z}_{\min\lbrace J\rbrace},...,\tilde{z}_{\max\lbrace J\rbrace})}, where
@@ -150,7 +150,7 @@ pick_Omegas <- function(p, M, d, params) {
 #' @inherit pick_Ami references
 #' @keywords internal
 
-pick_weightpars <- function(p, M, d, params, weight_function=c("relative_dens", "logit"),
+pick_weightpars <- function(p, M, d, params, weight_function=c("relative_dens", "mlogit"),
                             weightfun_pars=NULL, cond_dist=c("Gaussian", "Student")) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -162,7 +162,7 @@ pick_weightpars <- function(p, M, d, params, weight_function=c("relative_dens", 
       alphas <- params[(length(params) - M - n_dfs + 2):(length(params) - n_dfs)]
       return(c(alphas, 1 - sum(alphas)))
     }
-  } else if(weight_function == "logit") {
+  } else if(weight_function == "mlogit") {
     if(M == 1) {
       return(numeric(0))
     } else {

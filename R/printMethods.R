@@ -67,7 +67,7 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params)
   weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                 cond_dist=cond_dist)
-  if(weight_function == "logit") {
+  if(weight_function == "mlogit") {
     all_gamma_m <- cbind(matrix(weightpars, ncol=M-1), 0) # Column per gamma_m, m=1,...,M-1, gamma_M=0.
   }
 
@@ -81,7 +81,7 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   cat(paste0("M = ", M, ", "))
   cat(paste0("d = ", d, ", #parameters = " , npars, ","),
       ifelse(is.na(T_obs), "\n", paste0("#observations = ", T_obs, " x ", d, "")))
-  if(weight_function == "logit") {
+  if(weight_function == "mlogit") {
     cat("\n ", paste0("Switching variables: ", paste0(var_names[weightfun_pars[[1]]], collapse=", "), " with ",
                      weightfun_pars[[2]], ifelse(weightfun_pars[[2]] == 1, " lag.", " lags.")))
   }
@@ -117,7 +117,7 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
     }
     if(weight_function == "relative_dens") {
       cat(paste("Weight param:", format_value(weightpars[m])), "\n")
-    } else if(weight_function == "logit") {
+    } else if(weight_function == "mlogit") {
       cat(paste("Weight params:", paste0(format_value(all_gamma_m[,m]), collapse=", ")))
       if(m == M) {
         cat(" (by normalization)")

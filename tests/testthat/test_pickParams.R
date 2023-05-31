@@ -88,7 +88,7 @@ alpha1_123 <- 0.6
 theta_123relg <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123),
                    vech(Omega2_123), alpha1_123)
 
-## weight_function = "logit"
+## weight_function = "mlogit"
 
 # p=1, M=2, d=2, weightfun_pars=list(vars=1, lags=1)
 gamma1_122_1_1 <- c(0.1, 0.2)
@@ -298,28 +298,28 @@ test_that("pick_Omegas work correctly", {
 })
 
 test_that("pick_weightpars work correctly", {
-  # logit, Gaussian
-  expect_equal(pick_weightpars(p=1, M=2, d=2, params=theta_122log_1_1, weight_function="logit", cond_dist="Gaussian",
+  # mlogit, Gaussian
+  expect_equal(pick_weightpars(p=1, M=2, d=2, params=theta_122log_1_1, weight_function="mlogit", cond_dist="Gaussian",
                                weightfun_pars=list(vars=1, lags=1)), gamma1_122_1_1)
-  expect_equal(pick_weightpars(p=1, M=2, d=2, params=theta_122log_12_1, weight_function="logit", cond_dist="Gaussian",
+  expect_equal(pick_weightpars(p=1, M=2, d=2, params=theta_122log_12_1, weight_function="mlogit", cond_dist="Gaussian",
                                weightfun_pars=list(vars=1:2, lags=1)), gamma1_122_12_1)
-  expect_equal(pick_weightpars(p=2, M=2, d=2, params=theta_222log_2_1, weight_function="logit", cond_dist="Gaussian",
+  expect_equal(pick_weightpars(p=2, M=2, d=2, params=theta_222log_2_1, weight_function="mlogit", cond_dist="Gaussian",
                                weightfun_pars=list(vars=2, lags=1)), gamma1_222_2_1)
-  expect_equal(pick_weightpars(p=2, M=2, d=2, params=theta_222log_12_2, weight_function="logit", cond_dist="Gaussian",
+  expect_equal(pick_weightpars(p=2, M=2, d=2, params=theta_222log_12_2, weight_function="mlogit", cond_dist="Gaussian",
                                weightfun_pars=list(vars=1:2, lags=2)), gamma1_222_12_2)
-  expect_equal(pick_weightpars(p=2, M=3, d=2, params=theta_232log_1_1, weight_function="logit", cond_dist="Gaussian",
+  expect_equal(pick_weightpars(p=2, M=3, d=2, params=theta_232log_1_1, weight_function="mlogit", cond_dist="Gaussian",
                                weightfun_pars=list(vars=1, lags=1)), c(gamma1_232_1_1, gamma2_232_1_1))
-  expect_equal(pick_weightpars(p=2, M=3, d=2, params=theta_232log_12_1, weight_function="logit", cond_dist="Gaussian",
+  expect_equal(pick_weightpars(p=2, M=3, d=2, params=theta_232log_12_1, weight_function="mlogit", cond_dist="Gaussian",
                                weightfun_pars=list(vars=1:2, lags=1)), c(gamma1_232_12_1, gamma2_232_12_1))
-  expect_equal(pick_weightpars(p=2, M=3, d=2, params=theta_232log_2_2, weight_function="logit", cond_dist="Gaussian",
+  expect_equal(pick_weightpars(p=2, M=3, d=2, params=theta_232log_2_2, weight_function="mlogit", cond_dist="Gaussian",
                                weightfun_pars=list(vars=2, lags=2)), c(gamma1_232_2_2, gamma2_232_2_2))
-  expect_equal(pick_weightpars(p=2, M=3, d=2, params=theta_232log_12_2, weight_function="logit", cond_dist="Gaussian",
+  expect_equal(pick_weightpars(p=2, M=3, d=2, params=theta_232log_12_2, weight_function="mlogit", cond_dist="Gaussian",
                                weightfun_pars=list(vars=1:2, lags=2)), c(gamma1_232_12_2, gamma2_232_12_2))
-  expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123log_1_1, weight_function="logit", cond_dist="Gaussian",
+  expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123log_1_1, weight_function="mlogit", cond_dist="Gaussian",
                                weightfun_pars=list(vars=1, lags=1)), gamma1_123_1_1)
-  expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123log_23_1, weight_function="logit", cond_dist="Gaussian",
+  expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123log_23_1, weight_function="mlogit", cond_dist="Gaussian",
                                weightfun_pars=list(vars=2:3, lags=1)), gamma1_123_23_1)
-  expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123log_123_1, weight_function="logit", cond_dist="Gaussian",
+  expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123log_123_1, weight_function="mlogit", cond_dist="Gaussian",
                                weightfun_pars=list(vars=1:3, lags=1)), gamma1_123_123_1)
 
   # relative_dens

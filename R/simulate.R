@@ -129,7 +129,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
        det_Sigmas[m] <- prod(diag(chol_Sigmas[, , m]))^2 # Faster determinant
      }
   }
-  if(weight_function == "logit") {
+  if(weight_function == "mlogit") {
     all_gamma_m <- matrix(weightpars, ncol=M-1)
     vars <- weightfun_pars[[1]]
     lags <- weightfun_pars[[2]]
@@ -138,8 +138,8 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
     # and then the index is added to always account for the constant term.
     inds_of_switching_vars <- c(1, as.vector(matrix(lowers, nrow=length(vars), ncol=length(lowers), byrow=TRUE) + vars + 1))
   }
-  if(!weight_function %in% c("relative_dens", "logit")) {
-    stop("Other than relative_dens and logit weight functions are not yet implemented to simulate.stvar")
+  if(!weight_function %in% c("relative_dens", "mlogit")) {
+    stop("Other than relative_dens and mlogit weight functions are not yet implemented to simulate.stvar")
   }
 
   # Set/generate initial values
@@ -172,7 +172,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
                                                                                       inv_Sigmas[, , m])%*%(Y[i1,] - rep(all_mu[, m], p))),
              numeric(1))
     } # Returns M x 1 vector; transformed into a matrix in get_alpha_mt
-  } else if(weight_function == "logit") {
+  } else if(weight_function == "mlogit") {
      # Calculate the sub model regressions for calculating the transition weights
      get_regression_values <- function(Y, i1) {
         regressions_mt <- numeric(M) # Vector of zeros
@@ -191,12 +191,12 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
         log_mvdvalues <- get_logmvdvalues(Y=Y, i1=i1)
         alpha_mt <- get_alpha_mt(M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                  weightpars=weightpars, log_mvdvalues=log_mvdvalues, epsilon=epsilon)
-      } else if(weight_function == "logit") {
+      } else if(weight_function == "mlogit") {
         regression_values <- get_regression_values(Y=Y, i1=i1)
         alpha_mt <- get_alpha_mt(M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                  weightpars=rep(1, times=M), log_mvdvalues=regression_values, epsilon=epsilon)
       } else {
-        stop("Only relative_dens and logit weight functions are implemented to simulate.stvar")
+        stop("Only relative_dens and mlogit weight functions are implemented to simulate.stvar")
       }
       transition_weights[i1, , j1] <- alpha_mt
 
