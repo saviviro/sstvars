@@ -67,6 +67,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   if(identification != "reduced_form") stop("Structural models are not yet implemented to simulate.stvar")
   AR_constraints <- stvar$model$AR_constraints
   mean_constraints <- stvar$model$mean_constraints
+  weight_constraints <- stvar$model$weight_constraints
   B_constraints <- stvar$model$B_constraints
   if(!is.null(B_constraints)) {
     stop("B_constained models are not yet implemented to simulate.stvar")
@@ -94,19 +95,20 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
                                     weight_function=weight_function, weightfun_pars=weightfun_pars,
                                     cond_dist=cond_dist, identification=identification,
                                     AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                                    B_constraints=B_constraints)
+                                    weight_constraints=weight_constraints, B_constraints=B_constraints)
   if(stvar$model$parametrization == "mean") {
     params <- change_parametrization(p=p, M=M, d=d, params=params,
                                      weight_function=weight_function, weightfun_pars=weightfun_pars,
                                      identification=identification, cond_dist=cond_dist,
-                                     AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL,
-                                     change_to="intercept")
+                                     AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
+                                     B_constraints=NULL, change_to="intercept")
   }
   all_mu <- get_regime_means(p=p, M=M, d=d, params=params,
                              weight_function=weight_function, weightfun_pars=weightfun_pars,
                              cond_dist=cond_dist, parametrization="intercept",
                              identification=identification,
-                             AR_constraints=NULL, mean_constraints=NULL, B_constraints=NULL)
+                             AR_constraints=NULL, mean_constraints=NULL,
+                             weight_constraints=NULL, B_constraints=NULL)
   all_phi0 <- pick_phi0(M=M, d=d, params=params)
   all_A <- pick_allA(p=p, M=M, d=d, params=params)
   all_A2 <- array(all_A, dim=c(d, d*p, M)) # cbind coefficient matrices of each component: m:th component is obtained at [, , m]
