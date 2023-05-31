@@ -85,7 +85,8 @@ See the vignette for more details about the weight functions.}
 
 \item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"} or \eqn{"Student"}.}
 
-\item{identification}{is it reduced form model or an identified structural model; if the latter, how is it identified?}
+\item{identification}{is it reduced form model or an identified structural model; if the latter, how is it identified
+(see the vignette or the references for details)?}
 
 \item{AR_constraints}{a size \eqn{(Mpd^2 x q)} constraint matrix \eqn{C} specifying linear constraints
 to the autoregressive parameters. The constraints are of the form

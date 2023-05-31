@@ -63,7 +63,8 @@
 #' @param cond_dist specifies the conditional distribution of the model as \code{"Gaussian"} or \eqn{"Student"}.
 #' @param parametrization \code{"intercept"} or \code{"mean"} determining whether the model is parametrized with intercept
 #'   parameters \eqn{\phi_{m,0}} or regime means \eqn{\mu_{m}}, m=1,...,M.
-#' @param identification is it reduced form model or an identified structural model; if the latter, how is it identified?
+#' @param identification is it reduced form model or an identified structural model; if the latter, how is it identified
+#'   (see the vignette or the references for details)?
 #' @param AR_constraints a size \eqn{(Mpd^2 x q)} constraint matrix \eqn{C} specifying linear constraints
 #'   to the autoregressive parameters. The constraints are of the form
 #'   \eqn{(\varphi_{1},...,\varphi_{M}) = C\psi}, where \eqn{\varphi_{m} = (vec(A_{m,1}),...,vec(A_{m,p})) \ (pd^2 x 1),\ m=1,...,M},
