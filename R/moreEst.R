@@ -40,6 +40,7 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
   identification <- stvar$model$identification
   AR_constraints <- stvar$model$AR_constraints
   mean_constraints <- stvar$model$mean_constraints
+  weight_constraints <- stvar$model$weight_constraints
   B_constraints <- stvar$model$B_constraints
   weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=stvar$model$weightfun_pars)
   minval <- get_minval(stvar$data)
@@ -51,8 +52,9 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
                            weight_function=weight_function, weightfun_pars=weightfun_pars,
                            cond_dist=cond_dist, parametrization=parametrization,
                            identification=identification, AR_constraints=AR_constraints,
-                           mean_constraints=mean_constraints, B_constraints=B_constraints,
-                           to_return="loglik", check_params=TRUE, minval=minval), error=function(e) minval)
+                           mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                           B_constraints=B_constraints, to_return="loglik", check_params=TRUE, minval=minval),
+             error=function(e) minval)
   }
 
   # Gradient of the log-likelihood function using central difference approximation
@@ -73,6 +75,7 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
                identification=identification,
                AR_constraints=AR_constraints,
                mean_constraints=mean_constraints,
+               weight_constraints=weight_constraints,
                B_constraints=B_constraints,
                calc_std_errors=calc_std_errors)
 
