@@ -110,11 +110,13 @@ change_parametrization <- function(p, M, d, params, weight_function=c("relative_
 #'   }
 #' @keywords internal
 
-sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "mlogit"), weightfun_pars=NULL,
+sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit"), weightfun_pars=NULL,
                          cond_dist=c("Gaussian", "Student"), identification=c("reduced_form", "recursive", "heteroskedasticity")) {
-  if(M == 1) return(params) # Nothing to sort
   weight_function <- match.arg(weight_function)
-  if(weight_function == "mlogit") return(params) # Does not sort
+  if(M == 1 || weight_function == "logistic" || weight_function == "mlogit") {
+    return(params) # Does not sort / nothing to sort
+  }
+
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
   if(identification != "reduced_form") stop("Structural models not yet implemented to sort_regimes!")
