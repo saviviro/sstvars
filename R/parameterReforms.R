@@ -138,7 +138,7 @@ sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "lo
   all_A <- matrix(pick_allA(p=p, M=M, d=d, params=params), ncol=M) #matrix(params[(d*M + 1):(d*M + d^2*p*M)], ncol=M)
   all_Omega <- matrix(params[(d*M*(1 + p*d) + 1):(d*M*(1 + p*d) + M*d*(d + 1)/2)], nrow=d*(d + 1)/2, ncol=M)
   all_weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function,
-                                    cond_dist=cond_dist)
+                                    weightfun_pars=weightfun_pars, cond_dist=cond_dist)
 
   c(all_phi0[,new_order], all_A[,new_order], all_Omega[,new_order], new_weightpars) # new_distpars
 }
