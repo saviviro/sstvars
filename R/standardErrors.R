@@ -101,7 +101,7 @@ print_std_errors <- function(stvar, digits=3) {
                                   weightfun_pars=weightfun_pars, cond_dist=cond_dist,
                                   identification=identification, AR_constraints=AR_constraints,
                                   mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                                  xB_constraints=B_constraints)
+                                  B_constraints=B_constraints)
   all_phi0_or_mu <- pick_phi0(M=M, d=d, params=pars)
   all_A <- pick_allA(p=p, M=M, d=d, params=pars)
   if(identification == "reduced_form") {
