@@ -88,6 +88,37 @@ alpha1_123 <- 0.6
 theta_123relg <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123),
                    vech(Omega2_123), alpha1_123)
 
+## weight_function = "logistic"
+
+# p=1, M=2, d=2, weightfun_pars=c(1, 1)
+c_and_gamma_122_1_1 <- c(0.1, 0.2)
+theta_122logistic_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), c_and_gamma_122_1_1)
+
+# p=1, M=2, d=2, weightfun_pars=c(2, 1)
+c_and_gamma_122_2_1 <- c(0.11, 0.22)
+theta_122logistic_2_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), c_and_gamma_122_2_1)
+
+# p=2, M=2, d=2, weightfun_pars=c(2, 1)
+c_and_gamma_222_2_1 <- c(0.1, 0.2)
+theta_222logistic_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                           vech(Omega1_222), vech(Omega2_222), c_and_gamma_222_2_1)
+
+# p=2, M=2, d=2, weightfun_pars=c(1, 2)
+c_and_gamma_222_1_2 <- c(0.11, 0.22)
+theta_222logistic_1_2 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                           vech(Omega1_222), vech(Omega2_222), c_and_gamma_222_1_2)
+
+# p=1, M=2, d=3, weightfun_pars=c(1, 1)
+c_and_gamma_123_1_1 <- c(0.1, 0.5)
+theta_123logistic_1_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123),
+                               vech(Omega2_123), c_and_gamma_123_1_1)
+
+# p=1, M=2, d=3, weightfun_pars=c(3, 1)
+c_and_gamma_123_3_1 <- c(0.1, 0.4)
+theta_123logistic_3_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123),
+                               vech(Omega2_123), c_and_gamma_123_3_1)
+
+
 ## weight_function = "mlogit"
 
 # p=1, M=2, d=2, weightfun_pars=list(vars=1, lags=1)
@@ -153,6 +184,19 @@ theta_123log_123_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(O
                        vech(Omega2_123), gamma1_123_123_1)
 
 test_that("pick_phi0 work correctly", {
+  expect_equal(pick_phi0(M=2, d=2, params=theta_122logistic_1_1)[,1], phi10_122)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_122logistic_1_1)[,2], phi20_122)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_122logistic_2_1)[,1], phi10_122)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_122logistic_2_1)[,2], phi20_122)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_222logistic_2_1)[,1], phi10_222)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_222logistic_2_1)[,2], phi20_222)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_222logistic_1_2)[,1], phi10_222)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_222logistic_1_2)[,2], phi20_222)
+  expect_equal(pick_phi0(M=2, d=3, params=theta_123logistic_1_1)[,1], phi10_123)
+  expect_equal(pick_phi0(M=2, d=3, params=theta_123logistic_1_1)[,2], phi20_123)
+  expect_equal(pick_phi0(M=2, d=3, params=theta_123logistic_3_1)[,1], phi10_123)
+  expect_equal(pick_phi0(M=2, d=3, params=theta_123logistic_3_1)[,2], phi20_123)
+
   expect_equal(pick_phi0(M=1, d=2, params=theta_112relg), as.matrix(phi10_112))
   expect_equal(pick_phi0(M=1, d=2, params=theta_212relg), as.matrix(phi10_212))
   expect_equal(pick_phi0(M=1, d=2, params=theta_312relg), as.matrix(phi10_312))
@@ -208,6 +252,15 @@ test_that("pick_Ami work correctly", {
   expect_equal(pick_Ami(p=2, M=2, d=2, m=2, i=1, params=theta_222log_12_2), A21_222)
   expect_equal(pick_Ami(p=2, M=2, d=2, m=2, i=2, params=theta_222log_12_2), A22_222)
 
+  expect_equal(pick_Ami(p=1, M=2, d=2, m=1, i=1, params=theta_122logistic_1_1), A11_122)
+  expect_equal(pick_Ami(p=1, M=2, d=2, m=2, i=1, params=theta_122logistic_1_1), A21_122)
+  expect_equal(pick_Ami(p=2, M=2, d=2, m=1, i=1, params=theta_222logistic_2_1), A11_222)
+  expect_equal(pick_Ami(p=2, M=2, d=2, m=1, i=2, params=theta_222logistic_2_1), A12_222)
+  expect_equal(pick_Ami(p=2, M=2, d=2, m=2, i=1, params=theta_222logistic_2_1), A21_222)
+  expect_equal(pick_Ami(p=2, M=2, d=2, m=2, i=2, params=theta_222logistic_2_1), A22_222)
+  expect_equal(pick_Ami(p=1, M=2, d=3, m=1, i=1, params=theta_123logistic_3_1), A11_123)
+  expect_equal(pick_Ami(p=1, M=2, d=3, m=2, i=1, params=theta_123logistic_3_1), A21_123)
+
   # unvec=FALSE
   expect_equal(pick_Ami(p=1, M=1, d=2, m=1, i=1, params=theta_112relg, unvec=FALSE), vec(A11_112))
   expect_equal(pick_Ami(p=1, M=2, d=2, m=1, i=1, params=theta_122relg, unvec=FALSE), vec(A11_122))
@@ -243,6 +296,15 @@ test_that("pick_Am work correctly", {
   expect_equal(pick_Am(p=2, M=2, d=2, m=1, params=theta_222log_2_1)[, , 2], A12_222)
   expect_equal(pick_Am(p=2, M=2, d=2, m=2, params=theta_222log_2_1)[, , 1], A21_222)
   expect_equal(pick_Am(p=2, M=2, d=2, m=2, params=theta_222log_2_1)[, , 2], A22_222)
+
+  expect_equal(pick_Am(p=1, M=2, d=2, m=1, params=theta_122logistic_1_1)[, , 1], A11_122)
+  expect_equal(pick_Am(p=1, M=2, d=2, m=2, params=theta_122logistic_1_1)[, , 1], A21_122)
+  expect_equal(pick_Am(p=2, M=2, d=2, m=1, params=theta_222logistic_2_1)[, , 1], A11_222)
+  expect_equal(pick_Am(p=2, M=2, d=2, m=1, params=theta_222logistic_2_1)[, , 2], A12_222)
+  expect_equal(pick_Am(p=2, M=2, d=2, m=2, params=theta_222logistic_2_1)[, , 1], A21_222)
+  expect_equal(pick_Am(p=2, M=2, d=2, m=2, params=theta_222logistic_2_1)[, , 2], A22_222)
+  expect_equal(pick_Am(p=1, M=2, d=3, m=1, params=theta_123logistic_1_1)[, , 1], A11_123)
+  expect_equal(pick_Am(p=1, M=2, d=3, m=2, params=theta_123logistic_1_1)[, , 1], A21_123)
 })
 
 test_that("pick_allA work correctly", {
@@ -273,6 +335,15 @@ test_that("pick_allA work correctly", {
   expect_equal(pick_allA(p=2, M=2, d=2, params=theta_222log_12_2)[, , 2, 1], A12_222)
   expect_equal(pick_allA(p=2, M=2, d=2, params=theta_222log_12_2)[, , 1, 2], A21_222)
   expect_equal(pick_allA(p=2, M=2, d=2, params=theta_222log_12_2)[, , 2, 2], A22_222)
+
+  expect_equal(pick_allA(p=1, M=2, d=2, params=theta_122logistic_1_1)[, , 1, 1], A11_122)
+  expect_equal(pick_allA(p=1, M=2, d=2, params=theta_122logistic_1_1)[, , 1, 2], A21_122)
+  expect_equal(pick_allA(p=2, M=2, d=2, params=theta_222logistic_1_2)[, , 1, 1], A11_222)
+  expect_equal(pick_allA(p=2, M=2, d=2, params=theta_222logistic_1_2)[, , 2, 1], A12_222)
+  expect_equal(pick_allA(p=2, M=2, d=2, params=theta_222logistic_1_2)[, , 1, 2], A21_222)
+  expect_equal(pick_allA(p=2, M=2, d=2, params=theta_222logistic_1_2)[, , 2, 2], A22_222)
+  expect_equal(pick_allA(p=1, M=2, d=3, params=theta_123logistic_1_1)[, , 1, 1], A11_123)
+  expect_equal(pick_allA(p=1, M=2, d=3, params=theta_123logistic_1_1)[, , 1, 2], A21_123)
 })
 
 test_that("pick_Omegas work correctly", {
@@ -295,10 +366,32 @@ test_that("pick_Omegas work correctly", {
   expect_equal(pick_Omegas(p=1, M=2, d=2, params=theta_122log_12_1)[, , 2], Omega2_122)
   expect_equal(pick_Omegas(p=2, M=2, d=2, params=theta_222log_2_1)[, , 1], Omega1_222)
   expect_equal(pick_Omegas(p=2, M=2, d=2, params=theta_222log_2_1)[, , 2], Omega2_222)
+
+  expect_equal(pick_Omegas(p=1, M=2, d=2, params=theta_122logistic_1_1)[, , 1], Omega1_122)
+  expect_equal(pick_Omegas(p=1, M=2, d=2, params=theta_122logistic_1_1)[, , 2], Omega2_122)
+  expect_equal(pick_Omegas(p=2, M=2, d=2, params=theta_222logistic_2_1)[, , 1], Omega1_222)
+  expect_equal(pick_Omegas(p=2, M=2, d=2, params=theta_222logistic_2_1)[, , 2], Omega2_222)
+  expect_equal(pick_Omegas(p=1, M=2, d=3, params=theta_123logistic_3_1)[, , 1], Omega1_123)
+  expect_equal(pick_Omegas(p=1, M=2, d=3, params=theta_123logistic_3_1)[, , 2], Omega2_123)
 })
 
 test_that("pick_weightpars work correctly", {
-  # mlogit, Gaussian
+  # logistic
+  expect_equal(pick_weightpars(p=1, M=2, d=2, params=theta_122logistic_1_1, weight_function="logistic", cond_dist="Gaussian",
+                               weightfun_pars=c(1, 1)), c_and_gamma_122_1_1)
+  expect_equal(pick_weightpars(p=1, M=2, d=2, params=theta_122logistic_2_1, weight_function="logistic", cond_dist="Gaussian",
+                               weightfun_pars=c(2, 1)), c_and_gamma_122_2_1)
+  expect_equal(pick_weightpars(p=2, M=2, d=2, params=theta_222logistic_2_1, weight_function="logistic", cond_dist="Gaussian",
+                               weightfun_pars=c(2, 1)), c_and_gamma_222_2_1)
+  expect_equal(pick_weightpars(p=2, M=2, d=2, params=theta_222logistic_1_2, weight_function="logistic", cond_dist="Gaussian",
+                               weightfun_pars=c(1, 2)), c_and_gamma_222_1_2)
+  expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123logistic_1_1, weight_function="logistic", cond_dist="Gaussian",
+                               weightfun_pars=c(1, 1)), c_and_gamma_123_1_1)
+  expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123logistic_3_1, weight_function="logistic", cond_dist="Gaussian",
+                               weightfun_pars=c(3, 1)), c_and_gamma_123_3_1)
+
+
+  # mlogit
   expect_equal(pick_weightpars(p=1, M=2, d=2, params=theta_122log_1_1, weight_function="mlogit", cond_dist="Gaussian",
                                weightfun_pars=list(vars=1, lags=1)), gamma1_122_1_1)
   expect_equal(pick_weightpars(p=1, M=2, d=2, params=theta_122log_12_1, weight_function="mlogit", cond_dist="Gaussian",
@@ -360,6 +453,12 @@ test_that("pick_regime work correctly", {
   expect_equal(pick_regime(p=1, M=2, d=2, m=2, params=theta_122log_1_1), c(phi20_122, vec(A21_122), vech(Omega2_122)))
   expect_equal(pick_regime(p=2, M=2, d=2, m=1, params=theta_222log_12_2), c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222)))
   expect_equal(pick_regime(p=2, M=2, d=2, m=2, params=theta_222log_12_2), c(phi20_222, vec(A21_222), vec(A22_222), vech(Omega2_222)))
-})
 
+  expect_equal(pick_regime(p=1, M=2, d=2, m=1, params=theta_122logistic_1_1), c(phi10_122, vec(A11_122), vech(Omega1_122)))
+  expect_equal(pick_regime(p=1, M=2, d=2, m=2, params=theta_122logistic_1_1), c(phi20_122, vec(A21_122), vech(Omega2_122)))
+  expect_equal(pick_regime(p=2, M=2, d=2, m=1, params=theta_222logistic_1_2), c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222)))
+  expect_equal(pick_regime(p=2, M=2, d=2, m=2, params=theta_222logistic_1_2), c(phi20_222, vec(A21_222), vec(A22_222), vech(Omega2_222)))
+  expect_equal(pick_regime(p=1, M=2, d=3, m=1, params=theta_123logistic_1_1), c(phi10_123, vec(A11_123), vech(Omega1_123)))
+  expect_equal(pick_regime(p=1, M=2, d=3, m=2, params=theta_123logistic_1_1), c(phi20_123, vec(A21_123), vech(Omega2_123)))
+})
 
