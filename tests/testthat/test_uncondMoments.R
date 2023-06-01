@@ -196,8 +196,6 @@ xi_222logisticcmw_2_1 <- c(0.33)
 theta_222logisticcmw_2_1 <- c(theta_222relgcm[-length(theta_222relgcm)], xi_222logisticcmw_2_1)
 
 
-
-
 test_that("get_regime_means works correctly", {
   expect_equal(c(get_regime_means(p=2, M=2, d=2, params=theta_222logcm_12_2, weight_function="mlogit",
                                   weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222)),
