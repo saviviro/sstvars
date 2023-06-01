@@ -1,8 +1,6 @@
 context("argumentChecks")
 library(sstvars)
 
-## A(M)(p)_(p)(M)(d)
-
 
 ## A(M)(p)_(p)(M)(d)
 
@@ -120,6 +118,38 @@ theta_123relg_notstab <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vec
 theta_123relg_notpd <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123_stab), vech(Omega1_123),
                            vech(Omega2_123_notpd), alpha1_123)
 
+
+## weight_function = "logistic"
+
+# p=1, M=2, d=2, weightfun_pars=c(1, 1)
+c_and_gamma_122_1_1 <- c(0.1, 0.2)
+theta_122logistic_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), c_and_gamma_122_1_1)
+
+# p=1, M=2, d=2, weightfun_pars=c(2, 1)
+c_and_gamma_122_2_1 <- c(0.11, 0.22)
+theta_122logistic_2_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), c_and_gamma_122_2_1)
+
+# p=2, M=2, d=2, weightfun_pars=c(2, 1)
+c_and_gamma_222_2_1 <- c(0.1, 0.2)
+theta_222logistic_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                           vech(Omega1_222), vech(Omega2_222), c_and_gamma_222_2_1)
+
+# p=2, M=2, d=2, weightfun_pars=c(1, 2)
+c_and_gamma_222_1_2 <- c(0.11, 0.22)
+theta_222logistic_1_2 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                           vech(Omega1_222), vech(Omega2_222), c_and_gamma_222_1_2)
+
+# p=1, M=2, d=3, weightfun_pars=c(1, 1)
+c_and_gamma_123_1_1 <- c(0.1, 0.5)
+theta_123logistic_1_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123),
+                           vech(Omega2_123), c_and_gamma_123_1_1)
+
+# p=1, M=2, d=3, weightfun_pars=c(3, 1)
+c_and_gamma_123_3_1 <- c(0.1, 0.4)
+theta_123logistic_3_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123),
+                           vech(Omega2_123), c_and_gamma_123_3_1)
+
+
 ## weight_function = "mlogit"
 
 # p=1, M=2, d=2, weightfun_pars=list(vars=1, lags=1)
@@ -207,6 +237,23 @@ theta_213relgc_expanded <- c(phi10_213, C_213%*%psi_213, vech(Omega1_213))
 C_123 <- rbind_diags(p=1, M=2, d=3)
 theta_123relgc <- c(phi10_123, phi20_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
 theta_123relgc_expanded <- c(phi10_123, phi20_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
+
+
+## weight_function = "logistic"
+
+# p=1, M=2, d=2, weightfun_pars=c(1, 1), AR_constraints=C_122
+theta_122logisticc_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vech(Omega1_122), vech(Omega2_122), c_and_gamma_122_1_1)
+theta_122logisticc_1_1_expanded <- c(phi10_122, phi20_122, vec(A11_122), vec(A11_122), vech(Omega1_122), vech(Omega2_122), c_and_gamma_122_1_1)
+
+# p=2, M=2, d=2, weightfun_pars=c(2, 1), AR_constraints=C_222
+theta_222logisticc_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), c_and_gamma_222_2_1)
+theta_222logisticc_2_1_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                     vech(Omega1_222), vech(Omega2_222), c_and_gamma_222_2_1)
+
+# p=1, M=2, d=3, weightfun_pars=c(3, 1), AR_constraints=C_123
+theta_123logisticc_3_1 <- c(phi10_123, phi20_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), c_and_gamma_123_3_1)
+theta_123logisticc_3_1_expanded <- c(phi10_123, phi20_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), c_and_gamma_123_3_1)
+
 
 
 ## weight_function = "mlogit"
@@ -302,6 +349,22 @@ theta_123relgm_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A21_123), v
 theta_123relgcm <- c(phi10_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
 theta_123relgcm_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
 
+
+
+## weight_function == "logistic"
+
+# p=2, M=2, d=2, weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222
+theta_222logisticcm_2_1 <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), c_and_gamma_222_2_1)
+theta_222logisticcm_2_1_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                      vech(Omega1_222), vech(Omega2_222), c_and_gamma_222_2_1)
+
+# p=1, M=2, p=3, weightfun_pars=c(3, 1), mean_constraints=list(1:2), AR_constraints=C_123
+theta_123logisticcm_3_1 <- c(phi10_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), c_and_gamma_123_3_1)
+theta_123logisticcm_3_1_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), c_and_gamma_123_3_1)
+
+
+
+
 ## weight_function == "mlogit"
 
 # p=1, M=2, d=2, weightfun_pars=list(vars=1, lags=1), mean_constraints=list(1:2)
@@ -347,6 +410,20 @@ xi_222logcmw_12_2 <- c(0.22, 0.33)
 theta_222logcmw_12_2 <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), xi_222logcmw_12_2 )
 theta_222logcmw_12_2_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
                                    vech(Omega1_222), vech(Omega2_222), c(0.22, 0.11, 0.12, 0.13, 0.33))
+
+
+## logistic
+
+# p=1, M=2, d=2, weight_function="logistic", weightfun_pars=c(1, 1), weight_constraints=list(R=0, r=c(0.02, 0.13))
+theta_122logisticw_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122))
+theta_122logisticw_1_1_expanded <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), c(0.02, 0.13))
+
+# p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
+# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))
+xi_222logisticcmw_2_1 <- c(0.33)
+theta_222logisticcmw_2_1 <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), xi_222logisticcmw_2_1)
+theta_222logisticcmw_2_1_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                       vech(Omega1_222), vech(Omega2_222), c(0.01, 0.33))
 
 
 Omegas_112 <- pick_Omegas(p=1, M=1, d=2, params=theta_112relg)
@@ -473,13 +550,24 @@ test_that("in_paramspace work correctly", {
                             all_boldA=boldA_123, all_Omegas=Omegas_123, weightpars=c(1.01, 0.01)))
   expect_false(in_paramspace(p=1, M=2, d=3, weight_function="relative_dens", cond_dist="Gaussian",
                              all_boldA=boldA_123, all_Omegas=Omegas_123, weightpars=c(-0.01, 0.99)))
+  expect_false(in_paramspace(p=1, M=2, d=2, weight_function="logistic", cond_dist="Gaussian",
+                             all_boldA=boldA_122, all_Omegas=Omegas_122, weightpars=c(0.1, -0.1)))
+  expect_false(in_paramspace(p=1, M=2, d=3, weight_function="logistic", cond_dist="Gaussian",
+                             all_boldA=boldA_122, all_Omegas=Omegas_122, weightpars=c(0.1, 0)))
+  expect_false(in_paramspace(p=1, M=2, d=3, weight_function="logistic", cond_dist="Gaussian",
+                             all_boldA=boldA_122, all_Omegas=Omegas_122, weightpars=c(0.1, 1e-10)))
+  expect_true(in_paramspace(p=1, M=2, d=2, weight_function="logistic", cond_dist="Gaussian",
+                             all_boldA=boldA_122, all_Omegas=Omegas_122, weightpars=c(0.0, 0.1)))
+  expect_true(in_paramspace(p=1, M=2, d=3, weight_function="logistic", cond_dist="Gaussian",
+                             all_boldA=boldA_122, all_Omegas=Omegas_122, weightpars=c(0.1, 0.01)))
 
-  # Checks df
-  # TO BE FILLED IN
 
   # mlogit (nothing to check in weightpars, so just checks that the function runs)
   expect_true(in_paramspace(p=2, M=2, d=2, weight_function="mlogit", cond_dist="Gaussian",
                             all_boldA=boldA_222log_12_2, all_Omegas=Omegas_222log_12_2, weightpars=weightpars_222log_12_2))
+
+  # Checks df
+  # TO BE FILLED IN
 })
 
 test_that("check_params work correctly", {

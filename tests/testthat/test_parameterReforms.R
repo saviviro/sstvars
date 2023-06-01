@@ -257,6 +257,7 @@ C_123 <- rbind_diags(p=1, M=2, d=3)
 theta_123relgc <- c(phi10_123, phi20_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
 theta_123relgc_expanded <- c(phi10_123, phi20_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), alpha1_123)
 
+
 ## weight_function = "logistic"
 
 # p=1, M=2, d=2, weightfun_pars=c(1, 1), AR_constraints=C_122

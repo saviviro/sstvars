@@ -60,29 +60,40 @@ stab_conds_satisfied <- function(p, M, d, params, all_boldA=NULL, tolerance=1e-3
 #'  @keywords internal
 
 in_paramspace <- function(p, M, d, weight_function, weightfun_pars=NULL, cond_dist, all_boldA, all_Omegas, weightpars, df,
-                          stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
+                          stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8, weightpar_tol=1e-8) {
   # in_paramspace is internal function that always takes in non-constrained reduced form parameter vector
   # Reform the parameter vectors before checking with in_paramspace
 
-  if(cond_dist == "Student") { # Check degrees of freedom parameter
+  # Check distribution parameters
+  if(cond_dist == "Student") {
     if(df <= 2 + df_tol) {
       return(FALSE)
     }
   }
+
+  # Check weight_function parameters
   if(weight_function == "relative_dens") {
     if(M >= 2 & sum(weightpars[-M]) >= 1) {
       return(FALSE)
     } else if(any(weightpars <= 0)) {
       return(FALSE)
     }
+  } else if(weight_function == "logistic") {
+    if(weightpars[2] <= 0 + weightpar_tol) {
+      return(FALSE) # We assume strictly positive scale parameter gamma
+    }
   } else if(weight_function == "mlogit") {
     # All real numbers are ok, so nothing to check
   } else {
-    stop("Other weight functions that relative_dens and mlogit are not yet implemented to in_paramspace!")
+    stop("Unkown weght_function in in_paramspace!")
   }
+
+  # Check stability conditions of a linear VAR
   if(!stab_conds_satisfied(p=p, M=M, d=d, all_boldA=all_boldA, tolerance=stab_tol)) {
     return(FALSE)
   }
+
+  # Check positive definiteness of the covariance matrices
   for(m in 1:M) {
     if(any(eigen(all_Omegas[, , m], symmetric=TRUE, only.values=TRUE)$values < posdef_tol)) {
       return(FALSE)
