@@ -115,10 +115,12 @@ print_std_errors <- function(stvar, digits=3) {
   if(cond_dist != "Gaussian") stop("Only Gaussian models are implemented to print_std_errors")
   if(weight_function == "relative_dens") {
     weightpars[M] <- NA # No standard error for the last alpha
+  } else if(weight_function == "logistic") {
+    # Weightpars are ok as is.
   } else if(weight_function == "mlogit") {
     all_gamma_m <- matrix(weightpars, ncol=M-1) # Column per gamma_m, m=1,...,M-1, gamma_M=0.
   } else {
-    stop("only relative dens and mlogit weigghtfunctions are implemented to print_std_errors")
+    stop("Unkown weight function in print_std_errors")
   }
 
   if(parametrization == "mean") {
@@ -154,6 +156,9 @@ print_std_errors <- function(stvar, digits=3) {
   if(weight_function == "mlogit") {
     cat("\n ", paste0("Switching variables: ", paste0(var_names[weightfun_pars[[1]]], collapse=", "), " with ",
                       weightfun_pars[[2]], ifelse(weightfun_pars[[2]] == 1, " lag.", " lags.")))
+  } else if(weight_function == "logistic") {
+    cat("\n ", paste0("Switching variable: ", paste0(var_names[weightfun_pars[1]], collapse=", "), " with ",
+                      weightfun_pars[2], " lag."))
   }
   cat("\n\n")
   cat("APPROXIMATE STANDARD ERRORS\n\n")
@@ -176,6 +181,11 @@ print_std_errors <- function(stvar, digits=3) {
       if(m < M) cat(paste("Weight param:", format_value(weightpars[m])), "\n")
     } else if(weight_function == "mlogit") {
       if(m < M) cat(paste("Weight params:", paste0(format_value(all_gamma_m[,m]), collapse=", ")), "\n")
+    } else if(weight_function == "logistic") {
+      if(m == M) {
+        cat(paste("Weight params:", paste0(format_value(weightpars[1]), " (location), ",
+                                           format_value(weightpars[2]), " (scale)")), "\n")
+      }
     }
     if(parametrization == "mean") cat("Regime means:", paste0(format_value(all_mu[,m]), collapse=", "), "\n")
     cat("\n")
