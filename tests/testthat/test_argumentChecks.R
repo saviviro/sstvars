@@ -643,6 +643,9 @@ test_that("check_pMd works correctly", {
   expect_error(check_pMd(p=2, M=c(1, 1), d=2))
   expect_error(check_pMd(p=-1, M=1, d=2))
   expect_error(check_pMd(p=c(1, 1), M=1, d=2))
+  expect_error(check_pMd(p=1, M=3, d=2, weight_function = "logistic"))
+  check_pMd(p=1, M=3, d=2, weight_function = "relative_dens")
+  check_pMd(p=1, M=3, d=2, weight_function = "mlogit")
 })
 
 test_that("all_pos_ints works correctly", {

@@ -210,7 +210,8 @@ all_pos_ints <- function(x) {
 #' @return Throws an error if something is wrong.
 #' @keywords internal
 
-check_pMd <- function(p, M, d) {
+check_pMd <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit")) {
+  weight_function <- match.arg(weight_function)
   if(!all_pos_ints(M) || length(M) != 1) {
     stop("The argument M must be a positive integer!")
   }
@@ -221,6 +222,9 @@ check_pMd <- function(p, M, d) {
     if(d < 2 | d%%1 != 0) {
       stop("The argument d, the number of columns in the data matrix, has to be a positive integer larger than one!")
     }
+  }
+  if(weight_function == "logistic" && M > 2) {
+    stop("Only two regime (M=2) models are accommodated by the logistic weight function. Use weight_function = 'mlogit' for M>2.")
   }
 }
 

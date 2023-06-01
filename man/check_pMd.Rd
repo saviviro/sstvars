@@ -4,7 +4,7 @@
 \alias{check_pMd}
 \title{Check that p, M, and d are correctly set}
 \usage{
-check_pMd(p, M, d)
+check_pMd(p, M, d, weight_function = c("relative_dens", "logistic", "mlogit"))
 }
 \arguments{
 \item{p}{the autoregressive order of the model}
