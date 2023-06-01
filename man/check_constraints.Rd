@@ -8,7 +8,7 @@ check_constraints(
   p,
   M,
   d,
-  weight_function = c("relative_dens", "mlogit"),
+  weight_function = c("relative_dens", "logistic", "mlogit"),
   weightfun_pars = NULL,
   AR_constraints = NULL,
   mean_constraints = NULL,

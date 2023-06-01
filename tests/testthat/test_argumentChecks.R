@@ -745,6 +745,14 @@ test_that("check_constraints works correctly", {
                                  weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(1, 0, 0.11, 0.12, 0.13, 0))))
   expect_error(check_constraints(p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=2),
                                  weight_constraints=list(r=c(0, 0.11, 0.12, 0.13, 0))))
+  expect_error(check_constraints(p=1, M=2, d=2, weight_function="logistic", weightfun_pars=c(1, 1),
+                                 weight_constraints=list(R=0, r=c(0.13))))
+  expect_error(check_constraints(p=1, M=2, d=2, weight_function="logistic", weightfun_pars=c(1, 1),
+                                 weight_constraints=list(R=0, r=c(0.13, 0.1, 0.1))))
+  expect_error(check_constraints(p=1, M=2, d=2, weight_function="logistic", weightfun_pars=c(1, 1),
+                                 weight_constraints=list(R=matrix(1:6, nrow=3), r=c(0.13, 0.1))))
+  expect_error(check_constraints(p=1, M=2, d=2, weight_function="logistic", weightfun_pars=c(1, 1),
+                                 weight_constraints=list(R=matrix(1:6, nrow=2), r=c(0.13, 0.1))))
 
   expect_error(check_constraints(p=1, M=1, d=2, AR_constraints=cbind(C_112, C_112)))
   expect_error(check_constraints(p=1, M=1, d=2, AR_constraints=rbind(C_112, C_112)))

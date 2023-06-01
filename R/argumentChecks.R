@@ -325,7 +325,7 @@ n_params <- function(p, M, d, weight_function=c("relative_dens", "logistic", "ml
 #' @return Does return anything but checks the constraints and throws an error if something is wrong.
 #' @keywords internal
 
-check_constraints <- function(p, M, d, weight_function=c("relative_dens", "mlogit"), weightfun_pars=NULL,
+check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit"), weightfun_pars=NULL,
                               AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
   weight_function <- match.arg(weight_function)
   weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars)
@@ -371,6 +371,8 @@ check_constraints <- function(p, M, d, weight_function=c("relative_dens", "mlogi
     }
     if(weight_function == "relative_dens") {
       n_nonconstr_weightpars <- M - 1
+    } else if(weight_function == "logistic") {
+      n_nonconstr_weightpars <- 2
     } else if(weight_function == "mlogit") {
       n_nonconstr_weightpars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
     } else {
@@ -385,6 +387,18 @@ check_constraints <- function(p, M, d, weight_function=c("relative_dens", "mlogi
         stop("The first element of weight_constraints (matrix R) has more columns than rows! What are you doing??")
       } else if(qr(weight_constraints[[1]])$rank != ncol(weight_constraints[[1]])) {
         stop("The first element of weight_constraints (matrix R) should have full column rank (or it should equal to zero)")
+      }
+      if(weight_function == "logistic") {
+        if(weight_constraints[[2]][2] <= 0) {
+          warning("When weight_function='logistic', the scale parameter needs to be strictly positive, and there is a negative
+                  (or zero) constraint in r for the scale parameter, implying that the estimation may fail.")
+        }
+      }
+      if(weight_function == "relative_dens") {
+        if(any(weight_constraints[[2]][2] <= 0)) {
+          warning("When weight_function='relative dens', the weight parameters need to be strictly positive, and there is a negative
+                  (or zero) constraint in r for a weight parameter, implying that the estimation may fail.")
+        }
       }
     }
     # Check r
