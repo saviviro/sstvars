@@ -17,7 +17,8 @@ in_paramspace(
   df,
   stab_tol = 0.001,
   posdef_tol = 1e-08,
-  df_tol = 1e-08
+  df_tol = 1e-08,
+  weightpar_tol = 1e-08
 )
 }
 \arguments{

@@ -561,7 +561,6 @@ test_that("in_paramspace work correctly", {
   expect_true(in_paramspace(p=1, M=2, d=3, weight_function="logistic", cond_dist="Gaussian",
                              all_boldA=boldA_122, all_Omegas=Omegas_122, weightpars=c(0.1, 0.01)))
 
-
   # mlogit (nothing to check in weightpars, so just checks that the function runs)
   expect_true(in_paramspace(p=2, M=2, d=2, weight_function="mlogit", cond_dist="Gaussian",
                             all_boldA=boldA_222log_12_2, all_Omegas=Omegas_222log_12_2, weightpars=weightpars_222log_12_2))
@@ -601,8 +600,6 @@ test_that("check_params work correctly", {
                AR_constraints=C_222)
   check_params(p=2, M=2, d=2, params=theta_222relgcm, weight_function="relative_dens", cond_dist="Gaussian",
                AR_constraints=C_222, mean_constraints=list(1:2))
-
-
 
   # Check Omegas
   check_params(p=1, M=1, d=2, params=theta_112relg, weight_function="relative_dens", cond_dist="Gaussian")
@@ -657,6 +654,20 @@ test_that("all_pos_ints works correctly", {
 })
 
 test_that("n_params works correctly", {
+  expect_equal(n_params(p=1, M=2, d=2, weight_function="logistic", cond_dist="Gaussian", weightfun_pars=c(1, 1)), 20)
+  expect_equal(n_params(p=1, M=2, d=2, weight_function="logistic", cond_dist="Gaussian", weightfun_pars=c(2, 1)), 20)
+  expect_equal(n_params(p=2, M=2, d=2, weight_function="logistic", cond_dist="Gaussian", weightfun_pars=c(2, 1)), 28)
+  expect_equal(n_params(p=1, M=2, d=3, weight_function="logistic", cond_dist="Gaussian", weightfun_pars=c(1, 1)), 38)
+  expect_equal(n_params(p=1, M=2, d=3, weight_function="logistic", cond_dist="Gaussian", weightfun_pars=c(3, 1),
+                        AR_constraints=C_123), 29)
+  expect_equal(n_params(p=1, M=2, d=3, weight_function="logistic", cond_dist="Gaussian", weightfun_pars=c(3, 1),
+                        AR_constraints=C_123, mean_constraints=list(1:2)), 26)
+  expect_equal(n_params(p=2, M=2, d=2, weight_function="logistic", cond_dist="Gaussian", weightfun_pars=c(2, 1),
+                        mean_constraints=list(1:2), AR_constraints=C_222,
+                        weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))), 17)
+
+
+
   expect_equal(n_params(p=1, M=3, d=2, weight_function="relative_dens", cond_dist="Gaussian",
                         weight_constraints=list(R=matrix(c(0.9, 0.5), nrow=2), r=c(0.13, 0.13))), 28)
   expect_equal(n_params(p=2, M=2, d=2, weight_function="relative_dens", cond_dist="Gaussian", mean_constraints=list(1:2),

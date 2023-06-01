@@ -9,7 +9,7 @@ check_params(
   M,
   d,
   params,
-  weight_function = c("relative_dens", "mlogit"),
+  weight_function = c("relative_dens", "logistic", "mlogit"),
   weightfun_pars = NULL,
   cond_dist = c("Gaussian", "Student"),
   parametrization = c("intercept", "mean"),

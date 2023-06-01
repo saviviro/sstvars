@@ -121,7 +121,7 @@ in_paramspace <- function(p, M, d, weight_function, weightfun_pars=NULL, cond_di
 #'  }
 #' @export
 
-check_params <- function(p, M, d, params, weight_function=c("relative_dens", "mlogit"), weightfun_pars=NULL,
+check_params <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit"), weightfun_pars=NULL,
                          cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
                          identification=c("reduced_form", "recursive", "heteroskedasticity"),
                          AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
@@ -257,13 +257,13 @@ check_data <- function(data, p) {
 #' @inherit in_paramspace references
 #' @keywords internal
 
-n_params <- function(p, M, d, weight_function=c("relative_dens", "mlogit"), weightfun_pars=NULL,
+n_params <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit"), weightfun_pars=NULL,
                      cond_dist=c("Gaussian", "Student"), identification=c("reduced_form", "recursive", "heteroskedasticity"),
                      AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
-  if(identification != "reduced_form") stop("Only reduced form models are currently supported")
+  if(identification != "reduced_form") stop("Only reduced form models are currently supported in n_params")
 
   if(is.null(mean_constraints)) {
     n_mean_pars <- M*d
@@ -284,11 +284,12 @@ n_params <- function(p, M, d, weight_function=c("relative_dens", "mlogit"), weig
   if(is.null(weight_constraints)) {
     if(weight_function == "relative_dens") {
       n_weight_pars <- M - 1
+    } else if(weight_function == "logistic") {
+      n_weight_pars <- 2
     } else if(weight_function == "mlogit") {
       n_weight_pars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
-    } else { # weight_function == "mlogit"
-      stop("only relative_dens and mlogit weight fn is implemented to n_params")
-      n_weight_pars <- NULL
+    } else {
+      stop("Unknown weightfunction in n_params")
     }
   } else { # Constraints on the weight parameters
     if(all(weight_constraints[[1]] == 0)) {

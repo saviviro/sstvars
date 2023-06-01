@@ -8,7 +8,7 @@ n_params(
   p,
   M,
   d,
-  weight_function = c("relative_dens", "mlogit"),
+  weight_function = c("relative_dens", "logistic", "mlogit"),
   weightfun_pars = NULL,
   cond_dist = c("Gaussian", "Student"),
   identification = c("reduced_form", "recursive", "heteroskedasticity"),
