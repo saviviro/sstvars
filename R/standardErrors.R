@@ -10,7 +10,7 @@
 #' @inherit in_paramspace references
 #' @keywords internal
 
-standard_errors <- function(data, p, M, params, weight_function=c("relative_dens", "mlogit"), weightfun_pars=NULL,
+standard_errors <- function(data, p, M, params, weight_function=c("relative_dens", "logistic", "mlogit"), weightfun_pars=NULL,
                             cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
                             identification=c("reduced_form", "recursive", "heteroskedasticity"),
                             AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
