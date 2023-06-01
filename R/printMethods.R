@@ -84,6 +84,9 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   if(weight_function == "mlogit") {
     cat("\n ", paste0("Switching variables: ", paste0(var_names[weightfun_pars[[1]]], collapse=", "), " with ",
                      weightfun_pars[[2]], ifelse(weightfun_pars[[2]] == 1, " lag.", " lags.")))
+  } else if(weight_function == "logistic") {
+    cat("\n ", paste0("Switching variable: ", paste0(var_names[weightfun_pars[1]], collapse=", "), " with ",
+                      weightfun_pars[2], " lag."))
   }
   cat("\n\n")
 
@@ -123,6 +126,11 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
         cat(" (by normalization)")
       }
       cat("\n")
+    } else if(weight_function == "logistic") {
+      if(m == M) {
+        cat(paste("Weight params:", paste0(format_value(weightpars[1]), " (location), ",
+                                           format_value(weightpars[2]), " (scale)")), "\n")
+      }
     }
     cat("Regime means:", paste0(format_value(all_mu[,m]), collapse=", "))
     cat("\n\n")
