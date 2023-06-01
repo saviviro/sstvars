@@ -76,6 +76,9 @@ evaluation of the log-likelihood might fail and cause error.}
 \item{df_tol}{the parameter vector is considered to be outside the parameter space the degrees of
 freedom parameters is not larger than \code{2 + df_tol}.}
 
+\item{weightpar_tol}{numerical tolerance for weight parameters being in the parameter space. Values closer to
+to the border of the parameter space than this are considered to be "outside" the parameter space.}
+
 \item{all_Omega}{3D array containing all covariance matrices \eqn{\Omega_{m}}, obtained from \code{pick_Omegas}.}
 }
 \value{

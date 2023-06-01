@@ -48,6 +48,8 @@ stab_conds_satisfied <- function(p, M, d, params, all_boldA=NULL, tolerance=1e-3
 #'   the error term covariance matrix of any regime has eigenvalues smaller than this, the model is classified
 #'   as not satisfying positive definiteness assumption. Note that if the tolerance is too small, numerical
 #'   evaluation of the log-likelihood might fail and cause error.
+#' @param weightpar_tol numerical tolerance for weight parameters being in the parameter space. Values closer to
+#'   to the border of the parameter space than this are considered to be "outside" the parameter space.
 #' @param df_tol the parameter vector is considered to be outside the parameter space the degrees of
 #'   freedom parameters is not larger than \code{2 + df_tol}.
 #' @details The parameter vector in the argument \code{params} should be unconstrained and reduced form.
@@ -125,7 +127,7 @@ check_params <- function(p, M, d, params, weight_function=c("relative_dens", "lo
                          cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
                          identification=c("reduced_form", "recursive", "heteroskedasticity"),
                          AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
-                         stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
+                         stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8, weightpar_tol=1e-8) {
   check_pMd(p=p, M=M, d=d)
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -169,10 +171,12 @@ check_params <- function(p, M, d, params, weight_function=c("relative_dens", "lo
     } else if(any(weightpars <= 0)) {
       stop("The transition weight parameter alphas must be strictly larger than zero!")
     }
+  } else if(weight_function == "logistic") {
+    if(weightpars[2] <= 0 + weightpar_tol) {
+      stop("The scale parameter of logistic transition weights needs to be strictly positive (with large enough numerical tolerance)" )
+    }
   } else if(weight_function == "mlogit") {
     if(!is.numeric(weightpars)) stop("Transition weight parameters need to be numeric") # All real numbers are ok
-  } else {
-    stop("Weight functions other than relative_dens and mlogit are not yet implemented to check_params!")
   }
   if(!stab_conds_satisfied(p=p, M=M, d=d, all_boldA=all_boldA, tolerance=stab_tol)) {
     stop("At least one of the regimes does not satisfy the stability condition (with large enough numerical tolerance)!")

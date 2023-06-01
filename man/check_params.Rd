@@ -20,7 +20,8 @@ check_params(
   B_constraints = NULL,
   stab_tol = 0.001,
   posdef_tol = 1e-08,
-  df_tol = 1e-08
+  df_tol = 1e-08,
+  weightpar_tol = 1e-08
 )
 }
 \arguments{
@@ -135,6 +136,9 @@ log-likelihood might fail and cause error.}
 
 \item{df_tol}{the parameter vector is considered to be outside the parameter space if the degrees of
 freedom parameters is not larger than \code{2 + df_tol} (applies only if \code{cond_dist="Student"}).}
+
+\item{weightpar_tol}{numerical tolerance for weight parameters being in the parameter space. Values closer to
+to the border of the parameter space than this are considered to be "outside" the parameter space.}
 }
 \value{
 Throws an informative error if there is something wrong with the parameter vector.
