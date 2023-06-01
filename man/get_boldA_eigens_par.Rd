@@ -9,7 +9,7 @@ get_boldA_eigens_par(
   M,
   d,
   params,
-  weight_function = c("relative_dens", "mlogit"),
+  weight_function = c("relative_dens", "logistic", "mlogit"),
   weightfun_pars = NULL,
   cond_dist = c("Gaussian", "Student"),
   identification = c("reduced_form", "impact_responses", "heteroskedasticity", "other"),

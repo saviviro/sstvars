@@ -52,7 +52,7 @@ get_omega_eigens <- function(stvar) {
 #' @inherit stab_conds_satisfied references
 #' @keywords internal
 
-get_boldA_eigens_par <- function(p, M, d, params, weight_function=c("relative_dens", "mlogit"), weightfun_pars=NULL,
+get_boldA_eigens_par <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit"), weightfun_pars=NULL,
                                  cond_dist=c("Gaussian", "Student"),
                                  identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
                                  AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
@@ -85,7 +85,7 @@ get_boldA_eigens_par <- function(p, M, d, params, weight_function=c("relative_de
 #' @inherit get_boldA_eigens references
 #' @keywords internal
 
-get_omega_eigens_par <- function(p, M, d, params, weight_function=c("relative_dens", "mlogit"), weightfun_pars=NULL,
+get_omega_eigens_par <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit"), weightfun_pars=NULL,
                                  cond_dist=c("Gaussian", "Student"),
                                  identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
                                  AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
