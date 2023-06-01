@@ -197,7 +197,8 @@ smart_df <- function(df, accuracy) {
 #' @keywords internal
 
 random_weightpars <- function(M, weight_function, weightfun_pars=NULL, AR_constraints=NULL, mean_constraints=NULL,
-                              weight_constraints=NULL) {
+                              weight_constraints=NULL, weight_scale) {
+  if(M == 1) return(numeric(0))
   if(weight_function == "relative_dens") {
     if(is.null(weight_constraints)) {
       alphas <- runif(n=M)
@@ -214,18 +215,31 @@ random_weightpars <- function(M, weight_function, weightfun_pars=NULL, AR_constr
         ret <- sort(runif(n=ncol(weight_constraints[[1]]), min=0, max=0.8), decreasing=TRUE)
       }
     }
-  } else if(weight_function == "mlogit") {
+  } else if(weight_function == "logistic") {
     if(is.null(weight_constraints)) {
-      ret <- rt(n=(M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]]), df=4)
+      ret <- c(rnorm(n=1, mean=weight_scale[1], sd=weight_scale[2]), abs(rnorm(n=1, mean=0, sd=weight_scale[3])) + 1e-8)
     } else {
       if(all(weight_constraints[[1]] == 0)) {
         ret <- numeric(0) # alpha = r constant, so it is not parametrized
       } else {
-        ret <- rt(n=ncol(weight_constraints[[1]]), df=4)
+        ret <- rnorm(n=ncol(weight_constraints[[1]]), mean=0, sd=weight_scale[3])
+      }
+    }
+  } else if(weight_function == "mlogit") {
+    if(is.null(weight_constraints)) {
+      k <- 1 + length(weightfun_pars[[1]])*weightfun_pars[[2]] # how many pars in each gamma_m
+      ret <- rnorm(n=(M - 1)*k, mean=0, sd=weight_scale[3])
+      # Replace different coefficients for constant terms:
+      ret[(1:(M - 1) - 1)*k + 1] <- rnorm(n=(M - 1), mean=weight_scale[1], sd=weight_scale[2])
+    } else {
+      if(all(weight_constraints[[1]] == 0)) {
+        ret <- numeric(0) # alpha = r constant, so it is not parametrized
+      } else {
+        ret <- rnorm(n=ncol(weight_constraints[[1]]), mean=0, sd=weight_scale[3])
       }
     }
   } else {
-    stop("Only relative dens and mlogit weights are currently implemented in random_weightpars")
+    stop("Unkown weight function in random_weightpars")
   }
   ret
 }
@@ -261,11 +275,11 @@ smart_weightpars <- function(M, weight_pars, weight_function, weight_constraints
                          sd=pmax(0.2, c(weight_pars, 1-sum(weight_pars))/accuracy))
     ret <- (weight_pars/sum(weight_pars))[-M]
     # Sort and standardize alphas; don't sort if AR_constraints or mean_constraints are used
-  } else if(weight_function == "mlogit") {
+  } else if(weight_function == "mlogit" || weight_function == "logistic") {
     ret <- rnorm(n=length(weight_pars), mean=weight_pars,
                  sd=pmax(0.2, weight_pars/accuracy))
   } else {
-    stop("Only relative dens and mlogit weights are currently implemented in smart_weightpars")
+    stop("Unkown weight function in smart_weightpars")
   }
   ret
 }
@@ -292,10 +306,10 @@ smart_weightpars <- function(M, weight_pars, weight_function, weight_constraints
 #'  }
 #' @keywords internal
 
-random_ind <- function(p, M, d, weight_function=c("relative_dens", "mlogit"), weightfun_pars=NULL,
+random_ind <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit"), weightfun_pars=NULL,
                        cond_dist=c("Gaussian", "Student"), AR_constraints=NULL, mean_constraints=NULL,
                        weight_constraints=NULL, force_stability=is.null(AR_constraints),
-                       mu_scale, mu_scale2, omega_scale, ar_scale=1, ar_scale2=1) {
+                       mu_scale, mu_scale2, omega_scale, weight_scale, ar_scale=1, ar_scale2=1) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   g <- ifelse(is.null(mean_constraints), M, length(mean_constraints)) # Number of groups of regimes with the same mean parameters
@@ -328,7 +342,7 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "mlogit"), we
   if(M > 1) {
     weight_pars <- random_weightpars(M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                      AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                                     weight_constraints=weight_constraints)
+                                     weight_constraints=weight_constraints, weight_scale=weight_scale)
   } else {
     weight_pars <- numeric(0) # Replicate returns a list if the value is numeric(0)
   }

@@ -8,7 +8,7 @@ random_ind(
   p,
   M,
   d,
-  weight_function = c("relative_dens", "mlogit"),
+  weight_function = c("relative_dens", "logistic", "mlogit"),
   weightfun_pars = NULL,
   cond_dist = c("Gaussian", "Student"),
   AR_constraints = NULL,
@@ -18,6 +18,7 @@ random_ind(
   mu_scale,
   mu_scale2,
   omega_scale,
+  weight_scale,
   ar_scale = 1,
   ar_scale2 = 1
 )
@@ -100,6 +101,19 @@ and for non-diagonal elements they are \code{sqrt(1/d*omega_scale[i]*omega_scale
 Note that for \code{d>4} this scale may need to be chosen carefully. Default in \code{GAfit} is
 \code{var(stats::ar(data[,i], order.max=10)$resid, na.rm=TRUE), i=1,...,d}. This argument is ignored if
 structural model is considered.}
+
+\item{weight_scale}{For...
+\describe{
+  \item{\code{weight_function == "relative_dens"}:}{not used.}
+  \item{\code{weight_function == "logistic"}:}{length three vector with the mean (in the first element)
+     and standard deviation (in the second element) of the normal distribution the location parameter is drawn from
+     in random mutations. The third element is the standard deviation of the normal distribution from whose absolute value
+     the location parameter is drawn from.}
+  \item{\code{weight_function == "mlogit"}:}{length two vector with the mean (in the first element)
+     and standard deviation (in the second element) of the normal distribution the coefficients of the logit sub model's
+     constant terms are drawn from in random mutations. The third element is the standard deviation of the normal distribution
+     from which the non-constant regressors' coefficients are drawn from. }
+}}
 
 \item{ar_scale}{a positive real number adjusting how large AR parameter values are typically proposed in construction
 of the initial population: larger value implies larger coefficients (in absolute value). After construction of the

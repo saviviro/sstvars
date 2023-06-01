@@ -130,12 +130,13 @@ If you wish to estimate a structural model, estimate first the reduced form mode
  use the found estimates as starting values for the genetic algorithm and and employ another round of estimation
  (see \code{?GAfit} how to set up an initial population with the dot parameters).
 
- \strong{If the estimation algorithm fails to create an initial population for the genetic algorithm},
- it usually helps to scale the individual series so that the AR coefficients (of a VAR model) will be
- relative small, preferably less than one. Even if one is able to create an initial population, it should
- be preferred to scale the series so that most of the AR coefficients will not be very large, as the
- estimation algorithm works better with relatively small AR coefficients. If needed, another package can be used
- to fit linear VARs to the series to see which scaling of the series results in relatively small AR coefficients.
+ \strong{If the estimation algorithm performs poorly (or fails to create an initial population for the genetic algorithm)},
+ it usually helps to scale the individual series so that they vary roughly in the same scale.
+ This makes it is easier to draw reasonable AR coefficients and (with some weight functions) weight parameter values.
+ Even if one is able to create an initial population, it should be preferred to scale the series so that most of the
+ AR coefficients will not be very large, as the estimation algorithm works better with relatively small AR coefficients.
+ If needed, another package can be used to fit linear VARs to the series to see which scaling of the series results in
+ relatively small AR coefficients. You may want to avoid very small (or very high) variability as well.
 
  \strong{weight_constraints:} If you are using weight constraints other than restricting some of the weight parameters to known
  constants, make sure the constraints are sensible. Otherwise, the estimation may fail due to the estimation algorithm not being

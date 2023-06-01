@@ -10,7 +10,8 @@ random_weightpars(
   weightfun_pars = NULL,
   AR_constraints = NULL,
   mean_constraints = NULL,
-  weight_constraints = NULL
+  weight_constraints = NULL,
+  weight_scale
 )
 }
 \arguments{
@@ -65,6 +66,19 @@ The constraints are of the form \eqn{\alpha = R\xi + r}, where \eqn{R} is a know
 constraint matrix of full column rank (\eqn{a} is the dimension of \eqn{\alpha}), \eqn{r} is a known \eqn{(a\times 1)} constant,
 and \eqn{\xi} is an unknown \eqn{(l\times 1)} parameter. \strong{Alternatively}, set \eqn{R=0} in order to constrain the
 the weight parameter to the constant \eqn{r} (in this case, \eqn{\alpha} is dropped from the constrained parameter vector).}
+
+\item{weight_scale}{For...
+\describe{
+  \item{\code{weight_function == "relative_dens"}:}{not used.}
+  \item{\code{weight_function == "logistic"}:}{length three vector with the mean (in the first element)
+     and standard deviation (in the second element) of the normal distribution the location parameter is drawn from
+     in random mutations. The third element is the standard deviation of the normal distribution from whose absolute value
+     the location parameter is drawn from.}
+  \item{\code{weight_function == "mlogit"}:}{length two vector with the mean (in the first element)
+     and standard deviation (in the second element) of the normal distribution the coefficients of the logit sub model's
+     constant terms are drawn from in random mutations. The third element is the standard deviation of the normal distribution
+     from which the non-constant regressors' coefficients are drawn from. }
+}}
 }
 \value{
 Returns a numeric vector ...

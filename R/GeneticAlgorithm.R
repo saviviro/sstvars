@@ -55,6 +55,18 @@
 #' @param ar_scale a positive real number adjusting how large AR parameter values are typically proposed in construction
 #'   of the initial population: larger value implies larger coefficients (in absolute value). After construction of the
 #'   initial population, a new scale is drawn from \code{(0, 0.)} uniform distribution in each iteration.
+#' @param weight_scale For...
+#'   \describe{
+#'     \item{\code{weight_function == "relative_dens"}:}{not used.}
+#'     \item{\code{weight_function == "logistic"}:}{length three vector with the mean (in the first element)
+#'        and standard deviation (in the second element) of the normal distribution the location parameter is drawn from
+#'        in random mutations. The third element is the standard deviation of the normal distribution from whose absolute value
+#'        the location parameter is drawn from.}
+#'     \item{\code{weight_function == "mlogit"}:}{length two vector with the mean (in the first element)
+#'        and standard deviation (in the second element) of the normal distribution the coefficients of the logit sub model's
+#'        constant terms are drawn from in random mutations. The third element is the standard deviation of the normal distribution
+#'        from which the non-constant regressors' coefficients are drawn from. }
+#'   }
 #' @param upper_ar_scale the upper bound for \code{ar_scale} parameter (see above) in the random mutations. Setting
 #'  this too high might lead to failure in proposing new parameters that are well enough inside the parameter space,
 #'  and especially with large \code{p} one might want to try smaller upper bound (e.g., 0.5).
@@ -118,7 +130,8 @@
 GAfit <- function(data, p, M, weight_function=c("relative_dens", "mlogit"), weightfun_pars=NULL,
                   cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
                   AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
-                  ngen=200, popsize, smart_mu=min(100, ceiling(0.5*ngen)), initpop=NULL, mu_scale, mu_scale2, omega_scale,
+                  ngen=200, popsize, smart_mu=min(100, ceiling(0.5*ngen)), initpop=NULL,
+                  mu_scale, mu_scale2, omega_scale, weight_scale,
                   ar_scale=0.2, upper_ar_scale=1, ar_scale2=1, regime_force_scale=1, red_criteria=c(0.05, 0.01),
                   pre_smart_mu_prob=0, to_return=c("alt_ind", "best_ind"), minval, seed=NULL) {
 
@@ -167,6 +180,23 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "mlogit"), weig
   } else if(!(length(omega_scale) == d & all(omega_scale > 0))) {
     stop("omega_scale must be numeric vector with length d and positive elements")
   }
+  if(missing(weight_scale)) {
+    if(weight_function == "logistic") {
+      weight_scale <- c(mean(data[,weightfun_pars[1]]), 3*sd(data[,weightfun_pars[1]]), 3*sd(data[,weightfun_pars[1]]))
+    } else if(weight_function == "mlogit") {
+      weight_scale <- c(mean(data[,weightfun_pars[[1]]]), 8*sd(data[,weightfun_pars[[1]]]), 8*sd(data[,weightfun_pars[[1]]]))
+    } else {
+      weight_scale <- NULL # Not used
+    }
+  } else {
+    if(weight_function %in% c("logistic", "mlogit")) {
+      if(length(weight_scale) != 2 || !is.vector(weight_scale) || !is.numeric(weight_scale) || weight_scale[2] <= 0) {
+        stop("For logistic and mlogit weight functions, the argument weight_scale should be a length two numeric vector
+              with strictly positive second element")
+      }
+    }
+  }
+
   stopifnot(pre_smart_mu_prob >= 0 && pre_smart_mu_prob <= 1)
   if(length(ar_scale) != 1 | ar_scale <= 0) {
     stop("ar_scale must be positive and have length one")
