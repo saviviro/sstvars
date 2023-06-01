@@ -389,15 +389,15 @@ check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logis
         stop("The first element of weight_constraints (matrix R) should have full column rank (or it should equal to zero)")
       }
       if(weight_function == "logistic") {
-        if(weight_constraints[[2]][2] <= 0) {
+        if(weight_constraints[[2]][2] < 0) {
           warning("When weight_function='logistic', the scale parameter needs to be strictly positive, and there is a negative
-                  (or zero) constraint in r for the scale parameter, implying that the estimation may fail.")
+                   constraint in r for the scale parameter, implying that the estimation may fail.")
         }
       }
       if(weight_function == "relative_dens") {
-        if(any(weight_constraints[[2]][2] <= 0)) {
+        if(any(weight_constraints[[2]][2] < 0)) {
           warning("When weight_function='relative dens', the weight parameters need to be strictly positive, and there is a negative
-                  (or zero) constraint in r for a weight parameter, implying that the estimation may fail.")
+                   constraint in r for a weight parameter, implying that the estimation may fail.")
         }
       }
     }

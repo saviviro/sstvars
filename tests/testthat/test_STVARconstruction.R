@@ -63,6 +63,13 @@ mod222logcmw_12_2 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logcmw_12
                           weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
                           weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0)))
 
+# p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
+# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))
+xi_222logisticcmw_2_1 <- c(0.33)
+theta_222logisticcmw_2_1 <- c(theta_222relgcm[-length(theta_222relgcm)], xi_222logisticcmw_2_1)
+mod222logisticcmw_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logisticcmw_2_1, weight_function="logistic",
+                               weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
+                               weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)))
 
 test_that("STVAR works correctly", {
   # Relative_dens Gaussian STVAR
@@ -73,7 +80,11 @@ test_that("STVAR works correctly", {
   expect_equal(mod323relg$params, theta_323relg)
   expect_equal(mod222relgcm$params, theta_222relgcm)
 
+  # Logistic
+  expect_equal(mod222logisticcmw_2_1$params, theta_222logisticcmw_2_1)
+
   # Logit
   expect_equal(mod222logcm_12_2$params, theta_222logcm_12_2)
   expect_equal(mod222logcmw_12_2$params, theta_222logcmw_12_2)
+
 })
