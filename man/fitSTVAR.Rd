@@ -8,7 +8,7 @@ fitSTVAR(
   data,
   p,
   M,
-  weight_function = c("relative_dens", "mlogit"),
+  weight_function = c("relative_dens", "logistic", "mlogit"),
   weightfun_pars = NULL,
   cond_dist = c("Gaussian", "Student"),
   parametrization = c("intercept", "mean"),
@@ -204,14 +204,24 @@ fit22c <- fitSTVAR(gdpdef, p=2, M=2, AR_constraints=C_222, nrounds=1, seeds=1, u
 fit22cm <- fitSTVAR(gdpdef, p=2, M=2, AR_constraints=C_222, mean_constraints=list(1:2),
   nrounds=1, seeds=1, use_parallel=FALSE)
 
-# p=3, M=2, d=3
+# p=3, M=2, d=3, relative_dens STVAR
 f32 <- fitSTVAR(usamone, p=3, M=2, nrounds=20, seeds=61:80)
 summary(f32)
 plot(f32)
 
+# p=3, M=2, d=2, logistic STVAR with the second variable as switching variable
+# with one lag.
+fitlogistic32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logistic", weightfun_pars=c(2, 1),
+ nrounds=1, seeds=4, use_parallel=FALSE)
+
+# p=3, M=2, d=2, logistic STVAR with the second variable as switching variable
+# with one lag, and the location parameter constrained to 1 and scale parameter unconstrained.
+fitlogistic32w <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logistic", weightfun_pars=c(2, 1),
+  weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(1, 0)), nrounds=1, seeds=1, use_parallel=FALSE)
+
 # mlogit STVAR, p=3, M=2, d=2, the second variable is the switching variable with one lag.
 fitmlogit32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1),
- nrounds=20, seeds=1:20)
+ nrounds=20, seeds=1:20, use_parallel=FALSE)
 
 # mlogit STVAR, p=3, M=2, d=2, the second variable is the switching variable with one lag,
 # constrain AR matrices equal across the regimes.
@@ -221,10 +231,6 @@ fitmlogit32c <- fitSTVAR(gdpdef, p=3, M=2, weight_function="mlogit", weightfun_p
 
 # relative_dens STVAR, p=1, M=2, d=2, with the weight parameter fixed to the constant r=0.8.
 fit12w <- fitSTVAR(gdpdef, p=1, M=2, weight_constraints=list(R=0, r=0.8), nrounds=1, seeds=10, use_parallel=FALSE)
-
-# mlogit STVAR, p=1, M=2, d=2, second variable as switching variable with one lag such that the constant term is -5.
-fitmlogit12w <- fitSTVAR(gdpdef, p=1, M=2, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1),
-  weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(-5, 0)), nrounds=20, seeds=1:20, use_parallel=FALSE)
 }
 }
 \references{

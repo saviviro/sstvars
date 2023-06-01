@@ -373,7 +373,7 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logistic", "
 #' @inherit random_ind return references
 #' @keywords internal
 
-smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "mlogit"), weightfun_pars=NULL,
+smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit"), weightfun_pars=NULL,
                       cond_dist=c("Gaussian", "Student"), AR_constraints=NULL, mean_constraints=NULL,
                       weight_constraints=NULL,  accuracy=1, which_random=numeric(0),
                       mu_scale, mu_scale2, omega_scale, ar_scale=1, ar_scale2=1) {

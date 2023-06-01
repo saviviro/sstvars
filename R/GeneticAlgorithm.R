@@ -127,7 +127,7 @@
 #'          \emph{Proceedings of the 1995 ACM Symposium on Applied Computing}, 345-350.
 #'  }
 
-GAfit <- function(data, p, M, weight_function=c("relative_dens", "mlogit"), weightfun_pars=NULL,
+GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit"), weightfun_pars=NULL,
                   cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
                   AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
                   ngen=200, popsize, smart_mu=min(100, ceiling(0.5*ngen)), initpop=NULL,
@@ -141,7 +141,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "mlogit"), weig
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
   to_return <- match.arg(to_return)
-  check_pMd(p=p, M=M)
+  check_pMd(p=p, M=M, weight_function=weight_function)
   data <- check_data(data=data, p=p)
   d <- ncol(data)
   n_obs <- nrow(data)
@@ -182,7 +182,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "mlogit"), weig
   }
   if(missing(weight_scale)) {
     if(weight_function == "logistic") {
-      weight_scale <- c(mean(data[,weightfun_pars[1]]), 3*sd(data[,weightfun_pars[1]]), 3*sd(data[,weightfun_pars[1]]))
+      weight_scale <- c(mean(data[,weightfun_pars[1]]), 3*sd(data[,weightfun_pars[1]]), 8*sd(data[,weightfun_pars[1]]))
     } else if(weight_function == "mlogit") {
       weight_scale <- c(mean(data[,weightfun_pars[[1]]]), 8*sd(data[,weightfun_pars[[1]]]), 8*sd(data[,weightfun_pars[[1]]]))
     } else {
