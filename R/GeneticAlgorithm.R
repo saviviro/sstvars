@@ -222,7 +222,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "mlogit"), weig
                                             force_stability=is.null(AR_constraints),
                                             mu_scale=mu_scale, mu_scale2=mu_scale2,
                                             omega_scale=omega_scale, ar_scale=ar_scale,
-                                            ar_scale2=ar_scale2))
+                                            weight_scale=weight_scale, ar_scale2=ar_scale2))
       ind_loks <- vapply(1:popsize, function(i2) loglikelihood(data=data, p=p, M=M, params=inds[,i2],
                                                                weight_function=weight_function, weightfun_pars=weightfun_pars,
                                                                cond_dist=cond_dist, parametrization="mean", identification="reduced_form",
@@ -457,6 +457,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "mlogit"), weig
                                                                                  mu_scale2=mu_scale2,
                                                                                  omega_scale=omega_scale,
                                                                                  ar_scale=ar_scale,
+                                                                                 weight_scale=weight_scale,
                                                                                  ar_scale2=ar_scale2), numeric(npars))
 
 
