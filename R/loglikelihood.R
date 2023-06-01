@@ -58,7 +58,7 @@
 #'  See the vignette for more details about the weight functions.
 #' @param weightfun_pars \describe{
 #'   \item{If \code{weight_function == "relative_dens"}:}{Not used.}
-#'   \item{If \code{weight_function == "relative_dens"}:}{a numeric vector with the switching variable \eqn{i\in\lbrace 1,...,d \rbrace}
+#'   \item{If \code{weight_function == "logistic"}:}{a numeric vector with the switching variable \eqn{i\in\lbrace 1,...,d \rbrace}
 #'     in the first and the lag \eqn{j\in\lbrace 1,...,p \rbrace} in the second element.}
 #'   \item{If \code{weight_function == "mlogit"}:}{a list of two elements: \describe{
 #'     \item{The first element \code{$vars}:}{a numeric vector containing the variables that should used as switching variables
@@ -296,8 +296,16 @@ get_alpha_mt <- function(data, Y2, p, M, d, weight_function, weightfun_pars, all
       }
     }
   }
+  if(weight_function == "logistic") {
+    # According to "lag" in weightfun_pars[2], only the column d(lag-1) + variable are used where "variable i is the switching variable"
+    subY2 <- Y2[,d*(weightfun_pars[2] - 1) + weightfun_pars[1]] # Returns a vector
+    in_exp <- -weightpars[2]*(subY2 - weightpars[1])
+    in_exp[in_exp > 700] <- 700 # Values larger than that would produce Inf and "break" the loglikelihood function
+    alpha_2t <- (1 + exp(in_exp))^(-1) # Weights of the second regime
+    return(cbind(1 - alpha_2t, alpha_2t))
+  }
 
-  if(weight_function == "mlogit" & is.null(log_mvdvalues)) {
+  if(weight_function == "mlogit" && is.null(log_mvdvalues)) {
 
     # M-1 vectors gamma_m, since gamma_M = 0.
     all_gamma_m <- matrix(weightpars, ncol=M-1) # Column per gamma_m, m=1,...,M-1

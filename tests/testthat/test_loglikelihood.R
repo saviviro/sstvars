@@ -102,6 +102,38 @@ alpha2_132 <- 0.3
 theta_132relg <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
                    vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), alpha1_132, alpha2_132)
 
+
+## weight_function = "logistic"
+
+# p=1, M=2, d=2, weightfun_pars=c(1, 1)
+c_and_gamma_122_1_1 <- c(0.1, 0.2)
+theta_122logistic_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), c_and_gamma_122_1_1)
+
+# p=1, M=2, d=2, weightfun_pars=c(2, 1)
+c_and_gamma_122_2_1 <- c(0.11, 0.22)
+theta_122logistic_2_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), c_and_gamma_122_2_1)
+
+# p=2, M=2, d=2, weightfun_pars=c(2, 1)
+c_and_gamma_222_2_1 <- c(0.1, 0.2)
+theta_222logistic_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                           vech(Omega1_222), vech(Omega2_222), c_and_gamma_222_2_1)
+
+# p=2, M=2, d=2, weightfun_pars=c(1, 2)
+c_and_gamma_222_1_2 <- c(0.11, 0.22)
+theta_222logistic_1_2 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                           vech(Omega1_222), vech(Omega2_222), c_and_gamma_222_1_2)
+
+# # p=1, M=2, d=3, weightfun_pars=c(1, 1)
+# c_and_gamma_123_1_1 <- c(0.1, 0.5)
+# theta_123logistic_1_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123),
+#                            vech(Omega2_123), c_and_gamma_123_1_1)
+#
+# # p=1, M=2, d=3, weightfun_pars=c(3, 1)
+# c_and_gamma_123_3_1 <- c(0.1, 0.4)
+# theta_123logistic_3_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123),
+#                            vech(Omega2_123), c_and_gamma_123_3_1)
+
+
 ## weight_function = "mlogit"
 
 # p=1, M=2, d=2, weightfun_pars=list(vars=1, lags=1)
@@ -287,6 +319,16 @@ theta_222logcmw_12_2 <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222
 theta_222logcmw_12_2_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
                                    vech(Omega1_222), vech(Omega2_222), c(0.22, 0.11, 0.12, 0.13, 0.33))
 
+# p=1, M=2, d=2, weight_function="logistic", weightfun_pars=c(1, 1), weight_constraints=list(R=0, r=c(0.02, 0.13))
+theta_122logisticw_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122))
+theta_122logisticw_1_1_expanded <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), c(0.02, 0.13))
+
+# p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
+# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))
+xi_222logisticcmw_2_1 <- c(0.33)
+theta_222logisticcmw_2_1 <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), xi_222logisticcmw_2_1)
+theta_222logisticcmw_2_1_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                       vech(Omega1_222), vech(Omega2_222), c(0.01, 0.33))
 
 
 
@@ -304,6 +346,14 @@ test_that("loglikelihood works correctly", {
   expect_equal(loglikelihood(data=usamone, p=3, M=1, params=theta_313relg, weight_function="relative_dens"), -669.5716, tolerance=1e-3)
   expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123relg, weight_function="relative_dens"), -570.019, tolerance=1e-3)
   expect_equal(loglikelihood(data=usamone, p=3, M=2, params=theta_323relg, weight_function="relative_dens"), -490.9401, tolerance=1e-3)
+
+  # logistic STVAR
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122logistic_1_1, weight_function="logistic",
+                             weightfun_pars=c(1, 1)), -342.6918, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222logistic_2_1, weight_function="logistic",
+                             weightfun_pars=c(2, 1)), -291.4979, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222logistic_1_2, weight_function="logistic",
+                             weightfun_pars=c(1, 2)), -303.1628, tolerance=1e-3)
 
   # mlogit STVAR
   expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122log_1_1, weight_function="mlogit",
@@ -363,9 +413,14 @@ test_that("loglikelihood works correctly", {
                              weight_constraints=list(R=0, r=0.6)), -277.5896, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122logw_1_1, weight_function="mlogit", weightfun_pars=list(vars=1, lags=1),
                              weight_constraints=list(R=0, r=c(0.12, 0.13))), -334.8481, tolerance=1e-3)
-  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222logcmw_12_2,, weight_function="mlogit",
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222logcmw_12_2, weight_function="mlogit",
                              weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
                              weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0))),
                -387.4826, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122logisticw_1_1, weight_function="logistic", weightfun_pars=c(1, 1),
+                             weight_constraints=list(R=0, r=c(0.02, 0.13))), -341.6723, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222logisticcmw_2_1, weight_function="logistic", weightfun_pars=c(2, 1),
+                             mean_constraints=list(1:2), AR_constraints=C_222,
+                             weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))), -333.9167, tolerance=1e-3)
 
 })

@@ -78,7 +78,7 @@ See the vignette for more details about the weight functions.}
 
 \item{weightfun_pars}{\describe{
   \item{If \code{weight_function == "relative_dens"}:}{Not used.}
-  \item{If \code{weight_function == "relative_dens"}:}{a numeric vector with the switching variable \eqn{i\in\lbrace 1,...,d \rbrace}
+  \item{If \code{weight_function == "logistic"}:}{a numeric vector with the switching variable \eqn{i\in\lbrace 1,...,d \rbrace}
     in the first and the lag \eqn{j\in\lbrace 1,...,p \rbrace} in the second element.}
   \item{If \code{weight_function == "mlogit"}:}{a list of two elements: \describe{
     \item{The first element \code{$vars}:}{a numeric vector containing the variables that should used as switching variables
