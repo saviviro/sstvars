@@ -23,10 +23,27 @@ theta_123relg <- c(0.10741, 0.13813, -0.12092, 3.48957, 0.60615, 0.45646, 0.8722
                    0.05544, 0.00212, 0.12708, 0.78618, 0.00922, 0.42627, 0.23765, 0.25386, 3.40834, 0.77357)
 mod123relg <- STVAR(data=usamone, p=1, M=2, params=theta_123relg, weight_function="relative_dens")
 
+# p=3, M=2, d=2, weight_function=logistic, weightfun_pars=c(2, 1)
+theta_322logistic <- c(0.575516, 0.039404, 2.747048, 0.298252, 0.268959, 0.055646, -0.28457, 0.368543,
+                       0.321873, 0.026186, -0.134235, 0.128367, -0.063395, 0.01267, -0.04303, 0.296143,
+                       0.173863, -0.028923, -1.124229, 0.652773, -0.046647, 0.003917, 0.611047, 0.089456,
+                       -0.066099, 0.045613, -0.651387, 0.066754, 0.356738, 0.005062, 0.031868, 1.15855,
+                       -0.039808, 0.15342, 1.193073, 7.518277)
+mod322logistic <- STVAR(data=gdpdef, p=3, M=2, params=theta_322logistic, weight_function="logistic", weightfun_pars=c(2, 1))
+
+# p=3, M=2, d=2, weight_function=mlogit, weightfun_pars=list(vars=2, lags=1)
+theta_322mlogit <- c(0.575457, 0.039417, 2.746742, 0.297945, 0.268969, 0.055635, -0.284341, 0.368566, 0.321876,
+                     0.026181, -0.134244, 0.128348, -0.063425, 0.012676, -0.043061, 0.296153, 0.173878, -0.028861,
+                     -1.123896, 0.652866, -0.046737, 0.003973, 0.61057, 0.089591, -0.066095, 0.045594, -0.651087,
+                     0.066679, 0.356729, 0.005054, 0.031869, 1.158638, -0.039743, 0.153416, 8.970726, -7.518924)
+mod322mlogit <- STVAR(data=gdpdef, p=3, M=2, params=theta_322mlogit, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1))
+
 set.seed(1); p112 <- predict(mod112relg, nsteps=1, nsim=1, pred_type="mean")
 set.seed(2); p122 <- predict(mod122relg, nsteps=3, nsim=3, pred_type="median")
 set.seed(3); p222 <- predict(mod222relg, nsteps=2, nsim=10, pred_type="mean", pi=c(0.5))
 set.seed(4); p123 <- predict(mod123relg, nsteps=4, nsim=7, pred_type="median", pi=c(0.3, 0.5, 0.7))
+set.seed(5); p322logistic <- predict(mod322logistic, nsteps=3, nsim=5, pred_type="mean", pi=0.9)
+set.seed(5); p322mlogit <- predict(mod322mlogit, nsteps=3, nsim=5, pred_type="median", pi=c(0.7, 0.8))
 
 
 test_that("simulate.stvar works correctly", {
@@ -35,16 +52,18 @@ test_that("simulate.stvar works correctly", {
   expect_equal(unname(p112$pred_ints[1, 3,]), c(0.2393741, 0.4936729), tol=1e-4)
   expect_equal(unname(p112$trans_pred[1,]), c(1), tol=1e-4)
   expect_equal(unname(p112$trans_pred_ints[1, 1, 1]), c(1), tol=1e-4)
-
   expect_equal(unname(p122$pred[3,]), c(1.4321082, 0.4083084), tol=1e-4)
   expect_equal(unname(p122$pred_ints[3, 2,]), c(1.0924034, 0.2907614), tol=1e-4)
-
   expect_equal(unname(p222$trans_pred[2,]), c(0.95938141, 0.04061859), tol=1e-4)
   expect_equal(unname(p222$trans_pred_ints[2, 1,]), c(0.95597200, 0.03039205), tol=1e-4)
-
   expect_equal(unname(p123$pred[4,]), c(2.154655, 1.960712, 1.612034), tol=1e-4)
   expect_equal(unname(p123$pred_ints[4, 5,]), c(2.422710, 2.372279, 7.711421), tol=1e-4)
   expect_equal(unname(p123$trans_pred[4,]), c(0.0002149667, 0.9997850333), tol=1e-4)
   expect_equal(unname(p123$trans_pred_ints[3, 4,]), c(0.1428647, 1.0000000), tol=1e-4)
+
+  expect_equal(unname(p322logistic$pred[3,]), c(1.042285, 0.327765), tol=1e-4)
+  expect_equal(unname(p322logistic$pred_ints[3, 2,]), c(1.7293984, 0.6218133), tol=1e-4)
+  expect_equal(unname(p322mlogit$pred[3,]), c(1.3200944, 0.3322151), tol=1e-4)
+  expect_equal(unname(p322mlogit$pred_ints[3, 4,]), c(1.5454664, 0.5335837), tol=1e-4)
 })
 

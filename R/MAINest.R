@@ -122,7 +122,7 @@
 #'
 #' # mlogit STVAR, p=3, M=2, d=2, the second variable is the switching variable with one lag.
 #' fitmlogit32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1),
-#'  nrounds=20, seeds=1:20, use_parallel=FALSE)
+#'   nrounds=1, seeds=1, use_parallel=FALSE)
 #'
 #' # mlogit STVAR, p=3, M=2, d=2, the second variable is the switching variable with one lag,
 #' # constrain AR matrices equal across the regimes.
