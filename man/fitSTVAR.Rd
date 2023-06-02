@@ -47,6 +47,12 @@ a univariate time series. Missing values are not supported.}
     {\sum_{n=1}^M\exp\lbrace \gamma_n'z_{t-1} \rbrace}}, where \eqn{\gamma_m} are coefficient vectors, \eqn{\gamma_M=0},
     and \eqn{z_{t-1}} \eqn{(k\times 1)} is the \eqn{\mathcal{F}_{t-1}}-measurable vector containing a constant and
     the (lagged) switching variables.}
+  \item{\code{"exponential"}:}{\eqn{M=2}, \eqn{\alpha_{1,t}=1-\alpha_{2,t}},
+    and \eqn{\alpha_{2,t}=1-\exp\lbrace -\gamma(y_{it-j}-c) \rbrace}, where \eqn{y_{it-j}} is the lag \eqn{j}
+    observation of the \eqn{i}th variable, \eqn{c} is a location parameter, and \eqn{\gamma > 0} is a scale parameter.}
+  \item{\code{"threshold"}:}{\eqn{\alpha_{m,t} = 1} if \eqn{r_{m-1}<y_{it-j}<r_{m}} and \eqn{0} otherwise, where
+     \eqn{-\infty\equiv r_0<r_1<\cdots <r_{M-1}<r_M\equiv\infty} are thresholds \eqn{y_{it-j}} is the lag \eqn{j}
+     observation of the \eqn{i}th variable.}
 }
 See the vignette for more details about the weight functions.}
 
@@ -221,7 +227,7 @@ fitlogistic32w <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logistic", weightf
 
 # mlogit STVAR, p=3, M=2, d=2, the second variable is the switching variable with one lag.
 fitmlogit32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1),
- nrounds=20, seeds=1:20, use_parallel=FALSE)
+  nrounds=1, seeds=1, use_parallel=FALSE)
 
 # mlogit STVAR, p=3, M=2, d=2, the second variable is the switching variable with one lag,
 # constrain AR matrices equal across the regimes.
