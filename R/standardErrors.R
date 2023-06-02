@@ -157,11 +157,11 @@ print_std_errors <- function(stvar, digits=3) {
     cat("\n ", paste0("Switching variables: ", paste0(var_names[weightfun_pars[[1]]], collapse=", "), " with ",
                       weightfun_pars[[2]], ifelse(weightfun_pars[[2]] == 1, " lag.", " lags.")))
   } else if(weight_function == "logistic") {
-    cat("\n ", paste0("Switching variable: ", paste0(var_names[weightfun_pars[1]], collapse=", "), " with ",
-                      weightfun_pars[2], " lag."))
+    cat("\n ", paste0("Switching variable: ", paste0(var_names[weightfun_pars[1]], collapse=", "), " with lag ",
+                      weightfun_pars[2], "."))
   }
   cat("\n\n")
-  cat("APPROXIMATE STANDARD ERRORS\n\n")
+  cat("APPROXIMATE STANDARD ERRORS ASSUMING ASYMPTOTIC NORMALITY\n\n")
 
   left_brackets <- rep("[", times=d)
   right_brackets <- rep("]", times=d)
