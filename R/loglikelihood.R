@@ -283,7 +283,7 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
 get_alpha_mt <- function(data, Y2, p, M, d, weight_function, weightfun_pars, all_A, all_boldA, all_Omegas, weightpars,
                          all_mu, epsilon, log_mvdvalues=NULL) {
   if(is.null(log_mvdvalues)) {
-    T_obs <- nrow(data) - p
+    T_obs <- ifelse(missing(data), 1, nrow(data) - p) # simulate.stvar uses without data, needs to return 1 if M=1.
     if(M == 1) {
       return(as.matrix(rep(1, times=T_obs)))
     }
@@ -300,9 +300,9 @@ get_alpha_mt <- function(data, Y2, p, M, d, weight_function, weightfun_pars, all
     # According to "lag" in weightfun_pars[2], only the column d(lag-1) + variable are used where "variable i is the switching variable"
     subY2 <- Y2[,d*(weightfun_pars[2] - 1) + weightfun_pars[1]] # Returns a vector
     in_exp <- -weightpars[2]*(subY2 - weightpars[1])
-    in_exp[in_exp > 700] <- 700 # Values larger than that would produce Inf and "break" the loglikelihood function
+    in_exp[in_exp > -epsilon] <- -epsilon # Values larger than that would produce Inf and "break" the loglikelihood function; epsilon -698
     alpha_2t <- (1 + exp(in_exp))^(-1) # Weights of the second regime
-    return(cbind(1 - alpha_2t, alpha_2t))
+    return(unname(cbind(1 - alpha_2t, alpha_2t)))
   }
 
   if(weight_function == "mlogit" && is.null(log_mvdvalues)) {
