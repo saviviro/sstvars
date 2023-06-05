@@ -806,7 +806,8 @@ test_that("form_boldA works correctly", {
 })
 
 
-calc_mu <- function(p, M, d, params, weight_function = c("relative_dens", "logistic", "mlogit"), cond_dist = c("Gaussian", "Student"),
+calc_mu <- function(p, M, d, params, weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+                    cond_dist = c("Gaussian", "Student"),
                     identification = c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
                     AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                     weightfun_pars=NULL) {
@@ -858,9 +859,40 @@ theta_122logisticw_1_1_mu <- change_parametrization(p=1, M=2, d=2, params=theta_
                                                     weightfun_pars=c(1, 1), weight_constraints=list(R=0, r=c(0.02, 0.13)), change_to="mean")
 
 
+theta_122exp_1_1_mu <- change_parametrization(p=1, M=2, d=2, params=theta_122exp_1_1, weight_function="exponential",
+                                              weightfun_pars=c(1, 1), change_to="mean")
+theta_123expc_3_1_mu <- change_parametrization(p=1, M=2, d=3, params=theta_123expc_3_1, weight_function="exponential",
+                                               weightfun_pars=c(3, 1), AR_constraints=C_123, change_to="mean")
+
+theta_122thres_1_1_mu <- change_parametrization(p=1, M=2, d=2, params=theta_122thres_1_1, weight_function="threshold",
+                                                weightfun_pars=c(1, 1), change_to="mean")
+theta_232thresw_1_1_mu <- change_parametrization(p=2, M=3, d=2, params=theta_232thresw_1_1, weight_function="threshold",
+                                                 weightfun_pars=c(1, 1), weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.1, 0)),
+                                                 change_to="mean")
+
+
 
 
 test_that("change_parametrization works correctly", {
+  expect_equal(pick_phi0(M=3, d=2, params=theta_232thresw_1_1_mu),
+               calc_mu(p=2, M=3, d=2, params=theta_232thresw_1_1, weight_function="threshold", weightfun_pars=c(1, 1)))
+  expect_equal(change_parametrization(p=2, M=3, d=2, params=theta_232thresw_1_1_mu, weight_function="threshold",
+                                      weightfun_pars=c(1, 1), weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.1, 0)),
+                                      change_to="intercept"), theta_232thresw_1_1)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_122thres_1_1_mu),
+               calc_mu(p=1, M=2, d=2, params=theta_122thres_1_1, weight_function="threshold", weightfun_pars=c(1, 1)))
+  expect_equal(change_parametrization(p=1, M=2, d=2, params=theta_122thres_1_1_mu, weight_function="exponential", weightfun_pars=c(1, 1),
+                                      change_to="intercept"), theta_122thres_1_1)
+
+  expect_equal(pick_phi0(M=2, d=3, params=theta_123expc_3_1_mu),
+               calc_mu(p=1, M=2, d=3, params=theta_123expc_3_1, weight_function="exponential", weightfun_pars=c(3, 1), AR_constraints=C_123))
+  expect_equal(change_parametrization(p=1, M=2, d=3, params=theta_123expc_3_1_mu, weight_function="exponential", weightfun_pars=c(3, 1),
+                                      AR_constraints=C_123, change_to="intercept"), theta_123expc_3_1)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_122exp_1_1_mu),
+               calc_mu(p=1, M=2, d=2, params=theta_122exp_1_1, weight_function="exponential", weightfun_pars=c(1, 1)))
+  expect_equal(change_parametrization(p=1, M=2, d=2, params=theta_122exp_1_1_mu, weight_function="exponential", weightfun_pars=c(1, 1),
+                                      change_to="intercept"), theta_122exp_1_1)
+
   expect_equal(pick_phi0(M=2, d=2, params=theta_122logistic_1_1_mu),
                calc_mu(p=1, M=2, d=2, params=theta_122logistic_1_1, weight_function="logistic", weightfun_pars=c(1, 1)))
   expect_equal(change_parametrization(p=1, M=2, d=2, params=theta_122logistic_1_1_mu, weight_function="logistic", weightfun_pars=c(1, 1),
