@@ -53,17 +53,18 @@ See the vignette for more details about the weight functions.}
 
 \item{weightfun_pars}{\describe{
   \item{If \code{weight_function == "relative_dens"}:}{Not used.}
-  \item{If \code{weight_function == "logistic"}:}{a numeric vector with the switching variable \eqn{i\in\lbrace 1,...,d \rbrace}
-    in the first and the lag \eqn{j\in\lbrace 1,...,p \rbrace} in the second element.}
-  \item{If \code{weight_function == "mlogit"}:}{a list of two elements: \describe{
-    \item{The first element \code{$vars}:}{a numeric vector containing the variables that should used as switching variables
-      in the weight function in an increasing order, i.e., a vector with unique elements in \eqn{\lbrace 1,...,d \rbrace}.}
-    \item{The second element \code{$lags}:}{an integer in \eqn{\lbrace 1,...,p \rbrace} specifying the number of lags to be
-     used in the weight function.}
-  }}
+  \item{If \code{weight_function \%in\% c("logistic", "exponential", "threshold")}:}{a numeric vector with the switching variable
+    \eqn{i\in\lbrace 1,...,d \rbrace} in the first and the lag \eqn{j\in\lbrace 1,...,p \rbrace} in the second element.}
+  \item{If \code{weight_function == "mlogit"}:}{a list of two elements:
+    \describe{
+      \item{The first element \code{$vars}:}{a numeric vector containing the variables that should used as switching variables
+        in the weight function in an increasing order, i.e., a vector with unique elements in \eqn{\lbrace 1,...,d \rbrace}.}
+      \item{The second element \code{$lags}:}{an integer in \eqn{\lbrace 1,...,p \rbrace} specifying the number of lags to be
+        used in the weight function.}
+    }}
 }}
 
-\item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"} or \eqn{"Student"}.}
+\item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"} or \code{"Student"}.}
 
 \item{all_boldA}{3D array containing the \eqn{((dp)x(dp))} "bold A" (companion form) matrices of each regime,
 obtained from \code{form_boldA}. Will be computed if not given.}

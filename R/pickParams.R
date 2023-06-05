@@ -167,31 +167,28 @@ pick_Omegas <- function(p, M, d, params) {
 #' @inherit pick_Ami references
 #' @keywords internal
 
-pick_weightpars <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit"),
+pick_weightpars <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
                             weightfun_pars=NULL, cond_dist=c("Gaussian", "Student")) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   n_distpars <- ifelse(cond_dist == "Student", 1, 0)
-  if(weight_function == "relative_dens") {
-    if(M == 1) {
+  if(M == 1) {
+    if(weight_function == "relative_dens") {
       return(1)
     } else {
-      alphas <- params[(length(params) - M - n_distpars + 2):(length(params) - n_distpars)]
-      return(c(alphas, 1 - sum(alphas)))
-    }
-  } else if(weight_function == "logistic") {
-    if(M == 1) {
       return(numeric(0))
-    } else {
-      return(params[(length(params) - n_distpars - 1):(length(params) - n_distpars)]) # two params: c and gamma
     }
+  }
+  if(weight_function == "relative_dens") {
+    alphas <- params[(length(params) - M - n_distpars + 2):(length(params) - n_distpars)]
+    return(c(alphas, 1 - sum(alphas)))
+  } else if(weight_function == "logistic" || weight_function == "exponential") {
+    return(params[(length(params) - n_distpars - 1):(length(params) - n_distpars)]) # two params: c and gamma
   } else if(weight_function == "mlogit") {
-    if(M == 1) {
-      return(numeric(0))
-    } else {
-      # (M-1)*k = (M-1)*|I|\tilde{p} pars to return
-      return(params[(length(params) - (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]]) - n_distpars + 1):(length(params) - n_distpars)])
-    }
+    # (M-1)*k = (M-1)*|I|\tilde{p} pars to return
+    return(params[(length(params) - (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]]) - n_distpars + 1):(length(params) - n_distpars)])
+  } else if(weight_function == "threshold") {
+    return(params[(length(params) - M - n_distpars + 2):(length(params) - n_distpars)])
   }
 }
 

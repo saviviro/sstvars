@@ -7,7 +7,7 @@
 random_distpars(cond_dist)
 }
 \arguments{
-\item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"} or \eqn{"Student"}.}
+\item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"} or \code{"Student"}.}
 }
 \value{
 Returns a numeric vector ...
