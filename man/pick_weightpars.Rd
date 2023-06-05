@@ -28,14 +28,25 @@ where
   \item{\eqn{\phi_{m,0} = } the \eqn{(d \times 1)} intercept (or mean) vector of the \eqn{m}th regime.}
   \item{\eqn{\varphi_m = (vec(A_{m,1}),...,vec(A_{m,p}))} \eqn{(pd^2 \times 1)}.}
   \item{\eqn{\sigma = (vech(\Omega_1),...,vech(\Omega_M)} \eqn{(Md(d + 1)/2 \times 1)}.}
-  \item{\eqn{\alpha} contains the transition weights parameters}
+  \item{\eqn{\alpha} contains the transition weights parameters.}
   \item{\eqn{\nu > 2} is the degrees of freedom parameter that is included only if \code{cond_dist="Student"}.}
 }
 \describe{
-  \item{For models with \code{weight_function="relative_dens"}:}{\eqn{\alpha = (\alpha_1,...,\alpha_{M-1})}
+  \item{\code{weight_function="relative_dens"}:}{\eqn{\alpha = (\alpha_1,...,\alpha_{M-1})}
         \eqn{(M - 1 \times 1)}, where \eqn{\alpha_m} \eqn{(1\times 1), m=1,...,M-1} are the transition weight parameters.}
-  \item{For models with \code{weight_function="mlogit"}:}{\eqn{\alpha = (\gamma_1,...,\gamma_M)} \eqn{((M-1)k\times 1)},
-        where \eqn{\gamma_m} \eqn{(k\times 1), m=1,...,M-1} contains the mlogit-regression coefficients of the \eqn{m}th regime.}
+ \item{\code{weight_function="logistic"}:}{\eqn{\alpha = (c,\gamma)}
+        \eqn{(2 \times 1)}, where \eqn{c\in\mathbb{R}} is the location parameter and \eqn{\gamma >0} is the scale parameter.}
+  \item{\code{weight_function="mlogit"}:}{\eqn{\alpha = (\gamma_1,...,\gamma_M)} \eqn{((M-1)k\times 1)},
+        where \eqn{\gamma_m} \eqn{(k\times 1)}, \eqn{m=1,...,M-1} contains the multinomial logit-regression coefficients
+        of the \eqn{m}th regime. Specifically, for switching variables with indices in \eqn{I\subset\lbrace 1,...,d\rbrace}, and with
+       \eqn{\tilde{p}\in\lbrace 1,...,p\rbrace} lags included, \eqn{\gamma_m} contains the coefficients for the vector
+       \eqn{z_{t-1} = (1,\tilde{z}_{\min\lbrace I\rbrace},...,\tilde{z}_{\max\lbrace I\rbrace})}, where
+       \eqn{\tilde{z}_{i} =(y_{it-1},...,y_{it-\tilde{p}})}, \eqn{i\in I}. So \eqn{k=1+|I|\tilde{p}}
+       where \eqn{|I|} denotes the number of elements in \eqn{I}.}
+  \item{\code{weight_function="exponential"}:}{\eqn{\alpha = (c,\gamma)}
+        \eqn{(2 \times 1)}, where \eqn{c\in\mathbb{R}} is the location parameter and \eqn{\gamma >0} is the scale parameter.}
+  \item{\code{weight_function="threshold"}:}{\eqn{\alpha = (r_1,...,r_{M-1})}
+        \eqn{(M-1 \times 1)}, where \eqn{r_1,...,r_{M-1}} are the threshold values.}
 }
 Above, \eqn{\phi_{m,0}} is the intercept parameter, \eqn{A_{m,i}} denotes the \eqn{i}th coefficient matrix of the \eqn{m}th
 mixture component, and \eqn{\Omega_{m}} denotes the error term covariance matrix of the \eqn{m}:th mixture component.
@@ -84,13 +95,20 @@ See the vignette for more details about the weight functions.}
 \describe{
     \item{If \code{weight_function = "relative_dens"}:}{Returns a length \eqn{M} vector containing the transition weight
           parameters \eqn{\alpha_{m}, m=1,...,M}, including the non-parametrized \eqn{\alpha_{M}}.}
+   \item{\code{weight_function="logistic"}:}{Returns a length two vector \eqn{(c,\gamma)}, where
+         \eqn{c\in\mathbb{R}} is the location parameter and \eqn{\gamma >0} is the scale parameter.}
     \item{If \code{weight_function = "mlogit"}:}{Returns a length \eqn{(M-1)k} vector \eqn{(\gamma_1,...,\gamma_M)},
-          where \eqn{\gamma_m} \eqn{(k\times 1)}, \eqn{m=1,...,M-1} contains the mlogit-regression coefficients of the \eqn{m}th regime.
-          Specifically, for switching variables with indices in \eqn{J\subset\lbrace 1,...,d\rbrace}, and with
-         \eqn{\tilde{p}\in\lbrace 1,...,p\rbrace} lags included, \eqn{\gamma_m} contains the coefficients for the vector
-         \eqn{z_{t-1} = (1,\tilde{z}_{\min\lbrace J\rbrace},...,\tilde{z}_{\max\lbrace J\rbrace})}, where
-         \eqn{\tilde{z}_{j} =(y_{j,t-1},...,y_{j,t-\tilde{p}})}, \eqn{j\in J}. So \eqn{k=1+|J|\tilde{p}}
-         where \eqn{|J|} denotes the number of elements in \eqn{J}.}
+          where \eqn{\gamma_m} \eqn{(k\times 1)}, \eqn{m=1,...,M-1} (\eqn{\gamma_M=0}) contains the mlogit-regression
+          coefficients of the \eqn{m}th regime. Specifically, for switching variables with indices in
+          \eqn{J\subset\lbrace 1,...,d\rbrace}, and with \eqn{\tilde{p}\in\lbrace 1,...,p\rbrace} lags included,
+          \eqn{\gamma_m} contains the coefficients for the vector
+          \eqn{z_{t-1} = (1,\tilde{z}_{\min\lbrace I\rbrace},...,\tilde{z}_{\max\lbrace I\rbrace})}, where
+          \eqn{\tilde{z}_{i} =(y_{j,t-1},...,y_{j,t-\tilde{p}})}, \eqn{i\in I}. So \eqn{k=1+|I|\tilde{p}}
+          where \eqn{|I|} denotes the number of elements in \eqn{I}.}
+    \item{\code{weight_function="exponential"}:}{Returns a length two vector \eqn{(c,\gamma)}, where
+          \eqn{c\in\mathbb{R}} is the location parameter and \eqn{\gamma >0} is the scale parameter.}
+    \item{\code{weight_function="threshold"}:}{Returns a length \eqn{M-1} vector \eqn{(r_1,...,r_{M-1})}, where
+          \eqn{r_1,...,r_{M-1}} are the threshold values.}
   }
 }
 \description{
