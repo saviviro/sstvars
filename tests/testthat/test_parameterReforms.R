@@ -769,6 +769,18 @@ test_that("change_regime works correctly", {
                c(phi10_112, phi20_122, A11_112, A21_122, vech(Omega1_112), vech(Omega2_122), c_and_gamma_122_1_1))
   expect_equal(change_regime(p=2, M=2, d=2, params=theta_222logistic_2_1, m=2, regime_pars=c(phi10_112, A11_112, A11_122, vech(Omega1_112))),
                c(phi10_222, phi10_112, A11_222, A12_222, A11_112, A11_122, vech(Omega1_222), vech(Omega1_112), c_and_gamma_222_2_1))
+
+  expect_equal(change_regime(p=1, M=2, d=2, params=theta_122exp_1_1, m=1, regime_pars=c(phi10_112, A11_112, vech(Omega1_112))),
+               c(phi10_112, phi20_122, A11_112, A21_122, vech(Omega1_112), vech(Omega2_122), c_and_gamma_122_1_1))
+  expect_equal(change_regime(p=2, M=2, d=2, params=theta_222exp_2_1, m=2, regime_pars=c(phi10_112, A11_112, A11_122, vech(Omega1_112))),
+               c(phi10_222, phi10_112, A11_222, A12_222, A11_112, A11_122, vech(Omega1_222), vech(Omega1_112), c_and_gamma_222_2_1))
+
+  expect_equal(change_regime(p=1, M=2, d=2, params=theta_122thres_1_1, m=1, regime_pars=c(phi10_112, A11_112, vech(Omega1_112))),
+               c(phi10_112, phi20_122, A11_112, A21_122, vech(Omega1_112), vech(Omega2_122), r1_122_1_1))
+  expect_equal(change_regime(p=2, M=3, d=2, params=theta_232thres_1_1, m=2, regime_pars=c(phi10_232, A11_232, A12_232, vech(Omega1_232))),
+               c(phi10_232, phi10_232, phi30_232, vec(A11_232), vec(A12_232), vec(A11_232), vec(A12_232),
+                 vec(A31_232), vec(A32_232), vech(Omega1_232), vech(Omega1_232), vech(Omega3_232),
+                 r1_232_1_1, r2_232_1_1))
 })
 
 
@@ -999,6 +1011,10 @@ test_that("sort_regimes works correctly", {
                c(phi20_123, phi10_123, vec(A21_123), vec(A11_123), vech(Omega2_123),
                  vech(Omega1_123), 1-alpha1_123_2))
 
-  expect_equal(sort_regimes(p=1, M=2, d=2, params=theta_122log_1_1, weight_function="mlogit"), theta_122log_1_1) # Does not sort with mlogit
+  # Does not sort:
+  expect_equal(sort_regimes(p=1, M=2, d=2, params=theta_122log_1_1, weight_function="mlogit"), theta_122log_1_1)
+  expect_equal(sort_regimes(p=1, M=2, d=2, params=theta_122logistic_1_1, weight_function="logistic"), theta_122logistic_1_1)
+  expect_equal(sort_regimes(p=1, M=2, d=2, params=theta_122exp_1_1, weight_function="exponential"), theta_122exp_1_1)
+  expect_equal(sort_regimes(p=1, M=2, d=2, params=theta_122thres_1_1, weight_function="threshold"), theta_122thres_1_1)
 })
 

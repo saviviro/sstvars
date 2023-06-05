@@ -114,8 +114,9 @@ change_parametrization <- function(p, M, d, params, weight_function=c("relative_
 #'   }
 #' @keywords internal
 
-sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"), weightfun_pars=NULL,
-                         cond_dist=c("Gaussian", "Student"), identification=c("reduced_form", "recursive", "heteroskedasticity")) {
+sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+                         weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"),
+                         identification=c("reduced_form", "recursive", "heteroskedasticity")) {
   weight_function <- match.arg(weight_function)
   if(M == 1 || weight_function %in% c("logistic", "mlogit", "exponential", "threshold")) {
     return(params) # Does not sort / nothing to sort
