@@ -191,6 +191,62 @@ gamma1_222_12_2 <- c(0.1, 0.2, 0.11, 0.22, 0.33)
 theta_222log_12_2 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
                        vech(Omega1_222), vech(Omega2_222),gamma1_222_12_2)
 
+## weight_function == "exponential"
+
+# p=1, M=2, d=2, weight_function="exponential", weightfun_pars=c(1, 1)
+theta_122exp_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), c_and_gamma_122_1_1)
+
+# p=1, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1)
+theta_122exp_2_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), c_and_gamma_122_2_1)
+
+# p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1)
+theta_222exp_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                      vech(Omega1_222), vech(Omega2_222), c_and_gamma_222_2_1)
+
+# p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(1, 2)
+theta_222exp_1_2 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                      vech(Omega1_222), vech(Omega2_222), c_and_gamma_222_1_2)
+
+# p=1, M=2, d=3, weight_function="exponential", weightfun_pars=c(1, 1)
+theta_123exp_1_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123),
+                      vech(Omega2_123), c_and_gamma_123_1_1)
+
+## weight_function == "threshold"
+
+# p=1, M=2, d=2, weight_function="threshold", weightfun_pars=c(1, 1)
+r1_122_1_1 <- c(0.5)
+theta_122thres_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), r1_122_1_1)
+
+# p=2, M=2, d=2, weight_function="threshold", weightfun_pars=c(2, 2)
+r1_222_2_2 <- c(0.7)
+theta_222thres_2_2 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                        vech(Omega1_222), vech(Omega2_222), r1_222_2_2)
+
+# p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1)
+r1_132_1_1 <- 0.5
+r2_132_1_1 <- 1.2
+theta_132thres_1_1 <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                        vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), r1_132_1_1, r2_132_1_1)
+
+# p=2, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1)
+phi10_232 <- phi10_132; phi20_232 <- phi20_132; phi30_232 <- phi30_132
+A11_232 <- A11_132; A12_232 <- -A11_132
+A21_232 <- A21_132; A22_232 <- -A21_132
+A31_232 <- A31_132; A32_232 <- -A31_132
+Omega1_232 <- Omega1_132; Omega2_232 <- Omega1_132; Omega3_232 <- Omega3_132
+r1_232_1_1 <- r1_132_1_1; r2_232_1_1 <- r2_132_1_1
+theta_232thres_1_1 <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232), vec(A22_232),
+                        vec(A31_232), vec(A32_232), vech(Omega1_232), vech(Omega2_232), vech(Omega3_232),
+                        r1_232_1_1, r2_232_1_1)
+
+
+# p=1, M=2, d=3, weight_function="threshold", weightfun_pars=c(2, 1)
+r1_123_2_1 <- 1
+theta_123thres_2_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123),
+                        vech(Omega2_123), r1_123_2_1)
+
+
+
 ### Constrained models
 
 ## A(M)(p)_(p)(M)(d)
@@ -274,7 +330,6 @@ theta_123logisticc_3_1 <- c(phi10_123, phi20_123, vec(A11_123), vech(Omega1_123)
 theta_123logisticc_3_1_expanded <- c(phi10_123, phi20_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), c_and_gamma_123_3_1)
 
 
-
 ## weight_function = "mlogit"
 
 # p=1, M=2, d=2, weightfun_pars=c(1, 1), C_122
@@ -313,6 +368,30 @@ theta_123logc_23_1_expanded <- c(phi10_123, phi20_123, vec(A11_123), vec(A11_123
 gamma1_123_123_1 <- c(0.1, 0.2, 0.3, 0.4)
 theta_123logc_123_1 <- c(phi10_123, phi20_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), gamma1_123_123_1)
 theta_123logc_123_1_expanded <- c(phi10_123, phi20_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), gamma1_123_123_1)
+
+## weight_function == "exponential"
+
+# p=2, M=2, d=2, weightfun_pars=c(2, 1), AR_constraints=C_222
+theta_222expc_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), c_and_gamma_222_2_1)
+theta_222expc_2_1_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                     vech(Omega1_222), vech(Omega2_222), c_and_gamma_222_2_1)
+
+# p=1, M=2, d=3, weightfun_pars=c(3, 1), AR_constraints=C_123
+theta_123expc_3_1 <- c(phi10_123, phi20_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), c_and_gamma_123_3_1)
+theta_123expc_3_1_expanded <- c(phi10_123, phi20_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), c_and_gamma_123_3_1)
+
+## weight_function == "threshold"
+
+# p=2, M=2, d=2, weight_function="threshold", weightfun_pars=c(1, 1), AR_constraints=C_222
+theta_222thresc_1_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), r1_222_2_2 )
+theta_222thresc_1_1_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                  vech(Omega1_222), vech(Omega2_222), r1_222_2_2 )
+
+# p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1,1), AR_constraints=C_132
+theta_132thresc_1_1 <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vech(Omega1_132), vech(Omega2_132),
+                    vech(Omega3_132), r1_132_1_1, r2_132_1_1)
+theta_132thresc_1_1_expanded <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A11_132), vec(A11_132),
+                              vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), r1_132_1_1, r2_132_1_1)
 
 
 ## Models with mean_constraints
@@ -411,6 +490,31 @@ theta_222logcm_12_2_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_22
 theta_123logcm_123_1 <- c(phi10_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), gamma1_123_123_1)
 theta_123logcm_123_1_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), gamma1_123_123_1)
 
+## weight_function = "exponential"
+
+# p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222
+theta_222expcm_2_1 <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), c_and_gamma_222_2_1)
+theta_222expcm_2_1_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                      vech(Omega1_222), vech(Omega2_222), c_and_gamma_222_2_1)
+
+# p=1, M=2, p=3, weight_function="exponential", weightfun_pars=c(3, 1), mean_constraints=list(1:2), AR_constraints=C_123
+theta_123expcm_3_1 <- c(phi10_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), c_and_gamma_123_3_1)
+theta_123expcm_3_1_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), c_and_gamma_123_3_1)
+
+
+## weight_function = "threshold"
+
+# p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), mean_constraints=list(1, 2:3)
+theta_132thresm_1_1 <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
+                     vech(Omega2_132), vech(Omega3_132), r1_132_1_1, r2_132_1_1)
+theta_132thresm_1_1_expanded <- c(phi10_132, phi20_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
+                                  vech(Omega2_132), vech(Omega3_132), r1_132_1_1, r2_132_1_1)
+
+# p=1, M=2, p=3, weight_function="threshold", weightfun_pars=c(2, 1), AR_constraints=C_123, mean_connstraints=list(1:2)
+theta_123threscm_2_1 <- c(phi10_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), r1_123_2_1)
+theta_123threscm_2_1_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), r1_123_2_1)
+
+
 ## Models with weight_constraints
 
 # p=1, M=3, d=2, weight_function="relative_dens", weight_constraints=list(R=matrix(c(0.9, 0.5), nrow=2), r=c(0.13, 0.13))
@@ -452,28 +556,86 @@ theta_222logisticcmw_2_1 <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1
 theta_222logisticcmw_2_1_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
                                    vech(Omega1_222), vech(Omega2_222), c(0.01, 0.33))
 
+## exponential
+
+# p=1, M=2, d=2, weight_function="exponential", weightfun_pars=c(1, 1), weight_constraints=list(R=0, r=c(0.02, 0.13))
+theta_122expw_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122))
+theta_122expw_1_1_expanded <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), c(0.02, 0.13))
+
+# p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
+# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))
+xi_222expcmw_2_1 <- c(0.33)
+theta_222expcmw_2_1 <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), xi_222expcmw_2_1)
+theta_222expcmw_2_1_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                       vech(Omega1_222), vech(Omega2_222), c(0.01, 0.33))
+
+## threshold
+
+# p=2, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.1, 0))
+xi_232thres_1_1 <- 0.5
+theta_232thresw_1_1 <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232), vec(A22_232),
+                        vec(A31_232), vec(A32_232), vech(Omega1_232), vech(Omega2_232), vech(Omega3_232), xi_232thres_1_1)
+theta_232thresw_1_1_expanded <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232), vec(A22_232),
+                                  vec(A31_232), vec(A32_232), vech(Omega1_232), vech(Omega2_232), vech(Omega3_232), 0.1, 0.5)
+
+# p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2))
+theta_132thresmw_1_1 <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
+                         vech(Omega2_132), vech(Omega3_132), r1_132_1_1, r2_132_1_1)
+theta_132thresmw_1_1_expanded <- c(phi10_132, phi20_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
+                                  vech(Omega2_132), vech(Omega3_132), 0, 1.2)
 
 
 test_that("reform_constrained_pars works correctly", {
-  # Models with weight_constraints
-  expect_equal(reform_constrained_pars(p=1, M=3, d=2, params=theta_132relgw, weight_function="relative_dens",
-                                       weight_constraints=list(R=matrix(c(0.9, 0.5), nrow=2), r=c(0.13, 0.13))), theta_132relgw_expanded)
-  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222relgcmw, weight_function="relative_dens",
-                                       mean_constraints=list(1:2), AR_constraints=C_222, weight_constraints=list(R=0, r=0.6)),
-               theta_222relgcmw_expanded)
-  expect_equal(reform_constrained_pars(p=1, M=2, d=2, params=theta_122logw_1_1, weight_function="mlogit",
-                                       weightfun_pars=list(vars=1, lags=1), weight_constraints=list(R=0, r=c(0.12, 0.13))),
-               theta_122logw_1_1_expanded)
-  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222logcmw_12_2, weight_function="mlogit",
-                                       weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
-                                       weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5),
-                                                               r=c(0, 0.11, 0.12, 0.13, 0))),
-               theta_222logcmw_12_2_expanded)
-  expect_equal(reform_constrained_pars(p=1, M=2, d=2, params=theta_122logw_1_1, weight_function="logistic", weightfun_pars=c(1, 1),
-                                       weight_constraints=list(R=0, r=c(0.02, 0.13))), theta_122logisticw_1_1_expanded)
-  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222logisticcmw_2_1, weight_function="logistic", weightfun_pars=c(2, 1),
-                                       mean_constraints=list(1:2), AR_constraints=C_222,
-                                       weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))), theta_222logisticcmw_2_1_expanded )
+  # Models with AR_constraints
+  expect_equal(reform_constrained_pars(p=1, M=1, d=2, params=theta_112relgc, weight_function="relative_dens",
+                                       AR_constraints=C_112), theta_112relgc_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=2, d=2, params=theta_122relgc, weight_function="relative_dens",
+                                       AR_constraints=C_122), theta_122relgc_expanded)
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222relgc, weight_function="relative_dens",
+                                       AR_constraints=C_222), theta_222relgc_expanded)
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222relgc2, weight_function="relative_dens",
+                                       AR_constraints=C_222_2), theta_222relgc2_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=3, d=2, params=theta_132relgc, weight_function="relative_dens",
+                                       AR_constraints=C_132), theta_132relgc_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=1, d=3, params=theta_113relgc, weight_function="relative_dens",
+                                       AR_constraints=C_113), theta_113relgc_expanded)
+  expect_equal(reform_constrained_pars(p=2, M=1, d=3, params=theta_213relgc, weight_function="relative_dens",
+                                       AR_constraints=C_213), theta_213relgc_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=2, d=3, params=theta_123relgc, weight_function="relative_dens",
+                                       AR_constraints=C_123), theta_123relgc_expanded)
+
+  expect_equal(reform_constrained_pars(p=1, M=2, d=2, params=theta_122logc_1_1, weight_function="mlogit",
+                                       weightfun_pars=list(vars=1, lags=1), AR_constraints=C_122), theta_122logc_1_1_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=2, d=2, params=theta_122logc_12_1, weight_function="mlogit",
+                                       weightfun_pars=list(vars=1:2, lags=1), AR_constraints=C_122), theta_122logc_12_1_expanded)
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222logc_2_1, weight_function="mlogit",
+                                       weightfun_pars=list(vars=2, lags=1), AR_constraints=C_222), theta_222logc_2_1_expanded)
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222logc_12_2, weight_function="mlogit",
+                                       weightfun_pars=list(vars=1:2, lags=2), AR_constraints=C_222), theta_222logc_12_2_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=2, d=3, params=theta_123logc_1_1, weight_function="mlogit",
+                                       weightfun_pars=list(vars=1, lags=1), AR_constraints=C_123), theta_123logc_1_1_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=2, d=3, params=theta_123logc_23_1, weight_function="mlogit",
+                                       weightfun_pars=list(vars=2:3, lags=1), AR_constraints=C_123), theta_123logc_23_1_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=2, d=3, params=theta_123logc_123_1, weight_function="mlogit",
+                                       weightfun_pars=list(vars=1:3, lags=1), AR_constraints=C_123), theta_123logc_123_1_expanded)
+
+  expect_equal(reform_constrained_pars(p=1, M=2, d=2, params=theta_122logisticc_1_1, weight_function="logistic",
+                                       weightfun_pars=c(1, 1), AR_constraints=C_122), theta_122logisticc_1_1_expanded)
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222logisticc_2_1, weight_function="logistic",
+                                       weightfun_pars=c(2, 1), AR_constraints=C_222), theta_222logisticc_2_1_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=2, d=3, params=theta_123logisticc_3_1, weight_function="logistic",
+                                       weightfun_pars=c(3, 1), AR_constraints=C_123), theta_123logisticc_3_1_expanded)
+
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222expc_2_1, weight_function="exponential",
+                                       weightfun_pars=c(2, 1), AR_constraints=C_222), theta_222expc_2_1_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=2, d=3, params=theta_123expc_3_1, weight_function="exponential",
+                                       weightfun_pars=c(3, 1), AR_constraints=C_123), theta_123expc_3_1_expanded)
+
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222thresc_1_1, weight_function="threshold",
+                                       weightfun_pars=c(1, 1), AR_constraints=C_222), theta_222thresc_1_1_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=3, d=2, params=theta_132thresc_1_1, weight_function="threshold",
+                                       weightfun_pars=c(1, 1), AR_constraints=C_132), theta_132thresc_1_1_expanded)
+
 
   # Models with mean_constraints
   expect_equal(reform_constrained_pars(p=1, M=1, d=2, params=theta_112relgm, weight_function="relative_dens",
@@ -521,45 +683,50 @@ test_that("reform_constrained_pars works correctly", {
                                        weightfun_pars=c(3, 1), mean_constraints=list(1:2), AR_constraints=C_123),
                theta_123logisticcm_3_1_expanded)
 
-  # Models with AR_constraints
-  expect_equal(reform_constrained_pars(p=1, M=1, d=2, params=theta_112relgc, weight_function="relative_dens",
-                                       AR_constraints=C_112), theta_112relgc_expanded)
-  expect_equal(reform_constrained_pars(p=1, M=2, d=2, params=theta_122relgc, weight_function="relative_dens",
-                                       AR_constraints=C_122), theta_122relgc_expanded)
-  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222relgc, weight_function="relative_dens",
-                                       AR_constraints=C_222), theta_222relgc_expanded)
-  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222relgc2, weight_function="relative_dens",
-                                       AR_constraints=C_222_2), theta_222relgc2_expanded)
-  expect_equal(reform_constrained_pars(p=1, M=3, d=2, params=theta_132relgc, weight_function="relative_dens",
-                                       AR_constraints=C_132), theta_132relgc_expanded)
-  expect_equal(reform_constrained_pars(p=1, M=1, d=3, params=theta_113relgc, weight_function="relative_dens",
-                                       AR_constraints=C_113), theta_113relgc_expanded)
-  expect_equal(reform_constrained_pars(p=2, M=1, d=3, params=theta_213relgc, weight_function="relative_dens",
-                                       AR_constraints=C_213), theta_213relgc_expanded)
-  expect_equal(reform_constrained_pars(p=1, M=2, d=3, params=theta_123relgc, weight_function="relative_dens",
-                                       AR_constraints=C_123), theta_123relgc_expanded)
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222expcm_2_1, weight_function="exponential",
+                                       weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222),
+               theta_222expcm_2_1_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=2, d=3, params=theta_123expcm_3_1, weight_function="exponential",
+                                       weightfun_pars=c(3, 1), mean_constraints=list(1:2), AR_constraints=C_123),
+               theta_123expcm_3_1_expanded)
 
-  expect_equal(reform_constrained_pars(p=1, M=2, d=2, params=theta_122logc_1_1, weight_function="mlogit",
-                                       weightfun_pars=list(vars=1, lags=1), AR_constraints=C_122), theta_122logc_1_1_expanded)
-  expect_equal(reform_constrained_pars(p=1, M=2, d=2, params=theta_122logc_12_1, weight_function="mlogit",
-                                       weightfun_pars=list(vars=1:2, lags=1), AR_constraints=C_122), theta_122logc_12_1_expanded)
-  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222logc_2_1, weight_function="mlogit",
-                                       weightfun_pars=list(vars=2, lags=1), AR_constraints=C_222), theta_222logc_2_1_expanded)
-  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222logc_12_2, weight_function="mlogit",
-                                       weightfun_pars=list(vars=1:2, lags=2), AR_constraints=C_222), theta_222logc_12_2_expanded)
-  expect_equal(reform_constrained_pars(p=1, M=2, d=3, params=theta_123logc_1_1, weight_function="mlogit",
-                                       weightfun_pars=list(vars=1, lags=1), AR_constraints=C_123), theta_123logc_1_1_expanded)
-  expect_equal(reform_constrained_pars(p=1, M=2, d=3, params=theta_123logc_23_1, weight_function="mlogit",
-                                       weightfun_pars=list(vars=2:3, lags=1), AR_constraints=C_123), theta_123logc_23_1_expanded)
-  expect_equal(reform_constrained_pars(p=1, M=2, d=3, params=theta_123logc_123_1, weight_function="mlogit",
-                                       weightfun_pars=list(vars=1:3, lags=1), AR_constraints=C_123), theta_123logc_123_1_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=3, d=2, params=theta_132thresm_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
+                                       mean_constraints=list(1, 2:3)), theta_132thresm_1_1_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=2, d=3, params=theta_123threscm_2_1, weight_function="threshold", weightfun_pars=c(2, 1),
+                                       mean_constraints=list(1:2), AR_constraints=C_123), theta_123threscm_2_1_expanded)
 
-  expect_equal(reform_constrained_pars(p=1, M=2, d=2, params=theta_122logisticc_1_1, weight_function="logistic",
-                                       weightfun_pars=c(1, 1), AR_constraints=C_122), theta_122logisticc_1_1_expanded)
-  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222logisticc_2_1, weight_function="logistic",
-                                       weightfun_pars=c(2, 1), AR_constraints=C_222), theta_222logisticc_2_1_expanded)
-  expect_equal(reform_constrained_pars(p=1, M=2, d=3, params=theta_123logisticc_3_1, weight_function="logistic",
-                                       weightfun_pars=c(3, 1), AR_constraints=C_123), theta_123logisticc_3_1_expanded)
+
+  # Models with weight_constraints
+  expect_equal(reform_constrained_pars(p=1, M=3, d=2, params=theta_132relgw, weight_function="relative_dens",
+                                       weight_constraints=list(R=matrix(c(0.9, 0.5), nrow=2), r=c(0.13, 0.13))), theta_132relgw_expanded)
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222relgcmw, weight_function="relative_dens",
+                                       mean_constraints=list(1:2), AR_constraints=C_222, weight_constraints=list(R=0, r=0.6)),
+               theta_222relgcmw_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=2, d=2, params=theta_122logw_1_1, weight_function="mlogit",
+                                       weightfun_pars=list(vars=1, lags=1), weight_constraints=list(R=0, r=c(0.12, 0.13))),
+               theta_122logw_1_1_expanded)
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222logcmw_12_2, weight_function="mlogit",
+                                       weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
+                                       weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5),
+                                                               r=c(0, 0.11, 0.12, 0.13, 0))),
+               theta_222logcmw_12_2_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=2, d=2, params=theta_122logw_1_1, weight_function="logistic", weightfun_pars=c(1, 1),
+                                       weight_constraints=list(R=0, r=c(0.02, 0.13))), theta_122logisticw_1_1_expanded)
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222logisticcmw_2_1, weight_function="logistic", weightfun_pars=c(2, 1),
+                                       mean_constraints=list(1:2), AR_constraints=C_222,
+                                       weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))), theta_222logisticcmw_2_1_expanded)
+
+  expect_equal(reform_constrained_pars(p=1, M=2, d=2, params=theta_122expw_1_1, weight_function="exponential", weightfun_pars=c(1, 1),
+                                       weight_constraints=list(R=0, r=c(0.02, 0.13))), theta_122expw_1_1_expanded)
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222expcmw_2_1, weight_function="exponential", weightfun_pars=c(2, 1),
+                                       mean_constraints=list(1:2), AR_constraints=C_222,
+                                       weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))), theta_222expcmw_2_1_expanded)
+
+  expect_equal(reform_constrained_pars(p=2, M=3, d=2, params=theta_232thresw_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
+                                       weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.1, 0))), theta_232thresw_1_1_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=3, d=2, params=theta_132thresmw_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
+                                       mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2))), theta_132thresmw_1_1_expanded)
+
 })
 
 
