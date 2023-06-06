@@ -728,8 +728,13 @@ test_that("check_params work correctly", {
                weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0)),
                cond_dist="Gaussian")
   check_params(p=2, M=2, d=2, params=theta_222logisticcmw_2_1, weight_function="logistic", weightfun_pars=c(2, 1),
-               mean_constraints=list(1:2), AR_constraints=C_222,weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)),
+               mean_constraints=list(1:2), AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)),
                cond_dist="Gaussian")
+  check_params(p=2, M=2, d=2, params=theta_222expcmw_2_1, weight_function="exponential", weightfun_pars=c(2, 1),
+               mean_constraints=list(1:2), AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)),
+               cond_dist="Gaussian")
+  check_params(p=2, M=2, d=2, params=theta_222thresc_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
+               AR_constraints=C_222, cond_dist="Gaussian")
 
 
   # Checks stability conditions
@@ -744,6 +749,8 @@ test_that("check_params work correctly", {
   expect_error(check_params(p=1, M=2, d=3, params=theta_123relg_notstab, weight_function="relative_dens", cond_dist="Gaussian"))
   expect_error(check_params(p=1, M=3, d=2, params=theta_132relgw, weight_function="relative_dens",
                             weight_constraints=list(R=matrix(c(0.9, 0.5), nrow=2), r=c(0.13, 0.13)), cond_dist="Gaussian"))
+  expect_error(check_params(p=1, M=3, d=2, params=theta_132thresmw_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
+                            mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2)), cond_dist="Gaussian"))
 
   # Check with AR_constraints (reform params used inside so just checks that the function goes through)
   check_params(p=1, M=1, d=2, params=theta_112relgc, weight_function="relative_dens", cond_dist="Gaussian",

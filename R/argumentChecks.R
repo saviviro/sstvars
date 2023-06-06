@@ -127,16 +127,16 @@ in_paramspace <- function(p, M, d, weight_function=c("relative_dens", "logistic"
 #'  }
 #' @export
 
-check_params <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit"), weightfun_pars=NULL,
-                         cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
-                         identification=c("reduced_form", "recursive", "heteroskedasticity"),
+check_params <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+                         weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
+                         identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
                          AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                          stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8, weightpar_tol=1e-8) {
-  check_pMd(p=p, M=M, d=d)
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
   identification <- match.arg(identification)
+  check_pMd(p=p, M=M, d=d, weight_function=weight_function)
   if(n_params(p=p, M=M, d=d, weight_function=weight_function, cond_dist=cond_dist,
               identification=identification, AR_constraints=AR_constraints,
               mean_constraints=mean_constraints, weight_constraints=weight_constraints,
@@ -175,12 +175,17 @@ check_params <- function(p, M, d, params, weight_function=c("relative_dens", "lo
     } else if(any(weightpars <= 0)) {
       stop("The transition weight parameter alphas must be strictly larger than zero!")
     }
-  } else if(weight_function == "logistic") {
+  } else if(weight_function == "logistic" || weight_function == "exponential") {
     if(weightpars[2] <= 0 + weightpar_tol) {
-      stop("The scale parameter of logistic transition weights needs to be strictly positive (with large enough numerical tolerance)" )
+      stop(paste0("The scale parameter of ", weight_function,
+                  " transition weights needs to be strictly positive (with large enough numerical tolerance)"))
     }
   } else if(weight_function == "mlogit") {
     if(!is.numeric(weightpars)) stop("Transition weight parameters need to be numeric") # All real numbers are ok
+  } else if(weight_function == "threshold") {
+    if(!all(order(weightpars, decreasing=FALSE) == seq_len(M - 1))) {
+      stop("The threshold parameters need be in an increasing ordering with threshold weight function")
+    }
   }
   if(!stab_conds_satisfied(p=p, M=M, d=d, all_boldA=all_boldA, tolerance=stab_tol)) {
     stop("At least one of the regimes does not satisfy the stability condition (with large enough numerical tolerance)!")
@@ -273,7 +278,7 @@ check_data <- function(data, p) {
 
 n_params <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
                      weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"),
-                     identification=c("reduced_form", "recursive", "heteroskedasticity"),
+                     identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
                      AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
