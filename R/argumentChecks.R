@@ -332,8 +332,9 @@ n_params <- function(p, M, d, weight_function=c("relative_dens", "logistic", "ml
 #' @return Does return anything but checks the constraints and throws an error if something is wrong.
 #' @keywords internal
 
-check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit"), weightfun_pars=NULL,
-                              AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
+check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+                              weightfun_pars=NULL, AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
+                              B_constraints=NULL) {
   weight_function <- match.arg(weight_function)
   weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars)
 
@@ -376,9 +377,9 @@ check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logis
     if(!is.list(weight_constraints) || length(weight_constraints) != 2) {
       stop("The argument weight_constraints should be a list of length two")
     }
-    if(weight_function == "relative_dens") {
+    if(weight_function == "relative_dens" || weight_function == "threshold") {
       n_nonconstr_weightpars <- M - 1
-    } else if(weight_function == "logistic") {
+    } else if(weight_function == "logistic" || weight_function == "exponential") {
       n_nonconstr_weightpars <- 2
     } else if(weight_function == "mlogit") {
       n_nonconstr_weightpars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
@@ -395,24 +396,32 @@ check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logis
       } else if(qr(weight_constraints[[1]])$rank != ncol(weight_constraints[[1]])) {
         stop("The first element of weight_constraints (matrix R) should have full column rank (or it should equal to zero)")
       }
-      if(weight_function == "logistic") {
-        if(weight_constraints[[2]][2] < 0) {
-          warning("When weight_function='logistic', the scale parameter needs to be strictly positive, and there is a negative
-                   constraint in r for the scale parameter, implying that the estimation may fail.")
-        }
-      }
-      if(weight_function == "relative_dens") {
-        if(any(weight_constraints[[2]][2] < 0)) {
-          warning("When weight_function='relative dens', the weight parameters need to be strictly positive, and there is a negative
-                   constraint in r for a weight parameter, implying that the estimation may fail.")
-        }
-      }
     }
     # Check r
     if(!is.numeric(weight_constraints[[2]]) || !is.vector(weight_constraints[[2]])) {
       stop("The second element of the argument weight_constraints should be a numeric vector r")
     } else if(length(weight_constraints[[2]]) != n_nonconstr_weightpars) {
       stop("The second element of the argument weight_constraints (vector r) has wrong dimension")
+    }
+
+    # Warnings if no errors
+    if(weight_function == "logistic" || weight_function == "exponential") {
+      if(weight_constraints[[2]][2] < 0) {
+        warning(paste0("When weight_function=", weight_function, "the scale parameter needs to be strictly positive, and there is a negative
+                   constraint in r for the scale parameter, implying that the estimation may fail."))
+      }
+    }
+    if(weight_function == "relative_dens") {
+      if(any(weight_constraints[[2]][2] < 0)) {
+        warning("When weight_function='relative dens', the weight parameters need to be strictly positive, and there is a negative
+                   constraint in r for a weight parameter, implying that the estimation may fail.")
+      }
+    }
+    if(weight_function == "threshold") {
+      if(!all(order(weight_constraints[[2]]) == seq_len(M - 1))) {
+        warning("When weight_function='threshold', the thresholds need to be in an increasing ordering, and the constraints imposed in r for
+                  the thresholds are not in an increasing ordering, implying that the estimation may fail.")
+      }
     }
   }
 
@@ -433,20 +442,22 @@ check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logis
 #'   a corrected version of the argument if possible.
 #' @keywords internal
 
-check_weightfun_pars <- function(p, d, weight_function=c("relative_dens", "logistic", "mlogit"), weightfun_pars=NULL) {
+check_weightfun_pars <- function(p, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+                                 weightfun_pars=NULL) {
   weight.function <- match.arg(weight_function)
   if(weight_function == "relative_dens") {   # weightfun_pars are not used in weight_function == "relative_dens"
     weightfun_pars <- NULL
-  } else if(weight_function == "logistic") {
+  } else if(weight_function %in% c("logistic", "exponential", "threshold")) {
     if(!is.numeric(weightfun_pars) || !is.vector(weightfun_pars) || length(weightfun_pars) != 2) {
-      stop("When weight_function == 'logistic', the argument weightfun_pars should be be a length two numeric vector.")
+      stop(paste0("When weight_function ==, ", weight_function, " the argument weightfun_pars should be be a length two numeric vector."))
     }
     if(!weightfun_pars[1] %in% 1:d) {
-      stop("When weight_function == 'logistic', the first element of argument weightfun_pars, i.e., the switching variable,
-           should be an integer in 1,...,ncol(data).")
+      stop(paste0("When weight_function == , ", weight_function, " the first element of argument weightfun_pars, i.e., the switching variable,
+           should be an integer in 1,...,ncol(data)."))
     } else if(!weightfun_pars[2] %in% 1:p) {
-      stop("When weight_function == 'logistic', the second element of argument weightfun_pars, i.e., the lag of the switching variable,
-           should be an integer in 1,...,p.")
+      stop(paste0("When weight_function == ", weight_function,
+           " the second element of argument weightfun_pars, i.e., the lag of the switching variable,
+           should be an integer in 1,...,p."))
     }
   } else if(weight_function == "mlogit") {
     if(!is.list(weightfun_pars) || length(weightfun_pars) != 2) {

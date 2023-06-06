@@ -7,7 +7,7 @@
 check_weightfun_pars(
   p,
   d,
-  weight_function = c("relative_dens", "logistic", "mlogit"),
+  weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
   weightfun_pars = NULL
 )
 }
