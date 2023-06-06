@@ -271,8 +271,9 @@ check_data <- function(data, p) {
 #' @inherit in_paramspace references
 #' @keywords internal
 
-n_params <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit"), weightfun_pars=NULL,
-                     cond_dist=c("Gaussian", "Student"), identification=c("reduced_form", "recursive", "heteroskedasticity"),
+n_params <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+                     weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"),
+                     identification=c("reduced_form", "recursive", "heteroskedasticity"),
                      AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -296,9 +297,9 @@ n_params <- function(p, M, d, weight_function=c("relative_dens", "logistic", "ml
     n_covmat_pars <- NULL
   }
   if(is.null(weight_constraints)) {
-    if(weight_function == "relative_dens") {
+    if(weight_function == "relative_dens" || weight_function == "threshold") {
       n_weight_pars <- M - 1
-    } else if(weight_function == "logistic") {
+    } else if(weight_function == "logistic" || weight_function == "exponential") {
       n_weight_pars <- 2
     } else if(weight_function == "mlogit") {
       n_weight_pars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])

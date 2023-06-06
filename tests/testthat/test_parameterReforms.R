@@ -580,7 +580,7 @@ theta_232thresw_1_1_expanded <- c(phi10_232, phi20_232, phi30_232, vec(A11_232),
 
 # p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2))
 theta_132thresmw_1_1 <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
-                         vech(Omega2_132), vech(Omega3_132), r1_132_1_1, r2_132_1_1)
+                         vech(Omega2_132), vech(Omega3_132))
 theta_132thresmw_1_1_expanded <- c(phi10_132, phi20_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
                                   vech(Omega2_132), vech(Omega3_132), 0, 1.2)
 

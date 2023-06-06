@@ -536,7 +536,7 @@ theta_222expcmw_2_1_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_22
 
 # p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2))
 theta_132thresmw_1_1 <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
-                          vech(Omega2_132), vech(Omega3_132), r1_132_1_1, r2_132_1_1)
+                          vech(Omega2_132), vech(Omega3_132))
 theta_132thresmw_1_1_expanded <- c(phi10_132, phi20_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
                                    vech(Omega2_132), vech(Omega3_132), 0, 1.2)
 
@@ -810,6 +810,27 @@ test_that("all_pos_ints works correctly", {
 })
 
 test_that("n_params works correctly", {
+  expect_equal(n_params(p=1, M=2, d=2, weight_function="threshold", cond_dist="Gaussian", weightfun_pars=c(1, 1)), 19)
+  expect_equal(n_params(p=2, M=2, d=2, weight_function="threshold", cond_dist="Gaussian", weightfun_pars=c(2, 2)), 27)
+  expect_equal(n_params(p=1, M=3, d=2, weight_function="threshold", cond_dist="Gaussian", weightfun_pars=c(1, 1)), 29)
+  expect_equal(n_params(p=1, M=3, d=2, weight_function="threshold", cond_dist="Gaussian", weightfun_pars=c(1, 1),
+                        AR_constraints=C_132), 21)
+  expect_equal(n_params(p=1, M=3, d=2, weight_function="threshold", cond_dist="Gaussian", weightfun_pars=c(1, 1),
+                        mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2))), 25)
+
+
+  expect_equal(n_params(p=1, M=2, d=2, weight_function="exponential", cond_dist="Gaussian", weightfun_pars=c(1, 1)), 20)
+  expect_equal(n_params(p=1, M=2, d=2, weight_function="exponential", cond_dist="Gaussian", weightfun_pars=c(2, 1)), 20)
+  expect_equal(n_params(p=2, M=2, d=2, weight_function="exponential", cond_dist="Gaussian", weightfun_pars=c(2, 1)), 28)
+  expect_equal(n_params(p=1, M=2, d=3, weight_function="exponential", cond_dist="Gaussian", weightfun_pars=c(1, 1)), 38)
+  expect_equal(n_params(p=1, M=2, d=3, weight_function="exponential", cond_dist="Gaussian", weightfun_pars=c(3, 1),
+                        AR_constraints=C_123), 29)
+  expect_equal(n_params(p=1, M=2, d=3, weight_function="exponential", cond_dist="Gaussian", weightfun_pars=c(3, 1),
+                        AR_constraints=C_123, mean_constraints=list(1:2)), 26)
+  expect_equal(n_params(p=2, M=2, d=2, weight_function="exponential", cond_dist="Gaussian", weightfun_pars=c(2, 1),
+                        mean_constraints=list(1:2), AR_constraints=C_222,
+                        weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))), 17)
+
   expect_equal(n_params(p=1, M=2, d=2, weight_function="logistic", cond_dist="Gaussian", weightfun_pars=c(1, 1)), 20)
   expect_equal(n_params(p=1, M=2, d=2, weight_function="logistic", cond_dist="Gaussian", weightfun_pars=c(2, 1)), 20)
   expect_equal(n_params(p=2, M=2, d=2, weight_function="logistic", cond_dist="Gaussian", weightfun_pars=c(2, 1)), 28)
