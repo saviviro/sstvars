@@ -61,10 +61,12 @@ stab_conds_satisfied <- function(p, M, d, params, all_boldA=NULL, tolerance=1e-3
 #'  }
 #'  @keywords internal
 
-in_paramspace <- function(p, M, d, weight_function, weightfun_pars=NULL, cond_dist, all_boldA, all_Omegas, weightpars, df,
+in_paramspace <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+                          weightfun_pars=NULL, cond_dist, all_boldA, all_Omegas, weightpars, df,
                           stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8, weightpar_tol=1e-8) {
   # in_paramspace is internal function that always takes in non-constrained reduced form parameter vector
   # Reform the parameter vectors before checking with in_paramspace
+  weight_function <- match.arg(weight_function)
 
   # Check distribution parameters
   if(cond_dist == "Student") {
@@ -80,14 +82,16 @@ in_paramspace <- function(p, M, d, weight_function, weightfun_pars=NULL, cond_di
     } else if(any(weightpars <= 0)) {
       return(FALSE)
     }
-  } else if(weight_function == "logistic") {
+  } else if(weight_function == "logistic" | weight_function == "exponential") {
     if(weightpars[2] <= 0 + weightpar_tol) {
       return(FALSE) # We assume strictly positive scale parameter gamma
     }
   } else if(weight_function == "mlogit") {
     # All real numbers are ok, so nothing to check
-  } else {
-    stop("Unkown weght_function in in_paramspace!")
+  } else if(weight_function == "threshold") {
+    if(!all(order(weightpars, decreasing=FALSE) == seq_len(M - 1))) {
+      return(FALSE) # We assume increasing ordering of the thresholds
+    }
   }
 
   # Check stability conditions of a linear VAR

@@ -172,6 +172,44 @@ theta_222log_12_2 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21
 
 
 
+## weight_function == "exponential"
+
+# p=1, M=2, d=2, weight_function="exponential", weightfun_pars=c(1, 1)
+theta_122exp_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), c_and_gamma_122_1_1)
+
+# p=1, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1)
+theta_122exp_2_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), c_and_gamma_122_2_1)
+
+# p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1)
+theta_222exp_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                      vech(Omega1_222), vech(Omega2_222), c_and_gamma_222_2_1)
+
+# p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(1, 2)
+theta_222exp_1_2 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                      vech(Omega1_222), vech(Omega2_222), c_and_gamma_222_1_2)
+
+# p=1, M=2, d=3, weight_function="exponential", weightfun_pars=c(1, 1)
+theta_123exp_1_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123),
+                      vech(Omega2_123), c_and_gamma_123_1_1)
+
+## weight_function == "threshold"
+
+# p=1, M=2, d=2, weight_function="threshold", weightfun_pars=c(1, 1)
+r1_122_1_1 <- c(0.5)
+theta_122thres_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), r1_122_1_1)
+
+# p=2, M=2, d=2, weight_function="threshold", weightfun_pars=c(2, 2)
+r1_222_2_2 <- c(0.7)
+theta_222thres_2_2 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                        vech(Omega1_222), vech(Omega2_222), r1_222_2_2)
+
+# p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1)
+r1_132_1_1 <- 0.5
+r2_132_1_1 <- 1.2
+theta_132thres_1_1 <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                        vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), r1_132_1_1, r2_132_1_1)
+
+
 ### Constrained models
 
 ## A(M)(p)_(p)(M)(d)
@@ -281,6 +319,33 @@ theta_123logc_123_1 <- c(phi10_123, phi20_123, vec(A11_123), vech(Omega1_123), v
 theta_123logc_123_1_expanded <- c(phi10_123, phi20_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), gamma1_123_123_1)
 
 
+
+## weight_function == "exponential"
+
+# p=2, M=2, d=2, weightfun_pars=c(2, 1), AR_constraints=C_222
+theta_222expc_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), c_and_gamma_222_2_1)
+theta_222expc_2_1_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                vech(Omega1_222), vech(Omega2_222), c_and_gamma_222_2_1)
+
+# p=1, M=2, d=3, weightfun_pars=c(3, 1), AR_constraints=C_123
+theta_123expc_3_1 <- c(phi10_123, phi20_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), c_and_gamma_123_3_1)
+theta_123expc_3_1_expanded <- c(phi10_123, phi20_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), c_and_gamma_123_3_1)
+
+## weight_function == "threshold"
+
+# p=2, M=2, d=2, weight_function="threshold", weightfun_pars=c(1, 1), AR_constraints=C_222
+theta_222thresc_1_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), r1_222_2_2 )
+theta_222thresc_1_1_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                  vech(Omega1_222), vech(Omega2_222), r1_222_2_2 )
+
+# p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1,1), AR_constraints=C_132
+C_132 <- rbind_diags(p=1, M=3, d=2)
+theta_132thresc_1_1 <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vech(Omega1_132), vech(Omega2_132),
+                         vech(Omega3_132), alpha1_132, alpha2_132)
+theta_132thresc_1_1_expanded <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A11_132), vec(A11_132),
+                                  vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), r1_132_1_1, r2_132_1_1)
+
+
 ### Models with mean_constraints
 
 # p=1, M=1, p=2, mean_constraints=list(1)
@@ -380,6 +445,33 @@ theta_222logcm_12_2_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_22
 theta_123logcm_123_1 <- c(phi10_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), gamma1_123_123_1)
 theta_123logcm_123_1_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), gamma1_123_123_1)
 
+
+## weight_function = "exponential"
+
+# p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222
+theta_222expcm_2_1 <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), c_and_gamma_222_2_1)
+theta_222expcm_2_1_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                 vech(Omega1_222), vech(Omega2_222), c_and_gamma_222_2_1)
+
+# p=1, M=2, p=3, weight_function="exponential", weightfun_pars=c(3, 1), mean_constraints=list(1:2), AR_constraints=C_123
+theta_123expcm_3_1 <- c(phi10_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), c_and_gamma_123_3_1)
+theta_123expcm_3_1_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), c_and_gamma_123_3_1)
+
+
+## weight_function = "threshold"
+
+# p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), mean_constraints=list(1, 2:3)
+theta_132thresm_1_1 <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
+                         vech(Omega2_132), vech(Omega3_132), r1_132_1_1, r2_132_1_1)
+theta_132thresm_1_1_expanded <- c(phi10_132, phi20_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
+                                  vech(Omega2_132), vech(Omega3_132), r1_132_1_1, r2_132_1_1)
+
+# p=1, M=2, p=3, weight_function="threshold", weightfun_pars=c(2, 1), AR_constraints=C_123, mean_connstraints=list(1:2)
+r1_123_2_1 <- 0.5
+theta_123threscm_2_1 <- c(phi10_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123), r1_123_2_1)
+theta_123threscm_2_1_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), r1_123_2_1)
+
+
 ## Models with weight_constraints
 
 # p=1, M=3, d=2, weight_function="relative_dens", weight_constraints=list(R=matrix(c(0.9, 0.5), nrow=2), r=c(0.13, 0.13))
@@ -424,6 +516,31 @@ xi_222logisticcmw_2_1 <- c(0.33)
 theta_222logisticcmw_2_1 <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), xi_222logisticcmw_2_1)
 theta_222logisticcmw_2_1_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
                                        vech(Omega1_222), vech(Omega2_222), c(0.01, 0.33))
+
+
+## exponential
+
+# p=1, M=2, d=2, weight_function="exponential", weightfun_pars=c(1, 1), weight_constraints=list(R=0, r=c(0.02, 0.13))
+theta_122expw_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122))
+theta_122expw_1_1_expanded <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), c(0.02, 0.13))
+
+# p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
+# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))
+xi_222expcmw_2_1 <- c(0.33)
+theta_222expcmw_2_1 <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), xi_222expcmw_2_1)
+theta_222expcmw_2_1_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                  vech(Omega1_222), vech(Omega2_222), c(0.01, 0.33))
+
+
+## threshold
+
+# p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2))
+theta_132thresmw_1_1 <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
+                          vech(Omega2_132), vech(Omega3_132), r1_132_1_1, r2_132_1_1)
+theta_132thresmw_1_1_expanded <- c(phi10_132, phi20_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
+                                   vech(Omega2_132), vech(Omega3_132), 0, 1.2)
+
+
 
 
 Omegas_112 <- pick_Omegas(p=1, M=1, d=2, params=theta_112relg)
@@ -560,6 +677,38 @@ test_that("in_paramspace work correctly", {
                              all_boldA=boldA_122, all_Omegas=Omegas_122, weightpars=c(0.0, 0.1)))
   expect_true(in_paramspace(p=1, M=2, d=3, weight_function="logistic", cond_dist="Gaussian",
                              all_boldA=boldA_122, all_Omegas=Omegas_122, weightpars=c(0.1, 0.01)))
+  expect_false(in_paramspace(p=1, M=2, d=2, weight_function="exponential", cond_dist="Gaussian",
+                             all_boldA=boldA_122, all_Omegas=Omegas_122, weightpars=c(0.1, -0.1)))
+  expect_false(in_paramspace(p=1, M=2, d=3, weight_function="exponential", cond_dist="Gaussian",
+                             all_boldA=boldA_122, all_Omegas=Omegas_122, weightpars=c(0.1, 0)))
+  expect_false(in_paramspace(p=1, M=2, d=3, weight_function="exponential", cond_dist="Gaussian",
+                             all_boldA=boldA_122, all_Omegas=Omegas_122, weightpars=c(0.1, 1e-10)))
+  expect_true(in_paramspace(p=1, M=2, d=2, weight_function="exponential", cond_dist="Gaussian",
+                            all_boldA=boldA_122, all_Omegas=Omegas_122, weightpars=c(0.0, 0.1)))
+  expect_true(in_paramspace(p=1, M=2, d=3, weight_function="exponential", cond_dist="Gaussian",
+                            all_boldA=boldA_122, all_Omegas=Omegas_122, weightpars=c(0.1, 0.01)))
+
+  expect_true(in_paramspace(p=1, M=2, d=2, weight_function="threshold", cond_dist="Gaussian",
+                            all_boldA=boldA_122, all_Omegas=Omegas_122, weightpars=c(-0.1)))
+  expect_true(in_paramspace(p=1, M=2, d=2, weight_function="threshold", cond_dist="Gaussian",
+                            all_boldA=boldA_122, all_Omegas=Omegas_122, weightpars=c(100)))
+  expect_true(in_paramspace(p=1, M=2, d=3, weight_function="threshold", cond_dist="Gaussian",
+                            all_boldA=boldA_122, all_Omegas=Omegas_122, weightpars=0))
+  expect_true(in_paramspace(p=1, M=3, d=2, weight_function="threshold", cond_dist="Gaussian",
+                            all_boldA=boldA_132, all_Omegas=Omegas_132, weightpars=c(1, 2)))
+  expect_true(in_paramspace(p=1, M=3, d=2, weight_function="threshold", cond_dist="Gaussian",
+                            all_boldA=boldA_132, all_Omegas=Omegas_132, weightpars=c(-0.1, 0.01)))
+  expect_true(in_paramspace(p=1, M=3, d=2, weight_function="threshold", cond_dist="Gaussian",
+                            all_boldA=boldA_132, all_Omegas=Omegas_132, weightpars=c(-0.1, 0.0)))
+  expect_true(in_paramspace(p=1, M=3, d=2, weight_function="threshold", cond_dist="Gaussian",
+                            all_boldA=boldA_132, all_Omegas=Omegas_132, weightpars=c(0, 0.01)))
+  expect_false(in_paramspace(p=1, M=3, d=2, weight_function="threshold", cond_dist="Gaussian",
+                            all_boldA=boldA_132, all_Omegas=Omegas_132, weightpars=c(0.01, 0.0)))
+  expect_false(in_paramspace(p=1, M=3, d=2, weight_function="threshold", cond_dist="Gaussian",
+                             all_boldA=boldA_132, all_Omegas=Omegas_132, weightpars=c(-0.01, -0.1)))
+  expect_false(in_paramspace(p=1, M=3, d=2, weight_function="threshold", cond_dist="Gaussian",
+                             all_boldA=boldA_132, all_Omegas=Omegas_132, weightpars=c(1, -1)))
+
 
   # mlogit (nothing to check in weightpars, so just checks that the function runs)
   expect_true(in_paramspace(p=2, M=2, d=2, weight_function="mlogit", cond_dist="Gaussian",

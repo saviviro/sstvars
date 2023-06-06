@@ -8,7 +8,7 @@ in_paramspace(
   p,
   M,
   d,
-  weight_function,
+  weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
   weightfun_pars = NULL,
   cond_dist,
   all_boldA,
