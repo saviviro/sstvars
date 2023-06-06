@@ -41,17 +41,6 @@ stab_conds_satisfied <- function(p, M, d, params, all_boldA=NULL, tolerance=1e-3
 #' @inheritParams stab_conds_satisfied
 #' @param weightpars numerical vector containing the transition weight parameters, obtained from \code{pick_weightpars}.
 #' @param all_Omega 3D array containing all covariance matrices \eqn{\Omega_{m}}, obtained from \code{pick_Omegas}.
-#' @param stab_tol numerical tolerance for the stability condition of each regime: if the "bold A" matrix of any regime
-#'   has eigenvalues larger that \code{1 - stab_tol} the parameter vector will be labeled as not in the parameter space.
-#'   Note that if the tolerance is too small, numerical evaluation of the log-likelihood might fail.
-#' @param posdef_tol numerical tolerance for positive definiteness of the regime-specific covariance matrices: if
-#'   the error term covariance matrix of any regime has eigenvalues smaller than this, the model is classified
-#'   as not satisfying positive definiteness assumption. Note that if the tolerance is too small, numerical
-#'   evaluation of the log-likelihood might fail and cause error.
-#' @param weightpar_tol numerical tolerance for weight parameters being in the parameter space. Values closer to
-#'   to the border of the parameter space than this are considered to be "outside" the parameter space.
-#' @param df_tol the parameter vector is considered to be outside the parameter space the degrees of
-#'   freedom parameters is not larger than \code{2 + df_tol}.
 #' @details The parameter vector in the argument \code{params} should be unconstrained and reduced form.
 #' @return Returns \code{TRUE} if the given parameter values are in the parameter space and \code{FALSE} otherwise.
 #'   This function does NOT consider identification conditions!

@@ -24,7 +24,8 @@ loglikelihood(
   minval = NULL,
   stab_tol = 0.001,
   posdef_tol = 1e-08,
-  df_tol = 1e-08
+  df_tol = 1e-08,
+  weightpar_tol = 1e-08
 )
 }
 \arguments{
@@ -90,7 +91,7 @@ of a given matrix from the principal diagonal downwards (including elements on t
   \item{\code{"exponential"}:}{\eqn{M=2}, \eqn{\alpha_{1,t}=1-\alpha_{2,t}},
     and \eqn{\alpha_{2,t}=1-\exp\lbrace -\gamma(y_{it-j}-c) \rbrace}, where \eqn{y_{it-j}} is the lag \eqn{j}
     observation of the \eqn{i}th variable, \eqn{c} is a location parameter, and \eqn{\gamma > 0} is a scale parameter.}
-  \item{\code{"threshold"}:}{\eqn{\alpha_{m,t} = 1} if \eqn{r_{m-1}<y_{it-j}<r_{m}} and \eqn{0} otherwise, where
+  \item{\code{"threshold"}:}{\eqn{\alpha_{m,t} = 1} if \eqn{r_{m-1}<y_{it-j}\leq r_{m}} and \eqn{0} otherwise, where
      \eqn{-\infty\equiv r_0<r_1<\cdots <r_{M-1}<r_M\equiv\infty} are thresholds \eqn{y_{it-j}} is the lag \eqn{j}
      observation of the \eqn{i}th variable.}
 }
@@ -149,6 +150,10 @@ computation time if it does for sure.}
 \item{minval}{the value that will be returned if the parameter vector does not lie in the parameter space
 (excluding the identification condition).}
 
+\item{stab_tol}{numerical tolerance for stability of condition of the regimes: if the "bold A" matrix of any regime
+has eigenvalues larger that \code{1 - stat_tol} the parameter is considered to be outside the parameter space.
+Note that if tolerance is too small, numerical evaluation of the log-likelihood might fail and cause error.}
+
 \item{posdef_tol}{numerical tolerance for positive definiteness of the error term covariance matrices: if
 the error term covariance matrix of any regime has eigenvalues smaller than this, the parameter is considered
 to be outside the parameter space. Note that if the tolerance is too small, numerical evaluation of the
@@ -157,9 +162,8 @@ log-likelihood might fail and cause error.}
 \item{df_tol}{the parameter vector is considered to be outside the parameter space if the degrees of
 freedom parameters is not larger than \code{2 + df_tol} (applies only if \code{cond_dist="Student"}).}
 
-\item{stat_tol}{numerical tolerance for stability of condition of the regimes: if the "bold A" matrix of any regime
-has eigenvalues larger that \code{1 - stat_tol} the parameter is considered to be outside the parameter space.
-Note that if tolerance is too small, numerical evaluation of the log-likelihood might fail and cause error.}
+\item{weightpar_tol}{numerical tolerance for weight parameters being in the parameter space. Values closer to
+to the border of the parameter space than this are considered to be "outside" the parameter space.}
 }
 \value{
 \describe{

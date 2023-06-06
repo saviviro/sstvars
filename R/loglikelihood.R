@@ -61,7 +61,7 @@
 #'    \item{\code{"exponential"}:}{\eqn{M=2}, \eqn{\alpha_{1,t}=1-\alpha_{2,t}},
 #'      and \eqn{\alpha_{2,t}=1-\exp\lbrace -\gamma(y_{it-j}-c) \rbrace}, where \eqn{y_{it-j}} is the lag \eqn{j}
 #'      observation of the \eqn{i}th variable, \eqn{c} is a location parameter, and \eqn{\gamma > 0} is a scale parameter.}
-#'    \item{\code{"threshold"}:}{\eqn{\alpha_{m,t} = 1} if \eqn{r_{m-1}<y_{it-j}<r_{m}} and \eqn{0} otherwise, where
+#'    \item{\code{"threshold"}:}{\eqn{\alpha_{m,t} = 1} if \eqn{r_{m-1}<y_{it-j}\leq r_{m}} and \eqn{0} otherwise, where
 #'       \eqn{-\infty\equiv r_0<r_1<\cdots <r_{M-1}<r_M\equiv\infty} are thresholds \eqn{y_{it-j}} is the lag \eqn{j}
 #'       observation of the \eqn{i}th variable.}
 #'  }
@@ -108,7 +108,7 @@
 #'   computation time if it does for sure.
 #' @param minval the value that will be returned if the parameter vector does not lie in the parameter space
 #'   (excluding the identification condition).
-#' @param stat_tol numerical tolerance for stability of condition of the regimes: if the "bold A" matrix of any regime
+#' @param stab_tol numerical tolerance for stability of condition of the regimes: if the "bold A" matrix of any regime
 #'   has eigenvalues larger that \code{1 - stat_tol} the parameter is considered to be outside the parameter space.
 #'   Note that if tolerance is too small, numerical evaluation of the log-likelihood might fail and cause error.
 #' @param posdef_tol numerical tolerance for positive definiteness of the error term covariance matrices: if
@@ -117,6 +117,8 @@
 #'   log-likelihood might fail and cause error.
 #' @param df_tol the parameter vector is considered to be outside the parameter space if the degrees of
 #'   freedom parameters is not larger than \code{2 + df_tol} (applies only if \code{cond_dist="Student"}).
+#' @param weightpar_tol numerical tolerance for weight parameters being in the parameter space. Values closer to
+#'   to the border of the parameter space than this are considered to be "outside" the parameter space.
 #' @details Calculates the log-likelihood of the specified model.
 #' @return
 #'   \describe{
@@ -146,7 +148,7 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
                           identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
                           AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                           to_return=c("loglik", "tw", "loglik_and_tw", "terms", "regime_cmeans", "total_cmeans", "total_ccovs"),
-                          check_params=TRUE, minval=NULL, stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8) {
+                          check_params=TRUE, minval=NULL, stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8, weightpar_tol=1e-8) {
   # Match args
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -191,7 +193,7 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
     if(!in_paramspace(p=p, M=M, d=d, weight_function=weight_function, cond_dist=cond_dist,
                       all_boldA=all_boldA, all_Omegas=all_Omegas, weightpars=weightpars, df=df,
                       weightfun_pars=weightfun_pars, stab_tol=stab_tol, posdef_tol=posdef_tol,
-                      df_tol=df_tol)) {
+                      df_tol=df_tol, weightpar_tol=weightpar_tol)) {
       return(minval)
     }
   }
@@ -291,8 +293,9 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
 #' @inherit in_paramspace references
 #' @keywords internal
 
-get_alpha_mt <- function(data, Y2, p, M, d, weight_function, weightfun_pars, all_A, all_boldA, all_Omegas, weightpars,
-                         all_mu, epsilon, log_mvdvalues=NULL) {
+get_alpha_mt <- function(data, Y2, p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+                         weightfun_pars=NULL, all_A, all_boldA, all_Omegas, weightpars, all_mu, epsilon, log_mvdvalues=NULL) {
+  weight_function <- match.arg(weight_function)
   if(is.null(log_mvdvalues)) {
     T_obs <- ifelse(missing(data), 1, nrow(data) - p) # simulate.stvar uses without data, needs to return 1 if M=1.
     if(M == 1) {
@@ -314,6 +317,27 @@ get_alpha_mt <- function(data, Y2, p, M, d, weight_function, weightfun_pars, all
     in_exp[in_exp > -epsilon] <- -epsilon # Values larger than that would produce Inf and "break" the loglikelihood function; epsilon -698
     alpha_2t <- (1 + exp(in_exp))^(-1) # Weights of the second regime
     return(unname(cbind(1 - alpha_2t, alpha_2t)))
+  } else if(weight_function == "exponential") {
+    # According to "lag" in weightfun_pars[2], only the column d(lag-1) + variable are used where "variable i is the switching variable"
+    subY2 <- Y2[,d*(weightfun_pars[2] - 1) + weightfun_pars[1]] # Returns a vector
+    in_exp <- -weightpars[2]*(subY2 - weightpars[1])^2
+    in_exp[in_exp > -epsilon] <- -epsilon # Values larger than that would produce Inf and "break" the loglikelihood function; epsilon -698
+    alpha_2t <- 1 - exp(in_exp) # Weights of the second regime
+    return(unname(cbind(1 - alpha_2t, alpha_2t)))
+  } else if(weight_function == "threshold") {
+    # According to "lag" in weightfun_pars[2], only the column d(lag-1) + variable are used where "variable i is the switching variable"
+    subY2 <- Y2[,d*(weightfun_pars[2] - 1) + weightfun_pars[1]] # Returns a vector
+    alpha_mt <- matrix(0, nrow=length(subY2), ncol=M) # [t, m] fill with ones according to the thresholds; weightpars in increasing order
+    for(m in 1:M) {
+      if(m == 1) {
+        alpha_mt[subY2 <= weightpars[m], m] <- 1
+      } else if(m < M) { # m > 1 && m < M; m>1 known if we end up here
+        alpha_mt[subY2 > weightpars[m-1] & subY2 <= weightpars[m], m] <- 1
+      } else { # m == M; m < M false if we end up here so we know this
+        alpha_mt[subY2 > weightpars[m-1], m] <- 1
+      }
+    }
+    return(alpha_mt) # Each row has one 1 and the rest are zero
   }
 
   if(weight_function == "mlogit" && is.null(log_mvdvalues)) {

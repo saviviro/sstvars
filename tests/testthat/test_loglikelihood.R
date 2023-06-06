@@ -85,7 +85,7 @@ theta_323relg <- c(0.98249, 0.66144, -1.17552, 0.50289, 0.17399, -0.01771, 0.961
 ###################
 
 
-# p=1, M=3, d=2 (not tested atm)
+# p=1, M=3, d=2
 phi10_132 <- phi10_122
 phi20_132 <- phi20_122
 phi30_132 <- c(12, 13)
@@ -196,6 +196,62 @@ theta_123log_23_1 <- c(theta_123log_noweightpars, gamma1_123_23_1)
 # p=1, M=2, d=3, weightfun_pars=list(vars=1:3, lags=1), usamone
 gamma1_123_123_1 <- c(0.1, 0.2, 0.3, 0.4)
 theta_123log_123_1 <- c(theta_123log_noweightpars, gamma1_123_123_1)
+
+
+## weight_function == "exponential"
+
+# p=1, M=2, d=2, weight_function="exponential", weightfun_pars=c(1, 1)
+theta_122exp_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), c_and_gamma_122_1_1)
+
+# p=1, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1)
+theta_122exp_2_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), c_and_gamma_122_2_1)
+
+# p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1)
+theta_222exp_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                      vech(Omega1_222), vech(Omega2_222), c_and_gamma_222_2_1)
+
+# p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(1, 2)
+theta_222exp_1_2 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                      vech(Omega1_222), vech(Omega2_222), c_and_gamma_222_1_2)
+
+# p=1, M=2, d=3, weight_function="exponential", weightfun_pars=c(1, 1)
+c_and_gamma_123_1_1 <- c(0.5, 1)
+theta_123exp_1_1 <-  c(theta_123log_noweightpars, c_and_gamma_123_1_1)
+
+## weight_function == "threshold"
+
+# p=1, M=2, d=2, weight_function="threshold", weightfun_pars=c(1, 1)
+r1_122_1_1 <- c(0.5)
+theta_122thres_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), r1_122_1_1)
+
+# p=2, M=2, d=2, weight_function="threshold", weightfun_pars=c(2, 2)
+r1_222_2_2 <- c(0.7)
+theta_222thres_2_2 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                        vech(Omega1_222), vech(Omega2_222), r1_222_2_2)
+
+# p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1)
+r1_132_1_1 <- 0.5
+r2_132_1_1 <- 1.2
+theta_132thres_1_1 <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                        vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), r1_132_1_1, r2_132_1_1)
+
+
+# p=2, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1)
+phi10_232 <- phi10_132; phi20_232 <- phi20_132; phi30_232 <- phi30_132
+A11_232 <- A11_132; A12_232 <- -A11_132
+A21_232 <- A21_132; A22_232 <- -A21_132
+A31_232 <- A31_132; A32_232 <- -A31_132
+Omega1_232 <- Omega1_132; Omega2_232 <- Omega1_132; Omega3_232 <- Omega3_132
+r1_232_1_1 <- -0.01; r2_232_1_1 <- 1.01
+theta_232thres_1_1 <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232), vec(A22_232),
+                        vec(A31_232), vec(A32_232), vech(Omega1_232), vech(Omega2_232), vech(Omega3_232),
+                        r1_232_1_1, r2_232_1_1)
+
+
+# p=1, M=2, d=3, weight_function="threshold", weightfun_pars=c(2, 1)
+r1_123_2_1 <- 1
+theta_123thres_2_1 <- c(theta_123log_noweightpars, r1_123_2_1)
+
 
 
 ## Constrained models
@@ -331,6 +387,35 @@ theta_222logisticcmw_2_1_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A
                                        vech(Omega1_222), vech(Omega2_222), c(0.01, 0.33))
 
 
+## weight_function == "exponential"
+
+# p=1, M=2, d=2, weight_function="exponential", weightfun_pars=c(1, 1), weight_constraints=list(R=0, r=c(0.02, 0.13))
+theta_122expw_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122))
+theta_122expw_1_1_expanded <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), c(0.02, 0.13))
+
+# p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
+# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))
+xi_222expcmw_2_1 <- c(0.33)
+theta_222expcmw_2_1 <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), xi_222expcmw_2_1)
+theta_222expcmw_2_1_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                  vech(Omega1_222), vech(Omega2_222), c(0.01, 0.33))
+
+## threshold
+
+# p=2, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.1, 0))
+xi_232thres_1_1 <- 0.5
+theta_232thresw_1_1 <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232), vec(A22_232),
+                         vec(A31_232), vec(A32_232), vech(Omega1_232), vech(Omega2_232), vech(Omega3_232), xi_232thres_1_1)
+theta_232thresw_1_1_expanded <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232), vec(A22_232),
+                                  vec(A31_232), vec(A32_232), vech(Omega1_232), vech(Omega2_232), vech(Omega3_232), 0.1, 0.5)
+
+# p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2))
+theta_132thresmw_1_1 <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
+                          vech(Omega2_132), vech(Omega3_132))
+theta_132thresmw_1_1_expanded <- c(phi10_132, phi20_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
+                                   vech(Omega2_132), vech(Omega3_132), 0, 1.2)
+
+
 
 test_that("loglikelihood works correctly", {
 
@@ -379,6 +464,27 @@ test_that("loglikelihood works correctly", {
   expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123log_123_1, weight_function="mlogit",
                              weightfun_pars=list(vars=1:3, lags=1)), -1155.278, tolerance=1e-3)
 
+  # Exponential STVAR
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122exp_1_1, weight_function="exponential",
+                             weightfun_pars=c(1, 1)), -336.8664, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222exp_2_1, weight_function="exponential",
+                             weightfun_pars=c(2, 1)), -308.0051, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222exp_1_2, weight_function="exponential",
+                             weightfun_pars=c(1, 2)), -407.7225, tolerance=1e-3)
+  expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123exp_1_1, weight_function="exponential",
+                             weightfun_pars=c(1, 1)), -1115.766, tolerance=1e-3)
+
+  # Threshold STVAR
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122thres_1_1, weight_function="threshold",
+                             weightfun_pars=c(1, 1)), -391.7463, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222thres_2_2, weight_function="threshold",
+                             weightfun_pars=c(2, 2)), -282.805, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=3, params=theta_132thres_1_1, weight_function="threshold",
+                             weightfun_pars=c(1, 1)), -5944.922, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=3, params=theta_232thres_1_1, weight_function="threshold",
+                             weightfun_pars=c(1, 1)), -8282.43, tolerance=1e-2)
+  expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123thres_2_1, weight_function="threshold",
+                             weightfun_pars=c(2, 1)), -682.5003, tolerance=1e-3)
 
   # Constrained models
   expect_equal(loglikelihood(data=gdpdef, p=1, M=1, params=theta_112relgc, weight_function="relative_dens",
@@ -423,4 +529,14 @@ test_that("loglikelihood works correctly", {
                              mean_constraints=list(1:2), AR_constraints=C_222,
                              weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))), -333.9167, tolerance=1e-3)
 
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122expw_1_1, weight_function="exponential", weightfun_pars=c(1, 1),
+                             weight_constraints=list(R=0, r=c(0.02, 0.13))), -336.0778, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222expcmw_2_1, weight_function="exponential", weightfun_pars=c(2, 1),
+                             mean_constraints=list(1:2), AR_constraints=C_222,
+                             weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))), -317.8996, tolerance=1e-3)
+
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=3, params=theta_232thresw_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
+                             weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.1, 0))), -16285.82, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=3, params=theta_132thresmw_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
+                             mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2))), -443.5233, tolerance=1e-3)
 })
