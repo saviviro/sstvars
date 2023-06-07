@@ -186,18 +186,26 @@ smart_df <- function(df, accuracy) {
 #' @return Returns a numeric vector ...
 #'   \describe{
 #'     \item{If \code{weight_function == "relative_dens"}:}{a length \code{M-1} vector \eqn{(\alpha_1,...,\alpha_{M-1})}.}
-#'     \item{If \code{weight_function == "mlogit"}:}{a length \eqn{((M-1)k\times 1)} vector \eqn{(\gamma_1,...,\gamma_M)},
+#'     \item{If \code{weight_function == "logistic"}:}{a length two vector \eqn{(c,\gamma)},
+#'           where \eqn{c\in\mathbb{R}} is the location parameter and \eqn{\gamma >0} is the scale parameter.}
+#'     \item{If \code{weight_function == "mlogit"}:}{a length \eqn{((M-1)k\times 1)} vector \eqn{(\gamma_1,...,\gamma_{M-1})},
 #'           where \eqn{\gamma_m} \eqn{(k\times 1)}, \eqn{m=1,...,M-1} contains the mlogit-regression coefficients of the \eqn{m}th regime.
-#'           Specifically, for switching variables with indices in \eqn{J\subset\lbrace 1,...,d\rbrace}, and with
-#'          \eqn{\tilde{p}\in\lbrace 1,...,p\rbrace} lags included, \eqn{\gamma_m} contains the coefficients for the vector
-#'          \eqn{z_{t-1} = (1,\tilde{z}_{\min\lbrace J\rbrace},...,\tilde{z}_{\max\lbrace J\rbrace})}, where
-#'          \eqn{\tilde{z}_{j} =(y_{j,t-1},...,y_{j,t-\tilde{p}})}, \eqn{j\in J}. So \eqn{k=1+|J|\tilde{p}}
-#'          where \eqn{|J|} denotes the number of elements in \eqn{J}.}
+#'           Specifically, for switching variables with indices in \eqn{I\subset\lbrace 1,...,d\rbrace}, and with
+#'           \eqn{\tilde{p}\in\lbrace 1,...,p\rbrace} lags included, \eqn{\gamma_m} contains the coefficients for the vector
+#'           \eqn{z_{t-1} = (1,\tilde{z}_{\min\lbrace I\rbrace},...,\tilde{z}_{\max\lbrace I\rbrace})}, where
+#'           \eqn{\tilde{z}_{i} =(y_{it-1},...,y_{it-\tilde{p}})}, \eqn{i\in I}. So \eqn{k=1+|I|\tilde{p}}
+#'           where \eqn{|I|} denotes the number of elements in \eqn{I}.}
+#'     \item{If \code{weight_function == "exponential"}:}{a length two vector \eqn{(c,\gamma)},
+#'           where \eqn{c\in\mathbb{R}} is the location parameter and \eqn{\gamma >0} is the scale parameter.}
+#'     \item{If \code{weight_function == "threshold"}:}{a length \eqn{M-1} vector \eqn{(r_1,...,r_{M-1})},
+#'           where \eqn{r_1,...,r_{M-1}} are the threshold values in an increasing order.}
 #'   }
 #' @keywords internal
 
-random_weightpars <- function(M, weight_function, weightfun_pars=NULL, AR_constraints=NULL, mean_constraints=NULL,
+random_weightpars <- function(M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+                              weightfun_pars=NULL, AR_constraints=NULL, mean_constraints=NULL,
                               weight_constraints=NULL, weight_scale) {
+  weight_function <- match.arg(weight_function)
   if(M == 1) return(numeric(0))
   if(weight_function == "relative_dens") {
     if(is.null(weight_constraints)) {
@@ -215,7 +223,7 @@ random_weightpars <- function(M, weight_function, weightfun_pars=NULL, AR_constr
         ret <- sort(runif(n=ncol(weight_constraints[[1]]), min=0, max=0.8), decreasing=TRUE)
       }
     }
-  } else if(weight_function == "logistic") {
+  } else if(weight_function == "logistic" || weight_function == "exponential") {
     if(is.null(weight_constraints)) {
       ret <- c(rnorm(n=1, mean=weight_scale[1], sd=weight_scale[2]), abs(rnorm(n=1, mean=0, sd=weight_scale[3])) + 1e-8)
     } else {
@@ -238,8 +246,8 @@ random_weightpars <- function(M, weight_function, weightfun_pars=NULL, AR_constr
         ret <- rnorm(n=ncol(weight_constraints[[1]]), mean=0, sd=weight_scale[3])
       }
     }
-  } else {
-    stop("Unkown weight function in random_weightpars")
+  } else if(weight_function == "threshold") {
+    ret <- sort(runif(n=M-1, min=weight_scale[1], max=weight_scale[2]), decreasing=FALSE)
   }
   ret
 }

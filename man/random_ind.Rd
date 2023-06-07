@@ -112,14 +112,16 @@ structural model is considered.}
 \item{weight_scale}{For...
 \describe{
   \item{\code{weight_function == "relative_dens"}:}{not used.}
-  \item{\code{weight_function == "logistic"}:}{length three vector with the mean (in the first element)
+  \item{\code{weight_function \%in\‰ c("logistic", "exponential")}:}{length three vector with the mean (in the first element)
      and standard deviation (in the second element) of the normal distribution the location parameter is drawn from
      in random mutations. The third element is the standard deviation of the normal distribution from whose absolute value
      the location parameter is drawn from.}
   \item{\code{weight_function == "mlogit"}:}{length two vector with the mean (in the first element)
      and standard deviation (in the second element) of the normal distribution the coefficients of the logit sub model's
      constant terms are drawn from in random mutations. The third element is the standard deviation of the normal distribution
-     from which the non-constant regressors' coefficients are drawn from. }
+     from which the non-constant regressors' coefficients are drawn from.}
+  \item{\code{weight_function == "threshold"}:}{a lenght two vector with the lower bound, in the first element
+     and the upper bound, in the second element, of the uniform distribution threshold parameters are drawn from in random mutations.}
 }}
 
 \item{ar_scale}{a positive real number adjusting how large AR parameter values are typically proposed in construction
