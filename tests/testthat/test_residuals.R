@@ -34,6 +34,12 @@ gamma1_222_12_2 <- c(0.1, 0.2, 0.11, 0.22, 0.33)
 theta_222log_12_2 <- c(theta_222relg[-length(theta_222relg)], gamma1_222_12_2)
 
 
+## weight_function == "threshold"
+
+# p=2, M=2, d=2, weight_function="threshold", weightfun_pars=c(2, 1),
+theta_222thres_2_1 <- c(theta_222relg[-length(theta_222relg)], 1)
+
+
 ## Constrained models
 rbind_diags <- function(p, M, d) {
   I <- diag(p*d^2)
@@ -58,9 +64,33 @@ theta_222logcmw_12_2 <-  c(theta_222relgcm[-length(theta_222relgcm)], xi_222logc
 xi_222logisticcmw_2_1 <- c(0.33)
 theta_222logisticcmw_2_1 <- c(theta_222relgcm[-length(theta_222relgcm)], xi_222logisticcmw_2_1)
 
+# p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
+# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))
+xi_222expcmw_2_1 <- c(0.33)
+theta_222expcmw_2_1 <- c(theta_222relgcm[-length(theta_222relgcm)], xi_222logisticcmw_2_1)
+
 
 
 test_that("get_residuals works correctly", {
+  # threshold
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222thres_2_1, weight_function="threshold",
+                               weightfun_pars=c(2, 1), standardize=TRUE)[c(1, 2, 210, 242),]),
+               c(-3.3073904, -2.3720290, 0.9687195, -0.9181623, 0.3946221, 0.4722489, -2.8858480, -0.2656000), tolerance=1e-3)
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222thres_2_1, weight_function="threshold",
+                               weightfun_pars=c(2, 1), standardize=FALSE)[c(1, 2, 210, 242),]),
+               c(-1.49694675, -1.07200730, 0.41519088, -0.41871592, 0.03562626, 0.05594944, -0.45546140, -0.05037556), tolerance=1e-3)
+
+  # exponential
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222expcmw_2_1, weight_function="exponential",
+                               weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
+                               weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), standardize=TRUE)[c(1, 2, 131, 242),]),
+               c(-4.0357127, -2.5716562, 0.5115762, -1.3625459, -3.4952403, -3.0373204, -4.7386797, -3.9608321))
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222expcmw_2_1, weight_function="exponential",
+                               weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
+                               weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), standardize=FALSE)[c(1, 2, 131, 242),]),
+               c(-1.9292555, -1.3307029, 0.2188449, -0.7247259, -0.6715463, -0.5928653, -0.9207879, -0.7329033))
+
+  # mlogit and logistic
   expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222logcmw_12_2, weight_function="mlogit",
                                weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
                                weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0)),
