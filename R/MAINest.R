@@ -29,7 +29,7 @@
 #'  large number of observations. If the iteration limit \code{maxit} in the variable metric algorithm is reached,
 #'  one can continue the estimation by iterating more with the function \code{iterate_more}. Alternatively, one may
 #'  use the found estimates as starting values for the genetic algorithm and and employ another round of estimation
-#'  (see \code{?GAfit} how to set up an initial population with the dot parameters).
+#'  (see \code{??GAfit} how to set up an initial population with the dot parameters).
 #'
 #'  \strong{If the estimation algorithm performs poorly (or fails to create an initial population for the genetic algorithm)},
 #'  it usually helps to scale the individual series so that they vary roughly in the same scale.

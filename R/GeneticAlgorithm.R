@@ -58,7 +58,7 @@
 #' @param weight_scale For...
 #'   \describe{
 #'     \item{\code{weight_function == "relative_dens"}:}{not used.}
-#'     \item{\code{weight_function \%in\‰ c("logistic", "exponential")}:}{length three vector with the mean (in the first element)
+#'     \item{\code{weight_function \%in\% c("logistic", "exponential")}:}{length three vector with the mean (in the first element)
 #'        and standard deviation (in the second element) of the normal distribution the location parameter is drawn from
 #'        in random mutations. The third element is the standard deviation of the normal distribution from whose absolute value
 #'        the location parameter is drawn from.}
@@ -129,8 +129,8 @@
 #'          \emph{Proceedings of the 1995 ACM Symposium on Applied Computing}, 345-350.
 #'  }
 
-GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit"), weightfun_pars=NULL,
-                  cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
+GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+                  weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
                   AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
                   ngen=200, popsize, smart_mu=min(100, ceiling(0.5*ngen)), initpop=NULL,
                   mu_scale, mu_scale2, omega_scale, weight_scale,
@@ -183,18 +183,40 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
     stop("omega_scale must be numeric vector with length d and positive elements")
   }
   if(missing(weight_scale)) {
-    if(weight_function == "logistic") {
+    if(weight_function == "logistic" || weight_function == "exponential") {
       weight_scale <- c(mean(data[,weightfun_pars[1]]), 3*sd(data[,weightfun_pars[1]]), 8*sd(data[,weightfun_pars[1]]))
     } else if(weight_function == "mlogit") {
       weight_scale <- c(mean(data[,weightfun_pars[[1]]]), 8*sd(data[,weightfun_pars[[1]]]), 8*sd(data[,weightfun_pars[[1]]]))
+    } else if(weight_function == "threshold") {
+      weight_scale <- c(min(data[,weightfun_pars[[1]]]), max(data[,weightfun_pars[[1]]]))
     } else {
       weight_scale <- NULL # Not used
     }
   } else {
-    if(weight_function %in% c("logistic", "mlogit")) {
+    if(weight_function %in% c("logistic", "exponential")) {
+      if(length(weight_scale) != 3 || !is.vector(weight_scale) || !is.numeric(weight_scale) ||
+         weight_scale[2] <= 0 || weight_scale[3] <= 0) {
+        stop("For logistic and exponential weight functions, the argument weight_scale should be a length three numeric vector
+              with strictly positive second and third elements")
+      }
+    } else if(weight_function == "mlogit") {
       if(length(weight_scale) != 2 || !is.vector(weight_scale) || !is.numeric(weight_scale) || weight_scale[2] <= 0) {
-        stop("For logistic and mlogit weight functions, the argument weight_scale should be a length two numeric vector
+        stop("For mlogit weight function, the argument weight_scale should be a length two numeric vector
               with strictly positive second element")
+      }
+    } else if(weight_function == "threshold") {
+      if(length(weight_scale) != 2 || !is.numeric(weight_scale)) {
+        stop("For threshold weight function, the argument weight_scale should be a length two numeric vecor")
+      }
+      if(weight_scale[1] < min(data[,weightfun_pars[[1]]])) {
+        warning("Lower bound for thresholds was set smaller than the smallest observation of the switching variable.
+                Using lower bound set to the smallest observation.")
+        weight_scale[1] <- min(data[,weightfun_pars[[1]]])
+      }
+      if(weight_scale[2] > max(data[,weightfun_pars[[1]]])) {
+        warning("Upper bound for thresholds was set larger than the largest observation of the switching variable.
+                Using upper bound set to the largest observation.")
+        weight_scale[2] <- max(data[,weightfun_pars[[1]]])
       }
     }
   }
