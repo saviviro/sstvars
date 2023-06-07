@@ -188,7 +188,7 @@ print_std_errors <- function(stvar, digits=3) {
       }
     } else if(weight_function == "threshold") {
       if(m < M) {
-        cat(paste0("Upper threshold: ", format_value(weightpars[m])))
+        cat(paste0("Upper threshold: ", format_value(weightpars[m])), "\n")
       }
     }
     if(parametrization == "mean") cat("Regime means:", paste0(format_value(all_mu[,m]), collapse=", "), "\n")

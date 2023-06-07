@@ -133,7 +133,7 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
       }
     } else if(weight_function == "threshold") {
       if(m < M) {
-        cat(paste0("Upper threshold: ", format_value(weightpars[m])))
+        cat(paste0("Upper threshold: ", format_value(weightpars[m])), "\n")
       }
     }
     cat("Regime means:", paste0(format_value(all_mu[,m]), collapse=", "))
