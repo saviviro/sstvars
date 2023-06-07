@@ -34,6 +34,15 @@ theta_323relg <- c(0.98249, 0.66144, -1.17552, 0.50289, 0.17399, -0.01771, 0.961
                    0.10245, 1.81845, 0.72719, 0.03235, 0.09857, 0.04826, 0.00908, 0.09761, 0.72127)
 mod323relg <- STVAR(data=usamone, p=3, M=2, params=theta_323relg, weight_function="relative_dens")
 
+
+## weight_function == "threshold"
+
+# p=2, M=2, d=2, weight_function="threshold", weighfun_pars=c(2, 1)
+theta_222thres_2_1 <- c(theta_222relg[-length(theta_222relg)], 1)
+mod222thres_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222thres_2_1, weight_function="threshold",
+                         weightfun_pars=c(2, 1))
+
+
 ## Constrained models
 rbind_diags <- function(p, M, d) {
   I <- diag(p*d^2)
@@ -71,6 +80,15 @@ mod222logisticcmw_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logis
                                weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
                                weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)))
 
+# p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
+# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))
+xi_222expcmw_2_1 <- c(0.33)
+theta_222expcmw_2_1 <- c(theta_222relgcm[-length(theta_222relgcm)], xi_222logisticcmw_2_1)
+mod222expcmw_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222expcmw_2_1, weight_function="exponential",
+                          weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
+                          weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)))
+
+
 test_that("STVAR works correctly", {
   # Relative_dens Gaussian STVAR
   expect_equal(mod112relg$params, theta_112relg)
@@ -87,4 +105,9 @@ test_that("STVAR works correctly", {
   expect_equal(mod222logcm_12_2$params, theta_222logcm_12_2)
   expect_equal(mod222logcmw_12_2$params, theta_222logcmw_12_2)
 
+  # Exponential
+  expect_equal(mod222expcmw_2_1$params, theta_222expcmw_2_1)
+
+  # Threshold
+  expect_equal(mod222thres_2_1$params, theta_222thres_2_1)
 })
