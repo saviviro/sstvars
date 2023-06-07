@@ -56,7 +56,6 @@ theta_222relg <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222
 
 stvar222 <- STVAR(p=2, M=2, d=2, params=theta_222relg, weight_function="relative_dens")
 
-
 # p=1, M=3, d=2
 phi10_132 <- phi10_122
 phi20_132 <- phi20_122
@@ -109,6 +108,15 @@ gamma1_222_12_2 <- c(0.1, 0.2, 0.11, 0.22, 0.33)
 theta_222log_12_2 <- c(theta_222relg[-length(theta_222relg)], gamma1_222_12_2)
 
 stvar222mlogit <- STVAR(p=2, M=2, d=2, params=theta_222log_12_2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=2))
+
+
+## weight_function == "threshold"
+
+# p=2, M=2, d=2, weight_function="threshold", weighfun_pars=c(2, 1)
+theta_222thres_2_1 <- c(theta_222relg[-length(theta_222relg)], 1)
+mod222thres_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222thres_2_1, weight_function="threshold",
+                         weightfun_pars=c(2, 1))
+
 
 ## Constrained models
 rbind_diags <- function(p, M, d) {
@@ -174,6 +182,16 @@ mod222logcmw_12_2 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logcmw_12
                            weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0)))
 
 
+# p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
+# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))
+xi_222expcmw_2_1 <- c(0.33)
+theta_222expcmw_2_1 <- c(theta_222relgcm[-length(theta_222relgcm)], xi_222logisticcmw_2_1)
+mod222expcmw_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222expcmw_2_1, weight_function="exponential",
+                          weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
+                          weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)))
+
+
+
 test_that("get_boldA_eigens work correctly", {
   expect_equal(get_boldA_eigens(stvar112), as.matrix(c(0.8953748, 0.2946252)), tol=1e-3)
   expect_equal(get_boldA_eigens(stvar312), as.matrix(c(0.6367684, 0.6367684, 0.5731850, 0.5466223, 0.5256310, 0.5256310)), tol=1e-3)
@@ -200,8 +218,14 @@ test_that("get_boldA_eigens work correctly", {
   expect_equal(get_boldA_eigens(mod132relgw)[1,], c(0.7186796, 0.7186796, 0.5372281), tol=1e-3)
   expect_equal(get_boldA_eigens(mod132relgw)[2,], c(0.34132038, 0.34132038, 0.03722813), tol=1e-3)
 
-  expect_equal(get_boldA_eigens(mod222logcmw_12_2)[,1], c(0.7667397, 0.7667397, 0.5076821, 0.41479431), tol=1e-3)
+  expect_equal(get_boldA_eigens(mod222logcmw_12_2)[,1], c(0.7667397, 0.7667397, 0.5076821, 0.4147943), tol=1e-3)
   expect_equal(get_boldA_eigens(mod222logcmw_12_2)[,2], c(0.7667397, 0.7667397, 0.5076821, 0.4147943), tol=1e-3)
+
+  expect_equal(get_boldA_eigens(mod222thres_2_1)[,1], c(0.7667397, 0.7667397, 0.5076821, 0.4147943), tol=1e-3)
+  expect_equal(get_boldA_eigens(mod222thres_2_1)[,2], c(0.9198650, 0.4317946, 0.2541513, 0.1575083), tol=1e-3)
+
+  expect_equal(get_boldA_eigens(mod222expcmw_2_1)[,1], c(0.7667397, 0.7667397, 0.5076821, 0.4147943), tol=1e-3)
+  expect_equal(get_boldA_eigens(mod222expcmw_2_1)[,2], c(0.7667397, 0.7667397, 0.5076821, 0.4147943), tol=1e-3)
 })
 
 
@@ -233,4 +257,10 @@ test_that("get_omega_eigens work correctly", {
 
   expect_equal(get_omega_eigens(mod222logcmw_12_2)[,1], c(0.21055385, 0.02944615), tol=1e-3)
   expect_equal(get_omega_eigens(mod222logcmw_12_2)[,2], c(1.100101, 0.109899), tol=1e-3)
+
+  expect_equal(get_omega_eigens(mod222thres_2_1)[,1], c(0.21055385, 0.02944615), tol=1e-3)
+  expect_equal(get_omega_eigens(mod222thres_2_1)[,2], c(1.100101, 0.109899), tol=1e-3)
+
+  expect_equal(get_omega_eigens(mod222expcmw_2_1)[,1], c(0.21055385, 0.02944615), tol=1e-3)
+  expect_equal(get_omega_eigens(mod222expcmw_2_1)[,2], c(1.100101, 0.109899), tol=1e-3)
 })
