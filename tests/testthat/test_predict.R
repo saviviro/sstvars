@@ -38,12 +38,31 @@ theta_322mlogit <- c(0.575457, 0.039417, 2.746742, 0.297945, 0.268969, 0.055635,
                      0.066679, 0.356729, 0.005054, 0.031869, 1.158638, -0.039743, 0.153416, 8.970726, -7.518924)
 mod322mlogit <- STVAR(data=gdpdef, p=3, M=2, params=theta_322mlogit, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1))
 
+# p=3, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1)
+theta_322exp <- c(0.39211, 0.01111, 2.36699, 0.46926, 0.25534, 0.03812, -0.03716, 0.37795, 0.35103, 0.02618, -0.09847,
+                  0.16067, -0.03619, 0.02972, -0.08469, 0.28501, 0.20048, -0.01467, -0.96397, 0.66189, -0.10317, 0.00512,
+                  0.72416, 0.05694, -0.06667, 0.02475, -0.70513, 0.01575, 0.34356, 0.00828, 0.02348, 1.29206, -0.05969,
+                  0.19413, 0.48621, 1.01986)
+mod322exp <- STVAR(data=gdpdef, p=3, M=2, params=theta_322exp, weight_function="exponential", weightfun_pars=c(2, 1))
+
+mod322exp <- STVAR(data=gdpdef, p=3, M=2, params=theta_322exp, weight_function="exponential", weightfun_pars=c(2, 1))
+
+# p=3, M=2, d=2, weight_function="threshold", weightfun_pars=c(2, 1)
+theta_322thres <- c(0.50787, 0.04477, 1.9715, 0.11992, 0.27899, 0.0507, -0.0855, 0.4122, 0.29264, 0.02062, -0.12133, 0.11042,
+                    -0.06851, 0.01426, -0.02835, 0.2834, 0.18424, -0.01164, -0.88906, 0.65569, -0.00658, 0.01358, 0.60105,
+                    0.11503, -0.03238, 0.05692, -0.52757, 0.11841, 0.37367, 0.00339, 0.03619, 1.13522, -0.03236, 0.13564, 1.10785)
+mod322thres <- STVAR(data=gdpdef, p=3, M=2, params=theta_322thres, weight_function="threshold", weightfun_pars=c(2, 1))
+
+
 set.seed(1); p112 <- predict(mod112relg, nsteps=1, nsim=1, pred_type="mean")
 set.seed(2); p122 <- predict(mod122relg, nsteps=3, nsim=3, pred_type="median")
 set.seed(3); p222 <- predict(mod222relg, nsteps=2, nsim=10, pred_type="mean", pi=c(0.5))
 set.seed(4); p123 <- predict(mod123relg, nsteps=4, nsim=7, pred_type="median", pi=c(0.3, 0.5, 0.7))
 set.seed(5); p322logistic <- predict(mod322logistic, nsteps=3, nsim=5, pred_type="mean", pi=0.9)
 set.seed(5); p322mlogit <- predict(mod322mlogit, nsteps=3, nsim=5, pred_type="median", pi=c(0.7, 0.8))
+set.seed(5); p322exp <- predict(mod322exp, nsteps=3, nsim=5, pred_type="mean", pi=0.95)
+set.seed(5); p322thres <- predict(mod322thres, nsteps=3, nsim=5, pred_type="median", pi=c(0.6, 0.81))
+
 
 
 test_that("simulate.stvar works correctly", {
@@ -65,5 +84,10 @@ test_that("simulate.stvar works correctly", {
   expect_equal(unname(p322logistic$pred_ints[3, 2,]), c(1.7293984, 0.6218133), tol=1e-4)
   expect_equal(unname(p322mlogit$pred[3,]), c(1.3200944, 0.3322151), tol=1e-4)
   expect_equal(unname(p322mlogit$pred_ints[3, 4,]), c(1.5454664, 0.5335837), tol=1e-4)
+
+  expect_equal(unname(p322exp$pred[3,]), c(0.9682415, 0.3139115), tol=1e-4)
+  expect_equal(unname(p322exp$pred_ints[3, 2,]), c(1.6870691, 0.5851358), tol=1e-4)
+  expect_equal(unname(p322thres$pred[3,]), c(1.364332, 0.344308), tol=1e-4)
+  expect_equal(unname(p322thres$pred_ints[3, 4,]), c(1.4781161, 0.5018161), tol=1e-4)
 })
 

@@ -188,7 +188,8 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
     } else if(weight_function == "mlogit") {
       weight_scale <- c(mean(data[,weightfun_pars[[1]]]), 8*sd(data[,weightfun_pars[[1]]]), 8*sd(data[,weightfun_pars[[1]]]))
     } else if(weight_function == "threshold") {
-      weight_scale <- c(min(data[,weightfun_pars[[1]]]), max(data[,weightfun_pars[[1]]]))
+      quants <- unname(quantile(data[,weightfun_pars[1]], probs=c(0.2, 0.8)))
+      weight_scale <- c(quants[1], quants[2])
     } else {
       weight_scale <- NULL # Not used
     }

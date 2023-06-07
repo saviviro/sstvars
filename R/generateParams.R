@@ -247,7 +247,16 @@ random_weightpars <- function(M, weight_function=c("relative_dens", "logistic", 
       }
     }
   } else if(weight_function == "threshold") {
-    ret <- sort(runif(n=M-1, min=weight_scale[1], max=weight_scale[2]), decreasing=FALSE)
+    if(is.null(weight_constraints)) {
+      ret <- sort(runif(n=M-1, min=weight_scale[1], max=weight_scale[2]), decreasing=FALSE)
+    } else {
+      if(all(weight_constraints[[1]] == 0)) {
+        ret <- numeric(0) # alpha = r constant, so it is not parametrized
+      } else {
+        # We don't sort here so that we don't accidentally always be outside the parameter space with some weird weight constraints
+        ret <- runif(n=ncol(weight_constraints[[1]]), min=weight_scale[1], max=weight_scale[2])
+      }
+    }
   }
   ret
 }

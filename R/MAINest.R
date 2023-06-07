@@ -132,11 +132,25 @@
 #'
 #' # relative_dens STVAR, p=1, M=2, d=2, with the weight parameter fixed to the constant r=0.8.
 #' fit12w <- fitSTVAR(gdpdef, p=1, M=2, weight_constraints=list(R=0, r=0.8), nrounds=1, seeds=10, use_parallel=FALSE)
+#'
+#' # p=3, M=2, d=2, exponential STVAR with the second variable as switching variable
+#' # with one lag, and AR parameter constrained identical across the regimes, means constrained
+#' # identical across the regimes, and the location parameter constrained to 0.5.
+#' fitexp32cmw <- fitSTVAR(gdpdef, p=3, M=2, weight_function="exponential", weightfun_pars=c(2, 1),
+#'   AR_constraints=C_322, mean_constraints=list(1:2), weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.5, 0)),
+#'   nrounds=1, seeds=1, use_parallel=FALSE)
+#'
+#' # p=3, M=2, d=2, threshold STVAR with the second variable as the switching variable with one lag,
+#' # and the threshold parameter constained to 1.
+#' fitthres32w <- fitSTVAR(gdpdef, p=3, M=2, weight_function="threshold", weightfun_pars=c(2, 1),
+#'   weight_constraints=list(R=0, r=1), nrounds=1, seeds=1, use_parallel=FALSE)
+#'
+#'
 #' }
 #' @export
 
-fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit"), weightfun_pars=NULL,
-                     cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
+fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+                     weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
                      AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
                      nrounds=(M + 1)^5, ncores=2, maxit=1000,
                      seeds=NULL, print_res=TRUE, use_parallel=TRUE, filter_estimates=TRUE, ...) {
