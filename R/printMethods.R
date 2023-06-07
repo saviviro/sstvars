@@ -84,7 +84,7 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   if(weight_function == "mlogit") {
     cat("\n ", paste0("Switching variables: ", paste0(var_names[weightfun_pars[[1]]], collapse=", "), " with ",
                      weightfun_pars[[2]], ifelse(weightfun_pars[[2]] == 1, " lag.", " lags.")))
-  } else if(weight_function == "logistic") {
+  } else if(weight_function %in% c("logistic", "exponential", "threshold")) {
     cat("\n ", paste0("Switching variable: ", paste0(var_names[weightfun_pars[1]], collapse=", "), " with lag ",
                       weightfun_pars[2], "."))
   }
@@ -126,10 +126,14 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
         cat(" (by normalization)")
       }
       cat("\n")
-    } else if(weight_function == "logistic") {
+    } else if(weight_function %in% c("logistic", "exponential")) {
       if(m == M) {
         cat(paste("Weight params:", paste0(format_value(weightpars[1]), " (location), ",
                                            format_value(weightpars[2]), " (scale)")), "\n")
+      }
+    } else if(weight_function == "threshold") {
+      if(m < M) {
+        cat(paste0("Upper threshold: ", format_value(weightpars[m])))
       }
     }
     cat("Regime means:", paste0(format_value(all_mu[,m]), collapse=", "))
@@ -169,7 +173,6 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   }
   if(identification != "reduced_form") {
     stop("STRUCTURAL MODELS NOT YET IMPLEMENTED TO PRINT.STVAR")
-    # Rekursiivisen voi vaan laittaa Omega square rootin tilalle?
     # Alla oleva toiminee jos cond.h.sked identifiointi?
     cat("Structural parameters:\n")
     W <- format_value(pick_W(p=p, M=M, d=d, params=params, structural_pars=structural_pars))
