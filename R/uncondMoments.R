@@ -165,10 +165,9 @@ get_Sigmas <- function(p, M, d, all_A, all_boldA, all_Omegas) {
 #' @inherit stab_conds_satisfied references
 #' @keywords internal
 
-get_regime_means <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit"), weightfun_pars=NULL,
-                             cond_dist=c("Gaussian", "Student"),
-                             parametrization=c("intercept", "mean"),
-                             identification=c("reduced_form", "recursive", "heteroskedasticity"),
+get_regime_means <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+                             weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
+                             identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
                              AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
