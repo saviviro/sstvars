@@ -10,9 +10,9 @@
 #' @inherit in_paramspace references
 #' @keywords internal
 
-standard_errors <- function(data, p, M, params, weight_function=c("relative_dens", "logistic", "mlogit"), weightfun_pars=NULL,
-                            cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
-                            identification=c("reduced_form", "recursive", "heteroskedasticity"),
+standard_errors <- function(data, p, M, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+                            weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
+                            identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
                             AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                             minval) {
   weight_function <- match.arg(weight_function)
@@ -156,7 +156,7 @@ print_std_errors <- function(stvar, digits=3) {
   if(weight_function == "mlogit") {
     cat("\n ", paste0("Switching variables: ", paste0(var_names[weightfun_pars[[1]]], collapse=", "), " with ",
                       weightfun_pars[[2]], ifelse(weightfun_pars[[2]] == 1, " lag.", " lags.")))
-  } else if(weight_function == "logistic") {
+  } else if(weight_function %in% c("logistic", "exponential", "threshold")) {
     cat("\n ", paste0("Switching variable: ", paste0(var_names[weightfun_pars[1]], collapse=", "), " with lag ",
                       weightfun_pars[2], "."))
   }
@@ -181,10 +181,14 @@ print_std_errors <- function(stvar, digits=3) {
       if(m < M) cat(paste("Weight param:", format_value(weightpars[m])), "\n")
     } else if(weight_function == "mlogit") {
       if(m < M) cat(paste("Weight params:", paste0(format_value(all_gamma_m[,m]), collapse=", ")), "\n")
-    } else if(weight_function == "logistic") {
+    } else if(weight_function %in% c("logistic", "exponential")) {
       if(m == M) {
         cat(paste("Weight params:", paste0(format_value(weightpars[1]), " (location), ",
                                            format_value(weightpars[2]), " (scale)")), "\n")
+      }
+    } else if(weight_function == "threshold") {
+      if(m < M) {
+        cat(paste0("Upper threshold: ", weightpars[m]))
       }
     }
     if(parametrization == "mean") cat("Regime means:", paste0(format_value(all_mu[,m]), collapse=", "), "\n")
