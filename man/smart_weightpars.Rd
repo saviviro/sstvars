@@ -7,7 +7,7 @@
 smart_weightpars(
   M,
   weight_pars,
-  weight_function,
+  weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
   weight_constraints = NULL,
   accuracy
 )

@@ -9,7 +9,7 @@ smart_ind(
   M,
   d,
   params,
-  weight_function = c("relative_dens", "logistic", "mlogit"),
+  weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
   weightfun_pars = NULL,
   cond_dist = c("Gaussian", "Student"),
   AR_constraints = NULL,

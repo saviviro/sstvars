@@ -272,7 +272,9 @@ random_weightpars <- function(M, weight_function=c("relative_dens", "logistic", 
 #' @inherit random_weightpars return
 #' @keywords internal
 
-smart_weightpars <- function(M, weight_pars, weight_function, weight_constraints=NULL, accuracy) {
+smart_weightpars <- function(M, weight_pars, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+                             weight_constraints=NULL, accuracy) {
+  weight_function <- match.arg(weight_function)
   if(!is.null(weight_constraints)) {
     if(all(weight_constraints[[1]] == 0)) {
       return(numeric(0)) # alpha = r constant, so it is not parametrized
@@ -283,11 +285,10 @@ smart_weightpars <- function(M, weight_pars, weight_function, weight_constraints
                          sd=pmax(0.2, c(weight_pars, 1-sum(weight_pars))/accuracy))
     ret <- (weight_pars/sum(weight_pars))[-M]
     # Sort and standardize alphas; don't sort if AR_constraints or mean_constraints are used
-  } else if(weight_function == "mlogit" || weight_function == "logistic") {
-    ret <- rnorm(n=length(weight_pars), mean=weight_pars,
-                 sd=pmax(0.2, weight_pars/accuracy))
-  } else {
-    stop("Unkown weight function in smart_weightpars")
+  } else if(weight_function == "mlogit" || weight_function == "logistic" || weight_function == "exponential") {
+    ret <- rnorm(n=length(weight_pars), mean=weight_pars, sd=pmax(0.2, weight_pars/accuracy))
+  } else if(weight_function == "threshold") {
+    ret <- sort(rnorm(n=length(weight_pars), mean=weight_pars, sd=pmax(0.2, weight_pars/accuracy)), decreasing=FALSE)
   }
   ret
 }
@@ -314,8 +315,8 @@ smart_weightpars <- function(M, weight_pars, weight_function, weight_constraints
 #'  }
 #' @keywords internal
 
-random_ind <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit"), weightfun_pars=NULL,
-                       cond_dist=c("Gaussian", "Student"), AR_constraints=NULL, mean_constraints=NULL,
+random_ind <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+                       weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), AR_constraints=NULL, mean_constraints=NULL,
                        weight_constraints=NULL, force_stability=is.null(AR_constraints),
                        mu_scale, mu_scale2, omega_scale, weight_scale, ar_scale=1, ar_scale2=1) {
   weight_function <- match.arg(weight_function)
@@ -381,8 +382,8 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logistic", "
 #' @inherit random_ind return references
 #' @keywords internal
 
-smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit"), weightfun_pars=NULL,
-                      cond_dist=c("Gaussian", "Student"), AR_constraints=NULL, mean_constraints=NULL,
+smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+                      weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), AR_constraints=NULL, mean_constraints=NULL,
                       weight_constraints=NULL,  accuracy=1, which_random=numeric(0),
                       mu_scale, mu_scale2, omega_scale, ar_scale=1, ar_scale2=1) {
   weight_function <- match.arg(weight_function)
