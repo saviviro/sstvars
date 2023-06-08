@@ -118,6 +118,13 @@ c_and_gamma_123_3_1 <- c(0.1, 0.4)
 theta_123logistic_3_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123),
                                vech(Omega2_123), c_and_gamma_123_3_1)
 
+# with cond_dist="Student"
+
+# p=2, M=2, d=2, cond_dist="Student", weight_function="logstic", weightfun_pars=c(2, 1)
+df_222_2_1 <- 3
+theta_222logistict_2_1 <- c(theta_222logistic_2_1, df_222_2_1)
+
+
 
 ## weight_function = "mlogit"
 
@@ -183,6 +190,13 @@ gamma1_123_123_1 <- c(0.1, 0.2, 0.3, 0.4)
 theta_123log_123_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123),
                        vech(Omega2_123), gamma1_123_123_1)
 
+# with cond_dist="Student"
+
+# p=1, M=2, d=3, weight_function="mlogit", weightfun_pars=list(vars=1, lags=1), cond_dist="Student"
+df_123_1_1 <- 13
+theta_123logt_1_1 <- c(theta_123log_1_1, df_123_1_1)
+
+
 ## weight_function == "exponential"
 
 # p=1, M=2, d=2, weight_function="exponential", weightfun_pars=c(1, 1)
@@ -202,6 +216,13 @@ theta_222exp_1_2 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_
 # p=1, M=2, d=3, weight_function="exponential", weightfun_pars=c(1, 1)
 theta_123exp_1_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123),
                            vech(Omega2_123), c_and_gamma_123_1_1)
+
+# with cond_dist="Student"
+
+# p=1, M=2, d=2, weight_function="exponential", weightfun_pars=c(1, 1), cond_dist="Student"
+df_122_1_1 <- 10
+theta_122expt_1_1 <- c(theta_122exp_1_1, df_122_1_1)
+
 
 ## weight_function == "threshold"
 
@@ -232,6 +253,11 @@ r1_123_2_1 <- 1
 theta_123thres_2_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123),
                         vech(Omega2_123), r1_123_2_1)
 
+# with cond_dist="Student"
+
+# p=2, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="Student"
+df_232_1_1 <- 30
+theta_232threst_1_1 <- c(theta_232thres_1_1, df_232_1_1)
 
 
 test_that("pick_phi0 work correctly", {
@@ -296,6 +322,16 @@ test_that("pick_phi0 work correctly", {
   expect_equal(pick_phi0(M=3, d=2, params=theta_232log_12_2)[,1], phi10_232)
   expect_equal(pick_phi0(M=3, d=2, params=theta_232log_12_2)[,2], phi20_232)
   expect_equal(pick_phi0(M=3, d=2, params=theta_232log_12_2)[,3], phi30_232)
+
+  # Student
+  expect_equal(pick_phi0(M=3, d=2, params=theta_232threst_1_1)[,2], phi20_232)
+  expect_equal(pick_phi0(M=3, d=2, params=theta_232threst_1_1)[,3], phi30_232)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_122expt_1_1)[,1], phi10_122)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_122expt_1_1)[,2], phi20_122)
+  expect_equal(pick_phi0(M=2, d=3, params=theta_123logt_1_1)[,1], phi10_123)
+  expect_equal(pick_phi0(M=2, d=3, params=theta_123logt_1_1)[,2], phi20_123)
+  expect_equal(pick_phi0(M=2, d=3, params=theta_123logt_1_1)[,1], phi10_123)
+  expect_equal(pick_phi0(M=2, d=3, params=theta_123logt_1_1)[,2], phi20_123)
 })
 
 test_that("pick_Ami work correctly", {
@@ -352,6 +388,22 @@ test_that("pick_Ami work correctly", {
   expect_equal(pick_Ami(p=1, M=3, d=2, m=1, i=1, params=theta_132thres_1_1), A11_132)
   expect_equal(pick_Ami(p=1, M=3, d=2, m=2, i=1, params=theta_132thres_1_1), A21_132)
   expect_equal(pick_Ami(p=1, M=3, d=2, m=3, i=1, params=theta_132thres_1_1), A31_132)
+
+  # Student
+  expect_equal(pick_Ami(p=1, M=2, d=3, m=1, i=1, params=theta_123logt_1_1), A11_123)
+  expect_equal(pick_Ami(p=1, M=2, d=3, m=2, i=1, params=theta_123logt_1_1), A21_123)
+  expect_equal(pick_Ami(p=2, M=2, d=2, m=1, i=1, params=theta_222logistict_2_1), A11_222)
+  expect_equal(pick_Ami(p=2, M=2, d=2, m=1, i=2, params=theta_222logistict_2_1), A12_222)
+  expect_equal(pick_Ami(p=2, M=2, d=2, m=2, i=1, params=theta_222logistict_2_1), A21_222)
+  expect_equal(pick_Ami(p=2, M=2, d=2, m=2, i=2, params=theta_222logistict_2_1), A22_222)
+  expect_equal(pick_Ami(p=1, M=2, d=2, m=1, i=1, params=theta_122expt_1_1), A11_122)
+  expect_equal(pick_Ami(p=1, M=2, d=2, m=2, i=1, params=theta_122expt_1_1), A21_122)
+  expect_equal(pick_Ami(p=2, M=3, d=2, m=1, i=1, params=theta_232threst_1_1), A11_232)
+  expect_equal(pick_Ami(p=2, M=3, d=2, m=2, i=1, params=theta_232threst_1_1), A21_232)
+  expect_equal(pick_Ami(p=2, M=3, d=2, m=3, i=1, params=theta_232threst_1_1), A31_232)
+  expect_equal(pick_Ami(p=2, M=3, d=2, m=1, i=2, params=theta_232threst_1_1), A12_232)
+  expect_equal(pick_Ami(p=2, M=3, d=2, m=2, i=2, params=theta_232threst_1_1), A22_232)
+  expect_equal(pick_Ami(p=2, M=3, d=2, m=3, i=2, params=theta_232threst_1_1), A32_232)
 
   # unvec=FALSE
   expect_equal(pick_Ami(p=1, M=1, d=2, m=1, i=1, params=theta_112relg, unvec=FALSE), vec(A11_112))
@@ -416,6 +468,22 @@ test_that("pick_Am work correctly", {
   expect_equal(pick_Am(p=1, M=3, d=2, m=1, params=theta_132thres_1_1)[, , 1], A11_132)
   expect_equal(pick_Am(p=1, M=3, d=2, m=2, params=theta_132thres_1_1)[, , 1], A21_132)
   expect_equal(pick_Am(p=1, M=3, d=2, m=3, params=theta_132thres_1_1)[, , 1], A31_132)
+
+  # Student
+  expect_equal(pick_Am(p=2, M=3, d=2, m=1, params=theta_232threst_1_1)[, , 1], A11_232)
+  expect_equal(pick_Am(p=2, M=3, d=2, m=2, params=theta_232threst_1_1)[, , 1], A21_232)
+  expect_equal(pick_Am(p=2, M=3, d=2, m=3, params=theta_232threst_1_1)[, , 1], A31_232)
+  expect_equal(pick_Am(p=2, M=3, d=2, m=1, params=theta_232threst_1_1)[, , 2], A12_232)
+  expect_equal(pick_Am(p=2, M=3, d=2, m=2, params=theta_232threst_1_1)[, , 2], A22_232)
+  expect_equal(pick_Am(p=2, M=3, d=2, m=3, params=theta_232threst_1_1)[, , 2], A32_232)
+  expect_equal(pick_Am(p=1, M=2, d=2, m=1, params=theta_122expt_1_1)[, , 1], A11_122)
+  expect_equal(pick_Am(p=1, M=2, d=2, m=2, params=theta_122expt_1_1)[, , 1], A21_122)
+  expect_equal(pick_Am(p=2, M=2, d=2, m=1, params=theta_222logistict_2_1)[, , 1], A11_222)
+  expect_equal(pick_Am(p=2, M=2, d=2, m=1, params=theta_222logistict_2_1)[, , 2], A12_222)
+  expect_equal(pick_Am(p=2, M=2, d=2, m=2, params=theta_222logistict_2_1)[, , 1], A21_222)
+  expect_equal(pick_Am(p=2, M=2, d=2, m=2, params=theta_222logistict_2_1)[, , 2], A22_222)
+  expect_equal(pick_Am(p=1, M=2, d=3, m=1, params=theta_123logt_1_1)[, , 1], A11_123)
+  expect_equal(pick_Am(p=1, M=2, d=3, m=2, params=theta_123logt_1_1)[, , 1], A21_123)
 })
 
 test_that("pick_allA work correctly", {
@@ -470,6 +538,22 @@ test_that("pick_allA work correctly", {
   expect_equal(pick_allA(p=1, M=3, d=2, params=theta_132thres_1_1)[, , 1, 2], A11_132)
   expect_equal(pick_allA(p=1, M=3, d=2, params=theta_132thres_1_1)[, , 1, 2], A21_132)
   expect_equal(pick_allA(p=1, M=3, d=2, params=theta_132thres_1_1)[, , 1, 3], A31_132)
+
+  # Student
+  expect_equal(pick_allA(p=2, M=3, d=2, params=theta_232threst_1_1)[, , 1, 2], A11_232)
+  expect_equal(pick_allA(p=2, M=3, d=2, params=theta_232threst_1_1)[, , 1, 2], A21_232)
+  expect_equal(pick_allA(p=2, M=3, d=2, params=theta_232threst_1_1)[, , 1, 3], A31_232)
+  expect_equal(pick_allA(p=2, M=3, d=2, params=theta_232threst_1_1)[, , 2, 2], A12_232)
+  expect_equal(pick_allA(p=2, M=3, d=2, params=theta_232threst_1_1)[, , 2, 2], A22_232)
+  expect_equal(pick_allA(p=2, M=3, d=2, params=theta_232threst_1_1)[, , 2, 3], A32_232)
+  expect_equal(pick_allA(p=1, M=2, d=2, params=theta_122expt_1_1)[, , 1, 1], A11_122)
+  expect_equal(pick_allA(p=1, M=2, d=2, params=theta_122expt_1_1)[, , 1, 2], A21_122)
+  expect_equal(pick_allA(p=2, M=2, d=2, params=theta_222logistict_2_1)[, , 1, 1], A11_222)
+  expect_equal(pick_allA(p=2, M=2, d=2, params=theta_222logistict_2_1)[, , 2, 1], A12_222)
+  expect_equal(pick_allA(p=2, M=2, d=2, params=theta_222logistict_2_1)[, , 1, 2], A21_222)
+  expect_equal(pick_allA(p=2, M=2, d=2, params=theta_222logistict_2_1)[, , 2, 2], A22_222)
+  expect_equal(pick_allA(p=1, M=2, d=3, params=theta_123log_1_1)[, , 1, 1], A11_123)
+  expect_equal(pick_allA(p=1, M=2, d=3, params=theta_123log_1_1)[, , 1, 2], A21_123)
 })
 
 test_that("pick_Omegas work correctly", {
@@ -514,6 +598,17 @@ test_that("pick_Omegas work correctly", {
   expect_equal(pick_Omegas(p=1, M=3, d=2, params=theta_132thres_1_1)[, , 1], Omega1_132)
   expect_equal(pick_Omegas(p=1, M=3, d=2, params=theta_132thres_1_1)[, , 2], Omega2_132)
   expect_equal(pick_Omegas(p=1, M=3, d=2, params=theta_132thres_1_1)[, , 3], Omega3_132)
+
+  # Student
+  expect_equal(pick_Omegas(p=2, M=3, d=2, params=theta_232threst_1_1)[, , 1], Omega1_232)
+  expect_equal(pick_Omegas(p=2, M=3, d=2, params=theta_232threst_1_1)[, , 2], Omega2_232)
+  expect_equal(pick_Omegas(p=2, M=3, d=2, params=theta_232threst_1_1)[, , 3], Omega3_232)
+  expect_equal(pick_Omegas(p=1, M=2, d=2, params=theta_122expt_1_1)[, , 1], Omega1_122)
+  expect_equal(pick_Omegas(p=1, M=2, d=2, params=theta_122expt_1_1)[, , 2], Omega2_122)
+  expect_equal(pick_Omegas(p=2, M=2, d=2, params=theta_222logistict_2_1)[, , 1], Omega1_222)
+  expect_equal(pick_Omegas(p=2, M=2, d=2, params=theta_222logistict_2_1)[, , 2], Omega2_222)
+  expect_equal(pick_Omegas(p=1, M=2, d=3, params=theta_123logt_1_1)[, , 1], Omega1_123)
+  expect_equal(pick_Omegas(p=1, M=2, d=3, params=theta_123logt_1_1)[, , 2], Omega2_123)
 })
 
 test_that("pick_weightpars work correctly", {
@@ -528,6 +623,8 @@ test_that("pick_weightpars work correctly", {
                                weightfun_pars=c(1, 1)), c(r1_232_1_1, r2_232_1_1))
   expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123thres_2_1, weight_function="threshold", cond_dist="Gaussian",
                                weightfun_pars=c(2, 1)), r1_123_2_1)
+  expect_equal(pick_weightpars(p=2, M=3, d=2, params=theta_232threst_1_1, weight_function="threshold", cond_dist="Student",
+                               weightfun_pars=c(1, 1)), c(r1_232_1_1, r2_232_1_1))
 
   # exponential
   expect_equal(pick_weightpars(p=1, M=2, d=2, params=theta_122exp_1_1, weight_function="exponential", cond_dist="Gaussian",
@@ -542,7 +639,8 @@ test_that("pick_weightpars work correctly", {
                                weightfun_pars=c(1, 1)), c_and_gamma_123_1_1)
   expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123exp_1_1, weight_function="exponential", cond_dist="Gaussian",
                                weightfun_pars=c(1, 1)), c_and_gamma_123_1_1)
-
+  expect_equal(pick_weightpars(p=1, M=2, d=2, params=theta_122expt_1_1, weight_function="exponential", cond_dist="Student",
+                               weightfun_pars=c(1, 1)), c_and_gamma_122_1_1)
 
   # logistic
   expect_equal(pick_weightpars(p=1, M=2, d=2, params=theta_122logistic_1_1, weight_function="logistic", cond_dist="Gaussian",
@@ -557,7 +655,8 @@ test_that("pick_weightpars work correctly", {
                                weightfun_pars=c(1, 1)), c_and_gamma_123_1_1)
   expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123logistic_3_1, weight_function="logistic", cond_dist="Gaussian",
                                weightfun_pars=c(3, 1)), c_and_gamma_123_3_1)
-
+  expect_equal(pick_weightpars(p=2, M=2, d=2, params=theta_222logistict_2_1, weight_function="logistic", cond_dist="Student",
+                               weightfun_pars=c(2, 1)), c_and_gamma_222_2_1)
 
   # mlogit
   expect_equal(pick_weightpars(p=1, M=2, d=2, params=theta_122log_1_1, weight_function="mlogit", cond_dist="Gaussian",
@@ -582,6 +681,8 @@ test_that("pick_weightpars work correctly", {
                                weightfun_pars=list(vars=2:3, lags=1)), gamma1_123_23_1)
   expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123log_123_1, weight_function="mlogit", cond_dist="Gaussian",
                                weightfun_pars=list(vars=1:3, lags=1)), gamma1_123_123_1)
+  expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123logt_1_1, weight_function="mlogit", cond_dist="Student",
+                               weightfun_pars=list(vars=1, lags=1)), gamma1_123_1_1)
 
   # relative_dens
   expect_equal(pick_weightpars(p=1, M=1, d=2, params=theta_112relg, weight_function="relative_dens", cond_dist="Gaussian"), 1)
@@ -645,5 +746,31 @@ test_that("pick_regime work correctly", {
   expect_equal(pick_regime(p=1, M=3, d=2, m=3, params=theta_132thres_1_1), c(phi30_132, vec(A31_132), vech(Omega3_132)))
   expect_equal(pick_regime(p=1, M=2, d=3, m=1, params=theta_123thres_2_1), c(phi10_123, vec(A11_123), vech(Omega1_123)))
   expect_equal(pick_regime(p=1, M=2, d=3, m=2, params=theta_123thres_2_1), c(phi20_123, vec(A21_123), vech(Omega2_123)))
+
+  # Student
+  expect_equal(pick_regime(p=2, M=3, d=2, m=1, params=theta_232threst_1_1), c(phi10_232, vec(A11_232), vec(A12_232), vech(Omega1_232)))
+  expect_equal(pick_regime(p=2, M=3, d=2, m=2, params=theta_232threst_1_1), c(phi20_232, vec(A21_232), vec(A22_232), vech(Omega2_232)))
+  expect_equal(pick_regime(p=2, M=3, d=2, m=3, params=theta_232threst_1_1), c(phi30_232, vec(A31_232), vec(A32_232), vech(Omega3_232)))
+  expect_equal(pick_regime(p=1, M=2, d=2, m=1, params=theta_122expt_1_1), c(phi10_122, vec(A11_122), vech(Omega1_122)))
+  expect_equal(pick_regime(p=1, M=2, d=2, m=2, params=theta_122expt_1_1), c(phi20_122, vec(A21_122), vech(Omega2_122)))
+  expect_equal(pick_regime(p=2, M=2, d=2, m=1, params=theta_222logistict_2_1), c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222)))
+  expect_equal(pick_regime(p=2, M=2, d=2, m=2, params=theta_222logistict_2_1), c(phi20_222, vec(A21_222), vec(A22_222), vech(Omega2_222)))
+  expect_equal(pick_regime(p=1, M=2, d=3, m=1, params=theta_123log_1_1), c(phi10_123, vec(A11_123), vech(Omega1_123)))
+  expect_equal(pick_regime(p=1, M=2, d=3, m=2, params=theta_123log_1_1), c(phi20_123, vec(A21_123), vech(Omega2_123)))
 })
 
+
+test_that("pick_distpars work correctly", {
+  # Gaussian
+  expect_equal(pick_distpars(params=theta_123thres_2_1, cond_dist="Gaussian"), numeric(0))
+  expect_equal(pick_distpars(params=theta_123exp_1_1, cond_dist="Gaussian"), numeric(0))
+  expect_equal(pick_distpars(params=theta_122logistic_1_1, cond_dist="Gaussian"), numeric(0))
+  expect_equal(pick_distpars(params=theta_112relg, cond_dist="Gaussian"), numeric(0))
+  expect_equal(pick_distpars(params=theta_222log_2_1), numeric(0))
+
+  # Student
+  expect_equal(pick_distpars(params=theta_232threst_1_1, cond_dist="Student"), df_232_1_1)
+  expect_equal(pick_distpars(params=theta_122expt_1_1, cond_dist="Student"), df_122_1_1)
+  expect_equal(pick_distpars(params=theta_123logt_1_1, cond_dist="Student"), df_123_1_1)
+  expect_equal(pick_distpars(params=theta_222logistict_2_1, cond_dist="Student"), df_222_2_1)
+})

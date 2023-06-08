@@ -96,7 +96,7 @@ pick_Am <- function(p, M, d, params, m, structural_pars=NULL) {
 }
 
 
-#' @title Pick coefficient all matrices
+#' @title Pick all coefficient matrices
 #'
 #' @description \code{pick_allA} picks all coefficient matrices \eqn{A_{m,i} (i=1,..,p, m=1,..,M)}
 #'   from the given parameter vector so that they are arranged in a 4D array with the fourth dimension
@@ -191,6 +191,30 @@ pick_weightpars <- function(p, M, d, params, weight_function=c("relative_dens", 
     return(params[(length(params) - M - n_distpars + 2):(length(params) - n_distpars)])
   }
 }
+
+
+#' @title Pick distribution parameters
+#'
+#' @description \code{pick_distpars} picks all the distribution parameters from
+#'   the parameter vector
+#'
+#' @inheritParams pick_weightpars
+#' @return
+#'   \describe{
+#'     \item{If \code{cond_dist == "Gaussian"}:}{Returns a numeric vector of length zero.}
+#'     \item{If \code{cond_dist == "Student"}:}{Returns the degrees of freedom parameter.}
+#'   }
+#' @keywords internal
+
+pick_distpars <- function(params, cond_dist=c("Gaussian", "Student")) {
+  cond_dist <- match.arg(cond_dist)
+  if(cond_dist == "Gaussian") {
+    return(numeric(0))
+  } else { # cond_dist == "Student"
+    return(params[length(params)])
+  }
+}
+
 
 
 #' @title Pick covariance matrices
