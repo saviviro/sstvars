@@ -81,6 +81,7 @@ change_parametrization <- function(p, M, d, params, weight_function=c("relative_
   Id <- diag(nrow=d)
   all_A <- pick_allA(p=p, M=M, d=d, params=params)
   all_phi0_or_mu <- pick_phi0(M=M, d=d, params=params)
+  # Nothing to change in distpars or weightpars, already in place
 
   # Calculate means/intercepts and insert them to re_params
   if(change_to == "mean") { # params has original parametrization with intercept
@@ -125,7 +126,6 @@ sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "lo
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
   if(identification != "reduced_form") stop("Structural models not yet implemented to sort_regimes!")
-  if(cond_dist != "Gaussian") stop("Only Gaussian cond_dist is implemented to sort_regimes")
 
   all_weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function,
                                     cond_dist=cond_dist)
@@ -144,8 +144,9 @@ sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "lo
   all_Omega <- matrix(params[(d*M*(1 + p*d) + 1):(d*M*(1 + p*d) + M*d*(d + 1)/2)], nrow=d*(d + 1)/2, ncol=M)
   all_weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function,
                                     weightfun_pars=weightfun_pars, cond_dist=cond_dist)
+  all_distpars <- pick_distpars(params=params, cond_dist=cond_dist)
 
-  c(all_phi0[,new_order], all_A[,new_order], all_Omega[,new_order], new_weightpars) # new_distpars
+  c(all_phi0[,new_order], all_A[,new_order], all_Omega[,new_order], new_weightpars, all_distpars)
 }
 
 

@@ -246,6 +246,23 @@ theta_123thres_2_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(O
                         vech(Omega2_123), r1_123_2_1)
 
 
+## cond_dist == "Student"
+
+# p=2, M=2, d=2, cond_dist="Student", weight_function="logistic", weightfun_pars=c(2, 1)
+df_222_2_1 <- 3
+theta_222logistict_2_1 <- c(theta_222logistic_2_1, df_222_2_1)
+
+# p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1, lags=1), cond_dist="Student"
+df_122_1_1 <- 13
+theta_122logt_1_1 <- c(theta_122log_1_1, df_122_1_1)
+
+# p=1, M=2, d=3, weight_function="exponential", weightfun_pars=c(1, 1), cond_dist="Student"
+df_123_1_1 <- 10
+theta_123expt_1_1 <- c(theta_123exp_1_1, df_123_1_1)
+
+# p=2, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="Student"
+df_232_1_1 <- 30
+theta_232threst_1_1 <- c(theta_232thres_1_1, df_232_1_1)
 
 ### Constrained models
 
@@ -585,6 +602,29 @@ theta_132thresmw_1_1_expanded <- c(phi10_132, phi20_132, phi20_132, vec(A11_132)
                                   vech(Omega2_132), vech(Omega3_132), 0, 1.2)
 
 
+## All kinds of constraints, cond_dist == "Student"
+
+# p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), cond_dist="Student",
+# mean_constraints=list(1:2), AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))
+df_122_2_1 <- 4
+theta_222expcmwt_2_1 <- c(theta_222expcmw_2_1, df_122_2_1)
+theta_222expcmwt_2_1_expanded <- c(theta_222expcmw_2_1_expanded, df_122_2_1)
+
+# p=2, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="Student",
+# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.1, 0))
+theta_232threswt_1_1 <- c(theta_232thresw_1_1, df_232_1_1)
+theta_232threswt_1_1_expanded <- c(theta_232thresw_1_1_expanded, df_232_1_1)
+
+# p=1, M=2, p=3, weight_function="logistic", weightfun_pars=c(3, 1), cond_dist="Student",
+# mean_constraints=list(1:2), AR_constraints=C_123
+df_123_3_1 <- 11
+theta_123logisticcmt_3_1 <- c(theta_123logisticcm_3_1, df_123_3_1)
+theta_123logisticcmt_3_1_expanded <- c(theta_123logisticcm_3_1_expanded, df_123_3_1)
+
+# p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1), cond_dist="Student", AR_constraints=C_222
+theta_222logct_2_1 <- c(theta_222logc_2_1, df_222_2_1)
+theta_222logct_expanded <- c(theta_222logc_2_1_expanded , df_222_2_1)
+
 test_that("reform_constrained_pars works correctly", {
   # Models with AR_constraints
   expect_equal(reform_constrained_pars(p=1, M=1, d=2, params=theta_112relgc, weight_function="relative_dens",
@@ -727,6 +767,17 @@ test_that("reform_constrained_pars works correctly", {
   expect_equal(reform_constrained_pars(p=1, M=3, d=2, params=theta_132thresmw_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
                                        mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2))), theta_132thresmw_1_1_expanded)
 
+  # Student
+  expect_equal(reform_constrained_pars(p=2, M=3, d=2, params=theta_232threswt_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
+                                       weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.1, 0)), cond_dist="Student"),
+               theta_232threswt_1_1_expanded)
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222logct_2_1, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1),
+                                       cond_dist="Student", AR_constraints=C_222), theta_222logct_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=2, d=3, params=theta_123logisticcmt_3_1, weight_function="logistic", weightfun_pars=c(3, 1),
+                                       cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_123), theta_123logisticcmt_3_1_expanded)
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222expcmwt_2_1, weight_function="exponential", weightfun_pars=c(2, 1),
+                                       cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_222,
+                                       weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))), theta_222expcmwt_2_1_expanded)
 })
 
 
@@ -781,6 +832,21 @@ test_that("change_regime works correctly", {
                c(phi10_232, phi10_232, phi30_232, vec(A11_232), vec(A12_232), vec(A11_232), vec(A12_232),
                  vec(A31_232), vec(A32_232), vech(Omega1_232), vech(Omega1_232), vech(Omega3_232),
                  r1_232_1_1, r2_232_1_1))
+
+  # Student
+  expect_equal(change_regime(p=2, M=2, d=2, params=theta_222logistict_2_1, m=1, regime_pars=c(phi10_112, A11_112, A11_122, vech(Omega1_112))),
+               c(phi10_112, phi20_222, A11_112, A11_122, A21_222, A22_222, vech(Omega1_112), vech(Omega2_222), c_and_gamma_222_2_1, df_222_2_1))
+  expect_equal(change_regime(p=1, M=2, d=3, params=theta_123expt_1_1, m=1, regime_pars=c(1:3, 3:11, 12:17)),
+               c(1:3, phi20_123, 3:11, A21_123, 12:17, vech(Omega2_123), c_and_gamma_123_1_1, df_123_1_1))
+  expect_equal(change_regime(p=1, M=2, d=3, params=theta_123expt_1_1, m=2, regime_pars=c(1:3, 3:11, 12:17)),
+               c(phi10_123, 1:3, A11_123, 3:11, vech(Omega1_123), 12:17, c_and_gamma_123_1_1, df_123_1_1))
+  expect_equal(change_regime(p=1, M=2, d=2, params=theta_122logt_1_1, m=1, regime_pars=c(phi10_112, A11_112, vech(Omega1_112))),
+               c(phi10_112, phi20_122, A11_112, A21_122, vech(Omega1_112), vech(Omega2_122), gamma1_122_1_1, df_122_1_1))
+  expect_equal(change_regime(p=2, M=3, d=2, params=theta_232threst_1_1, m=2, regime_pars=c(phi10_232, A11_232, A12_232, vech(Omega1_232))),
+               c(phi10_232, phi10_232, phi30_232, vec(A11_232), vec(A12_232), vec(A11_232), vec(A12_232),
+                 vec(A31_232), vec(A32_232), vech(Omega1_232), vech(Omega1_232), vech(Omega3_232),
+                 r1_232_1_1, r2_232_1_1, df_232_1_1))
+
 })
 
 
@@ -882,7 +948,16 @@ theta_232thresw_1_1_mu <- change_parametrization(p=2, M=3, d=2, params=theta_232
                                                  weightfun_pars=c(1, 1), weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.1, 0)),
                                                  change_to="mean")
 
-
+# Student
+theta_122logt_1_1_mu <- change_parametrization(p=1, M=2, d=2, params=theta_122logt_1_1, weight_function="mlogit",
+                                              weightfun_pars=list(vars=1, lags=1), cond_dist="Student", change_to="mean")
+theta_232threswt_1_1_mu <- change_parametrization(p=2, M=3, d=2, params=theta_232threswt_1_1, weight_function="threshold",
+                                                  weightfun_pars=c(1, 1), weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.1, 0)),
+                                                  cond_dist="Student", change_to="mean")
+theta_222logistict_2_1_mu <- change_parametrization(p=2, M=2, d=2, params=theta_222logistict_2_1, weight_function="logistic",
+                                                    weightfun_pars=c(2, 1), cond_dist="Student", change_to="mean")
+theta_123expt_1_1_mu <- change_parametrization(p=1, M=2, d=3, params=theta_123expt_1_1, weight_function="exponential",
+                                               weightfun_pars=c(1, 1), cond_dist="Student", change_to="mean")
 
 
 test_that("change_parametrization works correctly", {
@@ -980,6 +1055,32 @@ test_that("change_parametrization works correctly", {
                                       weightfun_pars=list(vars=1:3, lags=1), AR_constraints=C_123,
                                       change_to="intercept"), theta_123logc_123_1)
 
+  # Student
+  expect_equal(pick_phi0(M=3, d=2, params=theta_232threswt_1_1_mu),
+               calc_mu(p=2, M=3, d=2, params=theta_232threswt_1_1, weight_function="threshold", weightfun_pars=c(1, 1)),
+                       cond_dist="Student")
+  expect_equal(change_parametrization(p=2, M=3, d=2, params=theta_232threswt_1_1_mu, weight_function="threshold",
+                                      weightfun_pars=c(1, 1), weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.1, 0)),
+                                      cond_dist="Student", change_to="intercept"), theta_232threswt_1_1)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_122logt_1_1_mu),
+               calc_mu(p=1, M=2, d=2, params=theta_122logt_1_1,  weight_function="mlogit",
+                       weightfun_pars=list(vars=1, lags=1), cond_dist="Student"))
+  expect_equal(change_parametrization(p=1, M=2, d=2, params=theta_122logt_1_1_mu,  weight_function="mlogit",
+                                      weightfun_pars=list(vars=1, lags=1), cond_dist="Student",
+                                      change_to="intercept"), theta_122logt_1_1)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_222logistict_2_1_mu),
+               calc_mu(p=2, M=2, d=2, params=theta_222logistict_2_1, weight_function="logistic",
+                       weightfun_pars=c(2, 1), cond_dist="Student"))
+  expect_equal(change_parametrization(p=2, M=2, d=2, params=theta_222logistict_2_1_mu, weight_function="logistic",
+                                      weightfun_pars=c(2, 1), cond_dist="Student",
+                                      change_to="intercept"), theta_222logistict_2_1)
+  expect_equal(pick_phi0(M=2, d=3, params=theta_123expt_1_1_mu),
+               calc_mu(p=1, M=2, d=3, params=theta_123expt_1_1, weight_function="exponential",
+                       weightfun_pars=c(1, 1), cond_dist="Student"))
+  expect_equal(change_parametrization(p=1, M=2, d=3, params=theta_123expt_1_1_mu, weight_function="exponential",
+                                      weightfun_pars=c(1, 1), cond_dist="Student",
+                                      change_to="intercept"), theta_123expt_1_1)
+
 })
 
 
@@ -1016,5 +1117,9 @@ test_that("sort_regimes works correctly", {
   expect_equal(sort_regimes(p=1, M=2, d=2, params=theta_122logistic_1_1, weight_function="logistic"), theta_122logistic_1_1)
   expect_equal(sort_regimes(p=1, M=2, d=2, params=theta_122exp_1_1, weight_function="exponential"), theta_122exp_1_1)
   expect_equal(sort_regimes(p=1, M=2, d=2, params=theta_122thres_1_1, weight_function="threshold"), theta_122thres_1_1)
+  expect_equal(sort_regimes(p=1, M=2, d=2, params=theta_122logt_1_1, weight_function="mlogit", cond_dist="Student"), theta_122logt_1_1)
+  expect_equal(sort_regimes(p=2, M=2, d=2, params=theta_222logistict_2_1, weight_function="logistic", cond_dist="Student"), theta_222logistict_2_1)
+  expect_equal(sort_regimes(p=1, M=2, d=3, params=theta_123expt_1_1, weight_function="exponential", cond_dist="Student"), theta_123expt_1_1)
+  expect_equal(sort_regimes(p=2, M=3, d=2, params=theta_232threst_1_1, weight_function="threshold", cond_dist="Student"), theta_232threst_1_1)
 })
 
