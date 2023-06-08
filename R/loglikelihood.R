@@ -115,8 +115,8 @@
 #'   the error term covariance matrix of any regime has eigenvalues smaller than this, the parameter is considered
 #'   to be outside the parameter space. Note that if the tolerance is too small, numerical evaluation of the
 #'   log-likelihood might fail and cause error.
-#' @param df_tol the parameter vector is considered to be outside the parameter space if the degrees of
-#'   freedom parameters is not larger than \code{2 + df_tol} (applies only if \code{cond_dist="Student"}).
+#' @param distpar_tol the parameter vector is considered to be outside the parameter space if the degrees of
+#'   freedom parameters is not larger than \code{2 + distpar_tol} (applies only if \code{cond_dist="Student"}).
 #' @param weightpar_tol numerical tolerance for weight parameters being in the parameter space. Values closer to
 #'   to the border of the parameter space than this are considered to be "outside" the parameter space.
 #' @details Calculates the log-likelihood of the specified model.
@@ -148,7 +148,7 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
                           identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
                           AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                           to_return=c("loglik", "tw", "loglik_and_tw", "terms", "regime_cmeans", "total_cmeans", "total_ccovs"),
-                          check_params=TRUE, minval=NULL, stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8, weightpar_tol=1e-8) {
+                          check_params=TRUE, minval=NULL, stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
   # Match args
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -186,14 +186,15 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function,
                                 cond_dist=cond_dist, weightfun_pars=weightfun_pars)
   all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
-  df <- numeric(0) # FILL IN WHEN STUDENT IS IMPLEMENTED
+  distpars <- pick_distpars(params=params, cond_dist=cond_dist)
 
   # Check that the parameter vector lies in the parameter space
   if(check_params) {
     if(!in_paramspace(p=p, M=M, d=d, weight_function=weight_function, cond_dist=cond_dist,
-                      all_boldA=all_boldA, all_Omegas=all_Omegas, weightpars=weightpars, df=df,
-                      weightfun_pars=weightfun_pars, stab_tol=stab_tol, posdef_tol=posdef_tol,
-                      df_tol=df_tol, weightpar_tol=weightpar_tol)) {
+                      all_boldA=all_boldA, all_Omegas=all_Omegas, weightpars=weightpars,
+                      distpars=distpars, weightfun_pars=weightfun_pars,
+                      stab_tol=stab_tol, posdef_tol=posdef_tol,
+                      distpar_tol=distpar_tol, weightpar_tol=weightpar_tol)) {
       return(minval)
     }
   }

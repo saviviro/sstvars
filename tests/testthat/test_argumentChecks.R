@@ -541,6 +541,46 @@ theta_132thresmw_1_1_expanded <- c(phi10_132, phi20_132, phi20_132, vec(A11_132)
                                    vech(Omega2_132), vech(Omega3_132), 0, 1.2)
 
 
+### Student
+
+# p=2, M=2, d=2, cond_dist="Student", weight_function="logistic", weightfun_pars=c(2, 1)
+df_222_2_1 <- 3
+theta_222logistict_2_1 <- c(theta_222logistic_2_1, df_222_2_1)
+
+# p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1, lags=1), cond_dist="Student"
+df_122_1_1 <- 13
+theta_122logt_1_1 <- c(theta_122log_1_1, df_122_1_1)
+
+# p=1, M=2, d=3, weight_function="exponential", weightfun_pars=c(1, 1), cond_dist="Student"
+df_123_1_1 <- 10
+theta_123expt_1_1 <- c(theta_123exp_1_1, df_123_1_1)
+
+# p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="Student"
+df_132_1_1 <- 30
+theta_132threst_1_1 <- c(theta_132thres_1_1, df_132_1_1)
+
+
+# p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), cond_dist="Student",
+# mean_constraints=list(1:2), AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))
+df_122_2_1 <- 4
+theta_222expcmwt_2_1 <- c(theta_222expcmw_2_1, df_122_2_1)
+theta_222expcmwt_2_1_expanded <- c(theta_222expcmw_2_1_expanded, df_122_2_1)
+
+# p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="Student",
+# mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2))
+theta_132thresmwt_1_1 <- c(theta_132thresmw_1_1, df_132_1_1)
+theta_132thresmwt_1_1_expanded <- c(theta_132thresmw_1_1_expanded, df_132_1_1)
+
+# p=1, M=2, p=3, weight_function="logistic", weightfun_pars=c(3, 1), cond_dist="Student",
+# mean_constraints=list(1:2), AR_constraints=C_123
+df_123_3_1 <- 11
+theta_123logisticcmt_3_1 <- c(theta_123logisticcm_3_1, df_123_3_1)
+theta_123logisticcmt_3_1_expanded <- c(theta_123logisticcm_3_1_expanded, df_123_3_1)
+
+# p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1), cond_dist="Student", AR_constraints=C_222
+theta_222logct_2_1 <- c(theta_222logc_2_1, df_222_2_1)
+theta_222logct_expanded <- c(theta_222logc_2_1_expanded , df_222_2_1)
+
 
 
 Omegas_112 <- pick_Omegas(p=1, M=1, d=2, params=theta_112relg)
@@ -708,13 +748,29 @@ test_that("in_paramspace work correctly", {
   expect_false(in_paramspace(p=1, M=3, d=2, weight_function="threshold", cond_dist="Gaussian",
                              all_boldA=boldA_132, all_Omegas=Omegas_132, weightpars=c(1, -1)))
 
-
   # mlogit (nothing to check in weightpars, so just checks that the function runs)
   expect_true(in_paramspace(p=2, M=2, d=2, weight_function="mlogit", cond_dist="Gaussian",
                             all_boldA=boldA_222log_12_2, all_Omegas=Omegas_222log_12_2, weightpars=weightpars_222log_12_2))
 
   # Checks distribution params
-  # TO BE FILLED IN
+  expect_true(in_paramspace(p=1, M=3, d=2, weight_function="threshold", cond_dist="Student",
+                            all_boldA=boldA_132, all_Omegas=Omegas_132, weightpars=c(0, 0.01), distpars=3))
+  expect_false(in_paramspace(p=1, M=3, d=2, weight_function="threshold", cond_dist="Student",
+                             all_boldA=boldA_132, all_Omegas=Omegas_132, weightpars=c(0, 0.01), distpars=2))
+  expect_true(in_paramspace(p=1, M=2, d=2, weight_function="logistic", cond_dist="Student",
+                            all_boldA=boldA_122, all_Omegas=Omegas_122, weightpars=c(0.0, 0.1), distpars=11))
+  expect_false(in_paramspace(p=1, M=2, d=2, weight_function="logistic", cond_dist="Student",
+                            all_boldA=boldA_122, all_Omegas=Omegas_122, weightpars=c(0.0, 0.1), distpars=0))
+  expect_true(in_paramspace(p=1, M=2, d=2, weight_function="exponential", cond_dist="Student",
+                            all_boldA=boldA_122, all_Omegas=Omegas_122, weightpars=c(0.0, 0.1), distpars=2.01))
+  expect_false(in_paramspace(p=1, M=2, d=2, weight_function="exponential", cond_dist="Student",
+                            all_boldA=boldA_122, all_Omegas=Omegas_122, weightpars=c(0.0, 0.1), distpars=1.99999))
+  expect_true(in_paramspace(p=2, M=2, d=2, weight_function="mlogit", cond_dist="Student",
+                            all_boldA=boldA_222log_12_2, all_Omegas=Omegas_222log_12_2, weightpars=weightpars_222log_12_2,
+                            distpars=100))
+  expect_false(in_paramspace(p=2, M=2, d=2, weight_function="mlogit", cond_dist="Student",
+                            all_boldA=boldA_222log_12_2, all_Omegas=Omegas_222log_12_2, weightpars=weightpars_222log_12_2,
+                            distpars=-3))
 })
 
 test_that("check_params work correctly", {
@@ -736,6 +792,18 @@ test_that("check_params work correctly", {
   check_params(p=2, M=2, d=2, params=theta_222thresc_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
                AR_constraints=C_222, cond_dist="Gaussian")
 
+  check_params(p=2, M=2, d=2, params=c(theta_222logcmw_12_2, 3), weight_function="mlogit",
+               weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
+               weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0)),
+               cond_dist="Student")
+  check_params(p=2, M=2, d=2, params=c(theta_222logisticcmw_2_1, 2.01), weight_function="logistic", weightfun_pars=c(2, 1),
+               mean_constraints=list(1:2), AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)),
+               cond_dist="Student")
+  check_params(p=2, M=2, d=2, params=c(theta_222expcmw_2_1, 999), weight_function="exponential", weightfun_pars=c(2, 1),
+               mean_constraints=list(1:2), AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)),
+               cond_dist="Student")
+  check_params(p=2, M=2, d=2, params=c(theta_222thresc_1_1, 13), weight_function="threshold", weightfun_pars=c(1, 1),
+               AR_constraints=C_222, cond_dist="Student")
 
   # Checks stability conditions
   check_params(p=1, M=1, d=2, params=theta_112relg, weight_function="relative_dens", cond_dist="Gaussian")
@@ -778,9 +846,49 @@ test_that("check_params work correctly", {
   expect_error(check_params(p=1, M=2, d=2, params=theta_122relg_badalphas, weight_function="relative_dens", cond_dist="Gaussian"))
   expect_error(check_params(p=1, M=3, d=2, params=theta_132relg_badalphas, weight_function="relative_dens", cond_dist="Gaussian"))
   expect_error(check_params(p=1, M=3, d=2, params=theta_132relg_badalphas2, weight_function="relative_dens", cond_dist="Gaussian"))
+  expect_error(check_params(p=1, M=2, d=2, params=c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122),
+                                                    0.1, 0), weight_function="logistic", cond_dist="Gaussian"))
+  expect_error(check_params(p=1, M=2, d=2, params=c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122),
+                                                    0.1), weight_function="logistic", cond_dist="Gaussian"))
+  expect_error(check_params(p=1, M=2, d=2, params=c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122),
+                                                    0.1, -0.2), weight_function="logistic", cond_dist="Gaussian"))
+  expect_error(check_params(p=1, M=2, d=2, params=c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122),
+                                                    0.1, 0), weight_function="exponential", cond_dist="Gaussian"))
+  expect_error(check_params(p=1, M=2, d=2, params=c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122),
+                                                    0.1, 0.1, 0.1), weight_function="exponential", cond_dist="Gaussian"))
+  expect_error(check_params(p=1, M=2, d=2, params=c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122),
+                                                    0.1, -0.2), weight_function="exponential", cond_dist="Gaussian"))
+  expect_error(check_params(p=1, M=2, d=2, params=c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122),
+                                                    0.1, 0, 13), weight_function="exponential", cond_dist="Student"))
+  expect_error(check_params(p=1, M=3, d=2, params=c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132_stab),
+                                                    vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), 1, 0.5),
+                            weight_function="threshold", cond_dist="Gaussian"))
+  expect_error(check_params(p=1, M=3, d=2, params=c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132_stab),
+                                                    vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), 1, 0.9999),
+                            weight_function="threshold", cond_dist="Gaussian"))
+  expect_error(check_params(p=1, M=3, d=2, params=c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132_stab),
+                                                    vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), -1, -1.9999),
+                            weight_function="threshold", cond_dist="Gaussian"))
+  expect_error(check_params(p=1, M=3, d=2, params=c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132_stab),
+                                                    vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), 1, -1.9999),
+                            weight_function="threshold", cond_dist="Gaussian"))
+  expect_error(check_params(p=1, M=3, d=2, params=c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132_stab),
+                                                    vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), 0, -1.9999),
+                            weight_function="threshold", cond_dist="Gaussian"))
 
-  # Checks df
-  # TO BE FILLED IN
+  # Checks distpars
+  expect_error(check_params(p=2, M=2, d=2, params=c(theta_222logcmw_12_2, -3), weight_function="mlogit",
+               weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
+               weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0)),
+               cond_dist="Student"))
+  expect_error(check_params(p=2, M=2, d=2, params=c(theta_222logisticcmw_2_1, 1.999), weight_function="logistic", weightfun_pars=c(2, 1),
+               mean_constraints=list(1:2), AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)),
+               cond_dist="Student"))
+  expect_error(check_params(p=2, M=2, d=2, params=c(theta_222expcmw_2_1, 0), weight_function="exponential", weightfun_pars=c(2, 1),
+               mean_constraints=list(1:2), AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)),
+               cond_dist="Student"))
+  expect_error(check_params(p=2, M=2, d=2, params=c(theta_222thresc_1_1, 0.22), weight_function="threshold", weightfun_pars=c(1, 1),
+               AR_constraints=C_222, cond_dist="Student"))
 
   # mlogit (nothing to check in weightpars, so just checks that the function runs)
   check_params(p=2, M=2, d=2, params=theta_222log_12_2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=2),
@@ -824,7 +932,6 @@ test_that("n_params works correctly", {
                         AR_constraints=C_132), 21)
   expect_equal(n_params(p=1, M=3, d=2, weight_function="threshold", cond_dist="Gaussian", weightfun_pars=c(1, 1),
                         mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2))), 25)
-
 
   expect_equal(n_params(p=1, M=2, d=2, weight_function="exponential", cond_dist="Gaussian", weightfun_pars=c(1, 1)), 20)
   expect_equal(n_params(p=1, M=2, d=2, weight_function="exponential", cond_dist="Gaussian", weightfun_pars=c(2, 1)), 20)
@@ -901,6 +1008,14 @@ test_that("n_params works correctly", {
   expect_equal(n_params(p=1, M=2, d=3, weight_function="mlogit", weightfun_pars=list(vars=1:3, lags=1), cond_dist="Gaussian",
                         AR_constraints=C_123, mean_constraints=list(1:2)), 28)
 
+  # Student
+  expect_equal(n_params(p=1, M=3, d=2, weight_function="threshold", cond_dist="Student", weightfun_pars=c(1, 1),
+                        mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2))), 26)
+  expect_equal(n_params(p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1), cond_dist="Student",
+                        AR_constraints=C_222), 21)
+  expect_equal(n_params(p=1, M=2, d=3, weight_function="logistic", cond_dist="Student", weightfun_pars=c(3, 1),
+                        AR_constraints=C_123), 30)
+  expect_equal(n_params(p=1, M=2, d=2, weight_function="exponential", cond_dist="Student", weightfun_pars=c(1, 1)), 21)
 })
 
 

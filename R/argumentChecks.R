@@ -51,15 +51,16 @@ stab_conds_satisfied <- function(p, M, d, params, all_boldA=NULL, tolerance=1e-3
 #'  @keywords internal
 
 in_paramspace <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
-                          weightfun_pars=NULL, cond_dist, all_boldA, all_Omegas, weightpars, df,
-                          stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8, weightpar_tol=1e-8) {
+                          weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), all_boldA, all_Omegas, weightpars, distpars,
+                          stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
   # in_paramspace is internal function that always takes in non-constrained reduced form parameter vector
   # Reform the parameter vectors before checking with in_paramspace
   weight_function <- match.arg(weight_function)
+  cond_dist <- match.arg(cond_dist)
 
   # Check distribution parameters
   if(cond_dist == "Student") {
-    if(df <= 2 + df_tol) {
+    if(distpars <= 2 + distpar_tol) {
       return(FALSE)
     }
   }
@@ -120,7 +121,7 @@ check_params <- function(p, M, d, params, weight_function=c("relative_dens", "lo
                          weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
                          identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
                          AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
-                         stab_tol=1e-3, posdef_tol=1e-8, df_tol=1e-8, weightpar_tol=1e-8) {
+                         stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
@@ -144,7 +145,7 @@ check_params <- function(p, M, d, params, weight_function=c("relative_dens", "lo
   weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
                                 weightfun_pars=weightfun_pars)
   all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
-  df <- numeric(0) # FILL IN WHEN STUDENT IS IMPLEMENTED
+  distpars <- pick_distpars(params=params, cond_dist=cond_dist)
   if(!is.null(B_constraints)) {
     stop("B_constraints are not yet implemented to check_params!")
   }
@@ -153,8 +154,7 @@ check_params <- function(p, M, d, params, weight_function=c("relative_dens", "lo
   }
 
   if(cond_dist == "Student") { # Check degrees of freedom parameter
-    stop("cond_dist = Student is not yet implented to check_params!")
-    if(df <= 2 + df_tol) {
+    if(distpars <= 2 + distpar_tol) {
       stop("The degrees of freedom parameter needs to be strictly larger than two (with large enough numerical tolerance)!")
     }
   }
