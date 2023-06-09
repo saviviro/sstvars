@@ -114,6 +114,11 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   for(m in seq_len(sum(M))) {
     count <- 1
     cat(paste("Regime", m), "\n")
+    if(cond_dist == "Student") {
+      if(m == 1) {
+        cat(paste0("Degrees of freedom: ", format_value(distpars), ", (for all regimes)"), "\n")
+      }
+    }
     if(summary_print) {
       cat(paste("Moduli of 'bold A' eigenvalues: ", paste0(format_value(all_boldA_eigens[,m]), collapse=", ")),"\n")
       cat(paste("Cov. matrix 'Omega' eigenvalues:", paste0(format_value(all_omega_eigens[,m]), collapse=", ")),"\n")

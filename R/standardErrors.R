@@ -171,12 +171,15 @@ print_std_errors <- function(stvar, digits=3) {
   Y <- paste0("Y", 1:d)
   tmp_names <- paste0("tmp", 1:(p*(d + 2) + d + 2))
 
-  # PRINT DISTRIBUTION PARAM SOMEWHERE FOR STUDENT COND DIST
-
   for(m in seq_len(M)) {
     count <- 1
     cat(paste("Regime", m))
     cat("\n")
+    if(cond_dist == "Student") {
+      if(m == 1) {
+        cat(paste0("Degrees of freedom: ", format_value(distpars), ", (for all regimes)"), "\n")
+      }
+    }
     if(weight_function == "relative_dens") {
       if(m < M) cat(paste("Weight param:", format_value(weightpars[m])), "\n")
     } else if(weight_function == "mlogit") {
