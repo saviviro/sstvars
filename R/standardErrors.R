@@ -112,7 +112,6 @@ print_std_errors <- function(stvar, digits=3) {
     stop("Structural models are not yet implemented to print_std_errors")
   }
   weightpars <- pick_weightpars(p=p, M=M, d=d, params=pars, weight_function=weight_function, weightfun_pars=weightfun_pars)
-  if(cond_dist != "Gaussian") stop("Only Gaussian models are implemented to print_std_errors")
   if(weight_function == "relative_dens") {
     weightpars[M] <- NA # No standard error for the last alpha
   } else if(weight_function == "logistic") {
