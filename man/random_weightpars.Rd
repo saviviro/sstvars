@@ -50,7 +50,8 @@ See the vignette for more details about the weight functions.}
         in the weight function in an increasing order, i.e., a vector with unique elements in \eqn{\lbrace 1,...,d \rbrace}.}
       \item{The second element \code{$lags}:}{an integer in \eqn{\lbrace 1,...,p \rbrace} specifying the number of lags to be
         used in the weight function.}
-    }}
+    }
+  }
 }}
 
 \item{AR_constraints}{a size \eqn{(Mpd^2 x q)} constraint matrix \eqn{C} specifying linear constraints

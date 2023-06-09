@@ -76,7 +76,8 @@
 #'         in the weight function in an increasing order, i.e., a vector with unique elements in \eqn{\lbrace 1,...,d \rbrace}.}
 #'       \item{The second element \code{$lags}:}{an integer in \eqn{\lbrace 1,...,p \rbrace} specifying the number of lags to be
 #'         used in the weight function.}
-#'     }}
+#'     }
+#'   }
 #' }
 #' @param cond_dist specifies the conditional distribution of the model as \code{"Gaussian"} or \code{"Student"}.
 #' @param parametrization \code{"intercept"} or \code{"mean"} determining whether the model is parametrized with intercept
