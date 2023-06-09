@@ -82,6 +82,8 @@ theta_323relg <- c(0.98249, 0.66144, -1.17552, 0.50289, 0.17399, -0.01771, 0.961
 
 ################### Speed test ##
 #microbenchmark::microbenchmark(loglikelihood(data=usamone, p=3, M=2, d=3, params=theta_323relg), times=1000L)
+#microbenchmark::microbenchmark(loglikelihood(data=usamone, p=1, M=2, params=c(theta_123thres_2_1, 7), weight_function="threshold",
+#                                            weightfun_pars=c(2, 1), cond_dist="Student"), times=1000L)
 ###################
 
 
@@ -539,4 +541,37 @@ test_that("loglikelihood works correctly", {
                              weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.1, 0))), -16285.82, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=1, M=3, params=theta_132thresmw_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
                              mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2))), -443.5233, tolerance=1e-3)
+
+  ## Student
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=c(theta_122logistic_1_1, 300), weight_function="logistic",
+                             weightfun_pars=c(1, 1), cond_dist="Student"), -341.7576, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=c(theta_222logistic_2_1, 10), weight_function="logistic",
+                             weightfun_pars=c(2, 1), cond_dist="Student"), -274.9028, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=c(theta_222logistic_1_2, 3), weight_function="logistic",
+                             weightfun_pars=c(1, 2), cond_dist="Student"), -276.1146, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=3, params=c(theta_232log_2_2, 13), weight_function="mlogit",
+                             weightfun_pars=list(vars=2, lags=2), cond_dist="Student"), -2300.686, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=3, params=c(theta_232log_12_2, 2.1), weight_function="mlogit",
+                             weightfun_pars=list(vars=1:2, lags=2), cond_dist="Student"), -1987.197, tolerance=1e-3)
+  expect_equal(loglikelihood(data=usamone, p=1, M=2, params=c(theta_123log_1_1, 30), weight_function="mlogit",
+                             weightfun_pars=list(vars=1, lags=1), cond_dist="Student"), -954.2666, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=c(theta_222exp_1_2, 7), weight_function="exponential",
+                             weightfun_pars=c(1, 2), cond_dist="Student"), -312.2618, tolerance=1e-3)
+  expect_equal(loglikelihood(data=usamone, p=1, M=2, params=c(theta_123exp_1_1, 12), weight_function="exponential",
+                             weightfun_pars=c(1, 1), cond_dist="Student"), -1001.058, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=3, params=c(theta_232thres_1_1, 10), weight_function="threshold",
+                             weightfun_pars=c(1, 1), cond_dist="Student"), -2233.18, tolerance=1e-2)
+  expect_equal(loglikelihood(data=usamone, p=1, M=2, params=c(theta_123thres_2_1, 2.01), weight_function="threshold",
+                             weightfun_pars=c(2, 1), cond_dist="Student"), -1448.457, tolerance=1e-2)
+
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=c(theta_122logc_12_1, 4.4), weight_function="mlogit",
+                             weightfun_pars=list(vars=1:2, lags=1), AR_constraints=C_122, cond_dist="Student"), -307.7079, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=c(theta_222logisticcmw_2_1, 30), weight_function="logistic", weightfun_pars=c(2, 1),
+                             mean_constraints=list(1:2), AR_constraints=C_222, cond_dist="Student",
+                             weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))), -322.5255, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=c(theta_122expw_1_1, 2.3), weight_function="exponential", weightfun_pars=c(1, 1),
+                             weight_constraints=list(R=0, r=c(0.02, 0.13)), cond_dist="Student"), -380.4028, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=3, params=c(theta_132thresmw_1_1, 11), weight_function="threshold", weightfun_pars=c(1, 1),
+                             mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2)), cond_dist="Student"),
+               -426.8132, tolerance=1e-3)
 })

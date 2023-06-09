@@ -38,6 +38,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// Student_densities_Cpp
+arma::mat Student_densities_Cpp(arma::mat obs, arma::mat means, arma::cube covmats, arma::mat alpha_mt, double df);
+RcppExport SEXP _sstvars_Student_densities_Cpp(SEXP obsSEXP, SEXP meansSEXP, SEXP covmatsSEXP, SEXP alpha_mtSEXP, SEXP dfSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type obs(obsSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type means(meansSEXP);
+    Rcpp::traits::input_parameter< arma::cube >::type covmats(covmatsSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type alpha_mt(alpha_mtSEXP);
+    Rcpp::traits::input_parameter< double >::type df(dfSEXP);
+    rcpp_result_gen = Rcpp::wrap(Student_densities_Cpp(obs, means, covmats, alpha_mt, df));
+    return rcpp_result_gen;
+END_RCPP
+}
 // get_mu_yt_Cpp
 arma::mat get_mu_yt_Cpp(arma::mat obs, arma::mat all_phi0, arma::cube all_A, arma::mat alpha_mt);
 RcppExport SEXP _sstvars_get_mu_yt_Cpp(SEXP obsSEXP, SEXP all_phi0SEXP, SEXP all_ASEXP, SEXP alpha_mtSEXP) {
@@ -80,6 +95,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_sstvars_Gaussian_densities_Cpp", (DL_FUNC) &_sstvars_Gaussian_densities_Cpp, 4},
     {"_sstvars_Gaussian_densities_const_Cpp", (DL_FUNC) &_sstvars_Gaussian_densities_const_Cpp, 3},
+    {"_sstvars_Student_densities_Cpp", (DL_FUNC) &_sstvars_Student_densities_Cpp, 5},
     {"_sstvars_get_mu_yt_Cpp", (DL_FUNC) &_sstvars_get_mu_yt_Cpp, 4},
     {"_sstvars_get_multisets_Cpp", (DL_FUNC) &_sstvars_get_multisets_Cpp, 3},
     {"_sstvars_get_permanent_Cpp", (DL_FUNC) &_sstvars_get_permanent_Cpp, 1},

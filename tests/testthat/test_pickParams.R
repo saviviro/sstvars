@@ -120,10 +120,9 @@ theta_123logistic_3_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vec
 
 # with cond_dist="Student"
 
-# p=2, M=2, d=2, cond_dist="Student", weight_function="logstic", weightfun_pars=c(2, 1)
+# p=2, M=2, d=2, cond_dist="Student", weight_function="logistic", weightfun_pars=c(2, 1)
 df_222_2_1 <- 3
 theta_222logistict_2_1 <- c(theta_222logistic_2_1, df_222_2_1)
-
 
 
 ## weight_function = "mlogit"

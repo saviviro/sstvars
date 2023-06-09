@@ -244,14 +244,16 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
 
   # Calculate the conditional log-likelihood; the initial values are not used here
   if(cond_dist == "Gaussian") { # Gaussian conditional distribution
-    #all_Omegas <- lapply(1:M, function(i1) all_Omegas[, , i1])
     all_lt <- -0.5*d*log(2*pi) + Gaussian_densities_Cpp(obs=data[(p+1):nrow(data),], means=mu_yt, covmats=all_Omegas, alpha_mt=alpha_mt)
 
     # BELOW IS THE R IMPLEMENTATION FOR SPEED COMPARISONS
+    #all_covmats <- array(rowSums(vapply(1:M, function(m) rep(alpha_mt[, m], each=d*d)*as.vector(all_Omegas[, , m]),
+    # numeric(d*d*T_obs))), dim=c(d, d, T_obs))
+    #obs_minus_cmean <- data[(p+1):nrow(data),] - mu_yt
     #all_lt <- numeric(T_obs)
     #tmp0 <- -0.5*d*log(2*pi)
     # for(i1 in 1:T_obs) {
-    #    # Calculate the l_t multinormal density for each observation
+    #    # Calculate the l_t log multinormal density for each observation
     #   cond_covmat <- matrix(0, nrow=d, ncol=d)
     #   for(i2 in 1:M) {
     #     cond_covmats[, , i2] <- alpha_mt[i1, i2]*all_Omegas[, , i2]
@@ -261,7 +263,19 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
     #                                                                          chol2inv(chol(cond_covmat))%*%(obs_minus_cmean[i1,]))
     # }
   } else if(cond_dist == "Student") {
-    stop("Student's t cond_dist is not implemented yet!")
+    logCd <- lgamma(0.5*(d + distpars)) - 0.5*d*log(base::pi) - 0.5*d*log(distpars - 2) - lgamma(0.5*distpars)
+    all_lt <- logCd + Student_densities_Cpp(obs=data[(p+1):nrow(data),], means=mu_yt, covmats=all_Omegas, alpha_mt=alpha_mt, df=distpars)
+
+    # # BELOW AN R IMPLEMENTATION FOR SPEED COMPARISONS
+    # all_covmats <- array(rowSums(vapply(1:M, function(m) rep(alpha_mt[, m], each=d*d)*as.vector(all_Omegas[, , m]),
+    #                                     numeric(d*d*T_obs))), dim=c(d, d, T_obs))
+    # obs_minus_cmean <- data[(p+1):nrow(data),] - mu_yt
+    # all_lt <- numeric(T_obs)
+    # for(i1 in 1:T_obs) {
+    #    # Calculate the l_t log multistudent density for each observation
+    #   all_lt[i1] <- logCd - 0.5*log(det(all_covmats[, , i1])) -
+    #     0.5*(d + distpars)*log(1 + crossprod(obs_minus_cmean[i1,], chol2inv(chol(all_covmats[, , i1]))%*%(obs_minus_cmean[i1,]))/(distpars - 2))
+    # }
   }
   if(to_return == "terms") {
     return(all_lt)
