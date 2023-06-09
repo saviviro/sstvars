@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{Student_densities_Cpp}
 \alias{Student_densities_Cpp}
-\title{Calculate log multivariate Student t densities}
+\title{Calculate log multivariate Student's t densities}
 \usage{
 Student_densities_Cpp(obs, means, covmats, alpha_mt, df)
 }
@@ -23,7 +23,7 @@ transition weights of the m:th regime.}
 \item{df}{the degrees of freedom parameter value (assumed larger than two).}
 }
 \value{
-a numeric vector containing the multivariate Gaussian densities, excluding the constant term.
+a numeric vector containing the multivariate Student's t densities, excluding the constant term.
 }
 \description{
 Calculates logs of multivariate Student t densities with varying mean

@@ -44,25 +44,17 @@ Gaussian_densities_const_Cpp <- function(obs, mean, cholcovmat) {
 }
 
 #' @name Student_densities_Cpp
-#' @title Calculate log multivariate Student t densities
+#' @title Calculate log multivariate Student's t densities
 #' @description Calculates logs of multivariate Student t densities with varying mean
 #'   and varying covariance matrix AND EXCLUDING the constant term of the density
 #'   (the constant is calculated and added in R code). The varying conditional covariance
 #'   matrix is calculated within the function from the regime covariance matrices and
 #'   transition weights.
 #'
-#' @param obs a \eqn{(T \times d)} matrix such that the i:th row contains the vector
-#'  \eqn{y_{i}=(y_{1i},...,y_{di})} \eqn{(dx1)}. That is, the initial values are
-#'  excluded but the last observations is included.
-#' @param means a \eqn{(T \times d)} matrix such that the i:th row contains the
-#'   conditional mean of the process \eqn{\mu_{y,i}}.
-#' @param covmats a \eqn{(d \times d \times M)} array such that the slice \code{[, , m]}
-#'   contains the conditional covariance matrix of regime m.
-#' @param alpha_mt a \eqn{(T \times M)} matrix such that \code{[t, m]} contains the time t
-#'   transition weights of the m:th regime.
+#' @inheritParams Gaussian_densities_Cpp
 #' @param df the degrees of freedom parameter value (assumed larger than two).
 #' @details Note that the parametrization is with the covariance matrix and not the scale matrix.
-#' @return a numeric vector containing the multivariate Gaussian densities, excluding the constant term.
+#' @return a numeric vector containing the multivariate Student's t densities, excluding the constant term.
 #' @keywords internal
 Student_densities_Cpp <- function(obs, means, covmats, alpha_mt, df) {
     .Call('_sstvars_Student_densities_Cpp', PACKAGE = 'sstvars', obs, means, covmats, alpha_mt, df)

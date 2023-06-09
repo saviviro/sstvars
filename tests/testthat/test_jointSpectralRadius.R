@@ -31,6 +31,5 @@ test_that("bound_joint_spectral_radius works correctly", {
   expect_equal(bound_joint_spectral_radius(mod122relg, accuracy="0.840"), 0.8537476, tol=1e-4)
   expect_equal(bound_joint_spectral_radius(mod222relg, accuracy="0.707"), 1.221905, tol=1e-4)
   expect_equal(bound_joint_spectral_radius(mod123relg, accuracy="0.707"), 1.303169, tol=1e-4)
-
 })
 

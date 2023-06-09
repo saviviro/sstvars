@@ -67,16 +67,17 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params)
   weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                 cond_dist=cond_dist)
+  distpars <- pick_distpars(params=params, cond_dist=cond_dist)
+
   if(weight_function == "mlogit") {
     all_gamma_m <- cbind(matrix(weightpars, ncol=M-1), 0) # Column per gamma_m, m=1,...,M-1, gamma_M=0.
   }
 
-  #### pick dist_pars
   cat(weight_function, cond_dist, "STVAR model,", paste0(identification, ","),
       ifelse(is.null(AR_constraints), "no AR_constraints,", "AR_constraints used,"),
-      ifelse(is.null(mean_constraints), paste0("no mean_constraints", ifelse(is.null(B_constraints), "", ",")),
-             paste0("mean_constraints used", ifelse(is.null(B_constraints), "", ","))),
-      ifelse(identification == "reduced_form", "", ifelse(is.null(B_constraints), "no B_constraints", "B_constraints used")))
+      ifelse(is.null(mean_constraints), paste0("no mean_constraints,", ifelse(is.null(B_constraints), "", ",")),
+             paste0("mean_constraints used,", ifelse(is.null(B_constraints), "", ","))),
+      ifelse(identification == "reduced_form", "", ifelse(is.null(B_constraints), "no B_constraints,", "B_constraints used,")))
   cat("\n", paste0(" p = ", p, ", "))
   cat(paste0("M = ", M, ", "))
   cat(paste0("d = ", d, ", #parameters = " , npars, ","),
@@ -107,16 +108,12 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   Y <- paste0("y", 1:d)
   tmp_names <- paste0("tmp", 1:(p*(d + 2) + d + 2))
 
-  if(cond_dist == "Student") { # Print degrees of freedom parameter
-    cat("PRINT DF PARAM ESTIMATE SOMEWHERE\n")
-  }
-
   for(m in seq_len(sum(M))) {
     count <- 1
     cat(paste("Regime", m), "\n")
     if(cond_dist == "Student") {
       if(m == 1) {
-        cat(paste0("Degrees of freedom: ", format_value(distpars), ", (for all regimes)"), "\n")
+        cat(paste0("Degrees of freedom: ", format_value(distpars), " (for all regimes)"), "\n")
       }
     }
     if(summary_print) {
@@ -126,11 +123,9 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
     if(weight_function == "relative_dens") {
       cat(paste("Weight param:", format_value(weightpars[m])), "\n")
     } else if(weight_function == "mlogit") {
-      cat(paste("Weight params:", paste0(format_value(all_gamma_m[,m]), collapse=", ")))
-      if(m == M) {
-        cat(" (by normalization)")
+      if(m < M) {
+        cat(paste("Weight params:", paste0(format_value(all_gamma_m[,m]), collapse=", ")), "\n")
       }
-      cat("\n")
     } else if(weight_function %in% c("logistic", "exponential")) {
       if(m == M) {
         cat(paste("Weight params:", paste0(format_value(weightpars[1]), " (location), ",

@@ -142,7 +142,7 @@ smart_covmat <- function(d, Omega, accuracy) {
 #'
 #' @inheritParams loglikelihood
 #' @return Returns a numeric vector ...
-#'   \decribe{
+#'   \describe{
 #'     \item{If \code{cond_dist == "Gaussian"}:}{of length zero.}
 #'     \item{If \code{cond_dist == "Student"}:}{of length one containing a df param strictly larger than two.}
 #'   }
@@ -157,25 +157,29 @@ random_distpars <- function(cond_dist) {
 }
 
 
-#' @title Create random degrees of freedom parameter values close to given values
+#' @title Create random distribution parameter values close to given values
 #'
-#' @description \code{smart_df} generates random degrees of freedom parameter values
+#' @description \code{smart_distpars} generates random degrees of freedom parameter values
 #'   close to given values.
 #'
-#' @param df the old degrees of freedom parameters (of all regimes)
-#' @param accuracy a positive real number adjusting how close to the given degrees of freedom parameters
-#'   the returned df should be.
-#' @return a numeric vector containing the degrees of freedom parameter values
+#' @param distpars the old distribution parameters (of all regimes)
+#' @param accuracy a positive real number adjusting how close to the given distribution parameters
+#'   the returned values should be.
+#' @return Returns a numeric vector ...
+#'   \describe{
+#'     \item{If \code{cond_dist == "Gaussian"}:}{of length zero.}
+#'     \item{If \code{cond_dist == "Student"}:}{of length one containing a degrees of freedom parameter value (strictly larger than two).}
+#'   }
 #' @keywords internal
 
-smart_df <- function(df, accuracy) {
-  if(length(df) == 0) {
+smart_distpars <- function(distpars, accuracy, cond_dist) {
+  if(cond_dist == "Gaussian") {
     return(numeric(0))
+  } else if(cond_dist == "Student") {
+    new_distpars <- rnorm(length(distpars), mean=distpars, sd=pmax(0.2, abs(distpars))/accuracy) # smart df
+    return(pmax(2.01, new_distpars)) # Make sure all df are above the strict lower bound 2
   }
-  new_df <- rnorm(length(df), mean=df, sd=pmax(0.2, abs(df))/accuracy) # smart df
-  pmax(2.01, new_df) # Make sure all df are above the strict lower bound 2
 }
-
 
 
 #' @title Create random transition weight parameter values
@@ -397,13 +401,12 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logis
                       mu_scale, mu_scale2, omega_scale, ar_scale=1, ar_scale2=1) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
-  if(cond_dist != "Gaussian") stop("Only Gaussian cond_dist is currently implemented to smart_ind!")
   scale_A <- ar_scale2*(1 + log(2*mean(c((p - 0.2)^(1.25), d))))
   params_std <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                         cond_dist=cond_dist, identification="reduced_form", AR_constraints=AR_constraints,
                                         mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                                         B_constraints=NULL) # Used so that pick_pars-functions works
-  # ? dist_pars <- pick_distpars
+  dist_pars <- pick_distpars(params=params_std, cond_dist=cond_dist)
   all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params_std)
   new_pars <- numeric(length(params))
   if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(weight_constraints)) {
@@ -510,7 +513,8 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logis
     new_pars[1:(M*g + q + M*d*(d + 1)/2 + length(weight_pars))] <- c(mean_pars, AR_pars, covmat_pars, weight_pars)
   }
   if(cond_dist == "Student") {
-    # ADD DF PARAMETERS HERE
+    # Add degrees of freedom parameter
+    new_pars[length(new_pars)] <- smart_distpars(distpars=dist_pars, accuracy=accuracy, cond_dist=cond_dist)
   }
   new_pars
 }

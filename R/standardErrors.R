@@ -104,6 +104,7 @@ print_std_errors <- function(stvar, digits=3) {
                                   B_constraints=B_constraints)
   all_phi0_or_mu <- pick_phi0(M=M, d=d, params=pars)
   all_A <- pick_allA(p=p, M=M, d=d, params=pars)
+  distpars <- pick_distpars(params=params, cond_dist=cond_dist)
   if(identification == "reduced_form") {
     all_Omega <- pick_Omegas(p=p, M=M, d=d, params=pars)
   } else {
@@ -146,9 +147,9 @@ print_std_errors <- function(stvar, digits=3) {
 
   cat(weight_function, cond_dist, "STVAR model,", paste0(identification, ","),
       ifelse(is.null(AR_constraints), "no AR_constraints,", "AR_constraints used,"),
-      ifelse(is.null(mean_constraints), paste0("no mean_constraints", ifelse(is.null(B_constraints), "", ",")),
-             paste0("mean_constraints used", ifelse(is.null(B_constraints), "", ","))),
-      ifelse(identification == "reduced_form", "", ifelse(is.null(B_constraints), "no B_constraints", "B_constraints used")))
+      ifelse(is.null(mean_constraints), paste0("no mean_constraints,", ifelse(is.null(B_constraints), "", ",")),
+             paste0("mean_constraints used,", ifelse(is.null(B_constraints), "", ","))),
+      ifelse(identification == "reduced_form", "", ifelse(is.null(B_constraints), "no B_constraints,", "B_constraints used,")))
   cat("\n", paste0(" p = ", p, ", "))
   cat(paste0("M = ", M, ", "))
   cat(paste0("d = ", d, ", #parameters = " , npars, ","))
@@ -176,7 +177,7 @@ print_std_errors <- function(stvar, digits=3) {
     cat("\n")
     if(cond_dist == "Student") {
       if(m == 1) {
-        cat(paste0("Degrees of freedom: ", format_value(distpars), ", (for all regimes)"), "\n")
+        cat(paste0("Degrees of freedom: ", format_value(distpars), " (for all regimes)"), "\n")
       }
     }
     if(weight_function == "relative_dens") {

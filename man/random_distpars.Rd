@@ -11,7 +11,7 @@ random_distpars(cond_dist)
 }
 \value{
 Returns a numeric vector ...
-  \decribe{
+  \describe{
     \item{If \code{cond_dist == "Gaussian"}:}{of length zero.}
     \item{If \code{cond_dist == "Student"}:}{of length one containing a df param strictly larger than two.}
   }

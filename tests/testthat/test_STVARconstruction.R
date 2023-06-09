@@ -42,7 +42,6 @@ theta_222thres_2_1 <- c(theta_222relg[-length(theta_222relg)], 1)
 mod222thres_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222thres_2_1, weight_function="threshold",
                          weightfun_pars=c(2, 1))
 
-
 ## Constrained models
 rbind_diags <- function(p, M, d) {
   I <- diag(p*d^2)
@@ -89,6 +88,34 @@ mod222expcmw_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222expcmw_2_1
                           weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)))
 
 
+## Student
+
+# p=2, M=2, d=2, weight_function="threshold", weighfun_pars=c(2, 1), cond_dist="Student"
+theta_222threst_2_1 <- c(theta_222thres_2_1, 13)
+mod222threst_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222threst_2_1, weight_function="threshold",
+                         weightfun_pars=c(2, 1), cond_dist="Student")
+
+# p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=2), cond_dist="Student", mean_constraints=list(1:2),
+# AR_constraints=C_222
+theta_222logcmt_12_2 <- c(theta_222logcm_12_2, 2.13)
+mod222logcmt_12_2 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logcmt_12_2, weight_function="mlogit",
+                          weightfun_pars=list(vars=1:2, lags=2), cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_222)
+
+# p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_222,
+# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))
+theta_222logisticcmwt_2_1 <- c(theta_222logisticcmw_2_1, 30)
+mod222logisticcmwt_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logisticcmwt_2_1, weight_function="logistic",
+                               weightfun_pars=c(2, 1), cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_222,
+                               weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)))
+
+
+# p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_222,
+# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))
+theta_222expcmwt_2_1 <- c(theta_222expcmw_2_1, 4)
+mod222expcmwt_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222expcmwt_2_1, weight_function="exponential",
+                           weightfun_pars=c(2, 1), cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_222,
+                           weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)))
+
 test_that("STVAR works correctly", {
   # Relative_dens Gaussian STVAR
   expect_equal(mod112relg$params, theta_112relg)
@@ -110,4 +137,10 @@ test_that("STVAR works correctly", {
 
   # Threshold
   expect_equal(mod222thres_2_1$params, theta_222thres_2_1)
+
+  # Student
+  expect_equal(mod222logisticcmwt_2_1$params, theta_222logisticcmwt_2_1)
+  expect_equal(mod222logcmt_12_2$params, theta_222logcmt_12_2)
+  expect_equal(mod222expcmwt_2_1$params, theta_222expcmwt_2_1)
+  expect_equal(mod222threst_2_1$params, theta_222threst_2_1)
 })
