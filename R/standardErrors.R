@@ -104,7 +104,7 @@ print_std_errors <- function(stvar, digits=3) {
                                   B_constraints=B_constraints)
   all_phi0_or_mu <- pick_phi0(M=M, d=d, params=pars)
   all_A <- pick_allA(p=p, M=M, d=d, params=pars)
-  distpars <- pick_distpars(params=params, cond_dist=cond_dist)
+  distpars <- pick_distpars(params=pars, cond_dist=cond_dist)
   if(identification == "reduced_form") {
     all_Omega <- pick_Omegas(p=p, M=M, d=d, params=pars)
   } else {

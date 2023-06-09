@@ -1,6 +1,8 @@
 context("simulate.stvar")
 library(sstvars)
 
+# NOTE: predict uses simulate, so some of the setups are only tested in predict, which breaks if simulate breaks
+
 # p=1, M=1, d=2
 theta_112relg <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103, 0.601786, -0.002945, 0.067224)
 mod112relg <- STVAR(data=gdpdef, p=1, M=1, params=theta_112relg, weight_function="relative_dens")
@@ -30,6 +32,8 @@ theta_322log_2_1 <- c(2.746765, 0.297951, 0.57546, 0.039418, 0.173881, -0.028861
                       0.296153, 1.158639, -0.039743, 0.153417, 0.356729, 0.005054, 0.031869, -8.970684, 7.518877)
 mod322log <- STVAR(data=gdpdef, p=3, M=2, d=2, params=theta_322log_2_1, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1))
 
+mod322logt <- STVAR(data=gdpdef, p=3, M=2, d=2, params=c(theta_322log_2_1, 10), weight_function="mlogit", weightfun_pars=list(vars=2, lags=1),
+                    cond_dist="Student")
 
 s112 <- simulate(mod112relg, nsim=1, seed=1, init_regime=1)
 s112_2 <- simulate(mod112relg, nsim=2, seed=1, init_regime=1)
@@ -39,6 +43,9 @@ s123 <- simulate(mod123relg, nsim=3, seed=4, init_regime=1)
 s123_2 <- simulate(mod123relg, nsim=1, seed=5, init_values=usamone)
 s322 <- simulate(mod322log, nsim=3, seed=3, init_regime=1)
 s322_2 <- simulate(mod322log, nsim=3, seed=3, init_values=gdpdef)
+
+s322t <- simulate(mod322logt, nsim=3, seed=3, init_values=gdpdef)
+
 
 test_that("simulate.stvar works correctly", {
   # Relative_dens Gaussian STVAR
@@ -64,5 +71,8 @@ test_that("simulate.stvar works correctly", {
   expect_equal(s322_2$sample[3,], c(0.7678891, 0.3236954), tol=1e-4)
   expect_equal(s322_2$transition_weights[2,], c(0.002522048, 0.997477952), tol=1e-4)
 
+  # Student
+  expect_equal(s322t$sample[3,], c(0.4749844, 0.6297811), tol=1e-4)
+  expect_equal(s322t$transition_weights[1,], c(0.002759205, 0.997240795), tol=1e-4)
 })
 

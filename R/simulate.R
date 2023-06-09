@@ -72,7 +72,6 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   if(!is.null(B_constraints)) {
     stop("B_constained models are not yet implemented to simulate.stvar")
   }
-  if(cond_dist != "Gaussian") stop("Other that Gaussian models are not yet implemented to simulate.stvar")
   if(is.null(init_values) & missing(init_regime)) {
     stop("Either init_values or init_regime needs to be specified")
   }
@@ -80,6 +79,8 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
     if(cond_dist != "Gaussian") {
       stop("init_regime is currently implemented for Gaussian models only. Please specify init_values instead.")
     }
+    # For threshold models: you can use initial values obtained from the data if data is provided
+    # Other: some kind of burn-in period: start from unconditional mean and then use burn-in? New function: simulate_from_regime?
     stopifnot(init_regime %in% 1:M)
   }
   if(!all_pos_ints(c(nsim, ntimes))) stop("Arguments nsim and ntimes must be positive integers")
@@ -117,7 +118,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   weightpars <- pick_weightpars(p=p, M=M, d=d, params=params,
                                 weight_function=weight_function, weightfun_pars=weightfun_pars,
                                 cond_dist=cond_dist)
-  # pick_distpars
+  distpars <- pick_distpars(params=params, cond_dist=cond_dist)
 
   # Calculate statistics that remain constant through the iterations
   if(cond_dist == "Gaussian") { # Initial regime Gaussian stat dist simu + relative_dens weight function uses this; latter only has Gaussian
@@ -215,10 +216,11 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
       }
 
       # Draw the structural error
-      if(cond_dist == "Gaussian") {
-        e_t <- rnorm(d)
-      } else {
-        stop("Other than Gaussian models are not yet implemented to simulat.stvar")
+      e_t <- rnorm(d) # This is used to create Student's t variables as well (but will be updated)
+
+      if(cond_dist == "Student") {
+        Z <- sqrt((distpars - 2)/distpars)*e_t # Sample from N(0, (df-2)/df*I_d) # df == distpars
+        e_t <- Z*sqrt(distpars/rchisq(n=1, df=distpars)) # Sample from t_d(0, I_d, df)
       }
 
       # Calculate the current observation
