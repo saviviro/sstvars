@@ -25,7 +25,8 @@ get_residuals <- function(data, p, M, params, weight_function=c("relative_dens",
   identification <- match.arg(identification)
   T_obs <- nrow(data) - p
   d <- ncol(data)
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars)
+  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                         cond_dist=cond_dist)
 
   mu_t <- loglikelihood(data=data, p=p, M=M, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
                         cond_dist=cond_dist, parametrization=parametrization, identification=identification,

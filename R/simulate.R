@@ -121,7 +121,9 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   distpars <- pick_distpars(params=params, cond_dist=cond_dist)
 
   # Calculate statistics that remain constant through the iterations
-  if(cond_dist == "Gaussian") { # Initial regime Gaussian stat dist simu + relative_dens weight function uses this; latter only has Gaussian
+  if(cond_dist == "Gaussian" || weight_function == "relative_dens") {
+    # Initial regime Gaussian stat dist simu + relative_dens weight function uses this;
+    # relative dens only has Gaussian cond dist, but it is used in simulate_from_regime with Student cond dist
      Sigmas <- get_Sigmas(p=p, M=M, d=d, all_A=all_A, all_boldA=all_boldA, all_Omegas=all_Omegas)
      inv_Sigmas <- array(NA, dim=c(d*p, d*p, M)) # Store inverses of the (dpxdp) covariance matrices
      det_Sigmas <- numeric(M) # Store determinants of the (dpxdp) covariance matrices
@@ -188,18 +190,23 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   for(j1 in seq_len(ntimes)) {
     for(i1 in seq_len(nsim)) {
       # Calculate transition weights
-      if(weight_function == "relative_dens") {
-        log_mvdvalues <- get_logmvdvalues(Y=Y, i1=i1)
-        alpha_mt <- get_alpha_mt(M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                 weightpars=weightpars, log_mvdvalues=log_mvdvalues, epsilon=epsilon)
-      } else if(weight_function %in% c("logistic", "exponential", "threshold")) {
-        alpha_mt <- get_alpha_mt(M=M, d=d, Y2=Y[i1, , drop=FALSE], weight_function=weight_function,
-                                 weightfun_pars=weightfun_pars, weightpars=weightpars, epsilon=epsilon)
-      } else if(weight_function == "mlogit") {
-        regression_values <- get_regression_values(Y=Y, i1=i1)
-        alpha_mt <- get_alpha_mt(M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                 weightpars=rep(1, times=M), log_mvdvalues=regression_values, epsilon=epsilon)
+      if(M == 1) {
+        alpha_mt <- matrix(1)
+      } else {
+        if(weight_function == "relative_dens") {
+          log_mvdvalues <- get_logmvdvalues(Y=Y, i1=i1)
+          alpha_mt <- get_alpha_mt(M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                   weightpars=weightpars, log_mvdvalues=log_mvdvalues, epsilon=epsilon)
+        } else if(weight_function %in% c("logistic", "exponential", "threshold")) {
+          alpha_mt <- get_alpha_mt(M=M, d=d, Y2=Y[i1, , drop=FALSE], weight_function=weight_function,
+                                   weightfun_pars=weightfun_pars, weightpars=weightpars, epsilon=epsilon)
+        } else if(weight_function == "mlogit") {
+          regression_values <- get_regression_values(Y=Y, i1=i1) # Uses regressions as logmvd values in relative_dens fun
+          alpha_mt <- get_alpha_mt(M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                   weightpars=rep(1, times=M), log_mvdvalues=regression_values, epsilon=epsilon)
+        }
       }
+
       transition_weights[i1, , j1] <- alpha_mt
 
       # Calculate conditional mean
@@ -242,4 +249,85 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
 
   list(sample=sample,
        transition_weights=transition_weights)
+}
+
+
+
+#' @title Simulate observations from a regime of a STVAR model
+#'
+#' @description \code{simulate_from_regime} allows to simulate observations from a single
+#'   regime of a STVAR model
+#'
+#' @inheritParams simulate.stvar
+#' @param stvar an object of class \code{'stvar'}.
+#' @param regime an integer in \eqn{1,...,M} determining the regime from which to simulate observations from
+#' @param init_values a size \eqn{(pxd)} matrix specifying the initial values, where d is the number
+#'   of time series in the system. The \strong{last} row will be used as initial values for the first lag,
+#'   the second last row for second lag etc. If not specified, initial values are set to the unconditional
+#'   mean of the regime.
+#' @details Does not take random number generator seed as an argument to avoid unwanted behavior,
+#'    because \code{simulate_from_regime} is mostly called from \code{simulate.stvar}
+#'    that takes a seed as its argument, and \code{simulate_from_regime} calls \code{simulate.stvar} to simulate the observations.
+#'    Specifically, \code{simulate_from_regime} generates a STVAR model from the given regime, sets up the initial values to the
+#'    (if not specified), and then calls \code{simulate.stvar} accordingly.
+#' @return Returns a \eqn{(nsim \times d)} matrix such that the \eqn{t}th row contains the \eqn{t}th simulated observation.
+#' @seealso \code{\link{simulate.stvar}}
+#' @inherit simulate.stvar references
+#' @keywords internal
+
+simulate_from_regime <- function(stvar, regime=1, nsim=1, init_values=NULL) {
+
+  # Model specifications
+  p <- stvar$model$p
+  M <- stvar$model$M
+  d <- stvar$model$d
+  weight_function <- stvar$model$weight_function
+  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=stvar$model$weightfun_pars)
+  cond_dist <- stvar$model$cond_dist
+  identification <- stvar$model$identification
+  AR_constraints <- stvar$model$AR_constraints
+  mean_constraints <- stvar$model$mean_constraints
+  weight_constraints <- stvar$model$weight_constraints
+  B_constraints <- stvar$model$B_constraints
+
+  # Collect parameter values
+  params <- stvar$params
+  params <- reform_constrained_pars(p=p, M=M, d=d, params=params,
+                                    weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                    cond_dist=cond_dist, identification=identification,
+                                    AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                    weight_constraints=weight_constraints, B_constraints=B_constraints)
+  if(stvar$model$parametrization == "mean") {
+    params <- change_parametrization(p=p, M=M, d=d, params=params,
+                                     weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                     identification=identification, cond_dist=cond_dist,
+                                     AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
+                                     B_constraints=NULL, change_to="intercept")
+  }
+  all_phi0 <- pick_phi0(M=M, d=d, params=params)
+  all_A <- pick_allA(p=p, M=M, d=d, params=params)
+  all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params)
+  distpars <- pick_distpars(params=params, cond_dist=cond_dist)
+
+  # Note that structural models not implemented here: no need here because just simulates initial values to the simulator funciton
+  new_params <- c(all_phi0[, regime], all_A[, , , regime], vech(all_Omegas[, , regime]), distpars) # VAR params corresponding the given regime
+
+  # Note that weight_function does not matter because there is just one regime; also, all constraints are removed prior to building the model.
+  new_stvar <- STVAR(p=p, M=1, d=d, params=new_params, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist=cond_dist,
+                     parametrization="intercept", identification="reduced_form", AR_constraints=NULL, mean_constraints=NULL,
+                     weight_constraints=NULL, B_constraints=NULL, calc_std_errors=FALSE)
+
+  if(is.null(init_values)) {
+    all_mu <- get_regime_means(p=p, M=M, d=d, params=params,
+                               weight_function=weight_function, weightfun_pars=weightfun_pars,
+                               cond_dist=cond_dist, parametrization="intercept",
+                               identification=identification,
+                               AR_constraints=NULL, mean_constraints=NULL,
+                               weight_constraints=NULL, B_constraints=NULL)
+    init_values <- matrix(rep(all_mu[, regime], times=p), nrow=p, ncol=d, byrow=TRUE)
+  } # else: simulate.stvar takes care of hand-specified initial values
+
+  # Simulate and return the sample
+  tmp_sim <- simulate(new_stvar, nsim=nsim, ntimes=1, init_values=init_values, drop=TRUE)
+  tmp_sim$sample
 }

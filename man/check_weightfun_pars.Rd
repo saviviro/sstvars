@@ -8,7 +8,8 @@ check_weightfun_pars(
   p,
   d,
   weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
-  weightfun_pars = NULL
+  weightfun_pars = NULL,
+  cond_dist = c("Gaussian", "Student")
 )
 }
 \arguments{
@@ -50,6 +51,8 @@ See the vignette for more details about the weight functions.}
     }
   }
 }}
+
+\item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"} or \code{"Student"}.}
 }
 \value{
 Does checks the argument \code{weightfun_pars} and throws an error if something is wrong; returns

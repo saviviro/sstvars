@@ -1097,6 +1097,7 @@ weightfun_pars6 <- list(vars=c(3, 1), 1)
 test_that("check_weightfun_pars works correctly", {
   # relative_dens
   expect_equal(check_weightfun_pars(p=1, d=2, weight_function="relative_dens", weightfun_pars="testobj"), NULL)
+  expect_error(check_weightfun_pars(p=2, d=2, weight_function="relative_dens", cond_dist="Student"))
 
   # logistic
   expect_error(check_weightfun_pars(p=5, d=4, weight_function="logistic", weightfun_pars=list(1, 1)))

@@ -165,7 +165,8 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   n_obs <- nrow(data)
   T_obs <- n_obs - p
 
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars)
+  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                         cond_dist=cond_dist)
 
 
   # Collect the parameter values

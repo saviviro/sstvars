@@ -127,6 +127,8 @@ check_params <- function(p, M, d, params, weight_function=c("relative_dens", "lo
   parametrization <- match.arg(parametrization)
   identification <- match.arg(identification)
   check_pMd(p=p, M=M, d=d, weight_function=weight_function)
+  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                         cond_dist=cond_dist)
   if(n_params(p=p, M=M, d=d, weight_function=weight_function, cond_dist=cond_dist,
               identification=identification, AR_constraints=AR_constraints,
               mean_constraints=mean_constraints, weight_constraints=weight_constraints,
@@ -330,7 +332,9 @@ check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logis
                               weightfun_pars=NULL, AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
                               B_constraints=NULL) {
   weight_function <- match.arg(weight_function)
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars)
+  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function,
+                                         weightfun_pars=weightfun_pars,
+                                         cond_dist="Gaussian")  # cond_dist="Gaussian" used since we dont want to check rel_dens distribution here
 
   # Check AR_constraints
   if(!is.null(AR_constraints)) {
@@ -437,10 +441,14 @@ check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logis
 #' @keywords internal
 
 check_weightfun_pars <- function(p, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
-                                 weightfun_pars=NULL) {
-  weight.function <- match.arg(weight_function)
+                                 weightfun_pars=NULL, cond_dist=c("Gaussian", "Student")) {
+  weight_function <- match.arg(weight_function)
+  cond_dist <- match.arg(cond_dist)
   if(weight_function == "relative_dens") {   # weightfun_pars are not used in weight_function == "relative_dens"
     weightfun_pars <- NULL
+    if(cond_dist != "Gaussian") {
+      stop("When weight_function == 'relative_dens', only Gaussian conditional distribution is supported (cond_dist='Gaussian').")
+    }
   } else if(weight_function %in% c("logistic", "exponential", "threshold")) {
     if(!is.numeric(weightfun_pars) || !is.vector(weightfun_pars) || length(weightfun_pars) != 2) {
       stop(paste0("When weight_function ==, ", weight_function, " the argument weightfun_pars should be be a length two numeric vector."))

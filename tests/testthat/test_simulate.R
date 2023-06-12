@@ -76,3 +76,25 @@ test_that("simulate.stvar works correctly", {
   expect_equal(s322t$transition_weights[1,], c(0.002759205, 0.997240795), tol=1e-4)
 })
 
+
+set.seed(1); sim_reg112_1 <- simulate_from_regime(mod112relg, regime=1, nsim=1)
+set.seed(1); sim_reg112_2 <- simulate_from_regime(mod112relg, regime=1, nsim=1, init_values=gdpdef)
+set.seed(2); sim_reg122_1 <- simulate_from_regime(mod122relg, regime=1, nsim=2)
+set.seed(3); sim_reg122_2 <- simulate_from_regime(mod122relg, regime=2, nsim=3)
+set.seed(4); sim_reg322_1 <- simulate_from_regime(mod322log, regime=1, nsim=4)
+set.seed(5); sim_reg322t_1 <- simulate_from_regime(mod322logt, regime=2, nsim=5)
+
+
+test_that("simulate_from_regime works correctly", {
+  # Relative_dens Gaussian STVAR
+  expect_equal(sim_reg112_1[1,], c(0.2634843, 0.8543901), tol=1e-4)
+  expect_equal(sim_reg112_2[1,], c(0.2393741, 0.4936729), tol=1e-4)
+  expect_equal(sim_reg122_1[2,], c(1.5384970, 0.3277234), tol=1e-4)
+  expect_equal(sim_reg122_2[3,], c(0.9612695, 0.8755360), tol=1e-4)
+
+  # Logit
+  expect_equal(sim_reg322_1[4,], c(-0.3290652, 1.7006393), tol=1e-4)
+
+  # Student
+  expect_equal(sim_reg322t_1[5,], c(1.7992914, 0.7365507), tol=1e-4)
+})
