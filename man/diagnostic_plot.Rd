@@ -35,6 +35,8 @@ diagnostic_plot(
 \details{
 Auto- and cross-correlations (types \code{"ac"} and \code{"ch"}) are calculated with the function
  \code{acf} from the package \code{stats} and the plot method for class \code{'acf'} objects is employed.
+ If \code{cond_dist == "Student"}, the estimate of the degrees of freedom parameter is used in theoretical
+ densities and quantiles.
 }
 \examples{
 # p=1, M=1, d=2, linear VAR
