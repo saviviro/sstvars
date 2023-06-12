@@ -12,6 +12,7 @@
   init_values = NULL,
   init_regime,
   ntimes = 1,
+  burnin = 1000,
   drop = TRUE
 )
 }
@@ -31,14 +32,16 @@ the regime specified in \code{init_regimes} (for Gaussian models only).}
 
 \item{init_regime}{an integer in \eqn{1,...,M} specifying the regime from which
 the initial values should be generated from. The initial values will be generated
-from the stationary distribution of the specific regime. Due to the (lack of)
-knowledge of the stationary distribution, only model with Gaussian conditional distribution
-are supported. For Student's t models, specify \code{init_values}.}
+from the stationary distribution of the specific regime. Due to the lack of
+knowledge of the stationary distribution, models with other than Gaussian conditional distribution
+use a simulation procedure with a burn-in period. See the details section.}
 
 \item{ntimes}{how many sets of simulations should be performed?}
 
 \item{drop}{if \code{TRUE} (default) then the components of the returned list are coerced to lower dimension if \code{ntimes==1}, i.e.,
 \code{$sample} and \code{$transition_weights} will be matrices, and \code{$component} will be vector.}
+
+\item{burin}{Burn-in period for simulating initial values from a regime when \code{cond_dist="Student"}. See the details section.}
 }
 \value{
 If \code{drop==TRUE} and \code{ntimes==1} (default): \code{$sample}, \code{$component}, and \code{$transition_weights} are matrices.
@@ -56,7 +59,13 @@ If \code{drop==TRUE} and \code{ntimes==1} (default): \code{$sample}, \code{$comp
 \code{simulate.stvar} is a simulate method for class 'stvar' objects.
 }
 \details{
-The argument \code{ntimes} is intended for forecasting, which is used by the predict method (see \code{?predict.stvar}).
+The stationary distribution of each regime is not known when \code{cond_dist="Student"}. Therefore, when using \code{init_regime}
+  to simulate the initial values from a given regime, we employ the following simulation procedure to obtain the initial values. First,
+  we set the initial values to the unconditional mean of the specified regime. Then, we simulate a large number observations from that
+  regime as specified in the argument \code{burnin}. The first \eqn{p} observations obtained after the burn-in period are then set as the
+  initial values obtained from the specified regime.
+
+  The argument \code{ntimes} is intended for forecasting, which is used by the predict method (see \code{?predict.stvar}).
 }
 \examples{
  # p=2, M=2, d=2, Gaussian relative dens weights

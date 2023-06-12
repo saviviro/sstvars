@@ -12,13 +12,20 @@
 #'   the regime specified in \code{init_regimes} (for Gaussian models only).
 #' @param init_regime an integer in \eqn{1,...,M} specifying the regime from which
 #'   the initial values should be generated from. The initial values will be generated
-#'   from the stationary distribution of the specific regime. Due to the (lack of)
-#'   knowledge of the stationary distribution, only model with Gaussian conditional distribution
-#'   are supported. For Student's t models, specify \code{init_values}.
+#'   from the stationary distribution of the specific regime. Due to the lack of
+#'   knowledge of the stationary distribution, models with other than Gaussian conditional distribution
+#'   use a simulation procedure with a burn-in period. See the details section.
 #' @param ntimes how many sets of simulations should be performed?
+#' @param burin Burn-in period for simulating initial values from a regime when \code{cond_dist="Student"}. See the details section.
 #' @param drop if \code{TRUE} (default) then the components of the returned list are coerced to lower dimension if \code{ntimes==1}, i.e.,
 #'   \code{$sample} and \code{$transition_weights} will be matrices, and \code{$component} will be vector.
-#' @details The argument \code{ntimes} is intended for forecasting, which is used by the predict method (see \code{?predict.stvar}).
+#' @details The stationary distribution of each regime is not known when \code{cond_dist="Student"}. Therefore, when using \code{init_regime}
+#'   to simulate the initial values from a given regime, we employ the following simulation procedure to obtain the initial values. First,
+#'   we set the initial values to the unconditional mean of the specified regime. Then, we simulate a large number observations from that
+#'   regime as specified in the argument \code{burnin}. The first \eqn{p} observations obtained after the burn-in period are then set as the
+#'   initial values obtained from the specified regime.
+#'
+#'   The argument \code{ntimes} is intended for forecasting, which is used by the predict method (see \code{?predict.stvar}).
 #' @return If \code{drop==TRUE} and \code{ntimes==1} (default): \code{$sample}, \code{$component}, and \code{$transition_weights} are matrices.
 #'   Otherwise, returns a list with...
 #'   \describe{
@@ -52,7 +59,7 @@
 #'  plot.ts(sim2$transition_weights) # Transition weights
 #' @export
 
-simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, init_regime, ntimes=1, drop=TRUE) {
+simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, init_regime, ntimes=1, burnin=1000, drop=TRUE) {
   # Checks etc
   if(!is.null(seed)) set.seed(seed)
   epsilon <- round(log(.Machine$double.xmin) + 10)
@@ -76,14 +83,9 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
     stop("Either init_values or init_regime needs to be specified")
   }
   if(!missing(init_regime)) {
-    if(cond_dist != "Gaussian") {
-      stop("init_regime is currently implemented for Gaussian models only. Please specify init_values instead.")
-    }
-    # For threshold models: you can use initial values obtained from the data if data is provided
-    # Other: some kind of burn-in period: start from unconditional mean and then use burn-in? New function: simulate_from_regime?
     stopifnot(init_regime %in% 1:M)
   }
-  if(!all_pos_ints(c(nsim, ntimes))) stop("Arguments nsim and ntimes must be positive integers")
+  if(!all_pos_ints(c(nsim, ntimes, burnin))) stop("Arguments nsim, ntimes, and burnin must be positive integers")
   if(!is.null(init_values)) {
     if(!is.matrix(init_values)) stop("init_values must be a numeric matrix")
     if(anyNA(init_values)) stop("init_values contains NA values")
@@ -146,14 +148,18 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
 
   # Set/generate initial values
   if(is.null(init_values)) {
-    # Generate the initial values from the stationary distribution of init_regime; Gaussian dist
-    mu <- rep(all_mu[, init_regime], p)
-    L <- t(chol_Sigmas[, , init_regime]) # Lower triangle
-    init_values <- matrix(mu + L%*%rnorm(d*p), nrow=p, ncol=d, byrow=TRUE) # i:th row for the i:th length d random vector
-  } else {
-    # Initial values given as argument
-    init_values <- init_values[(nrow(init_values) - p + 1):nrow(init_values), , drop=FALSE]
+    if(cond_dist == "Gaussian") {
+      # Generate the initial values from the stationary distribution of init_regime; Gaussian dist
+      mu <- rep(all_mu[, init_regime], p)
+      L <- t(chol_Sigmas[, , init_regime]) # Lower triangle
+      init_values <- matrix(mu + L%*%rnorm(d*p), nrow=p, ncol=d, byrow=TRUE) # i:th row for the i:th length d random vector
+    } else {
+      # Generate the initial values using the simulation procedure with a burn-in period.
+      init_values <- simulate_from_regime(stvar=stvar, regime=init_regime, nsim=burnin)
+    }
   }
+  # Take the last p rows of initial values as the initial values
+  init_values <- init_values[(nrow(init_values) - p + 1):nrow(init_values), , drop=FALSE]
 
 
   # Container for the simulated values and initial values. First row row initial values vector, and t:th row for (y_{i-1},...,y_{i-p})

@@ -45,6 +45,7 @@ s322 <- simulate(mod322log, nsim=3, seed=3, init_regime=1)
 s322_2 <- simulate(mod322log, nsim=3, seed=3, init_values=gdpdef)
 
 s322t <- simulate(mod322logt, nsim=3, seed=3, init_values=gdpdef)
+s322t_2 <- simulate(mod322logt, nsim=3, seed=3, init_regime=2)
 
 
 test_that("simulate.stvar works correctly", {
@@ -67,13 +68,15 @@ test_that("simulate.stvar works correctly", {
   # Logit
   expect_equal(s322$sample[3,], c(-0.6565136, 1.7113249), tol=1e-4)
   expect_equal(s322$transition_weights[1,], c(0.8947074, 0.1052926), tol=1e-4)
-
   expect_equal(s322_2$sample[3,], c(0.7678891, 0.3236954), tol=1e-4)
   expect_equal(s322_2$transition_weights[2,], c(0.002522048, 0.997477952), tol=1e-4)
 
   # Student
   expect_equal(s322t$sample[3,], c(0.4749844, 0.6297811), tol=1e-4)
   expect_equal(s322t$transition_weights[1,], c(0.002759205, 0.997240795), tol=1e-4)
+
+  expect_equal(s322t_2$sample[3,], c(-0.5229988, 0.3237579), tol=1e-4)
+  expect_equal(s322t_2$transition_weights[1,], c(0.01405111, 0.98594889), tol=1e-4)
 })
 
 
