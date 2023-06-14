@@ -7,6 +7,8 @@
 iterate_more(stvar, maxit = 100, calc_std_errors = TRUE)
 }
 \arguments{
+\item{stvar}{an object of class \code{'stvar'}, created by, e.g., \code{fitSTVAR}.}
+
 \item{maxit}{the maximum number of iterations in the variable metric algorithm.}
 
 \item{calc_std_errors}{should approximate standard errors be calculated?}

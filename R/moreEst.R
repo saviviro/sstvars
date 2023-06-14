@@ -3,9 +3,9 @@
 #' @description \code{iterate_more} uses a variable metric algorithm to estimate a reduced form or structural STVAR model
 #'  (object of class \code{'stvar'}) based on preliminary estimates.
 #'
-#' @inheritParams simulate.stvar
 #' @inheritParams fitSTVAR
 #' @inheritParams STVAR
+#' @param stvar an object of class \code{'stvar'}, created by, e.g., \code{fitSTVAR}.
 #' @details The purpose of \code{iterate_more} is to provide a simple and convenient tool to finalize
 #'   the estimation when the maximum number of iterations is reached when estimating a STVAR model
 #'   with the main estimation function \code{fitSTVAR} or \code{fitSSTVAR}.
