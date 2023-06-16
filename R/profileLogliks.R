@@ -21,11 +21,15 @@
 #' @inherit loglikelihood references
 #' @seealso \code{\link{get_foc}}, \code{\link{get_soc}}, \code{\link{diagnostic_plot}}
 #' @examples
-#' \donttest{
-#' # Running all the below examples takes approximately FILL IN HOW MANY MINUTES
+#' # Threhold STVAR, p=1, M=2, the first lag of the second variable as switching variable:
+#' pars <- c(0.5231, 0.1015, 1.9471, 0.3253, 0.3476, 0.0649, -0.035, 0.7513, 0.1651,
+#'  -0.029, -0.7947, 0.7925, 0.4233, 5e-04, 0.0439, 1.2332, -0.0402, 0.1481, 1.2036)
+#' mod12thres <- STVAR(data=gdpdef, p=1, M=2, params=pars, weight_function="threshold",
+#'   weightfun_pars=c(2, 1))
+#' profile_logliks(mod12thres, precision=50) # Plots fast with precision=50
 #'
-#' # FILL IN
-#' }
+#' # Plot only the profile log-likelihood function of the threshold parameter:
+#' profile_logliks(mod12thres, which_pars=length(pars), precision=100)
 #' @export
 
 profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precision=200,
@@ -70,8 +74,10 @@ profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precisi
   # Determine the numbers of each type of parameters:
   if(is.null(mean_constraints)) {
     n_mean_pars <- M*d
+    g <- M # Number groups with the same mean parameters
   } else { # Means constrained
     n_mean_pars <- d*length(mean_constraints)
+    g <- length(mean_constraints) # Number groups with the same mean parameters
   }
   if(is.null(AR_constraints)) {
     n_ar_pars <- M*p*d^2
@@ -107,7 +113,8 @@ profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precisi
     n_dist_pars <- 1 # degrees of freedom param
   }
 
-  for(i1 in which_pars) { # Go though the parameters
+  # Go though the parameters in which_pars
+  for(i1 in which_pars) {
     pars <- params
     range <- abs(scale*pars[i1])
     vals <- seq(from=pars[i1] - range, to=pars[i1] + range, length.out=precision) # Loglik to be evaluated at these points
@@ -124,5 +131,71 @@ profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precisi
     }, numeric(1))
 
     # Determine which type of parameter is i1 to determine the label for the individual plot
+    if(i1 <= n_mean_pars) { # mean or intercept parameter
+      cum_d <- (0:(g - 1))*d # The indeces after which regime changes
+      m <- sum(i1 > cum_d) # Which regime?
+      pos <- i1 - cum_d[m] # Which time series?
+      if(parametrization == "intercept") {
+        main <- substitute(phi[foo](foo2), list(foo=paste0(m, ",0"), foo2=pos))
+      } else {
+        main <- substitute(mu[foo](foo2), list(foo=m, foo2=pos))
+      }
+    } else if(i1 <= n_mean_pars + n_ar_pars) { # AR parameter
+      if(is.null(AR_constraints)) {
+        cum_q <- n_mean_pars + (0:(M - 1))*p*d^2 # The indeces after which regime changes
+        m <- sum(i1 > cum_q) # To which regime the parameter is related to
+        cum_lag <- cum_q[m] + (0:(p - 1))*d^2 # The indeces after which lag changes in the current regime
+        j <- sum(i1 > cum_lag)  # To which lag the parameter is related to
+        # Next, we want to obtain the row and column A_mj, the index is in vec(A_mj)
+        cum_col <- cum_lag[j] + (0:(d - 1))*d # The index after which column changes
+        col_ind <- sum(i1 > cum_col) # Column index of A_mj
+        row_ind <- sum(i1 > cum_col[col_ind] + 0:(d - 1)) # Row index of A_mi
+        main <- substitute(A[foo](foo2), list(foo=paste0(m, ",", j), foo2=paste0(row_ind, ",", col_ind)))
+      } else {
+        main <- substitute(psi(foo), list(foo=i1 - n_mean_pars))
+      }
+    } else if(i1 <= n_mean_pars + n_ar_pars + n_covmat_pars) { # Covariance matrix parameter
+      if(identification == "reduced_form") {
+        cum_o <- n_mean_pars + n_ar_pars + (0:(M - 1))*d*(d + 1)/2 # The indeces after which regime changes
+        m <- sum(i1 > cum_o) # Which regime
+        cum_col <- cum_o[m] + c(0, cumsum(d - 0:(d - 1))) # The indeces after which column changes in vech(Omega_m)
+        col_ind <- sum(i1 > cum_col) # Column in Omega_m
+        row_inds <- unlist(lapply(1:d, function(i2) i2:d)) # At which row are we in for each pos in vech(Omega_m)
+        row_ind <- row_inds[i1 - cum_o[m]] # Row in Omega_m
+        main <- substitute(Omega[foo](foo2), list(foo=m, foo2=paste0(row_ind, ",", col_ind)))
+      } else { # Structural model
+        stop("Structural models are not yet implemented to profile_logliks")
+        if(!is.null(B_constraints)) stop("B_constraints are not yet implemented to profile_logliks")
+      }
+    } else if(i1 <= n_mean_pars + n_ar_pars + n_covmat_pars + n_weight_pars) { # Transition weight parameter
+      pos <- i1 - n_mean_pars - n_ar_pars - n_covmat_pars # Position in weightpars
+      if(is.null(weight_constraints)) {
+        if(weight_function == "relative_dens") {
+          main <- substitute(alpha[foo], list(foo=pos))
+        } else if(weight_function %in% c("logistic", "exponential")) {
+          if(pos == 1) {
+            main <- substitute(c) # Location parameter
+          } else {
+            main <- substitute(gamma) # Scale parameter
+          }
+        } else if(weight_function == "mlogit") {
+          # The index after which the regime changes:
+          cum_a <- n_mean_pars + n_ar_pars + n_covmat_pars + (0:(M - 2))*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
+          m <- sum(i1 > cum_a) # Which regime
+          pos0 <- sum(i1 > cum_a[m] + 0:(length(weightfun_pars[[1]])*weightfun_pars[[2]])) # Position in gamma_m
+          main <- substitute(gamma[foo](foo2), list(foo=m, foo2=pos0))
+        } else if(weight_function == "threshold") {
+          main <- substitute(r[foo], list(foo=pos))
+        }
+      } else {
+        if(n_weight_pars > 0) { # Zero weights pars if all are known constants
+          main <- substitute(xi[foo], list(foo=pos))
+        }
+      }
+    } else { # Must be a distribution parameter
+      main <- substitute(nu) # Must be the only df parameter
+    }
+    plot(x=vals, y=logliks, type="l", main=main, xlab="", ylab="")
+    abline(v=pars[i1], col="red") # Points the estimate
   }
 }

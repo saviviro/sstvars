@@ -451,10 +451,10 @@ check_weightfun_pars <- function(p, d, weight_function=c("relative_dens", "logis
     }
   } else if(weight_function %in% c("logistic", "exponential", "threshold")) {
     if(!is.numeric(weightfun_pars) || !is.vector(weightfun_pars) || length(weightfun_pars) != 2) {
-      stop(paste0("When weight_function ==, ", weight_function, " the argument weightfun_pars should be be a length two numeric vector."))
+      stop(paste0("When weight_function == ", weight_function, " the argument weightfun_pars should be be a length two numeric vector."))
     }
     if(!weightfun_pars[1] %in% 1:d) {
-      stop(paste0("When weight_function == , ", weight_function, " the first element of argument weightfun_pars, i.e., the switching variable,
+      stop(paste0("When weight_function ==  ", weight_function, " the first element of argument weightfun_pars, i.e., the switching variable,
            should be an integer in 1,...,ncol(data)."))
     } else if(!weightfun_pars[2] %in% 1:p) {
       stop(paste0("When weight_function == ", weight_function,
