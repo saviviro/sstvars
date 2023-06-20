@@ -324,15 +324,15 @@ theta_222logc_2_1_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222)
 
 ## Models with mean_constraints
 
-# p=1, M=1, p=2, mean_constraints=list(1)
+# p=1, M=1, p=2, mean_constraints=list(1), parametrization="mean"
 theta_112relgm <- theta_112relg
 
-# p=1, M=2, d=2, mean_constraints=list(1:2)
+# p=1, M=2, d=2, mean_constraints=list(1:2), parametrization="mean"
 mu_122relgm <- c(0.5342688, 0.7382623)
 theta_122relgm <- c(mu_122relgm, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), alpha1_122)
 theta_122relgm_expanded <- c(mu_122relgm, mu_122relgm, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), alpha1_122)
 
-# p=2, M=2, d=2, mean_constraints=list(1:2), C_222
+# p=2, M=2, d=2, mean_constraints=list(1:2), C_222, parametrization="mean"
 mu_222relgcm <- c(0.7209658, 0.8108580)
 theta_222relgcm <- c(mu_222relgcm, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), alpha1_222)
 theta_222relgcm_expanded <- c(mu_222relgcm, mu_222relgcm, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
@@ -340,11 +340,11 @@ theta_222relgcm_expanded <- c(mu_222relgcm, mu_222relgcm, vec(A11_222), vec(A12_
 
 # weightfunction == "mlogit"
 
-# p=1, M=2, d=2, weigthfun_pars=list(vars=1, lags=1), mean_constraints=list(1:2)
+# p=1, M=2, d=2, weigthfun_pars=list(vars=1, lags=1), mean_constraints=list(1:2), parametrization="mean"
 theta_122logm_1_1 <- c(phi10_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), gamma1_122_1_1)
 theta_122logm_1_1_expanded <- c(phi10_122, phi10_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), gamma1_122_1_1)
 
-# p=2, M=2, d=2, weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), C_222
+# p=2, M=2, d=2, weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), C_222, parametrization="mean"
 theta_222logcm_12_2 <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), gamma1_222_12_2)
 theta_222logcm_12_2_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
                                   vech(Omega1_222), vech(Omega2_222), gamma1_222_12_2)
@@ -360,7 +360,7 @@ theta_222logcm_12_2_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_22
 #                              vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), matrix(c(0.9, 0.5), nrow=2)%*%xi_132relgw + 0.13)
 
 # p=2, M=2, d=2, weight_function="relative_dens", mean_constraints=list(1:2), AR_constraints=C_222,
-# weight_constraints=list(R=0, r=0.6)
+# weight_constraints=list(R=0, r=0.6), parametrization="mean"
 theta_222relgcmw <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222)) # No weight param since replaced with r
 theta_222relgcmw_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
                                vech(Omega1_222), vech(Omega2_222), 0.6)
@@ -371,7 +371,7 @@ theta_122logw_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Om
 theta_122logw_1_1_expanded <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), c(0.12, 0.13))
 
 # p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
-# weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0))
+# weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0)), parametrization="mean"
 xi_222logcmw_12_2 <- c(0.22, 0.33)
 theta_222logcmw_12_2 <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), xi_222logcmw_12_2 )
 theta_222logcmw_12_2_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
@@ -382,7 +382,7 @@ theta_122logisticw_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), ve
 theta_122logisticw_1_1_expanded <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), c(0.02, 0.13))
 
 # p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
-# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))
+# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean"
 xi_222logisticcmw_2_1 <- c(0.33)
 theta_222logisticcmw_2_1 <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), xi_222logisticcmw_2_1)
 theta_222logisticcmw_2_1_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
@@ -396,7 +396,7 @@ theta_122expw_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Om
 theta_122expw_1_1_expanded <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), c(0.02, 0.13))
 
 # p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
-# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))
+# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean"
 xi_222expcmw_2_1 <- c(0.33)
 theta_222expcmw_2_1 <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), xi_222expcmw_2_1)
 theta_222expcmw_2_1_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
@@ -411,7 +411,8 @@ theta_232thresw_1_1 <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_
 theta_232thresw_1_1_expanded <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232), vec(A22_232),
                                   vec(A31_232), vec(A32_232), vech(Omega1_232), vech(Omega2_232), vech(Omega3_232), 0.1, 0.5)
 
-# p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2))
+# p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), mean_constraints=list(1, 2:3),
+# weight_constraints=list(R=0, r=c(0, 1.2)), parametrization="mean"
 theta_132thresmw_1_1 <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
                           vech(Omega2_132), vech(Omega3_132))
 theta_132thresmw_1_1_expanded <- c(phi10_132, phi20_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
@@ -517,30 +518,31 @@ test_that("loglikelihood works correctly", {
                -453.5176, tolerance=1e-3)
 
   expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222relgcmw, weight_function="relative_dens",
-                             mean_constraints=list(1:2), AR_constraints=C_222,
-                             weight_constraints=list(R=0, r=0.6)), -277.5896, tolerance=1e-3)
+                             mean_constraints=list(1:2), AR_constraints=C_222, parametrization="mean",
+                             weight_constraints=list(R=0, r=0.6)), -348.8925, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122logw_1_1, weight_function="mlogit", weightfun_pars=list(vars=1, lags=1),
                              weight_constraints=list(R=0, r=c(0.12, 0.13))), -334.8481, tolerance=1e-3)
-  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222logcmw_12_2, weight_function="mlogit",
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222logcmw_12_2, weight_function="mlogit", parametrization="mean",
                              weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
                              weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0))),
-               -387.4826, tolerance=1e-3)
+               -458.0816, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122logisticw_1_1, weight_function="logistic", weightfun_pars=c(1, 1),
                              weight_constraints=list(R=0, r=c(0.02, 0.13))), -341.6723, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222logisticcmw_2_1, weight_function="logistic", weightfun_pars=c(2, 1),
-                             mean_constraints=list(1:2), AR_constraints=C_222,
-                             weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))), -333.9167, tolerance=1e-3)
+                             mean_constraints=list(1:2), AR_constraints=C_222, parametrization="mean",
+                             weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))), -382.3062, tolerance=1e-3)
 
   expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122expw_1_1, weight_function="exponential", weightfun_pars=c(1, 1),
                              weight_constraints=list(R=0, r=c(0.02, 0.13))), -336.0778, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222expcmw_2_1, weight_function="exponential", weightfun_pars=c(2, 1),
-                             mean_constraints=list(1:2), AR_constraints=C_222,
-                             weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))), -317.8996, tolerance=1e-3)
+                             mean_constraints=list(1:2), AR_constraints=C_222, parametrization="mean",
+                             weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))), -386.0939, tolerance=1e-3)
 
   expect_equal(loglikelihood(data=gdpdef, p=2, M=3, params=theta_232thresw_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
                              weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.1, 0))), -16285.82, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=1, M=3, params=theta_132thresmw_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
-                             mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2))), -443.5233, tolerance=1e-3)
+                             mean_constraints=list(1, 2:3), parametrization="mean", weight_constraints=list(R=0, r=c(0, 1.2))),
+               -467.6997, tolerance=1e-3)
 
   ## Student
   expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=c(theta_122logistic_1_1, 300), weight_function="logistic",
@@ -567,11 +569,11 @@ test_that("loglikelihood works correctly", {
   expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=c(theta_122logc_12_1, 4.4), weight_function="mlogit",
                              weightfun_pars=list(vars=1:2, lags=1), AR_constraints=C_122, cond_dist="Student"), -307.7079, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=c(theta_222logisticcmw_2_1, 30), weight_function="logistic", weightfun_pars=c(2, 1),
-                             mean_constraints=list(1:2), AR_constraints=C_222, cond_dist="Student",
-                             weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))), -322.5255, tolerance=1e-3)
+                             mean_constraints=list(1:2), AR_constraints=C_222, cond_dist="Student", parametrization="mean",
+                             weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))), -368.2865, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=c(theta_122expw_1_1, 2.3), weight_function="exponential", weightfun_pars=c(1, 1),
                              weight_constraints=list(R=0, r=c(0.02, 0.13)), cond_dist="Student"), -380.4028, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=1, M=3, params=c(theta_132thresmw_1_1, 11), weight_function="threshold", weightfun_pars=c(1, 1),
-                             mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2)), cond_dist="Student"),
-               -426.8132, tolerance=1e-3)
+                             mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2)), cond_dist="Student",
+                             parametrization="mean"), -447.6652, tolerance=1e-3)
 })

@@ -46,7 +46,7 @@ rbind_diags <- function(p, M, d) {
   Reduce(rbind, replicate(M, I, simplify=FALSE))
 }
 
-# p=2, M=2, d=2, mean_constraints=list(1:2), AR_constraints=C_222
+# p=2, M=2, d=2, mean_constraints=list(1:2), AR_constraints=C_222, parametrization="mean"
 C_222 <- rbind_diags(p=2, M=2, d=2)
 theta_222relgcm <- c(0.7209658, 0.810858, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01, 0.08, 0.3, 0.21, 0.01,
                      0.03, 1.1, 0.01, 0.11, 0.37)
@@ -55,17 +55,17 @@ theta_222relgcm <- c(0.7209658, 0.810858, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01, 
 theta_222logcm_12_2 <- c(theta_222relgcm[-length(theta_222relgcm)], gamma1_222_12_2)
 
 # p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
-# weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0))
+# weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0)), parametrization="mean"
 xi_222logcmw_12_2 <- c(0.002, 1.33)
 theta_222logcmw_12_2 <-  c(theta_222relgcm[-length(theta_222relgcm)], xi_222logcmw_12_2)
 
 # p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
-# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))
+# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean"
 xi_222logisticcmw_2_1 <- c(0.33)
 theta_222logisticcmw_2_1 <- c(theta_222relgcm[-length(theta_222relgcm)], xi_222logisticcmw_2_1)
 
 # p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
-# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))
+# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean"
 xi_222expcmw_2_1 <- c(0.33)
 theta_222expcmw_2_1 <- c(theta_222relgcm[-length(theta_222relgcm)], xi_222logisticcmw_2_1)
 
@@ -82,33 +82,33 @@ test_that("get_residuals works correctly", {
 
   # exponential
   expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222expcmw_2_1, weight_function="exponential",
-                               weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
+                               weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222, parametrization="mean",
                                weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), standardize=TRUE)[c(1, 2, 131, 242),]),
-               c(-4.0357127, -2.5716562, 0.5115762, -1.3625459, -3.4952403, -3.0373204, -4.7386797, -3.9608321))
+               c(-3.2931481, -1.8707419, 1.1592722, -0.6483687, -0.1403753, 0.1644838, -1.7407096, -0.7096609), tolerance=1e-3)
   expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222expcmw_2_1, weight_function="exponential",
-                               weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
+                               weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222, parametrization="mean",
                                weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), standardize=FALSE)[c(1, 2, 131, 242),]),
-               c(-1.9292555, -1.3307029, 0.2188449, -0.7247259, -0.6715463, -0.5928653, -0.9207879, -0.7329033))
+               c(-1.53180711, -0.93325451, 0.61629329, -0.32727751, -0.07600599, 0.00267501, -0.32524759, -0.13736299), tolerance=1e-3)
 
   # mlogit and logistic
   expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222logcmw_12_2, weight_function="mlogit",
-                               weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
+                               weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222, parametrization="mean",
                                weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0)),
                                standardize=FALSE)[c(1, 2, 131, 242),]),
-               c(-1.9292555, -1.3307029, 0.2188449, -0.7247259, -0.6715463, -0.5928653, -0.9207879, -0.7329033), tolerance=1e-3)
-  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222logcmw_12_2, weight_function="mlogit",
+               c(-1.53180711, -0.93325451, 0.61629329, -0.32727751, -0.07600599, 0.00267501, -0.32524759, -0.13736299), tolerance=1e-3)
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222logcmw_12_2, weight_function="mlogit", parametrization="mean",
                                weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
                                weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0)),
                                standardize=TRUE)[c(1, 2, 131, 242),]),
-               c(-2.7402663, -1.7862155, 0.4164804, -1.0247764, -2.7572364, -2.3630465, -4.2180631, -3.1732240), tolerance=1e-3)
+               c(-2.20635541, -1.27687738, 0.98627696, -0.47684704, -0.22411340, 0.06489152, -1.53428089, -0.58082203), tolerance=1e-3)
   expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222logisticcmw_2_1, weight_function="logistic",
-                               weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
+                               weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222, parametrization="mean",
                                weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), standardize=FALSE)[c(1, 2, 131, 242),]),
-               c(-1.9292555, -1.3307029, 0.2188449, -0.7247259, -0.6715463, -0.5928653, -0.9207879, -0.7329033), tolerance=1e-3)
+               c(-1.53180711, -0.93325451, 0.61629329, -0.32727751, -0.07600599, 0.00267501, -0.32524759, -0.13736299), tolerance=1e-3)
   expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222logisticcmw_2_1, weight_function="logistic",
-                               weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
+                               weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222, parametrization="mean",
                                weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), standardize=TRUE)[c(1, 2, 131, 242),]),
-               c(-2.3374011, -1.5870885, 0.2987970, -0.8500573, -2.4416244, -2.1496724, -3.4003916, -2.7024237), tolerance=1e-3)
+               c(-1.87533862, -1.13026252, 0.75108910, -0.39190481, -0.22041415, 0.04830197, -1.22258744, -0.49855698), tolerance=1e-3)
 
 
   # Relative_dens Gausssian STVAR
@@ -153,21 +153,21 @@ test_that("get_residuals works correctly", {
                c(0.104542201, -0.342051868, -0.093341863, 0.002395015, -0.009236036, 0.457097339, 0.309139979, 0.014297527,
                  -0.201011975, 0.034911801, 0.195203026, -0.959691787), tolerance=1e-3)
 
-  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222relgcm, weight_function="relative_dens",
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222relgcm, weight_function="relative_dens", parametrization="mean",
                                AR_constraints=C_222, mean_constraints=list(1:2), standardize=TRUE)[c(1, 2, 111, 242),]),
-               c(-1.8258029, -1.2566449, -0.4063410, -0.6758498, -1.9853812, -1.7605275, -1.5997944, -2.1955479), tolerance=1e-3)
-  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222relgcm, weight_function="relative_dens",
+               c(-1.45951694, -0.89019514, -0.06394894, -0.44363764, -0.19736637, 0.02752430, 0.27478373, -0.55008306), tolerance=1e-3)
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222relgcm, weight_function="relative_dens", parametrization="mean",
                                AR_constraints=C_222, mean_constraints=list(1:2), standardize=FALSE)[c(1, 2, 113, 242),]),
-               c(-1.9292555, -1.3307029, -0.3430104, -0.7247259, -0.6715463, -0.5928653, -0.5735814, -0.7329033), tolerance=1e-3)
+               c(-1.53180711, -0.93325451, 0.05443799, -0.32727751, -0.07600599, 0.00267501, 0.02195891, -0.13736299), tolerance=1e-3)
 
-  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222logcm_12_2, weight_function="mlogit",
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222logcm_12_2, weight_function="mlogit", parametrization="mean",
                                weightfun_pars=list(vars=1:2, lags=2), AR_constraints=C_222, mean_constraints=list(1:2),
                                standardize=TRUE)[c(1, 2, 111, 242),]),
-               c(-2.8675912, -1.8374481, -0.5741327, -0.9633951, -2.8485764, -2.4152399, -2.1901918, -3.0124336), tolerance=1e-3)
-  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222logcm_12_2, weight_function="mlogit",
+               c(-2.31162836, -1.31484188, -0.05949686, -0.44674751, -0.22244747, 0.06969202, 0.26055843, -0.55304014), tolerance=1e-3)
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222logcm_12_2, weight_function="mlogit", parametrization="mean",
                                weightfun_pars=list(vars=1:2, lags=2), AR_constraints=C_222, mean_constraints=list(1:2),
                                standardize=FALSE)[c(1, 2, 131, 242),]),
-               c(-1.9292555, -1.3307029, 0.2188449, -0.7247259, -0.6715463, -0.5928653, -0.9207879, -0.7329033), tolerance=1e-3)
+               c(-1.53180711, -0.93325451, 0.61629329, -0.32727751, -0.07600599, 0.00267501, -0.32524759, -0.13736299), tolerance=1e-3)
 
   # Student
   expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=c(theta_222thres_2_1, 100), weight_function="threshold",
@@ -176,30 +176,30 @@ test_that("get_residuals works correctly", {
   expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=c(theta_222thres_2_1, 3), weight_function="threshold",
                                weightfun_pars=c(2, 1), cond_dist="Student", standardize=FALSE)[c(2, 242),]),
                c(-1.07200730, -0.41871592, 0.05594944, -0.05037556), tolerance=1e-3)
-  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=c(theta_222expcmw_2_1, 20), weight_function="exponential",
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=c(theta_222expcmw_2_1, 20), weight_function="exponential", parametrization="mean",
                                weightfun_pars=c(2, 1), cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_222,
                                weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), standardize=TRUE)[c(1, 242),]),
-               c(-4.035713, -1.362546, -3.495240, -3.960832), tolerance=1e-3)
-  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=c(theta_222expcmw_2_1, 3), weight_function="exponential",
+               c(-3.2931481, -0.6483687, -0.1403753, -0.7096609), tolerance=1e-3)
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=c(theta_222expcmw_2_1, 3), weight_function="exponential", parametrization="mean",
                                weightfun_pars=c(2, 1), cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_222,
                                weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), standardize=FALSE)[c(131, 242),]),
-               c(0.2188449, -0.7247259, -0.9207879, -0.7329033), tolerance=1e-3)
-  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=c(theta_222logcmw_12_2, 7), weight_function="mlogit",
+               c(0.6162933, -0.3272775, -0.3252476, -0.1373630), tolerance=1e-3)
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=c(theta_222logcmw_12_2, 7), weight_function="mlogit", parametrization="mean",
                                weightfun_pars=list(vars=1:2, lags=2), cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_222,
                                weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0)),
                                standardize=FALSE)[c(1, 2),]),
-               c(-1.9292555, -1.3307029, -0.6715463, -0.5928653), tolerance=1e-3)
-  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=c(theta_222logcmw_12_2, 4), weight_function="mlogit",
+               c(-1.53180711, -0.93325451, -0.07600599, 0.00267501), tolerance=1e-3)
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=c(theta_222logcmw_12_2, 4), weight_function="mlogit", parametrization="mean",
                                weightfun_pars=list(vars=1:2, lags=2), cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_222,
                                weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0)),
                                standardize=TRUE)[c(1, 242),]),
-               c(-2.740266, -1.024776, -2.757236, -3.173224), tolerance=1e-3)
-  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=c(theta_222logisticcmw_2_1, 5), weight_function="logistic",
+               c(-2.2063554, -0.4768470, -0.2241134, -0.5808220), tolerance=1e-3)
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=c(theta_222logisticcmw_2_1, 5), weight_function="logistic", parametrization="mean",
                                weightfun_pars=c(2, 1), cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_222,
                                weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), standardize=FALSE)[c(2, 131),]),
-               c(-1.3307029, 0.2188449, -0.5928653, -0.9207879), tolerance=1e-3)
-  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=c(theta_222logisticcmw_2_1, 12), weight_function="logistic",
+               c(-0.93325451, 0.61629329, 0.00267501, -0.32524759), tolerance=1e-3)
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=c(theta_222logisticcmw_2_1, 12), weight_function="logistic", parametrization="mean",
                                weightfun_pars=c(2, 1), cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_222,
                                weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), standardize=TRUE)[c(1, 242),]),
-               c(-2.3374011, -0.8500573, -2.4416244, -2.7024237), tolerance=1e-3)
+               c(-1.8753386, -0.3919048, -0.2204141, -0.4985570), tolerance=1e-3)
 })

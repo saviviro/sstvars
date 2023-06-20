@@ -329,9 +329,12 @@ n_params <- function(p, M, d, weight_function=c("relative_dens", "logistic", "ml
 #' @keywords internal
 
 check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
-                              weightfun_pars=NULL, AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
-                              B_constraints=NULL) {
+                              weightfun_pars=NULL, parametrization=c("intercept", "mean"),
+                              identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
+                              AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
   weight_function <- match.arg(weight_function)
+  parametrization <- match.arg(parametrization)
+  identification <- match.arg(identification)
   weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function,
                                          weightfun_pars=weightfun_pars,
                                          cond_dist="Gaussian")  # cond_dist="Gaussian" used since we dont want to check rel_dens distribution here
@@ -351,6 +354,9 @@ check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logis
 
   # Check mean_constraints
   if(!is.null(mean_constraints)) {
+    if(parametrization != "mean") {
+      stop("mean_constraints are available only for models with parametrization = 'mean'.")
+    }
     if(!is.list(mean_constraints)) {
       stop("The argument mean_constraints should a list (or null if mean parameters are not constrained)")
     } else if(length(mean_constraints) == 0) {
@@ -426,6 +432,10 @@ check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logis
   # Check B_constraints
   if(!is.null(B_constraints)) {
     stop("B_constraints are not yet implemented to check_constraints")
+
+    if(identification != "reduced_form") {
+      stop("B_constraints are not available for reduced form models")
+    }
   }
 }
 

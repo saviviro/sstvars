@@ -10,6 +10,8 @@ check_constraints(
   d,
   weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
   weightfun_pars = NULL,
+  parametrization = c("intercept", "mean"),
+  identification = c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
   AR_constraints = NULL,
   mean_constraints = NULL,
   weight_constraints = NULL,
@@ -59,6 +61,12 @@ See the vignette for more details about the weight functions.}
     }
   }
 }}
+
+\item{parametrization}{\code{"intercept"} or \code{"mean"} determining whether the model is parametrized with intercept
+parameters \eqn{\phi_{m,0}} or regime means \eqn{\mu_{m}}, m=1,...,M.}
+
+\item{identification}{is it reduced form model or an identified structural model; if the latter, how is it identified
+(see the vignette or the references for details)?}
 
 \item{AR_constraints}{a size \eqn{(Mpd^2 x q)} constraint matrix \eqn{C} specifying linear constraints
 to the autoregressive parameters. The constraints are of the form

@@ -130,21 +130,21 @@ theta_222relgc <- c(0.36, 0.12, 0.48, 0.07, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01
 stvar222relgc <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222relgc, weight_function="relative_dens",
                        AR_constraints=C_222)
 
-# p=2, M=2, d=2, mean_constraints=list(1:2), AR_constraints=C_222
+# p=2, M=2, d=2, mean_constraints=list(1:2), AR_constraints=C_222, parametrization="mean"
 theta_222relgcm <- c(0.7209658, 0.810858, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01, 0.08, 0.3, 0.21, 0.01,
                      0.03, 1.1, 0.01, 0.11, 0.37)
 stvar222relgcm <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222relgcm, weight_function="relative_dens",
-                        AR_constraints=C_222, mean_constraints=list(1:2))
+                        AR_constraints=C_222, mean_constraints=list(1:2), parametrization="mean")
 
 ## mlogit
 
-# p=2, M=2, d=2, weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), C_222
+# p=2, M=2, d=2, weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222, parametrization="mean"
 theta_222logcm_12_2 <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), gamma1_222_12_2)
 theta_222logcm_12_2_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
                                   vech(Omega1_222), vech(Omega2_222), gamma1_222_12_2)
 
 stvar222mlogitcm <- STVAR(p=2, M=2, d=2, params=theta_222logcm_12_2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=2),
-                         AR_constraints=C_222, mean_constraints=list(1:2))
+                         AR_constraints=C_222, mean_constraints=list(1:2), parametrization="mean")
 
 
 ## Models with weight_constraints
@@ -161,7 +161,7 @@ mod132relgw <- STVAR(data=gdpdef, p=1, M=3, d=2, params=theta_132relgw,  weight_
 
 
 # p=2, M=2, d=2, weight_function="relative_dens", mean_constraints=list(1:2), AR_constraints=C_222,
-# weight_constraints=list(R=0, r=0.6)
+# weight_constraints=list(R=0, r=0.6), parametrization="mean"
 theta_222relgcmw <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222)) # No weight param since replaced with r
 theta_222relgcmw_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
                                vech(Omega1_222), vech(Omega2_222), 0.6)
@@ -172,23 +172,23 @@ theta_122logw_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Om
 theta_122logw_1_1_expanded <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vech(Omega1_122), vech(Omega2_122), c(0.12, 0.13))
 
 # p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
-# weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0))
+# weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0)), parametrization="mean"
 xi_222logcmw_12_2 <- c(0.22, 0.33)
 theta_222logcmw_12_2 <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), xi_222logcmw_12_2 )
 theta_222logcmw_12_2_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
                                    vech(Omega1_222), vech(Omega2_222), c(0.22, 0.11, 0.12, 0.13, 0.33))
-mod222logcmw_12_2 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logcmw_12_2, weight_function="mlogit",
+mod222logcmw_12_2 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logcmw_12_2, weight_function="mlogit", parametrization="mean",
                            weightfun_pars=list(vars=1:2, lags=2), mean_constraints=list(1:2), AR_constraints=C_222,
                            weight_constraints=list(R=matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1), nrow=5), r=c(0, 0.11, 0.12, 0.13, 0)))
 
 
 # p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
-# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))
+# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean"
 xi_222expcmw_2_1 <- c(0.33)
 theta_222expcmw_2_1 <- c(theta_222relgcm[-length(theta_222relgcm)], xi_222expcmw_2_1)
 mod222expcmw_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222expcmw_2_1, weight_function="exponential",
                           weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
-                          weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)))
+                          weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean")
 
 ## Student
 
@@ -198,25 +198,25 @@ mod222threst_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222threst_2_1
                           weightfun_pars=c(2, 1), cond_dist="Student")
 
 # p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=2), cond_dist="Student", mean_constraints=list(1:2),
-# AR_constraints=C_222
+# AR_constraints=C_222, parametrization="mean"
 theta_222logcmt_12_2 <- c(theta_222logcm_12_2, 2.13)
-mod222logcmt_12_2 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logcmt_12_2, weight_function="mlogit",
+mod222logcmt_12_2 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logcmt_12_2, weight_function="mlogit", parametrization="mean",
                            weightfun_pars=list(vars=1:2, lags=2), cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_222)
 
 
 # p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_222,
-# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))
+# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean"
 theta_222expcmwt_2_1 <- c(theta_222expcmw_2_1, 4)
-mod222expcmwt_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222expcmwt_2_1, weight_function="exponential",
+mod222expcmwt_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222expcmwt_2_1, weight_function="exponential", parametrization="mean",
                            weightfun_pars=c(2, 1), cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_222,
                            weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)))
 
 # p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_222,
-# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))
+# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean"
 theta_222logisticcmwt_2_1 <- theta_222expcmwt_2_1
 mod222logisticcmwt_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logisticcmwt_2_1, weight_function="logistic",
                                 weightfun_pars=c(2, 1), cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_222,
-                                weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)))
+                                weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean")
 
 
 
