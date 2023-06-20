@@ -173,7 +173,7 @@ to the border of the parameter space than this are considered to be "outside" th
       in m:th column.}
     \item{If \code{to_return=="loglik_and_tw"}:}{a list of two elements. The first element (\code{$loglik}) contains the
       log-likelihood and the second element (\code{$tw}) contains the transition weights.}
-    \item{If \code{to_return=="terms"}:}{a size \eqn{((n_obs-p)\times 1)} numeric vector containing the terms \eqn{l_{t}}.}
+    \item{If \code{to_return=="terms"}:}{a size \eqn{((n\_obs-p)\times 1)} numeric vector containing the terms \eqn{l_{t}}.}
     \item{If \code{to_return=="regime_cmeans"}:}{an \code{[n_obs-p, d, M]} array containing the regimewise conditional means.}
     \item{If \code{to_return=="total_cmeans"}:}{a \code{[n_obs-p, d]} matrix containing the conditional means of the process.}
     \item{If \code{to_return=="total_ccovs"}:}{an \code{[d, d, n_obs-p]} array containing the conditional covariance matrices of
