@@ -9,7 +9,7 @@ Description: TO BE FILLED IN
     Use four spaces when indenting paragraphs within the Description.
 Depends: R (>= 4.0.0)
 BugReports: https://github.com/saviviro/sstvars/issues
-License: GDPL-3
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3

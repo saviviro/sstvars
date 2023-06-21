@@ -23,7 +23,7 @@
 #'  densities and quantiles.
 #' @inherit get_residuals references
 #' @seealso \code{\link{profile_logliks}}, \code{\link{fitSTVAR}}, \code{\link{STVAR}},
-#'  \code{\link{LR_test}}, \code{\link{Wald_test}}, \code{\link{cond_moment_plot}}
+#'  \code{\link{LR_test}}, \code{\link{Wald_test}}, \code{\link{Rao_test}}
 #' @examples
 #' # p=1, M=1, d=2, linear VAR
 #' theta_112 <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103,

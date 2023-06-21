@@ -227,7 +227,8 @@ fitlogistict32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logistic", weightf
 # p=3, M=2, d=2, logistic STVAR with the second variable as switching variable
 # with one lag, and the location parameter constrained to 1 and scale parameter unconstrained.
 fitlogistic32w <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logistic", weightfun_pars=c(2, 1),
- weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(1, 0)), nrounds=1, seeds=1, use_parallel=FALSE)
+ weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(1, 0)), nrounds=1, seeds=1,
+ use_parallel=FALSE)
 
 # mlogit STVAR, p=3, M=2, d=2, the second variable is the switching variable with one lag.
 fitmlogit32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="mlogit",

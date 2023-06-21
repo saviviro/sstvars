@@ -2,6 +2,8 @@
 #' @describeIn STVAR plot method for class 'stvar'
 #' @param x object of class \code{'stvar'}
 #' @param ... currently not used.
+#' @param plot_type should the series be plotted with the estimated transition weights
+#'   or conditional means?
 #' @details The plot displays the time series together with estimated transition weights.
 #' @export
 

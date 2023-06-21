@@ -294,14 +294,15 @@ smart_weightpars <- function(M, weight_pars, weight_function=c("relative_dens", 
     }
   }
   if(weight_function == "relative_dens") {
-    weight_pars <- rnorm(n=length(weight_pars)+1, mean=c(weight_pars, 1-sum(weight_pars)),
-                         sd=pmax(0.2, c(weight_pars, 1-sum(weight_pars))/accuracy))
-    ret <- (weight_pars/sum(weight_pars))[-M]
-    # Sort and standardize alphas; don't sort if AR_constraints or mean_constraints are used
+    # Note: this assumes that the unparametrized alpha is not in weight_pars!
+    weight_pars <- abs(rnorm(n=length(weight_pars) + 1, mean=c(weight_pars, 1 - sum(weight_pars)),
+                         sd=pmax(0.2, c(weight_pars, 1 - sum(weight_pars)))/accuracy))
+    ret <- (weight_pars/sum(weight_pars))[-M] # Standardize alphas; sorts in GA in sort_regimes if no constraints are imposed
   } else if(weight_function == "mlogit" || weight_function == "logistic" || weight_function == "exponential") {
-    ret <- rnorm(n=length(weight_pars), mean=weight_pars, sd=pmax(0.2, weight_pars/accuracy))
+    ret <- rnorm(n=length(weight_pars), mean=weight_pars, sd=pmax(0.2, weight_pars)/accuracy)
   } else if(weight_function == "threshold") {
-    ret <- sort(rnorm(n=length(weight_pars), mean=weight_pars, sd=pmax(0.2, weight_pars/accuracy)), decreasing=FALSE)
+    # Threshold pars always need to be sorted;
+    ret <- sort(rnorm(n=length(weight_pars), mean=weight_pars, sd=pmax(0.2, weight_pars)/accuracy), decreasing=FALSE)
   }
   ret
 }
@@ -411,7 +412,7 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logis
   new_pars <- numeric(length(params))
   if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(weight_constraints)) {
     all_means_and_A <- params[1:(d*M + M*p*d^2)] # all mu + A if called from GAfit
-    new_pars[1:(d*M + M*p*d^2)] <- rnorm(n=length(all_means_and_A), mean=all_means_and_A, sd=pmax(0.2, abs(all_means_and_A)))
+    new_pars[1:(d*M + M*p*d^2)] <- rnorm(n=length(all_means_and_A), mean=all_means_and_A, sd=pmax(0.2, abs(all_means_and_A))/accuracy)
     for(m in 1:M) {
       if(any(which_random) == m) { # Not a smart regime
         new_pars[((m - 1)*d + 1):(m*d)] <- rnorm(d, mean=mu_scale, sd=mu_scale2) # Random mean
@@ -493,9 +494,12 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logis
       if(is.null(weight_constraints)) {
         weight_pars <- pick_weightpars(p=p, M=M, d=d, params=params_std, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                        cond_dist=cond_dist)
+        if(weight_function == "relative_dens") {
+          weight_pars <- weight_pars[-length(weight_pars)]
+        }
         weight_pars <- smart_weightpars(M=M, weight_pars=weight_pars, weight_function=weight_function,
                                         weight_constraints=weight_constraints, accuracy=accuracy)
-      } else {
+      } else { # Weight constraints used
         if(all(weight_constraints[[1]] == 0)) {
           weight_pars <- numeric(0) # alpha = r known constant so it is not parametrized here
         } else {

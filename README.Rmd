@@ -38,6 +38,7 @@ This is a basic example which shows you how to solve a common problem:
 ```{r example}
 # library(sstvars)
 ## basic example code
+1+1
 ```
 
 What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:

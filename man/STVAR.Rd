@@ -165,6 +165,9 @@ the weight parameter to the constant \eqn{r} (in this case, \eqn{\alpha} is drop
 
 \item{x}{an object of class \code{'stvar'}.}
 
+\item{plot_type}{should the series be plotted with the estimated transition weights
+or conditional means?}
+
 \item{summary_print}{if set to \code{TRUE} then the print
 will include log-likelihood and information criteria values.}
 }
