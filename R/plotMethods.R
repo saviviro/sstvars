@@ -5,9 +5,11 @@
 #' @details The plot displays the time series together with estimated transition weights.
 #' @export
 
-plot.stvar <- function(x, ...) {
+plot.stvar <- function(x, ..., plot_type=c("trans_weights", "cond_mean")) {
   stvar <- x
+  stopifnot(!is.null(stvar$data))
   data <- as.ts(stvar$data)
+  plot_type <- match.arg(plot_type)
   n_obs <- nrow(data)
   p <- stvar$model$p
   M <- stvar$model$M
@@ -16,22 +18,56 @@ plot.stvar <- function(x, ...) {
   ts_tw <- ts(rbind(matrix(NA, nrow=p, ncol=M), stvar$transition_weights),
               start=start(data), frequency=frequency(data)) # First p observations are starting values
 
-  # Time series and transition
+  # Old graphical parameters, set back on exit.
   old_par <- par(no.readonly=TRUE)
   on.exit(par(old_par))
-  graphics::par(mfrow=c(2, 1), mar=c(2.5, 2.5, 2.1, 1))
+
+  # Time series and transition weights
   colpal_ts <- grDevices::colorRampPalette(c("darkgreen", "darkblue", "darkmagenta", "red3"))(d)
   colpal_tw <- grDevices::colorRampPalette(c("blue", "turquoise1", "green", "red"))(M)
   names_ts <- colnames(data)
   names_tw <- paste0("Regime", 1:M)
-  draw_legend <- function(nams, cols) {
-    legend("topleft", legend=nams, bty="n", col=cols, lty=1, lwd=2, text.font=2, cex=0.6, x.intersp=0.5, y.intersp=1)
-  }
 
-  ts.plot(data, gpars=list(main="Time series", col=colpal_ts, lty=1:d))
-  draw_legend(names_ts, cols=colpal_ts)
-  ts.plot(ts_tw, gpars=list(main="Transition weights", ylim=c(0, 1), col=colpal_tw, lty=2))
-  draw_legend(names_tw, cols=colpal_tw)
+  if(plot_type == "trans_weights") {
+    graphics::par(mfrow=c(2, 1), mar=c(2.5, 2.5, 2.1, 1))
+    draw_legend <- function(nams, cols) {
+      legend("topleft", legend=nams, bty="n", col=cols, lty=1, lwd=2, text.font=2, cex=0.6, x.intersp=0.5, y.intersp=1)
+    }
+    ts.plot(data, gpars=list(main="Time series", col=colpal_ts, lty=1:d))
+    draw_legend(names_ts, cols=colpal_ts)
+    ts.plot(ts_tw, gpars=list(main="Transition weights", ylim=c(0, 1), col=colpal_tw, lty=2))
+    draw_legend(names_tw, cols=colpal_tw)
+  } else { # plot_type == "cond_mean"
+    if(is.null(stvar$regime_cmeans)) stop("Conditional means were not calculated when building this model")
+    graphics::par(mfrow=c(d, 1), mar=c(0.5, 3, 2.1, 1), las=1)
+    total_cmeans <- stvar$total_cmeans
+    weight_x_reg <- lapply(1:d, function(d1) stvar$transition_weights*stvar$regime_cmeans[, d1, ])
+    vals <- lapply(1:d, function(d1) c(total_cmeans[,d1], vec(weight_x_reg[[d1]]), data[,d1]))
+    make_ts <- function(dat) ts(c(rep(NA, p), dat), start=start(data), frequency=frequency(data))
+
+    for(d1 in 1:d) {
+      xaxt <- "n"
+      if(d1 == d) {
+        xaxt <- "s"
+        par(mar=c(2.5, 3, 0.5, 1))
+      } else if(d1 > 1) {
+        par(mar=c(0.5, 3, 0.5, 1))
+      }
+      ymin <- floor(min(vals[[d1]]))
+      ymax <-  max(vals[[d1]]) # ceiling(max(vals[[d1]]))
+      main <- ifelse(d1 == 1, "Conditional means", "")
+      plot(data[,d1], ylim=c(ymin, ymax), xlab="", ylab="", xaxt=xaxt, main=main)
+      lines(make_ts(total_cmeans[,d1]), col="grey", lty=2, lwd=2)
+      for(m1 in 1:M) {
+        lines(make_ts(weight_x_reg[[d1]][,m1]), col=colpal_tw[m1], lty=3)
+      }
+      legend("topleft", legend=names_ts[d1], bty="n", col="black", text.font=2, cex=0.65, x.intersp=0.5, y.intersp=1)
+      if(d1 == 1) {
+        legend("topright", legend=c("total", paste0("Regime ", 1:M)), bty="n", col=c("grey", colpal_tw),
+               lty=c(2, rep(3, M)), lwd=2, text.font=2, cex=0.65, x.intersp=0.5, y.intersp=1)
+      }
+    }
+  }
 }
 
 

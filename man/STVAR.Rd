@@ -34,7 +34,7 @@ STVAR(
 
 \method{summary}{stvar}(object, ..., digits = 2)
 
-\method{plot}{stvar}(x, ...)
+\method{plot}{stvar}(x, ..., plot_type = c("trans_weights", "cond_mean"))
 
 \method{print}{stvar}(x, ..., digits = 2, summary_print = FALSE)
 }
