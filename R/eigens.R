@@ -13,9 +13,10 @@
 get_boldA_eigens <- function(stvar) {
   get_boldA_eigens_par(p=stvar$model$p, M=stvar$model$M, d=stvar$model$d, params=stvar$params,
                        weight_function=stvar$model$weight_function, weightfun_pars=stvar$model$weightfun_pars,
-                       cond_dist=stvar$model$cond_dist, identification=stvar$model$identification,
-                       AR_constraints=stvar$model$AR_constraints, mean_constraints=stvar$model$mean_constraints,
-                       weight_constraints=stvar$model$weight_constraints, B_constraints=stvar$model$B_constraints)
+                       cond_dist=stvar$model$cond_dist, parametrization=stvar$model$parametrization,
+                       identification=stvar$model$identification, AR_constraints=stvar$model$AR_constraints,
+                       mean_constraints=stvar$model$mean_constraints, weight_constraints=stvar$model$weight_constraints,
+                       B_constraints=stvar$model$B_constraints)
 }
 
 
@@ -34,9 +35,10 @@ get_boldA_eigens <- function(stvar) {
 get_omega_eigens <- function(stvar) {
   get_omega_eigens_par(p=stvar$model$p, M=stvar$model$M, d=stvar$model$d, params=stvar$params,
                        weight_function=stvar$model$weight_function, weightfun_pars=stvar$model$weightfun_pars,
-                       cond_dist=stvar$model$cond_dist, identification=stvar$model$identification,
-                       AR_constraints=stvar$model$AR_constraints, mean_constraints=stvar$model$mean_constraints,
-                       weight_constraints=stvar$model$weight_constraints, B_constraints=stvar$model$B_constraints)
+                       cond_dist=stvar$model$cond_dist, parametrization=stvar$model$parametrization,
+                       identification=stvar$model$identification, AR_constraints=stvar$model$AR_constraints,
+                       mean_constraints=stvar$model$mean_constraints, weight_constraints=stvar$model$weight_constraints,
+                       B_constraints=stvar$model$B_constraints)
 }
 
 
@@ -53,9 +55,10 @@ get_omega_eigens <- function(stvar) {
 #' @keywords internal
 
 get_boldA_eigens_par <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
-                                 weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"),
+                                 weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
                                  identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
                                  AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
+  parametrization <- match.arg(parametrization)
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
@@ -91,9 +94,10 @@ get_boldA_eigens_par <- function(p, M, d, params, weight_function=c("relative_de
 #' @keywords internal
 
 get_omega_eigens_par <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
-                                 weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"),
+                                 weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
                                  identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
                                  AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
+  parametrization <- match.arg(parametrization)
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)

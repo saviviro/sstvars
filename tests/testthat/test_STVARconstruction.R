@@ -145,3 +145,24 @@ test_that("STVAR works correctly", {
   expect_equal(mod222expcmwt_2_1$params, theta_222expcmwt_2_1)
   expect_equal(mod222threst_2_1$params, theta_222threst_2_1)
 })
+
+test_that("swap_parametrization works correctly", {
+  # Linear Gaussian STVAR
+  expect_equal(swap_parametrization(mod112relg, calc_std_errors=FALSE)$params,
+               c(0.7499743, 0.8049962, 0.2885260, 0.0217670, -0.1440240, 0.8971030,
+                 0.6017860, -0.0029450, 0.0672240), tolerance=1e-3)
+
+  # Relative dens Gaussian STVAR
+  expect_equal(swap_parametrization(mod222relg, calc_std_errors=FALSE)$params,
+               c(0.960032, 0.554909, 0.490841, 1.1693, 0.13996, 0.035172, -0.164575,
+                 0.386816, 0.451675, 0.013086, 0.227882, 0.336084, 0.239257, 0.024173,
+                 -0.021209, 0.707502, 0.063322, 0.027287, 0.009182, 0.197066, 0.205831,
+                 0.005157, 0.025877, 1.092094, -0.009327, 0.116449, 0.592446), tolerance=1e-3)
+
+  # Student Threshold
+  expect_equal(swap_parametrization(mod222threst_2_1, calc_std_errors=FALSE)$params,
+               c(0.960032, 0.554909, 0.490841, 1.1693, 0.13996, 0.035172, -0.164575,
+                 0.386816, 0.451675, 0.013086, 0.227882, 0.336084, 0.239257, 0.024173,
+                 -0.021209, 0.707502, 0.063322, 0.027287, 0.009182, 0.197066, 0.205831,
+                 0.005157, 0.025877, 1.092094, -0.009327, 0.116449, 1, 13), tolerance=1e-3)
+})

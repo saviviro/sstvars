@@ -198,6 +198,7 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
 #' @export
 
 alt_stvar <- function(stvar, which_largest=1, which_round, calc_std_errors=TRUE) {
+  stopifnot(class(stvar) == "stvar")
   stopifnot(!is.null(stvar$all_estimates))
   if(missing(which_round)) {
     stopifnot(which_largest >= 1 && which_largest <= length(stvar$all_estimates))
@@ -228,3 +229,55 @@ alt_stvar <- function(stvar, which_largest=1, which_round, calc_std_errors=TRUE)
   warn_eigens(ret)
   ret
 }
+
+
+
+#' @title Swap the parametrization of a STVAR model
+#'
+#' @description \code{swap_parametrization} swaps the parametrization of a STVAR model
+#'  to \code{"mean"} if the current parametrization is \code{"intercept"}, and vice versa.
+#'
+#' @inheritParams diagnostic_plot
+#' @inheritParams STVAR
+#' @details \code{swap_parametrization} is a convenient tool if you have estimated the model in
+#'  "intercept" parametrization but wish to work with "mean" parametrization in the future, or vice versa.
+#' @inherit STVAR references return
+#' @examples
+#' ## p=1, M=1, d=2, linear VAR
+#' theta_112relg <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103,
+#'   0.601786, -0.002945, 0.067224)
+#' mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112relg, calc_std_errors=TRUE)
+#' print_std_errors(mod112) # Standard errors for the intercepts
+#'
+#' # Swap to mean parametrization:
+#' mod112mu <- swap_parametrization(mod112, calc_std_errors=TRUE)
+#' print_std_errors(mod112mu) # Standard errors for the stationary means
+#'
+#' ## p=1, M=2, d=2, relative dens weight function; not calculating standard errors:
+#' theta_122relg <- c(0.734054, 0.225598, 0.705744, 0.187897, 0.259626, -0.000863,
+#'   -0.3124, 0.505251, 0.298483, 0.030096, -0.176925, 0.838898, 0.310863, 0.007512,
+#'   0.018244, 0.949533, -0.016941, 0.121403, 0.573269)
+#' mod122 <- STVAR(data=gdpdef, p=1, M=2, params=theta_122relg, calc_std_errors=FALSE)
+#' mod122mu <- swap_parametrization(mod122, calc_std_errors=FALSE) # mean parametrization
+#' @export
+
+swap_parametrization <- function(stvar, calc_std_errors=FALSE) {
+  stopifnot(class(stvar) == "stvar")
+  if(!is.null(stvar$model$mean_constraints)) {
+    stop("Cannot change parametrization to intercept if the mean parameters are constrained")
+  }
+  change_to <- ifelse(stvar$model$parametrization == "intercept", "mean", "intercept")
+  new_params <- change_parametrization(p=stvar$model$p, M=stvar$model$M, d=stvar$model$d, params=stvar$params,
+                                       weight_function=stvar$model$weight_function, weightfun_pars=stvar$model$weightfun_pars,
+                                       cond_dist=stvar$model$cond_dist, identification=stvar$model$identification,
+                                       AR_constraints=stvar$model$AR_constraints, mean_constraints=stvar$model$mean_constraints,
+                                       weight_constraints=stvar$model$weight_constraints, B_constraints=stvar$model$B_constraints,
+                                       change_to=change_to)
+  STVAR(data=stvar$data, p=stvar$model$p, M=stvar$model$M, d=stvar$model$d, params=new_params, parametrization=change_to,
+        weight_function=stvar$model$weight_function, weightfun_pars=stvar$model$weightfun_pars,
+        cond_dist=stvar$model$cond_dist, identification=stvar$model$identification,
+        AR_constraints=stvar$model$AR_constraints, mean_constraints=stvar$model$mean_constraints,
+        weight_constraints=stvar$model$weight_constraints, B_constraints=stvar$model$B_constraints,
+        calc_std_errors=calc_std_errors)
+}
+
