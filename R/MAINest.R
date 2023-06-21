@@ -87,14 +87,16 @@
 #'
 #' # p=1, M=2, d=2 relative_dens Gaussian STVAR with the means constrained
 #' # to be identical in both regimes
-#' fit12m <- fitSTVAR(gdpdef, p=1, M=2, mean_constraints=list(1:2), nrounds=1, seeds=1, use_parallel=FALSE)
+#' fit12m <- fitSTVAR(gdpdef, p=1, M=2, mean_constraints=list(1:2), nrounds=1, seeds=1,
+#'  use_parallel=FALSE)
 #'
 #' # p=1, M=2, d=2 relative_dens Gaussian STVAR with the means and AR matrices constrained
 #' # to be identical in both regimes
-#' fit12cm <- fitSTVAR(gdpdef, p=1, M=2, AR_constraints=C_122, mean_constraints=list(1:2), nrounds=1, seeds=1, use_parallel=FALSE)
+#' fit12cm <- fitSTVAR(gdpdef, p=1, M=2, AR_constraints=C_122, mean_constraints=list(1:2),
+#'  nrounds=1, seeds=1, use_parallel=FALSE)
 #'
-#' # p=2, M=2, d=2, relative_dens Gaussian STVAR; constrain AR-parameters to be the same for all regimes
-#' # and constrain the of-diagonal elements of AR-matrices to be zero.
+#' # p=2, M=2, d=2, relative_dens Gaussian STVAR; constrain AR-parameters to be the same
+#' # for all regimes and constrain the of-diagonal elements of AR-matrices to be zero.
 #' mat0 <- matrix(c(1, rep(0, 10), 1, rep(0, 8), 1, rep(0, 10), 1), nrow=2*2^2, byrow=FALSE)
 #' C_222 <- rbind(mat0, mat0)
 #' fit22c <- fitSTVAR(gdpdef, p=2, M=2, AR_constraints=C_222, nrounds=1, seeds=1, use_parallel=FALSE)
@@ -118,30 +120,33 @@
 #' # p=3, M=2, d=2, logistic STVAR with the second variable as switching variable
 #' # with one lag, and the location parameter constrained to 1 and scale parameter unconstrained.
 #' fitlogistic32w <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logistic", weightfun_pars=c(2, 1),
-#'   weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(1, 0)), nrounds=1, seeds=1, use_parallel=FALSE)
+#'  weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(1, 0)), nrounds=1, seeds=1, use_parallel=FALSE)
 #'
 #' # mlogit STVAR, p=3, M=2, d=2, the second variable is the switching variable with one lag.
-#' fitmlogit32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1),
-#'   nrounds=1, seeds=1, use_parallel=FALSE)
+#' fitmlogit32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="mlogit",
+#'  weightfun_pars=list(vars=2, lags=1), nrounds=1, seeds=1, use_parallel=FALSE)
 #'
 #' # mlogit Student STVAR, p=3, M=2, d=2, the second variable is the switching variable with two lags,
 #' # constrain AR matrices equal across the regimes.
 #' C_322 <- rbind(diag(3*2^2), diag(3*2^2))
-#' fitmlogit32ct <- fitSTVAR(gdpdef, p=3, M=2, weight_function="mlogit", weightfun_pars=list(vars=2, lags=2),
-#'  cond_dist="Student", AR_constraints=C_322, nrounds=1, seeds=1, use_parallel=FALSE)
+#' fitmlogit32ct <- fitSTVAR(gdpdef, p=3, M=2, weight_function="mlogit",
+#'  weightfun_pars=list(vars=2, lags=2), cond_dist="Student", AR_constraints=C_322, nrounds=1, seeds=1,
+#'  use_parallel=FALSE)
 #'
 #' # relative_dens STVAR, p=1, M=2, d=2, with the weight parameter fixed to the constant r=0.8.
-#' fit12w <- fitSTVAR(gdpdef, p=1, M=2, weight_constraints=list(R=0, r=0.8), nrounds=1, seeds=10, use_parallel=FALSE)
+#' fit12w <- fitSTVAR(gdpdef, p=1, M=2, weight_constraints=list(R=0, r=0.8), nrounds=1, seeds=10,
+#'  use_parallel=FALSE)
 #'
 #' # p=3, M=2, d=2, exponential STVAR with the second variable as switching variable
 #' # with one lag, and AR parameter constrained identical across the regimes, means constrained
 #' # identical across the regimes, and the location parameter constrained to 0.5.
 #' fitexp32cmw <- fitSTVAR(gdpdef, p=3, M=2, weight_function="exponential", weightfun_pars=c(2, 1),
-#'   AR_constraints=C_322, mean_constraints=list(1:2), weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.5, 0)),
+#'   AR_constraints=C_322, mean_constraints=list(1:2),
+#'   weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.5, 0)),
 #'   cond_dist="Student", nrounds=1, seeds=1, use_parallel=FALSE)
 #'
-#' # p=3, M=2, d=2, threshold Student's t STVAR with the second variable as the switching variable with one lag,
-#' # and the threshold parameter constained to 1.
+#' # p=3, M=2, d=2, threshold Student's t STVAR with the second variable as the switching variable
+#' # with one lag, and the threshold parameter constained to 1.
 #' fitthres32wt <- fitSTVAR(gdpdef, p=3, M=2, weight_function="threshold", weightfun_pars=c(2, 1),
 #'   cond_dist="Student", weight_constraints=list(R=0, r=1), nrounds=1, seeds=2, use_parallel=FALSE)
 #' }

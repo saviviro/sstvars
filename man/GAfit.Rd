@@ -215,8 +215,6 @@ never survive. The default is \code{-(10^(ceiling(log10(n_obs)) + d) - 1)}.}
 \item{seed}{a single value, interpreted as an integer, or NULL, that sets seed for the random number generator in
 the beginning of the function call. If calling \code{GAfit} from \code{fitGSMVAR}, use the argument \code{seeds}
 instead of passing the argument \code{seed}.}
-
-\item{conditional}{a logical argument specifying whether the conditional or exact log-likelihood function}
 }
 \value{
 Returns the estimated parameter vector which has the form described in \code{initpop}.

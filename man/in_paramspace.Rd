@@ -70,7 +70,15 @@ See the vignette for more details about the weight functions.}
 \item{all_boldA}{3D array containing the \eqn{((dp)x(dp))} "bold A" (companion form) matrices of each regime,
 obtained from \code{form_boldA}. Will be computed if not given.}
 
+\item{all_Omegas}{3D array containing all covariance matrices \eqn{\Omega_{m}}, obtained from \code{pick_Omegas}.}
+
 \item{weightpars}{numerical vector containing the transition weight parameters, obtained from \code{pick_weightpars}.}
+
+\item{distpars}{A numeric vector containing the distribution parameters,
+\describe{
+  \item{If \code{cond_dist=="Gaussian"}:}{Not used, i.e., a numeric vector of length zero.}
+  \item{If \code{cond_dist=="Student"}:}{The degrees of freedom parameter, i.e., a numeric vector of length one.}
+}}
 
 \item{stab_tol}{numerical tolerance for stability of condition of the regimes: if the "bold A" matrix of any regime
 has eigenvalues larger that \code{1 - stat_tol} the parameter is considered to be outside the parameter space.
@@ -86,8 +94,6 @@ freedom parameters is not larger than \code{2 + distpar_tol} (applies only if \c
 
 \item{weightpar_tol}{numerical tolerance for weight parameters being in the parameter space. Values closer to
 to the border of the parameter space than this are considered to be "outside" the parameter space.}
-
-\item{all_Omega}{3D array containing all covariance matrices \eqn{\Omega_{m}}, obtained from \code{pick_Omegas}.}
 }
 \value{
 Returns \code{TRUE} if the given parameter values are in the parameter space and \code{FALSE} otherwise.

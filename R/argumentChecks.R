@@ -40,7 +40,12 @@ stab_conds_satisfied <- function(p, M, d, params, all_boldA=NULL, tolerance=1e-3
 #' @inheritParams loglikelihood
 #' @inheritParams stab_conds_satisfied
 #' @param weightpars numerical vector containing the transition weight parameters, obtained from \code{pick_weightpars}.
-#' @param all_Omega 3D array containing all covariance matrices \eqn{\Omega_{m}}, obtained from \code{pick_Omegas}.
+#' @param all_Omegas 3D array containing all covariance matrices \eqn{\Omega_{m}}, obtained from \code{pick_Omegas}.
+#' @param distpars A numeric vector containing the distribution parameters,
+#'   \describe{
+#'     \item{If \code{cond_dist=="Gaussian"}:}{Not used, i.e., a numeric vector of length zero.}
+#'     \item{If \code{cond_dist=="Student"}:}{The degrees of freedom parameter, i.e., a numeric vector of length one.}
+#'   }
 #' @details The parameter vector in the argument \code{params} should be unconstrained and reduced form.
 #' @return Returns \code{TRUE} if the given parameter values are in the parameter space and \code{FALSE} otherwise.
 #'   This function does NOT consider identification conditions!

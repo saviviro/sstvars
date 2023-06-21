@@ -19,6 +19,8 @@ get_Sigmas(p, M, d, all_A, all_boldA, all_Omegas)
 \item{all_boldA}{3D array containing the \eqn{((dp)x(dp))} "bold A" (companion form) matrices of each regime,
 obtained from \code{form_boldA}. Will be computed if not given.}
 
+\item{all_Omegas}{3D array containing all covariance matrices \eqn{\Omega_{m}}, obtained from \code{pick_Omegas}.}
+
 \item{all_Omega}{a \code{[d, d, M]} array containing the covariance matrix Omegas}
 }
 \value{

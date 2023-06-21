@@ -38,10 +38,10 @@ use a simulation procedure with a burn-in period. See the details section.}
 
 \item{ntimes}{how many sets of simulations should be performed?}
 
+\item{burnin}{Burn-in period for simulating initial values from a regime when \code{cond_dist="Student"}. See the details section.}
+
 \item{drop}{if \code{TRUE} (default) then the components of the returned list are coerced to lower dimension if \code{ntimes==1}, i.e.,
 \code{$sample} and \code{$transition_weights} will be matrices, and \code{$component} will be vector.}
-
-\item{burin}{Burn-in period for simulating initial values from a regime when \code{cond_dist="Student"}. See the details section.}
 }
 \value{
 If \code{drop==TRUE} and \code{ntimes==1} (default): \code{$sample}, \code{$component}, and \code{$transition_weights} are matrices.

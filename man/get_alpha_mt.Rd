@@ -75,6 +75,8 @@ See the vignette for more details about the weight functions.}
 \item{all_boldA}{3D array containing the \eqn{((dp)x(dp))} "bold A" (companion form) matrices of each regime,
 obtained from \code{form_boldA}. Will be computed if not given.}
 
+\item{all_Omegas}{3D array containing all covariance matrices \eqn{\Omega_{m}}, obtained from \code{pick_Omegas}.}
+
 \item{weightpars}{numerical vector containing the transition weight parameters, obtained from \code{pick_weightpars}.}
 
 \item{all_mu}{an \eqn{(d \times M)} matrix containing the unconditional regime-specific means}

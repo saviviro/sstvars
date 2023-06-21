@@ -36,7 +36,6 @@
 #'   If \code{parametrization=="mean"}, just replace each \eqn{\phi_{m,0}} with regimewise mean \eqn{\mu_{m}}.
 #'   \eqn{vec()} is vectorization operator that stacks columns of a given matrix into a vector. \eqn{vech()} stacks columns
 #'   of a given matrix from the principal diagonal downwards (including elements on the diagonal) into a vector.
-#' @param conditional a logical argument specifying whether the conditional or exact log-likelihood function
 #' @param mu_scale a size \eqn{(dx1)} vector defining \strong{means} of the normal distributions from which each
 #'   mean parameter \eqn{\mu_{m}} is drawn from in random mutations. Default is \code{colMeans(data)}. Note that
 #'   mean-parametrization is always used for optimization in \code{GAfit} - even when \code{parametrization=="intercept"}.
