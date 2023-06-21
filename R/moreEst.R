@@ -10,7 +10,7 @@
 #'   the estimation when the maximum number of iterations is reached when estimating a STVAR model
 #'   with the main estimation function \code{fitSTVAR} or \code{fitSSTVAR}.
 #' @return Returns an object of class \code{'stvar'} defining the estimated model
-#' @seealso \code{\link{fitSTVAR}}, \code{\link{fitSSTVAR}}, \code{\link{STVAR}}, \code{\link[stats]{optim}}
+#' @seealso \code{\link{fitSTVAR}}, \code{\link{STVAR}}, \code{\link[stats]{optim}}
 #' @inherit STVAR references
 #' @examples
 #' \donttest{

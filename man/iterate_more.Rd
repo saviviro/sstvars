@@ -46,5 +46,5 @@ fit12
  }
 }
 \seealso{
-\code{\link{fitSTVAR}}, \code{\link{fitSSTVAR}}, \code{\link{STVAR}}, \code{\link[stats]{optim}}
+\code{\link{fitSTVAR}}, \code{\link{STVAR}}, \code{\link[stats]{optim}}
 }

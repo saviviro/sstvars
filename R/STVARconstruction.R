@@ -16,7 +16,7 @@
 #'   If data is not provided, only the \code{print} and \code{simulate} methods are available.
 #'   If data is provided, then in addition to the ones listed above, \code{predict} method is also available.
 #'   See \code{?simulate.stvar} and \code{?predict.stvar} for details about the usage.
-#' @seealso \code{\link{fitSTVAR}}, \code{\link{swap_parametrization}}, \code{\link{GIRF}}
+#' @seealso \code{\link{fitSTVAR}}, \code{\link{swap_parametrization}}, \code{\link{alt_stvar}}
 #' @references
 #'  \itemize{
 #'    \item TO BE FILLED IN
