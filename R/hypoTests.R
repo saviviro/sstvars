@@ -189,6 +189,7 @@ LR_test <- function(stvar1, stvar2) {
 #'  \code{\link{profile_logliks}}
 #' @inherit Wald_test references return
 #' @examples
+#' \donttest{
 #' # Logistic Student's t STVAR with p=1, M=2, and the first lag of the second variable
 #' # as the switching variable.
 #'
@@ -222,6 +223,7 @@ LR_test <- function(stvar1, stvar2) {
 #'
 #' # Test the null:
 #' Rao_test(fit12cm)
+#' }
 #' @export
 
 Rao_test <- function(stvar) {

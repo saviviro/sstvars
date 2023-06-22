@@ -27,6 +27,7 @@ Tests the constraints imposed in the model given in the argument \code{stvar}. N
   \strong{The test is based on the assumption of the standard result of asymptotic normality!}
 }
 \examples{
+\donttest{
 # Logistic Student's t STVAR with p=1, M=2, and the first lag of the second variable
 # as the switching variable.
 
@@ -60,6 +61,7 @@ fit12cm <- STVAR(data=gdpdef, p=1, M=2, params=params12cm, weight_function="logi
 
 # Test the null:
 Rao_test(fit12cm)
+}
 }
 \references{
 \itemize{

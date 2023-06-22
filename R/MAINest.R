@@ -89,11 +89,6 @@
 #' fit12c <- fitSTVAR(gdpdef, p=1, M=2, AR_constraints=C_122, nrounds=1, seeds=1,
 #'   use_parallel=FALSE)
 #'
-#' # p=1, M=2, d=2 relative_dens Gaussian STVAR with the means constrained
-#' # to be identical in both regimes
-#' fit12m <- fitSTVAR(gdpdef, p=1, M=2, mean_constraints=list(1:2), nrounds=1, seeds=1,
-#'  use_parallel=FALSE)
-#'
 #' # p=1, M=2, d=2 relative_dens Gaussian STVAR with the means and AR matrices constrained
 #' # to be identical in both regimes
 #' fit12cm <- fitSTVAR(gdpdef, p=1, M=2, AR_constraints=C_122, mean_constraints=list(1:2),
@@ -134,7 +129,7 @@
 #'  use_parallel=FALSE)
 #'
 #' # relative_dens STVAR, p=1, M=2, d=2, with the weight parameter fixed to the constant r=0.8.
-#' fit12w <- fitSTVAR(gdpdef, p=1, M=2, weight_constraints=list(R=0, r=0.8), nrounds=1, seeds=10,
+#' fit12w <- fitSTVAR(gdpdef, p=1, M=2, weight_constraints=list(R=0, r=0.8), nrounds=1, seeds=9,
 #'  use_parallel=FALSE)
 #'
 #' # p=3, M=2, d=2, exponential STVAR with the second variable as switching variable

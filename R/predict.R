@@ -50,7 +50,7 @@ predict.stvar <- function(object, ..., nsteps, nsim=1000, pi=c(0.95, 0.80), pred
   if(!all_pos_ints(c(nsim, nsteps))) stop("nsim and n_ahaed should be positive integers")
 
   # Simulations
-  simulations <- simulate(stvar, nsim=nsteps, init_values=dat, ntimes=nsim, drop=FALSE)
+  simulations <- simulate.stvar(stvar, nsim=nsteps, init_values=dat, ntimes=nsim, drop=FALSE)
   sample <- simulations$sample
   alpha_mt <- simulations$transition_weights
   colnames(sample) <- colnames(dat)

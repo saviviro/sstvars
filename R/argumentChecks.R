@@ -421,7 +421,7 @@ check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logis
       }
     }
     if(weight_function == "relative_dens") {
-      if(any(weight_constraints[[2]][2] < 0)) {
+      if(any(weight_constraints[[2]] < 0)) {
         warning("When weight_function='relative dens', the weight parameters need to be strictly positive, and there is a negative
                    constraint in r for a weight parameter, implying that the estimation may fail.")
       }
