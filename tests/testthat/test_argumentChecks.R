@@ -1139,3 +1139,13 @@ test_that("check_weightfun_pars works correctly", {
   expect_error(check_weightfun_pars(p=2, d=2, weight_function="threshold", weightfun_pars=c(3, 1)))
   expect_error(check_weightfun_pars(p=2, d=2, weight_function="threshold", weightfun_pars=c(1, 3)))
 })
+
+
+# p=1, M=1, d=2
+theta_112relg <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103, 0.601786, -0.002945, 0.067224)
+mod112relg <- STVAR(data=gdpdef, p=1, M=1, params=theta_112relg, weight_function="relative_dens")
+
+test_that("check_stvar works correctly", {
+   check_stvar(mod112relg)
+   expect_error(check_stvar(theta_112relg))
+})

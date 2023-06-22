@@ -11,6 +11,7 @@
 #' @keywords internal
 
 get_boldA_eigens <- function(stvar) {
+  check_stvar(stvar)
   get_boldA_eigens_par(p=stvar$model$p, M=stvar$model$M, d=stvar$model$d, params=stvar$params,
                        weight_function=stvar$model$weight_function, weightfun_pars=stvar$model$weightfun_pars,
                        cond_dist=stvar$model$cond_dist, parametrization=stvar$model$parametrization,
@@ -33,6 +34,7 @@ get_boldA_eigens <- function(stvar) {
 #' @keywords internal
 
 get_omega_eigens <- function(stvar) {
+  check_stvar(stvar)
   get_omega_eigens_par(p=stvar$model$p, M=stvar$model$M, d=stvar$model$d, params=stvar$params,
                        weight_function=stvar$model$weight_function, weightfun_pars=stvar$model$weightfun_pars,
                        cond_dist=stvar$model$cond_dist, parametrization=stvar$model$parametrization,

@@ -35,7 +35,7 @@
 profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precision=200,
                             stab_tol=0.001, posdef_tol=1e-08, distpar_tol=1e-08, weightpar_tol=1e-08) {
   # Initial checks
-  stopifnot(class(stvar) == "stvar")
+  check_stvar(stvar)
   if(is.null(stvar$data)) stop("Cannot plot profile logliks if the model does not contain data.")
 
   # Model specs

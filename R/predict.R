@@ -42,6 +42,7 @@
 #' @export
 
 predict.stvar <- function(object, ..., nsteps, nsim=1000, pi=c(0.95, 0.80), pred_type=c("mean", "median")) {
+  check_stvar(object, object_name="object")
   stvar <- object
   if(is.null(stvar$data)) stop("The model needs to contain data")
   stopifnot(all(pi > 0 & pi < 1))

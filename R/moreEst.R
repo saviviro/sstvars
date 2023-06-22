@@ -29,6 +29,7 @@
 #' @export
 
 iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
+  check_stvar(stvar)
   stopifnot(maxit %% 1 == 0 & maxit >= 1)
   p <- stvar$model$p
   M <- stvar$model$M

@@ -500,3 +500,21 @@ check_weightfun_pars <- function(p, d, weight_function=c("relative_dens", "logis
   }
   weightfun_pars
 }
+
+
+#' @title Checks whether the given object has class attribute 'stvar'
+#'
+#' @description \code{check_gsmvar} checks that the object has class attribute 'stvar'.
+#'
+#' @param object S3 object to be tested
+#' @param object_name what is the name of the object that should of class 'stvar'?
+#' @return Throws an error if the object doesn't have the class attribute 'stvar'.
+#' @keywords internal
+
+check_stvar <- function(object, object_name) {
+  if(missing(object_name)) object_name <- "stvar"
+  if(!any(class(object) == "stvar")) {
+    stop(paste("The object", object_name, "has to be of class 'stvar', typically created with the function 'STVAR', 'fitSTVAR', or 'fitSSTVAR'"))
+  }
+}
+

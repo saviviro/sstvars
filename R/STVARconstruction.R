@@ -202,7 +202,7 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
 #' @export
 
 alt_stvar <- function(stvar, which_largest=1, which_round, calc_std_errors=TRUE) {
-  stopifnot(class(stvar) == "stvar")
+  check_stvar(stvar)
   stopifnot(!is.null(stvar$all_estimates))
   if(missing(which_round)) {
     stopifnot(which_largest >= 1 && which_largest <= length(stvar$all_estimates))
@@ -266,7 +266,7 @@ alt_stvar <- function(stvar, which_largest=1, which_round, calc_std_errors=TRUE)
 #' @export
 
 swap_parametrization <- function(stvar, calc_std_errors=FALSE) {
-  stopifnot(class(stvar) == "stvar")
+  check_stvar(stvar)
   if(!is.null(stvar$model$mean_constraints)) {
     stop("Cannot change parametrization to intercept if the mean parameters are constrained")
   }

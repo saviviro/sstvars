@@ -62,6 +62,7 @@
 simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, init_regime, ntimes=1, burnin=1000, drop=TRUE) {
   # Checks etc
   if(!is.null(seed)) set.seed(seed)
+  check_stvar(object, object_name="object")
   epsilon <- round(log(.Machine$double.xmin) + 10)
   stvar <- object
   p <- stvar$model$p
@@ -282,6 +283,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
 #' @keywords internal
 
 simulate_from_regime <- function(stvar, regime=1, nsim=1, init_values=NULL) {
+  check_stvar(stvar)
 
   # Model specifications
   p <- stvar$model$p
@@ -334,6 +336,6 @@ simulate_from_regime <- function(stvar, regime=1, nsim=1, init_values=NULL) {
   } # else: simulate.stvar takes care of hand-specified initial values
 
   # Simulate and return the sample
-  tmp_sim <- simulate(new_stvar, nsim=nsim, ntimes=1, init_values=init_values, drop=TRUE)
+  tmp_sim <- simulate.stvar(new_stvar, nsim=nsim, ntimes=1, init_values=init_values, drop=TRUE)
   tmp_sim$sample
 }

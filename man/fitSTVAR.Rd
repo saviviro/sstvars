@@ -162,7 +162,7 @@ If you wish to estimate a structural model, estimate first the reduced form mode
 \section{S3 methods}{
 
   The following S3 methods are supported for class \code{'stvar'}: \code{logLik}, \code{residuals}, \code{print}, \code{summary},
-   \code{predict}, \code{simulate}, and \code{plot}. NONE OF THESE IS IMPLEMENTED YET!
+   \code{predict}, \code{simulate}, and \code{plot}.
 }
 
 \section{About the warning "chol()}{
@@ -259,5 +259,5 @@ fitthres32wt <- fitSTVAR(gdpdef, p=3, M=2, weight_function="threshold", weightfu
  }
 }
 \seealso{
-\code{\link{GAfit}}
+\code{\link{GAfit}},  \code{\link{iterate_more}}
 }

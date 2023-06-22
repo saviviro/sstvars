@@ -84,6 +84,7 @@ standard_errors <- function(data, p, M, params, weight_function=c("relative_dens
 #' @export
 
 print_std_errors <- function(stvar, digits=3) {
+  check_stvar(stvar)
   if(!all_pos_ints(digits)) stop("Argument digits must be positive integer")
   format_value <- format_valuef(digits)
   p <- stvar$model$p

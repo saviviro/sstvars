@@ -70,6 +70,7 @@ calc_hessian <- function(x, fn, h=6e-06, ...) {
 #' @export
 
 get_gradient <- function(stvar) {
+  check_stvar(stvar)
   foo <- function(x) {
     # Log-likelihood function as a function of the parameter
     loglikelihood(data=stvar$data, p=stvar$model$p, M=stvar$model$M, params=x,
@@ -93,6 +94,7 @@ get_gradient <- function(stvar) {
 #' @export
 
 get_hessian <- function(stvar) {
+  check_stvar(stvar)
   foo <- function(x) {
     # Log-likelihood function as a function of the parameter
     loglikelihood(data=stvar$data, p=stvar$model$p, M=stvar$model$M, params=x,
@@ -119,6 +121,6 @@ get_foc <- function(stvar) {
 #' @rdname calc_gradient
 #' @export
 get_soc <- function(stvar) {
-  eigen(get_hessian(stvar))$value
+  eigen(get_hessian(stvar))$values
 }
 
