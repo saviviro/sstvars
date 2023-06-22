@@ -199,7 +199,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     parallel::clusterExport(cl, ls(environment(fitSTVAR)), envir=environment(fitSTVAR)) # assign all variables from package:fitSTVAR
     parallel::clusterEvalQ(cl, c(library(pbapply), library(Rcpp), library(RcppArmadillo), library(sstvars)))
 
-    doParallel::registerDoParallel(cl)
+    #doParallel::registerDoParallel(cl)
 
     cat("Optimizing with a genetic algorithm...\n")
     GAresults <- pbapply::pblapply(1:nrounds, function(i1) GAfit(data=data, p=p, M=M,

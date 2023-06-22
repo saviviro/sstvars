@@ -1,3 +1,5 @@
+#' @import stats
+#'
 #' @title Genetic algorithm for preliminary estimation of a GMVAR, StMVAR, or G-StMVAR model
 #'
 #' @description \code{GAfit} estimates the specified GMVAR, StMVAR, or G-StMVAR model using a genetic algorithm.
@@ -283,7 +285,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
       if(parametrization == "intercept") {
         ind <- change_parametrization(p=p, M=M, d=d, params=ind, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                       cond_dist=cond_dist, identification="reduced_form", AR_constraints=AR_constraints,
-                                      mean_constraints=mean_constaints, weight_constraints=weight_constraints,
+                                      mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                                       B_constraints=NULL, change_to="mean")
       }
       if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(weight_constraints)) {
@@ -583,7 +585,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
 
     # Sort components according to the transition weight parameters. No sorting if constraints are employed.
     if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(weight_constraints)) {
-      H2 <- vapply(1:popsize, function(i2) sort_regimes(p=p, M=M, d=d, params=H2[,i2], weight_functio=weight_function,
+      H2 <- vapply(1:popsize, function(i2) sort_regimes(p=p, M=M, d=d, params=H2[,i2], weight_function=weight_function,
                                                         weightfun_pars=weightfun_pars, cond_dist=cond_dist,
                                                         identification="reduced_form"), numeric(npars))
     }

@@ -174,38 +174,38 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   if(identification != "reduced_form") {
     stop("STRUCTURAL MODELS NOT YET IMPLEMENTED TO PRINT.STVAR")
     # Alla oleva toiminee jos cond.h.sked identifiointi?
-    cat("Structural parameters:\n")
-    W <- format_value(pick_W(p=p, M=M, d=d, params=params, structural_pars=structural_pars))
-
-    tmp <- c(rep(" ", times=d - 1), ",")
-    df2 <- data.frame(left_brackets, W=W[,1])
-    for(i1 in 2:d) {
-      df2 <- cbind(df2, W[, i1])
-      colnames(df2)[1 + i1] <- "tmp"
-    }
-    df2 <- cbind(df2, right_brackets)
-    if(sum(M) > 1) {
-      lambdas <- format_value(pick_lambdas(p=p, M=M, d=d, params=params, structural_pars=structural_pars))
-      tmp <- c(rep(" ", times=d - 1), ",")
-      lambdas <- matrix(lambdas, nrow=d, ncol=sum(M) - 1, byrow=FALSE) # Column for each regime
-      for(i1 in 1:(sum(M) - 1)) {
-        lmb <- lambdas[,i1]
-        df2 <- cbind(df2, tmp, left_brackets, lmb, right_brackets)
-        colnames(df2)[grep("lmb", colnames(df2))] <- paste0("lamb", i1 + 1)
-      }
-    }
-    names_to_omit <- unlist(lapply(c("left_brackets", "right_brackets", "tmp"), function(nam) grep(nam, colnames(df2))))
-    colnames(df2)[names_to_omit] <- " "
-    print(df2)
-    cat("\n")
-    W_orig <- stvar$model$structural_pars$W
-    n_zero <- sum(W_orig == 0, na.rm=TRUE)
-    n_free <- sum(is.na(W_orig))
-    n_sign <- d^2 - n_zero - n_free
-    cat("The B-matrix (or equally W) is subject to", n_zero, "zero constraints and", n_sign, "sign constraints.\n")
-    cat("The eigenvalues lambda_{mi} are", ifelse(is.null(stvar$model$structural_pars$C_lambda), "not subject to linear constraints.",
-                                                  "subject to linear constraints."))
-    cat("\n")
+    # cat("Structural parameters:\n")
+    # W <- format_value(pick_W(p=p, M=M, d=d, params=params, structural_pars=structural_pars))
+    #
+    # tmp <- c(rep(" ", times=d - 1), ",")
+    # df2 <- data.frame(left_brackets, W=W[,1])
+    # for(i1 in 2:d) {
+    #   df2 <- cbind(df2, W[, i1])
+    #   colnames(df2)[1 + i1] <- "tmp"
+    # }
+    # df2 <- cbind(df2, right_brackets)
+    # if(sum(M) > 1) {
+    #   lambdas <- format_value(pick_lambdas(p=p, M=M, d=d, params=params, structural_pars=structural_pars))
+    #   tmp <- c(rep(" ", times=d - 1), ",")
+    #   lambdas <- matrix(lambdas, nrow=d, ncol=sum(M) - 1, byrow=FALSE) # Column for each regime
+    #   for(i1 in 1:(sum(M) - 1)) {
+    #     lmb <- lambdas[,i1]
+    #     df2 <- cbind(df2, tmp, left_brackets, lmb, right_brackets)
+    #     colnames(df2)[grep("lmb", colnames(df2))] <- paste0("lamb", i1 + 1)
+    #   }
+    # }
+    # names_to_omit <- unlist(lapply(c("left_brackets", "right_brackets", "tmp"), function(nam) grep(nam, colnames(df2))))
+    # colnames(df2)[names_to_omit] <- " "
+    # print(df2)
+    # cat("\n")
+    # W_orig <- stvar$model$structural_pars$W
+    # n_zero <- sum(W_orig == 0, na.rm=TRUE)
+    # n_free <- sum(is.na(W_orig))
+    # n_sign <- d^2 - n_zero - n_free
+    # cat("The B-matrix (or equally W) is subject to", n_zero, "zero constraints and", n_sign, "sign constraints.\n")
+    # cat("The eigenvalues lambda_{mi} are", ifelse(is.null(stvar$model$structural_pars$C_lambda), "not subject to linear constraints.",
+    #                                               "subject to linear constraints."))
+    # cat("\n")
   }
 
   if(summary_print) {
