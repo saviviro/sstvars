@@ -72,10 +72,13 @@
 #' \donttest{
 #' ## These are long running examples that use parallel computing!
 #' # Running all the below examples will take approximately FILL IN HOW MANY minutes.
-#' # SET SEEDS/ROUNDS
+#' # When estimating the models to data, typically a large number of estimation
+#' # rounds (set by the argumetn 'nround') should be used. These examples use
+#' # only one round to decrease the running time of the examples.
 #'
 #' # p=3, M=2, d=2 relative_dens Gaussian STVAR
-#' fit32 <- fitSTVAR(gdpdef, p=3, M=2, nrounds=20, seeds=1:20)
+#' fit32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="relative_dens",
+#'  cond_dist="Gaussian", nrounds=1, seeds=1)
 #' fit32
 #' summary(fit32)
 #' plot(fit32)
@@ -83,7 +86,8 @@
 #' # p=1, M=2, d=2 relative_dens Gaussian STVAR with the AR matrices
 #' # constrained to be identical in both regimes
 #' C_122 <- rbind(diag(1*2^2), diag(1*2^2))
-#' fit12c <- fitSTVAR(gdpdef, p=1, M=2, AR_constraints=C_122, nrounds=1, seeds=1, use_parallel=FALSE)
+#' fit12c <- fitSTVAR(gdpdef, p=1, M=2, AR_constraints=C_122, nrounds=1, seeds=1,
+#'   use_parallel=FALSE)
 #'
 #' # p=1, M=2, d=2 relative_dens Gaussian STVAR with the means constrained
 #' # to be identical in both regimes
@@ -106,11 +110,6 @@
 #' # constrain the means identical in both regimes.
 #' fit22cm <- fitSTVAR(gdpdef, p=2, M=2, AR_constraints=C_222, mean_constraints=list(1:2),
 #'   nrounds=1, seeds=1, use_parallel=FALSE)
-#'
-#' # p=3, M=2, d=3, relative_dens STVAR
-#' f32 <- fitSTVAR(usamone, p=3, M=2, nrounds=20, seeds=61:80)
-#' summary(f32)
-#' plot(f32)
 #'
 #' # p=3, M=2, d=2, logistic Student's t STVAR with the second variable as switching variable
 #' # with one lag.
