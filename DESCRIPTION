@@ -1,6 +1,6 @@
 Package: sstvars
 Type: Package
-Title: Toolkit for structural smooth transition vector autoregressive models
+Title: Toolkit for Structural Smooth Transition Vector Autoregressive Models
 Version: 0.1.0
 Authors@R: person("Savi", "Virolainen", email = "savi.virolainen@helsinki.fi", role = c("aut", "cre"),
                   comment = c(ORCID = "0000-0002-5075-6821"))
