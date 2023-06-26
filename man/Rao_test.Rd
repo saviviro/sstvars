@@ -17,11 +17,7 @@ A list with class "hypotest" containing the test results and arguments used to c
 \code{Rao_test} performs Rao's score test for a STVAR model
 }
 \details{
-Tests the constraints imposed in the model given in the argument \code{stvar}. Note that since
-  nothing guarantees positive definiteness of the Hessian of the log-likelihood function when the constraints
-  are relaxed, calculation of the test statistic may fail. It it does, make sure that the constrained estimates
-  are ok, e.g., with the functions \code{get_foc}, \code{get_soc}, and \code{profile_logliks}.
-
+Tests the constraints imposed in the model given in the argument \code{stvar}.
   This implementation uses the outer product of gradients approximation in the test statistic.
 
   \strong{The test is based on the assumption of the standard result of asymptotic normality!}
