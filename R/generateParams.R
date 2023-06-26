@@ -213,7 +213,7 @@ random_weightpars <- function(M, weight_function=c("relative_dens", "logistic", 
   if(M == 1) return(numeric(0))
   if(weight_function == "relative_dens") {
     if(is.null(weight_constraints)) {
-      alphas <- runif(n=M)
+      alphas <- runif(n=M, min=0.00, max=1)
       # Sort and standardize alphas; don't sort if AR_constraints or mean_constraints are used
       if(is.null(AR_constraints) && is.null(mean_constraints)) {
         alphas <- sort(alphas, decreasing=TRUE)

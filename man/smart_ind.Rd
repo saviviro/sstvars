@@ -140,7 +140,7 @@ However, input (in \code{initpop}) and output (return value) parameter vectors c
 
 \item{mu_scale2}{a size \eqn{(dx1)} strictly positive vector defining \strong{standard deviations} of the normal
 distributions from which each mean parameter \eqn{\mu_{m}} is drawn from in random mutations.
-Default is \code{2*sd(data[,i]), i=1,..,d}.}
+Default is \code{vapply(1:d, function(i1) sd(data[,i1]), numeric(1))}.}
 
 \item{omega_scale}{a size \eqn{(dx1)} strictly positive vector specifying the scale and variability of the
 random covariance matrices in random mutations. The covariance matrices are drawn from (scaled) Wishart

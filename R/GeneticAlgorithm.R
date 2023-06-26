@@ -44,7 +44,7 @@
 #'   However, input (in \code{initpop}) and output (return value) parameter vectors can be intercept-parametrized.
 #' @param mu_scale2 a size \eqn{(dx1)} strictly positive vector defining \strong{standard deviations} of the normal
 #'   distributions from which each mean parameter \eqn{\mu_{m}} is drawn from in random mutations.
-#'   Default is \code{2*sd(data[,i]), i=1,..,d}.
+#'   Default is \code{vapply(1:d, function(i1) sd(data[,i1]), numeric(1))}.
 #' @param omega_scale a size \eqn{(dx1)} strictly positive vector specifying the scale and variability of the
 #'   random covariance matrices in random mutations. The covariance matrices are drawn from (scaled) Wishart
 #'   distribution. Expected values of the random covariance matrices are \code{diag(omega_scale)}. Standard
@@ -176,7 +176,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
     stop("Argument mu_scale must be numeric vector with length d")
   }
   if(missing(mu_scale2)) {
-    mu_scale2 <- vapply(1:d, function(i1) 2*sd(data[,i1]), numeric(1))
+    mu_scale2 <- vapply(1:d, function(i1) sd(data[,i1]), numeric(1))
   } else if(length(mu_scale2) != d | any(mu_scale2 <= 0)) {
     stop("Argument mu_scale2 must be strictly positive vector with length d")
   }
