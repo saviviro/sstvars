@@ -471,13 +471,13 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logis
           }
         } else { # Smart AR matrix
           all_Am <- as.vector(all_A[, , , m])
-          rnorm(n=length(all_Am), mean=all_Am, sd=pmax(0.2, abs(all_Am))/accuracy)
+          rnorm(n=length(all_Am), mean=all_Am, sd=pmax(0.1, abs(all_Am))/accuracy)
         }
       }, numeric(p*d^2))
     } else {
       q <- ncol(AR_constraints)
       psi <- params[(g*d + 1):(g*d + q)]
-      AR_pars <- rnorm(q, mean=psi, sd=pmax(0.2, abs(psi))/accuracy)
+      AR_pars <- rnorm(q, mean=psi, sd=pmax(0.1, abs(psi))/accuracy)
     }
 
     # Covariance matrix parameters
