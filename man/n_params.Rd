@@ -88,7 +88,11 @@ constraint matrix of full column rank (\eqn{a} is the dimension of \eqn{\alpha})
 and \eqn{\xi} is an unknown \eqn{(l\times 1)} parameter. \strong{Alternatively}, set \eqn{R=0} in order to constrain the
 the weight parameter to the constant \eqn{r} (in this case, \eqn{\alpha} is dropped from the constrained parameter vector).}
 
-\item{B_constraints}{NOT YET IMPLEMENTED!}
+\item{B_constraints}{a \eqn{(d \times d)} matrix with its entries imposing constraints on the impact matrix \eqn{B_t}:
+\code{NA} indicating that the element is unconstrained, a positive value indicating strict positive sign constraint,
+a negative value indicating strict negative sign constraint, and zero indicating that the element is constrained to zero.
+Currently only available for models with \code{identification="heteroskedasticity"} due to the (in)availability of appropriate
+parametrizations that allow such constraints to be imposed.}
 }
 \value{
 Returns the number of parameters in the parameter vector of the specified model.

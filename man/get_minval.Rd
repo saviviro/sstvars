@@ -7,7 +7,7 @@
 get_minval(data)
 }
 \arguments{
-\item{data}{data a matrix or class \code{'ts'} object with \code{d>1} columns. Each column is taken to represent
+\item{data}{a matrix or class \code{'ts'} object with \code{d>1} columns. Each column is taken to represent
 a univariate time series. Missing values are not supported.}
 }
 \value{

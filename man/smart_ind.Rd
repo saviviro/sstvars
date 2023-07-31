@@ -31,11 +31,11 @@ smart_ind(
 
 \item{params}{a real valued vector specifying the parameter values.
 Should have the form \eqn{\theta = (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\sigma,\alpha,\nu)},
-where
+where:
 \itemize{
   \item{\eqn{\phi_{m,0} = } the \eqn{(d \times 1)} intercept (or mean) vector of the \eqn{m}th regime.}
   \item{\eqn{\varphi_m = (vec(A_{m,1}),...,vec(A_{m,p}))} \eqn{(pd^2 \times 1)}.}
-  \item{\eqn{\sigma = (vech(\Omega_1),...,vech(\Omega_M)} \eqn{(Md(d + 1)/2 \times 1)}.}
+  \item{\eqn{\sigma = (vech(\Omega_1),...,vech(\Omega_M))} \eqn{(Md(d + 1)/2 \times 1)} (for structural models, see below).}
   \item{\eqn{\alpha = } the \eqn{(a\times 1)} vector containing the transition weight parameters.}
   \item{\eqn{\nu > 2} is the degrees of freedom parameter that is included only if \code{cond_dist="Student"}.}
 }
@@ -60,12 +60,15 @@ For models with...
   \item{mean_constraints:}{Replace \eqn{\phi_{1,0},...,\phi_{M,0}} with \eqn{(\mu_{1},...,\mu_{g})} where
         \eqn{\mu_i, \ (d\times 1)} is the mean parameter for group \eqn{i} and \eqn{g} is the number of groups.}
   \item{weight_constraints:}{Replace \eqn{\alpha} with \eqn{\xi} as described in the argument \code{weigh_constraints}.}
+  \item{B_constraints:}{\eqn{\sigma = } FILL IN}
 }
 Above, \eqn{\phi_{m,0}} is the intercept parameter, \eqn{A_{m,i}} denotes the \eqn{i}th coefficient matrix of the \eqn{m}th
 mixture component, and \eqn{\Omega_{m}} denotes the error term covariance matrix of the \eqn{m}:th mixture component.
 If \code{parametrization=="mean"}, just replace each \eqn{\phi_{m,0}} with regimewise mean \eqn{\mu_{m}}.
 \eqn{vec()} is vectorization operator that stacks columns of a given matrix into a vector. \eqn{vech()} stacks columns
-of a given matrix from the principal diagonal downwards (including elements on the diagonal) into a vector.}
+of a given matrix from the principal diagonal downwards (including elements on the diagonal) into a vector. \eqn{Bvec()}
+is a vectorization operator that stacks the columns of a given impact matrix \eqn{B_m} into a vector so that the elements
+that are constrained to zero by the argument \code{B_constraints} are excluded.}
 
 \item{weight_function}{What type of transition weights \eqn{\alpha_{m,t}} should be used?
 \describe{

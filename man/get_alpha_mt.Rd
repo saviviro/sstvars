@@ -22,7 +22,7 @@ get_alpha_mt(
 )
 }
 \arguments{
-\item{data}{data a matrix or class \code{'ts'} object with \code{d>1} columns. Each column is taken to represent
+\item{data}{a matrix or class \code{'ts'} object with \code{d>1} columns. Each column is taken to represent
 a univariate time series. Missing values are not supported.}
 
 \item{Y2}{the data arranged as obtained from \code{reform_data(data, p)} but excluding the last row}

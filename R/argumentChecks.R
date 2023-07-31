@@ -436,11 +436,11 @@ check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logis
 
   # Check B_constraints
   if(!is.null(B_constraints)) {
-    stop("B_constraints are not yet implemented to check_constraints")
-
-    if(identification != "reduced_form") {
-      stop("B_constraints are not available for reduced form models")
+    if(identification != "heteroskedasticity") {
+      stop("B_constraints are currently available only for models with identication = 'heteroskedasticity'.")
     }
+    # CHECK THE CONSTRAINTS
+    stop("B_constraints are not yet implemented to check_constraints")
   }
 }
 
