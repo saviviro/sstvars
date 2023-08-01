@@ -65,7 +65,7 @@ form_boldA <- function(p, M, d, all_A) {
 
 change_parametrization <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
                                    weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"),
-                                   identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
+                                   identification=c("reduced_form", "recursive", "heteroskedasticity"),
                                    AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                                    change_to=c("intercept", "mean")) {
   weight_function <- match.arg(weight_function)
@@ -190,7 +190,7 @@ change_regime <- function(p, M, d, params, m, regime_pars) {
 
 reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
                                     weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"),
-                                    identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
+                                    identification=c("reduced_form", "recursive", "heteroskedasticity"),
                                     AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                                     change_na=FALSE) {
   weight_function <- match.arg(weight_function)

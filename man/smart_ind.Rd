@@ -60,6 +60,7 @@ For models with...
   \item{mean_constraints:}{Replace \eqn{\phi_{1,0},...,\phi_{M,0}} with \eqn{(\mu_{1},...,\mu_{g})} where
         \eqn{\mu_i, \ (d\times 1)} is the mean parameter for group \eqn{i} and \eqn{g} is the number of groups.}
   \item{weight_constraints:}{Replace \eqn{\alpha} with \eqn{\xi} as described in the argument \code{weigh_constraints}.}
+  \item{\code{identification="heteroskedasticity"}:}{Replace .. FILL IN}
   \item{B_constraints:}{\eqn{\sigma = } FILL IN}
 }
 Above, \eqn{\phi_{m,0}} is the intercept parameter, \eqn{A_{m,i}} denotes the \eqn{i}th coefficient matrix of the \eqn{m}th

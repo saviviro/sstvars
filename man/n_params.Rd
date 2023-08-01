@@ -11,7 +11,7 @@ n_params(
   weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
   weightfun_pars = NULL,
   cond_dist = c("Gaussian", "Student"),
-  identification = c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
+  identification = c("reduced_form", "recursive", "heteroskedasticity"),
   AR_constraints = NULL,
   mean_constraints = NULL,
   weight_constraints = NULL,
@@ -65,7 +65,13 @@ See the vignette for more details about the weight functions.}
 \item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"} or \code{"Student"}.}
 
 \item{identification}{is it reduced form model or an identified structural model; if the latter, how is it identified
-(see the vignette or the references for details)?}
+(see the vignette or the references for details)?
+\describe{
+  \item{\code{"reduced_form"}:}{Reduced form model, shocks not identified.}
+  \item{\code{"recursive"}:}{The usual lower-triangular recursive identification of the shocks via their impact responses.}
+  \item{\code{"heteroskedasticity"}:}{Identification by conditional heteroskedasticity, which imposes constant relative
+    impact responses for each shock.}
+}}
 
 \item{AR_constraints}{a size \eqn{(Mpd^2 x q)} constraint matrix \eqn{C} specifying linear constraints
 to the autoregressive parameters. The constraints are of the form

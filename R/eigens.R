@@ -58,7 +58,7 @@ get_omega_eigens <- function(stvar) {
 
 get_boldA_eigens_par <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
                                  weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
-                                 identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
+                                 identification=c("reduced_form", "recursive", "heteroskedasticity"),
                                  AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
   parametrization <- match.arg(parametrization)
   weight_function <- match.arg(weight_function)
@@ -97,7 +97,7 @@ get_boldA_eigens_par <- function(p, M, d, params, weight_function=c("relative_de
 
 get_omega_eigens_par <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
                                  weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
-                                 identification=c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
+                                 identification=c("reduced_form", "recursive", "heteroskedasticity"),
                                  AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
   parametrization <- match.arg(parametrization)
   weight_function <- match.arg(weight_function)

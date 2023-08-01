@@ -13,7 +13,7 @@ loglikelihood(
   weightfun_pars = NULL,
   cond_dist = c("Gaussian", "Student"),
   parametrization = c("intercept", "mean"),
-  identification = c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
+  identification = c("reduced_form", "recursive", "heteroskedasticity"),
   AR_constraints = NULL,
   mean_constraints = NULL,
   weight_constraints = NULL,
@@ -67,6 +67,7 @@ For models with...
   \item{mean_constraints:}{Replace \eqn{\phi_{1,0},...,\phi_{M,0}} with \eqn{(\mu_{1},...,\mu_{g})} where
         \eqn{\mu_i, \ (d\times 1)} is the mean parameter for group \eqn{i} and \eqn{g} is the number of groups.}
   \item{weight_constraints:}{Replace \eqn{\alpha} with \eqn{\xi} as described in the argument \code{weigh_constraints}.}
+  \item{\code{identification="heteroskedasticity"}:}{Replace .. FILL IN}
   \item{B_constraints:}{\eqn{\sigma = } FILL IN}
 }
 Above, \eqn{\phi_{m,0}} is the intercept parameter, \eqn{A_{m,i}} denotes the \eqn{i}th coefficient matrix of the \eqn{m}th
@@ -120,7 +121,13 @@ See the vignette for more details about the weight functions.}
 parameters \eqn{\phi_{m,0}} or regime means \eqn{\mu_{m}}, m=1,...,M.}
 
 \item{identification}{is it reduced form model or an identified structural model; if the latter, how is it identified
-(see the vignette or the references for details)?}
+(see the vignette or the references for details)?
+\describe{
+  \item{\code{"reduced_form"}:}{Reduced form model, shocks not identified.}
+  \item{\code{"recursive"}:}{The usual lower-triangular recursive identification of the shocks via their impact responses.}
+  \item{\code{"heteroskedasticity"}:}{Identification by conditional heteroskedasticity, which imposes constant relative
+    impact responses for each shock.}
+}}
 
 \item{AR_constraints}{a size \eqn{(Mpd^2 x q)} constraint matrix \eqn{C} specifying linear constraints
 to the autoregressive parameters. The constraints are of the form

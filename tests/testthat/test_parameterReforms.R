@@ -886,7 +886,7 @@ test_that("form_boldA works correctly", {
 
 calc_mu <- function(p, M, d, params, weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
                     cond_dist = c("Gaussian", "Student"),
-                    identification = c("reduced_form", "impact_responses", "heteroskedasticity", "other"),
+                    identification = c("reduced_form", "recursive", "heteroskedasticity"),
                     AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                     weightfun_pars=NULL) {
   weight_function <- match.arg(weight_function)
