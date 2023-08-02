@@ -200,9 +200,6 @@ reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative
   if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(weight_constraints) && is.null(B_constraints)) {
     return(params)
   }
-  if(!is.null(B_constraints)) {
-    stop("B_constraints are not yet implemented to reform_constrained_pars")
-  }
 
   ## Obtain the mean parameters ##
   if(is.null(mean_constraints)) {
@@ -242,22 +239,24 @@ reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative
   }
 
   ## Obtain the covariance matrix parameters ##
-  if(identification == "reduced_form") {
+  if(identification == "reduced_form" || identification == "recursive") {
     covmatpars <- params[(d*M - less_pars + q + 1):(d*M - less_pars + q + M*d*(d + 1)/2)]
-   } else {
+  } else if(identification == "heteroskedasticity") {
     if(is.null(B_constraints)) {
-      # Something
-
-      # W <- structural_pars$W # Obtain the indices with zero constraints (the zeros don't exist in params)
-      # n_zeros <- sum(W == 0, na.rm=TRUE)
-      # new_W <- numeric(d^2)
-      # W_pars <- params[(d*M + q + 1 - less_pars):(d*M + q + d^2 - n_zeros - less_pars)]
-      # new_W[W != 0 | is.na(W)] <- W_pars
-    } else {
-      # Reform B_constraints
+      covmatpars <- params[(d*M - less_pars + q + 1):(d*M - less_pars + q + d^2 + d*(M - 1))]
+    } else { # B_constraints imposed on W
+      n_zeros <- sum(B_constraints == 0, na.rm=TRUE)
+      new_W <- numeric(d^2)
+      W_pars <- params[(d*M - less_pars + q + 1):(d*M - less_pars + q + d^2 - n_zeros)] # Does not include non parametrized zeros
+      new_W[B_constraints != 0 | is.na(B_constraints)] <- W_pars
+      if(M > 1) {
+        lambdas <- params[(d*M - less_pars + q + d^2 - n_zeros + 1):(d*M - less_pars + q + d^2 - n_zeros + d*(M - 1))]
+      } else {
+        lambdas <- numeric(0)
+      }
+      covmatpars <- c(new_W, lambdas)
     }
-    stop("Structural model are not yet implemented to reform_constraints_pars")
-   }
+  }
   n_covmatspars <- length(covmatpars)
 
   ## Obtain the weight parameters ##
