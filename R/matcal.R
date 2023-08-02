@@ -32,41 +32,40 @@ unvec <- function(d, a) {
 
 #' @title Vectorization operator that removes zeros
 #'
-#' @description \code{Bvec} stacks columns of the given matrix to form a vector
+#' @description \code{Wvec} stacks columns of the given matrix to form a vector
 #'   and removes elements that are zeros.
 #'
-#' @param Bmat a size \eqn{(dxd)} square matrix to be vectorized.
+#' @param W a size \eqn{(dxd)} square matrix to be vectorized.
 #' @return a vector of length \eqn{d^2 - n_zeros} where \eqn{n_zeros} is the
-#'   number of zero entries in the matrix \code{B}.
+#'   number of zero entries in the matrix \code{W}.
 #' @section Warning:
 #'  No argument checks!
 #' @keywords internal
 
-Bvec <- function(Bmat) {
-  Bmat[Bmat != 0]
+Wvec <- function(W) {
+  W[W != 0]
 }
 
 
 #' @title Reverse vectorization operator that restores zeros
 #'
-#' @description \code{unBvec} forms a square matrix from a vector of
+#' @description \code{unWvec} forms a square matrix from a vector of
 #'   stacked columns where zeros are removed according to impact
 #'   matrix constraints.
 #'
 #' @inheritParams unvec
-#' @param Bvector a length \eqn{d^2 - n_zeros} vector where \eqn{n_zeros} is the
+#' @param Wvector a length \eqn{d^2 - n_zeros} vector where \eqn{n_zeros} is the
 #'   number of zero entries in the impact matrix.
 #'
-#' @return a \eqn{(d x d)} impact matrix \eqn{B}.
+#' @return a \eqn{(d x d)} impact matrix \eqn{W}.
 #' @section Warning:
 #'  No argument checks!
 #' @keywords internal
 
-unBvec <- function(Bvector, d, B_constraints) {
-  if(is.null(B_constraints)) stop("B_constraints are needed")
-  new_B <- numeric(d^2)
-  new_B[B_constraints != 0] <- Bvector
-  matrix(new_B, nrow=d, byrow=FALSE)
+unWvec <- function(Wvector, d, B_constraints) {
+  new_W <- numeric(d^2)
+  new_W[B_constraints != 0] <- Wvector
+  matrix(new_W, nrow=d, byrow=FALSE)
 }
 
 
@@ -160,7 +159,7 @@ diag_Omegas <- function(Omega1, Omega2) {
 
 
 #' @title In the decomposition of the covariance matrices (Muirhead, 1982, Theorem A9.9), change
-#'   the order of the covariance matrices.
+#'   the ordering of the covariance matrices.
 #'
 #' @description \code{redecompose_Omegas} exchanges the order of the covariance matrices in
 #'   the decomposition of Muirhead (1982, Theorem A9.9) and returns the new decomposition.

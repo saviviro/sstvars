@@ -3,7 +3,7 @@
 \name{redecompose_Omegas}
 \alias{redecompose_Omegas}
 \title{In the decomposition of the covariance matrices (Muirhead, 1982, Theorem A9.9), change
-  the order of the covariance matrices.}
+  the ordering of the covariance matrices.}
 \usage{
 redecompose_Omegas(M, d, W, lambdas, perm = 1:M)
 }

@@ -27,11 +27,11 @@ reform_constrained_pars(
 
 \item{params}{a real valued vector specifying the parameter values.
 Should have the form \eqn{\theta = (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\sigma,\alpha,\nu)},
-where:
+where (see exceptions below):
 \itemize{
   \item{\eqn{\phi_{m,0} = } the \eqn{(d \times 1)} intercept (or mean) vector of the \eqn{m}th regime.}
   \item{\eqn{\varphi_m = (vec(A_{m,1}),...,vec(A_{m,p}))} \eqn{(pd^2 \times 1)}.}
-  \item{\eqn{\sigma = (vech(\Omega_1),...,vech(\Omega_M))} \eqn{(Md(d + 1)/2 \times 1)} (for structural models, see below).}
+  \item{\eqn{\sigma = (vech(\Omega_1),...,vech(\Omega_M))} \eqn{(Md(d + 1)/2 \times 1)}.}
   \item{\eqn{\alpha = } the \eqn{(a\times 1)} vector containing the transition weight parameters.}
   \item{\eqn{\nu > 2} is the degrees of freedom parameter that is included only if \code{cond_dist="Student"}.}
 }
@@ -56,8 +56,13 @@ For models with...
   \item{mean_constraints:}{Replace \eqn{\phi_{1,0},...,\phi_{M,0}} with \eqn{(\mu_{1},...,\mu_{g})} where
         \eqn{\mu_i, \ (d\times 1)} is the mean parameter for group \eqn{i} and \eqn{g} is the number of groups.}
   \item{weight_constraints:}{Replace \eqn{\alpha} with \eqn{\xi} as described in the argument \code{weigh_constraints}.}
-  \item{\code{identification="heteroskedasticity"}:}{Replace .. FILL IN}
-  \item{B_constraints:}{\eqn{\sigma = } FILL IN}
+  \item{\code{identification="heteroskedasticity"}:}{\eqn{\sigma = (vec(W),\lambda_2,...,\lambda_M)}, where
+        \eqn{W} \eqn{(d\times d)} and \eqn{\lambda_m} \eqn{(d\times 1)}, \eqn{m=2,...,M}, satisfy
+        \eqn{\Omega_1=WW'} and \eqn{\Omega_m=W\Lambda_mW'}, \eqn{\Lambda_m=diag(\lambda_{m1},...,\lambda_{md})},
+        \eqn{\lambda_{mi}>0}, \eqn{m=2,...,M}, \eqn{i=1,...,d}.}
+  \item{B_constraints (only for structural models identified by heteroskedasticity):}{Replace \eqn{vec(W)} with \eqn{\tilde{vec}(W)}
+        that stacks the columns of the matrix \eqn{W} in to vector
+        so that the elements that are constrained to zero are not included.}
 }
 Above, \eqn{\phi_{m,0}} is the intercept parameter, \eqn{A_{m,i}} denotes the \eqn{i}th coefficient matrix of the \eqn{m}th
 mixture component, and \eqn{\Omega_{m}} denotes the error term covariance matrix of the \eqn{m}:th mixture component.
