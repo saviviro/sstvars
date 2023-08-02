@@ -216,8 +216,7 @@ pick_distpars <- function(params, cond_dist=c("Gaussian", "Student")) {
 }
 
 
-
-#' @title Pick covariance matrices
+#' @title Pick regime parameters
 #'
 #' @description \code{pick_regime} picks the regime parameters
 #'   \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vech(\Omega_m))}
@@ -234,4 +233,43 @@ pick_regime <- function(p, M, d, params, m) {
     params[(M*d + M*p*d^2 + (m - 1)*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + m*d*(d + 1)/2)])
 }
 
+
+#' @title Pick the structural parameter matrix W
+#'
+#' @description \code{pick_W} picks the structural parameter matrix W from the parameter vector
+#'   of a structural model identified by heteroskedasticity.
+#' @inheritParams loglikelihood
+#' @details Constrained parameter vectors are not supported. Not even constraints in \eqn{W}!
+#' @return Returns a \eqn{(d x d)} matrix \eqn{W} for structural models identified by heteroskedasticity
+#'   and \code{NULL} for other models.
+#' @inherit in_paramspace references
+#' @keywords internal
+
+pick_W <- function(p, M, d, params, identification=c("reduced_form", "recursive", "heteroskedasticity")) {
+  identification <- match.arg(identification)
+  if(identification != "heteroskedasticity") return(NULL)
+  unvec(d=d, a=params[(M*d + d^2*p*M + 1):(M*d + d^2*p*M + d^2)])
+}
+
+
+#' @title Pick the structural parameter eigenvalues 'lambdas'
+#'
+#' @description \code{pick_lambdas} picks the structural parameters eigenvalue 'lambdas' from the parameter vector
+#'   of a structural model identified by heteroskedasticity.
+#' @inheritParams loglikelihood
+#' @return Returns the length \eqn{(d*(M - 1))} vector \eqn{(\lambda_{2},...,\lambda_{M})}
+#'  (see the argument \code{params}) for structural models identified by heteroskedasticity,
+#'  \code{numeric(0)} if \eqn{M=1}, and \code{NULL} for other models.
+#' @inherit pick_W details references
+#' @keywords internal
+
+pick_lambdas <- function(p, M, d, params, identification=c("reduced_form", "recursive", "heteroskedasticity")) {
+  identification <- match.arg(identification)
+  if(identification != "heteroskedasticity") {
+    return(NULL)
+  } else if(M == 1) {
+    return(numeric(0))
+  }
+  params[(M*d + d^2*p*M + d^2 + 1):((M*d + d^2*p*M + d^2 + d*(M - 1)))]
+}
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/pickParams.R
 \name{pick_regime}
 \alias{pick_regime}
-\title{Pick covariance matrices}
+\title{Pick regime parameters}
 \usage{
 pick_regime(p, M, d, params, m)
 }

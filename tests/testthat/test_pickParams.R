@@ -259,6 +259,9 @@ df_232_1_1 <- 30
 theta_232threst_1_1 <- c(theta_232thres_1_1, df_232_1_1)
 
 
+## Structural models
+
+
 test_that("pick_phi0 work correctly", {
   expect_equal(pick_phi0(M=2, d=2, params=theta_122thres_1_1)[,1], phi10_122)
   expect_equal(pick_phi0(M=2, d=2, params=theta_122thres_1_1)[,2], phi20_122)
