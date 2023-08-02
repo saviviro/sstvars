@@ -259,10 +259,42 @@ df_232_1_1 <- 30
 theta_232threst_1_1 <- c(theta_232thres_1_1, df_232_1_1)
 
 
-## Structural models
+### Structural models
+# (recursively identified models use the same parametrization as reduced form models)
+
+# p=1, M=2, d=2, weight_function="relative_dens", identification="heteroskedasticity"
+W_122 <- matrix(c(-0.03, 0.24, -0.76, -0.02), nrow=2, ncol=2, byrow=FALSE)
+lambdas_122 <- c(3.36, 0.86)
+theta_122relgsh <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vec(W_122), lambdas_122, alpha1_122)
+
+# p=1, M=3, d=2, weight_function="relative_dens", identification="heteroskedasticity"
+W_132 <- W_122; lambdas2_132 <- lambdas_122; lambdas3_132 <- c(2.1, 0.62)
+theta_132relgsh <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                     vec(W_132), lambdas2_132, lambdas3_132, alpha1_132, alpha2_132)
+
+# p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="Student",
+# identification="heteroskedasticity"
+W_222 <- W_122; lambdas_222 <- lambdas_122
+theta_222logistictsh_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                              vec(W_222), lambdas_222, c_and_gamma_222_2_1, df_222_2_1)
+
+# p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=1), identification="heteroskedasticity"
+theta_122logsh_12_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vec(W_122), lambdas_122, gamma1_122_12_1)
+
+# p=1, M=2, d=3, weight_function="exponential", weightfun_pars=c(1, 1), identification="heteroskedasticity"
+W_123 <- matrix(c(-0.47, -0.40, 1.25, 0.58, -1.01, 0.18, -0.66, -0.91, -1.19), nrow=3, ncol=3, byrow=FALSE)
+lambdas_123 <- c(1.56, 1.44, 0.59)
+theta_123expsh_1_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vec(W_123), lambdas_123, c_and_gamma_123_1_1)
+
+# p=2, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="Student",
+# identification="heteroskedasticity"
+W_232 <- W_132; lambdas2_232 <- lambdas2_132; lambdas3_232 <- lambdas3_132
+theta_232threstsh_1_1 <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232), vec(A22_232),
+                          vec(A31_232), vec(A32_232), vec(W_232), lambdas2_232, lambdas3_232, r1_232_1_1, r2_232_1_1,
+                          df_232_1_1)
 
 
-test_that("pick_phi0 work correctly", {
+test_that("pick_phi0 works correctly", {
   expect_equal(pick_phi0(M=2, d=2, params=theta_122thres_1_1)[,1], phi10_122)
   expect_equal(pick_phi0(M=2, d=2, params=theta_122thres_1_1)[,2], phi20_122)
   expect_equal(pick_phi0(M=2, d=2, params=theta_222thres_2_2)[,1], phi10_222)
@@ -336,7 +368,7 @@ test_that("pick_phi0 work correctly", {
   expect_equal(pick_phi0(M=2, d=3, params=theta_123logt_1_1)[,2], phi20_123)
 })
 
-test_that("pick_Ami work correctly", {
+test_that("pick_Ami works correctly", {
   expect_equal(pick_Ami(p=1, M=1, d=2, m=1, i=1, params=theta_112relg), A11_112)
   expect_equal(pick_Ami(p=2, M=1, d=2, m=1, i=1, params=theta_212relg), A11_212)
   expect_equal(pick_Ami(p=2, M=1, d=2, m=1, i=2, params=theta_212relg), A12_212)
@@ -414,7 +446,7 @@ test_that("pick_Ami work correctly", {
   expect_equal(pick_Ami(p=2, M=1, d=3, m=1, i=1, params=theta_213relg, unvec=FALSE), vec(A11_213))
 })
 
-test_that("pick_Am work correctly", {
+test_that("pick_Am works correctly", {
   expect_equal(pick_Am(p=1, M=1, d=2, m=1, params=theta_112relg)[, , 1], A11_112)
   expect_equal(pick_Am(p=2, M=1, d=2, m=1, params=theta_212relg)[, , 1], A11_212)
   expect_equal(pick_Am(p=2, M=1, d=2, m=1, params=theta_212relg)[, , 2], A12_212)
@@ -488,7 +520,7 @@ test_that("pick_Am work correctly", {
   expect_equal(pick_Am(p=1, M=2, d=3, m=2, params=theta_123logt_1_1)[, , 1], A21_123)
 })
 
-test_that("pick_allA work correctly", {
+test_that("pick_allA works correctly", {
   expect_equal(pick_allA(p=1, M=1, d=2, params=theta_112relg)[, , 1, 1], A11_112)
   expect_equal(pick_allA(p=2, M=1, d=2, params=theta_212relg)[, , 1, 1], A11_212)
   expect_equal(pick_allA(p=2, M=1, d=2, params=theta_212relg)[, , 2, 1], A12_212)
@@ -558,7 +590,7 @@ test_that("pick_allA work correctly", {
   expect_equal(pick_allA(p=1, M=2, d=3, params=theta_123log_1_1)[, , 1, 2], A21_123)
 })
 
-test_that("pick_Omegas work correctly", {
+test_that("pick_Omegas works correctly", {
   expect_equal(pick_Omegas(p=1, M=1, d=2, params=theta_112relg)[, , 1], Omega1_112)
   expect_equal(pick_Omegas(p=2, M=1, d=2, params=theta_212relg)[, , 1], Omega1_212)
   expect_equal(pick_Omegas(p=3, M=1, d=2, params=theta_312relg)[, , 1], Omega1_312)
@@ -613,7 +645,7 @@ test_that("pick_Omegas work correctly", {
   expect_equal(pick_Omegas(p=1, M=2, d=3, params=theta_123logt_1_1)[, , 2], Omega2_123)
 })
 
-test_that("pick_weightpars work correctly", {
+test_that("pick_weightpars works correctly", {
   # threshold
   expect_equal(pick_weightpars(p=1, M=2, d=2, params=theta_122thres_1_1, weight_function="threshold", cond_dist="Gaussian",
                                weightfun_pars=c(1, 1)), r1_122_1_1)
@@ -703,7 +735,7 @@ test_that("pick_weightpars work correctly", {
 
 })
 
-test_that("pick_regime work correctly", {
+test_that("pick_regime works correctly", {
   expect_equal(pick_regime(p=1, M=1, d=2, m=1, params=theta_112relg), c(phi10_112, vec(A11_112), vech(Omega1_112)))
   expect_equal(pick_regime(p=2, M=1, d=2, m=1, params=theta_212relg), c(phi10_212, vec(A11_212), vec(A12_212), vech(Omega1_212)))
   expect_equal(pick_regime(p=3, M=1, d=2, m=1, params=theta_312relg), c(phi10_312, vec(A11_312), vec(A12_312),
@@ -762,17 +794,23 @@ test_that("pick_regime work correctly", {
 })
 
 
-test_that("pick_distpars work correctly", {
-  # Gaussian
-  expect_equal(pick_distpars(params=theta_123thres_2_1, cond_dist="Gaussian"), numeric(0))
-  expect_equal(pick_distpars(params=theta_123exp_1_1, cond_dist="Gaussian"), numeric(0))
-  expect_equal(pick_distpars(params=theta_122logistic_1_1, cond_dist="Gaussian"), numeric(0))
-  expect_equal(pick_distpars(params=theta_112relg, cond_dist="Gaussian"), numeric(0))
-  expect_equal(pick_distpars(params=theta_222log_2_1), numeric(0))
+test_that("pick_W works correctly", {
+  expect_equal(pick_W(p=1, M=2, d=2, params=theta_122relgsh, identification="heteroskedasticity"), W_122)
+  expect_equal(pick_W(p=1, M=3, d=2, params=theta_132relgsh, identification="heteroskedasticity"), W_132)
+  expect_equal(pick_W(p=2, M=2, d=2, params=theta_222logistictsh_2_1, identification="heteroskedasticity"), W_222)
+  expect_equal(pick_W(p=1, M=2, d=2, params=theta_122logsh_12_1, identification="heteroskedasticity"), W_122)
+  expect_equal(pick_W(p=1, M=2, d=3, params=theta_123expsh_1_1, identification="heteroskedasticity"), W_123)
+  expect_equal(pick_W(p=2, M=3, d=2, params=theta_232threstsh_1_1, identification="heteroskedasticity"), W_232)
+})
 
-  # Student
-  expect_equal(pick_distpars(params=theta_232threst_1_1, cond_dist="Student"), df_232_1_1)
-  expect_equal(pick_distpars(params=theta_122expt_1_1, cond_dist="Student"), df_122_1_1)
-  expect_equal(pick_distpars(params=theta_123logt_1_1, cond_dist="Student"), df_123_1_1)
-  expect_equal(pick_distpars(params=theta_222logistict_2_1, cond_dist="Student"), df_222_2_1)
+
+test_that("pick_lambdas works correctly", {
+  expect_equal(pick_lambdas(p=1, M=2, d=2, params=theta_122relgsh, identification="heteroskedasticity"), lambdas_122)
+  expect_equal(pick_lambdas(p=1, M=3, d=2, params=theta_132relgsh, identification="heteroskedasticity"),
+               c(lambdas2_132, lambdas3_132))
+  expect_equal(pick_lambdas(p=2, M=2, d=2, params=theta_222logistictsh_2_1, identification="heteroskedasticity"), lambdas_222)
+  expect_equal(pick_lambdas(p=1, M=2, d=2, params=theta_122logsh_12_1, identification="heteroskedasticity"), lambdas_122)
+  expect_equal(pick_lambdas(p=1, M=2, d=3, params=theta_123expsh_1_1, identification="heteroskedasticity"), lambdas_123)
+  expect_equal(pick_lambdas(p=2, M=3, d=2, params=theta_232threstsh_1_1, identification="heteroskedasticity"),
+               c(lambdas2_232, lambdas3_232))
 })
