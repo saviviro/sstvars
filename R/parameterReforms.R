@@ -286,7 +286,7 @@ reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative
   ## Obtain the distribution parameters ##
   if(cond_dist == "Gaussian") {
     distpars <- numeric(0)
-  } else { # cond_dist == Student
+  } else { # cond_dist == "Student"
     distpars <- params[length(params)]
   }
 
