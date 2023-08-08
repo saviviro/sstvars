@@ -61,7 +61,7 @@ Returns parameter vector with \code{m}:th regime changed to \code{regime_pars}.
   to the new given parameters.
 }
 \details{
-Does not support constrained models or structural models. Weight parameters nor distribution
+Does not support constrained models or structural models. Weight parameters and distribution
   parameters are not changed.
 }
 \references{

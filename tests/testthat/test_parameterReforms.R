@@ -710,7 +710,6 @@ theta_232threstshb_1_1_expanded <- c(phi10_232, phi20_232, phi30_232, vec(A11_23
                                      vec(A22_232), vec(A31_232), vec(A32_232), vec(W_232b), lambdas2_232,
                                      lambdas3_232, r1_232_1_1, r2_232_1_1, df_232_1_1)
 
-
 test_that("reform_constrained_pars works correctly", {
   # Models with AR_constraints
   expect_equal(reform_constrained_pars(p=1, M=1, d=2, params=theta_112relgc, weight_function="relative_dens",
@@ -1072,6 +1071,27 @@ theta_222logistict_2_1_mu <- change_parametrization(p=2, M=2, d=2, params=theta_
 theta_123expt_1_1_mu <- change_parametrization(p=1, M=2, d=3, params=theta_123expt_1_1, weight_function="exponential",
                                                weightfun_pars=c(1, 1), cond_dist="Student", change_to="mean")
 
+## Structural
+theta_122relgshc_mu <- change_parametrization(p=1, M=2, d=2, params=theta_122relgshc, weight_function="relative_dens",
+                                              identification="heteroskedasticity", AR_constraints=C_122, change_to="mean")
+theta_132relgshb_mu <- change_parametrization(p=1, M=3, d=2, params=theta_132relgshb,  weight_function="relative_dens",
+                                              identification="heteroskedasticity", B_constraints=matrix(c(0.1, NA, 0.3, 0), nrow=2),
+                                              change_to="mean")
+theta_122logshwb_12_1_mu <- change_parametrization(p=1, M=2, d=2, params=theta_122logshwb_12_1, weight_function="mlogit",
+                                                   weightfun_pars=list(vars=1:2, lags=1), identification="heteroskedasticity",
+                                                   weight_constraints=list(R=0, r=c(0.1, 0.2, 0.3)),
+                                                   B_constraints=matrix(c(0.1, 0.2, 0.3, 0), nrow=2), change_to="mean")
+theta_123expshcwb_1_1_mu <- change_parametrization(p=1, M=2, d=3, params=theta_123expshcwb_1_1, weight_function="exponential",
+                                                   weightfun_pars=c(1, 1), identification="heteroskedasticity",
+                                                   AR_constraints=C_123, weight_constraints=list(R=matrix(c(1, 0.5), nrow=2), r=c(0, 0)),
+                                                   B_constraints=matrix(c(-0.47, -0.40, 0, 0.58, -1.01, -0.66, 0, -0.91, -1.19),
+                                                                        nrow=3, ncol=3, byrow=FALSE), change_to="mean")
+theta_232threstshb_1_1_mu <- change_parametrization(p=2, M=3, d=2, params=theta_232threstshb_1_1, weight_function="threshold",
+                                                    weightfun_pars=c(1, 1), cond_dist="Student",
+                                                    identification="heteroskedasticity",
+                                                    B_constraints=matrix(c(0.1, 0.2, -0.3, 0), nrow=2),
+                                              change_to="mean")
+
 
 test_that("change_parametrization works correctly", {
   expect_equal(pick_phi0(M=3, d=2, params=theta_232thresw_1_1_mu),
@@ -1194,6 +1214,49 @@ test_that("change_parametrization works correctly", {
                                       weightfun_pars=c(1, 1), cond_dist="Student",
                                       change_to="intercept"), theta_123expt_1_1)
 
+  # Structural
+  expect_equal(pick_phi0(M=2, d=2, params=theta_122relgshc_mu),
+               calc_mu(p=1, M=2, d=2, params=theta_122relgshc, weight_function="relative_dens",
+                       identification="heteroskedasticity", AR_constraints=C_122))
+  expect_equal(change_parametrization(p=1, M=2, d=2, params=theta_122relgshc_mu, weight_function="relative_dens",
+                                      identification="heteroskedasticity", AR_constraints=C_122,
+                                      change_to="intercept"), theta_122relgshc)
+  expect_equal(pick_phi0(M=3, d=2, params=theta_132relgshb_mu),
+               calc_mu(p=1, M=3, d=2, params=theta_132relgshb, weight_function="relative_dens",
+                       identification="heteroskedasticity", B_constraints=matrix(c(0.1, NA, 0.3, 0), nrow=2)))
+  expect_equal(change_parametrization(p=1, M=3, d=2, params=theta_132relgshb_mu,   weight_function="relative_dens",
+                                      identification="heteroskedasticity", B_constraints=matrix(c(0.1, NA, 0.3, 0), nrow=2),
+                                      change_to="intercept"), theta_132relgshb)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_122logshwb_12_1_mu),
+               calc_mu(p=1, M=2, d=2, params=theta_122logshwb_12_1, weight_function="mlogit",
+                       weightfun_pars=list(vars=1:2, lags=1), identification="heteroskedasticity",
+                       weight_constraints=list(R=0, r=c(0.1, 0.2, 0.3)),
+                       B_constraints=matrix(c(0.1, 0.2, 0.3, 0), nrow=2)))
+  expect_equal(change_parametrization(p=1, M=2, d=2, params=theta_122logshwb_12_1_mu, weight_function="mlogit",
+                                      weightfun_pars=list(vars=1:2, lags=1), identification="heteroskedasticity",
+                                      weight_constraints=list(R=0, r=c(0.1, 0.2, 0.3)),
+                                      B_constraints=matrix(c(0.1, 0.2, 0.3, 0), nrow=2),
+                                      change_to="intercept"), theta_122logshwb_12_1)
+  expect_equal(pick_phi0(M=2, d=3, params=theta_123expshcwb_1_1_mu),
+               calc_mu(p=1, M=2, d=3, params=theta_123expshcwb_1_1, weight_function="exponential",
+                       weightfun_pars=c(1, 1), identification="heteroskedasticity",
+                       AR_constraints=C_123, weight_constraints=list(R=matrix(c(1, 0.5), nrow=2), r=c(0, 0)),
+                       B_constraints=matrix(c(-0.47, -0.40, 0, 0.58, -1.01, -0.66, 0, -0.91, -1.19),
+                                            nrow=3, ncol=3, byrow=FALSE)))
+  expect_equal(change_parametrization(p=1, M=2, d=3, params=theta_123expshcwb_1_1_mu, weight_function="exponential",
+                                      weightfun_pars=c(1, 1), identification="heteroskedasticity",
+                                      AR_constraints=C_123, weight_constraints=list(R=matrix(c(1, 0.5), nrow=2), r=c(0, 0)),
+                                      B_constraints=matrix(c(-0.47, -0.40, 0, 0.58, -1.01, -0.66, 0, -0.91, -1.19),
+                                                           nrow=3, ncol=3, byrow=FALSE),
+                                      change_to="intercept"), theta_123expshcwb_1_1)
+  expect_equal(pick_phi0(M=3, d=2, params=theta_232threstshb_1_1_mu),
+               calc_mu(p=2, M=3, d=2, params=theta_232threstshb_1_1, weight_function="threshold",
+                       weightfun_pars=c(1, 1), cond_dist="Student", identification="heteroskedasticity",
+                       B_constraints=matrix(c(0.1, 0.2, -0.3, 0), nrow=2)))
+  expect_equal(change_parametrization(p=2, M=3, d=2, params=theta_232threstshb_1_1_mu, weight_function="threshold",
+                                      weightfun_pars=c(1, 1), cond_dist="Student", identification="heteroskedasticity",
+                                      B_constraints=matrix(c(0.1, 0.2, -0.3, 0), nrow=2),
+                                      change_to="intercept"), theta_232threstshb_1_1)
 })
 
 

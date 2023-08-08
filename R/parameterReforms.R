@@ -161,7 +161,7 @@ sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "lo
 #' @param regime_pars the \eqn{(dp + pd^2 + d(d+1)/2 \times 1)} vector
 #'   \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vech(\Omega_m))}
 #' @return Returns parameter vector with \code{m}:th regime changed to \code{regime_pars}.
-#' @details Does not support constrained models or structural models. Weight parameters nor distribution
+#' @details Does not support constrained models or structural models. Weight parameters and distribution
 #'   parameters are not changed.
 #' @inherit in_paramspace references
 #' @keywords internal
