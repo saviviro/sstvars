@@ -241,11 +241,14 @@ reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative
   ## Obtain the covariance matrix parameters ##
   if(identification == "reduced_form" || identification == "recursive") {
     covmatpars <- params[(d*M - less_pars + q + 1):(d*M - less_pars + q + M*d*(d + 1)/2)]
+    less_covmatpars <- 0 # How much covmats pars less are there in the constrained param vector relative to the expanded one
   } else if(identification == "heteroskedasticity") {
     if(is.null(B_constraints)) {
       covmatpars <- params[(d*M - less_pars + q + 1):(d*M - less_pars + q + d^2 + d*(M - 1))]
+      less_covmatpars <- 0
     } else { # B_constraints imposed on W
       n_zeros <- sum(B_constraints == 0, na.rm=TRUE)
+      less_covmatpars <- n_zeros
       new_W <- numeric(d^2)
       W_pars <- params[(d*M - less_pars + q + 1):(d*M - less_pars + q + d^2 - n_zeros)] # Does not include non parametrized zeros
       new_W[B_constraints != 0 | is.na(B_constraints)] <- W_pars
@@ -257,7 +260,7 @@ reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative
       covmatpars <- c(new_W, lambdas)
     }
   }
-  n_covmatspars <- length(covmatpars)
+  n_covmatpars <- length(covmatpars) - less_covmatpars
 
   ## Obtain the weight parameters ##
   if(M > 1) {
@@ -269,13 +272,13 @@ reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative
       n_nonconstr_weightpars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
     }
     if(is.null(weight_constraints)) {
-      weightpars <- params[(d*M - less_pars + q + n_covmatspars + 1):(d*M - less_pars + q + n_covmatspars + n_nonconstr_weightpars)]
+      weightpars <- params[(d*M - less_pars + q + n_covmatpars + 1):(d*M - less_pars + q + n_covmatpars + n_nonconstr_weightpars)]
     } else { # Obtain unconstrained weightpars
       if(all(weight_constraints[[1]] == 0)) {
         weightpars <- weight_constraints[[2]] # alpha = r if R=0
       } else {
         l <- ncol(weight_constraints[[1]])
-        xi <- params[(d*M - less_pars + q + n_covmatspars + 1):(d*M - less_pars + q + n_covmatspars + l)]
+        xi <- params[(d*M - less_pars + q + n_covmatpars + 1):(d*M - less_pars + q + n_covmatpars + l)]
         weightpars <- weight_constraints[[1]]%*%xi + weight_constraints[[2]] # alpha = R%*%xi + r
       }
     }

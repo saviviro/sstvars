@@ -74,7 +74,7 @@ that are constrained to zero by the argument \code{B_constraints} are excluded.}
 }}
 }
 \value{
-Returns the length \eqn{(d*(M - 1))} vector \eqn{(\lambda_{2},...,\lambda_{M})}
+Returns the length \code{(d*(M - 1))} vector \eqn{(\lambda_{2},...,\lambda_{M})}
  (see the argument \code{params}) for structural models identified by heteroskedasticity,
  \code{numeric(0)} if \eqn{M=1}, and \code{NULL} for other models.
 }
