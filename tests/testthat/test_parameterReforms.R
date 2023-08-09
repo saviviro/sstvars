@@ -1260,6 +1260,32 @@ test_that("change_parametrization works correctly", {
 })
 
 
+
+# p=1, M=3, d=2, weight_function="relative_dens", identification="heteroskedasticity", to sort
+alpha1_132_22 <- 0.2; alpha2_132_22 <- 0.3
+theta_132relgsh_2 <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                       vec(W_132), lambdas2_132, lambdas3_132, alpha1_132_22, alpha2_132_22)
+sortedWpars_132 <- redecompose_Omegas(M=3, d=2, W=W_132, lambdas=c(lambdas2_132, lambdas3_132), perm=c(3, 2, 1))
+theta_132relgsh_2_sorted <- c(phi30_132, phi20_132, phi10_132, vec(A31_132), vec(A21_132), vec(A11_132),
+                              sortedWpars_132, 1 - alpha1_132_22 - alpha2_132_22, alpha2_132_22)
+
+# p=1, M=3, d=2, weight_function="relative_dens", identification="heteroskedasticity", to sort
+alpha1_132_33 <- 0.5; alpha2_132_33 <- 0.2
+theta_132relgsh_3 <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                       vec(W_132), lambdas2_132, lambdas3_132, alpha1_132_33, alpha2_132_33)
+sortedWpars_132_3 <- redecompose_Omegas(M=3, d=2, W=W_132, lambdas=c(lambdas2_132, lambdas3_132), perm=c(1, 3, 2))
+theta_132relgsh_3_sorted <- c(phi10_132, phi30_132, phi20_132, vec(A11_132), vec(A31_132), vec(A21_132),
+                              sortedWpars_132_3, alpha1_132_33, 1 - alpha1_132_33 - alpha2_132_33)
+
+# p=1, M=3, d=2, weight_function="relative_dens", identification="heteroskedasticity",
+# B_constraints=matrix(c(0.1, NA, 0.3, 0), nrow=2); to sort!
+W_132b <- matrix(c(0.11, 0.22, 0.33, 0), nrow=2);
+theta_132relgshb_2 <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                        Wvec(W_132b), lambdas2_132, lambdas3_132, alpha1_132_22, alpha2_132_22)
+sortedWpars_132b_2 <- redecompose_Omegas(M=3, d=2, W=W_132b, lambdas=c(lambdas2_132, lambdas3_132), perm=c(3, 2, 1))
+theta_132relgshb_2_sorted <- c(phi30_132, phi20_132, phi10_132, vec(A31_132), vec(A21_132), vec(A11_132),
+                               Wvec(sortedWpars_132b_2), 1 - alpha1_132_22 - alpha2_132_22, alpha2_132_22)
+
 test_that("sort_regimes works correctly", {
   expect_equal(sort_regimes(p=1, M=1, d=2, params=theta_112relg, weight_function="relative_dens"), theta_112relg)
   expect_equal(sort_regimes(p=2, M=1, d=2, params=theta_212relg, weight_function="relative_dens"), theta_212relg)
@@ -1288,6 +1314,18 @@ test_that("sort_regimes works correctly", {
                c(phi20_123, phi10_123, vec(A21_123), vec(A11_123), vech(Omega2_123),
                  vech(Omega1_123), 1-alpha1_123_2))
 
+  # Struct models
+  expect_equal(sort_regimes(p=1, M=2, d=2, params=theta_122relgsh, weight_function="relative_dens", identification="heteroskedasticity"),
+               theta_122relgsh)
+  expect_equal(sort_regimes(p=1, M=3, d=2, params=theta_132relgsh_2, weight_function="relative_dens", identification="heteroskedasticity"),
+               theta_132relgsh_2_sorted)
+  expect_equal(sort_regimes(p=1, M=3, d=2, params=theta_132relgsh_3, weight_function="relative_dens", identification="heteroskedasticity"),
+               theta_132relgsh_3_sorted)
+  expect_equal(sort_regimes(p=1, M=3, d=2, params=theta_132relgshb, weight_function="relative_dens", identification="heteroskedasticity",
+                            B_constraints=matrix(c(0.1, NA, 0.3, 0), nrow=2)), theta_132relgshb)
+  expect_equal(sort_regimes(p=1, M=3, d=2, params=theta_132relgshb_2, weight_function="relative_dens", identification="heteroskedasticity",
+                            B_constraints=matrix(c(0.1, NA, 0.3, 0), nrow=2)), theta_132relgshb_2_sorted)
+
   # Does not sort:
   expect_equal(sort_regimes(p=1, M=2, d=2, params=theta_122log_1_1, weight_function="mlogit"), theta_122log_1_1)
   expect_equal(sort_regimes(p=1, M=2, d=2, params=theta_122logistic_1_1, weight_function="logistic"), theta_122logistic_1_1)
@@ -1297,5 +1335,13 @@ test_that("sort_regimes works correctly", {
   expect_equal(sort_regimes(p=2, M=2, d=2, params=theta_222logistict_2_1, weight_function="logistic", cond_dist="Student"), theta_222logistict_2_1)
   expect_equal(sort_regimes(p=1, M=2, d=3, params=theta_123expt_1_1, weight_function="exponential", cond_dist="Student"), theta_123expt_1_1)
   expect_equal(sort_regimes(p=2, M=3, d=2, params=theta_232threst_1_1, weight_function="threshold", cond_dist="Student"), theta_232threst_1_1)
+  expect_equal(sort_regimes(p=2, M=2, d=2, params=theta_222logistictsh_2_1, weight_function="logistic", weightfun_pars=c(2, 1),
+                            cond_dist="Student", identification="heteroskedasticity"), theta_222logistictsh_2_1)
+  expect_equal(sort_regimes(p=1, M=2, d=2, params=theta_122logsh_12_1, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=1),
+                            identification="heteroskedasticity"), theta_122logsh_12_1)
+  expect_equal(sort_regimes(p=1, M=2, d=3, params=theta_123expsh_1_1, weight_function="exponential", weightfun_pars=c(1, 1),
+                            identification="heteroskedasticity"), theta_123expsh_1_1)
+  expect_equal(sort_regimes(p=2, M=3, d=2, params=theta_232threstsh_1_1, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="Student",
+                            identification="heteroskedasticity"), theta_232threstsh_1_1)
 })
 

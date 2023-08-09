@@ -142,11 +142,18 @@ sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "lo
 
   # Covmat pars
   if(identification == "heteroskedasticity") {
-    n_zeros <- sum(B_constraints == 0, na.rm=TRUE)
-    less_covmatpars <- n_zeros
-    old_W <- numeric(d^2) # We include the unparametrized zeros here
+    if(is.null(B_constraints)) {
+      n_zeros <- 0
+    } else {
+      n_zeros <- sum(B_constraints == 0, na.rm=TRUE)
+    }
     W_pars <- params[(d*M + M*p*d^2 + 1):(d*M + M*p*d^2 + d^2 - n_zeros)] # Does not include non parametrized zeros
-    old_W[B_constraints != 0 | is.na(B_constraints)] <- W_pars
+    if(is.null(B_constraints)) {
+      old_W <- W_pars
+    } else {
+      old_W <- numeric(d^2) # We include the unparametrized zeros here
+      old_W[B_constraints != 0 | is.na(B_constraints)] <- W_pars
+    }
     lambdas <- params[(d*M + M*p*d^2 + d^2 - n_zeros + 1):(d*M + M*p*d^2 + d^2 - n_zeros + d*(M - 1))]
     new_covmatpars <- Wvec(redecompose_Omegas(M=M, d=d, W=old_W, lambdas=lambdas, perm=new_order)) # Wvec removes the unparametrized zeros
   } else { # Identification %in% c("reduced_form", "recursive")
