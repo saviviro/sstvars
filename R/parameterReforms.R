@@ -101,8 +101,8 @@ change_parametrization <- function(p, M, d, params, weight_function=c("relative_
 #'   the transition weight parameters.
 #'
 #' @inheritParams loglikelihood
-#' @details Constrained parameter vectors are not supported. Currently only reduced form models
-#'   are supported.
+#' @details Constrained parameter vectors are not supported (except \code{B_constraints} for structural models identified
+#'   by heteroskedasticity).
 #' @return Returns sorted parameter vector of the form described for the argument \code{params},
 #'   with the regimes sorted so that...
 #'   \describe{
@@ -117,15 +117,13 @@ change_parametrization <- function(p, M, d, params, weight_function=c("relative_
 
 sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
                          weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"),
-                         identification=c("reduced_form", "recursive", "heteroskedasticity")) {
+                         identification=c("reduced_form", "recursive", "heteroskedasticity"), B_constraints=NULL) {
   weight_function <- match.arg(weight_function)
   if(M == 1 || weight_function %in% c("logistic", "mlogit", "exponential", "threshold")) {
     return(params) # Does not sort / nothing to sort
   }
-
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
-  if(identification != "reduced_form") stop("Structural models not yet implemented to sort_regimes!")
 
   all_weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function,
                                     cond_dist=cond_dist)
@@ -141,12 +139,27 @@ sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "lo
 
   all_phi0 <- pick_phi0(M=M, d=d, params=params)
   all_A <- matrix(pick_allA(p=p, M=M, d=d, params=params), ncol=M) #matrix(params[(d*M + 1):(d*M + d^2*p*M)], ncol=M)
-  all_Omega <- matrix(params[(d*M*(1 + p*d) + 1):(d*M*(1 + p*d) + M*d*(d + 1)/2)], nrow=d*(d + 1)/2, ncol=M)
+
+  # Covmat pars
+  if(identification == "heteroskedasticity") {
+    n_zeros <- sum(B_constraints == 0, na.rm=TRUE)
+    less_covmatpars <- n_zeros
+    old_W <- numeric(d^2) # We include the unparametrized zeros here
+    W_pars <- params[(d*M + M*p*d^2 + 1):(d*M + M*p*d^2 + d^2 - n_zeros)] # Does not include non parametrized zeros
+    old_W[B_constraints != 0 | is.na(B_constraints)] <- W_pars
+    lambdas <- params[(d*M + M*p*d^2 + d^2 - n_zeros + 1):(d*M + M*p*d^2 + d^2 - n_zeros + d*(M - 1))]
+    new_covmatpars <- Wvec(redecompose_Omegas(M=M, d=d, W=old_W, lambdas=lambdas, perm=new_order)) # Wvec removes the unparametrized zeros
+  } else { # Identification %in% c("reduced_form", "recursive")
+    all_Omega <- matrix(params[(d*M*(1 + p*d) + 1):(d*M*(1 + p*d) + M*d*(d + 1)/2)], nrow=d*(d + 1)/2, ncol=M)
+    new_covmatpars <- all_Omega[,new_order]
+  }
+
+  # Weight and dist pars
   all_weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function,
                                     weightfun_pars=weightfun_pars, cond_dist=cond_dist)
   all_distpars <- pick_distpars(params=params, cond_dist=cond_dist)
 
-  c(all_phi0[,new_order], all_A[,new_order], all_Omega[,new_order], new_weightpars, all_distpars)
+  c(all_phi0[,new_order], all_A[,new_order], new_covmatpars, new_weightpars, all_distpars)
 }
 
 

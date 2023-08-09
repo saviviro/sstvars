@@ -12,7 +12,8 @@ sort_regimes(
   weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
   weightfun_pars = NULL,
   cond_dist = c("Gaussian", "Student"),
-  identification = c("reduced_form", "recursive", "heteroskedasticity")
+  identification = c("reduced_form", "recursive", "heteroskedasticity"),
+  B_constraints = NULL
 )
 }
 \arguments{
@@ -114,6 +115,12 @@ See the vignette for more details about the weight functions.}
   \item{\code{"heteroskedasticity"}:}{Identification by conditional heteroskedasticity, which imposes constant relative
     impact responses for each shock.}
 }}
+
+\item{B_constraints}{a \eqn{(d \times d)} matrix with its entries imposing constraints on the impact matrix \eqn{B_t}:
+\code{NA} indicating that the element is unconstrained, a positive value indicating strict positive sign constraint,
+a negative value indicating strict negative sign constraint, and zero indicating that the element is constrained to zero.
+Currently only available for models with \code{identification="heteroskedasticity"} due to the (in)availability of appropriate
+parametrizations that allow such constraints to be imposed.}
 }
 \value{
 Returns sorted parameter vector of the form described for the argument \code{params},
@@ -132,7 +139,7 @@ Returns sorted parameter vector of the form described for the argument \code{par
   the transition weight parameters.
 }
 \details{
-Constrained parameter vectors are not supported. Currently only reduced form models
-  are supported.
+Constrained parameter vectors are not supported (except \code{B_constraints} for structural models identified
+  by heteroskedasticity).
 }
 \keyword{internal}

@@ -177,7 +177,7 @@ diag_Omegas <- function(Omega1, Omega2) {
 #'  corresponding eigenvectors. Note that this decomposition does not necessarily exists for \eqn{M > 2}.
 #'
 #'  See Muirhead (1982), Theorem A9.9 for more details on the decomposition and the source code for more details on the reparametrization.
-#' @return Returns a \eqn{d^2 + (M - 1)*d x 1} vector of the form \code{c(vec(new_W), new_lambdas)}
+#' @return Returns a \eqn{d^2 + (M - 1)d \times 1} vector of the form \code{c(vec(new_W), new_lambdas)}
 #'   where the lambdas parameters are in the regimewise order (first regime 2, then 3, etc) and the
 #'   "new W" and "new lambdas" are constitute the new decomposition with the order of the covariance
 #'   matrices given by the argument \code{perm}. Notice that if the first element of \code{perm}
@@ -212,7 +212,6 @@ diag_Omegas <- function(Omega1, Omega2) {
 #' @export
 
 redecompose_Omegas <- function(M, d, W, lambdas, perm=1:M) {
-  M <- sum(M)
   if(all(perm == 1:M)) {
     return(c(W, lambdas))
   } else if(perm[1] == 1) {

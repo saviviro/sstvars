@@ -21,7 +21,7 @@ where \strong{\eqn{\lambda_{m}}}\eqn{=(\lambda_{m1},...,\lambda_{md})}}
 (relative to the current order)}
 }
 \value{
-Returns a \eqn{d^2 + (M - 1)*d x 1} vector of the form \code{c(vec(new_W), new_lambdas)}
+Returns a \eqn{d^2 + (M - 1)d \times 1} vector of the form \code{c(vec(new_W), new_lambdas)}
   where the lambdas parameters are in the regimewise order (first regime 2, then 3, etc) and the
   "new W" and "new lambdas" are constitute the new decomposition with the order of the covariance
   matrices given by the argument \code{perm}. Notice that if the first element of \code{perm}
