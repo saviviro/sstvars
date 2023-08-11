@@ -8,7 +8,8 @@ check_pMd(
   p,
   M,
   d,
-  weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold")
+  weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+  identification = c("reduced_form", "recursive", "heteroskedasticity")
 )
 }
 \arguments{

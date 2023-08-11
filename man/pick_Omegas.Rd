@@ -4,7 +4,13 @@
 \alias{pick_Omegas}
 \title{Pick covariance matrices}
 \usage{
-pick_Omegas(p, M, d, params)
+pick_Omegas(
+  p,
+  M,
+  d,
+  params,
+  identification = c("reduced_form", "recursive", "heteroskedasticity")
+)
 }
 \arguments{
 \item{p}{the autoregressive order of the model}
