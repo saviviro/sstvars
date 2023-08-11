@@ -209,6 +209,20 @@ r2_132_1_1 <- 1.2
 theta_132thres_1_1 <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
                         vech(Omega1_132), vech(Omega2_132), vech(Omega3_132), r1_132_1_1, r2_132_1_1)
 
+# p=2, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1)
+phi10_232 <- phi10_132; phi20_232 <- phi20_132; phi30_232 <- phi30_132
+A11_232 <- A11_132; A12_232 <- -A11_132
+A21_232 <- A21_132; A22_232 <- -A21_132
+A31_232 <- A31_132; A32_232 <- -A31_132
+Omega1_232 <- Omega1_132; Omega2_232 <- Omega1_132; Omega3_232 <- Omega3_132
+r1_232_1_1 <- r1_132_1_1; r2_232_1_1 <- r2_132_1_1
+theta_232thres_1_1 <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232), vec(A22_232),
+                        vec(A31_232), vec(A32_232), vech(Omega1_232), vech(Omega2_232), vech(Omega3_232),
+                        r1_232_1_1, r2_232_1_1)
+
+# p=2, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="Student"
+df_232_1_1 <- 30
+theta_232threst_1_1 <- c(theta_232thres_1_1, df_232_1_1)
 
 ### Constrained models
 
@@ -580,6 +594,92 @@ theta_123logisticcmt_3_1_expanded <- c(theta_123logisticcm_3_1_expanded, df_123_
 # p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1), cond_dist="Student", AR_constraints=C_222
 theta_222logct_2_1 <- c(theta_222logc_2_1, df_222_2_1)
 theta_222logct_expanded <- c(theta_222logc_2_1_expanded , df_222_2_1)
+
+
+### Structural models
+# (recursively identified models use the same parametrization as reduced form models)
+
+# p=1, M=2, d=2, weight_function="relative_dens", identification="heteroskedasticity"
+W_122 <- matrix(c(-0.03, 0.24, -0.76, -0.02), nrow=2, ncol=2, byrow=FALSE)
+lambdas_122 <- c(3.36, 0.86)
+theta_122relgsh <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vec(W_122), lambdas_122, alpha1_122)
+
+# p=1, M=3, d=2, weight_function="relative_dens", identification="heteroskedasticity"
+W_132 <- W_122; lambdas2_132 <- lambdas_122; lambdas3_132 <- c(2.1, 0.62)
+theta_132relgsh <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                     vec(W_132), lambdas2_132, lambdas3_132, alpha1_132, alpha2_132)
+
+# p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="Student",
+# identification="heteroskedasticity"
+W_222 <- W_122; lambdas_222 <- lambdas_122
+theta_222logistictsh_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                              vec(W_222), lambdas_222, c_and_gamma_222_2_1, df_222_2_1)
+
+# p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=1), identification="heteroskedasticity"
+theta_122logsh_12_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vec(W_122), lambdas_122, gamma1_122_12_1)
+
+# p=1, M=2, d=3, weight_function="exponential", weightfun_pars=c(1, 1), identification="heteroskedasticity"
+W_123 <- matrix(c(-0.47, -0.40, 1.25, 0.58, -1.01, 0.18, -0.66, -0.91, -1.19), nrow=3, ncol=3, byrow=FALSE)
+lambdas_123 <- c(1.56, 1.44, 0.59)
+theta_123expsh_1_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vec(W_123), lambdas_123, c_and_gamma_123_1_1)
+
+# p=2, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="Student",
+# identification="heteroskedasticity"
+W_232 <- W_132; lambdas2_232 <- lambdas2_132; lambdas3_232 <- lambdas3_132
+theta_232threstsh_1_1 <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232), vec(A22_232),
+                           vec(A31_232), vec(A32_232), vec(W_232), lambdas2_232, lambdas3_232, r1_232_1_1, r2_232_1_1,
+                           df_232_1_1)
+
+
+## Structural models imposing constraints
+
+# p=1, M=2, d=2, weight_function="relative_dens", identification="heteroskedasticity", AR_constraints=C_122
+W_122 <- matrix(c(-0.03, 0.24, -0.76, -0.02), nrow=2, ncol=2, byrow=FALSE)
+lambdas_122 <- c(3.36, 0.86)
+theta_122relgshc <- c(phi10_122, phi20_122, vec(A11_122), vec(W_122), lambdas_122, alpha1_122)
+theta_122relgshc_expanded <- c(phi10_122, phi20_122, vec(A11_122), vec(A11_122), vec(W_122), lambdas_122, alpha1_122)
+
+# p=1, M=3, d=2, weight_function="relative_dens", identification="heteroskedasticity",
+# B_constraints=matrix(c(0.1, NA, 0.3, 0), nrow=2)
+W_132b <- matrix(c(0.11, 0.22, 0.33, 0), nrow=2);
+theta_132relgshb <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                      Wvec(W_132b), lambdas2_132, lambdas3_132, alpha1_132, alpha2_132)
+theta_132relgshb_expanded <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                               vec(W_132b), lambdas2_132, lambdas3_132, alpha1_132, alpha2_132)
+
+# p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="Student",
+# identification="heteroskedasticity", mean_constraints=list(1:2), B_constraints=matrix(c(0.1, 0, 0, 0.3), nrow=2)
+W_222b <- matrix(c(0.12, 0, 0, 0.31), nrow=2)
+theta_222logistictshmb_2_1 <- c(phi10_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                                Wvec(W_222b), lambdas_222, c_and_gamma_222_2_1, df_222_2_1)
+theta_222logistictshmb_2_1_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                                         vec(W_222b), lambdas_222, c_and_gamma_222_2_1, df_222_2_1)
+
+# p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=1), identification="heteroskedasticity",
+# weight_constraints=list(R=0, r=c(0.1, 0.2, 0.3)), B_constraints=matrix(c(0.1, 0.2, 0.3, 0), nrow=2)
+W_122b <- matrix(c(0.11, 0.22, 0.33, 0), nrow=2)
+theta_122logshwb_12_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), Wvec(W_122b), lambdas_122)
+theta_122logshwb_12_1_expanded <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vec(W_122b),
+                                    lambdas_122, c(0.1, 0.2, 0.3))
+
+# p=1, M=2, d=3, weight_function="exponential", weightfun_pars=c(1, 1), identification="heteroskedasticity",
+# AR_constraints=C_123, weight_constraints=list(R=matrix(c(1, 0.5), nrow=2), r=c(0, 0))
+# B_constraints=matrix(c(-0.47, -0.40, 0, 0.58, -1.01, -0.66, 0, -0.91, -1.19), nrow=3, ncol=3, byrow=FALSE)
+W_123b <- matrix(c(-0.47, -0.40, 0, 0.58, -1.01, -0.66, 0, -0.91, -1.19), nrow=3, ncol=3, byrow=FALSE)
+lambdas_123 <- c(1.56, 1.44, 0.59)
+theta_123expshcwb_1_1 <- c(phi10_123, phi20_123, vec(A11_123), Wvec(W_123b), lambdas_123, 0.6)
+theta_123expshcwb_1_1_expanded <- c(phi10_123, phi20_123, vec(A11_123), vec(A11_123), vec(W_123b),
+                                    lambdas_123, c(0.6, 0.3))
+
+# p=2, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="Student",
+# identification="heteroskedasticity", B_constraints=matrix(c(0.1, 0.2, -0.3, 0), nrow=2)
+W_232b <- matrix(c(0.1, 0.2, -0.1, 0), nrow=2)
+theta_232threstshb_1_1 <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232), vec(A22_232),
+                            vec(A31_232), vec(A32_232), Wvec(W_232b), lambdas2_232, lambdas3_232, r1_232_1_1, r2_232_1_1,
+                            df_232_1_1)
+theta_232threstshb_1_1_expanded <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232),
+                                     vec(A22_232), vec(A31_232), vec(A32_232), vec(W_232b), lambdas2_232,
+                                     lambdas3_232, r1_232_1_1, r2_232_1_1, df_232_1_1)
 
 
 
@@ -1016,6 +1116,36 @@ test_that("n_params works correctly", {
   expect_equal(n_params(p=1, M=2, d=3, weight_function="logistic", cond_dist="Student", weightfun_pars=c(3, 1),
                         AR_constraints=C_123), 30)
   expect_equal(n_params(p=1, M=2, d=2, weight_function="exponential", cond_dist="Student", weightfun_pars=c(1, 1)), 21)
+
+  ## Structural
+  expect_equal(n_params(p=1, M=3, d=2, weight_function="threshold", cond_dist="Student", identification="recursive", weightfun_pars=c(1, 1),
+                        mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2))), 26)
+  expect_equal(n_params(p=1, M=2, d=3, weight_function="logistic", cond_dist="Student", identification="recursive", weightfun_pars=c(3, 1),
+                        AR_constraints=C_123), 30)
+  expect_equal(n_params(p=1, M=2, d=3, weight_function="mlogit", weightfun_pars=list(vars=1:3, lags=1), cond_dist="Gaussian",
+                        identification="recursive", AR_constraints=C_123, mean_constraints=list(1:2)), 28)
+
+  expect_equal(n_params(p=1, M=2, d=2, weight_function="relative_dens", identification="heteroskedasticity"), 19)
+  expect_equal(n_params(p=1, M=3, d=2, weight_function="relative_dens", identification="heteroskedasticity"), 28)
+  expect_equal(n_params(p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="Student",
+                        identification="heteroskedasticity"), 29)
+  expect_equal(n_params(p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=1),
+                        identification="heteroskedasticity"), 21)
+  expect_equal(n_params(p=1, M=2, d=3, weight_function="exponential", weightfun_pars=c(1, 1), identification="heteroskedasticity"), 38)
+  expect_equal(n_params(p=2, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="Student",
+                        identification="heteroskedasticity"), 41)
+  expect_equal(n_params(p=1, M=2, d=2, weight_function="relative_dens", identification="heteroskedasticity", AR_constraints=C_122), 15)
+  expect_equal(n_params(p=1, M=3, d=2, weight_function="relative_dens", identification="heteroskedasticity",
+                        B_constraints=matrix(c(0.1, NA, 0.3, 0), nrow=2)), 27)
+  expect_equal(n_params(p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="Student",
+                        identification="heteroskedasticity", mean_constraints=list(1:2), B_constraints=matrix(c(0.1, 0, 0, 0.3), nrow=2)), 25)
+  expect_equal(n_params(p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=1), identification="heteroskedasticity",
+                        weight_constraints=list(R=0, r=c(0.1, 0.2, 0.3)), B_constraints=matrix(c(0.1, 0.2, 0.3, 0), nrow=2)), 17)
+  expect_equal(n_params(p=1, M=2, d=3, weight_function="exponential", weightfun_pars=c(1, 1), identification="heteroskedasticity",
+                        AR_constraints=C_123, weight_constraints=list(R=matrix(c(1, 0.5), nrow=2), r=c(0, 0)),
+                        B_constraints=matrix(c(-0.47, -0.40, 0, 0.58, -1.01, -0.66, 0, -0.91, -1.19), nrow=3, ncol=3, byrow=FALSE)), 26)
+  expect_equal(n_params(p=2, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="Student",
+                        identification="heteroskedasticity", B_constraints=matrix(c(0.1, 0.2, -0.3, 0), nrow=2)), 40)
 })
 
 
@@ -1087,9 +1217,8 @@ test_that("check_constraints works correctly", {
   # Check B_constraints
   expect_error(check_constraints(p=1, M=2, d=2, identification="heteroskedasticity", B_constraints=matrix(1:9, nrow=3)))
   expect_error(check_constraints(p=1, M=2, d=2, identification="heteroskedasticity", B_constraints=matrix(c(0, 0, 1, NA), nrow=2)))
-  expect_error(check_constraints(p=2, M=2, d=3, identification="heteroskedasticity", B_constraints=matrix(c(1, 0, NA,
-                                                                                                            NA, 0, 1,
-                                                                                                            1, 0, NA), nrow=3)))
+  expect_error(check_constraints(p=2, M=2, d=3, identification="heteroskedasticity",
+                                 B_constraints=matrix(c(1, 0, NA, NA, 0, 1, 1, 0, NA), nrow=3)))
   expect_error(check_constraints(p=1, M=2, d=3, identification="heteroskedasticity", B_constraints=matrix(1:4, nrow=2)))
   expect_error(check_constraints(p=2, M=2, d=2, identification="heteroskedasticity", B_constraints=1:4))
 })

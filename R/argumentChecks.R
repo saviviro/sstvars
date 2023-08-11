@@ -279,7 +279,6 @@ n_params <- function(p, M, d, weight_function=c("relative_dens", "logistic", "ml
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
-  if(identification != "reduced_form") stop("Only reduced form models are currently supported in n_params")
 
   if(is.null(mean_constraints)) {
     n_mean_pars <- M*d
@@ -291,11 +290,16 @@ n_params <- function(p, M, d, weight_function=c("relative_dens", "logistic", "ml
   } else { # AR matrices constrained
     n_ar_pars <- ncol(AR_constraints)
   }
-  if(is.null(B_constraints)) {
-    n_covmat_pars <- M*d*(d + 1)/2
-  } else { # Constraints on the impact matrix
-    stop("B_constraints not yet implemented to n_parms")
-    n_covmat_pars <- NULL
+  # Covmatpars
+  if(identification %in% c("reduced_form", "recursive")) {
+    n_covmat_pars <- M*d*(d + 1)/2 # No B_constraints available here
+  } else { # identification == "heteroskedasticity
+    if(is.null(B_constraints)) {
+      n_zeros <- 0
+    } else {
+      n_zeros <- sum(B_constraints == 0, na.rm=TRUE)
+    }
+    n_covmat_pars <- d^2 + d*(M - 1) - n_zeros
   }
   if(is.null(weight_constraints)) {
     if(weight_function == "relative_dens" || weight_function == "threshold") {
@@ -304,8 +308,6 @@ n_params <- function(p, M, d, weight_function=c("relative_dens", "logistic", "ml
       n_weight_pars <- 2
     } else if(weight_function == "mlogit") {
       n_weight_pars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
-    } else {
-      stop("Unknown weightfunction in n_params")
     }
   } else { # Constraints on the weight parameters
     if(all(weight_constraints[[1]] == 0)) {
