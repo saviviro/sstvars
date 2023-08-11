@@ -215,10 +215,17 @@ all_pos_ints <- function(x) {
 #' @return Throws an error if something is wrong.
 #' @keywords internal
 
-check_pMd <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold")) {
+check_pMd <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+                      identification=c("reduced_form", "recursive", "heteroskedasticity")) {
   weight_function <- match.arg(weight_function)
+  identification <- match.arg(identification)
   if(!all_pos_ints(M) || length(M) != 1) {
     stop("The argument M must be a positive integer!")
+  }
+  if(identification == "heteroskedasticity") {
+    if(M == 1) {
+      stop("M=1 models cannot be identified by heteroskefasticty")
+    }
   }
   if(!all_pos_ints(p) || length(p) != 1) {
     stop("The argument p must be a positive integer!")

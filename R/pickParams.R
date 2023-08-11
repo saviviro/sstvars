@@ -128,11 +128,21 @@ pick_allA <- function(p, M, d, params) {
 #' @inherit pick_Ami references
 #' @keywords internal
 
-pick_Omegas <- function(p, M, d, params) {
+pick_Omegas <- function(p, M, d, params, identification=c("reduced_form", "recursive", "heteroskedasticity")) {
+  identification <- match.arg(identification)
   Omegas <- array(dim=c(d, d, M))
-  qm1 <- d*M*(1 + p*d) + (1:M - 1)*d*(d + 1)/2
-  for(m in 1:M) {
-    Omegas[, , m] <- unvech(d=d, a=params[(qm1[m] + 1):(qm1[m] + d*(d + 1)/2)])
+  if(identification == "heteroskedasticity") {
+    W <- unvec(d=d, a=params[(M*d + d^2*p*M + 1):(M*d + d^2*p*M + d^2)])
+    Omegas[, , 1] <- tcrossprod(W)
+    for(m in 2:M) {
+      lambdas <- params[(d*M*(1 + d*p) + d^2 + d*(m - 2) + 1):(d*M*(1 + d*p) + d^2 + d*(m - 1))]
+      Omegas[, , m] <- W%*%tcrossprod(diag(lambdas), W)
+    }
+  } else { # Regular parameter vector
+    qm1 <- d*M*(1 + p*d) + (1:M - 1)*d*(d + 1)/2
+    for(m in 1:M) {
+      Omegas[, , m] <- unvech(d=d, a=params[(qm1[m] + 1):(qm1[m] + d*(d + 1)/2)])
+    }
   }
   Omegas
 }

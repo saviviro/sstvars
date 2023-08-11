@@ -196,6 +196,10 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
                                     weight_constraints=weight_constraints, B_constraints=B_constraints,
                                     weightfun_pars=weightfun_pars)
 
+  # HUOM!!! TÄÄLLÄ PARAMETRIVEKTORI EI OLE VIELÄ REDUSOIDUN MUODON, KOSKA REFORM_CONSTRAINED PARS EI MUUUTA
+  # RAKENTEELLISEN PARAMETREJA EI RAKENTEELLISIKSI! SE TÄYTYY TEHDÄ ERIKSEEN!
+  # VAIHTOEHTO: PICK OMEGAAN STRUCTURAL PARSSEISTA OMEGAT
+
   # Pick params
   if(parametrization == "intercept") { # [d, M]
     all_phi0 <- pick_phi0(M=M, d=d, params=params)
