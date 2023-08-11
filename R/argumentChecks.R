@@ -439,8 +439,14 @@ check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logis
     if(identification != "heteroskedasticity") {
       stop("B_constraints are currently available only for models with identication = 'heteroskedasticity'.")
     }
-    # CHECK THE CONSTRAINTS
-    stop("B_constraints are not yet implemented to check_constraints")
+    if(!is.matrix(B_constraints) || any(dim(B_constraints) != d)) {
+      stop("B_constraints should be a (d x d) matrix")
+    }
+    n_zeros1 <- vapply(1:d, function(i1) sum(B_constraints[i1,] == 0, na.rm=TRUE), numeric(1))
+    n_zeros2 <- vapply(1:d, function(i1) sum(B_constraints[,i1] == 0, na.rm=TRUE), numeric(1))
+    if(any(n_zeros1 == d) || any(n_zeros2 == d)) {
+      stop("The matrix 'W' should be non-singular, so you cannot constrain it to be singular via B_constraints")
+    }
   }
 }
 
