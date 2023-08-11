@@ -116,7 +116,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   all_phi0 <- pick_phi0(M=M, d=d, params=params)
   all_A <- pick_allA(p=p, M=M, d=d, params=params)
   all_A2 <- array(all_A, dim=c(d, d*p, M)) # cbind coefficient matrices of each component: m:th component is obtained at [, , m]
-  all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params) # Note that structural models not implemented here
+  all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params, identification=identification)
   all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
   weightpars <- pick_weightpars(p=p, M=M, d=d, params=params,
                                 weight_function=weight_function, weightfun_pars=weightfun_pars,

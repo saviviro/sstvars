@@ -113,7 +113,7 @@ print_std_errors <- function(stvar, digits=3) {
   all_A <- pick_allA(p=p, M=M, d=d, params=pars)
   distpars <- pick_distpars(params=pars, cond_dist=cond_dist)
   if(identification == "reduced_form") {
-    all_Omega <- pick_Omegas(p=p, M=M, d=d, params=pars)
+    all_Omega <- pick_Omegas(p=p, M=M, d=d, params=pars, identification=identification)
   } else {
     # No standard errors for cov. mats. as the model is parametrized with W and lambdas
     all_Omega <- array(" ", dim=c(d, d, M))

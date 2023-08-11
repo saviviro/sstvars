@@ -64,7 +64,7 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   }
   all_phi0 <- pick_phi0(M=M, d=d, params=params)
   all_A <- pick_allA(p=p, M=M, d=d, params=params)
-  all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params)
+  all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params, identification=identification)
   weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                 cond_dist=cond_dist)
   distpars <- pick_distpars(params=params, cond_dist=cond_dist)

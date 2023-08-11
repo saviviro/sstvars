@@ -196,10 +196,6 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
                                     weight_constraints=weight_constraints, B_constraints=B_constraints,
                                     weightfun_pars=weightfun_pars)
 
-  # HUOM!!! TÄÄLLÄ PARAMETRIVEKTORI EI OLE VIELÄ REDUSOIDUN MUODON, KOSKA REFORM_CONSTRAINED PARS EI MUUUTA
-  # RAKENTEELLISEN PARAMETREJA EI RAKENTEELLISIKSI! SE TÄYTYY TEHDÄ ERIKSEEN!
-  # VAIHTOEHTO: PICK OMEGAAN STRUCTURAL PARSSEISTA OMEGAT
-
   # Pick params
   if(parametrization == "intercept") { # [d, M]
     all_phi0 <- pick_phi0(M=M, d=d, params=params)
@@ -207,7 +203,7 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
     all_mu <- pick_phi0(M=M, d=d, params=params) # mean parameters instead of intercepts
   }
   all_A <- pick_allA(p=p, M=M, d=d, params=params) # [d, d, p, M]
-  all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params) # [d, d, M]
+  all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params, identification=identification) # [d, d, M]
   weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function,
                                 cond_dist=cond_dist, weightfun_pars=weightfun_pars)
   all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)

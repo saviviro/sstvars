@@ -117,7 +117,7 @@ get_omega_eigens_par <- function(p, M, d, params, weight_function=c("relative_de
   if(identification != "reduced_form") {
     stop("Structural models not yet implemented to get_omega_eigens_par")
   }
-  all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params)
+  all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params, identification=identification)
   matrix(vapply(1:M, function(m) eigen(all_Omega[, , m], symmetric=TRUE, only.values=TRUE)$'values', numeric(d)),
          nrow=d, ncol=M, byrow=FALSE)
 }

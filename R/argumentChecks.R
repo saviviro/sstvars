@@ -148,7 +148,7 @@ check_params <- function(p, M, d, params, weight_function=c("relative_dens", "lo
   # Pick params
   all_phi0 <- pick_phi0(M=M, d=d, params=params) # phi0 or mean parameters
   all_A <- pick_allA(p=p, M=M, d=d, params=params) # [d, d, p, M]
-  all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params) # [d, d, M]
+  all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params, identification=identification) # [d, d, M]
   weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
                                 weightfun_pars=weightfun_pars)
   all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
