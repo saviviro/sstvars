@@ -1083,6 +1083,15 @@ test_that("check_constraints works correctly", {
   expect_error(check_constraints(p=3, M=2, d=2, mean_constraints=list(1, 1:2)))
   expect_error(check_constraints(p=1, M=1, d=2, mean_constraints=list()))
   expect_error(check_constraints(p=1, M=1, d=2, mean_constraints=list(1:2)))
+
+  # Check B_constraints
+  expect_error(check_constraints(p=1, M=2, d=2, identification="heteroskedasticity", B_constraints=matrix(1:9, nrow=3)))
+  expect_error(check_constraints(p=1, M=2, d=2, identification="heteroskedasticity", B_constraints=matrix(c(0, 0, 1, NA), nrow=2)))
+  expect_error(check_constraints(p=2, M=2, d=3, identification="heteroskedasticity", B_constraints=matrix(c(1, 0, NA,
+                                                                                                            NA, 0, 1,
+                                                                                                            1, 0, NA), nrow=3)))
+  expect_error(check_constraints(p=1, M=2, d=3, identification="heteroskedasticity", B_constraints=matrix(1:4, nrow=2)))
+  expect_error(check_constraints(p=2, M=2, d=2, identification="heteroskedasticity", B_constraints=1:4))
 })
 
 
