@@ -59,7 +59,7 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
       d <- ncol(data)
     }
   }
-  check_pMd(p=p, M=M, d=d, weight_function=weight_function)
+  check_pMd(p=p, M=M, d=d, weight_function=weight_function, identiciation=identification)
   weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                          cond_dist=cond_dist)
   check_constraints(p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,

@@ -156,7 +156,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
-  check_pMd(p=p, M=M, weight_function=weight_function)
+  check_pMd(p=p, M=M, weight_function=weight_function, identification="reduced_form")
   if(!all_pos_ints(c(nrounds, ncores, maxit))) stop("Arguments nrounds, ncores, and maxit must be positive integers")
   stopifnot(length(nrounds) == 1)
   if(!is.null(seeds) && length(seeds) != nrounds) stop("The argument 'seeds' should be NULL or a vector of length 'nrounds'")

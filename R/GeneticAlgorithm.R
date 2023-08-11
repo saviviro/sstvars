@@ -144,7 +144,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
   to_return <- match.arg(to_return)
-  check_pMd(p=p, M=M, weight_function=weight_function)
+  check_pMd(p=p, M=M, weight_function=weight_function, identification="reduced_form")
   data <- check_data(data=data, p=p)
   d <- ncol(data)
   n_obs <- nrow(data)

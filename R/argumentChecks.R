@@ -131,7 +131,7 @@ check_params <- function(p, M, d, params, weight_function=c("relative_dens", "lo
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
   identification <- match.arg(identification)
-  check_pMd(p=p, M=M, d=d, weight_function=weight_function)
+  check_pMd(p=p, M=M, d=d, weight_function=weight_function, identification=identification)
   weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                          cond_dist=cond_dist)
   if(n_params(p=p, M=M, d=d, weight_function=weight_function, cond_dist=cond_dist,
