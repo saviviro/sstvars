@@ -1008,9 +1008,11 @@ test_that("check_pMd works correctly", {
   expect_error(check_pMd(p=c(1, 1), M=1, d=2))
   expect_error(check_pMd(p=1, M=3, d=2, weight_function = "logistic"))
   expect_error(check_pMd(p=1, M=3, d=2, weight_function = "exponential"))
+  expect_error(check_pMd(p=1, M=1, d=2, identification="heteroskedasticity"))
   check_pMd(p=1, M=3, d=2, weight_function = "relative_dens")
   check_pMd(p=1, M=3, d=2, weight_function = "mlogit")
   check_pMd(p=1, M=3, d=2, weight_function = "threshold")
+  check_pMd(p=1, M=1, d=2, identification="recursive")
 })
 
 test_that("all_pos_ints works correctly", {

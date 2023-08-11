@@ -224,7 +224,7 @@ check_pMd <- function(p, M, d, weight_function=c("relative_dens", "logistic", "m
   }
   if(identification == "heteroskedasticity") {
     if(M == 1) {
-      stop("M=1 models cannot be identified by heteroskefasticty")
+      stop("M=1 models cannot be identified by heteroskedasticty")
     }
   }
   if(!all_pos_ints(p) || length(p) != 1) {
