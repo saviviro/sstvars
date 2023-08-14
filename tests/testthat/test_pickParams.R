@@ -643,6 +643,40 @@ test_that("pick_Omegas works correctly", {
   expect_equal(pick_Omegas(p=2, M=2, d=2, params=theta_222logistict_2_1)[, , 2], Omega2_222)
   expect_equal(pick_Omegas(p=1, M=2, d=3, params=theta_123logt_1_1)[, , 1], Omega1_123)
   expect_equal(pick_Omegas(p=1, M=2, d=3, params=theta_123logt_1_1)[, , 2], Omega2_123)
+
+  # Structural
+  expect_equal(pick_Omegas(p=2, M=3, d=2, params=theta_232threst_1_1, identification="recursive")[, , 1], Omega1_232)
+  expect_equal(pick_Omegas(p=2, M=3, d=2, params=theta_232threst_1_1, identification="recursive")[, , 2], Omega2_232)
+  expect_equal(pick_Omegas(p=2, M=3, d=2, params=theta_232threst_1_1, identification="recursive")[, , 3], Omega3_232)
+  expect_equal(pick_Omegas(p=1, M=2, d=2, params=theta_122relgsh, identification="heteroskedasticity")[, , 1],
+               tcrossprod(W_122), tolerance=1e-4)
+  expect_equal(pick_Omegas(p=1, M=2, d=2, params=theta_122relgsh, identification="heteroskedasticity")[, , 2],
+               W_122%*%tcrossprod(diag(lambdas_122), W_122), tolerance=1e-4)
+  expect_equal(pick_Omegas(p=1, M=3, d=2, params=theta_132relgsh, identification="heteroskedasticity")[, , 1],
+               tcrossprod(W_132), tolerance=1e-4)
+  expect_equal(pick_Omegas(p=1, M=3, d=2, params=theta_132relgsh, identification="heteroskedasticity")[, , 2],
+               W_132%*%tcrossprod(diag(lambdas2_132), W_132), tolerance=1e-4)
+  expect_equal(pick_Omegas(p=1, M=3, d=2, params=theta_132relgsh, identification="heteroskedasticity")[, , 3],
+               W_132%*%tcrossprod(diag(lambdas3_132), W_132), tolerance=1e-4)
+  expect_equal(pick_Omegas(p=2, M=2, d=2, params=theta_222logistictsh_2_1, identification="heteroskedasticity")[, , 1],
+               tcrossprod(W_222), tolerance=1e-4)
+  expect_equal(pick_Omegas(p=2, M=2, d=2, params=theta_222logistictsh_2_1, identification="heteroskedasticity")[, , 2],
+               W_222%*%tcrossprod(diag(lambdas_222), W_222), tolerance=1e-4)
+  expect_equal(pick_Omegas(p=1, M=2, d=2, params=theta_122logsh_12_1, identification="heteroskedasticity")[, , 1],
+               tcrossprod(W_122), tolerance=1e-4)
+  expect_equal(pick_Omegas(p=1, M=2, d=2, params=theta_122logsh_12_1, identification="heteroskedasticity")[, , 2],
+               W_122%*%tcrossprod(diag(lambdas_122), W_122), tolerance=1e-4)
+  expect_equal(pick_Omegas(p=1, M=2, d=3, params=theta_123expsh_1_1, identification="heteroskedasticity")[, , 1],
+               tcrossprod(W_123), tolerance=1e-4)
+  expect_equal(pick_Omegas(p=1, M=2, d=3, params=theta_123expsh_1_1, identification="heteroskedasticity")[, , 2],
+               W_123%*%tcrossprod(diag(lambdas_123), W_123), tolerance=1e-4)
+  expect_equal(pick_Omegas(p=2, M=3, d=2, params=theta_232threstsh_1_1, identification="heteroskedasticity")[, , 1],
+               tcrossprod(W_232), tolerance=1e-4)
+  expect_equal(pick_Omegas(p=2, M=3, d=2, params=theta_232threstsh_1_1, identification="heteroskedasticity")[, , 2],
+               W_232%*%tcrossprod(diag(lambdas2_232), W_232), tolerance=1e-4)
+  expect_equal(pick_Omegas(p=2, M=3, d=2, params=theta_232threstsh_1_1, identification="heteroskedasticity")[, , 3],
+               W_232%*%tcrossprod(diag(lambdas3_232), W_232), tolerance=1e-4)
+
 })
 
 test_that("pick_weightpars works correctly", {
