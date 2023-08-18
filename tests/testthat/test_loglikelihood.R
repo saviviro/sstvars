@@ -420,6 +420,94 @@ theta_132thresmw_1_1_expanded <- c(phi10_132, phi20_132, phi20_132, vec(A11_132)
 
 
 
+### Structural models
+# (recursively identified models use the same parametrization as reduced form models)
+
+# p=1, M=2, d=2, weight_function="relative_dens", identification="heteroskedasticity"
+W_122 <- matrix(c(-0.03, 0.24, -0.76, -0.02), nrow=2, ncol=2, byrow=FALSE)
+lambdas_122 <- c(3.36, 0.86)
+theta_122relgsh <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vec(W_122), lambdas_122, alpha1_122)
+
+# p=1, M=3, d=2, weight_function="relative_dens", identification="heteroskedasticity"
+df_222_2_1 <- 3
+W_132 <- W_122; lambdas2_132 <- lambdas_122; lambdas3_132 <- c(2.1, 0.62)
+theta_132relgsh <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                     vec(W_132), lambdas2_132, lambdas3_132, alpha1_132, alpha2_132)
+
+# p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="Student",
+# identification="heteroskedasticity"
+W_222 <- W_122; lambdas_222 <- lambdas_122
+theta_222logistictsh_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                              vec(W_222), lambdas_222, c_and_gamma_222_2_1, df_222_2_1)
+
+# p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=1), identification="heteroskedasticity"
+theta_122logsh_12_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vec(W_122), lambdas_122, gamma1_122_12_1)
+
+# p=1, M=2, d=3, weight_function="exponential", weightfun_pars=c(1, 1), identification="heteroskedasticity"
+W_123 <- matrix(c(-0.47, -0.40, 1.25, 0.58, -1.01, 0.18, -0.66, -0.91, -1.19), nrow=3, ncol=3, byrow=FALSE)
+lambdas_123 <- c(1.56, 1.44, 0.59)
+theta_123expsh_1_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A11_123), vec(W_123), lambdas_123, c_and_gamma_123_1_1)
+
+# p=2, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="Student",
+# identification="heteroskedasticity"
+df_232_1_1 <- 10
+W_232 <- W_132; lambdas2_232 <- lambdas2_132; lambdas3_232 <- lambdas3_132
+theta_232threstsh_1_1 <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232), vec(A22_232),
+                           vec(A31_232), vec(A32_232), vec(W_232), lambdas2_232, lambdas3_232, r1_232_1_1, r2_232_1_1,
+                           df_232_1_1)
+
+
+## Structural models imposing constraints
+
+# p=1, M=2, d=2, weight_function="relative_dens", identification="heteroskedasticity", AR_constraints=C_122
+W_122 <- matrix(c(-0.03, 0.24, -0.76, -0.02), nrow=2, ncol=2, byrow=FALSE)
+lambdas_122 <- c(3.36, 0.86)
+theta_122relgshc <- c(phi10_122, phi20_122, vec(A11_122), vec(W_122), lambdas_122, alpha1_122)
+theta_122relgshc_expanded <- c(phi10_122, phi20_122, vec(A11_122), vec(A11_122), vec(W_122), lambdas_122, alpha1_122)
+
+# p=1, M=3, d=2, weight_function="relative_dens", identification="heteroskedasticity",
+# B_constraints=matrix(c(0.1, NA, 0.3, 0), nrow=2)
+W_132b <- matrix(c(0.11, 0.22, 0.33, 0), nrow=2);
+theta_132relgshb <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                      Wvec(W_132b), lambdas2_132, lambdas3_132, alpha1_132, alpha2_132)
+theta_132relgshb_expanded <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                               vec(W_132b), lambdas2_132, lambdas3_132, alpha1_132, alpha2_132)
+
+# p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="Student", parametrization="mean"
+# identification="heteroskedasticity", mean_constraints=list(1:2), B_constraints=matrix(c(0.1, 0, 0, 0.3), nrow=2)
+W_222b <- matrix(c(0.12, 0, 0, 0.31), nrow=2)
+theta_222logistictshmb_2_1 <- c(phi10_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                                Wvec(W_222b), lambdas_222, c_and_gamma_222_2_1, df_222_2_1)
+theta_222logistictshmb_2_1_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                                         vec(W_222b), lambdas_222, c_and_gamma_222_2_1, df_222_2_1)
+
+# p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=1), identification="heteroskedasticity",
+# weight_constraints=list(R=0, r=c(0.1, 0.2, 0.3)), B_constraints=matrix(c(0.1, 0.2, 0.3, 0), nrow=2)
+W_122b <- matrix(c(0.11, 0.22, 0.33, 0), nrow=2)
+theta_122logshwb_12_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), Wvec(W_122b), lambdas_122)
+theta_122logshwb_12_1_expanded <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vec(W_122b),
+                                    lambdas_122, c(0.1, 0.2, 0.3))
+
+# p=1, M=2, d=3, weight_function="exponential", weightfun_pars=c(1, 1), identification="heteroskedasticity",
+# AR_constraints=C_123, weight_constraints=list(R=matrix(c(1, 0.5), nrow=2), r=c(0, 0))
+# B_constraints=matrix(c(-0.47, -0.40, 0, 0.58, -1.01, -0.66, 0, -0.91, -1.19), nrow=3, ncol=3, byrow=FALSE)
+W_123b <- matrix(c(-0.47, -0.40, 0, 0.58, -1.01, -0.66, 0, -0.91, -1.19), nrow=3, ncol=3, byrow=FALSE)
+lambdas_123 <- c(1.56, 1.44, 0.59)
+theta_123expshcwb_1_1 <- c(phi10_123, phi20_123, vec(A11_123), Wvec(W_123b), lambdas_123, 0.6)
+theta_123expshcwb_1_1_expanded <- c(phi10_123, phi20_123, vec(A11_123), vec(A11_123), vec(W_123b),
+                                    lambdas_123, c(0.6, 0.3))
+
+# p=2, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="Student",
+# identification="heteroskedasticity", B_constraints=matrix(c(0.1, 0.2, -0.3, 0), nrow=2)
+W_232b <- matrix(c(0.1, 0.2, -0.1, 0), nrow=2)
+theta_232threstshb_1_1 <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232), vec(A22_232),
+                            vec(A31_232), vec(A32_232), Wvec(W_232b), lambdas2_232, lambdas3_232, r1_232_1_1, r2_232_1_1,
+                            df_232_1_1)
+theta_232threstshb_1_1_expanded <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232),
+                                     vec(A22_232), vec(A31_232), vec(A32_232), vec(W_232b), lambdas2_232,
+                                     lambdas3_232, r1_232_1_1, r2_232_1_1, df_232_1_1)
+
+
 test_that("loglikelihood works correctly", {
 
   # Relative_dens Gaussian STVAR
@@ -480,6 +568,8 @@ test_that("loglikelihood works correctly", {
   # Threshold STVAR
   expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122thres_1_1, weight_function="threshold",
                              weightfun_pars=c(1, 1)), -391.7463, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122thres_1_1, weight_function="threshold",
+                             weightfun_pars=c(1, 1), parametrization="mean"), -427.092, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222thres_2_2, weight_function="threshold",
                              weightfun_pars=c(2, 2)), -282.805, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=1, M=3, params=theta_132thres_1_1, weight_function="threshold",
@@ -576,4 +666,45 @@ test_that("loglikelihood works correctly", {
   expect_equal(loglikelihood(data=gdpdef, p=1, M=3, params=c(theta_132thresmw_1_1, 11), weight_function="threshold", weightfun_pars=c(1, 1),
                              mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2)), cond_dist="Student",
                              parametrization="mean"), -447.6652, tolerance=1e-3)
+
+  # Structural models identified by heteroskedasticity
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122relgsh, weight_function="relative_dens",
+                             identification="heteroskedasticity"), -313.0517, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122relgsh, weight_function="relative_dens",
+                             identification="heteroskedasticity", parametrization="mean"), -357.8102, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=3, params=theta_132relgsh, weight_function="relative_dens",
+                             identification="heteroskedasticity"), -311.6129, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222logistictsh_2_1, weight_function="logistic", weightfun_pars=c(2, 1),
+                             cond_dist="Student", identification="heteroskedasticity"), -322.2773, tolerance=1e-3)
+  expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123expsh_1_1,  weight_function="exponential", weightfun_pars=c(1, 1),
+                             identification="heteroskedasticity"), -2336.49, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=3, params=theta_232threstsh_1_1, weight_function="threshold",
+                             weightfun_pars=c(1, 1), cond_dist="Student", identification="heteroskedasticity"),
+               -2988.147, tolerance=1e-3)
+
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122relgshc, weight_function="relative_dens",
+                             identification="heteroskedasticity", AR_constraints=C_122), -313.0517, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=3, params=theta_132relgshb, weight_function="relative_dens", identification="heteroskedasticity",
+                             B_constraints=matrix(c(0.1, NA, 0.3, 0), nrow=2)), -755.7973, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222logistictshmb_2_1, weight_function="logistic", weightfun_pars=c(2, 1),
+                             cond_dist="Student", identification="heteroskedasticity", mean_constraints=list(1:2), parametrization="mean",
+                             B_constraints=matrix(c(0.1, 0, 0, 0.3), nrow=2)), -776.4632, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122logshwb_12_1, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=1),
+                             identification="heteroskedasticity", weight_constraints=list(R=0, r=c(0.1, 0.2, 0.3)),
+                             B_constraints=matrix(c(0.1, 0.2, 0.3, 0), nrow=2)), -755.1974, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122logshwb_12_1, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=1),
+                             identification="heteroskedasticity", weight_constraints=list(R=0, r=c(0.1, 0.2, 0.3)), parametrization="mean",
+                             B_constraints=matrix(c(0.1, 0.2, 0.3, 0), nrow=2)), -806.3316, tolerance=1e-3)
+  expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123expshcwb_1_1, weight_function="exponential", weightfun_pars=c(1, 1),
+                             identification="heteroskedasticity", AR_constraints=C_123, weight_constraints=list(R=matrix(c(1, 0.5), nrow=2), r=c(0, 0)),
+                             B_constraints=matrix(c(-0.47, -0.40, 0, 0.58, -1.01, -0.66, 0, -0.91, -1.19), nrow=3, ncol=3, byrow=FALSE)),
+               -9514.231, tolerance=1e-3)
+  expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123expshcwb_1_1, weight_function="exponential", weightfun_pars=c(1, 1),
+                             identification="heteroskedasticity", AR_constraints=C_123, weight_constraints=list(R=matrix(c(1, 0.5), nrow=2), r=c(0, 0)),
+                             B_constraints=matrix(c(-0.47, -0.40, 0, 0.58, -1.01, -0.66, 0, -0.91, -1.19), nrow=3, ncol=3, byrow=FALSE),
+                             parametrization="mean"), -9557.789, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=3, params=theta_232threstshb_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
+                             cond_dist="Student", identification="heteroskedasticity",
+                             B_constraints=matrix(c(0.1, 0.2, -0.3, 0), nrow=2)), -4541.691, tolerance=1e-3)
+
 })

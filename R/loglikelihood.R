@@ -169,14 +169,13 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
                           AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                           to_return=c("loglik", "tw", "loglik_and_tw", "terms", "regime_cmeans", "total_cmeans", "total_ccovs"),
                           check_params=TRUE, minval=NULL, stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
+
   # Match args
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
   identification <- match.arg(identification)
   to_return <- match.arg(to_return)
-  if(identification != "reduced_form") stop("Structural models are not yet implemented to loglikelihood")
-  if(!is.null(B_constraints)) stop("B_constrained models are not yet implemented to loglikelihood")
 
   # Compute some required statistics
   epsilon <- round(log(.Machine$double.xmin) + 10) # Logarithm of the smallest value that can be handled normally
@@ -306,8 +305,6 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   }
   sum(all_lt)
 }
-
-
 
 
 #' @title Get the transition weights alpha_mt
