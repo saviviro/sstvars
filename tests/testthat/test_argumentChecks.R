@@ -681,6 +681,35 @@ theta_232threstshb_1_1_expanded <- c(phi10_232, phi20_232, phi30_232, vec(A11_23
                                      vec(A22_232), vec(A31_232), vec(A32_232), vec(W_232b), lambdas2_232,
                                      lambdas3_232, r1_232_1_1, r2_232_1_1, df_232_1_1)
 
+## Structural models with illegal W or lambdas
+
+# p=1, M=2, d=2, weight_function="relative_dens", identification="heteroskedasticity"
+W_122 <- matrix(c(-0.03, 0.24, -0.76, -0.02), nrow=2, ncol=2, byrow=FALSE)
+lambdas_122_e <- c(3.36, 0.00)
+theta_122relgsh_e <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vec(W_122), lambdas_122_e, alpha1_122)
+
+# p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="Student",
+# identification="heteroskedasticity"
+W_222 <- W_122; lambdas_222_e <- c(-0.1, 1.2)
+theta_222logistictsh_2_1_e <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                                vec(W_222), lambdas_222_e, c_and_gamma_222_2_1, df_222_2_1)
+
+# p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="Student",
+# identification="heteroskedasticity", mean_constraints=list(1:2), B_constraints=matrix(c(0.1, 0, 0, 0.3), nrow=2)
+W_222b_e <- matrix(c(0.12, 0, 0, -0.001), nrow=2)
+theta_222logistictshmb_2_1_e <- c(phi10_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                                  Wvec(W_222b_e), lambdas_222, c_and_gamma_222_2_1, df_222_2_1)
+
+# p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=1), identification="heteroskedasticity",
+# weight_constraints=list(R=0, r=c(0.1, 0.2, 0.3)), B_constraints=matrix(c(0.1, 0.2, 0.3, 0), nrow=2)
+W_122b_e <- matrix(c(0.11, -0.22, 0.33, 0), nrow=2)
+theta_122logshwb_12_1_e <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), Wvec(W_122b_e), lambdas_122)
+
+# p=1, M=2, d=3, weight_function="exponential", weightfun_pars=c(1, 1), identification="heteroskedasticity",
+# AR_constraints=C_123, weight_constraints=list(R=matrix(c(1, 0.5), nrow=2), r=c(0, 0))
+# B_constraints=matrix(c(-0.47, -0.40, 0, 0.58, -1.01, -0.66, 0, -0.91, -1.19), nrow=3, ncol=3, byrow=FALSE)
+W_123b_e <- matrix(c(-0.47, -0.40, 0, 0.58, -1.01, -0.66, 0, -0.91, 0.19), nrow=3, ncol=3, byrow=FALSE)
+theta_123expshcwb_1_1_e <- c(phi10_123, phi20_123, vec(A11_123), Wvec(W_123b_e), lambdas_123, 0.6)
 
 
 Omegas_112 <- pick_Omegas(p=1, M=1, d=2, params=theta_112relg)
@@ -905,6 +934,18 @@ test_that("check_params work correctly", {
   check_params(p=2, M=2, d=2, params=c(theta_222thresc_1_1, 13), weight_function="threshold", weightfun_pars=c(1, 1),
                AR_constraints=C_222, cond_dist="Student")
 
+  check_params(p=1, M=2, d=2, params=theta_122relgsh, weight_function="relative_dens", identification="heteroskedasticity")
+  check_params(p=2, M=2, d=2, params=theta_222logistictsh_2_1, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="Student",
+               identification="heteroskedasticity")
+  check_params(p=2, M=2, d=2, params=theta_222logistictshmb_2_1, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="Student",
+               identification="heteroskedasticity", mean_constraints=list(1:2), B_constraints=matrix(c(0.1, 0, 0, 0.3), nrow=2))
+  check_params(p=1, M=2, d=2, params=theta_122logshwb_12_1, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=1),
+               identification="heteroskedasticity", weight_constraints=list(R=0, r=c(0.1, 0.2, 0.3)),
+               B_constraints=matrix(c(0.1, 0.2, 0.3, 0), nrow=2))
+  check_params(p=1, M=2, d=3, params=theta_123expshcwb_1_1, weight_function="exponential", weightfun_pars=c(1, 1),
+               identification="heteroskedasticity", AR_constraints=C_123, weight_constraints=list(R=matrix(c(1, 0.5), nrow=2), r=c(0, 0)),
+               B_constraints=matrix(c(-0.47, -0.40, 0, 0.58, -1.01, -0.66, 0, -0.91, -1.19), nrow=3, ncol=3, byrow=FALSE))
+
   # Checks stability conditions
   check_params(p=1, M=1, d=2, params=theta_112relg, weight_function="relative_dens", cond_dist="Gaussian")
   check_params(p=1, M=2, d=2, params=theta_122relg, weight_function="relative_dens", cond_dist="Gaussian")
@@ -919,6 +960,12 @@ test_that("check_params work correctly", {
                             weight_constraints=list(R=matrix(c(0.9, 0.5), nrow=2), r=c(0.13, 0.13)), cond_dist="Gaussian"))
   expect_error(check_params(p=1, M=3, d=2, params=theta_132thresmw_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
                             mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2)), cond_dist="Gaussian"))
+  expect_error(check_params(p=1, M=3, d=2, params=theta_132relgshb, weight_function="relative_dens", identification="heteroskedasticity",
+                            B_constraints=matrix(c(0.1, NA, 0.3, 0), nrow=2)))
+  expect_error(check_params(p=1, M=2, d=3, params=theta_123expsh_1_1, weight_function="exponential", weightfun_pars=c(1, 1),
+                            identification="heteroskedasticity"))
+  expect_error(check_params(p=2, M=3, d=2, params=theta_232threstshb_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
+                            cond_dist="Student", identification="heteroskedasticity", B_constraints=matrix(c(0.1, 0.2, -0.3, 0), nrow=2)))
 
   # Check with AR_constraints (reform params used inside so just checks that the function goes through)
   check_params(p=1, M=1, d=2, params=theta_112relgc, weight_function="relative_dens", cond_dist="Gaussian",
@@ -941,6 +988,20 @@ test_that("check_params work correctly", {
   expect_error(check_params(p=1, M=2, d=3, params=theta_123relg_notpd, weight_function="relative_dens", cond_dist="Gaussian"))
   expect_error(check_params(p=1, M=3, d=2, params=theta_132relgw_notpd, weight_function="relative_dens",
                             weight_constraints=list(R=matrix(c(0.9, 0.5), nrow=2), r=c(0.13, 0.13)), cond_dist="Gaussian"))
+
+  # Check W, lambdas, in B_constraints
+  expect_error(check_params(p=1, M=2, d=2, params=theta_122relgsh_e, weight_function="relative_dens", identification="heteroskedasticity"))
+  expect_error(check_params(p=2, M=2, d=2, params=theta_222logistictsh_2_1_e, weight_function="logistic", weightfun_pars=c(2, 1),
+                            cond_dist="Student", identification="heteroskedasticity"))
+  expect_error(check_params(p=2, M=2, d=2, params=theta_222logistictshmb_2_1_e, weight_function="logistic", weightfun_pars=c(2, 1),
+                            cond_dist="Student", identification="heteroskedasticity", mean_constraints=list(1:2),
+                            B_constraints=matrix(c(0.1, 0, 0, 0.3), nrow=2)))
+  expect_error(check_params(p=1, M=2, d=2, params=theta_122logshwb_12_1_e, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=1),
+                            identification="heteroskedasticity", weight_constraints=list(R=0, r=c(0.1, 0.2, 0.3)),
+                            B_constraints=matrix(c(0.1, 0.2, 0.3, 0), nrow=2)))
+  expect_error(check_params(p=1, M=2, d=3, params=theta_123expshcwb_1_1_e, weight_function="exponential", weightfun_pars=c(1, 1),
+                            identification="heteroskedasticity", AR_constraints=C_123, weight_constraints=list(R=matrix(c(1, 0.5), nrow=2), r=c(0, 0)),
+                            B_constraints=matrix(c(-0.47, -0.40, 0, 0.58, -1.01, -0.66, 0, -0.91, -1.19), nrow=3, ncol=3, byrow=FALSE)))
 
   # Check weightpars
   expect_error(check_params(p=1, M=2, d=2, params=theta_122relg_badalphas, weight_function="relative_dens", cond_dist="Gaussian"))
