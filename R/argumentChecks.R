@@ -153,11 +153,18 @@ check_params <- function(p, M, d, params, weight_function=c("relative_dens", "lo
                                 weightfun_pars=weightfun_pars)
   all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
   distpars <- pick_distpars(params=params, cond_dist=cond_dist)
-  if(!is.null(B_constraints)) {
-    stop("B_constraints are not yet implemented to check_params!")
-  }
-  if(identification != "reduced_form") {
-    stop("Only reduced form models are currently implemented to check_params!")
+
+  if(identification == "heteroskedasticity") { # Check W lambdas
+    W <- pick_W(p=p, M=M, d=d, params=params, identification=identification)
+    lambdas <- pick_lambdas(p=p, M=M, d=d, params=params, identification=identification)
+    if(any(W[B_constraints == 0] != 0, na.rm=TRUE)) {
+      stop("The matrix W doesn't satisfy the zero constraints in B_constraints")
+    } else if(any(W[B_constraints > 0] <= 0, na.rm=TRUE) || any(W[B_constraints < 0] >= 0, na.rm=TRUE)) {
+      stop("The matrix W doesn't satisfy the strict sign constraints in B_constraints")
+    }
+    if(any(lambdas <= 0)) {
+      stop("The eigenvalues 'lambdas' should be strictly positive")
+    }
   }
 
   if(cond_dist == "Student") { # Check degrees of freedom parameter
