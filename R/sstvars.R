@@ -13,5 +13,5 @@
 #' @import Rcpp RcppArmadillo parallel pbapply
 #' @importFrom Rcpp evalCpp
 #' @useDynLib sstvars
-#' @name sstvars
-NULL
+#' @name sstvars-package
+"_PACKAGE"
