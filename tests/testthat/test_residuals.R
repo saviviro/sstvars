@@ -69,6 +69,25 @@ theta_222logisticcmw_2_1 <- c(theta_222relgcm[-length(theta_222relgcm)], xi_222l
 xi_222expcmw_2_1 <- c(0.33)
 theta_222expcmw_2_1 <- c(theta_222relgcm[-length(theta_222relgcm)], xi_222logisticcmw_2_1)
 
+## Structural models
+
+# p=1, M=2, d=2, weight_function="relative_dens", identification="heteroskedasticity"
+all_phi_122 <- c(0.734054, 0.225598, 0.705744, 0.187897)
+all_A_122 <- c(0.259626, -0.000863, -0.3124, 0.505251, 0.298483, 0.030096, -0.176925, 0.838898)
+W_122 <- matrix(c(-0.03, 0.24, -0.76, -0.02), nrow=2, ncol=2, byrow=FALSE)
+lambdas_122 <- c(3.36, 0.86)
+alpha1_122 <- 0.6
+theta_122relgsh <- c(all_phi_122, all_A_122, vec(W_122), lambdas_122, alpha1_122)
+
+# p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="Student",
+# identification="heteroskedasticity"
+all_phi_222 <- all_phi_122
+all_A_222 <- c(0.13996, 0.035172, -0.164575, 0.386816, 0.451675, 0.013086, 0.227882, 0.336084, 0.239257, 0.024173,
+               -0.021209, 0.707502, 0.063322, 0.027287, 0.009182, 0.197066)
+W_222 <- W_122; lambdas_222 <- lambdas_122
+c_and_gamma_222_2_1 <- c(0.1, 0.2)
+df_222_2_1 <- 7
+theta_222logistictsh_2_1 <- c(all_phi_222, all_A_222, vec(W_222), lambdas_222, c_and_gamma_222_2_1, df_222_2_1)
 
 
 test_that("get_residuals works correctly", {
@@ -202,4 +221,24 @@ test_that("get_residuals works correctly", {
                                weightfun_pars=c(2, 1), cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_222,
                                weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), standardize=TRUE)[c(1, 242),]),
                c(-1.8753386, -0.3919048, -0.2204141, -0.4985570), tolerance=1e-3)
+
+  # Structural models
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=c(theta_222thres_2_1, 100), weight_function="threshold",
+                               weightfun_pars=c(2, 1), cond_dist="Student", identification="recursive", standardize=TRUE)[c(1, 242),]),
+               c(-3.3073904, -0.9181623, 0.3946221, -0.2656000), tolerance=1e-3)
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=c(theta_222thres_2_1, 3), weight_function="threshold",
+                               weightfun_pars=c(2, 1), cond_dist="Student", identification="recursive", standardize=FALSE)[c(2, 242),]),
+               c(-1.07200730, -0.41871592, 0.05594944, -0.05037556), tolerance=1e-3)
+  expect_equal(c(get_residuals(data=gdpdef, p=1, M=2, params=theta_122relgsh, weight_function="relative_dens",
+                               identification="heteroskedasticity", standardize=TRUE)[c(1, 243),]),
+               c(1.4454483, -0.4589756, -0.7624527, 0.0456093), tolerance=1e-3)
+  expect_equal(c(get_residuals(data=gdpdef, p=1, M=2, params=theta_122relgsh, weight_function="relative_dens",
+                               identification="heteroskedasticity", standardize=FALSE)[c(12, 243),]),
+               c(0.628148740, -0.346101003, 0.117316575, 0.009761137), tolerance=1e-3)
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222logistictsh_2_1, weight_function="logistic", weightfun_pars=c(2, 1),
+                               cond_dist="Student", identification="heteroskedasticity", standardize=TRUE)[c(1, 200),]),
+               c(-2.1569257, -0.1839126, -0.2149345, -0.9619645), tolerance=1e-3)
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222logistictsh_2_1, weight_function="logistic", weightfun_pars=c(2, 1),
+                               cond_dist="Student", identification="heteroskedasticity", standardize=FALSE)[c(1, 242),]),
+               c(-1.58310517, -0.61862850, -0.07319559, -0.16385961), tolerance=1e-3)
 })
