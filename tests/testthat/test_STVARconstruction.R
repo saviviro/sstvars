@@ -83,7 +83,7 @@ mod222logisticcmw_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logis
 # p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
 # weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))
 xi_222expcmw_2_1 <- c(0.33)
-theta_222expcmw_2_1 <- c(theta_222relgcm[-length(theta_222relgcm)], xi_222logisticcmw_2_1)
+theta_222expcmw_2_1 <- c(theta_222relgcm[-length(theta_222relgcm)], xi_222expcmw_2_1)
 mod222expcmw_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222expcmw_2_1, weight_function="exponential",
                           weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222, parametrization="mean",
                           weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)))
@@ -117,6 +117,46 @@ mod222expcmwt_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222expcmwt_2
                            weightfun_pars=c(2, 1), cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_222,
                            weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean")
 
+## Structural models
+
+
+# p=2, M=2, d=2, weight_function="threshold", weighfun_pars=c(2, 1), identification="recursive"
+mod222thressr_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222thres_2_1, weight_function="threshold",
+                           weightfun_pars=c(2, 1), identification="recursive")
+
+# p=1, M=2, d=2, weight_function="relative_dens", identification="heteroskedasticity"
+all_phi_122 <- c(0.734054, 0.225598, 0.705744, 0.187897)
+all_A_122 <- c(0.259626, -0.000863, -0.3124, 0.505251, 0.298483, 0.030096, -0.176925, 0.838898)
+W_122 <- matrix(c(-0.03, 0.24, -0.76, -0.02), nrow=2, ncol=2, byrow=FALSE)
+lambdas_122 <- c(3.36, 0.86)
+alpha1_122 <- 0.6
+theta_122relgsh <- c(all_phi_122, all_A_122, vec(W_122), lambdas_122, alpha1_122)
+mod122relgsh <- STVAR(data=gdpdef, p=1, M=2, d=2, params=theta_122relgsh, weight_function="relative_dens", identification="heteroskedasticity")
+
+# p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="Student",
+# identification="heteroskedasticity"
+all_phi_222 <- c(0.356914, 0.107436, 0.356386, 0.08633)
+all_A_222 <- c(0.13996, 0.035172, -0.164575, 0.386816, 0.451675, 0.013086, 0.227882, 0.336084, 0.239257, 0.024173,
+               -0.021209, 0.707502, 0.063322, 0.027287, 0.009182, 0.197066)
+W_222 <- W_122; lambdas_222 <- lambdas_122
+c_and_gamma_222_2_1 <- c(0.1, 0.2)
+df_222_2_1 <- 7
+theta_222logistictsh_2_1 <- c(all_phi_222, all_A_222, vec(W_222), lambdas_222, c_and_gamma_222_2_1, df_222_2_1)
+mod222logistictsh_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logistictsh_2_1, weight_function="logistic", weightfun_pars=c(2, 1),
+                               cond_dist="Student", identification="heteroskedasticity")
+
+
+## Structural models imposing constraints
+
+# p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_222,
+# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean"
+theta_222expcmwtsh_2_1 <- c(0.7209658, 0.810858, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01, 0.08, 0.3, # mu + A
+                            -0.03, 0.24, -0.76, -0.02, 3.36, 0.86, # W + lambdas
+                            0.33, 4) # xi + nu
+mod222expcmwtsh_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222expcmwtsh_2_1, weight_function="exponential",
+                             weightfun_pars=c(2, 1), identification="heteroskedasticity", cond_dist="Student", mean_constraints=list(1:2),
+                             AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean")
+
 test_that("STVAR works correctly", {
   # Relative_dens Gaussian STVAR
   expect_equal(mod112relg$params, theta_112relg)
@@ -144,6 +184,12 @@ test_that("STVAR works correctly", {
   expect_equal(mod222logcmt_12_2$params, theta_222logcmt_12_2)
   expect_equal(mod222expcmwt_2_1$params, theta_222expcmwt_2_1)
   expect_equal(mod222threst_2_1$params, theta_222threst_2_1)
+
+  # Structural
+  expect_equal(mod222thressr_2_1$params, theta_222thres_2_1)
+  expect_equal(mod122relgsh$params, theta_122relgsh)
+  expect_equal(mod222logistictsh_2_1$params, theta_222logistictsh_2_1)
+  expect_equal(mod222expcmwtsh_2_1$params, theta_222expcmwtsh_2_1)
 })
 
 test_that("swap_parametrization works correctly", {
@@ -165,4 +211,12 @@ test_that("swap_parametrization works correctly", {
                  0.386816, 0.451675, 0.013086, 0.227882, 0.336084, 0.239257, 0.024173,
                  -0.021209, 0.707502, 0.063322, 0.027287, 0.009182, 0.197066, 0.205831,
                  0.005157, 0.025877, 1.092094, -0.009327, 0.116449, 1, 13), tolerance=1e-3)
+
+  # Structural logistic
+  expect_equal(swap_parametrization(mod222logistictsh_2_1, calc_std_errors=FALSE)$params,
+               c(0.9600324, 0.5549088, 0.4908410, 1.1693004, 0.1399600, 0.0351720, -0.1645750,
+                 0.3868160, 0.4516750, 0.0130860, 0.2278820, 0.3360840, 0.2392570, 0.0241730,
+                 -0.0212090, 0.7075020, 0.0633220, 0.0272870, 0.0091820, 0.1970660, -0.0300000,
+                 0.2400000, -0.7600000, -0.0200000, 3.3600000, 0.8600000, 0.1000000, 0.2000000, 7.0000000),
+               tolerance=1e-3)
 })
