@@ -119,7 +119,6 @@ mod222expcmwt_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222expcmwt_2
 
 ## Structural models
 
-
 # p=2, M=2, d=2, weight_function="threshold", weighfun_pars=c(2, 1), identification="recursive"
 mod222thressr_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222thres_2_1, weight_function="threshold",
                            weightfun_pars=c(2, 1), identification="recursive")
