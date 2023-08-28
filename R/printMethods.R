@@ -54,10 +54,6 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
                                     cond_dist=cond_dist, identification=identification, AR_constraints=AR_constraints,
                                     mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                                     B_constraints=B_constraints)
-  if(identification != "reduced_form") {
-    print("Structural models are not yet implemented to print.stvar")
-    return(invisible(stvar))
-  }
   if(stvar$model$parametrization == "mean") {
     params <- change_parametrization(p=p, M=M, d=d, params=params, AR_constraints=NULL,
                                      mean_constraints=NULL, change_to="intercept")
@@ -73,7 +69,9 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
     all_gamma_m <- cbind(matrix(weightpars, ncol=M-1), 0) # Column per gamma_m, m=1,...,M-1, gamma_M=0.
   }
 
-  cat(weight_function, cond_dist, "STVAR model,", paste0(identification, ","),
+  cat(weight_function, cond_dist, "STVAR model,",
+      ifelse(identification == "reduced_form", "reduced form model",
+             ifelse(identification == "recursive", "recursive identification,", paste0("identified by ", identification, ","))),
       ifelse(is.null(AR_constraints), "no AR_constraints,", "AR_constraints used,"),
       ifelse(is.null(mean_constraints), paste0("no mean_constraints,", ifelse(is.null(B_constraints), "", ",")),
              paste0("mean_constraints used,", ifelse(is.null(B_constraints), "", ","))),
@@ -108,7 +106,7 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   Y <- paste0("y", 1:d)
   tmp_names <- paste0("tmp", 1:(p*(d + 2) + d + 2))
 
-  for(m in seq_len(sum(M))) {
+  for(m in seq_len(M)) {
     count <- 1
     cat(paste("Regime", m), "\n")
     if(cond_dist == "Student") {
@@ -171,41 +169,38 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
       cat("\n")
     }
   }
-  if(identification != "reduced_form") {
-    stop("STRUCTURAL MODELS NOT YET IMPLEMENTED TO PRINT.STVAR")
-    # Alla oleva toiminee jos cond.h.sked identifiointi?
-    # cat("Structural parameters:\n")
-    # W <- format_value(pick_W(p=p, M=M, d=d, params=params, structural_pars=structural_pars))
-    #
-    # tmp <- c(rep(" ", times=d - 1), ",")
-    # df2 <- data.frame(left_brackets, W=W[,1])
-    # for(i1 in 2:d) {
-    #   df2 <- cbind(df2, W[, i1])
-    #   colnames(df2)[1 + i1] <- "tmp"
-    # }
-    # df2 <- cbind(df2, right_brackets)
-    # if(sum(M) > 1) {
-    #   lambdas <- format_value(pick_lambdas(p=p, M=M, d=d, params=params, structural_pars=structural_pars))
-    #   tmp <- c(rep(" ", times=d - 1), ",")
-    #   lambdas <- matrix(lambdas, nrow=d, ncol=sum(M) - 1, byrow=FALSE) # Column for each regime
-    #   for(i1 in 1:(sum(M) - 1)) {
-    #     lmb <- lambdas[,i1]
-    #     df2 <- cbind(df2, tmp, left_brackets, lmb, right_brackets)
-    #     colnames(df2)[grep("lmb", colnames(df2))] <- paste0("lamb", i1 + 1)
-    #   }
-    # }
-    # names_to_omit <- unlist(lapply(c("left_brackets", "right_brackets", "tmp"), function(nam) grep(nam, colnames(df2))))
-    # colnames(df2)[names_to_omit] <- " "
-    # print(df2)
-    # cat("\n")
-    # W_orig <- stvar$model$structural_pars$W
-    # n_zero <- sum(W_orig == 0, na.rm=TRUE)
-    # n_free <- sum(is.na(W_orig))
-    # n_sign <- d^2 - n_zero - n_free
-    # cat("The B-matrix (or equally W) is subject to", n_zero, "zero constraints and", n_sign, "sign constraints.\n")
-    # cat("The eigenvalues lambda_{mi} are", ifelse(is.null(stvar$model$structural_pars$C_lambda), "not subject to linear constraints.",
-    #                                               "subject to linear constraints."))
-    # cat("\n")
+  if(!identification %in% c("reduced_form", "recursive")) { # No separate struct pars for recursively identified models
+    cat("Structural parameters:\n")
+    if(identification == "heteroskedasticity") {
+      W <- format_value(pick_W(p=p, M=M, d=d, params=params, identification=identification))
+
+      tmp <- c(rep(" ", times=d - 1), ",")
+      df2 <- data.frame(left_brackets, W=W[,1])
+      for(i1 in 2:d) {
+        df2 <- cbind(df2, W[, i1])
+        colnames(df2)[1 + i1] <- "tmp"
+      }
+      df2 <- cbind(df2, right_brackets)
+      if(M > 1) {
+        lambdas <- format_value(pick_lambdas(p=p, M=M, d=d, params=params, identification=identification))
+        tmp <- c(rep(" ", times=d - 1), ",")
+        lambdas <- matrix(lambdas, nrow=d, ncol=M - 1, byrow=FALSE) # Column for each regime
+        for(i1 in 1:(sum(M) - 1)) {
+          lmb <- lambdas[,i1]
+          df2 <- cbind(df2, tmp, left_brackets, lmb, right_brackets)
+          colnames(df2)[grep("lmb", colnames(df2))] <- paste0("lamb", i1 + 1)
+        }
+      }
+      names_to_omit <- unlist(lapply(c("left_brackets", "right_brackets", "tmp"), function(nam) grep(nam, colnames(df2))))
+      colnames(df2)[names_to_omit] <- " "
+      print(df2)
+      cat("\n")
+      n_zero <- sum(B_constraints == 0, na.rm=TRUE)
+      n_free <- sum(is.na(B_constraints))
+      n_sign <- d^2 - n_zero - n_free
+      cat("The impact matrix is subject to", n_zero, "zero constraints and", n_sign, "sign constraints.\n")
+      cat("\n")
+    }
   }
 
   if(summary_print) {
