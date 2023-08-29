@@ -35,6 +35,20 @@ mod322log <- STVAR(data=gdpdef, p=3, M=2, d=2, params=theta_322log_2_1, weight_f
 mod322logt <- STVAR(data=gdpdef, p=3, M=2, d=2, params=c(theta_322log_2_1, 10), weight_function="mlogit", weightfun_pars=list(vars=2, lags=1),
                     cond_dist="Student")
 
+# p=3, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1), identification="recursive"
+mod322logtr_2_1 <- STVAR(data=gdpdef, p=3, M=2, d=2, params=c(theta_322log_2_1, 10), weight_function="mlogit",
+                          weightfun_pars=list(vars=2, lags=1), cond_dist="Student", identification="recursive")
+
+# p=1, M=2, d=2, weight_function="relative_dens", identification="heteroskedasticity"
+all_phi_122 <- c(0.734054, 0.225598, 0.705744, 0.187897)
+all_A_122 <- c(0.259626, -0.000863, -0.3124, 0.505251, 0.298483, 0.030096, -0.176925, 0.838898)
+W_122 <- matrix(c(-0.03, 0.24, -0.76, -0.02), nrow=2, ncol=2, byrow=FALSE)
+lambdas_122 <- c(3.36, 0.86)
+alpha1_122 <- 0.6
+theta_122relgsh <- c(all_phi_122, all_A_122, vec(W_122), lambdas_122, alpha1_122)
+mod122relgsh <- STVAR(data=gdpdef, p=1, M=2, d=2, params=theta_122relgsh, weight_function="relative_dens", identification="heteroskedasticity")
+
+
 s112 <- simulate(mod112relg, nsim=1, seed=1, init_regime=1)
 s112_2 <- simulate(mod112relg, nsim=2, seed=1, init_regime=1)
 s122 <- simulate(mod122relg, nsim=5, seed=2, init_values=gdpdef)
@@ -47,6 +61,8 @@ s322_2 <- simulate(mod322log, nsim=3, seed=3, init_values=gdpdef)
 s322t <- simulate(mod322logt, nsim=3, seed=3, init_values=gdpdef)
 s322t_2 <- simulate(mod322logt, nsim=3, seed=3, init_regime=2)
 
+s322tr <- simulate(mod322logtr_2_1, nsim=4, seed=3, init_values=gdpdef)
+s122relgsh <- simulate(mod122relgsh, nsim=3, seed=4, init_regime=2)
 
 test_that("simulate.stvar works correctly", {
   # Relative_dens Gaussian STVAR
@@ -74,9 +90,14 @@ test_that("simulate.stvar works correctly", {
   # Student
   expect_equal(s322t$sample[3,], c(0.4749844, 0.6297811), tol=1e-4)
   expect_equal(s322t$transition_weights[1,], c(0.002759205, 0.997240795), tol=1e-4)
-
   expect_equal(s322t_2$sample[3,], c(-0.5229988, 0.3237579), tol=1e-4)
   expect_equal(s322t_2$transition_weights[1,], c(0.01405111, 0.98594889), tol=1e-4)
+
+  # Structural
+  expect_equal(s322tr$sample[4,], c(-0.05019288, -0.07683787), tol=1e-4)
+  expect_equal(s322tr$transition_weights[4,], c(0.01415435, 0.985845655), tol=1e-4)
+  expect_equal(s122relgsh$sample[3,], c(0.64751483, 0.9216674), tol=1e-4)
+  expect_equal(s122relgsh$transition_weights[1,], c(0.6535839, 0.3464161), tol=1e-4)
 })
 
 
@@ -86,6 +107,10 @@ set.seed(2); sim_reg122_1 <- simulate_from_regime(mod122relg, regime=1, nsim=2)
 set.seed(3); sim_reg122_2 <- simulate_from_regime(mod122relg, regime=2, nsim=3)
 set.seed(4); sim_reg322_1 <- simulate_from_regime(mod322log, regime=1, nsim=4)
 set.seed(5); sim_reg322t_1 <- simulate_from_regime(mod322logt, regime=2, nsim=5)
+
+set.seed(5); sim_regs322tr_1 <- simulate_from_regime(mod322logtr_2_1, regime=2, nsim=1)
+set.seed(6); sim_regs122relgsh_1 <- simulate_from_regime(mod122relgsh, regime=1, nsim=6)
+
 
 
 test_that("simulate_from_regime works correctly", {
@@ -100,4 +125,8 @@ test_that("simulate_from_regime works correctly", {
 
   # Student
   expect_equal(sim_reg322t_1[5,], c(1.7992914, 0.7365507), tol=1e-4)
+
+  # Structural
+  expect_equal(sim_regs322tr_1[1,], c(0.05300774, 0.8396193), tol=1e-4)
+  expect_equal(sim_regs122relgsh_1[6,], c(2.0474385, 0.1348014), tol=1e-4)
 })

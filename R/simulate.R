@@ -72,14 +72,11 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=stvar$model$weightfun_pars)
   cond_dist <- stvar$model$cond_dist
   identification <- stvar$model$identification
-  if(identification != "reduced_form") stop("Structural models are not yet implemented to simulate.stvar")
   AR_constraints <- stvar$model$AR_constraints
   mean_constraints <- stvar$model$mean_constraints
   weight_constraints <- stvar$model$weight_constraints
   B_constraints <- stvar$model$B_constraints
-  if(!is.null(B_constraints)) {
-    stop("B_constained models are not yet implemented to simulate.stvar")
-  }
+
   if(is.null(init_values) & missing(init_regime)) {
     stop("Either init_values or init_regime needs to be specified")
   }
@@ -94,8 +91,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   }
 
   # Collect parameter values
-  params <- stvar$params
-  params <- reform_constrained_pars(p=p, M=M, d=d, params=params,
+  params <- reform_constrained_pars(p=p, M=M, d=d, params=stvar$params,
                                     weight_function=weight_function, weightfun_pars=weightfun_pars,
                                     cond_dist=cond_dist, identification=identification,
                                     AR_constraints=AR_constraints, mean_constraints=mean_constraints,
@@ -122,6 +118,12 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
                                 weight_function=weight_function, weightfun_pars=weightfun_pars,
                                 cond_dist=cond_dist)
   distpars <- pick_distpars(params=params, cond_dist=cond_dist)
+
+  # Structural pars (recursive just takes Cholesky)
+  if(identification == "heteroskedasticity") {
+    W <- pick_W(p=p, M=M, d=d, params=params, identification=identification)
+    lambdas <- matrix(pick_lambdas(p=p, M=M, d=d, params=params, identification=identification), nrow=d, ncol=M-1)
+  }
 
   # Calculate statistics that remain constant through the iterations
   if(cond_dist == "Gaussian" || weight_function == "relative_dens") {
@@ -225,8 +227,19 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
       # Calculate B_t
       if(identification == "reduced_form") {
         B_t <- matrix(get_symmetric_sqrt(Omega_yt), nrow=d, ncol=d)
-      } else {
-        stop("Structural models are not yet implemented to simulate.stvar")
+      } else if(identification == "recursive") {
+        B_t <- t(chol(Omega_yt))
+      } else if(identification == "heteroskedasticity") {
+        if(M == 1) {
+          B_t <- W
+        } else {
+          tmp <- array(dim=c(d, d, M)) # Store alpha_mt[m]*Lambda_m
+          tmp[, , 1] <- alpha_mt[1]*diag(d) # m=1, Lambda = I_d
+          for(m in 2:M) {
+            tmp[, , m] <- alpha_mt[m]*diag(lambdas[, m - 1])
+          }
+          B_t <- W%*%sqrt(apply(tmp, MARGIN=1:2, FUN=sum)) # Calculate B_t
+        }
       }
 
       # Draw the structural error
@@ -314,7 +327,7 @@ simulate_from_regime <- function(stvar, regime=1, nsim=1, init_values=NULL) {
   }
   all_phi0 <- pick_phi0(M=M, d=d, params=params)
   all_A <- pick_allA(p=p, M=M, d=d, params=params)
-  all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params)
+  all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params, identification=identification)
   distpars <- pick_distpars(params=params, cond_dist=cond_dist)
 
   # Note that structural models not implemented here: no need here because just simulates initial values to the simulator funciton
