@@ -156,6 +156,17 @@ mod222expcmwtsh_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222expcmwt
                              weightfun_pars=c(2, 1), identification="heteroskedasticity", cond_dist="Student", mean_constraints=list(1:2),
                              AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean")
 
+# p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_222,
+# weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean",
+# B_constraints=matrix(c(-0.03, 0.24, 0, -0.02), nrow=2, ncol=2)
+theta_222expcmwbtsh_2_1 <- c(0.7209658, 0.810858, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01, 0.08, 0.3, # mu + A
+                            -0.03, 0.24, -0.02, 3.36, 0.86, # W + lambdas (excludes zero constr element)
+                            0.33, 4) # xi + nu
+mod222expcmwbtsh_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222expcmwbtsh_2_1, weight_function="exponential",
+                              weightfun_pars=c(2, 1), identification="heteroskedasticity", cond_dist="Student", mean_constraints=list(1:2),
+                              AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)),
+                              B_constraints=matrix(c(-0.03, 0.24, 0, -0.02), nrow=2, ncol=2), parametrization="mean")
+
 test_that("STVAR works correctly", {
   # Relative_dens Gaussian STVAR
   expect_equal(mod112relg$params, theta_112relg)
@@ -189,6 +200,7 @@ test_that("STVAR works correctly", {
   expect_equal(mod122relgsh$params, theta_122relgsh)
   expect_equal(mod222logistictsh_2_1$params, theta_222logistictsh_2_1)
   expect_equal(mod222expcmwtsh_2_1$params, theta_222expcmwtsh_2_1)
+  expect_equal(mod222expcmwbtsh_2_1$params, theta_222expcmwbtsh_2_1)
 })
 
 test_that("swap_parametrization works correctly", {

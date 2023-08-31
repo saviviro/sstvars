@@ -173,7 +173,6 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
     cat("Structural parameters:\n")
     if(identification == "heteroskedasticity") {
       W <- format_value(pick_W(p=p, M=M, d=d, params=params, identification=identification))
-
       tmp <- c(rep(" ", times=d - 1), ",")
       df2 <- data.frame(left_brackets, W=W[,1])
       for(i1 in 2:d) {

@@ -54,8 +54,6 @@ profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precisi
   B_constraints <- stvar$model$B_constraints
 
   # Checks, default arguments etc
-  if(identification != "reduced_form") stop("Structural models are not yet implemented to profile_logliks")
-  if(!is.null(B_constraints)) stop("B_constained models are not yet implemented to profile_logliks")
   if(missing(which_pars)) which_pars <- 1:length(params)
   if(!all_pos_ints(which_pars) || any(which_pars > length(params))) {
     stop("The argument 'which_pars' should contain strictly positive integers not larger than length of the parameter vector.")
@@ -84,11 +82,16 @@ profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precisi
   } else { # AR matrices constrained
     n_ar_pars <- ncol(AR_constraints)
   }
-  if(is.null(B_constraints)) {
+  if(identification %in% c("reduced_form", "recursive")) {
     n_covmat_pars <- M*d*(d + 1)/2
-  } else { # Constraints on the impact matrix
-    stop("B_constraints not yet implemented to n_parms")
-    n_covmat_pars <- NULL
+  } else if(identification == "heteroskedasticity") {
+    if(is.null(B_constraints)) {
+      n_zeros <- 0
+    } else {
+      n_zeros <- sum(B_constraints == 0, na.rm=TRUE)
+    }
+    n_covmat_pars <- d^2 + d*(M - 1) - n_zeros
+    W_row_ind <- rep(1, times=d) # row for each column
   }
   if(is.null(weight_constraints)) {
     if(weight_function == "relative_dens" || weight_function == "threshold") {
@@ -163,9 +166,30 @@ profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precisi
         row_inds <- unlist(lapply(1:d, function(i2) i2:d)) # At which row are we in for each pos in vech(Omega_m)
         row_ind <- row_inds[i1 - cum_o[m]] # Row in Omega_m
         main <- substitute(Omega[foo](foo2), list(foo=m, foo2=paste0(row_ind, ",", col_ind)))
-      } else { # Structural model
-        stop("Structural models are not yet implemented to profile_logliks")
-        if(!is.null(B_constraints)) stop("B_constraints are not yet implemented to profile_logliks")
+      } else { # Structural model with different params than reduced form models
+        if(identification == "heteroskedasticity") {
+          if(i1 <= n_mean_pars + n_ar_pars + d^2 - n_zeros) { # W params
+            n_zeros_in_each_column <- vapply(1:d, function(i2) sum(B_constraints[,i2] == 0, na.rm=TRUE), numeric(1))
+            zero_positions <- lapply(1:d, function(i2) (1:d)[B_constraints[,i2] == 0 & !is.na(B_constraints[,i2])]) # zero constr pos in each col
+            cum_wc <- c(0, cumsum(d - n_zeros_in_each_column)) # Index in W parameters after which a new column in W starts
+            posw <- i1 - (n_mean_pars + n_ar_pars) # Index in W parameters
+            col_ind <- sum(posw > cum_wc)
+            while(TRUE) {
+              if(W_row_ind[col_ind] %in% zero_positions[[col_ind]]) {
+                W_row_ind[col_ind] <- W_row_ind[col_ind] + 1
+              } else {
+                break
+              }
+            }
+            main <- substitute(W(foo), list(foo=paste0(W_row_ind[col_ind], ", ", col_ind)))
+            W_row_ind[col_ind] <- W_row_ind[col_ind] + 1
+          } else { # lambda parameters
+            cum_lamb <- n_mean_pars + n_ar_pars + d^2 - n_zeros + c(0, cumsum(rep(d, times=M))) # Index after which the regime changes
+            m <- sum(i1 > cum_lamb) + 1
+            pos <- i1 - cum_lamb[m - 1] # which i=1,...,d in lambda_{mi}
+            main <- substitute(lambda[foo](foo2), list(foo=m, foo2=pos))
+          }
+        }
       }
     } else if(i1 <= n_mean_pars + n_ar_pars + n_covmat_pars + n_weight_pars) { # Transition weight parameter
       pos <- i1 - n_mean_pars - n_ar_pars - n_covmat_pars # Position in weightpars

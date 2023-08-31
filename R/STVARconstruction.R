@@ -154,7 +154,7 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
                             AR_constraints=AR_constraints,
                             mean_constraints=mean_constraints,
                             weight_constraints=weight_constraints,
-                            B_constraints),
+                            B_constraints=B_constraints),
                  params=params,
                  std_errors=std_errors,
                  transition_weights=lok_and_tw$tw,
