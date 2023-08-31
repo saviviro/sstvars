@@ -155,7 +155,7 @@ profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precisi
         main <- substitute(psi(foo), list(foo=i1 - n_mean_pars))
       }
     } else if(i1 <= n_mean_pars + n_ar_pars + n_covmat_pars) { # Covariance matrix parameter
-      if(identification == "reduced_form") {
+      if(identification %in% c("reduced_form", "recursive")) {
         cum_o <- n_mean_pars + n_ar_pars + (0:(M - 1))*d*(d + 1)/2 # The indeces after which regime changes
         m <- sum(i1 > cum_o) # Which regime
         cum_col <- cum_o[m] + c(0, cumsum(d - 0:(d - 1))) # The indeces after which column changes in vech(Omega_m)

@@ -61,6 +61,21 @@ mod322expt <- STVAR(data=gdpdef, p=3, M=2, params=c(theta_322exp, 20), weight_fu
 mod322threst <- STVAR(data=gdpdef, p=3, M=2, params=c(theta_322thres, 2.01), weight_function="threshold", weightfun_pars=c(2, 1),
                       cond_dist="Student")
 
+## Structural
+
+# p=3, M=2, d=2, weight_function="threshold", weightfun_pars=list(vars=2, lags=1), identification="recursive"
+mod322thresr_2_1 <- STVAR(data=gdpdef, p=3, M=2, d=2, params=c(theta_322thres, 2.01), weight_function="threshold",
+                          weightfun_pars=c(2, 1), cond_dist="Student", identification="recursive")
+
+# p=1, M=2, d=2, weight_function="relative_dens", identification="heteroskedasticity"
+all_phi_122 <- c(0.734054, 0.225598, 0.705744, 0.187897)
+all_A_122 <- c(0.259626, -0.000863, -0.3124, 0.505251, 0.298483, 0.030096, -0.176925, 0.838898)
+W_122 <- matrix(c(-0.03, 0.24, -0.76, -0.02), nrow=2, ncol=2, byrow=FALSE)
+lambdas_122 <- c(3.36, 0.86)
+alpha1_122 <- 0.6
+theta_122relgsh <- c(all_phi_122, all_A_122, vec(W_122), lambdas_122, alpha1_122)
+mod122relgsh <- STVAR(data=gdpdef, p=1, M=2, d=2, params=theta_122relgsh, weight_function="relative_dens", identification="heteroskedasticity")
+
 
 set.seed(1); p112 <- predict(mod112relg, nsteps=1, nsim=1, pred_type="mean")
 set.seed(2); p122 <- predict(mod122relg, nsteps=3, nsim=3, pred_type="median")
@@ -76,6 +91,8 @@ set.seed(5); p322mlogitt <- predict(mod322mlogitt, nsteps=3, nsim=5, pred_type="
 set.seed(5); p322expt <- predict(mod322expt, nsteps=3, nsim=5, pred_type="mean", pi=0.95)
 set.seed(5); p322threst <- predict(mod322threst, nsteps=3, nsim=5, pred_type="median", pi=c(0.6, 0.81))
 
+set.seed(6); p322thresr <- predict(mod322thres, nsteps=3, nsim=5, pred_type="mean", pi=c(0.7, 0.99))
+set.seed(6); p122relgsh <- predict(mod122relgsh, nsteps=4, nsim=3, pred_type="median", pi=c(0.7, 0.98))
 
 
 test_that("simulate.stvar works correctly", {
@@ -113,5 +130,12 @@ test_that("simulate.stvar works correctly", {
   expect_equal(unname(p322expt$pred_ints[3, 2,]), c(1.7067186, 0.6818502), tol=1e-4)
   expect_equal(unname(p322threst$pred[3,]), c(0.7924443, 0.4580927), tol=1e-4)
   expect_equal(unname(p322threst$pred_ints[3, 4,]), c(0.8058259, 0.4715564), tol=1e-4)
+
+  # Structural
+  expect_equal(unname(p322thresr$pred[3,]), c(1.6001306, 0.3472043), tol=1e-4)
+  expect_equal(unname(p322thresr$pred_ints[3, 3,]), c(1.965468, 0.650851), tol=1e-4)
+  expect_equal(unname(p122relgsh$pred[4,]), c(0.8342902, 0.8843367), tol=1e-4)
+  expect_equal(unname(p122relgsh$pred_ints[4, 1,]), c(0.3007967, 0.3969968), tol=1e-4)
+
 })
 
