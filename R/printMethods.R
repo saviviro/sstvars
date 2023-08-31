@@ -75,7 +75,7 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
       ifelse(is.null(AR_constraints), "no AR_constraints,", "AR_constraints used,"),
       ifelse(is.null(mean_constraints), paste0("no mean_constraints,", ifelse(is.null(B_constraints), "", ",")),
              paste0("mean_constraints used,", ifelse(is.null(B_constraints), "", ","))),
-      ifelse(identification == "reduced_form", "", ifelse(is.null(B_constraints), "no B_constraints,", "B_constraints used,")))
+      ifelse(identification %in% c("reduced_form", "recursive"), "", ifelse(is.null(B_constraints), "no B_constraints,", "B_constraints used,")))
   cat("\n", paste0(" p = ", p, ", "))
   cat(paste0("M = ", M, ", "))
   cat(paste0("d = ", d, ", #parameters = " , npars, ","),
