@@ -247,3 +247,50 @@ get_symmetric_sqrt <- function(Omega) {
   diag_Omegas(Omega1=Omega)
 }
 
+
+#' @title Compute the j:th power of a square matrix A
+#'
+#' @description \code{mat_power} computes the j:th power of a square matrix A using
+#' exponentiation by squaring.
+#'
+#' @param A A square numeric matrix.
+#' @param j A natural number representing the power to which the matrix will be raised.
+#'
+#' @return A matrix which is A raised to the power j.
+#' @keywords internal
+
+mat_power <- function(A, j) {
+  if(j == 0) {
+    return(diag(nrow(A)))
+  }
+  res <- diag(nrow(A))
+  tmp <- A
+  while(j > 0) {
+    if(j%%2 == 1) {
+      res <- res%*%tmp
+    }
+    tmp <- tmp%*%tmp
+    j <- j%/%2
+  }
+  res
+}
+
+
+#' @title Create a special matrix J
+#'
+#' @description \code{create_J_matrix} generates a d x dp matrix J, where the first d x d block is the identity matrix I_d,
+#' and the rest is filled with zeros.
+#'
+#' @param d An integer representing the dimension of the identity matrix.
+#' @param p An integer representing the factor by which to extend the matrix with zeros.
+#'
+#' @return A \eqn{d x dp} matrix \eqn{J} where the first \eqn{d x d} block is the identity matrix \eqn{I_d},
+#'   and the rest is filled with zeros.
+#' @keywords internal
+
+create_J_matrix <- function(d, p) {
+  J <- matrix(0, nrow=d, ncol=d*p) # Initialize a matrix with zeros
+  diag(J[ , 1:d]) <- 1 # Fill the first d x d block with the identity matrix
+  J
+}
+

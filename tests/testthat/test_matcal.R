@@ -172,3 +172,118 @@ test_that("redecompose_Omegas works correctly", {
   expect_equal(get_Omega(M=3, d=3, W_and_lambdas=decomp33_4, which=3), Omega33_3, tolerance=1e-6)
 })
 
+
+
+mat_power_test <- function(A, j) {
+  if(j == 0) return(diag(nrow(A)))
+  Reduce('%*%', replicate(j, A, simplify=FALSE))
+}
+
+B5 <- cbind(rbind(B2, Omega1_3), rbind(Omega23_1, Omega1_3))
+W3 <- matrix(W32, nrow=2, ncol=2)
+W4 <- matrix(W33, nrow=3, ncol=3)
+
+
+test_that("mat_power works correctly", {
+  expect_equal(mat_power(A1, 0), A1, tol=1e-10)
+  expect_equal(mat_power(A1, 1), A1, tol=1e-10)
+  expect_equal(mat_power(A1, 2), A1%*%A1, tol=1e-10)
+
+  expect_equal(mat_power(A2, 0), diag(nrow(A2)), tol=1e-10)
+  expect_equal(mat_power(A2, 1), A2, tol=1e-10)
+  expect_equal(mat_power(A2, 2), A2%*%A2, tol=1e-10)
+  expect_equal(mat_power(A2, 3), A2%*%A2%*%A2, tol=1e-10)
+  expect_equal(mat_power(A2, 13), mat_power_test(A2, 13), tol=1e-10)
+  expect_equal(mat_power(A2, 51), mat_power_test(A2, 51), tol=1e-10)
+
+  expect_equal(mat_power(A3, 0), diag(nrow(A3)), tol=1e-10)
+  expect_equal(mat_power(A3, 1), A3, tol=1e-10)
+  expect_equal(mat_power(A3, 2), A3%*%A3, tol=1e-10)
+  expect_equal(mat_power(A3, 3), A3%*%A3%*%A3, tol=1e-10)
+  expect_equal(mat_power(A3, 8), mat_power_test(A3, 8), tol=1e-10)
+  expect_equal(mat_power(A3, 27), mat_power_test(A3, 27), tol=1e-10)
+
+  expect_equal(mat_power(B3, 3), B3%*%B3%*%B3, tol=1e-10)
+  expect_equal(mat_power(B3, 4), mat_power_test(B3, 4), tol=1e-10)
+  expect_equal(mat_power(B3, 43), mat_power_test(B3, 43), tol=1e-10)
+
+  expect_equal(mat_power(B4, 0), diag(nrow(B4)), tol=1e-10)
+  expect_equal(mat_power(B4, 1), B4, tol=1e-10)
+  expect_equal(mat_power(B4, 2), B4%*%B4, tol=1e-10)
+  expect_equal(mat_power(B4, 3), B4%*%B4%*%B4, tol=1e-10)
+  expect_equal(mat_power(B4, 4), B4%*%B4%*%B4%*%B4, tol=1e-10)
+  expect_equal(mat_power(B4, 10), mat_power_test(B4, 10), tol=1e-10)
+  expect_equal(mat_power(B4, 21), mat_power_test(B4, 21), tol=1e-10)
+
+  expect_equal(mat_power(B5, 0), diag(nrow(B5)), tol=1e-10)
+  expect_equal(mat_power(B5, 1), B5, tol=1e-10)
+  expect_equal(mat_power(B5, 2), B5%*%B5, tol=1e-10)
+  expect_equal(mat_power(B5, 3), B5%*%B5%*%B5, tol=1e-10)
+  expect_equal(mat_power(B5, 4), B5%*%B5%*%B5%*%B5, tol=1e-10)
+  expect_equal(mat_power(B5, 10), mat_power_test(B5, 10), tol=1e-10)
+  expect_equal(mat_power(B5, 21), mat_power_test(B5, 21), tol=1e-10)
+
+  expect_equal(mat_power(W3, 0), diag(nrow(W3)), tol=1e-10)
+  expect_equal(mat_power(W3, 1), W3, tol=1e-10)
+  expect_equal(mat_power(W3, 2), W3%*%W3, tol=1e-10)
+  expect_equal(mat_power(W3, 3), W3%*%W3%*%W3, tol=1e-10)
+  expect_equal(mat_power(W3, 5), mat_power_test(W3, 5), tol=1e-10)
+  expect_equal(mat_power(W3, 24), mat_power_test(W3, 24), tol=1e-10)
+
+  expect_equal(mat_power(W4, 0), diag(nrow(W4)), tol=1e-10)
+  expect_equal(mat_power(W4, 1), W4, tol=1e-10)
+  expect_equal(mat_power(W4, 2), W4%*%W4, tol=1e-10)
+  expect_equal(mat_power(W4, 3), W4%*%W4%*%W4, tol=1e-10)
+  expect_equal(mat_power(W4, 4), W4%*%W4%*%W4%*%W4, tol=1e-10)
+  expect_equal(mat_power(W4, 11), mat_power_test(W4, 11), tol=1e-10)
+  expect_equal(mat_power(W4, 20), mat_power_test(W4, 20), tol=1e-10)
+})
+
+test_that("create_J_matrix works", {
+
+  # Test with d = 2, p = 3
+  J <- create_J_matrix(2, 3)
+
+  # Check dimensions
+  expect_equal(dim(J), c(2, 6))
+
+  # Check the first d x d block is identity matrix
+  expect_equal(J[ , 1:2], diag(2))
+
+  # Check remaining blocks are zeros
+  expect_equal(J[ , 3:6], matrix(0, nrow = 2, ncol = 4))
+
+  # Test with d = 3, p = 1 (edge case where p = 1)
+  J <- create_J_matrix(3, 1)
+
+  # Check dimensions
+  expect_equal(dim(J), c(3, 3))
+
+  # Check it's an identity matrix
+  expect_equal(J, diag(3))
+
+  # Test with d = 100, p = 50 (large case)
+  J <- create_J_matrix(100, 50)
+
+  # Check dimensions
+  expect_equal(dim(J), c(100, 5000))
+
+  # Check the first d x d block is identity matrix
+  expect_equal(J[ , 1:100], diag(100))
+
+  # Check remaining blocks are zeros
+  expect_equal(J[ , 101:5000], matrix(0, nrow = 100, ncol = 4900))
+
+  # Test with d = 5, p = 9 (moderate size case)
+  J <- create_J_matrix(5, 9)
+
+  # Check dimensions
+  expect_equal(dim(J), c(5, 45))
+
+  # Check the first K x K block is identity matrix
+  expect_equal(J[ , 1:5], diag(5))
+
+  # Check remaining blocks are zeros
+  expect_equal(J[ , 6:45], matrix(0, nrow = 5, ncol = 40))
+})
+
