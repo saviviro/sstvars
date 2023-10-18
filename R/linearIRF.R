@@ -117,7 +117,7 @@ linear_IRF <- function(stvar, N=30, regime=1, which_cumulative=numeric(0),
   boldA <- all_boldA[, , regime] # Companion form AR matrix for the selected regime
   J_matrix <- create_J_matrix(d=d, p=p)
   all_boldA_powers <- array(NA, dim=c(d*p, d*p, N+1)) # The first [, , i1] is for the impact period, i1+1 for period i1
-  all_phi_i <- array(NA, dim=c(d*p, d*p, N+1)) # JA^iJ' matrices; [, , 1] is for the impact period, i1+1 for period i1
+  all_phi_i <- array(NA, dim=c(d, d, N+1)) # JA^iJ' matrices; [, , 1] is for the impact period, i1+1 for period i1
   all_Phi_i <- array(NA, dim=c(d*p, d*p, N+1)) # IR-matrices [, , 1] is for the impact period, i1+1 for period i1
   for(i1 in 1:(N + 1)) { # Go through the periods, i1=1 for the impact period, i1+1 for the period i1 after the impact
     if(i1 == 1) {
