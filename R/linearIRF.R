@@ -114,27 +114,35 @@ linear_IRF <- function(stvar, N=30, regime=1, which_cumulative=numeric(0),
   }
 
   # Calculate the impulse response functions
-  boldA <- all_boldA[, , regime] # Companion form AR matrix for the selected regime
-  J_matrix <- create_J_matrix(d=d, p=p)
-  all_boldA_powers <- array(NA, dim=c(d*p, d*p, N+1)) # The first [, , i1] is for the impact period, i1+1 for period i1
-  all_phi_i <- array(NA, dim=c(d, d, N+1)) # JA^iJ' matrices; [, , 1] is for the impact period, i1+1 for period i1
-  all_Phi_i <- array(NA, dim=c(d*p, d*p, N+1)) # IR-matrices [, , 1] is for the impact period, i1+1 for period i1
-  for(i1 in 1:(N + 1)) { # Go through the periods, i1=1 for the impact period, i1+1 for the period i1 after the impact
-    if(i1 == 1) {
-      all_boldA_powers[, , i1] <- diag(d*p) # Diagonal matrix for the power 0
-    } else {
-      all_boldA_powers[, , i1] <- all_boldA_powers[, , i1 - 1]%*%boldA # boldA^{i1-1} because i1=1 is for the zero period
+  # Function to calculate IRF
+  get_IRF <- function(p, d, N, boldA, B_matrix) {
+    J_matrix <- create_J_matrix(d=d, p=p)
+    all_boldA_powers <- array(NA, dim=c(d*p, d*p, N+1)) # The first [, , i1] is for the impact period, i1+1 for period i1
+    all_Theta_i <- array(NA, dim=c(d, d, N+1)) # JA^iJ' matrices; [, , 1] is for the impact period, i1+1 for period i1
+    all_Theta_i <- array(NA, dim=c(d, d, N+1)) # IR-matrices [, , 1] is for the impact period, i1+1 for period i1
+    for(i1 in 1:(N + 1)) { # Go through the periods, i1=1 for the impact period, i1+1 for the period i1 after the impact
+      if(i1 == 1) {
+        all_boldA_powers[, , i1] <- diag(d*p) # Diagonal matrix for the power 0
+      } else {
+        all_boldA_powers[, , i1] <- all_boldA_powers[, , i1 - 1]%*%boldA # boldA^{i1-1} because i1=1 is for the zero period
+      }
+      all_Theta_i[, , i1] <- J_matrix%*%all_boldA_powers[, , i1]%*%t(J_matrix)
+      all_Theta_i[, , i1] <- all_Theta_i[, , i1]%*%B_matrix
     }
-    all_phi_i[, , i1] <- J_matrix%*%all_boldA_powers[, , i1]%*%t(J_matrix)
-    all_Phi_i[, , i1] <- all_phi_i[, , i1]%*%B_matrix
+    all_Theta_i # all_Theta_i[variable, shock, horizon] -> all_Theta_i[variable, shock, ] subsets the IRF!
   }
-  # all_Phi_i[variable, shock, horizon] -> all_Phi_i[variable, shock, ] subsets the IRF!
+
+  ## Calculate the impulse response functions:
+  point_est_IRF <- get_IRF(p=p, d=d, N=N,
+                           boldA=all_boldA[, , regime], # boldA= Companion form AR matrix of the selected regime
+                           B_matrix=B_matrix)
+  # all_Theta_i[variable, shock, horizon] -> all_Theta_i[variable, shock, ] subsets the IRF!
 
   # NOTE which cumulative does not do anything yet! Maybe original + cumulative for all?
   # Depends on how the confidence bounds are created!
 
   # Return the results
-  structure(list(all_irfs=all_Phi_i,
+  structure(list(all_irfs=point_est_IRF,
                  N=N,
                  ci=ci,
                  which_cumulative=which_cumulative,
