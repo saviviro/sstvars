@@ -142,7 +142,7 @@ linear_IRF <- function(stvar, N=30, regime=1, which_cumulative=numeric(0),
   # Depends on how the confidence bounds are created!
 
   # Return the results
-  structure(list(all_irfs=point_est_IRF,
+  structure(list(point_est_IRF=point_est_IRF,
                  N=N,
                  ci=ci,
                  which_cumulative=which_cumulative,
