@@ -175,11 +175,9 @@ fitSSTVAR <- function(stvar, new_identification=c("recursive", "heteroskedastici
     return(STVAR(data=data, p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
                  parametrization=parametrization, identification=new_identification,
                  AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                 weight_constraints=weight_constraints, B_constraints=NULL))
+                 weight_constraints=weight_constraints, B_constraints=NULL, calc_std_errors=calc_std_errors))
   }
 
-
-  # ret orig odel if old_ide
 
   identification <- new_identification # old in old_identification
 
@@ -196,7 +194,19 @@ fitSSTVAR <- function(stvar, new_identification=c("recursive", "heteroskedastici
 
   # Set up initial values using the obtained parameters
   if(identification == "heteroskedasticity") {
-    # Returns the model
+    if(M == 2 && is.null(B_constraints) && old_identification == "reduced_form") {
+      # Nothing to estimate, decompose the error term covariance matrices and create new params
+      # and return the new model
+
+    } else if(old_B_constraints == B_constraints && old_identification == "heteroskedasticity") {
+      # The model does not change, return the original model
+    }
+    ## If arrived here, overidentifying constraints are imposed.
+
+    # Returns the model already if M = 2 and new_B_constraints = old_B_constraints
+
+    ## TEE GSMVAR_TO_SGSMVAR TYYLINEN APUFUNKTIO, JOLLA REDUSOIDUN MUODON MALLI MUUTETAAN HET.SKED MALLIKSI,
+    ## HUOM, EI EXPORTATA!
   } else {
     # Not possible to arrive here currently, but will be updated later for new identification methods.
     stop("Unknown identification in fitSSTVAR")
