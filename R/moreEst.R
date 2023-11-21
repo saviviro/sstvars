@@ -194,7 +194,9 @@ fitSSTVAR <- function(stvar, new_identification=c("recursive", "heteroskedastici
 
   # Set up initial values using the obtained parameters
   if(identification == "heteroskedasticity") {
-    if(M == 2 && is.null(B_constraints) && old_identification == "reduced_form") {
+    if(M == 1) {
+      stop("Identification by heteroskedasticity requires at least two regimes")
+    } else if(M == 2 && is.null(B_constraints) && old_identification == "reduced_form") {
       # Nothing to estimate, decompose the error term covariance matrices and create new params
       # and return the new model
 

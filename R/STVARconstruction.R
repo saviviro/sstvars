@@ -285,3 +285,56 @@ swap_parametrization <- function(stvar, calc_std_errors=FALSE) {
         calc_std_errors=calc_std_errors)
 }
 
+
+
+#' @title Switch from two-regime reduced form STVAR model to a structural model identified by heteroskedasticity
+#'
+#' @description \code{get_hetsked_sstvar} constructs structural STVAR model identified by heteroskedasticity
+#'   based on a reduced form STVAR model.
+#'
+#' @inheritParams fitSSTVAR
+#' @details The switch is made by simultaneously diagonalizing the two error term covariance matrices
+#'   with a well known matrix decomposition (Muirhead, 1982, Theorem A9.9) and then normalizing the
+#'   diagonal of the matrix W positive (which implies positive diagonal of the impact matrix). Models with
+#'   more that two regimes are not supported because the matrix decomposition does not generally
+#'   exists for more than two covariance matrices.
+#' @return Returns an object of class \code{'stvar'} defining a structural STVAR model identified by heteroskedasticity,
+#'   with the main diagonal of the impact matrix normalized to be positive.
+#' @seealso \code{\link{fitSSTVAR}}, \code{\link{STVAR}}, code{\link{fitSTVAR}}
+#'  \itemize{
+#'    \item Muirhead R.J. 1982. Aspects of Multivariate Statistical Theory, \emph{Wiley}.
+#'  }
+
+get_hetsked_sstvar <- function(stvar, calc_std_errors=FALSE) {
+  check_stvar(stvar)
+  p <- stvar$model$p
+  M <- stvar$model$M
+  d <- stvar$model$d
+  data <- stvar$data
+  params <- stvar$params
+  weight_function <- stvar$model$weight_function
+  cond_dist <- stvar$model$cond_dist
+  parametrization <- stvar$model$parametrization
+  identification <- stvar$model$identification
+  stopifnot(identification == "reduced_form")
+  stopifnot(M == 2)
+  AR_constraints <- stvar$model$AR_constraints
+  mean_constraints <- stvar$model$mean_constraints
+  weight_constraints <- stvar$model$weight_constraints
+  B_constraints <- stvar$model$B_constraints
+  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function,
+                                         weightfun_pars=stvar$model$weightfun_pars, cond_dist=cond_dist)
+  params <- reform_constrained_pars(p=p, M=M, d=d, params=params,
+                                    weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                    cond_dist=cond_dist, identification=identification,
+                                    AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                    weight_constraints=weight_constraints, B_constraints=B_constraints)
+
+  # Obtain and diagonalized the covariance matrices
+  all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params, identification=identification)
+  tmp <- diag_Omegas(Omega1=all_Omega[, , 1], Omega2=all_Omega[, , 2])
+}
+
+
+
+
