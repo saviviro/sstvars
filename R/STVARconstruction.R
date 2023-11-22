@@ -373,9 +373,9 @@ get_hetsked_sstvar <- function(stvar, calc_std_errors=FALSE) {
   }
 
   mean_pars <- pars_orig[1:n_mean_pars]
-  ar_pars <- pars_orig[(n_mean_pars + 1):(n_means_pars + n_ar_pars)]
+  ar_pars <- pars_orig[(n_mean_pars + 1):(n_mean_pars + n_ar_pars)]
   weight_pars <- pars_orig[(n_mean_pars + n_ar_pars + n_covmat_pars
-                            + 1):(n_means_pars + n_ar_pars + n_covmat_pars + n_weight_pars)]
+                            + 1):(n_mean_pars + n_ar_pars + n_covmat_pars + n_weight_pars)]
   if(cond_dist == "Gaussian") {
     dist_pars <- numeric(0)
   } else { # cond_dist == "Student"
@@ -384,7 +384,7 @@ get_hetsked_sstvar <- function(stvar, calc_std_errors=FALSE) {
   new_params <- c(mean_pars, ar_pars, vec(W), lambdas, weight_pars, dist_pars)
 
   # Return the structural model identified by heteroskedasticity
-  STVAR(data=data, p=p, M=M, d=d, params=new_params,
+  STVAR(data=data, p=p, M=M, d=d, params=new_params, cond_dist=cond_dist,
         weight_function=weight_function, weightfun_pars=weightfun_pars,
         parametrization=parametrization, identification="heteroskedasticity",
         AR_constraints=AR_constraints, mean_constraints=mean_constraints,
