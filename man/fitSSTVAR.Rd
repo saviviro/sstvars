@@ -9,7 +9,8 @@ fitSSTVAR(
   stvar,
   new_identification = c("recursive", "heteroskedasticity"),
   new_B_constraints = NULL,
-  maxit = 100,
+  maxit = 1000,
+  maxit_robust = 1000,
   robust_method = c("none", "Nelder-Mead", "SANN"),
   calc_std_errors = TRUE
 )
@@ -19,6 +20,8 @@ fitSSTVAR(
 specifying a reduced form or a structural model}
 
 \item{maxit}{the maximum number of iterations in the variable metric algorithm.}
+
+\item{maxit_robust}{the maximum number of iterations on the first phase robust estimation, if employed.}
 
 \item{robust_method}{Should some robust estimation method be used in the estimation before switching
 to the gradient based variable metric algorithm? See details.}
@@ -40,7 +43,7 @@ When the structural model does not impose overidentifying constraints, it is dir
   Structural models can be provided in the argument \code{stvar} if overidentifying constraints should be
   imposed.
 
-  Using a robust estimation method before switching to the variable metric can be useful if the intial
+  Using a robust estimation method before switching to the variable metric can be useful if the initial
   estimates are not very close to the ML estimate of the structural model, as the variable metric algorithm
   (usually) converges to a nearby local maximum or saddle point. This is particularly the case when the imposed
   overidentifying restrictions are such that the unrestricted estimate is not close to satisfying them.
