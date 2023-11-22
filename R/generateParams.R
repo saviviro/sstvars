@@ -514,7 +514,7 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logis
       weight_pars <- numeric(0)
     }
 
-    new_pars[1:(M*g + q + M*d*(d + 1)/2 + length(weight_pars))] <- c(mean_pars, AR_pars, covmat_pars, weight_pars)
+    new_pars[1:(d*g + q + M*d*(d + 1)/2 + length(weight_pars))] <- c(mean_pars, AR_pars, covmat_pars, weight_pars)
   }
   if(cond_dist == "Student") {
     # Add degrees of freedom parameter

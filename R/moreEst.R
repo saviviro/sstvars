@@ -120,7 +120,9 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
 #'   Using a robust estimation method before switching to the variable metric can be useful if the initial
 #'   estimates are not very close to the ML estimate of the structural model, as the variable metric algorithm
 #'   (usually) converges to a nearby local maximum or saddle point. This is particularly the case when the imposed
-#'   overidentifying restrictions are such that the unrestricted estimate is not close to satisfying them.
+#'   overidentifying restrictions are such that the unrestricted estimate is not close to satisfying them. Note that
+#'   the results may not very reliable even with the robust method if the initial estimates after imposing the constraints
+#'   are far from the unconstrained ones.
 #'
 #'   Employs the estimation function \code{optim} from the package \code{stats} that implements the optimization
 #'   algorithms. See \code{?optim} for the documentation on the
@@ -135,15 +137,45 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
 #' # p=3, M=2, d=2 relative_dens Gaussian STVAR with the means and AR matrices constrained
 #' # to be identical in both regimes
 #' fit32cm <- fitSTVAR(gdpdef, p=3, M=2, AR_constraints=rbind(diag(3*2^2), diag(3*2^2)),
-#'                     mean_constraints=list(1:2), parametrization="mean", nrounds=1, seeds=1, use_parallel=FALSE)
+#'   weight_function="relative_dens", mean_constraints=list(1:2), parametrization="mean",
+#'   nrounds=1, seeds=1, use_parallel=FALSE)
+#'
+#' # Estimate various structural models based on the reduced form model:
+#' fit32cms_rec <- fitSSTVAR(fit32cm, new_identification="recursive") # Recursive
+#' fit32cms_hetsked <- fitSSTVAR(fit32cm, new_identification="heteroskedasticity") # Het.sked.
+#' fit32cms_hs2 <- fitSSTVAR(fit32cm, new_identification="heteroskedasticity",
+#'  new_B_constraints=matrix(c(1, NA, 0, 1), nrow=2)) # Overidentify by B_constraints
+#' fit32cms_hs3 <- fitSSTVAR(fit32cms_hs2, new_identification="heteroskedasticity",
+#'  new_B_constraints=matrix(c(1, 0, 0, 1), nrow=2)) # Overidentify more by B_constraints
+#'
+#' # p=3, M=3, d=2 Threshold Student STVAR with the means and AR matrices constrained
+#' # to be identical in both regimes; the first lag of the second variable as the
+#' #  switching variable:
+#' fit32cml <- fitSTVAR(gdpdef, p=3, M=3, cond_dist="Student",
+#'  AR_constraints=rbind(diag(3*2^2), diag(3*2^2), diag(3*2^2)),
+#'  weight_function="threshold", weightfun_pars=c(2, 1), mean_constraints=list(1:3),
+#'  parametrization="mean", nrounds=1, seeds=1, use_parallel=FALSE)
+#'
+#' # Estimate various structural models based on the reduced form model:
+#' fit32cmls_rec <- fitSSTVAR(fit32cml, new_identification="recursive") # Recursive
+#' fit32cmls_hs <- fitSSTVAR(fit32cml, new_identification="heteroskedasticity") # Het.sked.
+#' fit32cmls_hs2 <- fitSSTVAR(fit32cmls_hs, new_identification="heteroskedasticity",
+#'  new_B_constraints=matrix(c(NA, 0, NA, NA), nrow=2),
+#'  robust_method="none") # Overidentified more by B_constraints; no robust estimation
+#' fit32cmls_hs3 <- fitSSTVAR(fit32cmls_hs2, new_identification="heteroskedasticity",
+#'  new_B_constraints=matrix(c(NA, NA, NA, NA), nrow=2),
+#'  robust_method="none") # Relax the B_constraints again; no robust estimation.
 #' }
 #' @export
 
 fitSSTVAR <- function(stvar, new_identification=c("recursive", "heteroskedasticity"), new_B_constraints=NULL,
-                      maxit=1000, maxit_robust=1000, robust_method=c("none", "Nelder-Mead", "SANN"), calc_std_errors=TRUE) {
+                      maxit=1000, maxit_robust=1000, robust_method=c("Nelder-Mead", "SANN", "none"),
+                      calc_std_errors=TRUE) {
   check_stvar(stvar)
   stopifnot(maxit %% 1 == 0 & maxit >= 1)
+  stopifnot(maxit_robust %% 1 == 0 & maxit_robust >= 1)
   robust_method <- match.arg(robust_method)
+  new_identification <- match.arg(new_identification)
   p <- stvar$model$p
   M <- stvar$model$M
   d <- stvar$model$d
@@ -175,7 +207,9 @@ fitSSTVAR <- function(stvar, new_identification=c("recursive", "heteroskedastici
     }
   } else if(new_identification == "recursive") {
     # Old identification reduced form, recursively identified model should be returned.
-    return(STVAR(data=data, p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
+    if(!is.null(new_B_constraints)) warning("Cannot impose B_constraints on recursively identified models")
+    return(STVAR(data=data, p=p, M=M, d=d, params=params, cond_dist=cond_dist,
+                 weight_function=weight_function, weightfun_pars=weightfun_pars,
                  parametrization=parametrization, identification=new_identification,
                  AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                  weight_constraints=weight_constraints, B_constraints=NULL, calc_std_errors=calc_std_errors))
@@ -233,7 +267,8 @@ fitSSTVAR <- function(stvar, new_identification=c("recursive", "heteroskedastici
   } else { # cond_dist == "Student
     n_dist_pars
   }
-  n_pars <- n_mean_pars + n_ar_pars + n_covmat_pars + weight_pars + n_dist_pars
+  n_pars <- n_mean_pars + n_ar_pars + n_covmat_pars + n_weight_pars + n_dist_pars
+
 
 
   # Set up initial values using the obtained parameters
@@ -244,7 +279,7 @@ fitSSTVAR <- function(stvar, new_identification=c("recursive", "heteroskedastici
       # Nothing to estimate, decompose the error term covariance matrices and create new params
       # and return the new model
       return(get_hetsked_sstvar(stvar, calc_std_errors=calc_std_errors))
-    } else if(old_B_constraints == B_constraints && old_identification == "heteroskedasticity") {
+    } else if(is.null(old_B_constraints) && is.null(B_constraints) && old_identification == "heteroskedasticity") {
       # The model does not change, return the original model
       return(stvar)
     }
@@ -259,12 +294,12 @@ fitSSTVAR <- function(stvar, new_identification=c("recursive", "heteroskedastici
         # to the first regime, and the second most to the third regime.
 
         # First, pick reduced form error covariance matrices:
-        params_std <- reform_constrained_pars(p=p, M=M, params=params, cond_dist=cond_dist,
+        params_std <- reform_constrained_pars(p=p, M=M, d=d, params=params, cond_dist=cond_dist,
                                               weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                              parametrization=parametrization, identification=old_identification,
+                                              identification=old_identification,
                                               AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                                               weight_constraints=weight_constraints, B_constraints=old_B_constraints)
-        all_Omegas <- pick_Omegas(p=p, M=M, params=params_std, identification=old_identification)
+        all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params_std, identification=old_identification)
 
         # W and lambda_2:
         W_and_lambdas <- numeric(d^2 + (M - 1)*d)
@@ -284,12 +319,16 @@ fitSSTVAR <- function(stvar, new_identification=c("recursive", "heteroskedastici
     } else {
       oldWpars <- params[(n_mean_pars + n_ar_pars + 1):(n_mean_pars + n_ar_pars + d^2 - n_zeros_in_W)]
     }
-
-    n_sign_changes <- 0
-    oldWpars_inW <- matrix(0, nrow=d, ncol=d) # Fill in the parameters including non-parametrized zeros:
     if(is.null(old_B_constraints)) {
       old_B_constraints <- matrix(NA, nrow=d, ncol=d) # No constraints imposed here but avoids null problems below
     }
+    if(is.null(B_constraints)) {
+      new_B_constraints <- matrix(NA, nrow=d, ncol=d) # No constraints imposed here but avoids null problems below
+      B_constraints <- matrix(NA, nrow=d, ncol=d) # No constraints imposed here but avoids null problems below
+    }
+
+    n_sign_changes <- 0
+    oldWpars_inW <- matrix(0, nrow=d, ncol=d) # Fill in the parameters including non-parametrized zeros:
     oldWpars_inW[old_B_constraints != 0 | is.na(old_B_constraints)] <- oldWpars
 
     # Go through the matrices old_B_constraints, new_B_constraints, and changes the oldWpars accordingly
@@ -304,21 +343,22 @@ fitSSTVAR <- function(stvar, new_identification=c("recursive", "heteroskedastici
         if(is.na(sn) && so != 0) { # No new constraint, old constraint is not zero
           newWpars[i1, i2] <- oldWpars_inW[i1, i2] # Insert old param
         } else if(is.na(sn) && so == 0) { # No new constraints, old constraint is zero
-          newWpars[i1, i2] <- 1e+6  # Insert close to zero value: not exactly zero to avoid the parameter disappearing in Wvec
+          newWpars[i1, i2] <- 1e-6  # Insert close to zero value: not exactly zero to avoid the parameter disappearing in Wvec
         } else if(so == sn) { # Same constraint in new and old W
           newWpars[i1, i2] <- oldWpars_inW[i1, i2] # Insert old param
         } else if(sn == 0) { # Zero constraint in new W
           newWpars[i1, i2] <- 0 # Insert zero (which will be removed as it is not parametrized)
         } else if(so > sn) { # sn must be negative, so could be zero or positive
-          newWpars[i1, i2] <- -0.01 # Insert small negative number
+          newWpars[i1, i2] <- -0.05 # Insert small negative number
           n_sign_changes <- n_sign_changes + 1
         } else { # It must be that so < sn, which implies sn > 0, while so could be zero or negative
-          newWpars[i1, i2] <- 0.01 # Insert s mall positive number
+          newWpars[i1, i2] <- 0.05 # Insert s mall positive number
           n_sign_changes <- n_sign_changes + 1
         }
       }
     }
     newWpars <- Wvec(newWpars) # New initial parameters for W
+
 
     # New initial params
     if(old_identification == "reduced_form" && M > 2) {
@@ -329,10 +369,10 @@ fitSSTVAR <- function(stvar, new_identification=c("recursive", "heteroskedastici
                       params[(n_mean_pars + n_ar_pars + length(oldWpars) + 1):length(params)])
     }
     if(n_sign_changes > 0) {
-      cat(paste0("There was ", n_sign_changes, "sign changes in W when creating preliminary estimates for the new model.",
-                  "The sign changes make the results more unrealiable. To obtain more reliable results, consider using",
-                  "the function 'swap_W_signs' to create a model that has the sign constraints readily satisfied and",
-                  "then applying this function.\n"))
+      cat(paste0("There was ", n_sign_changes, " sign changes in W when creating preliminary estimates for the new model. ",
+                  "The sign changes make the results more unrealiable. To obtain more reliable results, consider using ",
+                  "the function 'swap_W_signs' to create a model that has the sign constraints readily satisfied and ",
+                  "then applying this function.\n\n"))
     }
   } else {
     # Not possible to arrive here currently, but will be updated later for new identification methods.
@@ -349,15 +389,15 @@ fitSSTVAR <- function(stvar, new_identification=c("recursive", "heteroskedastici
 
   if(is.null(new_loglik)) {
     cat("Problem with the new parameter vector - try a different new_W?\n See:\n")
-    check_params(p=p, M=M, params=new_params, cond_dist=cond_dist,
+    check_params(p=p, M=M, d=d, params=new_params, cond_dist=cond_dist,
                  weight_function=weight_function, weightfun_pars=weightfun_pars,
                  parametrization=parametrization, identification=identification,
                  AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                 weight_constraints=weight_constraints, B_constraints=B_constraints,)
+                 weight_constraints=weight_constraints, B_constraints=B_constraints)
   }
 
   cat("The log-likelihood of the supplied model:   ", round(c(stvar$loglik), 3),
-      "\nConstrained log-likelihood prior estimation:", round(new_loglik, 3), "\n\n")
+      "\nConstrained log-likelihood prior estimation:", round(new_loglik, 3), "\n")
 
 
   ### Estimation
@@ -375,7 +415,7 @@ fitSSTVAR <- function(stvar, new_identification=c("recursive", "heteroskedastici
 
   # Function to optimize
   loglik_fn <- function(params) {
-    tryCatch(loglikelihood(data=data, p=p, M=M, params=new_params,
+    tryCatch(loglikelihood(data=data, p=p, M=M, params=params,
                            weight_function=weight_function, weightfun_pars=weightfun_pars,
                            cond_dist=cond_dist, parametrization=parametrization,
                            identification=identification, AR_constraints=AR_constraints,
@@ -385,6 +425,7 @@ fitSSTVAR <- function(stvar, new_identification=c("recursive", "heteroskedastici
   }
 
   ## Gradient of the log-likelihood function using central difference approximation
+  npars <- length(new_params)
   h <- 6e-6
   I <- diag(rep(1, times=npars))
   loglik_grad <- function(params) {
@@ -397,7 +438,7 @@ fitSSTVAR <- function(stvar, new_identification=c("recursive", "heteroskedastici
     robust_results <- stats::optim(par=new_params, fn=loglik_fn, gr=loglik_grad, method=robust_method,
                                    control=list(fnscale=-1, maxit=maxit_robust))
     new_params <- robust_results$par
-    cat(paste0("The log-likelihood after robust estimation: ", round(robust_results$value, 3)), "\n")
+    cat(paste0("The log-likelihood after robust estimation:  ", round(robust_results$value, 3)), "\n")
   }
 
   ## Estimation by the variable metric algorithm...
@@ -405,7 +446,7 @@ fitSSTVAR <- function(stvar, new_identification=c("recursive", "heteroskedastici
   final_results <- stats::optim(par=new_params, fn=loglik_fn, gr=loglik_grad, method="BFGS",
                              control=list(fnscale=-1, maxit=maxit))
   new_params <- final_results$par
-  cat(paste0("The log-likelihood after the estimation: ", round(final_results$value), 3), "\n")
+  cat(paste0("The log-likelihood after final estimation:   ", round(final_results$value, 3)), "\n")
 
   #cat("Finished!")
   STVAR(data=data, p=p, M=M, d=d, params=new_params, cond_dist=cond_dist,

@@ -11,7 +11,7 @@ fitSSTVAR(
   new_B_constraints = NULL,
   maxit = 1000,
   maxit_robust = 1000,
-  robust_method = c("none", "Nelder-Mead", "SANN"),
+  robust_method = c("Nelder-Mead", "SANN", "none"),
   calc_std_errors = TRUE
 )
 }
@@ -46,7 +46,9 @@ When the structural model does not impose overidentifying constraints, it is dir
   Using a robust estimation method before switching to the variable metric can be useful if the initial
   estimates are not very close to the ML estimate of the structural model, as the variable metric algorithm
   (usually) converges to a nearby local maximum or saddle point. This is particularly the case when the imposed
-  overidentifying restrictions are such that the unrestricted estimate is not close to satisfying them.
+  overidentifying restrictions are such that the unrestricted estimate is not close to satisfying them. Note that
+  the results may not very reliable even with the robust method if the initial estimates after imposing the constraints
+  are far from the unconstrained ones.
 
   Employs the estimation function \code{optim} from the package \code{stats} that implements the optimization
   algorithms. See \code{?optim} for the documentation on the
@@ -55,6 +57,38 @@ When the structural model does not impose overidentifying constraints, it is dir
 \donttest{
 ## These are long running examples that use parallel computing!
 ## Running the below examples takes approximately FILL IN HOW MANY minutes
+
+# p=3, M=2, d=2 relative_dens Gaussian STVAR with the means and AR matrices constrained
+# to be identical in both regimes
+fit32cm <- fitSTVAR(gdpdef, p=3, M=2, AR_constraints=rbind(diag(3*2^2), diag(3*2^2)),
+  weight_function="relative_dens", mean_constraints=list(1:2), parametrization="mean",
+  nrounds=1, seeds=1, use_parallel=FALSE)
+
+# Estimate various structural models based on the reduced form model:
+fit32cms_rec <- fitSSTVAR(fit32cm, new_identification="recursive") # Recursive
+fit32cms_hetsked <- fitSSTVAR(fit32cm, new_identification="heteroskedasticity") # Het.sked.
+fit32cms_hs2 <- fitSSTVAR(fit32cm, new_identification="heteroskedasticity",
+ new_B_constraints=matrix(c(1, NA, 0, 1), nrow=2)) # Overidentify by B_constraints
+fit32cms_hs3 <- fitSSTVAR(fit32cms_hs2, new_identification="heteroskedasticity",
+ new_B_constraints=matrix(c(1, 0, 0, 1), nrow=2)) # Overidentify more by B_constraints
+
+# p=3, M=3, d=2 Threshold Student STVAR with the means and AR matrices constrained
+# to be identical in both regimes; the first lag of the second variable as the
+#  switching variable:
+fit32cml <- fitSTVAR(gdpdef, p=3, M=3, cond_dist="Student",
+ AR_constraints=rbind(diag(3*2^2), diag(3*2^2), diag(3*2^2)),
+ weight_function="threshold", weightfun_pars=c(2, 1), mean_constraints=list(1:3),
+ parametrization="mean", nrounds=1, seeds=1, use_parallel=FALSE)
+
+# Estimate various structural models based on the reduced form model:
+fit32cmls_rec <- fitSSTVAR(fit32cml, new_identification="recursive") # Recursive
+fit32cmls_hs <- fitSSTVAR(fit32cml, new_identification="heteroskedasticity") # Het.sked.
+fit32cmls_hs2 <- fitSSTVAR(fit32cmls_hs, new_identification="heteroskedasticity",
+ new_B_constraints=matrix(c(NA, 0, NA, NA), nrow=2),
+ robust_method="none") # Overidentified more by B_constraints; no robust estimation
+fit32cmls_hs3 <- fitSSTVAR(fit32cmls_hs2, new_identification="heteroskedasticity",
+ new_B_constraints=matrix(c(NA, NA, NA, NA), nrow=2),
+ robust_method="none") # Relax the B_constraints again; no robust estimation.
 }
 }
 \references{
