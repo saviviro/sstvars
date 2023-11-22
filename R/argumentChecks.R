@@ -195,7 +195,8 @@ check_params <- function(p, M, d, params, weight_function=c("relative_dens", "lo
   }
   for(m in 1:M) {
     if(any(eigen(all_Omegas[, , m], symmetric=TRUE, only.values=TRUE)$values < posdef_tol)) {
-      stop(paste0("The conditional covariance matrix of Regime ", m, " is not positive definite (with large enough numerical tolerance)!"))
+      stop(paste0("The conditional covariance matrix of Regime ", m,
+                  " is not positive definite (with large enough numerical tolerance)!"))
     }
   }
 }
@@ -358,7 +359,8 @@ check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logis
   identification <- match.arg(identification)
   weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function,
                                          weightfun_pars=weightfun_pars,
-                                         cond_dist="Gaussian")  # cond_dist="Gaussian" used since we dont want to check rel_dens distribution here
+                                         cond_dist="Gaussian")
+  # cond_dist="Gaussian" used above since we dont want to check rel_dens distribution here
 
   # Check AR_constraints
   if(!is.null(AR_constraints)) {
@@ -432,20 +434,22 @@ check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logis
     # Warnings if no errors
     if(weight_function == "logistic" || weight_function == "exponential") {
       if(weight_constraints[[2]][2] < 0) {
-        warning(paste0("When weight_function=", weight_function, "the scale parameter needs to be strictly positive, and there is a negative
-                   constraint in r for the scale parameter, implying that the estimation may fail."))
+        warning(paste0("When weight_function=", weight_function,
+                       "the scale parameter needs to be strictly positive, and there is a negative",
+                       "constraint in r for the scale parameter, implying that the estimation may fail."))
       }
     }
     if(weight_function == "relative_dens") {
       if(any(weight_constraints[[2]] < 0)) {
-        warning("When weight_function='relative dens', the weight parameters need to be strictly positive, and there is a negative
-                   constraint in r for a weight parameter, implying that the estimation may fail.")
+        warning(paste("When weight_function='relative dens', the weight parameters need to be strictly positive,",
+                      "and there is a negative constraint in r for a weight parameter, implying that the estimation may fail."))
       }
     }
     if(weight_function == "threshold") {
       if(!all(order(weight_constraints[[2]]) == seq_len(M - 1))) {
-        warning("When weight_function='threshold', the thresholds need to be in an increasing ordering, and the constraints imposed in r for
-                  the thresholds are not in an increasing ordering, implying that the estimation may fail.")
+        warning(paste("When weight_function='threshold', the thresholds need to be in an increasing ordering,",
+                      "and the constraints imposed in r for the thresholds are not in an increasing ordering,",
+                      "implying that the estimation may fail."))
       }
     }
   }
@@ -488,11 +492,13 @@ check_weightfun_pars <- function(p, d, weight_function=c("relative_dens", "logis
     }
   } else if(weight_function %in% c("logistic", "exponential", "threshold")) {
     if(!is.numeric(weightfun_pars) || !is.vector(weightfun_pars) || length(weightfun_pars) != 2) {
-      stop(paste0("When weight_function == ", weight_function, " the argument weightfun_pars should be be a length two numeric vector."))
+      stop(paste0("When weight_function == ", weight_function,
+                  " the argument weightfun_pars should be be a length two numeric vector."))
     }
     if(!weightfun_pars[1] %in% 1:d) {
-      stop(paste0("When weight_function ==  ", weight_function, " the first element of argument weightfun_pars, i.e., the switching variable,
-           should be an integer in 1,...,ncol(data)."))
+      stop(paste0("When weight_function == ", weight_function,
+                  " the first element of argument weightfun_pars, i.e., the switching variable,",
+                  " should be an integer in 1,...,ncol(data)."))
     } else if(!weightfun_pars[2] %in% 1:p) {
       stop(paste0("When weight_function == ", weight_function,
            " the second element of argument weightfun_pars, i.e., the lag of the switching variable,
@@ -536,7 +542,9 @@ check_weightfun_pars <- function(p, d, weight_function=c("relative_dens", "logis
 check_stvar <- function(object, object_name) {
   if(missing(object_name)) object_name <- "stvar"
   if(!any(class(object) == "stvar")) {
-    stop(paste("The object", object_name, "has to be of class 'stvar', typically created with the function 'STVAR', 'fitSTVAR', or 'fitSSTVAR'"))
+    stop(paste("The object", object_name,
+               "has to be of class 'stvar',",
+               "typically created with the function 'STVAR', 'fitSTVAR', or 'fitSSTVAR'"))
   }
 }
 

@@ -311,7 +311,7 @@ get_hetsked_sstvar <- function(stvar, calc_std_errors=FALSE) {
   M <- stvar$model$M
   d <- stvar$model$d
   data <- stvar$data
-  params <- stvar$params
+  pars_orig <- stvar$params
   weight_function <- stvar$model$weight_function
   cond_dist <- stvar$model$cond_dist
   parametrization <- stvar$model$parametrization
@@ -324,17 +324,72 @@ get_hetsked_sstvar <- function(stvar, calc_std_errors=FALSE) {
   B_constraints <- stvar$model$B_constraints
   weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function,
                                          weightfun_pars=stvar$model$weightfun_pars, cond_dist=cond_dist)
-  params <- reform_constrained_pars(p=p, M=M, d=d, params=params,
+  params <- reform_constrained_pars(p=p, M=M, d=d, params=pars_orig,
                                     weight_function=weight_function, weightfun_pars=weightfun_pars,
                                     cond_dist=cond_dist, identification=identification,
                                     AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                                     weight_constraints=weight_constraints, B_constraints=B_constraints)
 
-  # Obtain and diagonalized the covariance matrices
+  # Obtain and simultaneously diagonalize the covariance matrices
   all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params, identification=identification)
   tmp <- diag_Omegas(Omega1=all_Omega[, , 1], Omega2=all_Omega[, , 2])
+  W <- matrix(tmp[1:(d^2)], nrow=d, ncol=d, byrow=FALSE)
+  lambdas <- tmp[(d^2 + 1):(d^2 + d)]
+
+  # Normalize the main diagonal of W to be positive
+  for(i1 in 1:d) {
+    if(W[i1, i1] < 0) W[,i1] <- -W[,i1]
+  }
+
+  ## Create the structural model parameter vector
+
+  # First determine the numbers of each type of parameters in the original parameter vector,
+  # so the new parameter vector can be constructed.
+  if(is.null(mean_constraints)) {
+    n_mean_pars <- M*d
+  } else { # Means constrained
+    n_mean_pars <- d*length(mean_constraints)
+  }
+  if(is.null(AR_constraints)) {
+    n_ar_pars <- M*p*d^2
+  } else { # AR matrices constrained
+    n_ar_pars <- ncol(AR_constraints)
+  }
+  n_covmat_pars <- M*d*(d + 1)/2 # No B_constraints available here, as reduced form identification assumed
+  if(is.null(weight_constraints)) {
+    if(weight_function == "relative_dens" || weight_function == "threshold") {
+      n_weight_pars <- M - 1
+    } else if(weight_function == "logistic" || weight_function == "exponential") {
+      n_weight_pars <- 2
+    } else if(weight_function == "mlogit") {
+      n_weight_pars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
+    }
+  } else { # Constraints on the weight parameters
+    if(all(weight_constraints[[1]] == 0)) {
+      n_weight_pars <- 0 # alpha = r, not in the parameter vector
+    } else {
+      n_weight_pars <- ncol(weight_constraints[[1]]) # The dimension of xi
+    }
+  }
+
+  mean_pars <- pars_orig[1:n_mean_pars]
+  ar_pars <- pars_orig[(n_mean_pars + 1):(n_means_pars + n_ar_pars)]
+  weight_pars <- pars_orig[(n_mean_pars + n_ar_pars + n_covmat_pars
+                            + 1):(n_means_pars + n_ar_pars + n_covmat_pars + n_weight_pars)]
+  if(cond_dist == "Gaussian") {
+    dist_pars <- numeric(0)
+  } else { # cond_dist == "Student"
+    dist_pars <- pars_orig[length(pars_orig)] # df is the last param
+  }
+  new_params <- c(mean_pars, ar_pars, vec(W), lambdas, weight_pars, dist_pars)
+
+  # Return the structural model identified by heteroskedasticity
+  STVAR(data=data, p=p, M=M, d=d, params=new_params,
+        weight_function=weight_function, weightfun_pars=weightfun_pars,
+        parametrization=parametrization, identification="heteroskedasticity",
+        AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+        weight_constraints=weight_constraints, B_constraints=NULL,
+        calc_std_errors=calc_std_errors)
 }
-
-
 
 
