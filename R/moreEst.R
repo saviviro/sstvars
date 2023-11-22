@@ -131,6 +131,11 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
 #' \donttest{
 #' ## These are long running examples that use parallel computing!
 #' ## Running the below examples takes approximately FILL IN HOW MANY minutes
+#'
+#' # p=3, M=2, d=2 relative_dens Gaussian STVAR with the means and AR matrices constrained
+#' # to be identical in both regimes
+#' fit32cm <- fitSTVAR(gdpdef, p=3, M=2, AR_constraints=rbind(diag(3*2^2), diag(3*2^2)),
+#'                     mean_constraints=list(1:2), parametrization="mean", nrounds=1, seeds=1, use_parallel=FALSE)
 #' }
 #' @export
 

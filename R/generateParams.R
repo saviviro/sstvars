@@ -408,7 +408,7 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logis
                                         mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                                         B_constraints=NULL) # Used so that pick_pars-functions works
   dist_pars <- pick_distpars(params=params_std, cond_dist=cond_dist)
-  all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params_std, identification=identification)
+  all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params_std, identification="reduced_form")
   new_pars <- numeric(length(params))
   if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(weight_constraints)) {
     all_means_and_A <- params[1:(d*M + M*p*d^2)] # all mu + A if called from GAfit
