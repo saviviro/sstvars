@@ -39,35 +39,37 @@ use a simulation procedure with a burn-in period. See the details section.}
 
 \item{ntimes}{how many sets of simulations should be performed?}
 
-\item{burnin}{Burn-in period for simulating initial values from a regime when \code{cond_dist="Student"}. See the details section.}
+\item{burnin}{Burn-in period for simulating initial values from a regime when \code{cond_dist!="Gaussian"}.
+See the details section.}
 
-\item{drop}{if \code{TRUE} (default) then the components of the returned list are coerced to lower dimension if \code{ntimes==1}, i.e.,
-\code{$sample} and \code{$transition_weights} will be matrices, and \code{$component} will be vector.}
+\item{drop}{if \code{TRUE} (default) then the components of the returned list are coerced to lower dimension if
+\code{ntimes==1}, i.e., \code{$sample} and \code{$transition_weights} will be matrices, and \code{$component}
+ will be vector.}
 
-\item{girf_pars}{This argument is used internally in the estimation of generalized impulse response functions (see \code{?GIRF}).
-You should ignore it (specifying something else than null to it will change how the function behaves).}
+\item{girf_pars}{This argument is used internally in the estimation of generalized impulse response functions
+(see \code{?GIRF}). You should ignore it (specifying something else than null to it will change how the function behaves).}
 }
 \value{
-If \code{drop==TRUE} and \code{ntimes==1} (default): \code{$sample}, \code{$component}, and \code{$transition_weights} are matrices.
-  Otherwise, returns a list with...
+If \code{drop==TRUE} and \code{ntimes==1} (default): \code{$sample}, \code{$component}, and \code{$transition_weights}
+  are matrices. Otherwise, returns a list with...
   \describe{
-    \item{\code{$sample}}{a size (\code{nsim}\eqn{ x d x }\code{ntimes}) array containing the samples: the dimension \code{[t, , ]} is
-     the time index, the dimension \code{[, d, ]} indicates the marginal time series, and the dimension \code{[, , i]} indicates
-     the i:th set of simulations.}
+    \item{\code{$sample}}{a size (\code{nsim}\eqn{ x d x }\code{ntimes}) array containing the samples: the dimension
+     \code{[t, , ]} is the time index, the dimension \code{[, d, ]} indicates the marginal time series, and the dimension
+     \code{[, , i]} indicates the i:th set of simulations.}
     \item{\code{$transition_weights}}{a size (\code{nsim}\eqn{ x M x }\code{ntimes}) array containing the transition weights
-     corresponding to the sample: the dimension \code{[t, , ]} is the time index, the dimension \code{[, m, ]} indicates the regime,
-     and the dimension \code{[, , i]} indicates the i:th set of simulations.}
+     corresponding to the sample: the dimension \code{[t, , ]} is the time index, the dimension \code{[, m, ]} indicates the
+     regime, and the dimension \code{[, , i]} indicates the i:th set of simulations.}
   }
 }
 \description{
 \code{simulate.stvar} is a simulate method for class 'stvar' objects.
 }
 \details{
-The stationary distribution of each regime is not known when \code{cond_dist="Student"}. Therefore, when using \code{init_regime}
-  to simulate the initial values from a given regime, we employ the following simulation procedure to obtain the initial values. First,
-  we set the initial values to the unconditional mean of the specified regime. Then, we simulate a large number observations from that
-  regime as specified in the argument \code{burnin}. The first \eqn{p} observations obtained after the burn-in period are then set as the
-  initial values obtained from the specified regime.
+The stationary distribution of each regime is not known when \code{cond_dist!="Gaussian"}. Therefore, when using
+  \code{init_regime} to simulate the initial values from a given regime, we employ the following simulation procedure to
+  obtain the initial values. First, we set the initial values to the unconditional mean of the specified regime. Then,
+  we simulate a large number observations from that regime as specified in the argument \code{burnin}. The first \eqn{p}
+  observations obtained after the burn-in period are then set as the initial values obtained from the specified regime.
 
   The argument \code{ntimes} is intended for forecasting, which is used by the predict method (see \code{?predict.stvar}).
 }
@@ -101,5 +103,6 @@ The stationary distribution of each regime is not known when \code{cond_dist="St
  }
 }
 \seealso{
-\code{\link{fitSTVAR}}, \code{\link{STVAR}}, \code{\link{predict.stvar}}
+\code{\link{predict.stvar}},\code{\link{GIRF}}, \code{\link{GFEVD}},  \code{\link{fitSTVAR}},
+  \code{\link{fitSSTVAR}} \code{\link{STVAR}}
 }

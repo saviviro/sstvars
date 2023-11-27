@@ -16,29 +16,32 @@
 #'   knowledge of the stationary distribution, models with other than Gaussian conditional distribution
 #'   use a simulation procedure with a burn-in period. See the details section.
 #' @param ntimes how many sets of simulations should be performed?
-#' @param burnin Burn-in period for simulating initial values from a regime when \code{cond_dist="Student"}. See the details section.
-#' @param drop if \code{TRUE} (default) then the components of the returned list are coerced to lower dimension if \code{ntimes==1}, i.e.,
-#'   \code{$sample} and \code{$transition_weights} will be matrices, and \code{$component} will be vector.
-#' @param girf_pars This argument is used internally in the estimation of generalized impulse response functions (see \code{?GIRF}).
-#'   You should ignore it (specifying something else than null to it will change how the function behaves).
-#' @details The stationary distribution of each regime is not known when \code{cond_dist="Student"}. Therefore, when using \code{init_regime}
-#'   to simulate the initial values from a given regime, we employ the following simulation procedure to obtain the initial values. First,
-#'   we set the initial values to the unconditional mean of the specified regime. Then, we simulate a large number observations from that
-#'   regime as specified in the argument \code{burnin}. The first \eqn{p} observations obtained after the burn-in period are then set as the
-#'   initial values obtained from the specified regime.
+#' @param burnin Burn-in period for simulating initial values from a regime when \code{cond_dist!="Gaussian"}.
+#'  See the details section.
+#' @param drop if \code{TRUE} (default) then the components of the returned list are coerced to lower dimension if
+#'  \code{ntimes==1}, i.e., \code{$sample} and \code{$transition_weights} will be matrices, and \code{$component}
+#'   will be vector.
+#' @param girf_pars This argument is used internally in the estimation of generalized impulse response functions
+#'   (see \code{?GIRF}). You should ignore it (specifying something else than null to it will change how the function behaves).
+#' @details The stationary distribution of each regime is not known when \code{cond_dist!="Gaussian"}. Therefore, when using
+#'   \code{init_regime} to simulate the initial values from a given regime, we employ the following simulation procedure to
+#'   obtain the initial values. First, we set the initial values to the unconditional mean of the specified regime. Then,
+#'   we simulate a large number observations from that regime as specified in the argument \code{burnin}. The first \eqn{p}
+#'   observations obtained after the burn-in period are then set as the initial values obtained from the specified regime.
 #'
 #'   The argument \code{ntimes} is intended for forecasting, which is used by the predict method (see \code{?predict.stvar}).
-#' @return If \code{drop==TRUE} and \code{ntimes==1} (default): \code{$sample}, \code{$component}, and \code{$transition_weights} are matrices.
-#'   Otherwise, returns a list with...
+#' @return If \code{drop==TRUE} and \code{ntimes==1} (default): \code{$sample}, \code{$component}, and \code{$transition_weights}
+#'   are matrices. Otherwise, returns a list with...
 #'   \describe{
-#'     \item{\code{$sample}}{a size (\code{nsim}\eqn{ x d x }\code{ntimes}) array containing the samples: the dimension \code{[t, , ]} is
-#'      the time index, the dimension \code{[, d, ]} indicates the marginal time series, and the dimension \code{[, , i]} indicates
-#'      the i:th set of simulations.}
+#'     \item{\code{$sample}}{a size (\code{nsim}\eqn{ x d x }\code{ntimes}) array containing the samples: the dimension
+#'      \code{[t, , ]} is the time index, the dimension \code{[, d, ]} indicates the marginal time series, and the dimension
+#'      \code{[, , i]} indicates the i:th set of simulations.}
 #'     \item{\code{$transition_weights}}{a size (\code{nsim}\eqn{ x M x }\code{ntimes}) array containing the transition weights
-#'      corresponding to the sample: the dimension \code{[t, , ]} is the time index, the dimension \code{[, m, ]} indicates the regime,
-#'      and the dimension \code{[, , i]} indicates the i:th set of simulations.}
+#'      corresponding to the sample: the dimension \code{[t, , ]} is the time index, the dimension \code{[, m, ]} indicates the
+#'      regime, and the dimension \code{[, , i]} indicates the i:th set of simulations.}
 #'   }
-#' @seealso \code{\link{fitSTVAR}}, \code{\link{STVAR}}, \code{\link{predict.stvar}}
+#' @seealso \code{\link{predict.stvar}},\code{\link{GIRF}}, \code{\link{GFEVD}},  \code{\link{fitSTVAR}},
+#'   \code{\link{fitSSTVAR}} \code{\link{STVAR}}
 #' @inherit loglikelihood references
 #' @examples
 #'  # p=2, M=2, d=2, Gaussian relative dens weights
@@ -157,6 +160,12 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
     inds_of_switching_vars <- c(1, as.vector(matrix(lowers, nrow=length(vars), ncol=length(lowers), byrow=TRUE) + vars + 1))
   }
 
+  # GIRF stuff, particularly for reduced form models, which assume Cholesky identification
+  if(!is.null(girf_pars)) {
+    R1 <- girf_pars$R1
+    all_Omegas_as_matrix <- t(matrix(all_Omegas, nrow=d^2, ncol=M)) # Used for reduced form model GIRF [,m]
+  }
+
   # Set/generate initial values
   if(is.null(init_values)) {
     if(cond_dist == "Gaussian") {
@@ -176,18 +185,24 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   # Container for the simulated values and initial values. First row row initial values vector, and t:th row for (y_{i-1},...,y_{i-p})
   Y <- matrix(nrow=nsim + 1, ncol=d*p)
   Y[1,] <- reform_data(init_values, p=p)
+  if(!is.null(girf_pars)) Y2 <- Y # Storage for the second sample path in the GIRF algorithm
 
   # Initialize data structures
   sample <- array(dim=c(nsim, d, ntimes))
   component <- matrix(nrow=nsim, ncol=ntimes)
   transition_weights <- array(dim=c(nsim, M, ntimes))
+  if(!is.null(girf_pars)) {
+    sample2 <- array(dim=c(nsim, d, ntimes))
+    transition_weights2 <- array(dim=c(nsim, M, ntimes))
+  }
 
   # Some functions to be used
   if(weight_function == "relative_dens") {
     # Get log multivariate normal densities for calculating the transition weights
     get_logmvdvalues <- function(Y, i1) {
-      vapply(1:M, function(m) -0.5*d*p*log(2*base::pi) - 0.5*log(det_Sigmas[m]) - 0.5*(crossprod(Y[i1,] - rep(all_mu[, m], p),
-                                                                                      inv_Sigmas[, , m])%*%(Y[i1,] - rep(all_mu[, m], p))),
+      vapply(1:M,
+             function(m) -0.5*d*p*log(2*base::pi) - 0.5*log(det_Sigmas[m]) - 0.5*(crossprod(Y[i1,] - rep(all_mu[, m], p),
+                                                                                  inv_Sigmas[, , m])%*%(Y[i1,] - rep(all_mu[, m], p))),
              numeric(1))
     } # Returns M x 1 vector; transformed into a matrix in get_alpha_mt
   } else if(weight_function %in% c("logistic", "exponential", "threshold")) {
@@ -267,6 +282,65 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
       } else {
         Y[i1 + 1,] <- c(sample[i1, , j1], Y[i1, 1:(d*p - d)])
       }
+
+      ## For the second sample in GIRF (with a specific structural shock occurring)
+      if(!is.null(girf_pars)) {
+        # Calculate transition weights
+        if(M == 1) {
+          alpha_mt2 <- matrix(1)
+        } else { # JATKA KAKKOSIEN PÄIVITTELYÄ
+          if(weight_function == "relative_dens") {
+            log_mvdvalues2 <- get_logmvdvalues(Y=Y2, i1=i1)
+            alpha_mt2 <- get_alpha_mt(M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                      weightpars=weightpars, log_mvdvalues=log_mvdvalues2, epsilon=epsilon)
+          } else if(weight_function %in% c("logistic", "exponential", "threshold")) {
+            alpha_mt2 <- get_alpha_mt(M=M, d=d, Y2=Y2[i1, , drop=FALSE], weight_function=weight_function,
+                                     weightfun_pars=weightfun_pars, weightpars=weightpars, epsilon=epsilon)
+          } else if(weight_function == "mlogit") {
+            regression_values2 <- get_regression_values(Y=Y2, i1=i1) # Uses regressions as logmvd values in relative_dens fun
+            alpha_mt2 <- get_alpha_mt(M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                      weightpars=rep(1, times=M), log_mvdvalues=regression_values2, epsilon=epsilon)
+          }
+        }
+        transition_weights2[i1, , j1] <- alpha_mt2
+
+        # Calculate conditional mean and conditional covariance matrix
+        mu_yt2 <- get_mu_yt_Cpp(obs=matrix(Y2[i1,], nrow=1), all_phi0=all_phi0, all_A=all_A2, alpha_mt=alpha_mt2)
+        Omega_yt2 <- matrix(rowSums(vapply(1:M, function(m) alpha_mt2[, m]*as.vector(all_Omegas[, , m]),
+                                           numeric(d*d))), nrow=d, ncol=d)
+        # Calculate B_t
+        if(identification == "reduced_form") {
+          B_t2 <- matrix(get_symmetric_sqrt(Omega_yt2), nrow=d, ncol=d)
+        } else if(identification == "recursive") {
+          B_t2 <- t(chol(Omega_yt2))
+        } else if(identification == "heteroskedasticity") {
+          if(M == 1) {
+            B_t2 <- W
+          } else {
+            tmp2 <- array(dim=c(d, d, M)) # Store alpha_mt[m]*Lambda_m
+            tmp2[, , 1] <- alpha_mt2[1]*diag(d) # m=1, Lambda = I_d
+            for(m in 2:M) {
+              tmp2[, , m] <- alpha_mt2[m]*diag(lambdas[, m - 1])
+            }
+            B_t2 <- W%*%sqrt(apply(tmp2, MARGIN=1:2, FUN=sum)) # Calculate B_t
+          }
+        }
+
+        # At impact: impose a specific shock to the structural error e_t (which is drawn already for 1st path)
+        if(i1 == 1) {
+          e_t[shock_numb] <- shock_size
+        }
+
+        # Calculate the current observation
+        sample2[i1, , j1] <- t(mu_yt2) + B_t2%*%e_t
+
+        # Update storage matrix Y (overwrites when ntimes > 1)
+        if(p == 1) {
+          Y2[i1 + 1,] <- sample2[i1, , j1]
+        } else {
+          Y2[i1 + 1,] <- c(sample2[i1, , j1], Y2[i1, 1:(d*p - d)])
+        }
+      }
     }
   }
 
@@ -339,9 +413,11 @@ simulate_from_regime <- function(stvar, regime=1, nsim=1, init_values=NULL) {
   distpars <- pick_distpars(params=params, cond_dist=cond_dist)
 
   # Note that structural models not implemented here: no need here because just simulates initial values to the simulator funciton
-  new_params <- c(all_phi0[, regime], all_A[, , , regime], vech(all_Omegas[, , regime]), distpars) # VAR params corresponding the given regime
+  new_params <- c(all_phi0[, regime], all_A[, , , regime],
+                  vech(all_Omegas[, , regime]), distpars) # VAR params corresponding the given regime
 
-  # Note that weight_function does not matter because there is just one regime; also, all constraints are removed prior to building the model.
+  # Note that weight_function does not matter because there is just one regime; also, all constraints are removed prior
+  # to building the model.
   new_stvar <- STVAR(p=p, M=1, d=d, params=new_params, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist=cond_dist,
                      parametrization="intercept", identification="reduced_form", AR_constraints=NULL, mean_constraints=NULL,
                      weight_constraints=NULL, B_constraints=NULL, calc_std_errors=FALSE)
