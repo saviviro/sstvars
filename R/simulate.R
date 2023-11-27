@@ -328,7 +328,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
 
         # At impact: impose a specific shock to the structural error e_t (which is drawn already for 1st path)
         if(i1 == 1) {
-          e_t[shock_numb] <- shock_size
+          e_t[girf_pars$shock_numb] <- girf_pars$shock_size
         }
 
         # Calculate the current observation
@@ -343,6 +343,20 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
       }
     }
   }
+
+  # Calculate a single GIRF for the given structural shock: (N + 1 x d) matrix
+  if(!is.null(girf_pars)) {
+    one_girf <- apply(X=sample2 - sample, MARGIN=1:2, FUN=mean)
+    if(!is.null(stvar$data)) {
+      colnames(one_girf) <- colnames(stvar$data)
+    } else {
+      colnames(one_girf) <- paste("shock", 1:d)
+    }
+    tw_girf <- apply(X=transition_weights2 - transition_weights, MARGIN=1:2, FUN=mean)
+    colnames(tw_girf) <- paste("tw reg.", 1:M)
+    return(cbind(one_girf, tw_girf))
+  }
+
 
   if(ntimes == 1 && drop) {
     sample <- matrix(sample, nrow=nsim, ncol=d)

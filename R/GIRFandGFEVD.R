@@ -76,7 +76,18 @@
 #'  # These are long-running examples that use parallel computing.
 #'  # It takes approximately 30 seconds to run all the below examples.
 #'
-#'  ## FILL IN
+#'  # Recursively identifed logistic Student's t STVAR(p=3, M=2) model with the first
+#'  # lag of the second variable as the switching variable:
+#'  params32logt <- c(0.5959, 0.0447, 2.6279, 0.2897, 0.2837, 0.0504, -0.2188, 0.4008,
+#'   0.3128, 0.0271, -0.1194, 0.1559, -0.0972, 0.0082, -0.1118, 0.2391, 0.164, -0.0363,
+#'   -1.073, 0.6759, 3e-04, 0.0069, 0.4271, 0.0533, -0.0498, 0.0355, -0.4686, 0.0812,
+#'    0.3368, 0.0035, 0.0325, 1.2289, -0.047, 0.1666, 1.2067, 7.2392, 11.6091)
+#'  mod32logt <- STVAR(gdpdef, p=3, M=2, params=params32logt, weight_function="logistic",
+#'   weightfun_pars=c(2, 1), cond_dist="Student", identification="recursive")
+#'
+#'  girf2 <- GIRF(mod32logt, which_shocks=1:2, shock_size=1, N=30, R1=10, R2=10, init_regime=1)
+#'
+#' ## UNCOMMENT NONPARALLEL STUFF TAI TEE USE_PARARALLEL
 #'  }
 #' @export
 
@@ -92,6 +103,7 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
   p <- stvar$model$p
   M <- stvar$model$M
   d <- stvar$model$d
+  identification <- stvar$model$identification
   stopifnot(N %% 1 == 0 && N > 0)
   stopifnot(scale_horizon %in% 0:N)
   if(identification == "recursive") {
@@ -113,8 +125,7 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
   }
   if(!is.null(init_values)) R2 <- 1
   if(!is.null(seeds) && length(seeds) != R2) stop("The argument 'seeds' needs be NULL or a vector of length 'R2'")
-  stopifnot(all(init_regimes %in% 1:M))
-  init_regimes <- unique(init_regimes)
+  stopifnot(init_regime %in% 1:M)
   stopifnot(length(ci) > 0 && all(ci > 0 & ci < 1))
   if(length(shock_size) != 1) {
     warning("The argument shock_size should be a numeric scalar. Using the first value.")
@@ -159,20 +170,21 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
   }
 
   ### Calculate the GIRFs ###
-  cl <- parallel::makeCluster(ncores)
-  on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.
-  parallel::clusterExport(cl, ls(environment(GIRF)), envir = environment(GIRF)) # assign all variables from package:sstvars
-  parallel::clusterEvalQ(cl, c(library(pbapply), library(Rcpp), library(RcppArmadillo), library(sstvars)))
+#  cl <- parallel::makeCluster(ncores)
+#  on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.
+#  parallel::clusterExport(cl, ls(environment(GIRF)), envir = environment(GIRF)) # assign all variables from package:sstvars
+#  parallel::clusterEvalQ(cl, c(library(pbapply), library(Rcpp), library(RcppArmadillo), library(sstvars)))
 
   GIRF_shocks <- vector("list", length=length(which_shocks))
 
   for(i1 in 1:length(which_shocks)) {
     cat(paste0("Estimating GIRFs for structural shock ", which_shocks[i1], "..."), "\n")
-    GIRF_shocks[[i1]] <- pbapply::pblapply(1:R2, function(i2) get_one_girf(shock_numb=which_shocks[i1],
-                                                                           shock_size=shock_size, seed=seeds[i2]), cl=cl)
+    #GIRF_shocks[[i1]] <- pbapply::pblapply(1:R2, function(i2) get_one_girf(shock_numb=which_shocks[i1],
+    #                                                                       shock_size=shock_size, seed=seeds[i2]), cl=cl)
+    GIRF_shocks[[i1]] <- lapply(1:R2, function(i2) get_one_girf(shock_numb=which_shocks[i1], shock_size=shock_size, seed=seeds[i2]))
   }
 
-  parallel::stopCluster(cl=cl)
+#  parallel::stopCluster(cl=cl)
 
   GIRF_results <- vector("list", length=length(which_shocks))
   all_GIRFS <- vector("list", length=length(which_shocks))
@@ -225,6 +237,7 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
     GIRF_results[[i1]] <- list(point_est=point_estimate,
                                conf_ints=conf_ints)
   }
+
 
   cat("Finished!\n")
   structure(list(girf_res=GIRF_results,
