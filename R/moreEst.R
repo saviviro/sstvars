@@ -5,12 +5,13 @@
 #'
 #' @inheritParams fitSTVAR
 #' @inheritParams STVAR
-#' @param stvar an object of class \code{'stvar'}, created by, e.g., \code{fitSTVAR}.
+#' @param stvar an object of class \code{'stvar'}, created by, e.g., \code{fitSTVAR} or \code{fitSSTVAR}.
 #' @details The purpose of \code{iterate_more} is to provide a simple and convenient tool to finalize
 #'   the estimation when the maximum number of iterations is reached when estimating a STVAR model
 #'   with the main estimation function \code{fitSTVAR} or \code{fitSSTVAR}.
 #' @return Returns an object of class \code{'stvar'} defining the estimated model
-#' @seealso \code{\link{fitSTVAR}}, \code{\link{STVAR}}, \code{\link[stats]{optim}}
+#' @seealso \code{\link{fitSTVAR}}, \code{\link{STVAR}}, \code{\link[stats]{optim}},
+#'  \code{\link{swap_W_signs}}, \code{\link{reorder_W_columns}}, \code{\link{iterate_more}}
 #' @inherit STVAR references
 #' @examples
 #' \donttest{

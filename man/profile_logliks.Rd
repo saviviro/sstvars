@@ -18,7 +18,7 @@ profile_logliks(
 )
 }
 \arguments{
-\item{stvar}{an object of class \code{'stvar'}, created by, e.g., \code{fitSTVAR}.}
+\item{stvar}{an object of class \code{'stvar'}, created by, e.g., \code{fitSTVAR} or \code{fitSSTVAR}.}
 
 \item{which_pars}{the profile log-likelihood function of which parameters should be plotted? An integer
 vector specifying the positions of the parameters in the parameter vector. The parameter vector has the

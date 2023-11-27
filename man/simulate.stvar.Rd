@@ -13,7 +13,8 @@
   init_regime,
   ntimes = 1,
   burnin = 1000,
-  drop = TRUE
+  drop = TRUE,
+  girf_pars = NULL
 )
 }
 \arguments{
@@ -42,6 +43,9 @@ use a simulation procedure with a burn-in period. See the details section.}
 
 \item{drop}{if \code{TRUE} (default) then the components of the returned list are coerced to lower dimension if \code{ntimes==1}, i.e.,
 \code{$sample} and \code{$transition_weights} will be matrices, and \code{$component} will be vector.}
+
+\item{girf_pars}{This argument is used internally in the estimation of generalized impulse response functions (see \code{?GIRF}).
+You should ignore it (specifying something else than null to it will change how the function behaves).}
 }
 \value{
 If \code{drop==TRUE} and \code{ntimes==1} (default): \code{$sample}, \code{$component}, and \code{$transition_weights} are matrices.

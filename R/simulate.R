@@ -19,6 +19,8 @@
 #' @param burnin Burn-in period for simulating initial values from a regime when \code{cond_dist="Student"}. See the details section.
 #' @param drop if \code{TRUE} (default) then the components of the returned list are coerced to lower dimension if \code{ntimes==1}, i.e.,
 #'   \code{$sample} and \code{$transition_weights} will be matrices, and \code{$component} will be vector.
+#' @param girf_pars This argument is used internally in the estimation of generalized impulse response functions (see \code{?GIRF}).
+#'   You should ignore it (specifying something else than null to it will change how the function behaves).
 #' @details The stationary distribution of each regime is not known when \code{cond_dist="Student"}. Therefore, when using \code{init_regime}
 #'   to simulate the initial values from a given regime, we employ the following simulation procedure to obtain the initial values. First,
 #'   we set the initial values to the unconditional mean of the specified regime. Then, we simulate a large number observations from that
@@ -59,7 +61,13 @@
 #'  plot.ts(sim2$transition_weights) # Transition weights
 #' @export
 
-simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, init_regime, ntimes=1, burnin=1000, drop=TRUE) {
+simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, init_regime, ntimes=1, burnin=1000,
+                           drop=TRUE, girf_pars=NULL) {
+  # girf_pars$shock_numb - which shock?
+  # girf_pars$shock_size - size of the structural shock?
+  # Returns a size (N+1 x d+M) vector containing the estimated GIRFs for the variables and
+  # the transition weights (column d+m for the m:th regime). The first row for response at impact.
+
   # Checks etc
   if(!is.null(seed)) set.seed(seed)
   check_stvar(object, object_name="object")

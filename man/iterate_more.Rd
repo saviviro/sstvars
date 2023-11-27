@@ -7,7 +7,7 @@
 iterate_more(stvar, maxit = 100, calc_std_errors = TRUE)
 }
 \arguments{
-\item{stvar}{an object of class \code{'stvar'}, created by, e.g., \code{fitSTVAR}.}
+\item{stvar}{an object of class \code{'stvar'}, created by, e.g., \code{fitSTVAR} or \code{fitSSTVAR}.}
 
 \item{maxit}{the maximum number of iterations in the variable metric algorithm.}
 
@@ -46,5 +46,6 @@ fit12
  }
 }
 \seealso{
-\code{\link{fitSTVAR}}, \code{\link{STVAR}}, \code{\link[stats]{optim}}
+\code{\link{fitSTVAR}}, \code{\link{STVAR}}, \code{\link[stats]{optim}},
+ \code{\link{swap_W_signs}}, \code{\link{reorder_W_columns}}, \code{\link{iterate_more}}
 }
