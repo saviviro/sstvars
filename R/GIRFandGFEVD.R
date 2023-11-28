@@ -51,6 +51,8 @@
 #'   seed for estimation of each GIRF. A single number of an initial value is
 #'   specified. or \code{NULL} for not initializing the seed. Exists for
 #'   creating reproducible results.
+#' @param use_parallel employ parallel computing? If \code{FALSE}, does not print
+#'   anything.
 #' @details The confidence bounds reflect uncertainty about the initial state (but
 #'   not about the parameter estimates) if initial values are not
 #'   specified. If initial values are specified, confidence intervals won't be
@@ -85,15 +87,13 @@
 #'  mod32logt <- STVAR(gdpdef, p=3, M=2, params=params32logt, weight_function="logistic",
 #'   weightfun_pars=c(2, 1), cond_dist="Student", identification="recursive")
 #'
-#'  girf2 <- GIRF(mod32logt, which_shocks=1:2, shock_size=1, N=30, R1=10, R2=10, init_regime=1)
-#'
-#' ## UNCOMMENT NONPARALLEL STUFF TAI TEE USE_PARARALLEL
+#'  girf1 <- GIRF(mod32logt, which_shocks=1:2, shock_size=1, N=30, R1=200, R2=200, init_regime=1, use_parallel=FALSE)
 #'  }
 #' @export
 
 GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_regime=1, init_values=NULL,
                  which_cumulative=numeric(0), scale=NULL, scale_type=c("instant", "peak"), scale_horizon=N,
-                 ci=c(0.95, 0.80), ncores=2, burn_in=1000, seeds=NULL) {
+                 ci=c(0.95, 0.80), ncores=2, burn_in=1000, seeds=NULL, use_parallel=TRUE) {
   check_stvar(stvar)
   scale_type <- match.arg(scale_type)
   if(stvar$model$identification == "reduced_form") {
@@ -157,34 +157,40 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
                    burn_in=burn_in, girf_pars=list(shock_numb=shock_numb, shock_size=shock_size))
   }
 
-  if(ncores > parallel::detectCores()) {
-    ncores <- parallel::detectCores()
-    message("ncores was set to be larger than the number of cores detected")
+  GIRF_shocks <- vector("list", length=length(which_shocks)) # Storage for the GIRFs [[shock]]
+
+  if(use_parallel) {
+    if(ncores > parallel::detectCores()) {
+      ncores <- parallel::detectCores()
+      message("ncores was set to be larger than the number of cores detected")
+    }
+    if(is.null(init_values)) {
+      cat(paste("Using", ncores, "cores to estimate", R2,"GIRFs for", length(which_shocks), "structural shocks,",
+                "each based on", R1, "Monte Carlo repetitions."), "\n")
+    } else {
+      cat(paste("Using", ncores, "cores to estimate one GIRF for", length(which_shocks), "structural shocks, each based on",
+                R1, "Monte Carlo repetitions."), "\n")
+    }
+
+    ### Calculate the GIRFs ###
+    cl <- parallel::makeCluster(ncores)
+    on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.
+    parallel::clusterExport(cl, ls(environment(GIRF)), envir = environment(GIRF)) # assign all variables from package:sstvars
+    parallel::clusterEvalQ(cl, c(library(pbapply), library(Rcpp), library(RcppArmadillo), library(sstvars)))
+
+    for(i1 in 1:length(which_shocks)) {
+      cat(paste0("Estimating GIRFs for structural shock ", which_shocks[i1], "..."), "\n")
+      GIRF_shocks[[i1]] <- pbapply::pblapply(1:R2, function(i2) get_one_girf(shock_numb=which_shocks[i1],
+                                                                             shock_size=shock_size, seed=seeds[i2]), cl=cl)
+    }
+    parallel::stopCluster(cl=cl)
+  } else { # No parallel computing
+    for(i1 in 1:length(which_shocks)) {
+      GIRF_shocks[[i1]] <- lapply(1:R2, function(i2) get_one_girf(shock_numb=which_shocks[i1],
+                                                                  shock_size=shock_size, seed=seeds[i2]))
+    }
   }
-  if(is.null(init_values)) {
-    cat(paste("Using", ncores, "cores to estimate", R2,"GIRFs for", length(which_shocks), "structural shocks,",
-              "each based on", R1, "Monte Carlo repetitions."), "\n")
-  } else {
-    cat(paste("Using", ncores, "cores to estimate one GIRF for", length(which_shocks), "structural shocks, each based on",
-              R1, "Monte Carlo repetitions."), "\n")
-  }
 
-  ### Calculate the GIRFs ###
-#  cl <- parallel::makeCluster(ncores)
-#  on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.
-#  parallel::clusterExport(cl, ls(environment(GIRF)), envir = environment(GIRF)) # assign all variables from package:sstvars
-#  parallel::clusterEvalQ(cl, c(library(pbapply), library(Rcpp), library(RcppArmadillo), library(sstvars)))
-
-  GIRF_shocks <- vector("list", length=length(which_shocks))
-
-  for(i1 in 1:length(which_shocks)) {
-    cat(paste0("Estimating GIRFs for structural shock ", which_shocks[i1], "..."), "\n")
-    #GIRF_shocks[[i1]] <- pbapply::pblapply(1:R2, function(i2) get_one_girf(shock_numb=which_shocks[i1],
-    #                                                                       shock_size=shock_size, seed=seeds[i2]), cl=cl)
-    GIRF_shocks[[i1]] <- lapply(1:R2, function(i2) get_one_girf(shock_numb=which_shocks[i1], shock_size=shock_size, seed=seeds[i2]))
-  }
-
-#  parallel::stopCluster(cl=cl)
 
   GIRF_results <- vector("list", length=length(which_shocks))
   all_GIRFS <- vector("list", length=length(which_shocks))
@@ -238,8 +244,7 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
                                conf_ints=conf_ints)
   }
 
-
-  cat("Finished!\n")
+  if(use_parallel) cat("Finished!\n")
   structure(list(girf_res=GIRF_results,
                  all_girfs=all_GIRFS,
                  shocks=which_shocks,
@@ -308,7 +313,7 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 
 GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "fixed"), R1=250, R2=250,
                   init_regime=1, init_values=NULL, which_cumulative=numeric(0), ncores=2, burn_in=1000,
-                  seeds=NULL) {
+                  seeds=NULL, use_parallel=TRUE) {
   check_stvar(stvar)
   initval_type <- match.arg(initval_type)
   if(stvar$model$identification == "reduced_form") {
@@ -353,35 +358,47 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
                     burn_in=burn_in, girf_pars=list(shock_numb=shock_numb, shock_size=shock_size))
   }
 
-  if(ncores > parallel::detectCores()) {
-    ncores <- parallel::detectCores()
-    message("ncores was set to be larger than the number of cores detected")
-  }
-  if(initval_type != "fixed") {
-    cat(paste("Using", ncores, "cores to estimate", R2,"GIRFs for", d, "structural shocks,", "each based on",
-              R1, "Monte Carlo repetitions."), "\n")
-  } else {
-    cat(paste("Using", ncores, "cores to estimate one GIRF for", d, "structural shocks, each based on",
-              R1, "Monte Carlo repetitions."), "\n")
+  GIRF_shocks <- vector("list", length=d) # Storage for the GIRFs [[shock]]
+
+  if(use_parallel) {
+    if(ncores > parallel::detectCores()) {
+      ncores <- parallel::detectCores()
+      message("ncores was set to be larger than the number of cores detected")
+    }
+    if(initval_type != "fixed") {
+      cat(paste("Using", ncores, "cores to estimate", R2,"GIRFs for", d, "structural shocks,", "each based on",
+                R1, "Monte Carlo repetitions."), "\n")
+    } else {
+      cat(paste("Using", ncores, "cores to estimate one GIRF for", d, "structural shocks, each based on",
+                R1, "Monte Carlo repetitions."), "\n")
+    }
+
+    ### Calculate the GIRFs ###
+    cl <- parallel::makeCluster(ncores)
+    on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.
+    parallel::clusterExport(cl, ls(environment(GFEVD)), envir = environment(GFEVD)) # assign all variables from package:gmvarkit
+    parallel::clusterEvalQ(cl, c(library(pbapply), library(Rcpp), library(RcppArmadillo), library(sstvars)))
+
+    for(i1 in 1:d) {
+      cat(paste0("Estimating GIRFs for structural shock ", i1, "..."), "\n")
+      GIRF_shocks[[i1]] <- pbapply::pblapply(1:R2,
+                                             function(i2) get_one_girf(shock_numb=i1,
+                                                                       shock_size=shock_size,
+                                                                       seed=seeds[i2],
+                                                                       init_values_for_1girf=matrix(all_initvals[, , i2],
+                                                                                                    nrow=p, ncol=d)), cl=cl)
+    }
+    parallel::stopCluster(cl=cl)
+  } else { # No parallel computing
+    for(i1 in 1:d) {
+      GIRF_shocks[[i1]] <- lapply(1:R2, function(i2) get_one_girf(shock_numb=i1,
+                                                                  shock_size=shock_size,
+                                                                  seed=seeds[i2],
+                                                                  init_values_for_1girf=matrix(all_initvals[, , i2],
+                                                                                               nrow=p, ncol=d)))
+    }
   }
 
-  ### Calculate the GIRFs ###
-  cl <- parallel::makeCluster(ncores)
-  on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.
-  parallel::clusterExport(cl, ls(environment(GFEVD)), envir = environment(GFEVD)) # assign all variables from package:gmvarkit
-  parallel::clusterEvalQ(cl, c(library(pbapply), library(Rcpp), library(RcppArmadillo), library(sstvars)))
-
-  GIRF_shocks <- vector("list", length=d)
-  for(i1 in 1:d) {
-    cat(paste0("Estimating GIRFs for structural shock ", i1, "..."), "\n")
-    GIRF_shocks[[i1]] <- pbapply::pblapply(1:R2,
-                                           function(i2) get_one_girf(shock_numb=i1,
-                                                                     shock_size=shock_size,
-                                                                     seed=seeds[i2],
-                                                                     init_values_for_1girf=matrix(all_initvals[, , i2],
-                                                                                                  nrow=p, ncol=d)), cl=cl)
-  }
-  parallel::stopCluster(cl=cl)
 
   if(is.null(colnames(stvar$data))) {
     varnames <- paste0("Variable", 1:d)
@@ -412,19 +429,18 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
     }
   }
 
-  cat("Finished!\n")
-  ret <- structure(list(gfevd_res=GFEVD_results,
-                        shock_size=shock_size,
-                        N=N,
-                        initval_type=initval_type,
-                        R1=R1,
-                        R2=R2,
-                        which_cumulative=which_cumulative,
-                        init_regime=init_regime,
-                        init_values=init_values,
-                        seeds=seeds,
-                        burn_in=burn_in,
-                        stvar=stvar),
-                   class="gfevd")
-  ret
+  if(use_parallel) cat("Finished!\n")
+  structure(list(gfevd_res=GFEVD_results,
+                 shock_size=shock_size,
+                 N=N,
+                 initval_type=initval_type,
+                 R1=R1,
+                 R2=R2,
+                 which_cumulative=which_cumulative,
+                 init_regime=init_regime,
+                 init_values=init_values,
+                 seeds=seeds,
+                 burn_in=burn_in,
+                 stvar=stvar),
+            class="gfevd")
 }

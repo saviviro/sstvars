@@ -17,7 +17,8 @@ GFEVD(
   which_cumulative = numeric(0),
   ncores = 2,
   burn_in = 1000,
-  seeds = NULL
+  seeds = NULL,
+  use_parallel = TRUE
 )
 }
 \arguments{
@@ -69,6 +70,9 @@ of each GIRF. Should have the length...
   \item ...\code{1} if \code{initval_type="fixed."}.
 }
 Set to \code{NULL} for not initializing the seed. Exists for creating reproducible results.}
+
+\item{use_parallel}{employ parallel computing? If \code{FALSE}, does not print
+anything.}
 }
 \value{
 Returns and object of class 'gfevd' containing the GFEVD for all the variables and to
