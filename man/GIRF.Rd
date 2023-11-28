@@ -155,6 +155,8 @@ The confidence bounds reflect uncertainty about the initial state (but
  \donttest{
  # These are long-running examples that use parallel computing.
  # It takes approximately 30 seconds to run all the below examples.
+ # Note that larger R1 and R2 should be used for more reliable results;
+ # small R1 and R2 are used here to shorten the estimation time.
 
  # Recursively identifed logistic Student's t STVAR(p=3, M=2) model with the first
  # lag of the second variable as the switching variable:
@@ -165,8 +167,26 @@ The confidence bounds reflect uncertainty about the initial state (but
  mod32logt <- STVAR(gdpdef, p=3, M=2, params=params32logt, weight_function="logistic",
   weightfun_pars=c(2, 1), cond_dist="Student", identification="recursive")
 
- girf1 <- GIRF(mod32logt, which_shocks=1:2, shock_size=-3, N=30, R1=100, R2=100, init_regime=1, use_parallel=FALSE)
- # GIRF is very strongly in the initial regime here -> hence narrow confidence bounds
+ # GIRF for one-standard-error positive structural shocks, N=30 steps ahaed,
+ # with the inital values drawn from the first regime.
+ girf1 <- GIRF(mod32logt, which_shocks=1:2, shock_size=1, N=30, R1=50, R2=50,
+  init_regime=1, use_parallel=FALSE)
+ print(girf1) # Print the results
+ plot(girf1) # Plot the GIRFs
+
+ # GIRF for one-standard-error positive structural shocks, N=30 steps ahaed,
+ # with the inital values drawn from the second regime. The responses of the
+ # GDP and GDP deflator growth rates are accumulated.
+ girf2 <- GIRF(mod32logt, which_shocks=1:2, which_cumulative=1:2, shock_size=1,
+  N=30, R1=50, R2=50, init_regime=2, use_parallel=FALSE)
+ plot(girf2) # Plot the GIRFs
+
+ # GIRF for two-standard-error negative structural shock - the first shock only.
+ # N=50 steps ahead with the inital values drawn from the first regime. The responses
+ # are scaled to correspond an instantanous increase of 0.5 of the first variable.
+ girf3 <- GIRF(mod32logt, which_shocks=1, shock_size=-2, N=50, R1=50, R2=50,
+  init_regime=1, scale_type="instant", scale=c(1, 1, 0.5), use_parallel=FALSE)
+ plot(girf3) # Plot the GIRFs
  }
 }
 \references{

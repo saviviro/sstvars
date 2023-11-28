@@ -185,7 +185,7 @@ If you wish to estimate a structural model, estimate first the reduced form mode
 
 # p=3, M=2, d=2 relative_dens Gaussian STVAR
 fit32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="relative_dens",
- cond_dist="Gaussian", nrounds=1, seeds=1)
+ cond_dist="Gaussian", nrounds=1, seeds=1, use_parallel=FALSE)
 fit32
 summary(fit32)
 plot(fit32)
