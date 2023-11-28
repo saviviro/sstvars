@@ -179,3 +179,103 @@ plot.stvarpred <- function(x, ..., nt, trans_weights=TRUE) {
   invisible(stvarpred)
 }
 
+
+#' @describeIn GIRF plot method
+#' @inheritParams print.girf
+#' @param margs numeric vector of length four that adjusts the
+#'  \code{[bottom_marginal, left_marginal, top_marginal, right_marginal]}
+#'  as the relative sizes of the marginals to the figures of the responses.
+#' @param ... graphical parameters passed to \code{plot} method plotting the GIRFs
+#' @export
+
+plot.girf <- function(x, margs, ...) {
+
+  # Relevant statistics etc
+  girf <- x
+  girf_res <- girf$girf_res
+  nresps <- ncol(girf_res[[1]]$point_est)
+  resp_names <- colnames(girf_res[[1]]$point_est)
+  ngirfs <- length(girf_res)
+
+  # Graphical settings
+  if(missing(margs)) {
+    margs <- c(max(0.4, 0.4 + log(0.31 + log(nresps))/6),
+               max(0.4, 0.4 + log(0.31 + log(ngirfs))),
+               max(0.35, 0.35 + log(0.31 + log(nresps))/6),
+               max(0.1, 0.1 + log(0.31 + log(ngirfs))/10))
+    if(ngirfs == 1) margs[2] <- 0.3
+    margs <- vapply(1:length(margs), function(i1) min(margs[i1], 1), numeric(1))
+  } else {
+    stopifnot(all(margs > 0))
+  }
+  old_par <- par(no.readonly=TRUE)
+  on.exit(par(old_par))
+  par(las=1, mar=c(0, 0, 0, 0))
+  nrows <- nresps + 2 # + 2 for bottom and top marginals
+  ncols <- 3*ngirfs # 3x for the left and right margin in each column of figures
+  nfigs <- nrows*ncols
+  layoutmat <- matrix(seq_len(nfigs), nrow=nrows, ncol=ncols, byrow=FALSE)
+  layout(layoutmat, # Below -0.2 for not including the ylab and also adding to the right marginals
+         widths=c(margs[2], 1, margs[4], rep(c(margs[2] - 0.2, 1, margs[4]), times=ngirfs - 1)),
+         heights=c(margs[3], rep(1, times=nrows - 2), margs[1]))
+
+  # Function to plot empty plots (for the marginals)
+  empty_plot <- function() plot(0, xaxt='n', yaxt='n', bty='n', pch='', ylab='', xlab='')
+
+  # Function to plot the GIRF for each response separately
+  plot_girf <- function(resp_ind, main="", xaxt="n", ylab="", first_col=FALSE, ...) {
+
+    # Plot point estimate
+    point_est <- girf_i1$point_est[, resp_ind]
+    conf_ints <- girf_i1$conf_ints[, , resp_ind]
+    plot(x=0:(length(point_est) - 1), y=point_est, type="l", ylim=c(min(0, min(conf_ints)), max(0, max(conf_ints))),
+         main="", ylab="", xlab="", xaxt=xaxt, lwd=2, col="blue", ...)
+    if(first_col) { # Add yaxis label to the first column of responses
+      mtext(resp_names[resp_ind], side=2, cex=0.8, font=2, las=0, padj=-4)
+    }
+    if(resp_ind == 1) mtext(main, padj=-0.5, cex=1, font=2)
+
+    # Plot confidence intervals
+    inds <- 0:girf$N
+    draw_poly <- function(up_or_low) polygon(x=c(inds, rev(inds)), y=c(up_or_low, rev(point_est)),
+                                             col=grDevices::rgb(0, 0, 1, 0.2), border=NA)
+
+    for(i1 in 1:length(girf$ci)) {
+      draw_poly(conf_ints[, i1]) # lower
+      draw_poly(conf_ints[, ncol(conf_ints) + 1 - i1]) # upper
+    }
+
+    abline(h=0, lty=3, col="red")
+  }
+
+  # Loop through the shocks
+  for(i1 in 1:ngirfs) {
+    # Plot a column of empty plots as the left margins
+    for(i2 in 1:(nrows + 1)) { # + 1 for the top margin of the first row of responses
+      empty_plot()
+    }
+
+    # Plot the responses of each variable to shock i1
+    girf_i1 <- girf_res[[i1]]
+
+    # Plot the GIRF of shocks i1
+    first_col <- i1 == 1
+    plot_girf(resp_ind=1, main=paste("Shock", girf$shocks[i1]),
+              ylab=resp_names[1], first_col=first_col)
+    if(nresps > 2) {
+      for(i2 in 2:(nresps - 1)) {
+        plot_girf(resp_ind=i2, ylab=resp_names[i2], first_col=first_col)
+      }
+    }
+    plot_girf(resp_ind=nresps, xaxt="s", ylab=resp_names[nresps], first_col=first_col)
+    empty_plot() # To bottom margin of the last row of responses
+
+    # Plot a column of empty plots as the right margins
+    for(i2 in 1:nrows) {
+      empty_plot()
+    }
+  }
+}
+
+
+

@@ -87,7 +87,8 @@
 #'  mod32logt <- STVAR(gdpdef, p=3, M=2, params=params32logt, weight_function="logistic",
 #'   weightfun_pars=c(2, 1), cond_dist="Student", identification="recursive")
 #'
-#'  girf1 <- GIRF(mod32logt, which_shocks=1:2, shock_size=1, N=30, R1=200, R2=200, init_regime=1, use_parallel=FALSE)
+#'  girf1 <- GIRF(mod32logt, which_shocks=1:2, shock_size=5, N=30, R1=100, R2=100, init_regime=1, use_parallel=FALSE)
+#'  # GIRF is very strongly in the initial regime here -> hence narrow confidence bounds
 #'  }
 #' @export
 
