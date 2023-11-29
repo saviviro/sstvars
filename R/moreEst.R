@@ -170,7 +170,7 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
 #' @export
 
 fitSSTVAR <- function(stvar, new_identification=c("recursive", "heteroskedasticity"), new_B_constraints=NULL,
-                      maxit=1000, maxit_robust=1000, robust_method=c("Nelder-Mead", "SANN", "none"),
+                      maxit=1000, maxit_robust=1000, robust_method=c("Nelder-Mead", "SANN", "none"), print_res=TRUE,
                       calc_std_errors=TRUE) {
   check_stvar(stvar)
   stopifnot(maxit %% 1 == 0 & maxit >= 1)
@@ -203,10 +203,13 @@ fitSSTVAR <- function(stvar, new_identification=c("recursive", "heteroskedastici
       return(stvar)
     } else if(old_identification != new_identification) {
       # Old model structural but identification changes
-      stop(paste("The type of the identification of a structural models cannot be changed.",
-                 "Consider using the initial reduced model to obtain the structural model with a specific identification."))
+      message(paste("The type of the identification of a structural models cannot be changed.",
+                    "Using the old identification as 'new_identification'."))
+      new_identification <- old_identification
     }
-  } else if(new_identification == "recursive") {
+  }
+
+  if(new_identification == "recursive") {
     # Old identification reduced form, recursively identified model should be returned.
     if(!is.null(new_B_constraints)) warning("Cannot impose B_constraints on recursively identified models")
     return(STVAR(data=data, p=p, M=M, d=d, params=params, cond_dist=cond_dist,
@@ -397,8 +400,10 @@ fitSSTVAR <- function(stvar, new_identification=c("recursive", "heteroskedastici
                  weight_constraints=weight_constraints, B_constraints=B_constraints)
   }
 
-  cat("The log-likelihood of the supplied model:   ", round(c(stvar$loglik), 3),
-      "\nConstrained log-likelihood prior estimation:", round(new_loglik, 3), "\n")
+  if(print_res) {
+    cat("The log-likelihood of the supplied model:   ", round(c(stvar$loglik), 3),
+                    "\nConstrained log-likelihood prior estimation:", round(new_loglik, 3), "\n")
+  }
 
 
   ### Estimation
@@ -439,7 +444,7 @@ fitSSTVAR <- function(stvar, new_identification=c("recursive", "heteroskedastici
     robust_results <- stats::optim(par=new_params, fn=loglik_fn, gr=loglik_grad, method=robust_method,
                                    control=list(fnscale=-1, maxit=maxit_robust))
     new_params <- robust_results$par
-    cat(paste0("The log-likelihood after robust estimation:  ", round(robust_results$value, 3)), "\n")
+    if(print_res) cat(paste0("The log-likelihood after robust estimation:  ", round(robust_results$value, 3)), "\n")
   }
 
   ## Estimation by the variable metric algorithm...
@@ -447,7 +452,7 @@ fitSSTVAR <- function(stvar, new_identification=c("recursive", "heteroskedastici
   final_results <- stats::optim(par=new_params, fn=loglik_fn, gr=loglik_grad, method="BFGS",
                              control=list(fnscale=-1, maxit=maxit))
   new_params <- final_results$par
-  cat(paste0("The log-likelihood after final estimation:   ", round(final_results$value, 3)), "\n")
+  if(print_res) cat(paste0("The log-likelihood after final estimation:   ", round(final_results$value, 3)), "\n")
 
   #cat("Finished!")
   STVAR(data=data, p=p, M=M, d=d, params=new_params, cond_dist=cond_dist,

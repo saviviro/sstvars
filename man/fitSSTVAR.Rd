@@ -12,6 +12,7 @@ fitSSTVAR(
   maxit = 1000,
   maxit_robust = 1000,
   robust_method = c("Nelder-Mead", "SANN", "none"),
+  print_res = TRUE,
   calc_std_errors = TRUE
 )
 }
@@ -25,6 +26,8 @@ specifying a reduced form or a structural model}
 
 \item{robust_method}{Should some robust estimation method be used in the estimation before switching
 to the gradient based variable metric algorithm? See details.}
+
+\item{print_res}{should summaries of estimation results be printed?}
 
 \item{calc_std_errors}{should approximate standard errors be calculated?}
 }
