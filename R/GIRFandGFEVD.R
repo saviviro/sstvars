@@ -455,7 +455,7 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
   } else {
     varnames <- colnames(stvar$data)
   }
-  varnames <- c(varnames, paste0("mw", 1:M))
+  varnames <- c(varnames, paste0("tw", 1:M))
   shocknames <- paste0("Shock", 1:d)
 
   GIRF_square_cumsum <- array(dim=c(N + 1, length(varnames), d),

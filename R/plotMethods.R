@@ -278,4 +278,67 @@ plot.girf <- function(x, margs, ...) {
 }
 
 
+#' @describeIn GFEVD plot method
+#' @inheritParams print.gfevd
+#' @param ... currently not used.
+#' @export
+
+plot.gfevd <- function(x, ...) {
+  old_par <- par(no.readonly=TRUE)
+  on.exit(par(old_par))
+
+  gfevd <- x
+  gfevd_res <- gfevd$gfevd_res
+  n_gfevds <- dim(gfevd_res)[3]
+  varnames <- dimnames(gfevd_res)[[3]]
+  n_shocks <- dim(gfevd_res)[2]
+  graphics::par(las=1, mfrow=c(1, 1), mar=c(2.6, 2.6, 2.6, 3.1))
+
+  # Function to plot the GFEVD for each variable separately
+  plot_gfevd <- function(var_ind, main) {
+
+    one_gfevd <- gfevd_res[, , var_ind] # [horizon, shock]
+    mycums <- as.matrix(1 - apply(one_gfevd[, 1:(ncol(one_gfevd) - 1), drop=FALSE], MARGIN=1, FUN=cumsum))
+    if(ncol(mycums) > 1) mycums <- t(mycums)
+    upper_ints <- cbind(rep(1, times=nrow(one_gfevd)), mycums)
+    lower_ints <- cbind(mycums,rep(0, times=nrow(one_gfevd)))
+    x_points <- seq(from=-0.5, to=gfevd$N + 0.5, by=1)
+
+    # Plot the template
+    colpal <- grDevices::adjustcolor(grDevices::topo.colors(ncol(one_gfevd)), alpha.f=0.3)
+    xlim_adj <- ifelse(gfevd$N < 13, 0, 0.04*(gfevd$N - 12))
+    plot(NA, ylim=c(0, 1), xlim=c(0 + xlim_adj, gfevd$N - xlim_adj),
+         main=main, ylab="", xlab="")
+    x_bars <- (0:(gfevd$N + 1) - 0.5)
+    segments(x0=x_bars, y0=rep(0, times=length(x_bars)), x1=x_bars, y1=rep(1, times=length(x_bars)))
+
+    # Go through the shocks
+    for(i1 in 1:ncol(one_gfevd)) {
+      for(i2 in 1:(length(x_points) - 1)) {
+        polygon(x=c(x_points[c(i2, i2 + 1)], x_points[c(i2 + 1, i2)]),
+                y=c(upper_ints[c(i2, i2), i1], lower_ints[c(i2, i2), i1]),
+                col=colpal[i1], border=NA)
+      }
+    }
+
+    # Add shock legengs
+    ylim_ajd <- ifelse(n_shocks < 500, 0.02*n_shocks, 0.01*n_shocks)
+    colpal2 <- grDevices::adjustcolor(colpal, alpha.f=3)
+    xtext_adj <- ifelse(gfevd$N < 10, 0.75 - gfevd$N^(-1/3), 0.4 - gfevd$N/150)
+    text(x=rep(gfevd$N + xtext_adj, n_shocks), y=seq(from=1, to=1 - 0.02*n_shocks, length.out=n_shocks),
+         labels=paste("Shock", 1:n_shocks),
+         col=colpal2, pos=4, font=2, cex=0.8, xpd=TRUE)
+
+  }
+
+  # Loop through the GFEVDs
+  for(i1 in 1:n_gfevds) {
+    if(i1 > 1) grDevices::devAskNewPage(TRUE)
+    plot_gfevd(var_ind=i1, main=ifelse(i1 <= n_shocks,
+                                       paste("GFEVD for ", varnames[i1]),
+                                       paste("GFEVD for regime", i1 - n_shocks, "trans. weight")))
+
+  }
+}
+
 
