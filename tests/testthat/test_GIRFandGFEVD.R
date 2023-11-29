@@ -24,10 +24,6 @@ theta_123relgh <- c(0.301922, 0.14077, 0.054866, 0.697999, 0.115812, -0.096371, 
 mod123relgh <- STVAR(data=usamone, p=1, M=2, params=theta_123relgh, weight_function="relative_dens",
                      identification="heteroskedasticity")
 
-
-
-
-
 test_that("GIRF works correctly", {
   girf1 <- GIRF(mod112rec, which_shocks=1:2, shock_size=1, N=3, R1=2, R2=4, init_regime=1, which_cumulative=2,
                 use_parallel=FALSE, seeds=1:4, ci=0.9)
@@ -54,4 +50,21 @@ test_that("GIRF works correctly", {
                c(0.666611, 2.107406, 2.107406, 2.107406, 2.113058, 2.113058, 2.113058, 2.327494, -0.120025, -0.076973, -0.076973,
                  -0.076973, 0, 0, 0, 0.402271, -0.402271, 0, 0, 0), tol=1e-4)
 
+})
+
+
+test_that("GIRF works correctly", {
+  gfevd1 <- GFEVD(mod112rec, shock_size=1, N=3, initval_type="data", R1=2, R2=4, which_cumulative=2,
+                  use_parallel=FALSE, seeds=1:nrow(mod112rec$data))
+  gfevd2 <- GFEVD(mod322logt, shock_size=-2.2, N=2, initval_type="random", R1=5, R2=3, init_regime=2,
+                  which_cumulative=numeric(0), use_parallel=FALSE, seeds=1:3)
+  gfevd3 <- GFEVD(mod123relgh, shock_size=2, N=1, initval_type="fixed", R1=1, R2=4, init_values=mod123relgh$data,
+                  which_cumulative=c(1, 3), use_parallel=FALSE, seeds=3)
+
+  expect_equal(c(unname(gfevd1$gfevd_res[4, , 1:2])), c(0.993349651, 0.006650349, 0.001999672, 0.998000328), tol=1e-4)
+  expect_equal(c(unname(gfevd2$gfevd_res[3, ,])), c(0.96153505, 0.03846495, 0.01188139, 0.98811861, 0.00125927,
+                                                    0.99874073, 0.00125927, 0.99874073), tol=1e-4)
+  expect_equal(c(unname(gfevd3$gfevd_res[2, ,])), c(0.654282189, 0.212599895, 0.133117916, 0.274154563, 0.049371263,
+                                                    0.676474175, 0.202381661, 0.793597167, 0.004021173, 0.060652235,
+                                                    0.426488073, 0.512859692, 0.060652235, 0.426488073, 0.512859692), tol=1e-4)
 })
