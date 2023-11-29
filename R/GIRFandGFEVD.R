@@ -89,14 +89,14 @@
 #'  mod32logt <- STVAR(gdpdef, p=3, M=2, params=params32logt, weight_function="logistic",
 #'   weightfun_pars=c(2, 1), cond_dist="Student", identification="recursive")
 #'
-#'  # GIRF for one-standard-error positive structural shocks, N=30 steps ahaed,
+#'  # GIRF for one-standard-error positive structural shocks, N=30 steps ahead,
 #'  # with the inital values drawn from the first regime.
 #'  girf1 <- GIRF(mod32logt, which_shocks=1:2, shock_size=1, N=30, R1=50, R2=50,
 #'   init_regime=1, use_parallel=FALSE)
 #'  print(girf1) # Print the results
 #'  plot(girf1) # Plot the GIRFs
 #'
-#'  # GIRF for one-standard-error positive structural shocks, N=30 steps ahaed,
+#'  # GIRF for one-standard-error positive structural shocks, N=30 steps ahead,
 #'  # with the inital values drawn from the second regime. The responses of the
 #'  # GDP and GDP deflator growth rates are accumulated.
 #'  girf2 <- GIRF(mod32logt, which_shocks=1:2, which_cumulative=1:2, shock_size=1,
@@ -327,8 +327,37 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 #'  \donttest{
 #'  # These are long-running examples that use parallel computing.
 #'  # It takes approximately 30 seconds to run all the below examples.
+#'  # Note that larger R1 and R2 should be used for more reliable results;
+#'  # small R1 and R2 are used here to shorten the estimation time.
 #'
-#'  ## FILL IN
+#'  # Recursively identifed logistic Student's t STVAR(p=3, M=2) model with the first
+#'  # lag of the second variable as the switching variable:
+#'  params32logt <- c(0.5959, 0.0447, 2.6279, 0.2897, 0.2837, 0.0504, -0.2188, 0.4008,
+#'   0.3128, 0.0271, -0.1194, 0.1559, -0.0972, 0.0082, -0.1118, 0.2391, 0.164, -0.0363,
+#'   -1.073, 0.6759, 3e-04, 0.0069, 0.4271, 0.0533, -0.0498, 0.0355, -0.4686, 0.0812,
+#'    0.3368, 0.0035, 0.0325, 1.2289, -0.047, 0.1666, 1.2067, 7.2392, 11.6091)
+#'  mod32logt <- STVAR(gdpdef, p=3, M=2, params=params32logt, weight_function="logistic",
+#'   weightfun_pars=c(2, 1), cond_dist="Student", identification="recursive")
+#'
+#'  # GFEVD for one-standard-error positive structural shocks, N=30 steps ahead,
+#'  # with fix initial values assuming all possible histories in the data.
+#'  gfevd1 <- GFEVD(mod32logt, shock_size=1, N=30, initval_type="data", R1=10,
+#'    use_parallel=FALSE, seeds=1:(nrow(mod32logt$data)-2))
+#'  print(gfevd1) # Print the results
+#'  plot(gfevd1) # Plot the GFEVD
+#'
+#'  # GFEVD for one-standard-error positive structural shocks, N=30 steps ahead,
+#'  # with fix initial values that are the last p observations of the data.
+#'  gfevd2 <- GFEVD(mod32logt, shock_size=1, N=30, initval_type="fixed", R1=100,
+#'    use_parallel=FALSE, seeds=1, init_values=mod32logt$data)
+#'  plot(gfevd2) # Plot the GFEVD
+#'
+#'  # GFEVD for two-standard-error negative structural shocks, N=50 steps ahead
+#'  # with the inital values drawn from the first regime. The responses of both
+#'  # variables are accumulated.
+#'  gfevd3 <- GFEVD(mod32logt, shock_size=-2, N=50, initval_type="random",
+#'   R1=50, R2=50, init_regime=1, use_parallel=FALSE)
+#'  plot(gfevd3) # Plot the GFEVD
 #'  }
 #' @export
 

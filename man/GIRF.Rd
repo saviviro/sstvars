@@ -167,14 +167,14 @@ The confidence bounds reflect uncertainty about the initial state (but
  mod32logt <- STVAR(gdpdef, p=3, M=2, params=params32logt, weight_function="logistic",
   weightfun_pars=c(2, 1), cond_dist="Student", identification="recursive")
 
- # GIRF for one-standard-error positive structural shocks, N=30 steps ahaed,
+ # GIRF for one-standard-error positive structural shocks, N=30 steps ahead,
  # with the inital values drawn from the first regime.
  girf1 <- GIRF(mod32logt, which_shocks=1:2, shock_size=1, N=30, R1=50, R2=50,
   init_regime=1, use_parallel=FALSE)
  print(girf1) # Print the results
  plot(girf1) # Plot the GIRFs
 
- # GIRF for one-standard-error positive structural shocks, N=30 steps ahaed,
+ # GIRF for one-standard-error positive structural shocks, N=30 steps ahead,
  # with the inital values drawn from the second regime. The responses of the
  # GDP and GDP deflator growth rates are accumulated.
  girf2 <- GIRF(mod32logt, which_shocks=1:2, which_cumulative=1:2, shock_size=1,
