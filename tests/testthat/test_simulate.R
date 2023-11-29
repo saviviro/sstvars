@@ -49,22 +49,20 @@ theta_122relgsh <- c(all_phi_122, all_A_122, vec(W_122), lambdas_122, alpha1_122
 mod122relgsh <- STVAR(data=gdpdef, p=1, M=2, d=2, params=theta_122relgsh, weight_function="relative_dens", identification="heteroskedasticity")
 
 
-s112 <- simulate(mod112relg, nsim=1, seed=1, init_regime=1)
-s112_2 <- simulate(mod112relg, nsim=2, seed=1, init_regime=1)
-s122 <- simulate(mod122relg, nsim=5, seed=2, init_values=gdpdef)
-s222 <- simulate(mod222relg, nsim=3, seed=3, init_regime=2)
-s123 <- simulate(mod123relg, nsim=3, seed=4, init_regime=1)
-s123_2 <- simulate(mod123relg, nsim=1, seed=5, init_values=usamone)
-s322 <- simulate(mod322log, nsim=3, seed=3, init_regime=1)
-s322_2 <- simulate(mod322log, nsim=3, seed=3, init_values=gdpdef)
-
-s322t <- simulate(mod322logt, nsim=3, seed=3, init_values=gdpdef)
-s322t_2 <- simulate(mod322logt, nsim=3, seed=3, init_regime=2)
-
-s322tr <- simulate(mod322logtr_2_1, nsim=4, seed=3, init_values=gdpdef)
-s122relgsh <- simulate(mod122relgsh, nsim=3, seed=4, init_regime=2)
-
 test_that("simulate.stvar works correctly", {
+  s112 <- simulate(mod112relg, nsim=1, seed=1, init_regime=1)
+  s112_2 <- simulate(mod112relg, nsim=2, seed=1, init_regime=1)
+  s122 <- simulate(mod122relg, nsim=5, seed=2, init_values=gdpdef)
+  s222 <- simulate(mod222relg, nsim=3, seed=3, init_regime=2)
+  s123 <- simulate(mod123relg, nsim=3, seed=4, init_regime=1)
+  s123_2 <- simulate(mod123relg, nsim=1, seed=5, init_values=usamone)
+  s322 <- simulate(mod322log, nsim=3, seed=3, init_regime=1)
+  s322_2 <- simulate(mod322log, nsim=3, seed=3, init_values=gdpdef)
+  s322t <- simulate(mod322logt, nsim=3, seed=3, init_values=gdpdef)
+  s322t_2 <- simulate(mod322logt, nsim=3, seed=3, init_regime=2)
+  s322tr <- simulate(mod322logtr_2_1, nsim=4, seed=3, init_values=gdpdef)
+  s122relgsh <- simulate(mod122relgsh, nsim=3, seed=4, init_regime=2)
+
   # Relative_dens Gaussian STVAR
   expect_equal(s112$sample[1,], c(-0.07206511, 1.343205), tol=1e-4)
   expect_equal(s112$transition_weights, as.matrix(1), tol=1e-4)
@@ -101,19 +99,17 @@ test_that("simulate.stvar works correctly", {
 })
 
 
-set.seed(1); sim_reg112_1 <- simulate_from_regime(mod112relg, regime=1, nsim=1)
-set.seed(1); sim_reg112_2 <- simulate_from_regime(mod112relg, regime=1, nsim=1, init_values=gdpdef)
-set.seed(2); sim_reg122_1 <- simulate_from_regime(mod122relg, regime=1, nsim=2)
-set.seed(3); sim_reg122_2 <- simulate_from_regime(mod122relg, regime=2, nsim=3)
-set.seed(4); sim_reg322_1 <- simulate_from_regime(mod322log, regime=1, nsim=4)
-set.seed(5); sim_reg322t_1 <- simulate_from_regime(mod322logt, regime=2, nsim=5)
-
-set.seed(5); sim_regs322tr_1 <- simulate_from_regime(mod322logtr_2_1, regime=2, nsim=1)
-set.seed(6); sim_regs122relgsh_1 <- simulate_from_regime(mod122relgsh, regime=1, nsim=6)
-
-
 
 test_that("simulate_from_regime works correctly", {
+  set.seed(1); sim_reg112_1 <- simulate_from_regime(mod112relg, regime=1, nsim=1)
+  set.seed(1); sim_reg112_2 <- simulate_from_regime(mod112relg, regime=1, nsim=1, init_values=gdpdef)
+  set.seed(2); sim_reg122_1 <- simulate_from_regime(mod122relg, regime=1, nsim=2)
+  set.seed(3); sim_reg122_2 <- simulate_from_regime(mod122relg, regime=2, nsim=3)
+  set.seed(4); sim_reg322_1 <- simulate_from_regime(mod322log, regime=1, nsim=4)
+  set.seed(5); sim_reg322t_1 <- simulate_from_regime(mod322logt, regime=2, nsim=5)
+  set.seed(5); sim_regs322tr_1 <- simulate_from_regime(mod322logtr_2_1, regime=2, nsim=1)
+  set.seed(6); sim_regs122relgsh_1 <- simulate_from_regime(mod122relgsh, regime=1, nsim=6)
+
   # Relative_dens Gaussian STVAR
   expect_equal(sim_reg112_1[1,], c(0.2634843, 0.8543901), tol=1e-4)
   expect_equal(sim_reg112_2[1,], c(0.2393741, 0.4936729), tol=1e-4)
