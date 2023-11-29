@@ -12,7 +12,8 @@
 #' @param seeds a length \code{nrounds} vector containing the random number generator seed
 #'  for each call to the genetic algorithm, or \code{NULL} for not initializing the seed.
 #' @param print_res should summaries of estimation results be printed?
-#' @param use_parallel employ parallel computing?
+#' @param use_parallel employ parallel computing? If \code{use_parallel=FALSE && print_res=FALSE},
+#'  nothing is printed.
 #' @param filter_estimates should the likely inappropriate estimates be filtered? See details.
 #' @param ... additional settings passed to the function \code{GAfit} employing the genetic algorithm.
 #' @details
@@ -92,7 +93,7 @@
 #' # p=1, M=2, d=2 relative_dens Gaussian STVAR with the means and AR matrices constrained
 #' # to be identical in both regimes
 #' fit12cm <- fitSTVAR(gdpdef, p=1, M=2, AR_constraints=C_122, mean_constraints=list(1:2),
-#'  nrounds=1, seeds=1, use_parallel=FALSE)
+#'  parametrization="mean", nrounds=1, seeds=1, use_parallel=FALSE)
 #'
 #' # p=2, M=2, d=2, relative_dens Gaussian STVAR; constrain AR-parameters to be the same
 #' # for all regimes and constrain the of-diagonal elements of AR-matrices to be zero.
@@ -157,6 +158,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
   check_pMd(p=p, M=M, weight_function=weight_function, identification="reduced_form")
+  no_prints <- !use_parallel && !print_res
   if(!all_pos_ints(c(nrounds, ncores, maxit))) stop("Arguments nrounds, ncores, and maxit must be positive integers")
   stopifnot(length(nrounds) == 1)
   if(!is.null(seeds) && length(seeds) != nrounds) stop("The argument 'seeds' should be NULL or a vector of length 'nrounds'")
@@ -166,7 +168,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                          cond_dist=cond_dist)
   if(!is.null(mean_constraints) && parametrization == "intercept") {
-    cat("mean_constraints can be applied for mean-parametrized models only. Switching to parametrization = 'mean'.\n")
+    if(!no_prints) cat("mean_constraints can be applied for mean-parametrized models only. Switching to parametrization = 'mean'.\n")
     parametrization <- "mean"
   }
   check_constraints(p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
@@ -213,10 +215,10 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                                                                  seed=seeds[i1], ...), cl=cl)
 
   } else {
-    cat("Optimizing with a genetic algorithm...\n")
+    if(!no_prints) cat("Optimizing with a genetic algorithm...\n")
 
     tmpfunGA <- function(i1, ...) {
-      cat(i1, "/", nrounds, "\r")
+      if(!no_prints) cat(i1, "/", nrounds, "\r")
       GAfit(data=data, p=p, M=M,
             weight_function=weight_function,
             weightfun_pars=weightfun_pars,
@@ -274,14 +276,14 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     vapply(1:npars, function(i1) (loglik_fn(params + I[i1,]*h) - loglik_fn(params - I[i1,]*h))/(2*h), numeric(1))
   }
 
-  cat("Optimizing with a variable metric algorithm...\n")
+  if(!no_prints) cat("Optimizing with a variable metric algorithm...\n")
   if(use_parallel) {
     NEWTONresults <- pbapply::pblapply(1:nrounds, function(i1) optim(par=GAresults[[i1]], fn=loglik_fn, gr=loglik_grad, method="BFGS",
                                                                      control=list(fnscale=-1, maxit=maxit)), cl=cl)
     parallel::stopCluster(cl=cl)
   } else {
     tmpfunNE <- function(i1) {
-      cat(i1, "/", nrounds, "\r")
+      if(!no_prints) cat(i1, "/", nrounds, "\r")
       optim(par=GAresults[[i1]], fn=loglik_fn, gr=loglik_grad, method="BFGS",
             control=list(fnscale=-1, maxit=maxit))
     }
@@ -300,7 +302,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   all_estimates <- lapply(NEWTONresults, function(x) x$par)
 
   if(filter_estimates) {
-    cat("Filtering inappropriate estimates...\n")
+    if(!no_prints) cat("Filtering inappropriate estimates...\n")
     ord_by_loks <- order(loks, decreasing=TRUE) # Ordering from largest loglik to smaller
 
     # Go through estimates, take the estimate that yield the higher likelihood
@@ -366,8 +368,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   }
 
   if(NEWTONresults[[which_best_fit]]$convergence == 1) {
-    message("Iteration limit was reached when estimating the best fitting individual!
-            Consider further estimation with the function 'iterate_more'")
+    if(!no_prints) message(paste("Iteration limit was reached when estimating the best fitting individual!",
+                                 "Consider further estimation with the function 'iterate_more'"))
   }
 
   transition_weights <- loglikelihood(data=data, p=p, M=M, params=params,
@@ -381,7 +383,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   }
 
   ### Wrap up ###
-  cat("Calculating approximate standard errors...\n")
+  if(!no_prints) cat("Calculating approximate standard errors...\n")
   ret <- STVAR(data=data, p=p, M=M, d=d, params=params,
                weight_function=weight_function,
                weightfun_pars=weightfun_pars,
@@ -398,7 +400,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   ret$which_converged <- converged
   ret$which_round <- which_best_fit # Which estimation round induced the largest log-likelihood?
   warn_eigens(ret)
-  cat("Finished!\n")
+  if(!no_prints) cat("Finished!\n")
   ret
 }
 

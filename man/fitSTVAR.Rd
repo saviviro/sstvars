@@ -107,7 +107,8 @@ for each call to the genetic algorithm, or \code{NULL} for not initializing the 
 
 \item{print_res}{should summaries of estimation results be printed?}
 
-\item{use_parallel}{employ parallel computing?}
+\item{use_parallel}{employ parallel computing? If \code{use_parallel=FALSE && print_res=FALSE},
+nothing is printed.}
 
 \item{filter_estimates}{should the likely inappropriate estimates be filtered? See details.}
 
@@ -199,7 +200,7 @@ fit12c <- fitSTVAR(gdpdef, p=1, M=2, AR_constraints=C_122, nrounds=1, seeds=1,
 # p=1, M=2, d=2 relative_dens Gaussian STVAR with the means and AR matrices constrained
 # to be identical in both regimes
 fit12cm <- fitSTVAR(gdpdef, p=1, M=2, AR_constraints=C_122, mean_constraints=list(1:2),
- nrounds=1, seeds=1, use_parallel=FALSE)
+ parametrization="mean", nrounds=1, seeds=1, use_parallel=FALSE)
 
 # p=2, M=2, d=2, relative_dens Gaussian STVAR; constrain AR-parameters to be the same
 # for all regimes and constrain the of-diagonal elements of AR-matrices to be zero.
