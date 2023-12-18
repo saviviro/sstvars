@@ -12,7 +12,7 @@ params322logt <- c(0.5959, 0.0447, 2.6279, 0.2897, 0.2837, 0.0504, -0.2188, 0.40
                    0.1559, -0.0972, 0.0082, -0.1118, 0.2391, 0.164, -0.0363, -1.073, 0.6759, 3e-04, 0.0069,
                    0.4271, 0.0533, -0.0498, 0.0355, -0.4686, 0.0812, 0.3368, 0.0035, 0.0325, 1.2289, -0.047,
                    0.1666, 1.2067, 7.2392, 11.6091)
-mod322logt <- STVAR(gdpdef, p=3, M=2, params=params32logt, weight_function="logistic", weightfun_pars=c(2, 1),
+mod322logt <- STVAR(gdpdef, p=3, M=2, params=params322logt, weight_function="logistic", weightfun_pars=c(2, 1),
                     cond_dist="Student", identification="recursive")
 
 # data=usamone, p=1, M=2, d=3, weight_function="relative_dens", identification="heteroskedasticity"
