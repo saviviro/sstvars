@@ -87,7 +87,8 @@ the weight parameter to the constant \eqn{r} (in this case, \eqn{\alpha} is drop
      constant terms are drawn from in random mutations. The third element is the standard deviation of the normal distribution
      from which the non-constant regressors' coefficients are drawn from.}
   \item{\code{weight_function == "threshold"}:}{a lenght two vector with the lower bound, in the first element
-     and the upper bound, in the second element, of the uniform distribution threshold parameters are drawn from in random mutations.}
+     and the upper bound, in the second element, of the uniform distribution threshold parameters are drawn from
+     in random mutations.}
 }}
 }
 \value{

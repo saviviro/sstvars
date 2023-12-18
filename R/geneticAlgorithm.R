@@ -53,9 +53,10 @@
 #'   Note that for \code{d>4} this scale may need to be chosen carefully. Default in \code{GAfit} is
 #'   \code{var(stats::ar(data[,i], order.max=10)$resid, na.rm=TRUE), i=1,...,d}. This argument is ignored if
 #'   structural model is considered.
-#' @param ar_scale a positive real number adjusting how large AR parameter values are typically proposed in construction
-#'   of the initial population: larger value implies larger coefficients (in absolute value). After construction of the
-#'   initial population, a new scale is drawn from \code{(0, 0.)} uniform distribution in each iteration.
+#' @param ar_scale a positive real number between zero and one adjusting how large AR parameter values are typically
+#'   proposed in construction of the initial population: larger value implies larger coefficients (in absolute value).
+#'   After construction of the initial population, a new scale is drawn from \code{(0, upper_ar_scale)} uniform
+#'   distribution in each iteration.
 #' @param weight_scale For...
 #'   \describe{
 #'     \item{\code{weight_function == "relative_dens"}:}{not used.}
@@ -68,11 +69,13 @@
 #'        constant terms are drawn from in random mutations. The third element is the standard deviation of the normal distribution
 #'        from which the non-constant regressors' coefficients are drawn from.}
 #'     \item{\code{weight_function == "threshold"}:}{a lenght two vector with the lower bound, in the first element
-#'        and the upper bound, in the second element, of the uniform distribution threshold parameters are drawn from in random mutations.}
+#'        and the upper bound, in the second element, of the uniform distribution threshold parameters are drawn from
+#'        in random mutations.}
 #'   }
 #' @param upper_ar_scale the upper bound for \code{ar_scale} parameter (see above) in the random mutations. Setting
 #'  this too high might lead to failure in proposing new parameters that are well enough inside the parameter space,
-#'  and especially with large \code{p} one might want to try smaller upper bound (e.g., 0.5).
+#'  and especially with large \code{p} one might want to try smaller upper bound (e.g., 0.5). With large \code{p} or
+#'  \code{d}, \code{upper_ar_scale} is restricted from above, see the details section.
 #' @param ar_scale2 a positive real number adjusting how large AR parameter values are typically proposed in some
 #'   random mutations (if AR constraints are employed, in all random mutations): larger value implies \strong{smaller}
 #'   coefficients (in absolute value). \strong{Values larger than 1 can be used if the AR coefficients are expected to
@@ -112,6 +115,12 @@
 #'  By "redundant" or "wasted" regimes we mean regimes that have the time varying mixing weights practically at
 #'  zero for almost all t. A model including redundant regimes would have about the same log-likelihood value without
 #'  the redundant regimes and there is no purpose to have redundant regimes in a model.
+#'
+#'  Some of the AR coefficients are drawn with the algorithm by Ansley and Kohn (1986). However,
+#'  when using large \code{ar_scale} with large \code{p} or \code{d}, numerical inaccuracies caused
+#'  by the imprecision of the float-point presentation may result in errors or nonstationary AR-matrices.
+#'  Using smaller \code{ar_scale} facilitates the usage of larger \code{p} or \code{d}. Therefore, we bound
+#'  \code{upper_ar_scale} from above by \eqn{1-pd/150} when \code{p*d>40} and by \eqn{1} otherwise.
 #'
 #'  Structural models are not supported here, as they are best estimated based on reduced form parameter estimates
 #'  using the function \code{fitSSTVAR}.
@@ -228,6 +237,13 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
   stopifnot(pre_smart_mu_prob >= 0 && pre_smart_mu_prob <= 1)
   if(length(ar_scale) != 1 | ar_scale <= 0) {
     stop("ar_scale must be positive and have length one")
+  }
+  if(upper_ar_scale > 1) {
+    stop("upper_ar_scale should be at most one")
+  } else if(p*d > 40) {
+    if(upper_ar_scale > 1 - p*d/150) {
+      upper_ar_scale <- max(1 - p*d/150, 0.05)
+    }
   }
   if(length(ar_scale2) != 1 | ar_scale2 <= 0) {
     stop("ar_scale2 must be positive and have length one")

@@ -170,16 +170,19 @@ structural model is considered.}
      constant terms are drawn from in random mutations. The third element is the standard deviation of the normal distribution
      from which the non-constant regressors' coefficients are drawn from.}
   \item{\code{weight_function == "threshold"}:}{a lenght two vector with the lower bound, in the first element
-     and the upper bound, in the second element, of the uniform distribution threshold parameters are drawn from in random mutations.}
+     and the upper bound, in the second element, of the uniform distribution threshold parameters are drawn from
+     in random mutations.}
 }}
 
-\item{ar_scale}{a positive real number adjusting how large AR parameter values are typically proposed in construction
-of the initial population: larger value implies larger coefficients (in absolute value). After construction of the
-initial population, a new scale is drawn from \code{(0, 0.)} uniform distribution in each iteration.}
+\item{ar_scale}{a positive real number between zero and one adjusting how large AR parameter values are typically
+proposed in construction of the initial population: larger value implies larger coefficients (in absolute value).
+After construction of the initial population, a new scale is drawn from \code{(0, upper_ar_scale)} uniform
+distribution in each iteration.}
 
 \item{upper_ar_scale}{the upper bound for \code{ar_scale} parameter (see above) in the random mutations. Setting
 this too high might lead to failure in proposing new parameters that are well enough inside the parameter space,
-and especially with large \code{p} one might want to try smaller upper bound (e.g., 0.5).}
+and especially with large \code{p} one might want to try smaller upper bound (e.g., 0.5). With large \code{p} or
+\code{d}, \code{upper_ar_scale} is restricted from above, see the details section.}
 
 \item{ar_scale2}{a positive real number adjusting how large AR parameter values are typically proposed in some
 random mutations (if AR constraints are employed, in all random mutations): larger value implies \strong{smaller}
@@ -234,6 +237,12 @@ Only reduced form models are supported!
  By "redundant" or "wasted" regimes we mean regimes that have the time varying mixing weights practically at
  zero for almost all t. A model including redundant regimes would have about the same log-likelihood value without
  the redundant regimes and there is no purpose to have redundant regimes in a model.
+
+ Some of the AR coefficients are drawn with the algorithm by Ansley and Kohn (1986). However,
+ when using large \code{ar_scale} with large \code{p} or \code{d}, numerical inaccuracies caused
+ by the imprecision of the float-point presentation may result in errors or nonstationary AR-matrices.
+ Using smaller \code{ar_scale} facilitates the usage of larger \code{p} or \code{d}. Therefore, we bound
+ \code{upper_ar_scale} from above by \eqn{1-pd/150} when \code{p*d>40} and by \eqn{1} otherwise.
 
  Structural models are not supported here, as they are best estimated based on reduced form parameter estimates
  using the function \code{fitSSTVAR}.

@@ -160,9 +160,10 @@ Note that for \code{d>4} this scale may need to be chosen carefully. Default in 
 \code{var(stats::ar(data[,i], order.max=10)$resid, na.rm=TRUE), i=1,...,d}. This argument is ignored if
 structural model is considered.}
 
-\item{ar_scale}{a positive real number adjusting how large AR parameter values are typically proposed in construction
-of the initial population: larger value implies larger coefficients (in absolute value). After construction of the
-initial population, a new scale is drawn from \code{(0, 0.)} uniform distribution in each iteration.}
+\item{ar_scale}{a positive real number between zero and one adjusting how large AR parameter values are typically
+proposed in construction of the initial population: larger value implies larger coefficients (in absolute value).
+After construction of the initial population, a new scale is drawn from \code{(0, upper_ar_scale)} uniform
+distribution in each iteration.}
 
 \item{ar_scale2}{a positive real number adjusting how large AR parameter values are typically proposed in some
 random mutations (if AR constraints are employed, in all random mutations): larger value implies \strong{smaller}
