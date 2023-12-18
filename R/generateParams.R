@@ -33,6 +33,11 @@ random_coefmats <- function(d, how_many, scale) {
 #'   and Kohn (1986) which forces stationarity. It's not clear in detail how \code{ar_scale}
 #'   affects the coefficient matrices. Read the cited article by Ansley and Kohn (1986) and
 #'   the source code for more information.
+#'
+#'   Note that when using large \code{ar_scale} with large \code{p} or \code{d}, numerical
+#'   inaccuracies caused by the imprecision of the float-point presentation may result in errors
+#'   or nonstationary AR-matrices. Using smaller \code{ar_scale} facilitates the usage of larger
+#'   \code{p} or \code{d}.
 #' @return Returns \eqn{((pd^2)x1)} vector containing stationary vectorized coefficient
 #'  matrices \eqn{(vec(A_{1}),...,vec(A_{p})}.
 #' @references
@@ -45,7 +50,7 @@ random_coefmats <- function(d, how_many, scale) {
 
 random_coefmats2 <- function(p, d, ar_scale=1) {
   # First generate matrices P_1,..,P_p with singular values less than one
-  stopifnot(ar_scale > 0)
+  stopifnot(ar_scale > 0 && ar_scale <= 1)
   Id <- diag(nrow=d)
   all_P <- array(dim=c(d, d, p))
   for(i1 in 1:p) {
