@@ -294,3 +294,23 @@ create_J_matrix <- function(d, p) {
   J
 }
 
+
+#' @title Create Matrix F_i
+#'
+#' @description \code{create_Fi_matrix} function generates\code{(T_obs \times T_obs)} matrix
+#' with 1's on the \code{(i+1)}-th sub-diagonal and 0's elsewhere.
+#'
+#' @param i Integer, the lag for which the matrix is constructed, corresponding to the sub-diagonal filled with 1's.
+#' @param T_obs Integer, the number of time periods or observations in the dataset, corresponding to the dimensions of the matrix.
+#' @details Used in \code{Portmanteau_test}. The matrix \eqn{F_i} in Lütkepohl (2005), p.158.
+#' @return A \code{(T_obs \times T_obs)} matrix with 1's on the \code{(i+1)}-th sub-diagonal and 0's elsewhere.
+#' @references
+#'  \itemize{
+#'    \item Lütkepohl, H. (2005). New Introduction to Multiple Time Series Analysis. Springer.
+#'  }
+
+create_Fi_matrix <- function(i, T_obs) {
+  Fi <- matrix(0, nrow=T_obs, ncol=T_obs)  # Create a T_obs x T_obs matrix of zeros
+  Fi[cbind((i+1):T, 1:(T-i))] <- 1 # Place 1s on the (i+1)-th sub-diagonal
+  Fi
+}
