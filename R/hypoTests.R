@@ -315,7 +315,6 @@ Rao_test <- function(stvar) {
   # Return
   structure(list(stvar=stvar,
                  stvar_unconstrained=new_stvar,
-                 df=df,
                  test_stat=test_stat,
                  df=df,
                  p_value=p_value,
