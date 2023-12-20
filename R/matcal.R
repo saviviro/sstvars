@@ -311,6 +311,10 @@ create_J_matrix <- function(d, p) {
 
 create_Fi_matrix <- function(i, T_obs) {
   Fi <- matrix(0, nrow=T_obs, ncol=T_obs)  # Create a T_obs x T_obs matrix of zeros
-  Fi[cbind((i+1):T, 1:(T-i))] <- 1 # Place 1s on the (i+1)-th sub-diagonal
+  if(i == 0) {
+    return(diag(T_obs))
+  } else if(i < T_obs) {
+    Fi[cbind((i+1):T_obs, 1:(T_obs-i))] <- 1 # Place 1s on the (i+1)-th sub-diagonal
+  } # Matrix of zeros if i=T_obs.
   Fi
 }

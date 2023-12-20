@@ -287,3 +287,43 @@ test_that("create_J_matrix works", {
   expect_equal(J[ , 6:45], matrix(0, nrow = 5, ncol = 40))
 })
 
+
+# Test that the function creates a matrix with the correct dimensions
+test_that("create_Fi_matrix returns matrix with correct dimensions", {
+  for(T_obs in c(5, 10, 20, 213)) {
+    for(i in 0:(T_obs - 1)) {
+      expect_equal(dim(create_Fi_matrix(i=i, T_obs=T_obs)), c(T_obs, T_obs))
+    }
+  }
+})
+
+# Test that the sub-diagonal is correctly filled with 1's
+test_that("Sub-diagonal of Fi is correctly filled with 1's", {
+  for(T_obs in c(5, 10, 15, 212, 421)) {
+    for(i in 1:(T_obs - 1)) {
+      Fi <- create_Fi_matrix(i=i, T_obs=T_obs)
+      expected_Fi <- matrix(data=0, nrow=T_obs, ncol=T_obs)
+      expected_Fi[cbind((i+1):T_obs, 1:(T_obs-i))] <- 1
+      expect_equal(Fi, expected_Fi)
+    }
+  }
+})
+
+# Test that the function returns an identity matrix for i=0
+test_that("create_Fi_matrix returns identity matrix for i=0", {
+  for(T_obs in c(1, 5, 10, 324)) {
+    Fi <- create_Fi_matrix(i=0, T_obs=T_obs)
+    expected_Fi <- diag(x=1, nrow=T_obs)
+    expect_equal(Fi, expected_Fi)
+  }
+})
+
+# Test that the function returns a zero matrix for T_obs equal to i
+test_that("create_Fi_matrix returns zero matrix for T_obs equal to i", {
+  for(T_obs in c(1, 5, 10, 731)) {
+    Fi <- create_Fi_matrix(i=T_obs, T_obs=T_obs)
+    expected_Fi <- matrix(data=0, nrow=T_obs, ncol=T_obs)
+    expect_equal(Fi, expected_Fi)
+  }
+})
+
