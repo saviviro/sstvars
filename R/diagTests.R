@@ -61,11 +61,15 @@ Portmanteau_test <- function(stvar, nlags=20, which_test=c("autocorr", "het.sked
   p <- stvar$model$p
   M <- stvar$model$M
   d <- stvar$model$d
+  if(nlags <= p) {
+    stop("The number of lags 'nlags' should be larger than the autoregressive order p")
+  }
+
   if(which_test == "autocorr") {
     U <- t(stvar$residuals_raw)
   } else { # which_test == het.sked
     U <- t(stvar$residuals_std^2) # Test applied to squared standardized residuals
-    U <- U - rowMeans(U)
+    U <- U - rowMeans(U) # Standardize zero mean
   }
   T_obs <- ncol(U) # U = (d x T_obs)
 
@@ -73,16 +77,6 @@ Portmanteau_test <- function(stvar, nlags=20, which_test=c("autocorr", "het.sked
   get_Ci <- function(i) { # T_obs and U taken from the parent environment
     U%*%tcrossprod(create_Fi_matrix(i=i, T_obs=T_obs), U)/T_obs
   }
-
-  #U_means <- rowMeans(U)
-  # get_Ci2 <- function(i) {
-  #   tmp <- array(dim=c(d, d, T_obs - i))
-  #   for(i1 in (i + 1):T_obs) {
-  #      tmp[, , i1 - i] <- tcrossprod(U[,i1] - U_means, U[,i1-i] - U_means)
-  #   }
-  #   apply(tmp, MARGIN=1:2, FUN=sum)/T_obs
-  # }
-  # Autocorr testissä ci ja ci2 välille tulee pieni ero mutta käytännössä sama tulos
 
   # Calculate the test statistic, Lütkepohl (2005), Equation (4.4.23)
   inv_C_0 <- solve(get_Ci(i=0))
