@@ -18,7 +18,7 @@
 #'   Also note that this function does \strong{not} check whether the model assumptions hold under the null.
 #' @return A list with class "hypotest" containing the test results and arguments used to calculate the test.
 #' @seealso \code{\link{LR_test}}, \code{\link{Rao_test}}, \code{\link{fitSTVAR}}, \code{\link{STVAR}},
-#'   \code{\link{diagnostic_plot}}, \code{\link{profile_logliks}},
+#'   \code{\link{diagnostic_plot}}, \code{\link{profile_logliks}}, \code{\link{Portmanteau_test}}
 #' @inherit in_paramspace references
 #' @examples
 #'  # Logistic Student's t STVAR with p=1, M=2, and the first lag of the second variable
@@ -106,7 +106,7 @@ Wald_test <- function(stvar, A, c) {
 #'   \strong{The test is based on the assumption of the standard result of asymptotic normality!}
 #'   Also, note that this function does \strong{not} verify that the two models are actually nested.
 #' @seealso \code{\link{Wald_test}}, \code{\link{Rao_test}}, \code{\link{fitSTVAR}}, \code{\link{STVAR}},
-#'   \code{\link{diagnostic_plot}}, \code{\link{profile_logliks}}
+#'   \code{\link{diagnostic_plot}}, \code{\link{profile_logliks}}, \code{\link{Portmanteau_test}}
 #' @inherit Wald_test references return
 #' @examples
 #' # Logistic Student's t STVAR with p=1, M=2, and the first lag of the second variable
@@ -181,8 +181,8 @@ LR_test <- function(stvar1, stvar2) {
 #'   This implementation uses the outer product of gradients approximation in the test statistic.
 #'
 #'   \strong{The test is based on the assumption of the standard result of asymptotic normality!}
-#' @seealso \code{\link{LR_test}}, \code{\link{Wald_test}}, \code{\link{fitSTVAR}}, \code{\link{STVAR}}, \code{\link{diagnostic_plot}},
-#'  \code{\link{profile_logliks}}
+#' @seealso \code{\link{LR_test}}, \code{\link{Wald_test}}, \code{\link{fitSTVAR}}, \code{\link{STVAR}},
+#'  \code{\link{diagnostic_plot}}, \code{\link{profile_logliks}}, \code{\link{Portmanteau_test}}
 #' @inherit Wald_test references return
 #' @examples
 #' \donttest{

@@ -67,5 +67,5 @@ Denoting the true parameter value by \eqn{\theta_{0}}, we test the null hypothes
 }
 \seealso{
 \code{\link{LR_test}}, \code{\link{Rao_test}}, \code{\link{fitSTVAR}}, \code{\link{STVAR}},
-  \code{\link{diagnostic_plot}}, \code{\link{profile_logliks}},
+  \code{\link{diagnostic_plot}}, \code{\link{profile_logliks}}, \code{\link{Portmanteau_test}}
 }

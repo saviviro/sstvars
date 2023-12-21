@@ -77,5 +77,5 @@ LR_test(fit12, fit12cm)
 }
 \seealso{
 \code{\link{Wald_test}}, \code{\link{Rao_test}}, \code{\link{fitSTVAR}}, \code{\link{STVAR}},
-  \code{\link{diagnostic_plot}}, \code{\link{profile_logliks}}
+  \code{\link{diagnostic_plot}}, \code{\link{profile_logliks}}, \code{\link{Portmanteau_test}}
 }

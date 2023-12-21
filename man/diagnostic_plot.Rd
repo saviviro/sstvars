@@ -64,6 +64,6 @@ diagnostic_plot(mod122, type="ch", resid_type="standardized")
  }
 }
 \seealso{
-\code{\link{profile_logliks}}, \code{\link{fitSTVAR}}, \code{\link{STVAR}},
+\code{\link{Portmanteau_test}}, \code{\link{profile_logliks}}, \code{\link{fitSTVAR}}, \code{\link{STVAR}},
  \code{\link{LR_test}}, \code{\link{Wald_test}}, \code{\link{Rao_test}}
 }
