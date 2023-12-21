@@ -8,8 +8,8 @@
 #' @param type should test for remaining autocorrelation or heteroskedasticity be calculated?
 #' @details The implemented adjusted Portmanteau test is based on Lütkepohl (2005), Section 4.4.3.
 #'   When testing for remaining heteroskedasticity, the Portmanteau test is applied to squared
-#'   standardized residuals. Note that the validity of the heteroskedasticity test requires that the
-#'   residuals are not autocorrelated.
+#'   standardized residuals that are centered to have zero mean. Note that the validity of the
+#'   heteroskedasticity test requires that the residuals are not autocorrelated.
 #' @return A list with class "hypotest" containing the test results and arguments used to calculate the test.
 #' @seealso \code{\link{LR_test}}, \code{\link{Rao_test}}, \code{\link{fitSTVAR}}, \code{\link{STVAR}},
 #'   \code{\link{diagnostic_plot}}, \code{\link{profile_logliks}},
@@ -19,7 +19,33 @@
 #'            \emph{Springer}.
 #'   }
 #' @examples
-#' # FILL IN
+#' # p=2, M=2, d=2, STVAR with relative_dens weight function:
+#' theta_222relg <- c(0.357, 0.107, 0.356, 0.086, 0.14, 0.035, -0.165, 0.387, 0.452,
+#'  0.013, 0.228, 0.336, 0.239, 0.024, -0.021, 0.708, 0.063, 0.027, 0.009, 0.197,
+#'  0.206, 0.005, 0.026, 1.092, -0.009, 0.116, 0.592)
+#' mod222relg <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222relg,
+#'  weight_function="relative_dens")
+#'
+#' # Test for remaining autocorrelation taking into account the first 20 lags:
+#' Portmanteau_test(mod222relg, nlags=20)
+#'
+#' # Test for remaining heteroskedasticity taking into account the first 20 lags:
+#' Portmanteau_test(mod222relg, nlags=20, which_test="het.sked")
+#'
+#' # p=3, M=2, d=2, Student's t Threhold VAR with the first lag of the second
+#' # variable as the switching variable:
+#' theta_322thres <- c(0.527, 0.039, 1.922, 0.154, 0.284, 0.053, 0.033, 0.453, 0.291,
+#'  0.024, -0.108, 0.153, -0.108, 0.003, -0.128, 0.219, 0.195, -0.03, -0.893, 0.686,
+#'  0.047, 0.016, 0.524, 0.068, -0.025, 0.044, -0.435, 0.119, 0.359, 0.002, 0.038,
+#'  1.252, -0.041, 0.151, 1.196, 12.312)
+#' mod322thres <- STVAR(data=gdpdef, p=3, M=2, d=2, params=theta_322thres,
+#'  weight_function="threshold", weightfun_pars=c(2, 1), cond_dist="Student")
+#'
+#' # Test for remaining autocorrelation taking into account the first 16 lags:
+#' Portmanteau_test(mod322thres, nlags=16)
+#'
+#' # Test for remaining heteroskedasticity taking into account the first 16 lags:
+#' Portmanteau_test(mod322thres, nlags=16, which_test="het.sked")
 #' @export
 
 Portmanteau_test <- function(stvar, nlags=20, which_test=c("autocorr", "het.sked")) {
@@ -32,7 +58,6 @@ Portmanteau_test <- function(stvar, nlags=20, which_test=c("autocorr", "het.sked
   if(length(nlags) != 1 || nlags < 1 || nlags%%1 != 0) {
     stop("The argument nlags should be a strictly positive interger")
   }
-  n_params <- length(stvar$params)
   p <- stvar$model$p
   M <- stvar$model$M
   d <- stvar$model$d
@@ -40,6 +65,7 @@ Portmanteau_test <- function(stvar, nlags=20, which_test=c("autocorr", "het.sked
     U <- t(stvar$residuals_raw)
   } else { # which_test == het.sked
     U <- t(stvar$residuals_std^2) # Test applied to squared standardized residuals
+    U <- U - rowMeans(U)
   }
   T_obs <- ncol(U) # U = (d x T_obs)
 
@@ -47,15 +73,16 @@ Portmanteau_test <- function(stvar, nlags=20, which_test=c("autocorr", "het.sked
   get_Ci <- function(i) { # T_obs and U taken from the parent environment
     U%*%tcrossprod(create_Fi_matrix(i=i, T_obs=T_obs), U)/T_obs
   }
-  # get_Ci2 <- function(i) {
-  #   ret <- matrix(0, ncol=d, nrow=d)
-  #   for(i1 in (i + 1):T_obs) {
-  #     ret <- ret + tcrossprod(U[,i1], U[,i1 - i])
-  #   }
-  #   ret/T_obs
-  # }
 
-  # K = d, nlags = h
+  #U_means <- rowMeans(U)
+  # get_Ci2 <- function(i) {
+  #   tmp <- array(dim=c(d, d, T_obs - i))
+  #   for(i1 in (i + 1):T_obs) {
+  #      tmp[, , i1 - i] <- tcrossprod(U[,i1] - U_means, U[,i1-i] - U_means)
+  #   }
+  #   apply(tmp, MARGIN=1:2, FUN=sum)/T_obs
+  # }
+  # Autocorr testissä ci ja ci2 välille tulee pieni ero mutta käytännössä sama tulos
 
   # Calculate the test statistic, Lütkepohl (2005), Equation (4.4.23)
   inv_C_0 <- solve(get_Ci(i=0))

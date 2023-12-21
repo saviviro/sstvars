@@ -658,9 +658,10 @@ test_that("loglikelihood works correctly", {
 
   expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=c(theta_122logc_12_1, 4.4), weight_function="mlogit",
                              weightfun_pars=list(vars=1:2, lags=1), AR_constraints=C_122, cond_dist="Student"), -307.7079, tolerance=1e-3)
-  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=c(theta_222logisticcmw_2_1, 30), weight_function="logistic", weightfun_pars=c(2, 1),
-                             mean_constraints=list(1:2), AR_constraints=C_222, cond_dist="Student", parametrization="mean",
-                             weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))), -368.2865, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=c(theta_222logisticcmw_2_1, 30), weight_function="logistic",
+                             weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222, cond_dist="Student",
+                             parametrization="mean", weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))),
+               -368.2865, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=c(theta_122expw_1_1, 2.3), weight_function="exponential", weightfun_pars=c(1, 1),
                              weight_constraints=list(R=0, r=c(0.02, 0.13)), cond_dist="Student"), -380.4028, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=1, M=3, params=c(theta_132thresmw_1_1, 11), weight_function="threshold", weightfun_pars=c(1, 1),
@@ -684,23 +685,28 @@ test_that("loglikelihood works correctly", {
 
   expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122relgshc, weight_function="relative_dens",
                              identification="heteroskedasticity", AR_constraints=C_122), -313.0517, tolerance=1e-3)
-  expect_equal(loglikelihood(data=gdpdef, p=1, M=3, params=theta_132relgshb, weight_function="relative_dens", identification="heteroskedasticity",
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=3, params=theta_132relgshb, weight_function="relative_dens",
+                             identification="heteroskedasticity",
                              B_constraints=matrix(c(0.1, NA, 0.3, 0), nrow=2)), -755.7973, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222logistictshmb_2_1, weight_function="logistic", weightfun_pars=c(2, 1),
                              cond_dist="Student", identification="heteroskedasticity", mean_constraints=list(1:2), parametrization="mean",
                              B_constraints=matrix(c(0.1, 0, 0, 0.3), nrow=2)), -776.4632, tolerance=1e-3)
-  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122logshwb_12_1, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=1),
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122logshwb_12_1, weight_function="mlogit",
+                             weightfun_pars=list(vars=1:2, lags=1),
                              identification="heteroskedasticity", weight_constraints=list(R=0, r=c(0.1, 0.2, 0.3)),
                              B_constraints=matrix(c(0.1, 0.2, 0.3, 0), nrow=2)), -755.1974, tolerance=1e-3)
-  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122logshwb_12_1, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=1),
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122logshwb_12_1, weight_function="mlogit",
+                             weightfun_pars=list(vars=1:2, lags=1),
                              identification="heteroskedasticity", weight_constraints=list(R=0, r=c(0.1, 0.2, 0.3)), parametrization="mean",
                              B_constraints=matrix(c(0.1, 0.2, 0.3, 0), nrow=2)), -806.3316, tolerance=1e-3)
   expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123expshcwb_1_1, weight_function="exponential", weightfun_pars=c(1, 1),
-                             identification="heteroskedasticity", AR_constraints=C_123, weight_constraints=list(R=matrix(c(1, 0.5), nrow=2), r=c(0, 0)),
+                             identification="heteroskedasticity", AR_constraints=C_123,
+                             weight_constraints=list(R=matrix(c(1, 0.5), nrow=2), r=c(0, 0)),
                              B_constraints=matrix(c(-0.47, -0.40, 0, 0.58, -1.01, -0.66, 0, -0.91, -1.19), nrow=3, ncol=3, byrow=FALSE)),
                -9514.231, tolerance=1e-3)
   expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123expshcwb_1_1, weight_function="exponential", weightfun_pars=c(1, 1),
-                             identification="heteroskedasticity", AR_constraints=C_123, weight_constraints=list(R=matrix(c(1, 0.5), nrow=2), r=c(0, 0)),
+                             identification="heteroskedasticity", AR_constraints=C_123,
+                             weight_constraints=list(R=matrix(c(1, 0.5), nrow=2), r=c(0, 0)),
                              B_constraints=matrix(c(-0.47, -0.40, 0, 0.58, -1.01, -0.66, 0, -0.91, -1.19), nrow=3, ncol=3, byrow=FALSE),
                              parametrization="mean"), -9557.789, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=2, M=3, params=theta_232threstshb_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
