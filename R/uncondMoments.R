@@ -193,3 +193,65 @@ get_regime_means <- function(p, M, d, params, weight_function=c("relative_dens",
   }
   pick_phi0(M=M, d=d, params=params)
 }
+
+
+
+#' @title Calculate regimewise autocovariance matrices
+#'
+#' @description \code{get_regime_autocovs} calculates the regimewise autocovariance matrices \eqn{\Gamma_{m}(j)}
+#'  \eqn{j=0,1,...,p}
+#'
+#' @inheritParams loglikelihood
+#' @inheritParams reform_constrained_pars
+#' @return Returns an \eqn{(d x d x p+1 x M)} array containing the first p regimewise autocovariance matrices.
+#'   The subset \code{[, , j, m]} contains the j-1:th lag autocovariance matrix of the m:th regime.
+#' @references
+#'   \itemize{
+#'    \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis,
+#'            \emph{Springer}.
+#'   }
+#' @keywords internal
+
+get_regime_autocovs <- function(p, M, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+                                weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"),
+                                identification=c("reduced_form", "recursive", "heteroskedasticity"),
+                                AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
+  # Match args
+  weight_function <- match.arg(weight_function)
+  cond_dist <- match.arg(cond_dist)
+  parametrization <- match.arg(parametrization)
+  identification <- match.arg(identification)
+
+  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function,
+                                         weightfun_pars=weightfun_pars, cond_dist=cond_dist)
+
+  # Collect the required parameter values
+  params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function,
+                                    cond_dist=cond_dist, identification=identification,
+                                    AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                    weight_constraints=weight_constraints, B_constraints=B_constraints,
+                                    weightfun_pars=weightfun_pars)
+  all_A <- pick_allA(p=p, M=M, d=d, params=params) # [d, d, p, M]
+  all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params, identification=identification) # [d, d, M]
+  all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
+
+  # Calculate teh regimewise autocovarinces
+  I_dp2 <- diag(nrow=(d*p)^2)
+  ZER_lower <- matrix(0, nrow=d*(p-1), ncol=d*p)
+  ZER_right <- matrix(0, nrow=d, ncol=d*(p - 1))
+  # For each m=1,..,M, store the (dxd) covariance matrices Gamma_{y,m}(0),...,Gamma{y,m}(p-1),,Gamma{y,m}(p):
+  all_Gammas <- array(NA, dim=c(d, d, p + 1, M))
+  for(m in 1:M) {
+    # Calculate the (dpxdp) Gamma_{Y,m}(0) covariance matrix (Lütkepohl 2005, eq. (2.1.39))
+    kronmat <- I_dp2 - kronecker(all_boldA[, , m], all_boldA[, , m])
+    sigma_epsm <- rbind(cbind(all_Omega[, , m], ZER_right), ZER_lower)
+    Gamma_m <- matrix(solve(kronmat, vec(sigma_epsm)), nrow=d*p, ncol=d*p, byrow=FALSE)
+
+    # Obtain the Gamma_{y,m}(0),...,Gamma_{y,m}(p-1) covariance matrices from Gamma_{Y,m}(0)
+    all_Gammas[, , , m] <- c(as.vector(Gamma_m[1:d,]), rep(NA, d*d))
+
+    # Calculate the Gamma{y,m}(p) recursively from Gamma_{y,m}(0),...,Gamma_{y,m}(p-1) (Lütkepohl 2005, eq. (2.1.37))
+    all_Gammas[, , p + 1, m] <- rowSums(vapply(1:p, function(i1) all_A[, ,i1 , m]%*%all_Gammas[, , p + 1 - i1, m], numeric(d*d)))
+  }
+  all_Gammas
+}
