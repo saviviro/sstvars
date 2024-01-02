@@ -7,6 +7,7 @@
 get_regime_autocovs(
   p,
   M,
+  d,
   params,
   weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
   weightfun_pars = NULL,

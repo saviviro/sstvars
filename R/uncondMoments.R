@@ -212,14 +212,13 @@ get_regime_means <- function(p, M, d, params, weight_function=c("relative_dens",
 #'   }
 #' @keywords internal
 
-get_regime_autocovs <- function(p, M, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+get_regime_autocovs <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
                                 weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"),
                                 identification=c("reduced_form", "recursive", "heteroskedasticity"),
                                 AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
   # Match args
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
-  parametrization <- match.arg(parametrization)
   identification <- match.arg(identification)
 
   weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function,
@@ -244,7 +243,7 @@ get_regime_autocovs <- function(p, M, params, weight_function=c("relative_dens",
   for(m in 1:M) {
     # Calculate the (dpxdp) Gamma_{Y,m}(0) covariance matrix (Lütkepohl 2005, eq. (2.1.39))
     kronmat <- I_dp2 - kronecker(all_boldA[, , m], all_boldA[, , m])
-    sigma_epsm <- rbind(cbind(all_Omega[, , m], ZER_right), ZER_lower)
+    sigma_epsm <- rbind(cbind(all_Omegas[, , m], ZER_right), ZER_lower)
     Gamma_m <- matrix(solve(kronmat, vec(sigma_epsm)), nrow=d*p, ncol=d*p, byrow=FALSE)
 
     # Obtain the Gamma_{y,m}(0),...,Gamma_{y,m}(p-1) covariance matrices from Gamma_{Y,m}(0)

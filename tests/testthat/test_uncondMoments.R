@@ -342,8 +342,6 @@ theta_232threstshb_1_1_expanded <- c(phi10_232, phi20_232, phi30_232, vec(A11_23
                                      vec(A22_232), vec(A31_232), vec(A32_232), vec(W_232b), lambdas2_232,
                                      lambdas3_232, r1_232_1_1, r2_232_1_1, df_232_1_1)
 
-
-
 test_that("get_regime_means works correctly", {
   expect_equal(c(get_regime_means(p=2, M=2, d=2, params=theta_222thres_2_1, weight_function="threshold", weightfun_pars=c(2, 1))),
                c(0.9600324, 0.5549088, 0.4908410, 1.1693004), tolerance=1e-3)
@@ -450,4 +448,13 @@ test_that("get_regime_means works correctly", {
   expect_equal(c(get_regime_means(p=2, M=3, d=2, params=theta_232threstshb_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
                                   cond_dist="Student", identification="heteroskedasticity", B_constraints=matrix(c(0.1, 0.2, -0.3, 0), nrow=2))),
                c(0.55, 0.11, 0.17, 0.25, 12.00, 13.00), tolerance=1e-3)
+})
+
+
+
+
+test_that("get_regime_autocovs works correctly", {
+  get_regime_autocovs(p=1, M=1, d=2, params=params112, weight_function="relative_dens", cond_dist="Gaussian", identification="reduced_form")
+
+
 })
