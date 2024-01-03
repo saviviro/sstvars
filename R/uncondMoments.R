@@ -267,14 +267,14 @@ get_regime_autocovs <- function(p, M, d, params, weight_function=c("relative_den
 #' @details FILL IN IF ANY
 #' @return Returns a list with three components:
 #'   \describe{
-#'     \item{\code{$uncond_means}}{a \eqn{M \times d} matrix vector containing the unconditional mean of the regime
+#'     \item{\code{$regime_means}}{a \eqn{M \times d} matrix vector containing the unconditional mean of the regime
 #'           \eqn{m} in the \eqn{m}th column.}
-#'     \item{\code{$uncond_vars}}{a \eqn{M \times d} matrix vector containing the unconditional marginal variances
+#'     \item{\code{$regime_vars}}{a \eqn{M \times d} matrix vector containing the unconditional marginal variances
 #'           of the regime \eqn{m} in the \eqn{m}th column.}
-#'     \item{\code{$autocovs}}{an \eqn{(d x d x p+1, M)} array containing the lag 0,1,...,p autocovariances of the process.
+#'     \item{\code{$regime_autocovs}}{an \eqn{(d x d x p+1, M)} array containing the lag 0,1,...,p autocovariances of the process.
 #'           The subset \code{[, , j, m]} contains the lag \code{j-1} autocovariance matrix (lag zero for the variance) for
 #'           the regime \eqn{m}.}
-#'     \item{\code{$autocors}}{the autocovariance matrices scaled to autocorrelation matrices.}
+#'     \item{\code{$regime_autocors}}{the autocovariance matrices scaled to autocorrelation matrices.}
 #'   }
 #' @inherit get_regime_autocovs references
 #' @examples
@@ -282,7 +282,13 @@ get_regime_autocovs <- function(p, M, d, params, weight_function=c("relative_den
 #' theta_112 <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103,
 #'  0.601786, -0.002945, 0.067224)
 #' mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112)
-#' uncond_moments(mod112)
+#' tmp112 <- uncond_moments(mod112)
+#' tmp112$regime_means # Unconditional means
+#' tmp112$regime_vars # Unconditional variances
+#' tmp112$regime_autocovs # Unconditional autocovariance matrices
+#' tmp112$regime_autocovs[, , 1, 1] # a.cov. matrix of lag zero (of the first regime)
+#' tmp112$regime_autocovs[, , 2, 1] # a.cov. matrix of lag one (of the first regime)
+#' tmp112$regime_autocors # Unconditional autocorrelation matrices
 #'
 #' # p=1, M=2, d=2, relative dens weight function
 #' theta_122relg <- c(0.734054, 0.225598, 0.705744, 0.187897, 0.259626, -0.000863,
@@ -290,7 +296,15 @@ get_regime_autocovs <- function(p, M, d, params, weight_function=c("relative_den
 #' 0.018244, 0.949533, -0.016941, 0.121403, 0.573269)
 #' mod122 <- STVAR(data=gdpdef, p=1, M=2, params=theta_122relg,
 #'  weight_function="relative_dens")
-#' uncond_moments(mod122)
+#' tmp122 <- uncond_moments(mod122)
+#' tmp122$regime_means[,1] # Unconditional means of the first regime
+#' tmp122$regime_means[,2] # Unconditional means of the second regime
+#' tmp122$regime_vars[,1] # Unconditional variances of the first regime
+#' tmp122$regime_vars[,2] # Unconditional variances of the second regime
+#' tmp122$regime_autocovs[, , , 1] # a.cov. matrices of the first regime
+#' tmp122$regime_autocovs[, , , 2] # a.cov. matrices of the second regime
+#' tmp122$regime_autocors[, , , 1] # a.cor. matrices of the first regime
+#' tmp122$regime_autocors[, , , 2] # a.cor. matrices of the second regime
 #' @export
 
 uncond_moments <- function(stvar) {
