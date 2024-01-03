@@ -17,8 +17,9 @@ Returns a list with three components:
           \eqn{m} in the \eqn{m}th column.}
     \item{\code{$uncond_vars}}{a \eqn{M \times d} matrix vector containing the unconditional marginal variances
           of the regime \eqn{m} in the \eqn{m}th column.}
-    \item{\code{$autocovs}}{an \eqn{(d x d x p+1)} array containing the lag 0,1,...,p autocovariances of the process.
-          The subset \code{[, , j]} contains the lag \code{j-1} autocovariance matrix (lag zero for the variance).}
+    \item{\code{$autocovs}}{an \eqn{(d x d x p+1, M)} array containing the lag 0,1,...,p autocovariances of the process.
+          The subset \code{[, , j, m]} contains the lag \code{j-1} autocovariance matrix (lag zero for the variance) for
+          the regime \eqn{m}.}
     \item{\code{$autocors}}{the autocovariance matrices scaled to autocorrelation matrices.}
   }
 }

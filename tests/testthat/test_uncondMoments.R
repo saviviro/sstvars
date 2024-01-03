@@ -237,6 +237,8 @@ W_122 <- matrix(c(-0.03, 0.24, -0.76, -0.02), nrow=2, ncol=2, byrow=FALSE)
 lambdas_122 <- c(3.36, 0.86)
 alpha1_122 <- 0.6
 theta_122relgsh <- c(all_phi_122, all_A_122, vec(W_122), lambdas_122, alpha1_122)
+mod_122relgsh <- STVAR(p=1, M=2, d=2, params=theta_122relgsh, weight_function="relative_dens",
+                       weightfun_pars=list(vars=1:2, lags=1), identification="heteroskedasticity")
 
 # p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="Student",
 # identification="heteroskedasticity"
@@ -247,6 +249,8 @@ W_222 <- W_122; lambdas_222 <- lambdas_122
 c_and_gamma_222_2_1 <- c(0.1, 0.2)
 df_222_2_1 <- 7
 theta_222logistictsh_2_1 <- c(all_phi_222, all_A_222, vec(W_222), lambdas_222, c_and_gamma_222_2_1, df_222_2_1)
+mod_222logistictsh_2_1 <- STVAR(p=2, M=2, d=2, params=theta_222logistictsh_2_1, weight_function="logistic",
+                                weightfun_pars=c(2, 1), cond_dist="Student", identification="heteroskedasticity")
 
 # p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=1), identification="heteroskedasticity"
 phi10_122 <- c(0.55, 0.11)
@@ -331,6 +335,11 @@ lambdas_123 <- c(1.56, 1.44, 0.59)
 theta_123expshcwb_1_1 <- c(phi10_123, phi20_123, vec(A11_123), Wvec(W_123b), lambdas_123, 0.6)
 theta_123expshcwb_1_1_expanded <- c(phi10_123, phi20_123, vec(A11_123), vec(A11_123), vec(W_123b),
                                     lambdas_123, c(0.6, 0.3))
+mod_123expshcwb_1_1 <- STVAR(p=1, M=2, d=3, params=theta_123expshcwb_1_1, weight_function="exponential",
+                             weightfun_pars=c(1, 1), identification="heteroskedasticity", AR_constraints=C_123,
+                             weight_constraints=list(R=matrix(c(1, 0.5), nrow=2), r=c(0, 0)),
+                             B_constraints=matrix(c(-0.47, -0.40, 0, 0.58, -1.01, -0.66, 0, -0.91, -1.19),
+                                                  nrow=3, ncol=3, byrow=FALSE))
 
 # p=2, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="Student",
 # identification="heteroskedasticity", B_constraints=matrix(c(0.1, 0.2, -0.3, 0), nrow=2)
@@ -341,6 +350,9 @@ theta_232threstshb_1_1 <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A
 theta_232threstshb_1_1_expanded <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232),
                                      vec(A22_232), vec(A31_232), vec(A32_232), vec(W_232b), lambdas2_232,
                                      lambdas3_232, r1_232_1_1, r2_232_1_1, df_232_1_1)
+mod_232threstshb_1_1 <- STVAR(p=2, M=3, d=2, params=theta_232threstshb_1_1, weight_function="threshold",
+                              weightfun_pars=c(1, 1), cond_dist="Student", identification="heteroskedasticity",
+                              B_constraints=matrix(c(0.1, 0.2, -0.3, 0), nrow=2))
 
 test_that("get_regime_means works correctly", {
   expect_equal(c(get_regime_means(p=2, M=2, d=2, params=theta_222thres_2_1, weight_function="threshold", weightfun_pars=c(2, 1))),
@@ -498,4 +510,23 @@ test_that("get_regime_autocovs works correctly", {
                  0.008227997, 0.150552232, -0.012670768, -0.023715349, -0.027034068, -0.153317830, 0.027703704, 0.042777778, 0.042777778,
                  0.085555556, 0.002518519, 0.003888889, 0.003888889, 0.007777778, -0.002518519, -0.003888889, -0.003888889, -0.007777778),
                tolerance=1e-3)
+})
+
+test_that("uncond_moments works correctly", {
+  expect_equal(c(uncond_moments(mod_122relgsh)$regime_means), c(0.7996501, 0.4545899, 0.6798440, 1.2933271), tolerance=1e-3)
+  expect_equal(c(uncond_moments(mod_122relgsh)$regime_autocors),
+               c(1.00000000, -0.02306240, -0.02306240, 1.00000000, 0.26216057, -0.01410544, -0.11588815, 0.50530758, 1.00000000,
+                 -0.21722460, -0.21722460, 1.00000000, 0.33845661, -0.15329361, -0.24885755, 0.83261246), tolerance=1e-3)
+  expect_equal(c(uncond_moments(mod_222logistictsh_2_1)$regime_vars), c(0.7825613, 0.1075721, 0.5371129, 0.9002343), tolerance=1e-3)
+  expect_equal(c(uncond_moments(mod_222logistictsh_2_1)$regime_autocors),
+               c(1.000000000, 0.151356062, 0.151356062, 1.000000000, 0.253928628, 0.196229036, 0.100732357, 0.614686734, 0.488029380,
+                 0.186157090, 0.129444694, 0.588752797, 1.000000000, -0.029638002, -0.029638002, 1.000000000, 0.25599326, -0.001668368,
+                 -0.024188799, 0.880412888, 0.124263674, 0.018835929, -0.019950973, 0.818883548), tolerance=1e-3)
+  expect_equal(c(uncond_moments(mod_123expshcwb_1_1)$regime_vars),
+               c(0.040171864, 0.108740054, 0.052405641, 0.002208206, 0.002620330, 0.003103934), tolerance=1e-3)
+  expect_equal(c(uncond_moments(mod_232threstshb_1_1)$regime_autocovs),
+               c(0.023956, 0.028149, 0.028149, 0.106523, 0.005886, 0.019497, 0.002325, 0.044842, -0.006057, -0.007133,
+                 -0.008163, -0.045701, 0.04061, 0.00101, 0.00101, 0.000494, 0.010292, 0.002646, -0.00056, 0.000159,
+                 -0.010324, -0.000338, -0.00053, -0.000319, 0.030148, 0.017519, 0.017519, 0.035037, 0.002741, 0.001593,
+                 0.001593, 0.003185, -0.002741, -0.001593, -0.001593, -0.003185), tolerance=1e-3)
 })
