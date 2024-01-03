@@ -254,3 +254,95 @@ get_regime_autocovs <- function(p, M, d, params, weight_function=c("relative_den
   }
   all_Gammas
 }
+
+
+
+#' @title Calculate the unconditional means, variances, the first p autocovariances, and the first p autocorrelations
+#'  of the regimes of the model.
+#'
+#' @description \code{uncond_moments} calculates the unconditional means, variances, the first p autocovariances,
+#'  and the first p autocorrelations of the regimes of the model.
+#'
+#' @inheritParams get_boldA_eigens
+#' @details FILL IN IF ANY
+#' @return Returns a list with three components:
+#'   \describe{
+#'     \item{\code{$uncond_means}}{a \eqn{M \times d} matrix vector containing the unconditional mean of the regime
+#'           \eqn{m} in the \eqn{m}th column.}
+#'     \item{\code{$uncond_vars}}{a \eqn{M \times d} matrix vector containing the unconditional marginal variances
+#'           of the regime \eqn{m} in the \eqn{m}th column.}
+#'     \item{\code{$autocovs}}{an \eqn{(d x d x p+1)} array containing the lag 0,1,...,p autocovariances of the process.
+#'           The subset \code{[, , j]} contains the lag \code{j-1} autocovariance matrix (lag zero for the variance).}
+#'     \item{\code{$autocors}}{the autocovariance matrices scaled to autocorrelation matrices.}
+#'   }
+#' @inherit get_regime_autocovs references
+#' @examples
+#' # p=1, M=1, d=2, linear VAR
+#' theta_112 <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103,
+#'  0.601786, -0.002945, 0.067224)
+#' mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112)
+#' uncond_moments(mod112)
+#'
+#' # p=1, M=2, d=2, relative dens weight function
+#' theta_122relg <- c(0.734054, 0.225598, 0.705744, 0.187897, 0.259626, -0.000863,
+#' -0.3124, 0.505251, 0.298483, 0.030096, -0.176925, 0.838898, 0.310863, 0.007512,
+#' 0.018244, 0.949533, -0.016941, 0.121403, 0.573269)
+#' mod122 <- STVAR(data=gdpdef, p=1, M=2, params=theta_122relg,
+#'  weight_function="relative_dens")
+#' uncond_moments(mod122)
+#' @export
+
+uncond_moments <- function(stvar) {
+  check_stvar(stvar)
+  p <- stvar$model$p
+  M <- stvar$model$M
+  d <- stvar$model$d
+  params <- stvar$params
+  weigth_function <- stvar$model$weight_function
+  weightfun_pars <- stvar$model$weightfun_pars
+  cond_dist <- stvar$model$cond_dist
+  parametrization <- stvar$model$parametrization
+  identification <- stvar$model$identification
+  AR_constraints <- stvar$model$AR_constraints
+  mean_constraints <- stvar$model$mean_constraints
+  weight_constraints <- stvar$model$weight_constraints
+  B_constraints <- stvar$model$B_constraints
+  params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weigth_function,
+                                    weightfun_pars=weightfun_pars, cond_dist=cond_dist,
+                                    identification=identification, AR_constraints=AR_constraints,
+                                    mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                                    B_constraints=B_constraints)
+
+  reg_means <- get_regime_means(p=p, M=M, d=d, params=params, weight_function=weigth_function,
+                                weightfun_pars=weightfun_pars, cond_dist=cond_dist,
+                                parametrization=parametrization, identification=identification,
+                                AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                weight_constraints=weight_constraints, B_constraints=B_constraints)
+
+   reg_autocovs <- get_regime_autocovs(p=p, M=M, d=d, params=params, weight_function=weigth_function,
+                                       weightfun_pars=weightfun_pars, cond_dist=cond_dist,
+                                       identification=identification, AR_constraints=AR_constraints,
+                                       mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                                       B_constraints=B_constraints)
+
+  # Obtain the unconditional variances from the diagonal of the first slice of reg_autocovs[, , , m]
+  reg_vars <- vapply(1:M, function(m) diag(reg_autocovs[, , 1, m]), numeric(d))
+
+  # Obtain the regimewise autocorrelation matrices from the regimewise autocovariance matrices
+  reg_autocors <- array(NA, dim=c(d, d, p + 1, M))
+  for(m in 1:M) {
+    for(i1 in 1:(p + 1)) {
+      for(i2 in 1:d) {
+        for(i3 in 1:d) {
+          reg_autocors[i2, i3, i1, m] <- reg_autocovs[i2, i3, i1, m]/sqrt(reg_vars[i2, m]*reg_vars[i3, m])
+        }
+      }
+    }
+  }
+
+  # Return the results
+  list(regime_means=reg_means,
+       regime_vars=reg_vars,
+       regime_autocovs=reg_autocovs,
+       regime_autocors=reg_autocors)
+}
