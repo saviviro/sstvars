@@ -212,12 +212,13 @@ reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative
                                     weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"),
                                     identification=c("reduced_form", "recursive", "heteroskedasticity"),
                                     AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
-                                    change_na=FALSE) {
+                                    other_constraints=NULL, change_na=FALSE) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
 
-  if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(weight_constraints) && is.null(B_constraints)) {
+  if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(weight_constraints) &&
+     is.null(B_constraints) && is.null(other_constraints)) {
     return(params)
   }
 
@@ -264,8 +265,13 @@ reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative
     less_covmatpars <- 0 # How much covmats pars less are there in the constrained param vector relative to the expanded one
   } else if(identification == "heteroskedasticity") {
     if(is.null(B_constraints)) {
-      covmatpars <- params[(d*M - less_pars + q + 1):(d*M - less_pars + q + d^2 + d*(M - 1))]
-      less_covmatpars <- 0
+      if(is.null(other_constraints$fixed_lambdas)) {
+        covmatpars <- params[(d*M - less_pars + q + 1):(d*M - less_pars + q + d^2 + d*(M - 1))]
+        less_covmatpars <- 0
+      } else { # lambdas defined by fixed_lambdas
+        covmatpars <- c(params[(d*M - less_pars + q + 1):(d*M - less_pars + q + d^2)], other_constraints$fixed_lambdas)
+        less_covmatpars <- d*(M - 1)
+      }
     } else { # B_constraints imposed on W
       n_zeros <- sum(B_constraints == 0, na.rm=TRUE)
       less_covmatpars <- n_zeros
@@ -273,7 +279,12 @@ reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative
       W_pars <- params[(d*M - less_pars + q + 1):(d*M - less_pars + q + d^2 - n_zeros)] # Does not include non parametrized zeros
       new_W[B_constraints != 0 | is.na(B_constraints)] <- W_pars
       if(M > 1) {
-        lambdas <- params[(d*M - less_pars + q + d^2 - n_zeros + 1):(d*M - less_pars + q + d^2 - n_zeros + d*(M - 1))]
+        if(is.null(other_constraints$fixed_lambdas)) {
+          lambdas <- params[(d*M - less_pars + q + d^2 - n_zeros + 1):(d*M - less_pars + q + d^2 - n_zeros + d*(M - 1))]
+        } else { # lambdas defined by fixed_lambdas
+          lambdas <- other_constraints$fixed_lambdas
+          less_covmatpars <- n_zeros + d*(M - 1)
+        }
       } else {
         lambdas <- numeric(0)
       }

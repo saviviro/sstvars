@@ -17,6 +17,7 @@ reform_constrained_pars(
   mean_constraints = NULL,
   weight_constraints = NULL,
   B_constraints = NULL,
+  other_constraints = NULL,
   change_na = FALSE
 )
 }
@@ -146,6 +147,13 @@ the weight parameter to the constant \eqn{r} (in this case, \eqn{\alpha} is drop
 a negative value indicating strict negative sign constraint, and zero indicating that the element is constrained to zero.
 Currently only available for models with \code{identification="heteroskedasticity"} due to the (in)availability of appropriate
 parametrizations that allow such constraints to be imposed.}
+
+\item{other_constraints}{A list containing internally used additional type of constraints (see the options below).
+\describe{
+   \item{$fixed_lambdas (only if \code{identification="heteroskedasticity"}):}{a length \eqn{d(M-1)} numeric vector
+     (\strong{\eqn{\lambda}}\eqn{_{2}}\eqn{,...,} \strong{\eqn{\lambda}}\eqn{_{M})} with elements strictly larger
+     than zero specifying the fixed parameter values for the parameters \eqn{\lambda_{mi}} should be constrained to.}
+ }}
 
 \item{change_na}{change NA parameter values of constrained models to -9.999?}
 }
