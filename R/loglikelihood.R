@@ -122,6 +122,12 @@
 #'   a negative value indicating strict negative sign constraint, and zero indicating that the element is constrained to zero.
 #'   Currently only available for models with \code{identification="heteroskedasticity"} due to the (in)availability of appropriate
 #'   parametrizations that allow such constraints to be imposed.
+#' @param other_constraints A list containing internally used additional type of constraints (see the options below).
+#'  \describe{
+#'     \item{$fixed_lambdas (only if \code{identification="heteroskedasticity"}):}{a length \eqn{d(M-1)} numeric vector
+#'       (\strong{\eqn{\lambda}}\eqn{_{2}}\eqn{,...,} \strong{\eqn{\lambda}}\eqn{_{M})} with elements strictly larger
+#'       than zero specifying the fixed parameter values for the parameters \eqn{\lambda_{mi}} should be constrained to.}
+#'   }
 #' @param to_return should the returned object be the log-likelihood, which is the default, or something else?
 #'   See the section "Value" for all the options.
 #' @param check_params should it be checked that the parameter vector satisfies the model assumptions? Can be skipped to save
@@ -166,7 +172,7 @@
 loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
                           weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
                           identification=c("reduced_form", "recursive", "heteroskedasticity"),
-                          AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
+                          AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL, other_constraints=NULL,
                           to_return=c("loglik", "tw", "loglik_and_tw", "terms", "regime_cmeans", "total_cmeans", "total_ccovs"),
                           check_params=TRUE, minval=NULL, stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
 
@@ -193,7 +199,7 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
                                     cond_dist=cond_dist, identification=identification,
                                     AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                                     weight_constraints=weight_constraints, B_constraints=B_constraints,
-                                    weightfun_pars=weightfun_pars)
+                                    other_constraints=other_constraints, weightfun_pars=weightfun_pars)
 
   # Pick params
   if(parametrization == "intercept") { # [d, M]
