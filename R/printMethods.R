@@ -41,12 +41,8 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   IC <- stvar$IC
   var_names <- colnames(stvar$data)
   if(is.null(var_names)) var_names <- paste0("Var.", 1:d)
-  all_mu <- round(get_regime_means(p=p, M=M, d=d, params=params,
-                                   weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                   cond_dist=cond_dist, parametrization=parametrization,
-                                   identification=identification, AR_constraints=AR_constraints,
-                                   mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                                   B_constraints=B_constraints), digits)
+  all_mu <- stvar$uncond_moments$regime_means
+  all_sd <- sqrt(stvar$uncond_moments$regime_vars)
   npars <- length(params)
   T_obs <- ifelse(is.null(stvar$data), NA, nrow(stvar$data) - p)
   params <- reform_constrained_pars(p=p, M=M, d=d, params=params,
@@ -136,6 +132,9 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
       }
     }
     cat("Regime means:", paste0(format_value(all_mu[,m]), collapse=", "))
+    if(summary_print) {
+      cat("\nRegime sdevs:", paste0(format_value(all_sd[,m]), collapse=", "))
+    }
     cat("\n\n")
 
     left_brackets <- rep("[", times=d)
