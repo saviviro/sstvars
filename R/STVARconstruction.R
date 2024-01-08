@@ -141,6 +141,19 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
     total_ccovs <- get_cm("total_ccovs")
   }
 
+  # Some unconditional moments
+  regime_autocovs <- get_regime_autocovs(p=p, M=M, d=d, params=params, weight_function=weight_function,
+                                         weightfun_pars=weightfun_pars, cond_dist=cond_dist,
+                                         identification=identification, AR_constraints=AR_constraints,
+                                         mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                                         B_constraints=B_constraints)
+  regime_vars <- vapply(1:M, function(m) diag(regime_autocovs[, , 1, m]), numeric(d))
+  regime_means <- get_regime_means(p=p, M=M, d=d, params=params, weight_function=weight_function,
+                                   weightfun_pars=weightfun_pars, cond_dist=cond_dist,
+                                   parametrization=parametrization, identification=identification,
+                                   AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                   weight_constraints=weight_constraints, B_constraints=B_constraints)
+
   # Return
   structure(list(data=data,
                  model=list(p=p,
@@ -161,6 +174,9 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
                  regime_cmeans=regime_cmeans,
                  total_cmeans=total_cmeans,
                  total_ccovs=total_ccovs,
+                 uncond_moments=list(regime_autocovs=regime_autocovs,
+                                     regime_vars=regime_vars,
+                                     regime_means=regime_means),
                  residuals_raw=residuals_raw,
                  residuals_std=residuals_std,
                  loglik=structure(lok_and_tw$loglik,
