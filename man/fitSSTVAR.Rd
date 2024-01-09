@@ -35,8 +35,8 @@ to the gradient based variable metric algorithm? See details.}
 Returns an object of class \code{'stvar'} defining the structural model
 }
 \description{
-\code{fitSSTVAR} uses a variable metric algorithm to estimate a structural STVAR model
-  based on preliminary estimates from a reduced form model.
+\code{fitSSTVAR} uses a robust method and a variable metric algorithm to estimate
+  a structural STVAR model based on preliminary estimates from a reduced form model.
 }
 \details{
 When the structural model does not impose overidentifying constraints, it is directly

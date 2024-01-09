@@ -100,8 +100,8 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
 #' @title Maximum likelihood estimation of a structural STVAR model based on preliminary estimates from
 #'   a reduced form model.
 #'
-#' @description \code{fitSSTVAR} uses a variable metric algorithm to estimate a structural STVAR model
-#'   based on preliminary estimates from a reduced form model.
+#' @description \code{fitSSTVAR} uses a robust method and a variable metric algorithm to estimate
+#'   a structural STVAR model based on preliminary estimates from a reduced form model.
 #'
 #' @inheritParams fitSTVAR
 #' @inheritParams STVAR
@@ -464,3 +464,32 @@ fitSSTVAR <- function(stvar, new_identification=c("recursive", "heteroskedastici
 }
 
 
+
+
+#' @title Internal estimation function for estimating STVAR model when bootstrapping confidence
+#'   bounds for IRFs in \code{linear_IRF}
+#'
+#' @description \code{fitbsSSTVAR} uses Nelder-Mead and a variable metric algorithm to estimate
+#'   a structural STVAR model based on preliminary estimates.
+#'
+#' @inheritParams loglikelihood
+#' @inheritParams fitSSTVAR
+#' @details Used internally in the funtions \code{linear_IRF} for estimating the model in each bootstrap replication.
+#'
+#'   Employs the estimation function \code{optim} from the package \code{stats} that implements the optimization
+#'   algorithms. See \code{?optim} for the documentation on the
+#' @return Returns an object of class \code{'stvar'} defining the structural model
+#' @seealso \code{\link{linear_IRF}}, \code{\link[stats]{optim}}
+#' @inherit STVAR references
+#' @keywords internal
+
+
+fitbsSSTVAR <- function(data, p, M, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+                        weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
+                        identification=c("reduced_form", "recursive", "heteroskedasticity"),
+                        AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
+                        other_constraints=NULL, maxit=1000, maxit_robust=1000, robust_method=c("Nelder-Mead", "none")) {
+
+
+  # Remember to filter out inappropriate estimates in the end!
+}
