@@ -10,16 +10,17 @@ linear_IRF(
   regime = 1,
   which_cumulative = numeric(0),
   scale = NULL,
-  scale_type = c("instant", "peak"),
-  scale_horizon = N,
   ci = NULL,
+  bootstrap_reps = 100,
+  ncores = 2,
+  nrounds = 1,
   seed = NULL,
   ...
 )
 }
 \arguments{
 \item{stvar}{an object of class \code{'stvar'} defining a structural or reduced form
-stvar model. For a reduced form model, the shocks are automatically identified by
+STVAR model. For a reduced form model, the shocks are automatically identified by
 the lower triangular Cholesky decomposition.}
 
 \item{N}{a positive integer specifying the horizon how far ahead should the
@@ -33,33 +34,32 @@ An integer in \eqn{1,...,M}.}
 responses should be cumulative. Default is none.}
 
 \item{scale}{should the linear IRFs to some of the shocks be scaled so that they
-correspond to a specific magnitude of instantaneous or peak response
-of some specific variable (see the argument \code{scale_type})?
-Provide a length three vector where the shock of interest
+correspond to a specific instantaneous response of some specific
+variable? Provide a length three vector where the shock of interest
 is given in the first element (an integer in \eqn{1,...,d}), the variable of
 interest is given in the second element (an integer in \eqn{1,...,d}), and
-the magnitude of its instantaneous or peak response in the third element
-(a non-zero real number). If the linear IRFs of multiple shocks should be scaled,
-provide a matrix which has one column for each of the shocks with the columns being
-the length three vectors described above.}
+its instantaneous response in the third element (a non-zero real number).
+If the linear IRFs of multiple shocks should be scaled, provide a matrix which has one
+column for each of the shocks with the columns being the length three vectors described above.}
 
-\item{scale_type}{If argument \code{scale} is specified, should the linear IRFs be
-scaled to match an instantaneous response (\code{"instant"}) or peak response
-(\code{"peak"}). If \code{"peak"}, the scale is based on the largest magnitude
-of peak response in absolute value. Ignored if \code{scale} is not specified.}
+\item{ci}{a real number in \eqn{(0, 1)} specifying the confidence level of the
+confidence intervals calculated via a fixed-design wild residual bootstrap method.
+Available only for models that impose linear autoregressive dynamics
+(excluding changes in the volatility regime).}
 
-\item{scale_horizon}{If \code{scale_type == "peak"} what the maximum horizon up
-to which peak response is expected? Scaling won't based on values after this.}
+\item{bootstrap_reps}{the number of bootstrap repetitions for estimating confidence bounds.}
 
-\item{ci}{a numeric vector with elements in \eqn{(0, 1)} specifying the
-confidence levels of the confidence intervals calculated via a bootstrap
-method, see the details section. Available only for models that impose linear
-autoregressive dynamics (excluding changes in the volatility regime).}
+\item{ncores}{the number of CPU cores to be used in parallel computing when bootstrapping confidence bounds.}
 
-\item{seed}{a length one numeric vector initializing the seed for the random generator.}
+\item{nrounds}{on how many estimation rounds should each bootstrap estimation be based on?
+Does not have to be very large since initial estimates used are based on the initially fitted model.
+Larger number of rounds gives more reliable results but is computationally more demanding.}
 
 \item{...}{parameters passed to the plot method \code{plot.irf} that plots
 the results.}
+
+\item{seeds}{a numeric vector of length \code{bootstrap_reps} initializing the seed for the random
+generator for each bootstrap replication.}
 }
 \value{
 Returns a class \code{'irf'} list with the linear IRFs in ... FILL IN!
@@ -69,13 +69,19 @@ Returns a class \code{'irf'} list with the linear IRFs in ... FILL IN!
   of a structural STVAR model.
 }
 \details{
-FILL IN DETAILS! NOTE THAT THIS FUNCTION IS STILL UNDER CONSTRUCTION!
+If the autoregressive dynamics of the model are linear (i.e., either M == 1 or mean and AR parameters
+  are constrained identical across the regimes), confidence bounds can be calculated based on a fixed-design
+  wild residual bootstrap method. We employ the method described in Herwartz and Lütkepohl (2014); see also
+  the relevant chapters in Kilian and Lütkepohl (2017).
 }
 \examples{
  # FILL IN
 }
 \references{
 \itemize{
+   \item Herwartz H. and Lütkepohl H. 2014. Structural vector autoregressions with Markov switching:
+     Combining conventional with statistical identification of shocks. \emph{Journal of Econometrics},
+     183, pp. 104-116.
    \item Kilian L. and Lütkepohl H. 2017. Structural Vectors Autoregressive Analysis.
          \emph{Cambridge University Press}, Cambridge.
  }
