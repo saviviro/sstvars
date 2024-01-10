@@ -363,7 +363,6 @@ plot.irf <- function(x, shocks_to_plot, ...) {
   var_names <- dimnames(point_est)[[1]]
   shock_names <- dimnames(point_est)[[2]]
 
-
   # Graphical settings
   old_par <- par(no.readonly=TRUE)
   on.exit(par(old_par))
