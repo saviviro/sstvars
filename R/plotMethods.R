@@ -342,3 +342,97 @@ plot.gfevd <- function(x, ...) {
 }
 
 
+#' @describeIn linear_IRF plot method
+#' @inheritParams print.irf
+#' @param shocks_to_plot IRFs of which shocks should be plotted? A numeric vector
+#'   with elements in \code{1,...,d}.
+#' @export
+
+plot.irf <- function(x, shocks_to_plot, ...) {
+
+  # Relevant statistics etc
+  irf <- x
+  point_est <- irf$point_est
+  conf_ints <- irf$conf_ints
+  d <- irf$stvar$model$d
+  if(missing(shocks_to_plot)) {
+    shocks_to_plot <- 1:d
+  } else {
+    stopifnot(all(shocks_to_plot %in% 1:irf$stvar$model$d))
+  }
+  var_names <- dimnames(point_est)[[1]]
+  shock_names <- dimnames(point_est)[[2]]
+
+
+  # Graphical settings
+  old_par <- par(no.readonly=TRUE)
+  on.exit(par(old_par))
+  margs <- c(max(0.4, 0.4 + log(0.31 + log(d))/6), 0.3,
+             max(0.35, 0.35 + log(0.31 + log(d))/6), 0.1)
+  margs <- vapply(1:length(margs), function(i1) min(margs[i1], 1), numeric(1))
+  par(las=1, mar=c(0, 0, 0, 0))
+  nrows <- d + 2 # +2 for bottom and top marginals
+  ncols <- 3 # +2 for the left and right margin; IRF of each shock in separate figure
+  nfigs <- nrows*ncols
+  layoutmat <- matrix(seq_len(nfigs), nrow=nrows, ncol=ncols, byrow=FALSE)
+  layout(layoutmat,
+         widths=c(margs[2], 1, margs[4]),
+         heights=c(margs[3], rep(1, times=nrows - 2), margs[1]))
+
+  # Function to plot empty plots (for the marginals)
+  empty_plot <- function() plot(0, xaxt='n', yaxt='n', bty='n', pch='', ylab='', xlab='')
+
+  # Function to plot the IRF for each variable separately (for a given shock)
+  plot_irf <- function(var_ind, shock_ind, main="", xaxt="n", ylab="") {
+
+    # Plot point estimate
+    pe_var_shock <- point_est[var_ind, shock_ind, ]
+    if(is.null(conf_ints)) {
+      ylim <- c(min(0, min(pe_var_shock)), max(0, max(pe_var_shock)))
+    } else {
+      ci_var_shock <- conf_ints[var_ind, shock_ind, , ] # [horizon, bound]
+      ylim <- c(min(0, min(cbind(ci_var_shock, pe_var_shock))),
+                max(0, max(cbind(ci_var_shock, pe_var_shock))))
+    }
+    plot(x=0:(length(pe_var_shock) - 1), y=pe_var_shock, type="l", ylim=ylim,
+         main="", ylab="", xlab="", xaxt=xaxt, lwd=2, col="black")
+    mtext(var_names[var_ind], side=2, cex=0.8, font=2, las=0, padj=-4) # Add yaxis label to the first column of responses
+    if(var_ind == 1) mtext(main, padj=-0.5, cex=1, font=2)
+
+    # Plot confidence intervals
+    if(!is.null(conf_ints)) {
+      lines(x=0:(length(pe_var_shock) - 1), y=ci_var_shock[,1], lty=2)
+      lines(x=0:(length(pe_var_shock) - 1), y=ci_var_shock[,2], lty=2)
+    }
+
+    abline(h=0, lty=3, col="lightgrey")
+  }
+
+  # Loop through the shocks
+  for(i1 in shocks_to_plot) {
+    if(i1 != shocks_to_plot[1]) {
+      grDevices::devAskNewPage(TRUE)
+    }
+
+    # Plot a column of empty plots as the left margins
+    for(i2 in 1:(nrows + 1)) { # + 1 for the top margin of the first row of responses
+      empty_plot()
+    }
+
+    # Plot the responses of each variable to shock i1
+    plot_irf(var_ind=1, shock_ind=i1, main=shock_names[i1], ylab=var_names[1])
+    if(d > 2) {
+      for(i2 in 2:(d - 1)) {
+        plot_irf(var_ind=i2, shock_ind=i1, ylab=var_names[i2])
+      }
+    }
+    plot_irf(var_ind=d, shock_ind=i1, xaxt="s", ylab=var_names[var])
+    empty_plot() # To bottom margin of the last row of responses
+
+    # Plot a column of empty plots as the right margins
+    for(i2 in 1:nrows) {
+      empty_plot()
+    }
+  }
+}
+
