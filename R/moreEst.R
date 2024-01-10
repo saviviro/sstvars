@@ -118,12 +118,13 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
 #'   Structural models can be provided in the argument \code{stvar} if overidentifying constraints should be
 #'   imposed.
 #'
-#'   Using a robust estimation method before switching to the variable metric can be useful if the initial
+#'   Using the robust estimation method SANN before switching to the variable metric can be useful if the initial
 #'   estimates are not very close to the ML estimate of the structural model, as the variable metric algorithm
-#'   (usually) converges to a nearby local maximum or saddle point. This is particularly the case when the imposed
-#'   overidentifying restrictions are such that the unrestricted estimate is not close to satisfying them. Note that
-#'   the results may not very reliable even with the robust method if the initial estimates after imposing the constraints
-#'   are far from the unconstrained ones.
+#'   (usually) converges to a nearby local maximum or saddle point. However, if the initial estimates are far from
+#'   the ML estimate, the resulting solution is likely local only even with SANN due to the complexity of the model.
+#'   This is particularly the case when the imposed overidentifying restrictions are such that the unrestricted
+#'   estimate is not close to satisfying them. Nevertheless, in most practical cases, the model is just identified
+#'   and estimation is not required, and often reasonable overidentifying constraints are close to the unrestricted estimate.
 #'
 #'   Employs the estimation function \code{optim} from the package \code{stats} that implements the optimization
 #'   algorithms. See \code{?optim} for the documentation on the
@@ -469,27 +470,72 @@ fitSSTVAR <- function(stvar, new_identification=c("recursive", "heteroskedastici
 #' @title Internal estimation function for estimating STVAR model when bootstrapping confidence
 #'   bounds for IRFs in \code{linear_IRF}
 #'
-#' @description \code{fitbsSSTVAR} uses Nelder-Mead and a variable metric algorithm to estimate
+#' @description \code{fitbsSSTVAR} uses a robust method and a variable metric algorithm to estimate
 #'   a structural STVAR model based on preliminary estimates.
 #'
 #' @inheritParams loglikelihood
 #' @inheritParams fitSSTVAR
-#' @details Used internally in the funtions \code{linear_IRF} for estimating the model in each bootstrap replication.
+#' @param seed the seed for the random number generator (relevant when using SANN).
+#' @details Used internally in the functions \code{linear_IRF} for estimating the model in each bootstrap replication.
 #'
 #'   Employs the estimation function \code{optim} from the package \code{stats} that implements the optimization
-#'   algorithms. See \code{?optim} for the documentation on the
+#'   algorithms.
 #' @return Returns an object of class \code{'stvar'} defining the structural model
+#' @section warning: No argument checks!
 #' @seealso \code{\link{linear_IRF}}, \code{\link[stats]{optim}}
 #' @inherit STVAR references
 #' @keywords internal
-
 
 fitbsSSTVAR <- function(data, p, M, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
                         weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
                         identification=c("reduced_form", "recursive", "heteroskedasticity"),
                         AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
-                        other_constraints=NULL, maxit=1000, maxit_robust=1000, robust_method=c("Nelder-Mead", "none")) {
+                        other_constraints=NULL, robust_method=c("Nelder-Mead", "SANN", "none"),
+                        maxit=1000, maxit_robust=1000, seed=NULL) {
+  set.seed(seed)
+  weight_function <- match.arg(weight_function)
+  cond_dist <- match.arg(cond_dist)
+  parametrization <- match.arg(parametrization)
+  identification <- match.arg(identification)
+  robust_method <- match.arg(robust_method)
 
+  # Function to optimize
+  loglik_fn <- function(params) {
+    tryCatch(loglikelihood(data=data, p=p, M=M, params=params,
+                           weight_function=weight_function, weightfun_pars=weightfun_pars,
+                           cond_dist=cond_dist, parametrization=parametrization,
+                           identification=identification, AR_constraints=AR_constraints,
+                           mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                           B_constraints=B_constraints, other_constraints=other_constraints, to_return="loglik",
+                           check_params=TRUE, minval=minval),
+             error=function(e) minval)
+  }
 
-  # Remember to filter out inappropriate estimates in the end!
+  ## Gradient of the log-likelihood function using central difference approximation
+  npars <- length(new_params)
+  h <- 6e-6
+  I <- diag(rep(1, times=npars))
+  loglik_grad <- function(params) {
+    vapply(1:npars, function(i1) (loglik_fn(params + I[i1,]*h) - loglik_fn(params - I[i1,]*h))/(2*h), numeric(1))
+  }
+
+  ## Estimation by robust method
+  if(robust_method != "none") {
+    robust_results <- stats::optim(par=new_params, fn=loglik_fn, gr=loglik_grad, method=robust_method,
+                                   control=list(fnscale=-1, maxit=maxit_robust))
+    new_params <- robust_results$par
+  }
+
+  ## Estimation by the variable metric algorithm..
+  final_results <- stats::optim(par=new_params, fn=loglik_fn, gr=loglik_grad, method="BFGS",
+                                control=list(fnscale=-1, maxit=maxit))
+  new_params <- final_results$par
+
+  ## Return the fitted STVAR model
+  STVAR(data=data, p=p, M=M, d=d, params=new_params, cond_dist=cond_dist,
+        weight_function=weight_function, weightfun_pars=weightfun_pars,
+        parametrization=parametrization, identification=identification,
+        AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+        weight_constraints=weight_constraints, B_constraints=B_constraints,
+        other_constraints=other_constraints, calc_std_errors=FALSE)
 }

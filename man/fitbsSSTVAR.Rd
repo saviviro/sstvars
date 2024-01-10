@@ -20,9 +20,10 @@ fitbsSSTVAR(
   weight_constraints = NULL,
   B_constraints = NULL,
   other_constraints = NULL,
+  robust_method = c("Nelder-Mead", "SANN", "none"),
   maxit = 1000,
   maxit_robust = 1000,
-  robust_method = c("Nelder-Mead", "none")
+  seed = NULL
 )
 }
 \arguments{
@@ -165,26 +166,32 @@ parametrizations that allow such constraints to be imposed.}
      than zero specifying the fixed parameter values for the parameters \eqn{\lambda_{mi}} should be constrained to.}
  }}
 
+\item{robust_method}{Should some robust estimation method be used in the estimation before switching
+to the gradient based variable metric algorithm? See details.}
+
 \item{maxit}{the maximum number of iterations in the variable metric algorithm.}
 
 \item{maxit_robust}{the maximum number of iterations on the first phase robust estimation, if employed.}
 
-\item{robust_method}{Should some robust estimation method be used in the estimation before switching
-to the gradient based variable metric algorithm? See details.}
+\item{seed}{the seed for the random number generator (relevant when using SANN).}
 }
 \value{
 Returns an object of class \code{'stvar'} defining the structural model
 }
 \description{
-\code{fitbsSSTVAR} uses Nelder-Mead and a variable metric algorithm to estimate
+\code{fitbsSSTVAR} uses a robust method and a variable metric algorithm to estimate
   a structural STVAR model based on preliminary estimates.
 }
 \details{
-Used internally in the funtions \code{linear_IRF} for estimating the model in each bootstrap replication.
+Used internally in the functions \code{linear_IRF} for estimating the model in each bootstrap replication.
 
   Employs the estimation function \code{optim} from the package \code{stats} that implements the optimization
-  algorithms. See \code{?optim} for the documentation on the
+  algorithms.
 }
+\section{warning}{
+ No argument checks!
+}
+
 \references{
 \itemize{
    \item TO BE FILLED IN
