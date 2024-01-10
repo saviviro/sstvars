@@ -499,7 +499,7 @@ fitbsSSTVAR <- function(data, p, M, params, weight_function=c("relative_dens", "
   parametrization <- match.arg(parametrization)
   identification <- match.arg(identification)
   robust_method <- match.arg(robust_method)
-  minval <- get_minval(stvar$data)
+  minval <- get_minval(data)
 
   # Function to optimize
   loglik_fn <- function(params) {
@@ -514,7 +514,7 @@ fitbsSSTVAR <- function(data, p, M, params, weight_function=c("relative_dens", "
   }
 
   ## Gradient of the log-likelihood function using central difference approximation
-  npars <- length(new_params)
+  npars <- length(params)
   h <- 6e-6
   I <- diag(rep(1, times=npars))
   loglik_grad <- function(params) {
@@ -523,16 +523,16 @@ fitbsSSTVAR <- function(data, p, M, params, weight_function=c("relative_dens", "
 
   ## Estimation by robust method
   if(robust_method != "none") {
-    robust_results <- stats::optim(par=new_params, fn=loglik_fn, gr=loglik_grad, method=robust_method,
+    robust_results <- stats::optim(par=params, fn=loglik_fn, gr=loglik_grad, method=robust_method,
                                    control=list(fnscale=-1, maxit=maxit_robust))
-    new_params <- robust_results$par
+   params <- robust_results$par
   }
 
   ## Estimation by the variable metric algorithm..
-  final_results <- stats::optim(par=new_params, fn=loglik_fn, gr=loglik_grad, method="BFGS",
+  final_results <- stats::optim(par=params, fn=loglik_fn, gr=loglik_grad, method="BFGS",
                                 control=list(fnscale=-1, maxit=maxit))
-  new_params <- final_results$par
+  params <- final_results$par
 
   ## Return the estimate
-  new_params
+  params
 }

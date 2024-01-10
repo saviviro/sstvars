@@ -173,7 +173,11 @@ linear_IRF <- function(stvar, N=30, regime=1, which_cumulative=numeric(0), scale
 
   # Check the argument scale and which_cumulative
   if(identification == "heteroskedasticity") {
-    B_constrs <- B_constraints
+    if(is.null(B_constraints)) {
+      B_constrs <- matrix(NA, nrow=d, ncol=d)
+    } else {
+      B_constrs <- B_constraints
+    }
   } else { # Reduced form or recursive identification
     B_constrs <- matrix(NA, nrow=d, ncol=d)
     B_constrs[upper.tri(B_constrs)] <- 0
