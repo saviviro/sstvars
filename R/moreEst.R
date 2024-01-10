@@ -118,10 +118,11 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
 #'   Structural models can be provided in the argument \code{stvar} if overidentifying constraints should be
 #'   imposed.
 #'
-#'   Using the robust estimation method SANN before switching to the variable metric can be useful if the initial
+#'   Using the robust estimation method before switching to the variable metric can be useful if the initial
 #'   estimates are not very close to the ML estimate of the structural model, as the variable metric algorithm
 #'   (usually) converges to a nearby local maximum or saddle point. However, if the initial estimates are far from
-#'   the ML estimate, the resulting solution is likely local only even with SANN due to the complexity of the model.
+#'   the ML estimate, the resulting solution is likely local only due to the complexity of the model. Note that
+#'   Nelder-Mead algorithm is much faster than SANN but can get stuck at a local solution.
 #'   This is particularly the case when the imposed overidentifying restrictions are such that the unrestricted
 #'   estimate is not close to satisfying them. Nevertheless, in most practical cases, the model is just identified
 #'   and estimation is not required, and often reasonable overidentifying constraints are close to the unrestricted estimate.
@@ -498,6 +499,7 @@ fitbsSSTVAR <- function(data, p, M, params, weight_function=c("relative_dens", "
   parametrization <- match.arg(parametrization)
   identification <- match.arg(identification)
   robust_method <- match.arg(robust_method)
+  minval <- get_minval(stvar$data)
 
   # Function to optimize
   loglik_fn <- function(params) {
@@ -531,11 +533,6 @@ fitbsSSTVAR <- function(data, p, M, params, weight_function=c("relative_dens", "
                                 control=list(fnscale=-1, maxit=maxit))
   new_params <- final_results$par
 
-  ## Return the fitted STVAR model
-  STVAR(data=data, p=p, M=M, d=d, params=new_params, cond_dist=cond_dist,
-        weight_function=weight_function, weightfun_pars=weightfun_pars,
-        parametrization=parametrization, identification=identification,
-        AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-        weight_constraints=weight_constraints, B_constraints=B_constraints,
-        other_constraints=other_constraints, calc_std_errors=FALSE)
+  ## Return the estimate
+  new_params
 }

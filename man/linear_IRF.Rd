@@ -13,7 +13,8 @@ linear_IRF(
   ci = NULL,
   bootstrap_reps = 100,
   ncores = 2,
-  nrounds = 1,
+  robust_method = c("Nelder-Mead", "SANN", "none"),
+  maxit_robust = 1000,
   seed = NULL,
   ...
 )
@@ -51,18 +52,30 @@ Available only for models that impose linear autoregressive dynamics
 
 \item{ncores}{the number of CPU cores to be used in parallel computing when bootstrapping confidence bounds.}
 
-\item{nrounds}{on how many estimation rounds should each bootstrap estimation be based on?
-Does not have to be very large since initial estimates used are based on the initially fitted model.
-Larger number of rounds gives more reliable results but is computationally more demanding.}
+\item{robust_method}{Should some robust estimation method be used in the estimation before switching
+to the gradient based variable metric algorithm? See details.}
+
+\item{maxit_robust}{the maximum number of iterations on the first phase robust estimation, if employed.}
+
+\item{seed}{a real number initializing the seed for the random generator.}
 
 \item{...}{parameters passed to the plot method \code{plot.irf} that plots
 the results.}
-
-\item{seeds}{a numeric vector of length \code{bootstrap_reps} initializing the seed for the random
-generator for each bootstrap replication.}
 }
 \value{
-Returns a class \code{'irf'} list with the linear IRFs in ... FILL IN!
+Returns a class \code{'irf'} list with  with the following elements:
+  \describe{
+    \item{\code{$point_est}:}{a 3D array \code{[variables, shock, horizon]} containing the point estimates of the IRFs.
+       Note that the first slice is for the impact responses and the slice i+1 for the period i. The response of the
+       variable 'i1' to the shock 'i2' is subsetted as \code{$point_est[i1, i2, ]}.}
+    \item{\code{$conf_ints}:}{bootstrapped confidence intervals for the IRFs in a \code{[variables, shock, horizon, bound]}
+       4D array. The lower bound is obtained as \code{$conf_ints[, , , 1]}, and similarly the upper bound as
+        \code{$conf_ints[, , , 2]}. The subsetted 3D array is then the bound in a form similar to \code{$point_est}.}
+    \item{\code{$all_bootstrap_reps}:}{IRFs from all of the bootstrap replications in a \code{[variables, shock, horizon, rep]}.
+       4D array. The IRF from replication i1 is obtained as \code{$all_bootstrap_reps[, , , i1]}, and the subsetted 3D array
+       is then the in a form similar to \code{$point_est}.}
+    \item{Other elements:}{contains some of the arguments the \code{linear_IRF} was called with.}
+  }
 }
 \description{
 \code{linear_IRF} estimates linear impulse response function based on a single regime
@@ -73,6 +86,10 @@ If the autoregressive dynamics of the model are linear (i.e., either M == 1 or m
   are constrained identical across the regimes), confidence bounds can be calculated based on a fixed-design
   wild residual bootstrap method. We employ the method described in Herwartz and Lütkepohl (2014); see also
   the relevant chapters in Kilian and Lütkepohl (2017).
+
+  Employs the estimation function \code{optim} from the package \code{stats} that implements the optimization
+  algorithms. The robust optimization method Nelder-Mead is much faster than SANN but can get stuck at a local
+  solution. See \code{?optim} and the references therein for further details.
 }
 \examples{
  # FILL IN

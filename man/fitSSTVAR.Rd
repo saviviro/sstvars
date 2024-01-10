@@ -46,10 +46,11 @@ When the structural model does not impose overidentifying constraints, it is dir
   Structural models can be provided in the argument \code{stvar} if overidentifying constraints should be
   imposed.
 
-  Using the robust estimation method SANN before switching to the variable metric can be useful if the initial
+  Using the robust estimation method before switching to the variable metric can be useful if the initial
   estimates are not very close to the ML estimate of the structural model, as the variable metric algorithm
   (usually) converges to a nearby local maximum or saddle point. However, if the initial estimates are far from
-  the ML estimate, the resulting solution is likely local only even with SANN due to the complexity of the model.
+  the ML estimate, the resulting solution is likely local only due to the complexity of the model. Note that
+  Nelder-Mead algorithm is much faster than SANN but can get stuck at a local solution.
   This is particularly the case when the imposed overidentifying restrictions are such that the unrestricted
   estimate is not close to satisfying them. Nevertheless, in most practical cases, the model is just identified
   and estimation is not required, and often reasonable overidentifying constraints are close to the unrestricted estimate.
