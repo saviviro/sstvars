@@ -292,7 +292,7 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 #'  for structural STVAR models.
 #'
 #' @inheritParams GIRF
-#' @param shock_size What shocks size should be used for all shocks? By the normalization, the conditional
+#' @param shock_size What sign and size should be used for all shocks? By the normalization, the conditional
 #'   covariance matrix of the structural error is an identity matrix.
 #' @param N a positive integer specifying the horizon how far ahead should the GFEVD be calculated.
 #' @param initval_type What type initial values are used for estimating the GIRFs that the GFEVD is based on?
@@ -303,6 +303,9 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 #'     \item{\code{"fixed"}:}{Estimate the GIRF for a fixed initial value only, which is specified with the argument
 #'        \code{init_values}.}
 #'   }
+#' @param use_data_shocks \code{TRUE} for a special feature in which for every possible length \eqn{p} history in the data,
+#'   the GIRF is estimated for a shock that has the sign and size of the corresponding structural shock recovered from the data.
+#'   See the details section.
 #' @param R2 the number of initial values to be drawn if \code{initval_type="random"}.
 #' @param seeds a numeric vector containing the random number generator seed for estimation
 #'   of each GIRF. Should have the length...
@@ -314,6 +317,13 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 #'   Set to \code{NULL} for not initializing the seed. Exists for creating reproducible results.
 #' @details  The GFEVD is a forecast error variance decomposition calculated with the generalized
 #'   impulse response function (GIRF). See Lanne and Nyberg (2016) for details.
+#'
+#'   If \code{use_data_shocks == TRUE}, the GIRF is estimated for a shock that has the sign and size of the
+#'   corresponding structural shock recovered from the data. This is done for every possible length \eqn{p} history
+#'   in the data. The GFEVD is then calculated as the average of the GFEVDs obtained from the GIRFs estimated for
+#'   the data shocks. The plot and print methods can be used as usual for this GFEVD. However, this feature also
+#'   obtain the contribution of each shock to the variance of the forecast errors at various horizons in specific
+#'   historical points of time. FILL IN HOW TO DO THIS / PLOT METHOD ETC.
 #' @return Returns and object of class 'gfevd' containing the GFEVD for all the variables and to
 #'   the transition weights. Note that the decomposition does not exist at horizon zero for transition weights
 #'   because the related GIRFs are always zero at impact.
@@ -361,9 +371,9 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 #'  }
 #' @export
 
-GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "fixed"), R1=250, R2=250,
-                  init_regime=1, init_values=NULL, which_cumulative=numeric(0), ncores=2, burn_in=1000,
-                  seeds=NULL, use_parallel=TRUE) {
+GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "fixed"), use_data_shocks=FALSE,
+                  R1=250, R2=250, init_regime=1, init_values=NULL, which_cumulative=numeric(0), ncores=2,
+                  burn_in=1000, seeds=NULL, use_parallel=TRUE) {
   check_stvar(stvar)
   initval_type <- match.arg(initval_type)
   if(stvar$model$identification == "reduced_form") {
