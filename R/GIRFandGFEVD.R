@@ -383,6 +383,9 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
   p <- stvar$model$p
   M <- stvar$model$M
   d <- stvar$model$d
+  if(use_data_shocks) {
+    initval_type <- "data" # Initval_type always data with data shocks
+  }
   if(initval_type == "data") {
     if(is.null(stvar$data)) {
       stop("The model does not contain data! Add data with the function 'add_data' or select another 'initval_type'.")
@@ -410,6 +413,9 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
     which_cumulative <- unique(which_cumulative)
     stopifnot(all(which_cumulative %in% 1:d))
   }
+
+  ## CONTINUE HERE! simulate.stvar need anothet girf_pars argument: data_shocks
+  ## Obtain the shocks in simulate.stvar
 
   # Function that estimates GIRF
   get_one_girf <- function(shock_numb, shock_size, seed, init_values_for_1girf) {
