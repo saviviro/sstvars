@@ -272,3 +272,16 @@ test_that("get_hetsked_sstvar works correctly", {
                  0.227882, 0.336084, 0.239257, 0.024173, -0.021209, 0.707502, 0.063322, 0.027287, 0.009182, 0.197066,
                  0.4046369, -0.0624318, 0.2051828, 0.1482541, 5.5613353, 4.3119004, 1, 13), tolerance=4)
 })
+
+test_that("reorder_W_columns works correctly", {
+  expect_equal(reorder_W_columns(mod222logistictsh_2_1, perm=1:2, calc_std_errors=FALSE)$params,
+               mod222logistictsh_2_1$params, tolerance=1e-4)
+  expect_equal(reorder_W_columns(mod222logistictsh_2_1, perm=2:1, calc_std_errors=FALSE)$params,
+               c(0.356914, 0.107436, 0.356386, 0.086330, 0.139960, 0.035172, -0.164575, 0.386816, 0.451675, 0.013086,
+                 0.227882, 0.336084, 0.239257, 0.024173, -0.021209, 0.707502, 0.063322, 0.027287, 0.009182, 0.197066,
+                 -0.760000, -0.020000, -0.030000, 0.240000, 0.860000, 3.360000, 0.100000, 0.200000, 7.000000), tolerance=1e-4)
+
+  expect_equal(reorder_W_columns(mod222expcmwbtsh_2_1, perm=2:1, calc_std_errors=FALSE)$params,
+               c(0.7209658, 0.8108580, 0.2200000, 0.0600000, -0.1500000, 0.3900000, 0.4100000, -0.0100000, 0.0800000, 0.3000000,
+                 -0.0200000, -0.0300000, 0.2400000, 0.8600000, 3.3600000, 0.3300000, 4.0000000), tolerance=1e-4)
+})

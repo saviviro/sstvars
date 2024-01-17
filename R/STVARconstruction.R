@@ -409,3 +409,112 @@ get_hetsked_sstvar <- function(stvar, calc_std_errors=FALSE) {
 }
 
 
+#' @title Reorder columns of the W-matrix and lambda parameters of a structural STVAR model
+#'   that is identified by heteroskedasticity.
+#'
+#' @description \code{reorder_W_columns} reorder columns of the W-matrix and lambda parameters
+#'   of a structural STVAR model that is identified by heteroskedasticity.
+#'
+#' @inheritParams STVAR
+#' @param stvar a class 'stvar' object defining a structural STVAR model that is identified by heteroskedasticity,
+#'   typically created with \code{fitSSTVAR}.
+#' @param perm an integer vector of length \eqn{d} specifying the new order of the columns of \eqn{W}.
+#'   Also lambda parameters of each regime will be reordered accordingly.
+#' @details The order of the columns of \eqn{W} can be changed without changing the implied reduced
+#'   form model as long as the order of lambda parameters is also changed accordingly. Note that the
+#'   constraints imposed on \eqn{W} (or the  impact matrix) will also be modified accordingly.
+#'
+#'   This function does not support models with constraints imposed on the lambda parameters!
+#'
+#'   Also all signs in any column of \eqn{W} can be swapped (without changing the implied reduced form model)
+#'   with the function \code{swap_W_signs} but this obviously also swaps the sign constraints in the
+#'   corresponding columns of \eqn{W}.
+#' @return Returns an object of class \code{'stvar'} defining a structural STVAR model with the columns of \eqn{W}
+#'   reordered.
+#' @seealso \code{\link{GIRF}}, \code{\link{fitSSTVAR}}, \code{\link{swap_W_signs}}
+#' @inherit STVAR references
+#' @examples
+#' # p=2, M=2, d=2, Student's t logistic STVAR model with the first lag of the second
+#'  # variable  as the switching variable and shocks identified by heteroskedasticity.
+#' theta_222logt <- c(0.356914, 0.107436, 0.356386, 0.086330, 0.139960, 0.035172, -0.164575,
+#'   0.386816, 0.451675, 0.013086, 0.227882, 0.336084, 0.239257, 0.024173, -0.021209, 0.707502,
+#'   0.063322, 0.027287, 0.009182, 0.197066, -0.03, 0.24, -0.76, -0.02, 3.36, 0.86, 0.1, 0.2, 7)
+#' mod222logt <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logt,
+#'                                weight_function="logistic", weightfun_pars=c(2, 1),
+#'                                cond_dist="Student", identification="heteroskedasticity")
+#' mod222logt
+#'
+#' # Reverse the ordering of the columns of W:
+#' mod222logt_rev <- reorder_W_columns(mod222logt, perm=c(2, 1))
+#' mod222logt_rev
+#'
+#' # Swap the ordering back to the original:
+#' mod222logt_rev2 <- reorder_W_columns(mod222logt_rev, perm=c(2, 1))
+#' mod222logt_rev2
+#'
+#' # Does not do anything, as perm=1:2 so the ordering does not change:
+#' reorder_W_columns(mod222logt, perm=c(1, 2))
+#' @export
+
+reorder_W_columns <- function(stvar, perm, calc_std_errors=FALSE) {
+  check_stvar(stvar)
+  if(stvar$model$identification != "heteroskedasticity") stop("Only model identified by heteroskedasticity are supported!")
+  p <- stvar$model$p
+  M <- stvar$model$M
+  d <- stvar$model$d
+  weight_function <- stvar$model$weight_function
+  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=stvar$model$weightfun_pars)
+  cond_dist <- stvar$model$cond_dist
+  identification <- stvar$model$identification
+  AR_constraints <- stvar$model$AR_constraints
+  mean_constraints <- stvar$model$mean_constraints
+  weight_constraints <- stvar$model$weight_constraints
+  B_constraints <- stvar$model$B_constraints
+  params <- reform_constrained_pars(p=p, M=M, d=d, params=stvar$params,
+                                    weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                    cond_dist=cond_dist, identification=identification,
+                                    AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                    weight_constraints=weight_constraints, B_constraints=B_constraints)
+  W <- pick_W(p=p, M=M, d=d, params=params, identification=identification)
+  lambdas <- pick_lambdas(p=p, M=M, d=d, params=params, identification=identification)
+  distpars <- pick_distpars(params=params, cond_dist=cond_dist)
+
+  # Calculate the number of weight parameters
+  if(is.null(weight_constraints)) {
+    if(weight_function == "relative_dens" || weight_function == "threshold") {
+      n_weight_pars <- M - 1
+    } else if(weight_function == "logistic" || weight_function == "exponential") {
+      n_weight_pars <- 2
+    } else if(weight_function == "mlogit") {
+      n_weight_pars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
+    }
+  } else { # Constraints on the weight parameters
+    if(all(weight_constraints[[1]] == 0)) {
+      n_weight_pars <- 0 # alpha = r, not in the parameter vector
+    } else {
+      n_weight_pars <- ncol(weight_constraints[[1]]) # The dimension of xi
+    }
+  }
+
+  # Create the new parameter vector
+  W <- W[, perm]
+  W <- Wvec(W) # Zeros removed
+  if(M > 1) {
+    lambdas <- matrix(lambdas, nrow=d, ncol=M - 1, byrow=FALSE)
+    lambdas <- vec(lambdas[perm,])
+  }
+  new_params <- stvar$params
+  new_params[(length(new_params) - (n_weight_pars + length(W) + length(lambdas)
+                                    + length(distpars)) + 1):(length(new_params) - (n_weight_pars + length(distpars)))] <- c(W, lambdas)
+  if(!is.null(B_constraints)) {
+    new_B_constraints <- B_constraints[, perm]
+  } else {
+    new_B_constraints <- NULL
+  }
+
+  # Construct the Sstvar model based on the obtained structural parameters
+  STVAR(data=stvar$data, p=p, M=M, d=d, params=new_params, weight_function=weight_function,
+        weightfun_pars=weightfun_pars, cond_dist=cond_dist, parametrization=stvar$model$parametrization,
+        identification=identification, AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+        weight_constraints=weight_constraints, B_constraints=new_B_constraints, calc_std_errors=calc_std_errors)
+}
