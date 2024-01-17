@@ -489,12 +489,6 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
 
     for(i1 in 1:d) {
       cat(paste0("Estimating GIRFs for structural shock ", i1, "..."), "\n")
-      if(initval_type == "random") {
-        init_values_for_1girf <- NULL
-      } else {
-        init_values_for_1girf=matrix(all_initvals[, , i2], nrow=p, ncol=d)
-      }
-
       GIRF_shocks[[i1]] <- pbapply::pblapply(1:R2,
                                              function(i2) get_one_girf(shock_numb=i1,
                                                                        shock_size=ifelse(use_data_shocks,
