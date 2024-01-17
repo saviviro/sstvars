@@ -14,6 +14,8 @@ params322logt <- c(0.5959, 0.0447, 2.6279, 0.2897, 0.2837, 0.0504, -0.2188, 0.40
                    0.1666, 1.2067, 7.2392, 11.6091)
 mod322logt <- STVAR(gdpdef, p=3, M=2, params=params322logt, weight_function="logistic", weightfun_pars=c(2, 1),
                     cond_dist="Student", identification="recursive")
+mod322logt2 <- STVAR(gdpdef[1:60,], p=3, M=2, params=params322logt, weight_function="logistic", weightfun_pars=c(2, 1),
+                    cond_dist="Student", identification="recursive")
 
 # data=usamone, p=1, M=2, d=3, weight_function="relative_dens", identification="heteroskedasticity"
 theta_123relgh <- c(0.301922, 0.14077, 0.054866, 0.697999, 0.115812, -0.096371, 0.800912, -0.015313, 0.097591,
@@ -23,6 +25,9 @@ theta_123relgh <- c(0.301922, 0.14077, 0.054866, 0.697999, 0.115812, -0.096371, 
                     0.526162)
 mod123relgh <- STVAR(data=usamone, p=1, M=2, params=theta_123relgh, weight_function="relative_dens",
                      identification="heteroskedasticity")
+mod123relgh2 <- STVAR(data=usamone[1:50,], p=1, M=2, params=theta_123relgh, weight_function="relative_dens",
+                      identification="heteroskedasticity")
+
 
 test_that("GIRF works correctly", {
   girf1 <- GIRF(mod112rec, which_shocks=1:2, shock_size=1, N=3, R1=2, R2=4, init_regime=1, which_cumulative=2,
@@ -60,6 +65,9 @@ test_that("GIRF works correctly", {
                   which_cumulative=numeric(0), use_parallel=FALSE, seeds=1:3)
   gfevd3 <- GFEVD(mod123relgh, shock_size=2, N=1, initval_type="fixed", R1=1, R2=4, init_values=mod123relgh$data,
                   which_cumulative=c(1, 3), use_parallel=FALSE, seeds=3)
+  gfevd4 <- GFEVD(mod322logt2, use_data_shocks=TRUE, R1=1, N=2, use_parallel=FALSE, seeds=1:(nrow(mod322logt2$data)-3))
+  gfevd5 <- GFEVD(mod123relgh2, use_data_shocks=TRUE, R1=2, N=3, which_cumulative=1:2,
+                  use_parallel=FALSE, seeds=1:(nrow(mod123relgh2$data)-1))
 
   expect_equal(c(unname(gfevd1$gfevd_res[4, , 1:2])), c(0.993349651, 0.006650349, 0.001999672, 0.998000328), tol=1e-4)
   expect_equal(c(unname(gfevd2$gfevd_res[3, ,])), c(0.96153505, 0.03846495, 0.01188139, 0.98811861, 0.00125927,
@@ -67,4 +75,10 @@ test_that("GIRF works correctly", {
   expect_equal(c(unname(gfevd3$gfevd_res[2, ,])), c(0.654282189, 0.212599895, 0.133117916, 0.274154563, 0.049371263,
                                                     0.676474175, 0.202381661, 0.793597167, 0.004021173, 0.060652235,
                                                     0.426488073, 0.512859692, 0.060652235, 0.426488073, 0.512859692), tol=1e-4)
+  expect_equal(c(unname(gfevd4$gfevd_res[2, 1:2,])), c(0.8904198994, 0.1095801006, 0.0422365983, 0.9577634017, 0.0003456756,
+                                                       0.9996543244, 0.0003456756, 0.9996543244), tol=1e-4)
+  expect_equal(c(unname(gfevd4$data_gfevd_res[1, 2, 1, 1:2])), c(0.3099849, 0.5128602), tol=1e-4)
+  expect_equal(c(unname(gfevd5$gfevd_res[1, 1:3, 1:3])), c(0.663734461, 0.316968251, 0.019297288, 0.429773671, 0.142054266,
+                                                           0.428172063, 0.201048548, 0.797946741, 0.001004711), tol=1e-4)
+  expect_equal(c(unname(gfevd5$data_gfevd_res[2, 3, 2, 1:2])), c(0.9447989, 0.8897515), tol=1e-4)
 })

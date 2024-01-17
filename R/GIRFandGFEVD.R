@@ -327,6 +327,8 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 #' @return Returns and object of class 'gfevd' containing the GFEVD for all the variables and to
 #'   the transition weights. Note that the decomposition does not exist at horizon zero for transition weights
 #'   because the related GIRFs are always zero at impact.
+#'   If \code{use_data_shocks=TRUE}, also contains the GFEVDs for each length \eqn{p} history in the data as
+#'   4D array with dimensions \code{[horizon, variable, shock, time]}.
 #' @seealso \code{\link{GIRF}}, \code{\link{linear_IRF}}, \code{\link{fitSSTVAR}}
 #' @references
 #'  \itemize{
@@ -368,6 +370,12 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 #'  gfevd3 <- GFEVD(mod32logt, shock_size=-2, N=50, initval_type="random",
 #'   R1=50, R2=50, init_regime=1, use_parallel=FALSE)
 #'  plot(gfevd3) # Plot the GFEVD
+#'
+#'  # GFEVD calculated for each lenght p history in the data in such a way that
+#'  # for each history, the structural shock recoved from the fitted model is
+#'  # used.
+#'  gfevd4 <- GFEVD(mod32logt, N=20, use_data_shocks=TRUE, R1=10, use_parallel=FALSE)
+#'  plot(gfevd4) # Usual plot method
 #'  }
 #' @export
 
@@ -391,7 +399,9 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
       stop("The model does not contain data! Add data with the function 'add_data' or select another 'initval_type'.")
     }
     stopifnot(nrow(stvar$data) >= p)
-    R2 <- nrow(stvar$data) - p + 1 # The number of length p histories in the data
+    # The number of length p histories in the data: the last history is not used if data shocks are used,
+    # because the last history is used a by the time index T+1 for which the shock cannot be recovered.
+    R2 <- nrow(stvar$data) - p + ifelse(use_data_shocks, 0, 1)
     all_initvals <- array(vapply(1:R2, function(i1) stvar$data[i1:(i1 + p - 1),], numeric(p*d)),
                           dim=c(p, d, R2)) # [, , i1] for i1 initval
   } else if(initval_type == "random") {
@@ -414,14 +424,46 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
     stopifnot(all(which_cumulative %in% 1:d))
   }
 
-  ## CONTINUE HERE! simulate.stvar need anothet girf_pars argument: data_shocks
-  ## Obtain the shocks in simulate.stvar
+  # Calculate the shock sizes for each history in the data
+  if(use_data_shocks) {
+    if(stvar$model$identification == "heteroskedasticity") {
+      # Pick W and lambdas from the parameter vector
+      params_std <- reform_constrained_pars(p=p, M=M, d=d, params=stvar$params, weight_function=stvar$model$weight_function,
+                                            weightfun_pars=stvar$model$weightfun_pars, cond_dist=stvar$model$cond_dist,
+                                            identification=stvar$model$identification, B_constraints=stvar$model$B_constraints,
+                                            mean_constraints=stvar$model$mean_constraints, AR_constraints=stvar$model$AR_constraints,
+                                            weight_constraints=stvar$model$weight_constraints)
+      W <- pick_W(p=p, M=M, d=d, params=params_std, identification=stvar$model$identification)
+      lambdas <- pick_lambdas(p=p, M=M, d=d, params=params_std, identification=stvar$model$identification)
+      if(M > 1) lambdas <- cbind(1, matrix(lambdas, nrow=d, ncol=M-1)) # First column is column of ones for the first regime
+    }
+    data_shocks <- matrix(NA, nrow=R2, ncol=d) # [t, shock], t starts from the p+1:th obervation of the data and ends in T:th obs.
+    # Recover the structural shocks for each initial value in all_initvals:
+    for(i1 in 1:R2) { # Go through the length p histories
+      # Calculate the impact matrix
+      if(stvar$model$identification == "recursive") {
+        B_t <- t(chol(stvar$total_ccovs[, , i1])) # Lower triangular Cholesky decomposition of Omega_t
+      } else if(stvar$model$identification == "heteroskedasticity") {
+        if(M == 1) {
+          B_t <- W
+        } else {
+          tmp <- array(dim=c(d, d, M))
+          for(m in 1:M) {
+            tmp[, , m] <- stvar$transition_weights[i1, m]*diag(lambdas[, m])
+          }
+          B_t <- W%*%sqrt(apply(tmp, MARGIN=1:2, FUN=sum))
+        }
+      }
+      # Recover the structural shock
+      data_shocks[i1,] <- solve(B_t, stvar$residuals_raw[i1, ])
+    }
+  }
 
   # Function that estimates GIRF
   get_one_girf <- function(shock_numb, shock_size, seed, init_values_for_1girf) {
     if(initval_type == "random") init_values_for_1girf <- NULL
     simulate.stvar(stvar, nsim=N+1, init_values=init_values_for_1girf, ntimes=R1, seed=seed, init_regime=init_regime,
-                    burn_in=burn_in, girf_pars=list(shock_numb=shock_numb, shock_size=shock_size))
+                   burn_in=burn_in, girf_pars=list(shock_numb=shock_numb, shock_size=shock_size))
   }
 
   GIRF_shocks <- vector("list", length=d) # Storage for the GIRFs [[shock]]
@@ -447,9 +489,17 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
 
     for(i1 in 1:d) {
       cat(paste0("Estimating GIRFs for structural shock ", i1, "..."), "\n")
+      if(initval_type == "random") {
+        init_values_for_1girf <- NULL
+      } else {
+        init_values_for_1girf=matrix(all_initvals[, , i2], nrow=p, ncol=d)
+      }
+
       GIRF_shocks[[i1]] <- pbapply::pblapply(1:R2,
                                              function(i2) get_one_girf(shock_numb=i1,
-                                                                       shock_size=shock_size,
+                                                                       shock_size=ifelse(use_data_shocks,
+                                                                                         data_shocks[i2, i1],
+                                                                                         shock_size),
                                                                        seed=seeds[i2],
                                                                        init_values_for_1girf=matrix(all_initvals[, , i2],
                                                                                                     nrow=p, ncol=d)), cl=cl)
@@ -458,13 +508,14 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
   } else { # No parallel computing
     for(i1 in 1:d) {
       GIRF_shocks[[i1]] <- lapply(1:R2, function(i2) get_one_girf(shock_numb=i1,
-                                                                  shock_size=shock_size,
+                                                                  shock_size=ifelse(use_data_shocks,
+                                                                                    data_shocks[i2, i1],
+                                                                                    shock_size),
                                                                   seed=seeds[i2],
                                                                   init_values_for_1girf=matrix(all_initvals[, , i2],
                                                                                                nrow=p, ncol=d)))
     }
   }
-
 
   if(is.null(colnames(stvar$data))) {
     varnames <- paste0("Variable", 1:d)
@@ -488,11 +539,41 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
 
   GFEVD_results <- array(dim=c(N + 1, d, length(varnames)),
                          dimnames=list(0:N, shocknames, varnames)) # [horizon, shock, variable]
-  for(i1 in 1:ncol(GIRF_square_cumsum)) { # Go through the variables and possibly mixing weights
+  for(i1 in 1:ncol(GIRF_square_cumsum)) { # Go through the variables
     denominator <- rowSums(GIRF_square_cumsum[, i1, ]) # The denominators for h=0,1,...,N
     for(i2 in 1:d) { # Go through the shocks
       GFEVD_results[ , i2, i1] <- GIRF_square_cumsum[, i1, i2]/denominator
     }
+  }
+
+  # Is data shocks are used, calculate the GFEVD also separately for each length p history in the data
+  if(use_data_shocks) {
+    # Note that the dim is different to the other GFEVD_results below, because the interest is in the contribution of
+    # each shock to the variance of the forecast errors at various horizons in specific historical points of time.
+    data_GFEVD_results <- array(dim=c(N + 1, length(varnames), d, R2),
+                                dimnames=list(0:N, varnames, shocknames, 1:R2)) # [horizon, variable, shock, time])
+    for(i1 in 1:R2) { # Go through the length p histories
+      GIRF_square_cumsum_i1 <- array(NA, dim=c(N+1, length(varnames), d)) # [horizon, variable, shock] for time period i1
+      for(i2 in 1:d) { # Go through the shocks
+        res_in_matrix <- GIRF_shocks[[i2]][[i1]] # [horizon, variable] GIRF of shock i2 at the time i1
+        if(length(which_cumulative > 0)) { # Any GIRFs that should be accumulated?
+          for(i3 in which_cumulative) {
+            res_in_matrix[, i3] <- cumsum(res_in_matrix[, i3]) # Replace GIRF with cumulative GIRF
+          }
+        }
+        # Squared cumulative GIRF of shock i2 at the time i1
+        GIRF_square_cumsum_i1[, , i2] <- apply(res_in_matrix^2, MARGIN=2, FUN=cumsum) # [horizon, variable]
+      }
+      # Calculate the denonimators
+      for(i2 in 1:length(varnames)) { # Go through the variables
+        denominator <- rowSums(GIRF_square_cumsum_i1[, i2, ]) # The denominators for h=0,1,...,N (sums over socks)
+        for(i3 in 1:d) { # Go through the shocks
+          data_GFEVD_results[ , i2, i3, i1] <- GIRF_square_cumsum_i1[, i2, i3]/denominator
+        }
+      }
+    }
+  } else {
+    data_GFEVD_results <- NULL
   }
 
   if(use_parallel) cat("Finished!\n")
@@ -507,6 +588,7 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
                  init_values=init_values,
                  seeds=seeds,
                  burn_in=burn_in,
+                 data_gfevd_res=data_GFEVD_results,
                  stvar=stvar),
             class="gfevd")
 }

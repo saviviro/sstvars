@@ -99,6 +99,8 @@ The default is that all the values are printed.}
 Returns and object of class 'gfevd' containing the GFEVD for all the variables and to
   the transition weights. Note that the decomposition does not exist at horizon zero for transition weights
   because the related GIRFs are always zero at impact.
+  If \code{use_data_shocks=TRUE}, also contains the GFEVDs for each length \eqn{p} history in the data as
+  4D array with dimensions \code{[horizon, variable, shock, time]}.
 }
 \description{
 \code{GFEVD} estimates generalized forecast error variance decomposition
@@ -157,6 +159,12 @@ The GFEVD is a forecast error variance decomposition calculated with the general
  gfevd3 <- GFEVD(mod32logt, shock_size=-2, N=50, initval_type="random",
   R1=50, R2=50, init_regime=1, use_parallel=FALSE)
  plot(gfevd3) # Plot the GFEVD
+
+ # GFEVD calculated for each lenght p history in the data in such a way that
+ # for each history, the structural shock recoved from the fitted model is
+ # used.
+ gfevd4 <- GFEVD(mod32logt, N=20, use_data_shocks=TRUE, R1=10, use_parallel=FALSE)
+ plot(gfevd4) # Usual plot method
  }
 }
 \references{
