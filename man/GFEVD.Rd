@@ -74,6 +74,9 @@ responses should be cumulative. Default is none.}
 single core computing is supported if an initial value is specified (and
 the GIRF won't thus be estimated multiple times).}
 
+\item{burn_in}{Burn-in period for simulating initial values from a regime when \code{cond_dist!="Gaussian"}.
+See the details section.}
+
 \item{seeds}{a numeric vector containing the random number generator seed for estimation
 of each GIRF. Should have the length...
 \itemize{

@@ -20,6 +20,21 @@ fitSSTVAR(
 \item{stvar}{a an object of class \code{'stvar'}, created by, e.g., \code{fitSTVAR},
 specifying a reduced form or a structural model}
 
+\item{new_identification}{Which identification should the structural model use?
+(see the vignette or the references for details)
+ \describe{
+   \item{\code{"recursive"}:}{The usual lower-triangular recursive identification of the shocks via their impact responses.}
+   \item{\code{"heteroskedasticity"}:}{Identification by conditional heteroskedasticity, which imposes constant relative
+     impact responses for each shock.}
+ }}
+
+\item{new_B_constraints}{Employ further constraints on the impact matrix?
+A \eqn{(d \times d)} matrix with its entries imposing constraints on the impact matrix \eqn{B_t}:
+\code{NA} indicating that the element is unconstrained, a positive value indicating strict positive sign constraint,
+a negative value indicating strict negative sign constraint, and zero indicating that the element is constrained to zero.
+Currently only available for models with \code{identification="heteroskedasticity"} due to the (in)availability of appropriate
+parametrizations that allow such constraints to be imposed.}
+
 \item{maxit}{the maximum number of iterations in the variable metric algorithm.}
 
 \item{maxit_robust}{the maximum number of iterations on the first phase robust estimation, if employed.}

@@ -23,8 +23,4 @@ Returns a length two numeric vector with the "year" (or "major")
 \code{get_new_start} calculates the new starting time of series
   that is forwarded some number of steps.
 }
-\examples{
- get_new_start(y_start=c(1999, 12), y_freq=12, steps_forward=1)
- get_new_start(y_start=c(1999, 12), y_freq=52, steps_forward=2)
-}
 \keyword{internal}

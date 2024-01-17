@@ -16,7 +16,7 @@
 #'   knowledge of the stationary distribution, models with other than Gaussian conditional distribution
 #'   use a simulation procedure with a burn-in period. See the details section.
 #' @param ntimes how many sets of simulations should be performed?
-#' @param burnin Burn-in period for simulating initial values from a regime when \code{cond_dist!="Gaussian"}.
+#' @param burn_in Burn-in period for simulating initial values from a regime when \code{cond_dist!="Gaussian"}.
 #'  See the details section.
 #' @param drop if \code{TRUE} (default) then the components of the returned list are coerced to lower dimension if
 #'  \code{ntimes==1}, i.e., \code{$sample} and \code{$transition_weights} will be matrices, and \code{$component}
@@ -26,7 +26,7 @@
 #' @details The stationary distribution of each regime is not known when \code{cond_dist!="Gaussian"}. Therefore, when using
 #'   \code{init_regime} to simulate the initial values from a given regime, we employ the following simulation procedure to
 #'   obtain the initial values. First, we set the initial values to the unconditional mean of the specified regime. Then,
-#'   we simulate a large number observations from that regime as specified in the argument \code{burnin}. The first \eqn{p}
+#'   we simulate a large number observations from that regime as specified in the argument \code{burn_in}. The first \eqn{p}
 #'   observations obtained after the burn-in period are then set as the initial values obtained from the specified regime.
 #'
 #'   The argument \code{ntimes} is intended for forecasting, which is used by the predict method (see \code{?predict.stvar}).
@@ -64,7 +64,7 @@
 #'  plot.ts(sim2$transition_weights) # Transition weights
 #' @export
 
-simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, init_regime, ntimes=1, burnin=1000,
+simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, init_regime, ntimes=1, burn_in=1000,
                            drop=TRUE, girf_pars=NULL) {
   # girf_pars$shock_numb - which shock?
   # girf_pars$shock_size - size of the structural shock?
@@ -94,7 +94,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   if(!missing(init_regime)) {
     stopifnot(init_regime %in% 1:M)
   }
-  if(!all_pos_ints(c(nsim, ntimes, burnin))) stop("Arguments nsim, ntimes, and burnin must be positive integers")
+  if(!all_pos_ints(c(nsim, ntimes, burn_in))) stop("Arguments nsim, ntimes, and burn_in must be positive integers")
   if(!is.null(init_values)) {
     if(!is.matrix(init_values)) stop("init_values must be a numeric matrix")
     if(anyNA(init_values)) stop("init_values contains NA values")
@@ -175,7 +175,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
       init_values <- matrix(mu + L%*%rnorm(d*p), nrow=p, ncol=d, byrow=TRUE) # i:th row for the i:th length d random vector
     } else {
       # Generate the initial values using the simulation procedure with a burn-in period.
-      init_values <- simulate_from_regime(stvar=stvar, regime=init_regime, nsim=burnin)
+      init_values <- simulate_from_regime(stvar=stvar, regime=init_regime, nsim=burn_in)
     }
   }
   # Take the last p rows of initial values as the initial values

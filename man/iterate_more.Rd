@@ -47,5 +47,5 @@ fit12
 }
 \seealso{
 \code{\link{fitSTVAR}}, \code{\link{STVAR}}, \code{\link[stats]{optim}},
- \code{\link{swap_W_signs}}, \code{\link{reorder_W_columns}}, \code{\link{iterate_more}}
+ \code{\link{swap_W_signs}}, \code{\link{reorder_W_columns}}
 }

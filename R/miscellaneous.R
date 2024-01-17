@@ -75,9 +75,6 @@ regime_distance <- function(regime_pars1, regime_pars2) {
 #'   time point in the first element the "quarter/month/week/day" (or "minor")
 #'   time in the second element for a series that is forwarded from \code{y_start}
 #'   \code{steps_forward} steps forward.
-#' @examples
-#'  get_new_start(y_start=c(1999, 12), y_freq=12, steps_forward=1)
-#'  get_new_start(y_start=c(1999, 12), y_freq=52, steps_forward=2)
 #' @keywords internal
 
 get_new_start <- function(y_start, y_freq, steps_forward) {

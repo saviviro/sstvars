@@ -12,7 +12,7 @@
   init_values = NULL,
   init_regime,
   ntimes = 1,
-  burnin = 1000,
+  burn_in = 1000,
   drop = TRUE,
   girf_pars = NULL
 )
@@ -39,7 +39,7 @@ use a simulation procedure with a burn-in period. See the details section.}
 
 \item{ntimes}{how many sets of simulations should be performed?}
 
-\item{burnin}{Burn-in period for simulating initial values from a regime when \code{cond_dist!="Gaussian"}.
+\item{burn_in}{Burn-in period for simulating initial values from a regime when \code{cond_dist!="Gaussian"}.
 See the details section.}
 
 \item{drop}{if \code{TRUE} (default) then the components of the returned list are coerced to lower dimension if
@@ -68,7 +68,7 @@ If \code{drop==TRUE} and \code{ntimes==1} (default): \code{$sample}, \code{$comp
 The stationary distribution of each regime is not known when \code{cond_dist!="Gaussian"}. Therefore, when using
   \code{init_regime} to simulate the initial values from a given regime, we employ the following simulation procedure to
   obtain the initial values. First, we set the initial values to the unconditional mean of the specified regime. Then,
-  we simulate a large number observations from that regime as specified in the argument \code{burnin}. The first \eqn{p}
+  we simulate a large number observations from that regime as specified in the argument \code{burn_in}. The first \eqn{p}
   observations obtained after the burn-in period are then set as the initial values obtained from the specified regime.
 
   The argument \code{ntimes} is intended for forecasting, which is used by the predict method (see \code{?predict.stvar}).

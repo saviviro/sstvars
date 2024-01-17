@@ -97,6 +97,9 @@ confidence levels of the confidence intervals.}
 single core computing is supported if an initial value is specified (and
 the GIRF won't thus be estimated multiple times).}
 
+\item{burn_in}{Burn-in period for simulating initial values from a regime when \code{cond_dist!="Gaussian"}.
+See the details section.}
+
 \item{seeds}{a length \code{R2} vector containing the random number generator
 seed for estimation of each GIRF. A single number of an initial value is
 specified. or \code{NULL} for not initializing the seed. Exists for

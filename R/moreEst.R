@@ -11,7 +11,7 @@
 #'   with the main estimation function \code{fitSTVAR} or \code{fitSSTVAR}.
 #' @return Returns an object of class \code{'stvar'} defining the estimated model
 #' @seealso \code{\link{fitSTVAR}}, \code{\link{STVAR}}, \code{\link[stats]{optim}},
-#'  \code{\link{swap_W_signs}}, \code{\link{reorder_W_columns}}, \code{\link{iterate_more}}
+#'  \code{\link{swap_W_signs}}, \code{\link{reorder_W_columns}}
 #' @inherit STVAR references
 #' @examples
 #' \donttest{
@@ -110,7 +110,19 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
 #'   specifying a reduced form or a structural model
 #' @param robust_method Should some robust estimation method be used in the estimation before switching
 #'   to the gradient based variable metric algorithm? See details.
-#'
+#' @param new_identification Which identification should the structural model use?
+#'  (see the vignette or the references for details)
+#'   \describe{
+#'     \item{\code{"recursive"}:}{The usual lower-triangular recursive identification of the shocks via their impact responses.}
+#'     \item{\code{"heteroskedasticity"}:}{Identification by conditional heteroskedasticity, which imposes constant relative
+#'       impact responses for each shock.}
+#'   }
+#' @param new_B_constraints Employ further constraints on the impact matrix?
+#'   A \eqn{(d \times d)} matrix with its entries imposing constraints on the impact matrix \eqn{B_t}:
+#'   \code{NA} indicating that the element is unconstrained, a positive value indicating strict positive sign constraint,
+#'   a negative value indicating strict negative sign constraint, and zero indicating that the element is constrained to zero.
+#'   Currently only available for models with \code{identification="heteroskedasticity"} due to the (in)availability of appropriate
+#'   parametrizations that allow such constraints to be imposed.
 #' @details When the structural model does not impose overidentifying constraints, it is directly
 #'   obtained from the reduced form model, and estimation is not required. When overidentifying constraints
 #'   are imposed, the model is estimated via ..
@@ -271,7 +283,7 @@ fitSSTVAR <- function(stvar, new_identification=c("recursive", "heteroskedastici
   if(cond_dist == "Gaussian") {
     n_dist_pars <- 0
   } else { # cond_dist == "Student
-    n_dist_pars
+    n_dist_pars <- 1
   }
   n_pars <- n_mean_pars + n_ar_pars + n_covmat_pars + n_weight_pars + n_dist_pars
 

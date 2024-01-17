@@ -12,10 +12,10 @@ create_Fi_matrix(i, T_obs)
 \item{T_obs}{Integer, the number of time periods or observations in the dataset, corresponding to the dimensions of the matrix.}
 }
 \value{
-A \code{(T_obs \times T_obs)} matrix with 1's on the \code{(i+1)}-th sub-diagonal and 0's elsewhere.
+A \eqn{(T_obs \times T_obs)} matrix with 1's on the \code{(i+1)}-th sub-diagonal and 0's elsewhere.
 }
 \description{
-\code{create_Fi_matrix} function generates\code{(T_obs \times T_obs)} matrix
+\code{create_Fi_matrix} function generates a \eqn{(T_obs \times T_obs)} matrix
 with 1's on the \code{(i+1)}-th sub-diagonal and 0's elsewhere.
 }
 \details{

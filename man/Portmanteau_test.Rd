@@ -11,7 +11,7 @@ Portmanteau_test(stvar, nlags = 20, which_test = c("autocorr", "het.sked"))
 
 \item{nlags}{a strictly positive integer specifying the number of lags to be tested.}
 
-\item{type}{should test for remaining autocorrelation or heteroskedasticity be calculated?}
+\item{which_test}{should test for remaining autocorrelation or heteroskedasticity be calculated?}
 }
 \value{
 A list with class "hypotest" containing the test results and arguments used to calculate the test.

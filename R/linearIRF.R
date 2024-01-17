@@ -168,7 +168,7 @@ linear_IRF <- function(stvar, N=30, regime=1, which_cumulative=numeric(0), scale
   all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params, identification=identification)
   all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
   weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function,
-                            weightfun_pars=weightufun_pars, cond_dist=cond_dist)
+                            weightfun_pars=weightfun_pars, cond_dist=cond_dist)
   distpars <- pick_distpars(params=params, cond_dist=cond_dist)
 
   # Check the argument scale and which_cumulative
