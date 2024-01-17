@@ -281,7 +281,7 @@ plot.girf <- function(x, margs, ...) {
 
 #' @describeIn GFEVD plot method
 #' @inheritParams print.gfevd
-#' @param ... currently not used.
+#' @param ... graphical parameters passed to the \code{'ts'} plot method when using \code{data_shock_pars}.
 #' @param data_shock_pars if \code{use_data_shocks}, alternative plot method can be used that
 #'  plots the relative contribution of a given shock to the forecast error variance of each variable
 #'  at a given horizon. Should be a length two numeric vector with the number of the shock (1,..,d)
@@ -336,9 +336,10 @@ plot.gfevd <- function(x, ..., data_shock_pars=NULL) {
 
   }
 
+  M <- gfevd$stvar$model$M
   if(is.null(data_shock_pars)) { # The usual GFEVD plot
     # Loop through the GFEVDs
-    for(i1 in 1:n_gfevds) {
+    for(i1 in 1:(n_gfevds - ifelse(M <= 2, 1, 0))) { # Don't plot redundant tw's
       if(i1 > 1) grDevices::devAskNewPage(TRUE)
       plot_gfevd(var_ind=i1, main=ifelse(i1 <= n_shocks,
                                          paste("GFEVD for ", varnames[i1]),
@@ -346,13 +347,17 @@ plot.gfevd <- function(x, ..., data_shock_pars=NULL) {
 
     }
   } else {
+    p <- gfevd$stvar$model$p
     d <- gfevd$stvar$model$d
     N <- gfevd$N
     stopifnot(length(data_shock_pars) == 2); stopifnot(data_shock_pars[1] %in% 1:d); stopifnot(data_shock_pars[2] %in% 0:N)
-    gfevd$data_gfevd_res[data_shock_pars[2]+1, data_shock_pars[1], ,] # [horizon, variable, shock, time]
+    # Time series of the GFEVDs
+    gfevd_ts <- ts(t(gfevd$data_gfevd_res[data_shock_pars[2]+1, , data_shock_pars[1], ]), frequency=frequency(gfevd$stvar$data),
+       start=get_new_start(y_start=start(gfevd$stvar$data), y_freq=frequency(gfevd$stvar$data), steps_forward=p))
 
-    ts(t(gfevd$data_gfevd_res[data_shock_pars[2]+1, data_shock_pars[1]+1, ,]),
-       frequency=frequency(gfevd$stvar$data))
+    # Plot the GFEVDs
+    plot(gfevd_ts[,1:(ncol(gfevd_ts) - ifelse(data_shock_pars[2] == 0, M, ifelse(M <= 2, 1, 0)))], # Remove reduntant tw:s
+         main=paste("Contribution of Shock", data_shock_pars[1], "at horizon", data_shock_pars[2]), ...)
   }
 }
 
