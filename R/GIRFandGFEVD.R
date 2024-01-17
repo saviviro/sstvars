@@ -323,7 +323,7 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 #'   in the data. The GFEVD is then calculated as the average of the GFEVDs obtained from the GIRFs estimated for
 #'   the data shocks. The plot and print methods can be used as usual for this GFEVD. However, this feature also
 #'   obtain the contribution of each shock to the variance of the forecast errors at various horizons in specific
-#'   historical points of time. FILL IN HOW TO DO THIS / PLOT METHOD ETC.
+#'   historical points of time. This can be done by using the plot method with the argument \code{data_shock_pars}.
 #' @return Returns and object of class 'gfevd' containing the GFEVD for all the variables and to
 #'   the transition weights. Note that the decomposition does not exist at horizon zero for transition weights
 #'   because the related GIRFs are always zero at impact.

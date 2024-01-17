@@ -108,7 +108,8 @@ plot.stvarpred <- function(x, ..., nt, trans_weights=TRUE) {
   } else {
     par(mfrow=c(d, 1), mar=c(2.5, 2.5, 2.1, 1))
   }
-  make_ts <- function(x, trans=FALSE) { # Make ts that has the first value the same as the last value of the observed series/estim. m.weights.
+  make_ts <- function(x, trans=FALSE) {
+    # Make ts that has the first value the same as the last value of the observed series/estim. m.weights.
     if(trans) {
       last_obs <- transition_weights[n_trans,]
     } else {
@@ -125,7 +126,7 @@ plot.stvarpred <- function(x, ..., nt, trans_weights=TRUE) {
   reg_names <- attributes(stvarpred$trans_pred)$dimnames[[2]]
   pred_ints <- aperm(stvarpred$pred_ints, perm=c(1, 3, 2)) # [step, series, quantiles]
   trans_pred_ints <- aperm(stvarpred$trans_pred_ints, perm=c(1, 3, 2)) # [step, series, quantiles]
-  all_val <- lapply(1:d, function(j) c(ts_dat[,j], ts_pred[,j], simplify2array(pred_ints, higher=TRUE)[, j, ])) # All values to get ylims
+  all_val <- lapply(1:d, function(j) c(ts_dat[,j], ts_pred[,j], simplify2array(pred_ints, higher=TRUE)[, j, ])) # All vals to get ylims
 
   # Prediction intervals, we lapply through quantiles [, , q]
   ts_fun_fact <- function(inds) function(pred_ints, trans=FALSE) lapply(inds, function(i1) make_ts(pred_ints[, , i1], trans))
@@ -281,9 +282,13 @@ plot.girf <- function(x, margs, ...) {
 #' @describeIn GFEVD plot method
 #' @inheritParams print.gfevd
 #' @param ... currently not used.
+#' @param data_shock_pars if \code{use_data_shocks}, alternative plot method can be used that
+#'  plots the relative contribution of a given shock to the forecast error variance of each variable
+#'  at a given horizon. Should be a length two numeric vector with the number of the shock (1,..,d)
+#'  in the first element and the horizon (0,1,2,...,N) in the second element.
 #' @export
 
-plot.gfevd <- function(x, ...) {
+plot.gfevd <- function(x, ..., data_shock_pars=NULL) {
   old_par <- par(no.readonly=TRUE)
   on.exit(par(old_par))
 
@@ -331,13 +336,23 @@ plot.gfevd <- function(x, ...) {
 
   }
 
-  # Loop through the GFEVDs
-  for(i1 in 1:n_gfevds) {
-    if(i1 > 1) grDevices::devAskNewPage(TRUE)
-    plot_gfevd(var_ind=i1, main=ifelse(i1 <= n_shocks,
-                                       paste("GFEVD for ", varnames[i1]),
-                                       paste("GFEVD for regime", i1 - n_shocks, "trans. weight")))
+  if(is.null(data_shock_pars)) { # The usual GFEVD plot
+    # Loop through the GFEVDs
+    for(i1 in 1:n_gfevds) {
+      if(i1 > 1) grDevices::devAskNewPage(TRUE)
+      plot_gfevd(var_ind=i1, main=ifelse(i1 <= n_shocks,
+                                         paste("GFEVD for ", varnames[i1]),
+                                         paste("GFEVD for regime", i1 - n_shocks, "trans. weight")))
 
+    }
+  } else {
+    d <- gfevd$stvar$model$d
+    N <- gfevd$N
+    stopifnot(length(data_shock_pars) == 2); stopifnot(data_shock_pars[1] %in% 1:d); stopifnot(data_shock_pars[2] %in% 0:N)
+    gfevd$data_gfevd_res[data_shock_pars[2]+1, data_shock_pars[1], ,] # [horizon, variable, shock, time]
+
+    ts(t(gfevd$data_gfevd_res[data_shock_pars[2]+1, data_shock_pars[1]+1, ,]),
+       frequency=frequency(gfevd$stvar$data))
   }
 }
 

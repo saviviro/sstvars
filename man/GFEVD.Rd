@@ -25,7 +25,7 @@ GFEVD(
   use_parallel = TRUE
 )
 
-\method{plot}{gfevd}(x, ...)
+\method{plot}{gfevd}(x, ..., data_shock_pars = NULL)
 
 \method{print}{gfevd}(x, ..., digits = 2, N_to_print)
 }
@@ -90,6 +90,11 @@ anything.}
 
 \item{...}{currently not used.}
 
+\item{data_shock_pars}{if \code{use_data_shocks}, alternative plot method can be used that
+plots the relative contribution of a given shock to the forecast error variance of each variable
+at a given horizon. Should be a length two numeric vector with the number of the shock (1,..,d)
+in the first element and the horizon (0,1,2,...,N) in the second element.}
+
 \item{digits}{the number of decimals to print}
 
 \item{N_to_print}{an integer specifying the horizon how far to print the estimates.
@@ -115,7 +120,7 @@ The GFEVD is a forecast error variance decomposition calculated with the general
   in the data. The GFEVD is then calculated as the average of the GFEVDs obtained from the GIRFs estimated for
   the data shocks. The plot and print methods can be used as usual for this GFEVD. However, this feature also
   obtain the contribution of each shock to the variance of the forecast errors at various horizons in specific
-  historical points of time. FILL IN HOW TO DO THIS / PLOT METHOD ETC.
+  historical points of time. This can be done by using the plot method with the argument \code{data_shock_pars}.
 }
 \section{Functions}{
 \itemize{
