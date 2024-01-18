@@ -124,6 +124,8 @@ The GFEVD is a forecast error variance decomposition calculated with the general
   the data shocks. The plot and print methods can be used as usual for this GFEVD. However, this feature also
   obtain the contribution of each shock to the variance of the forecast errors at various horizons in specific
   historical points of time. This can be done by using the plot method with the argument \code{data_shock_pars}.
+  Note that the arguments \code{shock_size}, \code{initval_type}, and \code{init_regime} are ignored if
+  \code{use_data_shocks == TRUE}.
 }
 \section{Functions}{
 \itemize{
@@ -173,6 +175,12 @@ The GFEVD is a forecast error variance decomposition calculated with the general
  # used.
  gfevd4 <- GFEVD(mod32logt, N=20, use_data_shocks=TRUE, R1=10, use_parallel=FALSE)
  plot(gfevd4) # Usual plot method
+
+ # Plot the contribution of the first to the variance of the forecast errors at
+ # the historial points of time using the structural shocks recovered from the data:
+ plot(gfevd4, data_shock_pars=c(1, 0)) # Contribution at impact
+ plot(gfevd4, data_shock_pars=c(1, 2)) # Contribution after two periods
+ plot(gfevd4, data_shock_pars=c(1, 4)) # Contribution after four periods
  }
 }
 \references{

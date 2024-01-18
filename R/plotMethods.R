@@ -301,7 +301,6 @@ plot.gfevd <- function(x, ..., data_shock_pars=NULL) {
 
   # Function to plot the GFEVD for each variable separately
   plot_gfevd <- function(var_ind, main) {
-
     one_gfevd <- gfevd_res[, , var_ind] # [horizon, shock]
     mycums <- as.matrix(1 - apply(one_gfevd[, 1:(ncol(one_gfevd) - 1), drop=FALSE], MARGIN=1, FUN=cumsum))
     if(ncol(mycums) > 1) mycums <- t(mycums)
@@ -351,13 +350,36 @@ plot.gfevd <- function(x, ..., data_shock_pars=NULL) {
     d <- gfevd$stvar$model$d
     N <- gfevd$N
     stopifnot(length(data_shock_pars) == 2); stopifnot(data_shock_pars[1] %in% 1:d); stopifnot(data_shock_pars[2] %in% 0:N)
+    graphics::par(las=1, mar=c(0, 5, 0, 0.4))
+    extra_marg <- 0.3
+    # One row for one GFEVD, but remove redundant transition weight GFEVDs and add two extra rows for margins
+    n_gfevds_to_remove <- ifelse(data_shock_pars[2] == 0, M, ifelse(M <= 2, 1, 0))
+    nrows <- n_gfevds - n_gfevds_to_remove + 2
+    ncols <- 1
+    nelements <- nrows*ncols
+    layout(matrix(1:nelements, byrow=FALSE, nrow=nrows, ncol=ncols),
+           widths=rep(1, times=ncols - 1),
+           heights=c(extra_marg, rep(1, times=nrows - 2), extra_marg))
+    empty_plot <- function() plot(0, xaxt='n', yaxt='n', bty='n', pch='', ylab='', xlab='') # Plots empty plot
     # Time series of the GFEVDs
     gfevd_ts <- ts(t(gfevd$data_gfevd_res[data_shock_pars[2]+1, , data_shock_pars[1], ]), frequency=frequency(gfevd$stvar$data),
        start=get_new_start(y_start=start(gfevd$stvar$data), y_freq=frequency(gfevd$stvar$data), steps_forward=p))
 
     # Plot the GFEVDs
-    plot(gfevd_ts[,1:(ncol(gfevd_ts) - ifelse(data_shock_pars[2] == 0, M, ifelse(M <= 2, 1, 0)))], # Remove reduntant tw:s
-         main=paste("Contribution of Shock", data_shock_pars[1], "at horizon", data_shock_pars[2]), ...)
+    empty_plot() # Plot top margin
+    text(x=1, y=0.0, font=2,
+         paste("Contribution of Shock", data_shock_pars[1], "at horizon", data_shock_pars[2]), cex=1.5)
+    for(i1 in 1:(ncol(gfevd_ts) - n_gfevds_to_remove)) {
+      if(i1 == 1) {
+        plot(gfevd_ts[,i1],
+             ylim=c(0, 1), ylab=varnames[i1], xlab="", xaxt="n", ...)
+      } else if(i1 == ncol(gfevd_ts) - n_gfevds_to_remove) {
+        plot(gfevd_ts[,i1], ylim=c(0, 1), ylab=varnames[i1], xlab="", xaxt="s", ...)
+      } else {
+        plot(gfevd_ts[,i1], ylim=c(0, 1), ylab=varnames[i1], xlab="", xaxt="n", ...)
+      }
+    }
+    empty_plot() # Plot bottom margin
   }
 }
 
