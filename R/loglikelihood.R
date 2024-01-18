@@ -149,11 +149,11 @@
 #' @return
 #'   \describe{
 #'     \item{If \code{to_return="loglik"}:}{the log-likelihood of the specified model.}
-#'     \item{If \code{to_return=="tw"}:}{a size \eqn{((n_obs-p)\times M)} matrix containing the transition weights: for m:th component
+#'     \item{If \code{to_return=="tw"}:}{a size \code{[n_obs-p, M]} matrix containing the transition weights: for m:th component
 #'       in m:th column.}
 #'     \item{If \code{to_return=="loglik_and_tw"}:}{a list of two elements. The first element (\code{$loglik}) contains the
 #'       log-likelihood and the second element (\code{$tw}) contains the transition weights.}
-#'     \item{If \code{to_return=="terms"}:}{a size \eqn{((n\_obs-p)\times 1)} numeric vector containing the terms \eqn{l_{t}}.}
+#'     \item{If \code{to_return=="terms"}:}{a length \code{n_obs-p} numeric vector containing the terms \eqn{l_{t}}.}
 #'     \item{If \code{to_return=="regime_cmeans"}:}{an \code{[n_obs-p, d, M]} array containing the regimewise conditional means.}
 #'     \item{If \code{to_return=="total_cmeans"}:}{a \code{[n_obs-p, d]} matrix containing the conditional means of the process.}
 #'     \item{If \code{to_return=="total_ccovs"}:}{an \code{[d, d, n_obs-p]} array containing the conditional covariance matrices of

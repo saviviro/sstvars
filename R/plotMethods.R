@@ -325,7 +325,7 @@ plot.gfevd <- function(x, ..., data_shock_pars=NULL) {
       }
     }
 
-    # Add shock legengs
+    # Add shock legends
     ylim_ajd <- ifelse(n_shocks < 500, 0.02*n_shocks, 0.01*n_shocks)
     colpal2 <- grDevices::adjustcolor(colpal, alpha.f=3)
     xtext_adj <- ifelse(gfevd$N < 10, 0.75 - gfevd$N^(-1/3), 0.4 - gfevd$N/150)

@@ -18,7 +18,8 @@ get_residuals(
   mean_constraints = NULL,
   weight_constraints = NULL,
   B_constraints = NULL,
-  standardize = TRUE
+  standardize = TRUE,
+  structural_shocks = FALSE
 )
 }
 \arguments{
@@ -155,12 +156,17 @@ Currently only available for models with \code{identification="heteroskedasticit
 parametrizations that allow such constraints to be imposed.}
 
 \item{standardize}{standardize the residuals to identity matrix covariance matrix?}
+
+\item{structural_shocks}{If \code{TRUE}, returns structural shocks instead of residuals
+(not available if \code{identification == "reduced_form"}, argument \code{standardize}
+is if structural shocks are to be returned).}
 }
 \value{
 Returns a \eqn{(T \times d)} matrix containing...
    \describe{
      \item{If \code{standardize == TRUE}:}{the standardized Pearson residuals.}
      \item{If \code{standardize == FALSE}:}{the nonstandardized residuals.}
+     \item{If \code{structural_shocks == TRUE}:}{the structural shocks.}
    }
   Note that the starting time is the start time of data plus \eqn{p + 1},
   as the first \eqn{p} observations are used as initial values.
