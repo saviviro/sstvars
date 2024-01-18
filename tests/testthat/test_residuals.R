@@ -241,4 +241,17 @@ test_that("get_residuals works correctly", {
   expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222logistictsh_2_1, weight_function="logistic", weightfun_pars=c(2, 1),
                                cond_dist="Student", identification="heteroskedasticity", standardize=FALSE)[c(1, 242),]),
                c(-1.58310517, -0.61862850, -0.07319559, -0.16385961), tolerance=1e-3)
+
+
+  # Structural shocks
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=c(theta_222thres_2_1, 100), weight_function="threshold",
+                               weightfun_pars=c(2, 1), cond_dist="Student", identification="recursive",
+                               structural_shocks=TRUE)[c(1, 242),]),
+               c(-3.2995215, -0.9229200, 0.4557586, -0.2485637), tolerance=1e-3)
+  expect_equal(c(get_residuals(data=gdpdef, p=1, M=2, params=theta_122relgsh, weight_function="relative_dens",
+                               identification="heteroskedasticity", structural_shocks=TRUE)[c(1, 243),]),
+               c(-0.83735425, 0.06954961, -1.40338622, 0.45596239), tolerance=1e-3)
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222logistictsh_2_1, weight_function="logistic", weightfun_pars=c(2, 1),
+                               cond_dist="Student", identification="heteroskedasticity", structural_shocks=TRUE)[c(12, 142),]),
+               c(-1.35036836, -0.42294593, 0.95211166, 0.06125506), tolerance=1e-3)
 })

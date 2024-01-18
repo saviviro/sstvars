@@ -64,6 +64,17 @@ get_residuals <- function(data, p, M, params, weight_function=c("relative_dens",
                                       weight_constraints=weight_constraints, B_constraints=B_constraints,
                                       check_params=TRUE, to_return="tw")
 
+  if(structural_shocks && identification == "heteroskedasticity") { # Obtain W and lambdas
+     params_std <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function,
+                                           weightfun_pars=weightfun_pars, cond_dist=cond_dist,
+                                           identification=identification, AR_constraints=AR_constraints,
+                                           mean_constraints=mean_constraints,weight_constraints=weight_constraints,
+                                           B_constraints=B_constraints)
+     W <- pick_W(p=p, M=M, d=d, params=params_std, identification=identification)
+     lambdas <- pick_lambdas(p=p, M=M, d=d, params=params_std, identification=identification)
+     if(M > 1) lambdas <- cbind(1, matrix(lambdas, nrow=d, ncol=M-1)) # First column is column of ones for the first regime
+  }
+
   # Go through each point of time and calculate the residuals/shocks
   for(i1 in 1:T_obs) {
     if(structural_shocks) { # Structural shock:
@@ -82,7 +93,7 @@ get_residuals <- function(data, p, M, params, weight_function=c("relative_dens",
         }
       }
       # Recover the structural shock
-      data_shocks[i1,] <- solve(B_t, y_minus_mu[i1, ])
+      all_residuals[i1,] <- solve(B_t, y_minus_mu[i1, ])
     } else { # Standardized Pearson residual:
       all_residuals[i1,] <- solve(unvec(d=d, a=get_symmetric_sqrt(Omega_t[, , i1])), y_minus_mu[i1,])
     }

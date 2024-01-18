@@ -80,6 +80,7 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
     lok_and_tw <- list(loglik=NA, mw=NA)
     IC <- data.frame(AIC=NA, HQIC=NA, BIC=NA)
     residuals_raw <- residuals_std <- NA
+    structural_shocks <- NA
   } else {
     if(npars >= d*nrow(data)) warning("There are at least as many parameters in the model as there are observations in the data")
     lok_and_tw <- loglikelihood(data=data, p=p, M=M, params=params,
@@ -102,6 +103,16 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
                                    mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                                    B_constraints=B_constraints, standardize=TRUE)
     IC <- get_IC(loglik=lok_and_tw$loglik, npars=npars, T_obs=nrow(data) - p)
+    if(identification == "reduced_form") {
+      structural_shocks <- NA
+    } else {
+      structural_shocks <- get_residuals(data=data, p=p, M=M, params=params,
+                                         weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                         cond_dist=cond_dist, parametrization=parametrization,
+                                         identification=identification, AR_constraints=AR_constraints,
+                                         mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                                         B_constraints=B_constraints, structural_shocks=TRUE)
+    }
   }
 
   # Standard errors
@@ -179,6 +190,7 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
                                      regime_means=regime_means),
                  residuals_raw=residuals_raw,
                  residuals_std=residuals_std,
+                 structural_shocks=structural_shocks,
                  loglik=structure(lok_and_tw$loglik,
                                   class="logLik",
                                   df=npars),
