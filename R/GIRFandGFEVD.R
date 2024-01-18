@@ -445,26 +445,8 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
       lambdas <- pick_lambdas(p=p, M=M, d=d, params=params_std, identification=stvar$model$identification)
       if(M > 1) lambdas <- cbind(1, matrix(lambdas, nrow=d, ncol=M-1)) # First column is column of ones for the first regime
     }
-    data_shocks <- matrix(NA, nrow=R2, ncol=d) # [t, shock], t starts from the p+1:th obervation of the data and ends in T:th obs.
     # Recover the structural shocks for each initial value in all_initvals:
-    for(i1 in 1:R2) { # Go through the length p histories
-      # Calculate the impact matrix
-      if(stvar$model$identification == "recursive") {
-        B_t <- t(chol(stvar$total_ccovs[, , i1])) # Lower triangular Cholesky decomposition of Omega_t
-      } else if(stvar$model$identification == "heteroskedasticity") {
-        if(M == 1) {
-          B_t <- W
-        } else {
-          tmp <- array(dim=c(d, d, M))
-          for(m in 1:M) {
-            tmp[, , m] <- stvar$transition_weights[i1, m]*diag(lambdas[, m])
-          }
-          B_t <- W%*%sqrt(apply(tmp, MARGIN=1:2, FUN=sum))
-        }
-      }
-      # Recover the structural shock
-      data_shocks[i1,] <- solve(B_t, stvar$residuals_raw[i1, ])
-    }
+    data_shocks <- stvar$structural_shocks
   }
 
   # Function that estimates GIRF
