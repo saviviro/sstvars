@@ -1,4 +1,4 @@
-\begin{thebibliography}{26}
+\begin{thebibliography}{31}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -22,12 +22,27 @@ Aomoto K, Kita M (2011).
 \newblock 1st edition. Springer-Verlag, Tokyo.
 \newblock \doi{10.1007/978-4-431-53938-4}.
 
+\bibitem[{Blondel and Nesterov(2005)}]{Blondel+Nesterov:2005}
+Blondel V, Nesterov Y (2005).
+\newblock \enquote{Computationally Efficient Approximations of the Joint
+  Spectral Radius.}
+\newblock \emph{SIAM Journal on Matrix Analysis and Applications},
+  \textbf{27}(1), 256--272.
+\newblock \doi{10.1137/040607009}.
+
 \bibitem[{Buse(1982)}]{Buse:1982}
 Buse A (1982).
 \newblock \enquote{The Likelihood Ratio, Wald, and Lagrange Multiplier Tests:
   An Expository Note.}
 \newblock \emph{The American Statistician}, \textbf{36}(3a), 153--157.
 \newblock \doi{10.1080/00031305.1982.10482817}.
+
+\bibitem[{Chang and Blondel(2013)}]{Chang+Blondel:2013}
+Chang CT, Blondel V (2013).
+\newblock \enquote{An experimental study of approximation algorithms for the
+  joint spectral radius.}
+\newblock \emph{Numerical Algorithms}, \textbf{64}, 181--202.
+\newblock \doi{10.1007/s11075-012-9661-z}.
 
 \bibitem[{Ding(2016)}]{Ding:2016}
 Ding P (2016).
@@ -63,6 +78,12 @@ Hubrich K, Teräsvirta T (2013).
 \newblock \emph{CREATES Research Paper 2013-18, Aarhus University}.
 \newblock \urlprefix\url{https://pure.au.dk/ws/files/54473123/rp13_18.pdf}.
 
+\bibitem[{Jungers(2023)}]{Jungers:2023}
+Jungers R (2023).
+\newblock \emph{The JSR toolbox
+  (\url{https://www.mathworks.com/matlabcentral/fileexchange/33202-the-jsr-toolbox}),
+  MATLAB Central File Exchange}.
+
 \bibitem[{Kalliovirta(2012)}]{Kalliovirta:2012}
 Kalliovirta L (2012).
 \newblock \enquote{Misspecification tests based on quantile residuals.}
@@ -83,6 +104,12 @@ Kalliovirta L, Saikkonen P (2010).
 \newblock \emph{Unpublished revision of HECER discussion paper No. 247}.
 \newblock
   \urlprefix\url{https://blogs.helsinki.fi/lkvaisan/files/2010/08/ReliableResiduals.pdf}.
+
+\bibitem[{Kheifets and Saikkonen(2020)}]{Kheifets+Saikkonen:2020}
+Kheifets I, Saikkonen P (2020).
+\newblock \enquote{Stationarity and ergodicity of vector STAR models.}
+\newblock \emph{Econometric Reviews}, \textbf{39}(407--414), 1311--1324.
+\newblock \doi{10.1080/07474938.2019.1651489}.
 
 \bibitem[{Kilian and L{\"u}tkepohl(2017)}]{Kilian+Lutkepohl:2017}
 Kilian L, L{\"u}tkepohl H (2017).
@@ -113,12 +140,6 @@ Lanne M, Nyberg H (2016).
   595--603.
 \newblock \doi{10.1111/obes.12125}.
 
-\bibitem[{L{\"u}tkepohl(2005)}]{Lutkepohl:2005}
-L{\"u}tkepohl H (2005).
-\newblock \emph{New Introduction to Multiple Time Series Analysis}.
-\newblock 1st edition. Springer, Berlin.
-\newblock \doi{10.1007/978-3-540-27752-1}.
-
 \bibitem[{Meitz and Saikkonen(2021)}]{Meitz+Saikkonen:2021}
 Meitz M, Saikkonen P (2021).
 \newblock \enquote{Testing for observation-dependent regime switching in
@@ -132,6 +153,14 @@ Nash J (1990).
   Function Minimization}.
 \newblock 2nd edition. Adam Hilger, Bristol and New York.
 \newblock \doi{10.1201/9781315139784}.
+
+\bibitem[{Parrilo and Jadbabaie(2008)}]{Parrilo+Jadbabaie:2008}
+Parrilo P, Jadbabaie A (2008).
+\newblock \enquote{Approximation of the joint spectral radius using sum of
+  squares.}
+\newblock \emph{Linear Algebra and its Applications}, \textbf{428}(10),
+  2385--2402.
+\newblock \doi{10.1016/j.laa.2007.12.027}.
 
 \bibitem[{Patnaik and Srinivas(1994)}]{Patnaik+Srinivas:1994}
 Patnaik L, Srinivas M (1994).
@@ -189,5 +218,13 @@ Virolainen S (2021).
   application to the asymmetric effects of monetary policy shocks.}
 \newblock \emph{Unpublished working paper, available as arXiv:2007.04713}.
 \newblock \urlprefix\url{https://arxiv.org/abs/2007.04713}.
+
+\bibitem[{Virolainen(2024)}]{sstvars}
+Virolainen S (2024).
+\newblock \emph{sstvars: Toolkit for Structural Smooth Transition Vector
+  Autoregressive models}.
+\newblock R package version 0.1.0 available at GitHub:
+  \url{https://github.com/saviviro/sstvars},
+  \urlprefix\url{https://github.com/saviviro/sstvars}.
 
 \end{thebibliography}
