@@ -47,7 +47,7 @@ covariance matrix of the structural error is an identity matrix.}
 }}
 
 \item{use_data_shocks}{\code{TRUE} for a special feature in which for every possible length \eqn{p} history in the data,
-the GIRF is estimated for a shock that has the sign and size of the corresponding structural shock recovered from the data.
+the GFEVD is estimated for a shock that has the sign and size of the corresponding structural shock recovered from the data.
 See the details section.}
 
 \item{R1}{the number of repetitions used to estimate GIRF for each initial

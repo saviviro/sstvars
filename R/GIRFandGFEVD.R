@@ -304,7 +304,7 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 #'        \code{init_values}.}
 #'   }
 #' @param use_data_shocks \code{TRUE} for a special feature in which for every possible length \eqn{p} history in the data,
-#'   the GIRF is estimated for a shock that has the sign and size of the corresponding structural shock recovered from the data.
+#'   the GFEVD is estimated for a shock that has the sign and size of the corresponding structural shock recovered from the data.
 #'   See the details section.
 #' @param R2 the number of initial values to be drawn if \code{initval_type="random"}.
 #' @param seeds a numeric vector containing the random number generator seed for estimation

@@ -802,13 +802,15 @@ We consider the generalized forecast error variance decomposition (GFEVD) \citep
 \end{equation}
 where $n$ is the chosen and $\text{GIRF}(l,\delta_j,\mathcal{F}_{t-1})_i$ is the $i$th element of the related GIRF (see also the notation described for GIRF in the previous section). That is, the GFEVD is otherwise similar to the conventional forecast error variance decomposition but with GIRFs in the place of conventional impulse response functions. Because the GFEVDs sum to unity (for each variable), they can be interpreted in a similar manner to the conventional FEVD.
 
-In \pkg{gmvarkit}, the GFEVD can be estimated with the function \code{GFEVD}. As with the GIRF, the GFEVD is dependent on the initial values. The type of the initial values is set with the argument \code{initval_type}, and there are three options:
+In \pkg{sstvars}, the GFEVD can be estimated with the function \code{GFEVD}. As with the GIRF, the GFEVD is dependent on the initial values. The type of the initial values is set with the argument \code{initval_type}, and there are three options:
 \begin{enumerate}
 \item \code{"data"} which estimates the GIRFs for all possible length $p$ histories in the data and then the GIRFs in the GFEVD are obtained as the sample mean over those GIRFs.
 \item \code{"random"} which generates the initial values from the stationary distribution of the process or from the mixture of the stationary distributions of some specific regime(s) with the relative mixing proportions given by the mixing weight parameters. The initial regimes can be set with the argument \code{init_regimes}. The GIRFs in the GFEVD are obtained as the sample mean over the GIRFs estimated for the different random initial values.
 \item \code{"fixed"} which estimates the GIRFs for a single fixed initial value that is set with the argument \code{init_values}.
 \end{enumerate}
 The shock size is the same for all scalar components of the structural shock and it can be adjusted with the argument \code{shock_size}. If the GIRFs for some variables should be cumulative before calculating the GFEVD, specify them with the argument \code{which_cumulative}. Finally, note that the GFEVD objects have their own plot and print methods.
+
+\code{sstvars} also implements a special feature in which for every possible length p history in the data, the GFEVD is estimated for a shock that has the sign and size of the corresponding structural shock recovered from the data. See the details section.
 
 \subsection{Linear impulse response functions}
 It is also possible to calculate linear impulse response functions (IRF) based on a specific regime of the estimated model by using the function \code{linear_IRF}. If the autoregressive dynamics of the model are linear (i.e., either $M=1$ or mean and AR parameters are constrained identical across the regimes), confidence bounds can be estimated based on a type of a fixed-design wild residual bootstrap method. \code{gmvarkit} implements the method proposed \cite{Herwartz+Lutkepohl:2014}.
