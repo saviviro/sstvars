@@ -1,4 +1,4 @@
-\begin{thebibliography}{36}
+\begin{thebibliography}{35}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -153,13 +153,6 @@ Meitz M, Preve D, Saikkonen P (2023).
 \newblock \emph{Communications in Statistics - Theory and Methods},
   \textbf{52}(2), 499--515.
 \newblock \doi{10.1080/03610926.2021.1916531}.
-
-\bibitem[{Meitz and Saikkonen(2021)}]{Meitz+Saikkonen:2021}
-Meitz M, Saikkonen P (2021).
-\newblock \enquote{Testing for observation-dependent regime switching in
-  mixture autoregressive models.}
-\newblock \emph{Journal of Econometrics}, \textbf{222}(1), 601--624.
-\newblock \doi{10.1016/j.jeconom.2020.04.048}.
 
 \bibitem[{Muirhead(1982)}]{Muirhead:1982}
 Muirhead R (1982).
