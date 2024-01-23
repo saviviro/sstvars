@@ -195,7 +195,7 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
       print(df2)
       cat("\n")
       n_zero <- sum(B_constraints == 0, na.rm=TRUE)
-      n_free <- sum(is.na(B_constraints))
+      n_free <- ifelse(is.null(B_constraints), d^2, sum(is.na(B_constraints)))
       n_sign <- d^2 - n_zero - n_free
       cat("The impact matrix is subject to", n_zero, "zero constraints and", n_sign, "sign constraints.\n")
       cat("\n")
