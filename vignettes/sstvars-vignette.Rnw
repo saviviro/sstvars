@@ -813,33 +813,18 @@ The shock size is the same for all scalar components of the structural shock and
 \code{sstvars} also implements a special feature in which for every possible length p history in the data, the GFEVD is estimated for a shock that has the sign and size of the corresponding structural shock recovered from the fitted model. This can be done by setting the argument \code{use_data_shocks=TRUE}. The GFEVD is then calculated as the average of the GFEVDs obtained from the GIRFs estimated for the data shocks. The plot and print methods can be used as usual for this GFEVD. However, this feature also obtain the contribution of each shock to the variance of the forecast errors at various horizons in specific historical points of time. This can be done by using the plot method with the argument \code{data_shock_pars}. Note that the arguments \code{shock_size}, \code{initval_type}, and \code{init_regime} are ignored if \code{use_data_shocks == TRUE}.
 
 \subsection{Linear impulse response functions}
-It is also possible to calculate linear impulse response functions (IRF) based on a specific regime of the estimated model by using the function \code{linear_IRF}. If the autoregressive dynamics of the model are linear (i.e., either $M=1$ or mean and AR parameters are constrained identical across the regimes), confidence bounds can be estimated based on a type of a fixed-design wild residual bootstrap method. \code{gmvarkit} implements the method proposed \cite{Herwartz+Lutkepohl:2014}.
+It is also possible to calculate linear impulse response functions (IRF) based on a specific regime of the estimated model by using the function \code{linear_IRF}. If the autoregressive dynamics of the model are linear (i.e., either $M=1$ or mean and AR parameters are constrained identical across the regimes), confidence bounds can be estimated based on a type of a fixed-design wild residual bootstrap method. \code{sstvars} implements the method proposed \cite{Herwartz+Lutkepohl:2014}.
 
-\section{Building a GSMVAR model with specific parameter values}\label{sec:GSMVAR}
-The function \code{GSMVAR} facilitates building GSMVAR models without estimation, for instance, in order to simulate observations from a GSMVAR process with specific parameter values. The parameter vector (of length $M(d + d^2p + d(d+1)/2 + 2) - M_1 - 1$ for unconstrained reduced form models) has the form $\boldsymbol{\theta} = (\boldsymbol{\vartheta}_1,...,\boldsymbol{\vartheta}_M,\alpha_1,...,\alpha_{M-1},\boldsymbol{\nu})$ where
-\begin{align}
-\boldsymbol{\vartheta}_m &= (\varphi_{m,0},\text{vec}({A_{m,1}}),...,\text{vec}(A_{m,p}),\text{vech}(\Omega_m)),\ \ m=1,...,M, \ \text{and}  \\
-\boldsymbol{\nu} &= (\nu_{M_1+1},...,\nu_M).
-\end{align}
-%
-In the GMVAR model (when $M_1=M$), the vector $\boldsymbol{\nu}$ is omitted, as the GMVAR model does not contain degrees of freedom parameters. For models imposing additional constraints on the paremeters, the parameter vectors are expressed in a different way. They are only presented in the package documentation for brevity, because the hand-specified parameter values can be set to satisfy any constraints as is.
+\section{Building a STVAR model with specific parameter values}\label{sec:STVAR}
+The function \code{STVAR} facilitates building STVAR models without estimation, for instance, in order to simulate observations from a STVAR process with specific parameter values. The function should be supplied at least with the arguments \code{p}, \code{M}, and \code{d} specifying the autoregressive order, the number of regimes, and the dimension of the time series, respectively. The argument \code{params} should be used to specify the parameter values, whereas the weight function and weight function parameters are specified in the arguments \code{weight_function} and \code{weightfun_pars}, respectively, and the conditional distribution in the function \code{cond_dist}.
 
-In a structural GSMVAR model, the parameter vector has the form
-\begin{align}
-\boldsymbol{\theta} &= (\varphi_{1,0},...,\varphi_{M,0},\text{vec}(\boldsymbol{A}_1),...,\text{vec}(\boldsymbol{A}_M),\text{vec}(W),\boldsymbol{\lambda}_1,...,\boldsymbol{\lambda}_M, \alpha_1,...,\alpha_{M-1},\boldsymbol{\nu}), \\
-\boldsymbol{A}_m & = (\text{vec}({A_{m,1}}),...,\text{vec}(A_{m,p})) \\
-\boldsymbol{\lambda}_m &= (\lambda_{m1},...,\lambda_{md}).
-\end{align}
-For constrained structural models (including constraints on the structural parameters), see the documentation of \code{GSMVAR} (or any other relevant function).
-
-In addition to the parameter vector, \code{GSMVAR} should be supplied with arguments \code{p} and \code{M} specifying the order of the model similarly to the estimation function \code{fitGSMVAR} discussed in Section \ref{sec:example_estim}. If one wishes to parametrize the model with the regimewise unconditional means ($\mu_m$) instead of the intercepts ($\varphi_{m,0}$), the argument \code{parametrization} should be set to \code{"mean"} in which case the intercept parameters $\varphi_{m,0}$ are replaced with $\mu_m$ in the parameter vector. By default, \pkg{gmvarkit} uses intercept parametrization.
-
-To exemplify, we build a reduced form StMVAR $p=1$, $M=1$, $d=2$ model. The model has intercept parametrization and parameter values $\varphi_{1,0}=(0, 1)$ $\text{vec}(A_{1,1}) = (0.2, 0.2, 0.2, -0.2)$, $\text{vech}(\Omega_2) = (1, 0.1, 1)$, and $\nu_1 = 3$. After building the model, we use the \code{print} method to examine it:
+To exemplify, we build a reduced form Gaussian STVAR $p=1$, $M=1$, $d=2$ model with relative stationary densities as the transition weights.. The model has intercept parametrization and parameter values $\varphi_{1,0}=(0, 1)$, $\varphi_{12,0}=(0, 2)$, $\text{vec}(A_{1,1}) = (0.2, 0.2, 0.2, -0.2)$, $\text{vec}(A_{1,1}) = (0.3, 0.3, 0.3, -0.3)$, $\text{vech}(\Omega_1) = (1, 0.1, 1)$, $\text{vech}(\Omega_2) = (4, 0.4, 4)$, and $\alpha_1$=0.6. After building the model, we use the \code{print} method to examine it:
 %
 \begin{CodeChunk}
 \begin{CodeInput}
-R> params112 <- c(0, 1, 0.2, 0.2, 0.2, -0.2, 1, 0.1, 1, 3)
-R> mod112 <- GSMVAR(p=1, M=1, d=2, params=params112, model="StMVAR")
+R> params112 <- c(0, 1, 0, 2, 0.2, 0.2, 0.2, -0.2, 0.3, 0.3, 0.3, -0.3, 1, 0.1,
++    4, 0.4, 4, 0.6)
+R> mod112 <- STVAR(p=1, M=1, d=2, params=params112, weight_function="relative_dens")
 R> mod112
 \end{CodeInput}
 \begin{CodeOutput}
