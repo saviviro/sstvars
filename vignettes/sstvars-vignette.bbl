@@ -1,4 +1,4 @@
-\begin{thebibliography}{33}
+\begin{thebibliography}{34}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -102,6 +102,12 @@ Kheifets I, Saikkonen P (2020).
 \newblock \enquote{Stationarity and ergodicity of vector STAR models.}
 \newblock \emph{Econometric Reviews}, \textbf{39}(407--414), 1311--1324.
 \newblock \doi{10.1080/07474938.2019.1651489}.
+
+\bibitem[{Kilian and L{\"u}tkepohl(2017)}]{Kilian+Lutkepohl:2017}
+Kilian L, L{\"u}tkepohl H (2017).
+\newblock \emph{Structural Vector Autoregressive Analysis}.
+\newblock 1st edition. Cambridge University Press, Cambridge.
+\newblock \doi{10.1017/9781108164818}.
 
 \bibitem[{Koop \emph{et~al.}(1996)Koop, Pesaran, and
   Potter}]{Koop+Pesaran+Potter:1996}
