@@ -1,4 +1,4 @@
-\begin{thebibliography}{40}
+\begin{thebibliography}{36}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -22,12 +22,6 @@ Angelini G, Bacchiocchi E, Caggiano G, Fanelli L (2019).
 \newblock \enquote{Uncertainty across volatility regimes.}
 \newblock \emph{Journal of Applied Econometrics}, \textbf{34}(3), 437--455.
 \newblock \doi{10.1002/jae.2672}.
-
-\bibitem[{Aomoto and Kita(2011)}]{Aomoto+Kita:2011}
-Aomoto K, Kita M (2011).
-\newblock \emph{Theory of Hypergeometric Functions}.
-\newblock 1st edition. Springer-Verlag, Tokyo.
-\newblock \doi{10.1007/978-4-431-53938-4}.
 
 \bibitem[{Bacchiocchi \emph{et~al.}(2016)Bacchiocchi, Castelnuovo, and
   Fanelli}]{Bacchiocchi+Castelnuovo+Fanelli:2016}
@@ -76,18 +70,6 @@ Chang CT, Blondel V (2013).
 \newblock \emph{Numerical Algorithms}, \textbf{64}, 181--202.
 \newblock \doi{10.1007/s11075-012-9661-z}.
 
-\bibitem[{Ding(2016)}]{Ding:2016}
-Ding P (2016).
-\newblock \enquote{On the Conditional Distribution of the Multivariate $t$
-  Distribution.}
-\newblock \emph{The American Statistician}, \textbf{70}(3), 293--295.
-\newblock \doi{10.1080/00031305.2016.1164756}.
-
-\bibitem[{Hankin \emph{et~al.}(2006)Hankin, Clausen, and Murdoch}]{gsl}
-Hankin R, Clausen A, Murdoch D (2006).
-\newblock \enquote{Special functions in R: introducing the gsl package.}
-\newblock \emph{R News}, \textbf{6}(4).
-
 \bibitem[{Herwartz and L{\"u}tkepohl(2014)}]{Herwartz+Lutkepohl:2014}
 Herwartz H, L{\"u}tkepohl H (2014).
 \newblock \enquote{Structural vector autoregressions with Markov switching:
@@ -134,12 +116,6 @@ Kheifets I, Saikkonen P (2020).
 \newblock \enquote{Stationarity and ergodicity of vector STAR models.}
 \newblock \emph{Econometric Reviews}, \textbf{39}(407--414), 1311--1324.
 \newblock \doi{10.1080/07474938.2019.1651489}.
-
-\bibitem[{Kilian and L{\"u}tkepohl(2017)}]{Kilian+Lutkepohl:2017}
-Kilian L, L{\"u}tkepohl H (2017).
-\newblock \emph{Structural Vector Autoregressive Analysis}.
-\newblock 1st edition. Cambridge University Press, Cambridge.
-\newblock \doi{10.1017/9781108164818}.
 
 \bibitem[{Koop \emph{et~al.}(1996)Koop, Pesaran, and
   Potter}]{Koop+Pesaran+Potter:1996}
