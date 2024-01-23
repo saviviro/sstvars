@@ -46,9 +46,10 @@
 #'
 #'  \strong{Filtering inappropriate estimates:} If \code{filter_estimates == TRUE}, the code will automatically filter
 #'  through estimates that it deems "inappropriate". That is, estimates that are not likely solutions of interest.
-#'  Specifically, solutions that incorporate a near-singular error term covariance matrix (any eigenvalue less than \eqn{0.002})
-#'  or transition weights such that they are close to zero for almost all \eqn{t} for at least one regime.
-#'  You are welcome to set \code{filter_estimates=FALSE} and find the solutions of interest yourself by using the
+#'  Specifically, solutions that incorporate a near-singular error term covariance matrix (any eigenvalue less than \eqn{0.002}),
+#'  any modulus of the eigenvalues of the companion form AR matrices larger than $0.9985$ (indicating the necessary condition for
+#'  stationarity is close to break), or transition weights such that they are close to zero for almost all \eqn{t} for at least one regime.
+#'  You are also welcome to set \code{filter_estimates=FALSE} and find the solutions of interest yourself by using the
 #'  function \code{alt_stvar}.
 #'
 #'  \strong{weight_constraints}
@@ -314,12 +315,19 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                                            cond_dist=cond_dist, identification="reduced_form",
                                            AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                                            weight_constraints=weight_constraints, B_constraints=NULL) # Pars in standard form for pick pars fns
+       # Check Omegas
        Omega_eigens <- get_omega_eigens_par(p=p, M=M, d=d, params=pars_std,
                                             weight_function=weight_function, weightfun_pars=weightfun_pars,
                                             cond_dist=cond_dist, identification="reduced_form",
                                             AR_constraints=NULL, mean_constraints=NULL,
                                             weight_constraints=NULL, B_constraints=NULL)
        Omegas_ok <- !any(Omega_eigens < 0.002)
+
+       # Checks AR matrices
+       boldA_eigens <- get_boldA_eigens(mod)
+       stat_ok <- !any(boldA_eigens > 0.9985)
+
+       # Check weight parameters
        if(weight_function == "relative_dens") {
          alphas <- pick_weightpars(p=p, M=M, d=d, params=pars_std, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                    cond_dist=cond_dist)
@@ -327,6 +335,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
        } else {
          weightpars_ok <- TRUE
        }
+
+       # Check transition weights
        tweights <- loglikelihood(data=data, p=p, M=M, params=pars_std,
                                  weight_function=weight_function, weightfun_pars=weightfun_pars,
                                  cond_dist=cond_dist, parametrization=parametrization,
@@ -334,7 +344,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                                  mean_constraints=NULL, B_constraints=NULL, weight_constraints=NULL,
                                  to_return="tw", check_params=TRUE, minval=matrix(0, nrow=n_obs-p, ncol=M))
        tweights_ok <- !any(vapply(1:M, function(m) sum(tweights[,m] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
-       if(Omegas_ok && tweights_ok && weightpars_ok) {
+       if(Omegas_ok && stat_ok && tweights_ok && weightpars_ok) {
          which_best_fit <- which_round # The estimation round of the appropriate estimate with the largest loglik
          break
        }

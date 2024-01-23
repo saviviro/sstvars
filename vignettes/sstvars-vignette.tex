@@ -131,7 +131,7 @@ where $\rho(\boldsymbol{A}_m)$ is the spectral radius of $\boldsymbol{A}_m$, $m=
 
 Note that validity Condition~\ref{cond:necessary} does not imply the validity of Condition~\ref{cond:sufficient} that guarantees stationarity of the model. However, in practice models that satisfy Condition~\ref{cond:necessary} and are not very close to breaking this condition should most often satisfy Condition~\ref{cond:sufficient}. For checking the validity of Condition~\ref{cond:sufficient}, \citep{sstvars} implements the formula of \cite{Parrilo+Jadbabaie:2008} for the upper bound proposed by \cite{Blondel+Nesterov:2005} (the function \code{bound_JSR}. But unfortunately the calculations required are computationally very demanding in practice when the model is not small and even a relatively tight upper bound is required to verify Condition~\ref{cond:sufficient}. Therefore, in the cases where Condition~\ref{cond:sufficient} needs to be formally verified, we suggest using the \proglang{MATLAB} toolbox \pkg{JSR} by \cite{Jungers:2023}, as automatically combines several methods for bound the JSR and finds an accurate upper bound with a more reasonable computational effort.
 
-\subsection{Specifications of the conditional distribution}
+\subsection{Specifications of the conditional distribution}\label{sec:cond_dist}
 
 \subsubsection{Gaussian STVAR model}
 Assuming the structural errors $e_t$ have standard normal distributions, the conditional distribution of $y_t$ conditional on $\mathcal{F}_{t-1}$ is Gaussian and characterized by the density function
@@ -281,7 +281,7 @@ If relative stationary densities are used as transition weights, $\alpha=(\alpha
 \begin{equation}\label{eq:loglik1}
 L_t(\boldsymbol{\theta})=\sum_{t=1}^T l_t(\boldsymbol{\theta}) = \sum_{t=1}^T \log d_d(y_t;\mu_{y,t},\Omega_{y,t},\nu).
 \end{equation}
-where $d_d(y_t;\mu_{y,t},\Omega_{y,t}, \nu)$ is the $d$-dimensional conditional density of the process, conditional on $\mathcal{F}_{t-1}$, at time $t$, given in Section~\ref{sec:stvar}. When the conditional distribution is Gaussian, the degrees of freedom parameter $\nu$ is dropped from the right side of (\ref{eq:loglik1}). That is, the ML estimator of $\boldsymbol{\theta}$ maximizes the log-likelihood function $L_t(\boldsymbol{\theta})$ over the parameter space.
+where $d_d(y_t;\mu_{y,t},\Omega_{y,t},\nu)$ is the $d$-dimensional conditional density of the process, conditional on $\mathcal{F}_{t-1}$, at time $t$, given in Section~\ref{sec:cond_dist}. When the conditional distribution is Gaussian, the degrees of freedom parameter $\nu$ is dropped from the right side of (\ref{eq:loglik1}). That is, the ML estimator of $\boldsymbol{\theta}$ maximizes the log-likelihood function $L_t(\boldsymbol{\theta})$ over the parameter space.
 
 We summarize the constraints imposed on the parameter space in the following assumption.
 %
@@ -299,7 +299,7 @@ Finding the ML estimate amounts maximizing the log-likelihood function (\ref{eq:
 Therefore, we follow \cite{Meitz+Preve+Saikkonen:2023} and \cite{Virolainen:2022} and employ a two-phase estimation procedure that is run for a large number of times. In the first phase, a genetic algorithm is used to find parameter values (hopefully) near local maximums. Since genetic algorithms tend to converge slowly near local solutions, a gradient based variable algorithm \cite[algorithm 21, implemented by \citealp{R}]{Nash:1990} is ran for each of the starting values, resulting in a number of alternative local solutions. Some of the estimation rounds may end up in saddle points or near-the-boundary points that are not local solutions, and some of the local solutions may be  inappropriate for econometric inference (for instance, there might be only a few observations from some of the regimes). After the estimation rounds have been ran, the researcher can choose the local solution that maximizes the log-likelihood among the appropriate local solutions. Inappropriate solutions are automatically filtered by \pkg{sstvars}, but this functionality can also be turned off and the researchers can use estimates based any estimation round. The R package \pkg{sstvars} employs a modified genetic algorithm that works similarly to the one described in the R packages \pkg{uGMAR} \citep{uGMAR} and \pkg{gmvarkit} \citep{gmvarkit} \citep[the genetic algorithm and iemployed in former is briefly described in][]{Virolainen:2022}. See \citet[Chapter~3]{Virolainen2:2022} for a related discussion on complex numerical estimation problems using the two-phase procedure.
 
 \subsection{Examples of unconstrained estimation}\label{sec:example_estim}
-In this section, we demonstrate how to estimate STVAR models with \pkg{sstvars}. In the examples, we only consider $p=1$ models for simplicity and because then the code outputs fit in the margins better, estimation times are shorter, etc. This order may not be best in the modeling perspective, however.
+In this section, we demonstrate how to estimate STVAR models with \pkg{sstvars}. In the examples, we only consider $p=1$ models for simplicity and merely because then the code outputs fit in the margins better. This order may not be best in the modeling perspective, however.
 
 In \pkg{sstvars}, the STVAR models are defined as class \code{stvar} S3 objects, which can be created with given parameter values using the constructor function \code{STVAR} (see Section~\ref{sec:STVAR}) or by using the estimation function \code{fitSTVAR}, which estimates the parameters and then builds the (reduced form) model. Structural models are estimated based on a reduced form model with the function \code{fitSSTVAR}. For estimation, \code{fitSTVAR} needs to be supplied with a multivariate time series and the arguments specifying the model. The necessary arguments for specifying the model include the autoregressive order \code{p}, the number of regimes \code{M}, the transition weight function \code{weight_function}, with some weight functions the switching variable(s) \code{weightfun_pars}, and the conditional distribution \code{cond_dist}.
 
@@ -307,100 +307,74 @@ Additional arguments may be supplied to \code{fitSTVAR} in order to specify, mos
 
 \textbf{In general, we recommend being conservative with choice of M due to the identifation problems induced if the number of regimes is chosen too large. Also, estimation of models that contain more than two regimes can be extremely challenging. Another important thing to know about estimation is that the estimation algorithm performs very poorly if some of the AR coefficients very large, signifcantly larger than one. This means that you need scale each component time series so that they vary approximately in the same magnitude. For instance, typically in macroeconomic time series, log-differences should be multiplied by hundred. If the suitable scales are not obvious, you can try out different scales and estimate linear VARs with your favorite package to see whether the AR coeffients are in a reasonable range. When a suitable scale is found, proceed to the STVAR models.}
 
-We illustrate the use of \pkg{sstvars} with a quarterly series consisting of two U.S. variables: the percentage change of real GDP and the percentage change of GDP implicit price deflator, covering the period from 1959Q1 to 2019Q4. The following code fits a STVAR($p=1,M=2$) model with Gaussian conditional distribution and relative stationary densities as transition weights by performing $16$ estimation rounds with $8$ CPU cores. We use only $16$ estimation rounds in this simplistic example to shorten the estimation time, knowing beforehand that the given seeds produce the desired result (in this simplistic case, majority the estimation rounds end up in the MLE anyway, though).\textbf{In practice, hundreds or even thousands of estimation rounds is often required to obtain reliable results. The larger the dimension of the series is and the larger the order of the model is and the more there are regimes, the more estimation rounds is required.}
+We illustrate the use of \pkg{sstvars} with a quarterly series consisting of two U.S. variables: the percentage change of real GDP and the percentage change of GDP implicit price deflator, covering the period from 1959Q1 to 2019Q4. The following code fits a STVAR($p=1,M=2$) model with Student's $t$ conditional distribution and logistic transition weights by performing $24$ estimation rounds with $8$ CPU cores.\textbf{In practice, hundreds or even thousands of estimation rounds is often required to obtain reliable results. The larger the dimension of the series is and the larger the order of the model is and the more there are regimes, the more estimation rounds is required. The model in our example is easy to estimate, as it is small in dimension and order.} We set the switching variable to be the first lag of the second variable, i.e., the GDP deflator by setting argument \code{weightfun_pars=c(2, 1)}.
 
 The argument \code{seeds} supplies the seeds that initialize the random number generator at the beginning of each call to the genetic algorithm, thereby yielding reproducible results.
 %
 \begin{CodeChunk}
 \begin{CodeInput}
-R> library(gmvarkit)
-R> data("gdpdef", package="gmvarkit")
-R> fit12t <- fitGSMVAR(gdpdef, p=1, M=2, model="StMVAR", ncalls=16, ncores=8,
-+    seeds=1:16)
+R> library(sstvars)
+R> data("gdpdef", package="sstvars")
+R> fit12t <- fitSTVAR(gdpdef, p=1, M=2, weight_function="logistic",
++    weightfun_pars=c(2, 1), cond_dist="Student", nrounds=24, ncores=8,
++    seeds=1:24)
 \end{CodeInput}
 \begin{CodeOutput}
-Using 8 cores for 16 estimations rounds...
+Using 8 cores for 24 estimations rounds...
 Optimizing with a genetic algorithm...
-  |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% elapsed=26s
+  |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% elapsed=31s
 Results from the genetic algorithm:
-The lowest loglik:  -277.038
-The mean loglik:    -258.416
-The largest loglik: -252.168
+The lowest loglik:  -283.893
+The largest loglik: -253.864
 Optimizing with a variable metric algorithm...
-  |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% elapsed=06s
+  |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% elapsed=03s
 Results from the variable metric algorithm:
-The lowest loglik:  -276.974
-The mean loglik:    -252.439
-The largest loglik: -243.719
+The lowest loglik:  -276.669
+The largest loglik: -250.236
+Filtering inappropriate estimates...
 Calculating approximate standard errors...
 Finished!
-Warning messages:
-1: In warn_df(p = p, M = M, params = params, model = model) :
-  The model contains overly large degrees of freedom parameters. Consider
-  switching to the appropriate G-StMVAR model by setting the corresponding
-  regimes to GMVAR type with the function 'stmvar_to_gstmvar'.
-2: In warn_eigens(ret) :
-  Regime 2 has near-singular error term covariance matrix! Consider
-  building a model from the next-largest local maximum with the function
-  'alt_gsmvar' by adjusting its argument 'which_largest'.
 \end{CodeOutput}
 \end{CodeChunk}
 %
 The progression of the estimation process is reported with a progress bar giving an estimate of the remaining estimation time. Also statistics on the spread of the log-likelihoods are printed after each estimation phase. The progress bars are generated during parallel computing with the package \pkg{pbapply} \citep{Solymos+Zawadzki:2020}.
 
-The function throws a warning (the second warning) because at least one the regimes contains a near-singular covariance matrix. This kind of unreasonable boundary points can often be disregarded, and the model can be built based on a reasonable estimate found from a local maximum that is clearly in the interior of the parameter space. Models based on the next-best local maximum can be built with the function \code{alt_gsmvar} by adjusting its argument \code{which_largest}.
+Because the log-likelihood function is highly multimodal, and the estimation algorithm is ran a large number of times, it produces a set of local solutions, possibly representing various modes in the log-likelihood function. Some of the local solutions may be inappropriate for econometric inference, for instance, because they contain a near-singular error term covariance matrix or regimes that have only a very small number of observations generated (even partially) from them. Such inappropriate solutions, i.e., estimates that are not solutions of interest, are filtered automatically by \pkg{sstvars}. Specifically, solutions that incorporate a near-singular error term covariance matrix (any eigenvalue less than $0.002$) or transition weights such that they are close to zero for almost all $t$ for at least one regime. Solution very close to the boundary of the stationarity region are not filtered automatically, because sometimes the series are very persistent and the solutions are very close to the boundary. In the case of a close-to-the-boundary solution, the researcher can check for alternative local solutions using the function \code{alt_stvar}.
 
-The following code builds a StMVAR model based on the second-largest local maximum found in the estimation:
-%
-\begin{CodeChunk}
-\begin{CodeInput}
-R> fit12t_alt <- alt_gsmvar(fit12t, which_largest=2)
-\end{CodeInput}
-\begin{CodeOutput}
-Warning message:
-In warn_df(p = p, M = M, params = params, model = model) :
-  The model contains overly large degrees of freedom parameters. Consider
-  switching to the appropriate G-StMVAR model by setting the corresponding
-  regimes to GMVAR type with the function 'stmvar_to_gstmvar'.
-\end{CodeOutput}
-\end{CodeChunk}
-%
+Automatic filtering can be turned this off with the argument \code{filter_estimates=FALSE}. Then, the various local solutions can be easily examined by hand by using the function \code{alt_stvar} and adjusting its argument \code{which_largest} or \code{which_round}. Note that \code{alt_stvar} can be used also when the automatic filtering is turned on, since the estimates from all of the estimation rounds are stored in the class \code{'stvar'} object returned by \code{fitSTVAR}.
 
 The estimates can be examined with the \code{print}.
 %
 \begin{CodeChunk}
 \begin{CodeInput}
-R> print(fit12t_alt)
+R> print(fit12)
 \end{CodeInput}
 \begin{CodeOutput}
-Reduced form StMVAR model:
- p = 1, M = 2, d = 2, #parameters = 21, #observations = 244 x 2,
- conditional log-likelihood, intercept parametrization, no AR parameter
- constraints
+logistic Student STVAR model, reduced form model no AR_constraints, no mean_constraints,
+  p = 1, M = 2, d = 2, #parameters = 21, #observations = 243 x 2
+  Switching variable: GDPDEF with lag 1.
 
 Regime 1
-Mixing weight: 0.83
-Regime means: 0.78, 0.54
-Df parameter:  7.57
+Degrees of freedom: 7.70 (for all regimes)
+Regime means: 0.71, 0.49
 
-   Y     phi0          A1                            Omega          1/2
-1 y1 = [ 0.55 ] + [  0.33 -0.04 ] y1.1 + (         [  0.42 0.00 ] )     eps1
-2 y2   [ 0.12 ]   [  0.05  0.71 ] y2.1   ( ARCH_mt [  0.00 0.04 ] )     eps2
+   Y     phi0          A1                  Omega        1/2
+1 y1 = [ 0.63 ] + [  0.35 -0.35 ] y1.1 + [  0.37 0.00 ]     eps1
+2 y2   [ 0.14 ]   [  0.06  0.62 ] y2.1   [  0.00 0.03 ]     eps2
 
 Regime 2
-Mixing weight: 0.17
-Regime means: 0.66, 1.67
-Df parameter:  92497.86
+Weight params: 1.22 (location), 5.01 (scale)
+Regime means: 0.77, 1.76
 
-   Y     phi0          A1                            Omega           1/2
-1 y1 = [ 1.60 ] + [  0.13 -0.61 ] y1.1 + (         [  1.21 -0.04 ] )     eps1
-2 y2   [ 0.48 ]   [ -0.03  0.72 ] y2.1   ( ARCH_mt [ -0.04  0.14 ] )     eps2
+   Y     phi0          A1                  Omega         1/2
+1 y1 = [ 2.41 ] + [  0.13 -0.99 ] y1.1 + [  1.29 -0.06 ]     eps1
+2 y2   [ 0.67 ]   [ -0.04  0.64 ] y2.1   [ -0.06  0.19 ]     eps2
 \end{CodeOutput}
 \end{CodeChunk}
 %
 The parameter estimates are reported for each mixture component separately so that the estimates can be easily interpreted. Each regime's autoregressive formula is presented in the form
 \begin{equation}
-y_t = \varphi_{m,0} + A_{m,1}y_{t - 1} + ... + A_{m,p}y_{t - p} + \Omega_{m,t}^{1/2}\varepsilon_{m,t}.
+y_t = \varphi_{m,0} + A_{m,1}y_{t - 1} + ... + A_{m,p}y_{t - p} + \Omega_{m}^{1/2}\varepsilon_{t}.
 \end{equation}
 If $\Omega_{m,t}^{1/2}$ is time varying, it printed in the form $\Omega_{m,t}^{1/2}=(\text{ARCH\_mt}\Omega_m)^{1/2}$ where $\text{ARCH\_mt}$ is the $\omega_{m,t}$ defined in (\ref{eq:sigma_mt}). No numerical value is given to the ARCH scalar, as it is time-varying. The other statistics are listed above the formula, including the mixing weight pameter $\alpha_m$, the unconditional mean $\mu_m$, and the degrees freedom parameter $\nu_m$.
 

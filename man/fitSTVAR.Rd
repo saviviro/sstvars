@@ -153,9 +153,10 @@ If you wish to estimate a structural model, estimate first the reduced form mode
 
  \strong{Filtering inappropriate estimates:} If \code{filter_estimates == TRUE}, the code will automatically filter
  through estimates that it deems "inappropriate". That is, estimates that are not likely solutions of interest.
- Specifically, solutions that incorporate a near-singular error term covariance matrix (any eigenvalue less than \eqn{0.002})
- or transition weights such that they are close to zero for almost all \eqn{t} for at least one regime.
- You are welcome to set \code{filter_estimates=FALSE} and find the solutions of interest yourself by using the
+ Specifically, solutions that incorporate a near-singular error term covariance matrix (any eigenvalue less than \eqn{0.002}),
+ any modulus of the eigenvalues of the companion form AR matrices larger than $0.9985$ (indicating the necessary condition for
+ stationarity is close to break), or transition weights such that they are close to zero for almost all \eqn{t} for at least one regime.
+ You are also welcome to set \code{filter_estimates=FALSE} and find the solutions of interest yourself by using the
  function \code{alt_stvar}.
 
  \strong{weight_constraints}
