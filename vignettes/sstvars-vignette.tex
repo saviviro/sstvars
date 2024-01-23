@@ -514,23 +514,80 @@ The resulting plot is presented in Figure~\ref{fig:proflogliks}.
 
 The output shows that the estimate's accuracy is reasonable, as changing any individual parameter value marginally would not increase the log-likelihood much. The argument \code{scale} can be adjusted to shorten or lengthen the interval shown in the horizontal axis. If one zooms in enough by setting \code{scale} to a very small number, it can be seen that the estimate is not exactly at the local maximum, but it is so close that moving there would not increase the log-likelihood notably. The argument \code{precision} can be adjusted to increase the number of points the graph is based on. For faster plotting, it can be decreased, and for more precision, it can be increased. The argument \code{which_pars} is used to specify the parameters whose profile log-likelihood functions should be plotted. This argument is particularly useful when creating as many plots as there are parameters in the model to a single figure would cause the individual plots to be very small. In such a case, profile log-likelihood functions for subsets of the parameters can be plotted separately by specifying this argument accordingly.
 
-We have discussed tools that can be utilized to evaluate whether the found estimate is a local maximum with a reasonable accuracy. It is, however, more difficult to establish that the estimate is the global maximum. With \pkg{gmvarkit}, the best way to increase the reliability that the found estimate is the global maximum, is to run more estimation rounds by adjusting the argument \code{ncalls} of the estimation function \code{fitGSMVAR}.
+We have discussed tools that can be utilized to evaluate whether the found estimate is a local maximum with a reasonable accuracy. It is, however, more difficult to establish that the estimate is the global maximum. With \pkg{sstvars}, the best way to increase the reliability that the found estimate is the global maximum (among the appropriate solutions), is to run more estimation rounds by adjusting the argument \code{nrounds} of the estimation function \code{fitSTVAR}.
 
-If the model is very large, a very large number of estimation rounds may be required to find the global maximum. If there are two regimes in the model, $p$ is reasonable, and the dimension of the time series at most four, the required number of estimation rounds typically varies from several hundred to several thousand depending on the model and the data. In the simpler models, less estimation rounds are required. In the larger models, and in particular if $M>2$ or $d>4$, a significantly large number of estimation rounds may be required obtain the MLE. Another thing that makes the estimation more challenging, are exotic parameter constraints that do not reduce the dimension of the parameter much. Constraints that greatly reduce complexity of the parameter space (such as constraining the autoregressive matrices to be identical in all regimes\footnote{Models constrained in this way can often be reliably estimated with a reasonable number of estimation rounds even when $M>2$}), on the other hand, make the estimation easier and reliable estimation of such models thereby require less estimation rounds.
-
+If the model is very large, a very large number of estimation rounds may be required to find the global maximum. If there are two regimes in the model, $p$ is reasonable, and the dimension of the time series at most four, the required number of estimation rounds typically varies from several hundred to several thousand depending on the model and the data. In the simpler models, less estimation rounds are required. In the larger models, and in particular if $M>2$ or $d>4$, a significantly large number of estimation rounds may be required obtain the MLE. Another thing that makes the estimation more challenging, are exotic parameter constraints that do not reduce the dimension of the parameter much. Constraints that greatly reduce complexity of the parameter space (such as constraining the autoregressive matrices to be identical in all regimes\footnote{Models constrained in this way can often be reliably estimated with a reasonable number of estimation rounds even when $M>2$}), on the other hand, make the estimation easier and reliable estimation of such models thereby require less estimation rounds. Constrained estimation is discussed in Section~\ref{sec:examp_const}.
 
 \subsection{Estimation of the structural GSMVAR model}\label{sec:estim_structural}
-As explained, \pkg{gmvarkit} currently supports two types of structural models: structural models identified recursively by the lower triangular Cholesky decomposition and structural models identified by conditional heteroskedasticity. Recursive identification is assumed for reduced form models, and thus do not require any further estimation.  Generalized impulse response functions and generalized forecast error variance decompositions can be estimated for recursively identified models by using the reduced form models directly in the functions \code{GIRF} and \code{GFEVD}. The rest of this section discusses estimation of structural models identified by conditional heteroskedasticity as in \cite{Virolainen2:2021}, which employ a parametrization different to the reduced form models.
+As explained, \pkg{sstvars} currently supports two types of structural models: structural models identified recursively by the lower triangular Cholesky decomposition and structural models identified by conditional heteroskedasticity. In either case, the structural models are estimated with the function \code{fitSTVAR} based on preliminary estimates from a reduced form model. If the structural model is not overidentifying, which is always the case for recursively identified models as well as for models identified by heteroskedasticity when there are two regime and further constraints are not imposed on the impact matrix, there is no need for estimation but at most for a reparametrization of the model. In any case, the \code{fitSTVAR} builds the structural model appropriately.
 
-The structural GSMVAR models are estimated similarly to the reduced form version, expect that the model is parametrized with $W$ and $\lambda_{mi}$, $m=2,...,M$, $i=1,...,d$ instead of the covariance matrices $\Omega_{m}$, $m=1,...,M$. The estimation is can be done with the function \code{fitGSMVAR} but now the argument \code{structural_pars} needs to be supplied with a list providing the constraints on $W$ (which equally imposes the constraints on the B-matrix), and optionally, linear constraints on the $\lambda_{mi}$ parameters or constraints restricting $\lambda_{mi}$ to fixed values.
+To exemplify, we first estimate a recursively identified structural model based on the reduced form model \code{fit12} by setting the argument \code{identification="recursive"}. Then, we will study an example of a structural model identified by heteroskedasticity. The following code builds the recursively identified model:
+\begin{CodeChunk}
+\begin{CodeInput}
+R> fit12rec <- fitSSTVAR(fit12, identification="recursive")
+\end{CodeInput}
+\end{CodeChunk}
+Since the parametrization did not change nor was any estimation required, \code{fit12rec} is essentially the reduced form model \code{fit12} with the property that can be used as a structural model in structural analysis such as estimating the generalied impulse response functions.
 
-The list \code{structural_pars} should contain at least the element \code{W} which is a $(dxd)$ matrix matrix with its entries imposing constraints on $W$: \code{NA} indicating that the element is unconstrained, a positive value indicating strict positive sign constraint, a negative value indicating strict negative sign constraint, and zero indicating that the element is constrained to zero. The elements named \code{C_lambda} and \code{fixed_lambdas} are optional (and alternative to each other).
+The following code creates a structural model identified by heteroskedasticity based on the reduced form model \code{fit12} and then prints it:
+\begin{CodeChunk}
+\begin{CodeInput}
+R> fit12het <- fitSSTVAR(fit12, identification="heteroskedasticity")
+R> print(fit12het)
+\end{CodeInput}
+\begin{CodeOutput}
+logistic Student STVAR model, identified by heteroskedasticity, no AR_constraints, no mean_constraints, no B_constraints,
+  p = 1, M = 2, d = 2, #parameters = 21, #observations = 243 x 2
+  Switching variable: GDPDEF with lag 1.
 
-If \code{C_lambda} is specified, it should be a $(d(M-1) \times r)$ constraint matrix that satisfies ($\lambda_{2},...,\lambda_{M}) =C_{\lambda} \gamma$ where $\lambda_{m}=(\lambda_{m1},...,\lambda_{md})$ and $\gamma$ is the new $(r x 1)$ parameter subject to which the model is estimated (similarly to AR parameter constraints). The entries of \code{C_lambda} must be either positive or zero.  Ignore (or set to \code{NULL}) if the eigenvalues $\lambda_{mi}$ should not be constrained. Note that other constraints than constraining some of the $\lambda_{mi}$ to be identical are not recommended but if such constraints are imposed, the argument \code{lambda_scale} in the genetic algorithm (see \code{?GAfit}) should be adjusted accordingly. If some of the $\lambda_{mi}$ are constrained to be identical, make sure the appropriate zero constraints placed in the $W$ matrix, because otherwise the MLE does not identify and you probably won't obtain any useful estimates \citep[see][Proposition 2]{Virolainen2:2021}.
+Regime 1
+Degrees of freedom: 7.70 (for all regimes)
+Regime means: 0.71, 0.49
 
-If \code{fixed_lambdas} is specified, it should be a $d(M-1)$ length numeric vector $(\lambda_{2},...,\lambda_{M})$ specifying fixed values for the eigenvalue parameters $\lambda_{mi}$. They should be strictly larger than zero. Ignore (or set to \code{NULL}) if the eigenvalues $\lambda_{mi}$ should not be constrained. Note that you cannot use both \code{C_lambda} and \code{fixed_lambdas} at the same time.
+   Y     phi0          A1                  Omega        1/2
+1 y1 = [ 0.63 ] + [  0.35 -0.35 ] y1.1 + [  0.37 0.00 ]     eps1
+2 y2   [ 0.14 ]   [  0.06  0.62 ] y2.1   [  0.00 0.03 ]     eps2
 
-\textbf{Reliable estimation of structural GSMVAR models typically requires much more estimation rounds than the estimation of the reduced form models. However, when $M=2$, every reduced form model has an implied statistically identified structural model, which can be built without any additional estimation (this will be discussed next). We recommend considering this implied model first. Then, if overidentifying constraints are to be imposed on the B-matrix (or equally $W$), we recommend using the unrestricted estimate to create an initial guess for the constrained parameter vector and pass this to the genetic algorithm as an initial population}. See the help page \code{?GAfit} for the arguments that can be passed by \code{fitGSMVAR} to the genetic algorithm. Create the initial guess for the parameter vector by using the form given in documentation of the argument \code{initpop}. If $M\neq 2$, the structural model needs to be estimated in the normal way with \code{fitGSMVAR}, however.
+Regime 2
+Weight params: 1.22 (location), 5.01 (scale)
+Regime means: 0.77, 1.76
+
+   Y     phi0          A1                  Omega         1/2
+1 y1 = [ 2.41 ] + [  0.13 -0.99 ] y1.1 + [  1.29 -0.06 ]     eps1
+2 y2   [ 0.67 ]   [ -0.04  0.64 ] y2.1   [ -0.06  0.19 ]     eps2
+
+Structural parameters:
+        W             lamb2
+1 [  0.17  0.59 ]   [  5.67 ]
+2 [ -0.18  0.06 ] , [  3.29 ]
+
+The impact matrix is subject to 0 zero constraints and 0 sign constraints.
+\end{CodeOutput}
+\end{CodeChunk}
+%
+Since the structural model identified by heteroskedasticity is not overidentified, no estimation was performed but merely a repameterization. The estimates for the structural parameters $W$ and $\lambda_2,...,\lambda_M$ are presented at the bottom of the printout.
+
+If the structural model is identified by heteroskedasticity, additional restrictions can be imposed on the impact matrix by setting them in argument \code{B_constraints}. A structural model identified by heteroskedasticity is overidentifying also when there are more than two regimes in the models, as then the matrix decomposition employed in the identification does not always exist. In either case, the structural model needs be estimated, which is performed in \code{sstvars} based on preliminary estimates obtained either from a reduced form model or from a structural model. The estimation is performed with the function \code{fitSSTVAR}, which implements a two-phase estimation procedure in which a robust estimation method is used in the first phase and a variable algorithm in the second phase. The default option for the robust method is Nelder-Mead algorithm implemented by \cite{R} in the function \code{optim} of the package \code{stats}.
+
+It is important to note that if the initial estimates are far from the ML estimate, the resulting solution is likely local only due to the complexity of the model. However, it is not often very appealing to impose overidentified constraints that far from the unrestricted estimates in the first place. But in any case, since the estimation may be unrealiable if the restricted ML estimate is far from the unrestricted ML estimate, we recommend using our package to estimate only such overidentifying structural models in which the unrestricted estimate is close to satisfying the imposed constraints.
+
+The exemplify, we estimate a structural model identified by heteroskedasticity based on the structural model \code{fit12het} by setting the argument \code{identification="heteroskedasticity"} and imposing the constraint that the second element of the second column of the impact matrix is zero (the above estimates of $W$ show that the corresponding unrestricted estimate is close to zero). The zero constraint is imposed by setting the argument \code{B_constraints} as matrix such that the second element of the second column is zero and all other elements are \code{NA}. Sign constraints can be set similarly by setting the corresponding elements to \code{1} or \code{-1} (or any other strictly positive of negative value). The following code estimates the model:
+\begin{CodeChunk}
+\begin{CodeInput}
+R> fit12hetb <- fitSSTVAR(fit12, identification="heteroskedasticity",
++    B_constraints=matrix(c(NA, NA, NA, 0), nrow=2))
+R> print(fit12het)
+\end{CodeInput}
+\begin{CodeOutput}
+The log-likelihood of the supplied model:    -250.236
+Constrained log-likelihood prior estimation: -260.164
+The log-likelihood after robust estimation:  -250.556
+The log-likelihood after final estimation:   -250.486
+\end{CodeOutput}
+\end{CodeChunk}
+The log-likelihoods of the original model, the initial estimates of the constrained model, the estimates after the robust estimation, and the final estimates are printed. If the log-likelihood of after final estimation is bad compared to the log-likelihood of the original model, the estimation is likely unreliable. The command \code{print(fit12hetb)} prints the estimated overidentified model (we ommit the printout for brevity).
+
+
 
 \subsubsection{Building structural model based on a reduced form model}
 If the number of regimes is two ($M=2$), a structural model can be built based on a reduced form model, because the matrix decomposition used in the simultaneous diagonalization of the error term covariance matrices always exists. This can be done with function \code{gsmvar_to_sgsmvar} which should be supplied with the reduced form model, and it then returns a corresponding structural model. After creating the structural model, the columns of $W$ can be reordered with the function \code{reorder_W_columns} which also reorders all $\lambda_{mi}$ accordingly (and hence the resulting model will coincide with the original reduced form model). Also, all signs any column of $W$ can be swapped with the function \code{swap_W_signs}.
@@ -985,241 +1042,5 @@ Some of the estimation results (and thereby everything that is calculated based 
 
 \pagebreak
 \bibliography{refs}
-
-\newpage
-
-\begin{appendix}
-\section{Properties of multivariate Gaussian and Student's $t$ distribution}\label{ap:propt}
-Denote a $d$-dimensional real valued vector by $y$.  It is well known that the density function of a $d$-dimensional Gaussian distribution with mean $\mu$ and covariance matrix $\Sigma$ is
-\begin{equation}
-n_d(y;\mu,\Sigma) = (2\pi)^{-d/2}\text{det}(\Sigma)^{-1/2}\exp\left\lbrace -\frac{1}{2}(y -\mu)'\Sigma^{-1}(y - \mu) \right\rbrace .
-\end{equation}
-Similarly to \cite{Meitz+Preve+Saikkonen:2021} but differing from the standard form, we parametrize the Student's $t$-distribution using its covariance matrix as a parameter together with the mean and the degrees of freedom. The density function of such a $d$-dimensional $t$-distribution with mean $\mu$, covariance matrix $\Sigma$, and $\nu>2$ degrees of freedom is
-\begin{equation}
-t_d(y;\mu,\Sigma,\nu)=C_d(\nu)\text{det}(\Sigma)^{-1/2}\left(1+\frac{(y -\mu)'\Sigma^{-1}(y - \mu)}{\nu-2}\right)^{-(d+\nu)/2},
-\end{equation}
-where
-\begin{equation}
-C_d(\nu)=\frac{\Gamma\left(\frac{d+\nu}{2}\right)}{\sqrt{\pi^d(\nu-2)^d}\Gamma\left(\frac{\nu}{2}\right)},
-\end{equation}
-and $\Gamma\left(\cdot\right)$ is the gamma function.  We assume that the covariance matrix $\Sigma$ is positive definite for both distributions.
-
-Consider a partition $X=(X_1,X_2)$ of either Gaussian or $t$-distributed (with $\nu$ degrees of freedom) random vector $X$ such that $X_1$ has dimension $(d_1\times1)$ and $X_2$ has dimension $(d_2\times1)$. Consider also a corresponding partition of the mean vector $\mu=(\mu_1,\mu_2)$ and the covariance matrix
-\begin{equation}
-\Sigma=
-\begin{bmatrix}
-\Sigma_{11} & \Sigma_{12} \\
-\Sigma_{12}' & \Sigma_{22}
-\end{bmatrix},
-\end{equation}
-where, for example, the dimension of $\Sigma_{11}$ is $(d_1\times d_1)$.  In the Gaussian case, $X_1$ then has the marginal distribution $n_{d_1}(\mu_1,\Sigma_{11})$ and $X_2$ has the marginal distribution $n_{d_2}(\mu_2,\Sigma_{22})$.  In the Student's $t$ case,  $X_1$ has the marginal distribution $t_{d_1}(\mu_1,\Sigma_{11},\nu)$ and $X_2$ has the marginal distribution $t_{d_2}(\mu_2,\Sigma_{22},\nu)$ (see, e.g., \cite{Ding:2016}, also in what follows).
-
-When $X$ has Gaussian distribution,  the conditional distribution of the random vector $X_1$ given $X_2=x_2$ is
-\begin{equation}
-X_1\mid(X_2=x_2)\sim n_{d_1}(\mu_{1\mid2}(x_2),\Sigma_{1\mid2}(x_2)),
-\end{equation}
-where
-\begin{align}
-\mu (x_2)\equiv \mu_{1\mid2}(x_2) &= \mu_1+\Sigma_{12}\Sigma_{22}^{-1}(x_2-\mu_2) \quad \text{and}\label{eq:mux_gaus} \\
-\Omega \equiv \Sigma_{1\mid2}(x_2) &= \Sigma_{11}-\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{12}'. \label{eq:omegax_gaus}
-\end{align}
-
-When $X$ has $t$-distribution, the conditional distribution of the random vector $X_1$ given $X_2=x_2$ is
-\begin{equation}
-X_1\mid(X_2=x_2)\sim t_{d_1}(\mu_{1\mid2}(x_2),\Sigma_{1\mid2}(x_2),\nu+d_2),
-\end{equation}
-where
-\begin{align}
-\mu (x_2) = \mu_{1\mid2}(x_2) &= \mu_1+\Sigma_{12}\Sigma_{22}^{-1}(x_2-\mu_2) \quad \text{and}\label{eq:mux} \\
-\Omega (x_2) \equiv \Sigma_{1\mid2}(x_2) &= \frac{\nu-2+(x_2-\mu_2)'\Sigma_{22}^{-1}(x_2-\mu_2)}{\nu-2+d_2}(\Sigma_{11}-\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{12}'). \label{eq:omegax}
-\end{align}
-In particular, we have
-\begin{align}\label{eq:td_decomp}
-n_d(x;\mu,\Sigma) &= n_{d_1}(x_1;\mu_{1|2}(x_2),\Sigma_{1|2}(x_2))t_{d_2}(x_2;\mu_2,\Sigma_{22}) \quad \text{and}\\
-t_d(x;\mu,\Sigma,\nu) &= t_{d_1}(x_1;\mu_{1|2}(x_2),\Sigma_{1|2}(x_2),\nu+d_2)t_{d_2}(x_2;\mu_2,\Sigma_{22},\nu).
-\end{align}
-
-
-
-\section{Quantile residuals of the G-StMVAR model}\label{ap:qresexpr}
-The conditional density function of the $d$-dimensional G-StMVAR process $y_t$ conditional on  $\mathcal{F}_{t-1}$ is
-\begin{equation}\label{eq:gstmvarconddens}
-f_{t-1}(y_t;\boldsymbol{\theta})=\sum_{m=1}^{M_1}\alpha_{m,t}n_d(y_t;\mu_{m,t},\Omega_{m}) + \sum_{m=M_1+1}^{M}\alpha_{m,t}t_d(y_t;\mu_{m,t},\Omega_{m,t},\nu_m + dp),
-\end{equation}
-where $n_d(\cdot;\mu_{m,t},\Omega_m,\nu_m + dp)$ is the density function of $d$-dimensional normal distribution with mean $\mu_{m,t}$ and covariance matrix $\Omega_{m}$; and  $t_d(\cdot;\mu_{m,t},\Omega_m,\nu_m + dp)$ is the density function of $d$-dimensional $t$-distribution with mean $\mu_{m,t}$, covariance matrix $\Omega_{m,t}$,  and $\nu_m + dp$ degrees of freedom.
-
-Denote $y_t^{(k)}=(y_{1,t},...,y_{k,t})$ $(k\times 1)$,  $k\leq d$,   $\mu_{m,t}^{(k)}=(\mu_{1,m,,t},...,\mu_{k,m,t})$ $(k\times 1)$,  $k\leq d$,  and by $\Omega_{m,t}^{(k)}$ ($\Omega_{m}^{(k)}$) the upper left $(k\times k)$ block matrix of $\Omega_{m,t}$ ($\Omega_{m}$).  Then,  the properties of the marginal distributions of multivariate Gaussian and $t$-distributions (see Appendix~\ref{ap:propt}) show that conditional on $\mathcal{F}_{t-1}$,  the random vectors $y_t^{(j)}$, $j=1,..,d$,  follow the distribution that is a mixture $M_1$ $j$-dimensional normal distributions (with means $\mu_{m,t}^{(j)}$ and covariance matrices $\Omega_{m}^{(j)}$) and $M_2\equiv M-M_1$ $j$-dimensional $t$-distributions (with means $\mu_{m,t}^{(j)}$,  covariance matrices $\Omega_{m,t}^{(j)}$, and $\nu_m + dp$ degrees of freedom).  The mixing weights $\alpha_{m,t}$ are not affected, as they are $\mathcal{F}_{t-1}$-measurable.  Therefore, the marginal density function of $y_t^{(j)}$ is
-\begin{equation}\label{eq:ytj_margdens}
-f_{t-1}(y_{t}^{(j)};\boldsymbol{\theta})=\sum_{m=1}^{M_1}\alpha_{m,t} n_j(y_{t}^{(j)};\mu_{m,t}^{(j)},\Omega_{m}^{(j)}) + \sum_{m=M_1 + 1}^{M}\alpha_{m,t} t_j(y_{t}^{(j)};\mu_{m,t}^{(j)},\Omega_{m,t}^{(j)},\nu_m + dp),
-\end{equation}
-
-The conditional density function $f_{0,t-1}(y_{1,t};\boldsymbol{\theta})$ in (\ref{eq:prodform}) is obtained from (\ref{eq:ytj_margdens}) by choosing $j=1$.  For $j=2,...,d$,  the conditional density functions  $f_{j-1,t-1}(y_{j,t};\boldsymbol{\theta})$ are obtained by substituting the equation (\ref{eq:ytj_margdens}) to the formula of conditional density function:
-\begin{align}\label{eq:conddens_gstmvar}
-\begin{aligned}
-&f_{j-1,t-1}\left(y_{j,t};\boldsymbol{\theta}\right) = \frac{f_{t-1}(y_{t}^{(j)};\boldsymbol{\theta})}{f_{t-1}(y_{t}^{(j-1)};\boldsymbol{\theta})} = \\
-&\frac{\sum_{m=1}^{M_1}\alpha_{m,t} n_j(y_{t}^{(j)};\mu_{m,t}^{(j)},\Omega_{m}^{(j)}) + \sum_{m=M_1+1}^{M}\alpha_{m,t} t_j(y_{t}^{(j)};\mu_{m,t}^{(j)},\Omega_{m,t}^{(j)}, \nu_m+dp)}{\sum_{n=1}^{M_1}\alpha_{n,t} n_{j-1}(y_{t}^{(j-1)};\mu_{n,t}^{(j-1)},\Omega_n^{(j-1)}) + \sum_{n=M_1+1}^{M}\alpha_{n,t} t_{j-1}(y_{t}^{(j-1)};\mu_{n,t}^{(j-1)},\Omega_n^{(j-1)},\nu_m + dp)}.
-\end{aligned}
-\end{align}
-
-It follows from the properties of the conditional distributions of multivariate normal distribution that we may express the $j$-dimensional normal distributions as
-\begin{equation}\label{eq:n1_nj-1}
-n_j(y_{t}^{(j)};\mu_{m,t}^{(j)},\Omega_m^{(j)}) = n_1(y_{j,t};\mu_{m,t,j|j-1},\Omega_{m,j|j-1}) n_{j-1}(y_{t}^{(j-1)};\mu_{m,t}^{(j-1)},\Omega_m^{(j-1)}),
-\end{equation}
-where $\mu_{m,t,j|j-1}$ and $\Omega_{m,j|j-1}$ are the conditional mean and covariance matrix of $y_{j,t}$ conditional on $\sigma(\mathcal{A}_{j-1},\mathcal{F}_{t-1})$.  Likewise, it follows from the properties of the conditional distributions of multivariate $t$-distribution that we may express the $j$-dimensional $t$-distributions as
-\begin{align}\label{eq:t1_tj-1}
-\begin{aligned}
-t_j(y_{t}^{(j)};\mu_{m,t}^{(j)},\Omega_{m,t}^{(j)},\nu_m + dp) =& t_1(y_{j,t};\mu_{m,t,j|j-1},\Omega_{m,t,j|j-1},\nu_m + dp + j  - 1) \\
-&\times t_{j-1}(y_{t}^{(j-1)};\mu_{m,t}^{(j-1)},\Omega_{m,t}^{(j-1)},\nu_m + dp),
-\end{aligned}
-\end{align}
-where $\mu_{m,t,j|j-1}$ and $\Omega_{m,t,j|j-1}$ are the conditional mean and covariance matrix of $y_{j,t}$ conditional on $\sigma(\mathcal{A}_{j-1},\mathcal{F}_{t-1})$.
-
-By denoting
-\begin{equation}\label{eq:beta_mtj_t}
-\beta_{m,t,j} \equiv \frac{\alpha_{m,t}n_{j-1}(y_{t}^{(j-1)};\mu_{m,t}^{(j-1)},\Omega_{m}^{(j-1)})}{\sum_{n=1}^{M_1}\alpha_{n,t} n_{j-1}(y_{t}^{(j-1)};\mu_{n,t}^{(j-1)},\Omega_{n}^{(j-1)}) +\sum_{n=M_1+1}^{M}\alpha_{n,t} t_{j-1}(y_{t}^{(j-1)};\mu_{n,t}^{(j-1)},\Omega_{n,t}^{(j-1)},\nu_n + dp)}
-\end{equation}
-for $m=1,..,M_1$,  $j=2,...,d$,  and
-\begin{equation}\label{eq:beta_mtj_t}
-\beta_{m,t,j} \equiv \frac{\alpha_{m,t}t_{j-1}(y_{t}^{(j-1)};\mu_{m,t}^{(j-1)},\Omega_{m,t}^{(j-1)},\nu_m + dp)}{\sum_{n=1}^{M_1}\alpha_{n,t} n_{j-1}(y_{t}^{(j-1)};\mu_{n,t}^{(j-1)},\Omega_{n}^{(j-1)}) +\sum_{n=M_1+1}^{M}\alpha_{n,t} t_{j-1}(y_{t}^{(j-1)};\mu_{n,t}^{(j-1)},\Omega_{n,t}^{(j-1)},\nu_n + dp)}
-\end{equation}
-for $m=M_1+1,...,M$,  $j=2,...,d$, and using the expressions (\ref{eq:n1_nj-1}) and (\ref{eq:t1_tj-1}),  we can express the conditional density function (\ref{eq:conddens_gstmvar}) as
-\begin{align}
-\begin{aligned}
-f_{j-1,t-1}\left(y_{j,t};\boldsymbol{\theta}\right)=&\sum_{m=1}^{M_1}\beta_{m,t,j}n_1(y_{j,t};\mu_{m,t,j|j-1},\Omega_{m,j|j-1})\\
-& + \sum_{m=M_1+1}^{M}\beta_{m,t,j}t_1(y_{j,t};\mu_{m,t,j|j-1},\Omega_{m,t,j|j-1},\nu_m + dp + j - 1), \ \ j=2,..,d.
-\end{aligned}
-\end{align}
-
-For $m=1,...,M_1$, the conditional means $\mu_{m,t,j|j-1}$ and covariance matrices $\Omega_{m,j|j-1}$ are as in (\ref{eq:mux_gaus}) and (\ref{eq:omegax_gaus}) when for each $j=2,...,d$ and $m=1,...,M$ we consider the partition $y_t^{(j)}=(y_t^{(j-1)},y_{j,t})$, $\mu_{m,t}^{(j)}=(\mu_{m,t}^{(j-1)},\mu_{j,m,t})$, and
-\begin{equation}
-\Omega_m^{(j)}=
-\begin{bmatrix}
-\Omega_m^{(j-1)} \quad\enspace & \Omega_{(j-1),j,m} \\
-\Omega_{(j-1),j,m}' & \Omega_{m}(j,j)  \\
-\end{bmatrix},
-\end{equation}
-where $\Omega_{m}(j,j)$ is the $jj$th elementh of $\Omega_m$ and $\Omega_{(j-1),j,m}$ $((j-1)\times 1)$  consists of the rows $1,...,j-1$ of the $j$th column of $\Omega_m$.  In particular, we have
-\begin{align}
-\mu_{m,t,j|j-1} &=\mu_{j,m,t} + \Omega_{(j-1),j,m}'(\Omega_m^{(j-1)})^{-1}(y_t^{(j-1)}-\mu_{m,t}^{(j-1)}),\label{eq:cond_mu_mtj_n}\\
-\Omega_{m,j|j-1} &= \Omega_{m}(j,j) - \Omega_{(j-1),j,m}'(\Omega_m^{(j-1)})^{-1} \Omega_{(j-1),j,m}. \label{eq:cond_omega_mj_n}
-\end{align}
-
-For $m=M_1+1,..,M$, the conditional means $\mu_{m,t,j|j-1}$ and covariance matrices $\Omega_{m,t,j|j-1}$ are as in (\ref{eq:mux}) and (\ref{eq:omegax}) when for each $j=2,...,d$ and $m=1,...,M$ we consider the partition $y_t^{(j)}=(y_t^{(j-1)},y_{j,t})$, $\mu_{m,t}^{(j)}=(\mu_{m,t}^{(j-1)},\mu_{j,m,t})$, and
-\begin{equation}
-\Omega_{m,t}^{(j)}=
-\begin{bmatrix}
-\Omega_{m,t}^{(j-1)} \quad\enspace & \Omega_{(j-1),j,m,t} \\
-\Omega_{(j-1),j,m,t}' & \Omega_{m,t}(j,j)  \\
-\end{bmatrix},
-\end{equation}
-where $\Omega_{m,t}(j,j)$ is the $jj$th elementh of $\Omega_{m,t}$ and $\Omega_{(j-1),j,m,t}$ $((j-1)\times 1)$  consists of the rows $1,...,j-1$ of the $j$th column of $\Omega_{m,t}$.  In particular,  taking use of the relation $\Omega_{m,t}=\omega_{m,t}\Omega_m$ (where $\omega_{m,t}$ is scalar), we have
-\begin{align}
-\begin{aligned}
-\mu_{m,t,j|j-1} &=\mu_{j,m,t} + \Omega_{(j-1),j,m,t}'(\Omega_{m,t}^{(j-1)})^{-1}(y_t^{(j-1)}-\mu_{m,t}^{(j-1)})\\
-&=\mu_{j,m,t} + \Omega_{(j-1),j,m}'(\Omega_{m}^{(j-1)})^{-1}(y_t^{(j-1)}-\mu_{m,t}^{(j-1)}),
-\end{aligned}\label{eq:cond_mu_mtj}
-\end{align}
-and
-\begin{align}
-\begin{aligned}
-\Omega_{m,t,j|j-1} &= \frac{\nu_m + dp + (y_t^{(j-1)} - \mu_{m,t}^{(j - 1)})'(\Omega_{m,t}^{(j-1)})^{-1}(y_t^{(j-1)} - \mu_{m,t}^{(j - 1)})}{\nu_m + dp + j - 3}\tilde{\Omega}_{m,t,j|j-1}\\
-&= \frac{\nu_m + dp + \omega_{m,t}^{-1}(y_t^{(j-1)} - \mu_{m,t}^{(j - 1)})'(\Omega_{m}^{(j-1)})^{-1}(y_t^{(j-1)} - \mu_{m,t}^{(j - 1)})}{\nu_m + dp + j - 3}\tilde{\Omega}_{m,t,j|j-1},
-\end{aligned}\label{eq:cond_omega_mtj}
-\end{align}
-where
-\begin{align}
-\begin{aligned}
-\tilde{\Omega}_{m,t,j|j-1} &\equiv \Omega_{m,t}(j,j) - \Omega_{(j-1),j,m,t}'(\Omega_{m,t}^{(j-1)})^{-1} \Omega_{(j-1),j,m,t}\\
-&=\omega_{m,t}(\Omega_{m}(j,j) - \Omega_{(j-1),j,m}'(\Omega_{m}^{(j-1)})^{-1} \Omega_{(j-1),j,m}).
-\end{aligned}
-\end{align}
-
-It then remains to find expressions for the conditional distribution functions $F_{j-1,t-1}(y_{j,t};\boldsymbol{\theta})$, $j=1,...,d$, in (\ref{eq:qrdef}).  For notational convenience, we write
-\begin{align}
-\begin{aligned}
-f_{j-1,t-1}(y_{j,t}\boldsymbol{\theta}) =& \sum_{m=1}^{M_1}\beta_{m,t,j}n_1(y_{j,t};\mu_{m,t,j|j-1},\Omega_{m,j|j-1}) \\
-&+ \sum_{m=M_1 + 1}^{M}\beta_{m,t,j}t_1(y_{j,t};\mu_{m,t,j|j-1},\Omega_{m,t,j|j-1},\nu_m + dp + j - 1)
-\end{aligned}
-\end{align}
-for all $j=1,...,d$ by defining $\beta_{m,t,1}\equiv \alpha_{m,t}$,  $\mu_{m,t,1|0}\equiv \mu_{m,t}^{(1)}$,  $\Omega_{m,1|0}\equiv \Omega_{m}^{(1)}$, and $\Omega_{m,t,1|0}\equiv \Omega_{m,t}^{(1)}$.  For $j=2,...,d$,  these quantities are defined in (\ref{eq:beta_mtj_t}), (\ref{eq:cond_mu_mtj_n}), (\ref{eq:cond_omega_mj_n}), (\ref{eq:cond_mu_mtj}), and (\ref{eq:cond_omega_mtj}). Then,
-\begin{align}
-\begin{aligned}
-F_{j-1,t-1}(y_{j,t};\boldsymbol{\theta})=&\sum_{m=1}^{M_1}\beta_{m,t,j}\int_{-\infty}^{y_{j,t}}n_1(u;\mu_{m,t,j|j-1},\Omega_{m,j|j-1})du \\
-&+\sum_{m=M_1+1}^{M}\beta_{m,t,j}\int_{-\infty}^{y_{j,t}}t_1(u;\mu_{m,t,j|j-1},\Omega_{m,t,j|j-1},\nu_m + dp + j - 1)du,
-\end{aligned}
-\end{align}
-where we seek to solve the integrals inside the sums.
-
-Regarding the first sum,  for $m=1,...,M_1$,  it is easy to see that the integrals can be expressed using the stardard normal distribution function $\Phi(\cdot)$ as
-\begin{align}
-\int_{-\infty}^{y_{j,t}}n_1(u;\mu_{m,t,j|j-1},\Omega_{m,j|j-1})du &= \Phi\left(\frac{y_{j,t}-\mu_{m,t,j|j-1}}{\sqrt{\Omega_{m,j|j-1}}}\right).
-\end{align}
-
-Next, consider the second sum,  $m=M_1+1,...,M$. By taking use of the symmetry of the $t$-distribution about its mean, we obtain
-\begin{align}\label{eq:integral1}
-\begin{aligned}
-&\int_{-\infty}^{y_{j,t}}t_1(u;\mu_{m,t,j|j-1},\Omega_{m,t,j|j-1},\nu_m + dp + j - 1)du \\
-&= \frac{1}{2} + \int_{\mu_{m,t,j|j-1}}^{y_{j,t}}t_1(u;\mu_{m,t,j|j-1},\Omega_{m,t,j|j-1},\nu_m + dp + j - 1)du.
-\end{aligned}
-\end{align}
-By applying the change of variables $\tilde{u}_{m,t,j} = u - \mu_{m,t,j|j-1}$ in the integral, the RHS of (\ref{eq:integral1}) can be expressed as
-\begin{equation}\label{eq:integral2}
-\frac{1}{2} + \frac{\Gamma\left(\frac{\nu_m + dp + j}{2}\right)}{\sqrt{\pi (\nu_m + dp + j - 3)}\Gamma\left(\frac{\nu_m + dp + j - 1}{2} \right)}\Omega_{m,t,j|j-1}^{-1/2}\int_{0}^{\tilde{y}_{m,t,j}}\left(1 + \frac{\tilde{u}_{m,t,j}^2}{a_{m,t,j}} \right)^{-b_{m,j}}d\tilde{u}_{m,t,j},
-\end{equation}
-where $\tilde{y}_{m,t,j} \equiv y_{j,t} - \mu_{m,t,j|j-1}$,  $a_{m,t,j} \equiv (\nu_m + dp + j - 3)\Omega_{m,t,j|j-1}$, and $b_{m,j}\equiv (\nu_m + dp + j)/2$.
-
-Then, by applying the change of variables $z_{m,t,j} =  \tilde{u}_{m,t,j}^2/\tilde{y}_{m,t,j}$,  we can express the integral in (\ref{eq:integral2}) as
-\begin{equation}\label{eq:integral3}
-\int_{0}^{\tilde{y}_{m,t,j}}\left(1 + \frac{\tilde{u}_{m,t,j}^2}{a_{m,t,j}} \right)^{-b_{m,j}}d\tilde{u}_{m,t,j} = \frac{1}{2}\int_{0}^{\tilde{y}_{m,t,j}}\left(\frac{\tilde{y}_{m,t,j}}{z_{m,t,j}}  \right)^{1/2}\left(1 + \frac{z_{m,t,j}\tilde{y}_{m,t,j}}{a_{m,t,j}} \right)^{-b_{m,j}}dz_{m,t,j}.
-\end{equation}
-By applying the third change of variables $x_{m,t,j}=z_{m,t,j}/\tilde{y}_{m,t,j}$ and using the properties of the gamma function,  the RHS of (\ref{eq:integral3}) can be expressed as
-\begin{equation}
-\frac{\tilde{y}_{m,t,j}}{2}\int_0^1 x_{m,t,j}^{-1/2}\left(1 - x_{m,t,j}\left(-\frac{\tilde{y}_{m,t,j}^2}{a_{m,t,j}}\right)  \right)^{-b_{m,j}}dx_{m,t,j} = \tilde{y}_{m,t,j} \times {}_2\text{F}_1\left(\frac{1}{2}, b_{m,j}, \frac{3}{2}; -\frac{\tilde{y}_{m,t,j}^2}{a_{m,t,j}} \right),
-\end{equation}
-where the hypergeometric function is defined as \citep[Section 1.3.1]{Aomoto+Kita:2011}
-\begin{equation}
-{}_2F_1(a,b,c;x)=\frac{\Gamma(c)}{\Gamma(a)\Gamma(c-a)}\int_0^1 s^{a-1}(1-s)^{c-a-1}(1-sx)^{-b}ds,
-\end{equation}
-when $|x|<1$, $a>0$, and $c-a>0$ (when $a,c\in\mathbb{R}$).
-
-Using the above result, we have
-\begin{align}\label{eq:stmvar_qr_closedform}
-\begin{aligned}
-&\int_{-\infty}^{y_{j,t}}t_1(u;\mu_{m,t,j|j-1},\Omega_{m,t,j|j-1},\nu_m + dp + j - 1)du \\
-&= \frac{1}{2} + \frac{\Gamma\left(\frac{\nu_m + dp + j}{2}\right)}{\sqrt{\pi (\nu_m + dp + j - 3)}\Gamma\left(\frac{\nu_m + dp + j - 1}{2} \right)}\Omega_{m,t,j|j-1}^{-1/2}\tilde{y}_{m,t,j} \times {}_2\text{F}_1\left(\frac{1}{2}, b_{m,j}, \frac{3}{2}; -\frac{\tilde{y}_{m,t,j}^2}{a_{m,t,j}} \right)
-\end{aligned}
-\end{align}
-whenever $\left|-\frac{\tilde{y}_{m,t,j}^2}{a_{m,t,j}}\right|<1$.  That is,  the closed form expression (\ref{eq:stmvar_qr_closedform}) exists when
-\begin{equation}
-|y_{j,t} - \mu_{m,t,j|j-1}| < \sqrt{(v_m + dp + j - 3)\Omega_{m,t,j,|j-1}}.
-\end{equation}
-If this condition does not hold, the quantile residual are obtained by numerically integrating the conditional density function $t_1(u;\mu_{m,t,j|j-1},\Omega_{m,t,j|j-1},\nu_m + dp + j - 1)$. For the hypergeometric function, \pkg{gmvarkit} uses the package \pkg{gsl} \citep{gsl}.
-
-
-\section{Monte Carlo algorithm}\label{sec:montecarlo}
-We present a Monte Carlo algorithm that produces point estimates and with random initial value $\boldsymbol{y}_{t-1}=(y_{t-1},...,y_{t-p})$ confidence intervals for the generalized impulse response function defined in (\ref{eq:girf}). Our algorithm is adapted from \citet[pp. 135-136]{Koop+Pesaran+Potter:1996} and \citet[pp. 601-602]{Kilian+Lutkepohl:2017}. We assume that the history $\boldsymbol{y}_{t-1}$ follows a known distribution $G$, which may be such that it produces a single outcome with probability one (corresponding to a fixed $\boldsymbol{y}_{t-1}$), or it can be the stationary distribution of the process or of a specific regime. In the following, $y_{t+h}^{(i)}(\delta_j,\boldsymbol{y}_{t-1})$ denotes a realization of the process at time $t+h$ conditional on the structural shock of magnitude $\delta_j$ in the $j$th element of $e_t$ hitting the system at time $t$ and on the $p$ observations $\boldsymbol{y}_{t-1}=(y_{t-1},...,y_{t-p})$ preceding the time $t$, whereas $y_{t+h}^{(i)}(\boldsymbol{y}_{t-1})$ denotes an alternative realization conditional on the history $\boldsymbol{y}_{t-1}$ only.
-
-The algorithm proceeds with the following steps.
-\begin{enumerate}\addtocounter{enumi}{-1}
-\item Decide the horizon $H$, the numbers of repetitions $R_1$ and $R_2$, and the magnitude $\delta_j$ for the $j$th structural shock that is of interest.
-
-\item Draw an initial value $\boldsymbol{y}_{t-1}$ from $G$.\label{step1}
-
-\item Draw $H+1$ independent realizations of a shock $\varepsilon_t$ from $N(0,I_d)$. If the models contains Student's $t$ regime, the Gaussian shocks are used obtain shocks from the appropriate Student's $t$ distributions (in this case, $H+1$ independent realizations of shocks from $\chi^2_{\nu_m + dp}$-distributions are also drawn for the $t$-regimes). Also, draw an initial regime $m\in \lbrace 1,...,M \rbrace$ according to the probabilities given by the mixing weights $\alpha_{1,t},...,\alpha_{M,t}$ and compute the reduced form shock $u_t$. If identification by heteroskedasticity is used, $u_t=W\Lambda_m^{1/2}\varepsilon_t$, where $\Lambda_1=I_d$. If the shocks are, instead, identified recursively, $u_t=L_t\varepsilon_t$, where $L_t$ is the lower triangular matrix obtained from the Cholesky decomposition $\Omega_t = L_tL_t'$ and $\Omega_t$ is the conditional covariance matrix of the process. Then, compute the structural shock $e_t = B_t^{-1}u_t$ and impose the size $\delta_j$ on its $j$th element to obtain $e_t^*$. Finally, calculate the modified reduced form shock $u_t^*=B_te_t^*$.\label{step2} %\footnote{The independent standard normal shocks $\varepsilon_t$ are introduced here to control random variation across the two sample paths $y_{t+n}^{(i)}(\delta_j,\boldsymbol{y}_{t-1})$ and $y_{t+n}^{(i)}(\boldsymbol{y}_{t-1})$.}
-
-\item Use the modified reduced form shock $u_t^*$ and the rest $H$ standard normal shocks $\varepsilon_t$ obtained from Step~\ref{step2} to compute realizations $y_{t+h}^{(i)}(\delta_j,\boldsymbol{y}_{t-1})$ for $n=0,1,...,H$, iterating forward so that in each iteration the regime $m$ that generates the observation is first drawn according to the probabilities given by the mixing weights. At $h=0$, the initial regime and the modified reduced form shock $u_t^*$ calculated from the structural shock in Step~\ref{step2} is used. From $h=1$ onwards, the $h+1$th standard normal shock $\varepsilon_t$ is used to calculate the reduced form shock $u_{t+h}=W\Lambda_m^{1/2}\varepsilon_{t+h}$, where $\Lambda_1=I_d$ and $m$ is the selected regime (note that only the reduced form shocks are of interest with $h>0$, so the same formula can be used for recursively identified shocks here).
-
-\item  Use the reduced form shock $u_t$ and the rest $H$ the standard normal shocks $\varepsilon_t$ obtained from  Step~\ref{step2} to compute realizations $y_{t+h}^{(i)}(\boldsymbol{y}_{t-1})$ for $h=0,1,...,H$, so that the reduced form shock $u_t$ (calculated in Step~\ref{step2}) is used to compute the time $h=0$ realization. Otherwise proceed similarly to the previous step.
-
-\item Calculate $y_{t+h}^{(i)}(\delta_j,\boldsymbol{y}_{t-1}) - y_{t+h}^{(i)}(\boldsymbol{y}_{t-1})$.\label{step5}
-
-\item Repeat Steps~\ref{step2}-\ref{step5} $R_1$ times and calculate the sample mean of $y_{t+h}^{(i)}(\delta_j,\boldsymbol{y}_{t-1}) - y_{t+n}^{(i)}(\boldsymbol{y}_{t-1})$ for $h=0,1,...,H$ to obtain an estimate of the GIRF$(h,\delta_j,\boldsymbol{y}_{t-1})$.\label{step6}
-
-\item Repeat Steps~\ref{step1}-\ref{step6} $R_2$ times to obtain estimates of GIRF$(h,\delta_j,\boldsymbol{y}_{t-1})$ with different starting values $\boldsymbol{y}_{t-1}$ generated from the distribution $G$. Then, take the sample mean and sample quantiles over the estimates to obtain point estimate and confidence intervals for the GIRF with random initial value.\label{step7}
-\end{enumerate}
-Notice that if a fixed initial value $\boldsymbol{y}_{t-1}$ is used, Step~\ref{step7} is redundant.
-
-
-\end{appendix}
 
 \end{document}

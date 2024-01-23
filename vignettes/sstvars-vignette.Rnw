@@ -564,74 +564,33 @@ Structural parameters:
 1 [  0.17  0.59 ]   [  5.67 ]
 2 [ -0.18  0.06 ] , [  3.29 ]
 
-The impact matrix is subject to 0 zero constraints and 4 sign constraints.
+The impact matrix is subject to 0 zero constraints and 0 sign constraints.
 \end{CodeOutput}
 \end{CodeChunk}
-
-
-If the structural model is identified by heteroskedasticity, additional restrictions can be imposed on the impact matrix by setting them in argument \code{B_constraints}.
-
-
-
-
-The structural GSMVAR models are estimated similarly to the reduced form version, expect that the model is parametrized with $W$ and $\lambda_{mi}$, $m=2,...,M$, $i=1,...,d$ instead of the covariance matrices $\Omega_{m}$, $m=1,...,M$. The estimation is can be done with the function \code{fitGSMVAR} but now the argument \code{structural_pars} needs to be supplied with a list providing the constraints on $W$ (which equally imposes the constraints on the B-matrix), and optionally, linear constraints on the $\lambda_{mi}$ parameters or constraints restricting $\lambda_{mi}$ to fixed values.
-
-
-\subsubsection{Building structural model based on a reduced form model}
-If the number of regimes is two ($M=2$), a structural model can be built based on a reduced form model, because the matrix decomposition used in the simultaneous diagonalization of the error term covariance matrices always exists. This can be done with function \code{gsmvar_to_sgsmvar} which should be supplied with the reduced form model, and it then returns a corresponding structural model. After creating the structural model, the columns of $W$ can be reordered with the function \code{reorder_W_columns} which also reorders all $\lambda_{mi}$ accordingly (and hence the resulting model will coincide with the original reduced form model). Also, all signs any column of $W$ can be swapped with the function \code{swap_W_signs}.
-
-The exemplify, the following code creates statistically identified structural model based on the reduced form model \code{fit12gs} and then prints the estimates.
 %
+Since the structural model identified by heteroskedasticity is not overidentified, no estimation was performed but merely a repameterization. The estimates for the structural parameters $W$ and $\lambda_2,...,\lambda_M$ are presented at the bottom of the printout.
+
+If the structural model is identified by heteroskedasticity, additional restrictions can be imposed on the impact matrix by setting them in argument \code{B_constraints}. A structural model identified by heteroskedasticity is overidentifying also when there are more than two regimes in the models, as then the matrix decomposition employed in the identification does not always exist. In either case, the structural model needs be estimated, which is performed in \code{sstvars} based on preliminary estimates obtained either from a reduced form model or from a structural model. The estimation is performed with the function \code{fitSSTVAR}, which implements a two-phase estimation procedure in which a robust estimation method is used in the first phase and a variable algorithm in the second phase. The default option for the robust method is Nelder-Mead algorithm implemented by \cite{R} in the function \code{optim} of the package \code{stats}.
+
+It is important to note that if the initial estimates are far from the ML estimate, the resulting solution is likely local only due to the complexity of the model. However, it is not often very appealing to impose overidentified constraints that far from the unrestricted estimates in the first place. But in any case, since the estimation may be unrealiable if the restricted ML estimate is far from the unrestricted ML estimate, we recommend using our package to estimate only such overidentifying structural models in which the unrestricted estimate is close to satisfying the imposed constraints.
+
+The exemplify, we estimate a structural model identified by heteroskedasticity based on the structural model \code{fit12het} by setting the argument \code{identification="heteroskedasticity"} and imposing the constraint that the second element of the second column of the impact matrix is zero (the above estimates of $W$ show that the corresponding unrestricted estimate is close to zero). The zero constraint is imposed by setting the argument \code{B_constraints} as matrix such that the second element of the second column is zero and all other elements are \code{NA}. Sign constraints can be set similarly by setting the corresponding elements to \code{1} or \code{-1} (or any other strictly positive of negative value). The following code estimates the model:
 \begin{CodeChunk}
 \begin{CodeInput}
-R> fit12gss <- gsmvar_to_sgsmvar(fit12gs)
-R> fit12gss
+R> fit12hetb <- fitSSTVAR(fit12, identification="heteroskedasticity",
++    B_constraints=matrix(c(NA, NA, NA, 0), nrow=2))
+R> print(fit12het)
 \end{CodeInput}
 \begin{CodeOutput}
-Structural G-StMVAR model:
- p = 1, M1 = 1, M2 = 1, d = 2, #parameters = 20, #observations = 244 x 2,
- conditional log-likelihood, intercept parametrization, no AR parameter
- constraints
-
-Regime 1 (GMVAR type)
-Mixing weight: 0.17
-Regime means: 0.66, 1.67
-
-   Y     phi0          A1                  Omega         1/2
-1 y1 = [ 1.60 ] + [  0.13 -0.61 ] y1.1 + [  1.21 -0.04 ]     eps1
-2 y2   [ 0.48 ]   [ -0.03  0.72 ] y2.1   [ -0.04  0.14 ]     eps2
-
-Regime 2 (StMVAR type)
-Mixing weight: 0.83
-Regime means: 0.78, 0.54
-Df parameter:  7.57
-
-   Y     phi0          A1                            Omega          1/2
-1 y1 = [ 0.55 ] + [  0.33 -0.04 ] y1.1 + (         [  0.42 0.00 ] )     eps1
-2 y2   [ 0.12 ]   [  0.05  0.71 ] y2.1   ( ARCH_mt [  0.00 0.04 ] )     eps2
-
-Structural parameters:
-        W             lamb2
-1 [  0.95 -0.55 ]   [  0.36 ]
-2 [  0.16  0.34 ] , [  0.28 ]
-
-The B-matrix (or equally W) is subject to 0 zero constraints and 2 sign
-constraints. The eigenvalues lambda_{mi} are not subject to linear constraints.
+The log-likelihood of the supplied model:    -250.236
+Constrained log-likelihood prior estimation: -260.164
+The log-likelihood after robust estimation:  -250.556
+The log-likelihood after final estimation:   -250.486
 \end{CodeOutput}
 \end{CodeChunk}
-%
-Estimates for the structural parameters, $W$ and the eigenvalues, are printed last.
+The log-likelihoods of the original model, the initial estimates of the constrained model, the estimates after the robust estimation, and the final estimates are printed. If the log-likelihood of after final estimation is bad compared to the log-likelihood of the original model, the estimation is likely unreliable. The command \code{print(fit12hetb)} prints the estimated overidentified model (we ommit the printout for brevity).
 
-If there is only one mixture component, i.e., \code{M == 1}, \code{gsmvar_to_sgsmvar} returns a symmetric and pos. def. square root matrix of the error term covariance matrix by default. But one may also employ lower triangular Cholesky identification by setting \code{cholesky = TRUE} in the arguments.
-
-\subsubsection{Estimating overidentified structural GSMVAR models}
-Sometimes is appropriate to impose overidentifying constraints on $W$ (or equally the B-matrix). With preliminary estimates from the just-identified model in the case $M>1$ or any model in the case $M=1$, it is convenient to use the function \code{estimate_sgsmvar}. It takes in a reduced form or structural GSMVAR model as a class 'gsmvar' object and new constraints in the argument \code{new_W} as a matrix expressing the sign or zero constraints. Strictly positive or negative elements signify strict sign constraints, zeros zero constraints, and \code{NA} values that the element is unconstrained.
-
-\code{estimate_sgsmvar} then creates preliminary estimate based on the supplied model and the constraints, and then runs the two-phase estimation with settings of the genetic algorithm such that the search is focused on the neighbourhood of the preliminary estimate. Thus, it will lead to the correct ML estimate only if the unconstrained estimate is close to the constrained one in the first place. It is therefore useful for imposing zero constraints for elements that are close to zero in the unrestricted estimate, for instance.
-
-\textbf{It is important to make sure that supplied model readily satisfies the sign constraints that are imposed. To achieve this, you can swap the signs in each column of the W matrix with the function \code{swap\_W\_signs}. If the sign constraints are not not readily satisfie, the preliminary estimate switches the signs and will probably lead to incorrect estimate.}
-
-\code{estimate_sgsmvar} can also be used to estimate models that are not identified, i.e., one regime models. If it supplied with a reduced form model, it will first apply the function \code{gsmvar_to_sgsmvar}, then impose the constraints and finally estimate the model.
+After creating a structural model identified by heteroskedasticity, the columns of $W$ can be reordered with the function \code{reorder_W_columns} which also reorders all $\lambda_{mi}$ accordingly (and hence the resulting model will coincide with the original reduced form model). Also, all signs any column of $W$ can be swapped with the function \code{swap_W_signs}.
 
 \subsection{Constrained estimation}\label{sec:examp_const}
 
