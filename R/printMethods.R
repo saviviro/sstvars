@@ -84,7 +84,11 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
     cat("\n ", paste0("Switching variable: ", paste0(var_names[weightfun_pars[1]], collapse=", "), " with lag ",
                       weightfun_pars[2], "."))
   }
-  cat("\n\n")
+  if(is.na(T_obs) && weight_function == "relative_dens") {
+    cat("\n")
+  } else {
+    cat("\n\n")
+  }
 
   if(summary_print) {
     all_boldA_eigens <- get_boldA_eigens(stvar)
