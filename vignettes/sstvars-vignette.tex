@@ -339,7 +339,7 @@ Finished!
 %
 The progression of the estimation process is reported with a progress bar giving an estimate of the remaining estimation time. Also statistics on the spread of the log-likelihoods are printed after each estimation phase. The progress bars are generated during parallel computing with the package \pkg{pbapply} \citep{Solymos+Zawadzki:2020}.
 
-Because the log-likelihood function is highly multimodal, and the estimation algorithm is ran a large number of times, it produces a set of local solutions, possibly representing various modes in the log-likelihood function. Some of the local solutions may be inappropriate for econometric inference, for instance, because they contain a near-singular error term covariance matrix or regimes that have only a very small number of observations generated (even partially) from them. Such inappropriate solutions, i.e., estimates that are not solutions of interest, are filtered automatically by \pkg{sstvars}. Specifically, solutions that incorporate a near-singular error term covariance matrix (any eigenvalue less than $0.002$) or transition weights such that they are close to zero for almost all $t$ for at least one regime. Solution very close to the boundary of the stationarity region are not filtered automatically, because sometimes the series are very persistent and the solutions are very close to the boundary. In the case of a close-to-the-boundary solution, the researcher can check for alternative local solutions using the function \code{alt_stvar}.
+Because the log-likelihood function is highly multimodal, and the estimation algorithm is ran a large number of times, it produces a set of local solutions, possibly representing various modes in the log-likelihood function. Some of the local solutions may be inappropriate for econometric inference, for instance, because they contain a near-singular error term covariance matrix or regimes that have only a very small number of observations generated (even partially) from them. Such inappropriate solutions, i.e., estimates that are not solutions of interest, are filtered automatically by \pkg{sstvars}. Specifically, solutions that incorporate a near-singular error term covariance matrix (any eigenvalue less than $0.002$), any modulus "bold A" eigenvalues larger than $0.9985$ (indicating the necessary condition for stationarity is close to break), or transition weights such that they are close to zero for almost all $t$ for at least one regime. With relative densities transition weights, also solutions in which a weight parameter estimate is close to zero are filtered out.
 
 Automatic filtering can be turned this off with the argument \code{filter_estimates=FALSE}. Then, the various local solutions can be easily examined by hand by using the function \code{alt_stvar} and adjusting its argument \code{which_largest} or \code{which_round}. Note that \code{alt_stvar} can be used also when the automatic filtering is turned on, since the estimates from all of the estimation rounds are stored in the class \code{'stvar'} object returned by \code{fitSTVAR}.
 
@@ -374,171 +374,106 @@ Regime means: 0.77, 1.76
 %
 The parameter estimates are reported for each mixture component separately so that the estimates can be easily interpreted. Each regime's autoregressive formula is presented in the form
 \begin{equation}
-y_t = \varphi_{m,0} + A_{m,1}y_{t - 1} + ... + A_{m,p}y_{t - p} + \Omega_{m}^{1/2}\varepsilon_{t}.
+y_t = \varphi_{m,0} + A_{m,1}y_{t - 1} + ... + A_{m,p}y_{t - p} + \Omega_{m}^{1/2}e_{t}.
 \end{equation}
-If $\Omega_{m,t}^{1/2}$ is time varying, it printed in the form $\Omega_{m,t}^{1/2}=(\text{ARCH\_mt}\Omega_m)^{1/2}$ where $\text{ARCH\_mt}$ is the $\omega_{m,t}$ defined in (\ref{eq:sigma_mt}). No numerical value is given to the ARCH scalar, as it is time-varying. The other statistics are listed above the formula, including the mixing weight pameter $\alpha_m$, the unconditional mean $\mu_m$, and the degrees freedom parameter $\nu_m$.
+The other statistics are listed above the formula, the degrees of freedom parameter estimate, the unconditional means of the regimes, and estimates of the transition weight parameters. Based on the estimate of the location parameter and the conditional means, the second regime accommodates periods of high inflation and the first regime thereby periods of lower inflation.
 
-The above printout shows that the second regime's degrees of freedom parameter estimate is very large, which might induce numerical problems. However, since a StMVAR model with some degrees of freedom parameters tending to infinity coincides with the G-StMVAR model with the corresponding regimes switched to GMVAR type, one may avoid the problems by switching to the appropriate G-StMVAR model \citep[see][]{Virolainen2:2021}. Switching to the appropriate G-StMVAR model is recommended also because it removes the redundant degrees of freedom parameters from the model, thereby reducing its complexity. The function \code{stmvar_to_gstmvar} does this switch automatically by first removing the large degrees of freedom parameters and then estimating the G-StMVAR model with a variable metric algorithm \citep[algorithm 21]{Nash:1990} using the induced parameter vector as the initial value.
-
-To exemplify, the following code switches all the regimes of the StMVAR model \code{fit12t_alt} with a degrees of freedom parameter estimate larger than $100$ to GMVAR type, and then estimates the corresponding G-StMVAR model.
+A more detailed printout is obtained with the \code{summary} method as follows:
 %
 \begin{CodeChunk}
 \begin{CodeInput}
-R> fit12gs <- stmvar_to_gstmvar(fit12t_alt, maxdf=100)
-\end{CodeInput}
-\end{CodeChunk}
-%
-We use the \code{summary} method to obtain a more detailed printout of the estimated the G-StMVAR model:
-%
-\begin{CodeChunk}
-\begin{CodeInput}
-R> summary(fit12gs)
+R> summary(fit12)
 \end{CodeInput}
 \begin{CodeOutput}
-Reduced form G-StMVAR model:
- p = 1, M1 = 1, M2 = 1, d = 2, #parameters = 20, #observations = 244 x 2,
- conditional log-likelihood, intercept parametrization, no AR parameter
- constraints
+logistic Student STVAR model, reduced form model no AR_constraints, no mean_constraints,
+  p = 1, M = 2, d = 2, #parameters = 21, #observations = 243 x 2
+  Switching variable: GDPDEF with lag 1.
 
- log-likelihood: -247.50, AIC: 534.99, HQIC: 563.13, BIC: 604.85
+loglik/T: -1.03, AIC: 2.23, HQIC: 2.35, BIC: 2.53
 
-Regime 1 (GMVAR type)
-Moduli of 'bold A' eigenvalues:  0.75, 0.10
-Cov. matrix 'Omega' eigenvalues: 1.21, 0.14
-Mixing weight: 0.17
-Regime means: 0.66, 1.67
+Regime 1
+Degrees of freedom: 7.70 (for all regimes)
+Moduli of 'bold A' eigenvalues:  0.49, 0.49
+Cov. matrix 'Omega' eigenvalues: 0.37, 0.03
+Regime means: 0.71, 0.49
+Regime sdevs: 0.66, 0.24
 
-   Y     phi0          A1                  Omega         1/2
-1 y1 = [ 1.60 ] + [  0.13 -0.61 ] y1.1 + [  1.21 -0.04 ]     eps1
-2 y2   [ 0.48 ]   [ -0.03  0.72 ] y2.1   [ -0.04  0.14 ]     eps2
-
-Error term correlation matrix:
-       [,1]   [,2]
-[1,]  1.000 -0.087
-[2,] -0.087  1.000
-
-Regime 2 (StMVAR type)
-Moduli of 'bold A' eigenvalues:  0.70, 0.34
-Cov. matrix 'Omega' eigenvalues: 0.42, 0.04
-Mixing weight: 0.83
-Regime means: 0.78, 0.54
-Df parameter:  7.57
-
-   Y     phi0          A1                            Omega          1/2
-1 y1 = [ 0.55 ] + [  0.33 -0.04 ] y1.1 + (         [  0.42 0.00 ] )     eps1
-2 y2   [ 0.12 ]   [  0.05  0.71 ] y2.1   ( ARCH_mt [  0.00 0.04 ] )     eps2
+   Y     phi0          A1                  Omega        1/2
+1 y1 = [ 0.63 ] + [  0.35 -0.35 ] y1.1 + [  0.37 0.00 ]     eps1
+2 y2   [ 0.14 ]   [  0.06  0.62 ] y2.1   [  0.00 0.03 ]     eps2
 
 Error term correlation matrix:
       [,1]  [,2]
-[1,] 1.000 0.014
-[2,] 0.014 1.000
+[1,] 1.000 0.028
+[2,] 0.028 1.000
+
+Regime 2
+Moduli of 'bold A' eigenvalues:  0.71, 0.06
+Cov. matrix 'Omega' eigenvalues: 1.29, 0.18
+Weight params: 1.22 (location), 5.01 (scale)
+Regime means: 0.77, 1.76
+Regime sdevs: 1.32, 0.59
+
+   Y     phi0          A1                  Omega         1/2
+1 y1 = [ 2.41 ] + [  0.13 -0.99 ] y1.1 + [  1.29 -0.06 ]     eps1
+2 y2   [ 0.67 ]   [ -0.04  0.64 ] y2.1   [ -0.06  0.19 ]     eps2
+
+Error term correlation matrix:
+      [,1]  [,2]
+[1,]  1.00 -0.12
+[2,] -0.12  1.00
 
 Print approximate standard errors with the function 'print_std_errors'.
 \end{CodeOutput}
 \end{CodeChunk}
 %
-In the G-StMVAR model, estimates for GMVAR type regimes are reported before StMVAR type regimes, in a decreasing order according to the mixing weight parameter estimates. As shown above, the model \code{fit12gs} incorporates one GMVAR type regime and one StMVAR type regime. Estimates of the unconditional mean, the first $p$ autocovariances and autocorrelations (including the unconditional covariance matrix) can be obtained from the element \code{\$uncond_moments} of the model object. The conditional moments calculated using the data are available for the process (\code{\$total_cmeans} and \code{\$total_ccovs}) as well as for the regimes separately (\code{\$regime_cmeans} and \code{\$regime_ccovs}). These conditional moments can be conveniently plotted along the series with the function \code{cond_moment_plot}.
+The above summary printout shows additional information compared to the print method, including moduli of the eigenvalues of the companion form AR matrices (to assess how close Condition~\ref{cond:necessary} is to break), eigenvalues of the error term covariance matrices (to assess how close they are to being non-positive definite), marginal standard deviations of the variables in each regime, error term correlation matrices, and the log-likelihood as well as values of the information criteria divided by the number of observations ($T-p$).
 
-Approximate standard errors can be printed with the function \code{print_std_errors}, which prints the standard errors in the same form as the print method prints the estimates. Note that the last mixing weight parameter estimate does not have an approximate standard error because it is not parametrized. Likewise, there is no standard error for the intercepts if mean parametrization is used (by setting \code{parametrization = "mean"} in \code{fitGSMVAR}) and vice versa. In order to obtain standard errors for the regimewise unconditional means or intercepts, one can easily swap between the mean and intercept parametrizations with the function \code{swap_parametrization}.
-
-To exemplify, the following code prints approximate standard errors for the model \code{fit12gs}:
-%
-\begin{CodeChunk}
-\begin{CodeInput}
-R> print_std_errors(fit12gs)
-\end{CodeInput}
-\begin{CodeOutput}
-Reduced form model:
-p = 1, M = 2, conditional log-likelihood, intercept parametrization,
-no AR parameter constraints
-
-APPROXIMATE STANDARD ERRORS
-
-Regime 1 (GMVAR type)
-Mixing weight: 0.124
-
-   Y      phi0          A1                  Omega         1/2
-1 Y1 = [ 0.759 ] + [ 0.149 0.386 ] Y1.1 + [ 0.264 0.061 ]     eps1
-2 Y2   [ 0.234 ]   [ 0.050 0.118 ] Y2.1   [ 0.061 0.029 ]     eps2
-
-Regime 2 (StMVAR type)
-Df parameter:  2.740
-
-   Y      phi0          A1                            Omega         1/2
-1 Y1 = [ 0.127 ] + [ 0.079 0.196 ] Y1.1 + (         [ 0.070 0.011 ]     eps1
-2 Y2   [ 0.037 ]   [ 0.024 0.064 ] Y2.1   ( ARCH_mt [ 0.011 0.008 ]     eps2
-\end{CodeOutput}
-\end{CodeChunk}
-%
-
-Missing values are reported when \pkg{gmvarkit} is not able to calculate the standard error. This typically happens either because there is an overly large degrees of freedom parameter estimate in the model or because the estimation algorithm did not stop a local maximum. In the former case, switch to the appropariate G-StMVAR with the function \code{stmvar_to_gstmvar}. In the latter case, make sure the estimate in not an unreasonable near-the-boundary point. If it is, it might appropriate the consider the next-best local maximum with the function \code{alt_gsmvar}. If it is not a near-the-boundary point, try running more iterations of the variable metric algorithm with the function \code{iterate_more}. Section~\ref{sec:examestim} discusses how to evaluate with \pkg{gmvarkit} whether the estimate is a local maximum (and how to improve the reliability that it is the global maximum).
-
-Other statistics reported in the summary printout include the log-likelihood and values of the information criteria, moduli of the eigenvalues of the 'bold A' matrix (see (\ref{eq:gausmatrices})) and eigenvalues of the covariance matrix $\Omega_m$. If some of the moduli are very close to one, the related estimates are near the boundary of the stationarity region. If some of the eigenvalues of $\Omega_m$ close to zero, the related estimates are near the boundary of positive-definiteness region. As mentioned already multiple times, this kind of near-the-boundary point might be unreasonable and maximize the log-likelihood function for a technical reason, so it might be more appropriate to consider the next-best local maximum with the function \code{alt_gsmvar}.
-
-This is possible in \pkg{gmvarkit}, because the estimation function \code{fitGSMVAR} stores the estimates from all the estimation rounds so that a GSMVAR model can be built based on any one of them, most conveniently with the function \code{alt_gsmvar}. The desired estimation round can be specified either with the argument \code{which_round} or \code{which_largest}. The former specifies the round in the estimation order, whereas the latter specifies it in a decreasing order of the log-likelihoods.
-
-It is also possible to automatically filter out inappropriate estimates by setting the argument \code{filter_estimates=TRUE} in \code{fitSGMVAR}. Then, the function will automatically filter out estimates that it deems "inappropriate". That is, estimates that are not likely solutions of interest. Specifically, solutions that incorporate a near-singular error term covariance matrix (any eigenvalue less than $0.002$), mixing weights such that they are close to zero for almost all $t$ for at least one regime, or mixing weight parameter estimate close to zero (or one). It also filters out estimates with any modulus "bold A" eigenvalues larger than 0.9985, as the solution is near the boundary of the stationarity region and likely not a local maximum. \code{fitSGMVAR} then returns the solution based on the largest log-likelihood that is not filtered out. Other solutions can be studied by using the function \code{alt_gsmvar} as usual.
+Approximate standard errors can be printed with the function \code{print_std_errors}, which prints the standard errors in the same form as the print method prints the estimates. Therefore, they should be used with caution. There is no standard error for the intercepts if mean parametrization is used (by setting \code{parametrization = "mean"} in \code{fitSTVAR}) and vice versa. In order to obtain standard errors for the regimewise unconditional means or intercepts, one can easily swap between the mean and intercept parametrizations with the function \code{swap_parametrization}. Note that approximate standard errors are based on the mere assumption of the standard Gaussian asymptotic distribution of the estimator.
 
 \subsection{Further examination of the estimates}\label{sec:examestim}
-In addition to examining the summary printout, it is often useful to visualize the model by plotting the mixing weights together with the time series and the model's (marginal) stationary density together with a kernel density estimate of the time series. That is exactly what the plot method for GSMVAR models does. The following command creates the time series plot along with estimated mixing weights:
+In addition to examining the summary printout, it is often useful to visualize the model by plotting the transition weights together with the time series. That is exactly what the plot method for GSMVAR models does. The following command creates the time series plot along with estimated mixing weights:
 %
 \begin{CodeChunk}
 \begin{CodeInput}
-R> plot(fit12gs, type="series")
+R> plot(fit12, type="series")
 \end{CodeInput}
 \end{CodeChunk}
 %
 The resulting plot is presented in Figure~\ref{fig:seriesplot}.
 
-%\begin{figure}[p]
-%  \centering
-%  \includegraphics{figures/seriesplot.png}
-%  \caption{The figure produced by the command \code{plot(fit12gs, type="series")}. On the top, a quarterly series consisting of two U.S. variables: the percentage change of real GDP and the percentage change of GDP implicit price deflator, covering the period from 1959Q1 to 2019Q4. On the bottom, the estimated mixing weights of the G-StMVAR model \code{plot(fit12gs)} fitted the series.}
-%\label{fig:seriesplot}
-%\end{figure}
+\begin{figure}[t]
+  \centering
+  \includegraphics{figures/seriesplot.png}
+  \caption{The figure produced by the command \code{plot(fit12)}. On the top, a quarterly series consisting of two U.S. variables: the percentage change of real GDP and the percentage change of GDP implicit price deflator, covering the period from 1959Q1 to 2019Q4. On the bottom, the estimated transition weights of the STVAR model \code{fit12gs} fitted the series.}
+\label{fig:seriesplot}\end{figure}
 
-And the following command creates the stationary density plot:
-%
-\begin{CodeChunk}
-\begin{CodeInput}
-R> plot(fit12gs, type="density")
-\end{CodeInput}
-\end{CodeChunk}
-%
-The resulting plot is presented in Figure~\ref{fig:densityplot}. If the argument \code{type} is not specified, both of the figures will be plotted.
-
-%\begin{figure}[p]
-%  \centering
-%  \includegraphics{figures/densityplot.png}
-%  \caption{The figure produced by the command \code{plot(fit12gs, type="density")}. Kernel density estimates of the marginal series of the data the model was fitted to (black solid line), the stationary marginal density of the estimated G-StMVAR model (grey dashed line), and the marginal stationary densities of the component processes multiplied by the mixing weight parameter estimates (blue and red dashed lines).}
-%\label{fig:densityplot}
-%\end{figure}
-
-It is also sometimes interesting to examine the time series of (one-step) conditional means and variances of the process along with the time series the model was fitted to. This can be done conveniently with the function \code{cond_moment_plot}, where the argument \code{which_moment} should be specified with \code{"mean"} or \code{"variance"} accordingly. In addition to the conditional moment of the process, \code{cond_moment_plot} also displays the conditional means or variances of the regimes multiplied by the mixing weights. Note, however, that the conditional variance of the process is not generally the same as the weighted sum of regimewise conditional variances, as it includes a component that encapsulates heteroskedasticity caused by variation in the conditional mean.
+It is also sometimes interesting to examine the time series of (one-step) conditional means of the process along with the time series the model was fitted to. This can be done conveniently with the function by setting the argument \code{plot_type="cond_mean"} in the plot method. This plot depicts the contribution of each regime to the conditional mean of the process and how close the conditional mean is to the observed series in each point of time.
 
 The variable metric algorithm employed in the final estimation does not necessarily stop at a local maximum point. The algorithm might also stop at a saddle point or near a local maximum, when the algorithm is not able to increase the log-likelihood, or at any point, when the maximum number of iterations has been reached. In the latter case, the estimation function throws a warning, but saddle points and inaccurate estimates need to be detected by the researcher.
 
-It is well known that in a local maximum point, the gradient of the log-likelihood function is zero, and the eigenvalues of the Hessian matrix are all negative. In a local minimum, the eigenvalues of the Hessian matrix are all positive, whereas in a saddle point, some of them are positive and some negative. Nearly numerically singular Hessian matrices occur when the surface of the log-likelihood function is very flat about the estimate in some directions. This particularly happens when the model contains overly large degrees of freedom parameter estimates or the mixing weights $\alpha_{m,t}$ are estimated close to zero for all $t=1,...,T$ for some regime $m$.
+It is well known that in a local maximum point, the gradient of the log-likelihood function is zero, and the eigenvalues of the Hessian matrix are all negative. In a local minimum, the eigenvalues of the Hessian matrix are all positive, whereas in a saddle point, some of them are positive and some negative. Nearly numerically singular Hessian matrices occur when the surface of the log-likelihood function is very flat about the estimate in some directions. This particularly happens when the transition weights $\alpha_{m,t}$ are estimated close to zero for all $t=1,...,T$ for some regime $m$.
 
-\pkg{gmvarkit} provides several functions for evaluating whether the estimate is a local maximum point. The function \code{get_foc} returns the (numerically approximated) gradient of the log-likelihood function evaluated at the estimate, and the function \code{get_soc} returns eigenvalues of the (numerically approximated) Hessian matrix of the log-likelihood function evaluated at the estimate. The numerical derivatives are calculated using a central difference approximation
+\pkg{sstvars} provides several functions for evaluating whether the estimate is a local maximum point. The function \code{get_foc} returns the (numerically approximated) gradient of the log-likelihood function evaluated at the estimate, and the function \code{get_soc} returns eigenvalues of the (numerically approximated) Hessian matrix of the log-likelihood function evaluated at the estimate. The numerical derivatives are calculated using a central difference approximation
 \begin{equation}
 \frac{\partial L(\boldsymbol{\theta})}{\partial \theta_i} \approx \frac{f(\boldsymbol{\theta} + \boldsymbol{h}^{(i)}) - f(\boldsymbol{\theta} - \boldsymbol{h}^{(i)})}{2h}, \ \ h>0,
 \end{equation}
 where $\theta_i$ is the $i$th element of $\boldsymbol{\theta}$ and $\boldsymbol{h}^{(i)}=(0,...,0,h,0,...,0)$
-contains $h$ as its $i$th element. By default, the difference $h=6\cdot 10^{-6}$ is used for all parameters except for overly large degrees of freedom parameters, whose partial derivatives are approximated using larger differences. The difference is increased for large degrees of freedom parameters, because the limited precision of the float point presentation induces artificially rugged surfaces to the their profile log-likelihood functions, and the increased differences diminish the related numerical error. On the other hand, as the surface of the profile log-likelihood function is very flat about a large degrees of freedom parameter estimate, large differences work well for the approximation.
+contains $h$ as its $i$th element. By default, the difference $h=6\cdot 10^{-6}$ is used.
 
-For example, the following code calculates the first order condition for the G-StMVAR model \code{fit12gs}:
+For example, the following code calculates the first order condition for the G-StMVAR model \code{fit12}:
 %
 \begin{CodeChunk}
 \begin{CodeInput}
-R> get_foc(fit12gs)
+R> get_foc(fit12)
 \end{CodeInput}
 \begin{CodeOutput}
- [1]  1.475392e-03  2.520058e-03  1.593868e-03 -4.325443e-03
- [5]  3.426033e-03  1.272343e-03 -7.762371e-04 -4.553748e-03
- [9]  3.181280e-03  3.919771e-03 -2.321276e-02  4.170381e-03
-[13] -1.782989e-02  3.166647e-03 -3.229744e-03 -3.738130e-03
-[17] -9.082465e-03  2.232360e-02 -7.895506e-03  9.746278e-06
+ [1]  4.262025e-04  4.048578e-04  1.281037e-04 -5.780028e-04
+ [5]  3.221411e-04  1.776783e-04  2.645895e-04 -3.844178e-04
+ [9] -2.174971e-05  1.380419e-04  1.664494e-04 -8.551879e-04
+[13]  1.246268e-04 -3.826628e-04 -2.131233e-03 -2.536638e-06
+[17]  1.432667e-04  1.818326e-04  3.602239e-04  1.000681e-05
+[21] -3.700270e-05
 \end{CodeOutput}
 \end{CodeChunk}
 %
@@ -546,35 +481,36 @@ and the following code calculates the second order condition:
 %
 \begin{CodeChunk}
 \begin{CodeInput}
-R> get_soc(fit12gs)
+R> get_soc(fit12)
 \end{CodeInput}
 \begin{CodeOutput}
- [1] -1.329154e-01 -1.389172e+00 -1.273009e+01 -1.865806e+01
- [5] -2.067262e+01 -5.037907e+01 -8.094178e+01 -1.070554e+02
- [9] -1.715455e+02 -2.124879e+02 -2.769413e+02 -3.371079e+02
-[13] -4.467047e+02 -1.104002e+03 -1.130339e+03 -1.261037e+03
-[17] -1.820865e+03 -9.262083e+03 -1.302900e+04 -3.456585e+04
+ [1] -1.494320e-01 -2.682544e-01 -1.047386e+00 -6.177532e+00
+ [5] -9.934297e+00 -1.654975e+01 -5.366908e+01 -7.191557e+01
+ [9] -1.215715e+02 -1.673756e+02 -1.859815e+02 -2.718937e+02
+[13] -3.775367e+02 -3.834231e+02 -6.567316e+02 -9.911009e+02
+[17] -1.227186e+03 -1.377650e+03 -8.775102e+03 -9.731932e+03
+[21] -3.895717e+04
 \end{CodeOutput}
 \end{CodeChunk}
 %
-All eigenvalues of the Hessian matrix are negative, which points to a local maximum, but the gradient of the log-likelihood function seems to somewhat deviate from zero. The gradient might be inaccurate, because it is based on a numerical approximation. It is also possible that the estimate is inaccurate, because it is based on approximative numerical estimation, and the estimates are therefore not expected to be exactly accurate. Whether the estimate is a local maximum point with accuracy that is reasonable enough, can be evaluated by plotting the graphs of the profile log-likelihood functions about the estimate. In \pkg{gmvarkit}, this can be done conveniently with the function \code{profile_logliks}.
+All eigenvalues of the Hessian matrix are negative, which points to a local maximum, and the gradient of the log-likelihood function is close to zero. The gradient is not exactly zero, because it is based on a numerical approximation. It is also possible that the estimate is inaccurate, because it is based on approximative numerical estimation, and the estimates are therefore not expected to be exactly accurate. Whether the estimate is a local maximum point with accuracy that is reasonable enough, can be evaluated by plotting the graphs of the profile log-likelihood functions about the estimate. In \pkg{sstvars}, this can be done conveniently with the function \code{profile_logliks}.
 
-The exemplify, the following command plots the graphs of profile log-likelihood functions of the estimated G-StMVAR model \code{fit12gs}:
+The exemplify, the following command plots the graphs of profile log-likelihood functions of the estimated G-StMVAR model \code{fit12}:
 %
 \begin{CodeChunk}
 \begin{CodeInput}
-R> profile_logliks(fit12gs, scale=0.02, precision=200)
+R> profile_logliks(fit12, scale=0.02, precision=200)
 \end{CodeInput}
 \end{CodeChunk}
 %
 The resulting plot is presented in Figure~\ref{fig:proflogliks}.
 
-%\begin{figure}%[p]
-%  \centering
-%  \includegraphics{figures/proflogliks.png}
-%  \caption{The figure produced by the command \code{profile\_logliks(fit12gs, scale=0.02, precision=200)}. The graphs of the profile log-likelihood functions of the G-StMVAR model drawn about the estimate. The red vertical lines denote the estimate.}
-%\label{fig:proflogliks}
-%\end{figure}
+\begin{figure}[t]
+  \centering
+  \includegraphics{figures/profilelogliks.png}
+  \caption{The figure produced by the command \code{profile\_logliks(fit12, scale=0.02, precision=200)}. The graphs of the profile log-likelihood functions of the logistic Student's $t$ STVAR model drawn about the estimate. The red vertical lines denote the estimate.}
+\label{fig:proflogliks}
+\end{figure}
 
 The output shows that the estimate's accuracy is reasonable, as changing any individual parameter value marginally would not increase the log-likelihood much. The argument \code{scale} can be adjusted to shorten or lengthen the interval shown in the horizontal axis. If one zooms in enough by setting \code{scale} to a very small number, it can be seen that the estimate is not exactly at the local maximum, but it is so close that moving there would not increase the log-likelihood notably. The argument \code{precision} can be adjusted to increase the number of points the graph is based on. For faster plotting, it can be decreased, and for more precision, it can be increased. The argument \code{which_pars} is used to specify the parameters whose profile log-likelihood functions should be plotted. This argument is particularly useful when creating as many plots as there are parameters in the model to a single figure would cause the individual plots to be very small. In such a case, profile log-likelihood functions for subsets of the parameters can be plotted separately by specifying this argument accordingly.
 

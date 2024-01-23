@@ -342,7 +342,7 @@ Finished!
 %
 The progression of the estimation process is reported with a progress bar giving an estimate of the remaining estimation time. Also statistics on the spread of the log-likelihoods are printed after each estimation phase. The progress bars are generated during parallel computing with the package \pkg{pbapply} \citep{Solymos+Zawadzki:2020}.
 
-Because the log-likelihood function is highly multimodal, and the estimation algorithm is ran a large number of times, it produces a set of local solutions, possibly representing various modes in the log-likelihood function. Some of the local solutions may be inappropriate for econometric inference, for instance, because they contain a near-singular error term covariance matrix or regimes that have only a very small number of observations generated (even partially) from them. Such inappropriate solutions, i.e., estimates that are not solutions of interest, are filtered automatically by \pkg{sstvars}. Specifically, solutions that incorporate a near-singular error term covariance matrix (any eigenvalue less than $0.002$), any modulus "bold A" eigenvalues larger than $0.9985$ (indicating the necessary condition for stationarity is close to break), or transition weights such that they are close to zero for almost all $t$ for at least one regime. Solution very close to the boundary of the stationarity region are not filtered automatically, because sometimes the series are very persistent and the solutions are very close to the boundary. In the case of a close-to-the-boundary solution, the researcher can check for alternative local solutions using the function \code{alt_stvar}.
+Because the log-likelihood function is highly multimodal, and the estimation algorithm is ran a large number of times, it produces a set of local solutions, possibly representing various modes in the log-likelihood function. Some of the local solutions may be inappropriate for econometric inference, for instance, because they contain a near-singular error term covariance matrix or regimes that have only a very small number of observations generated (even partially) from them. Such inappropriate solutions, i.e., estimates that are not solutions of interest, are filtered automatically by \pkg{sstvars}. Specifically, solutions that incorporate a near-singular error term covariance matrix (any eigenvalue less than $0.002$), any modulus "bold A" eigenvalues larger than $0.9985$ (indicating the necessary condition for stationarity is close to break), or transition weights such that they are close to zero for almost all $t$ for at least one regime. With relative densities transition weights, also solutions in which a weight parameter estimate is close to zero are filtered out.
 
 Automatic filtering can be turned this off with the argument \code{filter_estimates=FALSE}. Then, the various local solutions can be easily examined by hand by using the function \code{alt_stvar} and adjusting its argument \code{which_largest} or \code{which_round}. Note that \code{alt_stvar} can be used also when the automatic filtering is turned on, since the estimates from all of the estimation rounds are stored in the class \code{'stvar'} object returned by \code{fitSTVAR}.
 
@@ -434,71 +434,49 @@ The above summary printout shows additional information compared to the print me
 
 Approximate standard errors can be printed with the function \code{print_std_errors}, which prints the standard errors in the same form as the print method prints the estimates. Therefore, they should be used with caution. There is no standard error for the intercepts if mean parametrization is used (by setting \code{parametrization = "mean"} in \code{fitSTVAR}) and vice versa. In order to obtain standard errors for the regimewise unconditional means or intercepts, one can easily swap between the mean and intercept parametrizations with the function \code{swap_parametrization}. Note that approximate standard errors are based on the mere assumption of the standard Gaussian asymptotic distribution of the estimator.
 
-
-This is possible in \pkg{gmvarkit}, because the estimation function \code{fitGSMVAR} stores the estimates from all the estimation rounds so that a GSMVAR model can be built based on any one of them, most conveniently with the function \code{alt_gsmvar}. The desired estimation round can be specified either with the argument \code{which_round} or \code{which_largest}. The former specifies the round in the estimation order, whereas the latter specifies it in a decreasing order of the log-likelihoods.
-
-It is also possible to automatically filter out inappropriate estimates by setting the argument \code{filter_estimates=TRUE} in \code{fitSGMVAR}. Then, the function will automatically filter out estimates that it deems "inappropriate". That is, estimates that are not likely solutions of interest. Specifically, solutions that incorporate a near-singular error term covariance matrix (any eigenvalue less than $0.002$), mixing weights such that they are close to zero for almost all $t$ for at least one regime, or mixing weight parameter estimate close to zero (or one). It also filters out estimates with any modulus "bold A" eigenvalues larger than 0.9985, as the solution is near the boundary of the stationarity region and likely not a local maximum. \code{fitSGMVAR} then returns the solution based on the largest log-likelihood that is not filtered out. Other solutions can be studied by using the function \code{alt_gsmvar} as usual.
-
 \subsection{Further examination of the estimates}\label{sec:examestim}
-In addition to examining the summary printout, it is often useful to visualize the model by plotting the mixing weights together with the time series and the model's (marginal) stationary density together with a kernel density estimate of the time series. That is exactly what the plot method for GSMVAR models does. The following command creates the time series plot along with estimated mixing weights:
+In addition to examining the summary printout, it is often useful to visualize the model by plotting the transition weights together with the time series. That is exactly what the plot method for GSMVAR models does. The following command creates the time series plot along with estimated mixing weights:
 %
 \begin{CodeChunk}
 \begin{CodeInput}
-R> plot(fit12gs, type="series")
+R> plot(fit12, type="series")
 \end{CodeInput}
 \end{CodeChunk}
 %
 The resulting plot is presented in Figure~\ref{fig:seriesplot}.
 
-%\begin{figure}[p]
-%  \centering
-%  \includegraphics{figures/seriesplot.png}
-%  \caption{The figure produced by the command \code{plot(fit12gs, type="series")}. On the top, a quarterly series consisting of two U.S. variables: the percentage change of real GDP and the percentage change of GDP implicit price deflator, covering the period from 1959Q1 to 2019Q4. On the bottom, the estimated mixing weights of the G-StMVAR model \code{plot(fit12gs)} fitted the series.}
-%\label{fig:seriesplot}
-%\end{figure}
+\begin{figure}[t]
+  \centering
+  \includegraphics{figures/seriesplot.png}
+  \caption{The figure produced by the command \code{plot(fit12)}. On the top, a quarterly series consisting of two U.S. variables: the percentage change of real GDP and the percentage change of GDP implicit price deflator, covering the period from 1959Q1 to 2019Q4. On the bottom, the estimated transition weights of the STVAR model \code{fit12gs} fitted the series.}
+\label{fig:seriesplot}\end{figure}
 
-And the following command creates the stationary density plot:
-%
-\begin{CodeChunk}
-\begin{CodeInput}
-R> plot(fit12gs, type="density")
-\end{CodeInput}
-\end{CodeChunk}
-%
-The resulting plot is presented in Figure~\ref{fig:densityplot}. If the argument \code{type} is not specified, both of the figures will be plotted.
-
-%\begin{figure}[p]
-%  \centering
-%  \includegraphics{figures/densityplot.png}
-%  \caption{The figure produced by the command \code{plot(fit12gs, type="density")}. Kernel density estimates of the marginal series of the data the model was fitted to (black solid line), the stationary marginal density of the estimated G-StMVAR model (grey dashed line), and the marginal stationary densities of the component processes multiplied by the mixing weight parameter estimates (blue and red dashed lines).}
-%\label{fig:densityplot}
-%\end{figure}
-
-It is also sometimes interesting to examine the time series of (one-step) conditional means and variances of the process along with the time series the model was fitted to. This can be done conveniently with the function \code{cond_moment_plot}, where the argument \code{which_moment} should be specified with \code{"mean"} or \code{"variance"} accordingly. In addition to the conditional moment of the process, \code{cond_moment_plot} also displays the conditional means or variances of the regimes multiplied by the mixing weights. Note, however, that the conditional variance of the process is not generally the same as the weighted sum of regimewise conditional variances, as it includes a component that encapsulates heteroskedasticity caused by variation in the conditional mean.
+It is also sometimes interesting to examine the time series of (one-step) conditional means of the process along with the time series the model was fitted to. This can be done conveniently with the function by setting the argument \code{plot_type="cond_mean"} in the plot method. This plot depicts the contribution of each regime to the conditional mean of the process and how close the conditional mean is to the observed series in each point of time.
 
 The variable metric algorithm employed in the final estimation does not necessarily stop at a local maximum point. The algorithm might also stop at a saddle point or near a local maximum, when the algorithm is not able to increase the log-likelihood, or at any point, when the maximum number of iterations has been reached. In the latter case, the estimation function throws a warning, but saddle points and inaccurate estimates need to be detected by the researcher.
 
-It is well known that in a local maximum point, the gradient of the log-likelihood function is zero, and the eigenvalues of the Hessian matrix are all negative. In a local minimum, the eigenvalues of the Hessian matrix are all positive, whereas in a saddle point, some of them are positive and some negative. Nearly numerically singular Hessian matrices occur when the surface of the log-likelihood function is very flat about the estimate in some directions. This particularly happens when the model contains overly large degrees of freedom parameter estimates or the mixing weights $\alpha_{m,t}$ are estimated close to zero for all $t=1,...,T$ for some regime $m$.
+It is well known that in a local maximum point, the gradient of the log-likelihood function is zero, and the eigenvalues of the Hessian matrix are all negative. In a local minimum, the eigenvalues of the Hessian matrix are all positive, whereas in a saddle point, some of them are positive and some negative. Nearly numerically singular Hessian matrices occur when the surface of the log-likelihood function is very flat about the estimate in some directions. This particularly happens when the transition weights $\alpha_{m,t}$ are estimated close to zero for all $t=1,...,T$ for some regime $m$.
 
-\pkg{gmvarkit} provides several functions for evaluating whether the estimate is a local maximum point. The function \code{get_foc} returns the (numerically approximated) gradient of the log-likelihood function evaluated at the estimate, and the function \code{get_soc} returns eigenvalues of the (numerically approximated) Hessian matrix of the log-likelihood function evaluated at the estimate. The numerical derivatives are calculated using a central difference approximation
+\pkg{sstvars} provides several functions for evaluating whether the estimate is a local maximum point. The function \code{get_foc} returns the (numerically approximated) gradient of the log-likelihood function evaluated at the estimate, and the function \code{get_soc} returns eigenvalues of the (numerically approximated) Hessian matrix of the log-likelihood function evaluated at the estimate. The numerical derivatives are calculated using a central difference approximation
 \begin{equation}
 \frac{\partial L(\boldsymbol{\theta})}{\partial \theta_i} \approx \frac{f(\boldsymbol{\theta} + \boldsymbol{h}^{(i)}) - f(\boldsymbol{\theta} - \boldsymbol{h}^{(i)})}{2h}, \ \ h>0,
 \end{equation}
 where $\theta_i$ is the $i$th element of $\boldsymbol{\theta}$ and $\boldsymbol{h}^{(i)}=(0,...,0,h,0,...,0)$
-contains $h$ as its $i$th element. By default, the difference $h=6\cdot 10^{-6}$ is used for all parameters except for overly large degrees of freedom parameters, whose partial derivatives are approximated using larger differences. The difference is increased for large degrees of freedom parameters, because the limited precision of the float point presentation induces artificially rugged surfaces to the their profile log-likelihood functions, and the increased differences diminish the related numerical error. On the other hand, as the surface of the profile log-likelihood function is very flat about a large degrees of freedom parameter estimate, large differences work well for the approximation.
+contains $h$ as its $i$th element. By default, the difference $h=6\cdot 10^{-6}$ is used.
 
-For example, the following code calculates the first order condition for the G-StMVAR model \code{fit12gs}:
+For example, the following code calculates the first order condition for the G-StMVAR model \code{fit12}:
 %
 \begin{CodeChunk}
 \begin{CodeInput}
-R> get_foc(fit12gs)
+R> get_foc(fit12)
 \end{CodeInput}
 \begin{CodeOutput}
- [1]  1.475392e-03  2.520058e-03  1.593868e-03 -4.325443e-03
- [5]  3.426033e-03  1.272343e-03 -7.762371e-04 -4.553748e-03
- [9]  3.181280e-03  3.919771e-03 -2.321276e-02  4.170381e-03
-[13] -1.782989e-02  3.166647e-03 -3.229744e-03 -3.738130e-03
-[17] -9.082465e-03  2.232360e-02 -7.895506e-03  9.746278e-06
+ [1]  4.262025e-04  4.048578e-04  1.281037e-04 -5.780028e-04
+ [5]  3.221411e-04  1.776783e-04  2.645895e-04 -3.844178e-04
+ [9] -2.174971e-05  1.380419e-04  1.664494e-04 -8.551879e-04
+[13]  1.246268e-04 -3.826628e-04 -2.131233e-03 -2.536638e-06
+[17]  1.432667e-04  1.818326e-04  3.602239e-04  1.000681e-05
+[21] -3.700270e-05
 \end{CodeOutput}
 \end{CodeChunk}
 %
@@ -506,55 +484,65 @@ and the following code calculates the second order condition:
 %
 \begin{CodeChunk}
 \begin{CodeInput}
-R> get_soc(fit12gs)
+R> get_soc(fit12)
 \end{CodeInput}
 \begin{CodeOutput}
- [1] -1.329154e-01 -1.389172e+00 -1.273009e+01 -1.865806e+01
- [5] -2.067262e+01 -5.037907e+01 -8.094178e+01 -1.070554e+02
- [9] -1.715455e+02 -2.124879e+02 -2.769413e+02 -3.371079e+02
-[13] -4.467047e+02 -1.104002e+03 -1.130339e+03 -1.261037e+03
-[17] -1.820865e+03 -9.262083e+03 -1.302900e+04 -3.456585e+04
+ [1] -1.494320e-01 -2.682544e-01 -1.047386e+00 -6.177532e+00
+ [5] -9.934297e+00 -1.654975e+01 -5.366908e+01 -7.191557e+01
+ [9] -1.215715e+02 -1.673756e+02 -1.859815e+02 -2.718937e+02
+[13] -3.775367e+02 -3.834231e+02 -6.567316e+02 -9.911009e+02
+[17] -1.227186e+03 -1.377650e+03 -8.775102e+03 -9.731932e+03
+[21] -3.895717e+04
 \end{CodeOutput}
 \end{CodeChunk}
 %
-All eigenvalues of the Hessian matrix are negative, which points to a local maximum, but the gradient of the log-likelihood function seems to somewhat deviate from zero. The gradient might be inaccurate, because it is based on a numerical approximation. It is also possible that the estimate is inaccurate, because it is based on approximative numerical estimation, and the estimates are therefore not expected to be exactly accurate. Whether the estimate is a local maximum point with accuracy that is reasonable enough, can be evaluated by plotting the graphs of the profile log-likelihood functions about the estimate. In \pkg{gmvarkit}, this can be done conveniently with the function \code{profile_logliks}.
+All eigenvalues of the Hessian matrix are negative, which points to a local maximum, and the gradient of the log-likelihood function is close to zero. The gradient is not exactly zero, because it is based on a numerical approximation. It is also possible that the estimate is inaccurate, because it is based on approximative numerical estimation, and the estimates are therefore not expected to be exactly accurate. Whether the estimate is a local maximum point with accuracy that is reasonable enough, can be evaluated by plotting the graphs of the profile log-likelihood functions about the estimate. In \pkg{sstvars}, this can be done conveniently with the function \code{profile_logliks}.
 
-The exemplify, the following command plots the graphs of profile log-likelihood functions of the estimated G-StMVAR model \code{fit12gs}:
+The exemplify, the following command plots the graphs of profile log-likelihood functions of the estimated G-StMVAR model \code{fit12}:
 %
 \begin{CodeChunk}
 \begin{CodeInput}
-R> profile_logliks(fit12gs, scale=0.02, precision=200)
+R> profile_logliks(fit12, scale=0.02, precision=200)
 \end{CodeInput}
 \end{CodeChunk}
 %
 The resulting plot is presented in Figure~\ref{fig:proflogliks}.
 
-%\begin{figure}%[p]
-%  \centering
-%  \includegraphics{figures/proflogliks.png}
-%  \caption{The figure produced by the command \code{profile\_logliks(fit12gs, scale=0.02, precision=200)}. The graphs of the profile log-likelihood functions of the G-StMVAR model drawn about the estimate. The red vertical lines denote the estimate.}
-%\label{fig:proflogliks}
-%\end{figure}
+\begin{figure}[t]
+  \centering
+  \includegraphics{figures/profilelogliks.png}
+  \caption{The figure produced by the command \code{profile\_logliks(fit12, scale=0.02, precision=200)}. The graphs of the profile log-likelihood functions of the logistic Student's $t$ STVAR model drawn about the estimate. The red vertical lines denote the estimate.}
+\label{fig:proflogliks}
+\end{figure}
 
 The output shows that the estimate's accuracy is reasonable, as changing any individual parameter value marginally would not increase the log-likelihood much. The argument \code{scale} can be adjusted to shorten or lengthen the interval shown in the horizontal axis. If one zooms in enough by setting \code{scale} to a very small number, it can be seen that the estimate is not exactly at the local maximum, but it is so close that moving there would not increase the log-likelihood notably. The argument \code{precision} can be adjusted to increase the number of points the graph is based on. For faster plotting, it can be decreased, and for more precision, it can be increased. The argument \code{which_pars} is used to specify the parameters whose profile log-likelihood functions should be plotted. This argument is particularly useful when creating as many plots as there are parameters in the model to a single figure would cause the individual plots to be very small. In such a case, profile log-likelihood functions for subsets of the parameters can be plotted separately by specifying this argument accordingly.
 
-We have discussed tools that can be utilized to evaluate whether the found estimate is a local maximum with a reasonable accuracy. It is, however, more difficult to establish that the estimate is the global maximum. With \pkg{gmvarkit}, the best way to increase the reliability that the found estimate is the global maximum, is to run more estimation rounds by adjusting the argument \code{ncalls} of the estimation function \code{fitGSMVAR}.
+We have discussed tools that can be utilized to evaluate whether the found estimate is a local maximum with a reasonable accuracy. It is, however, more difficult to establish that the estimate is the global maximum. With \pkg{sstvars}, the best way to increase the reliability that the found estimate is the global maximum (among the appropriate solutions), is to run more estimation rounds by adjusting the argument \code{nrounds} of the estimation function \code{fitSTVAR}.
 
-If the model is very large, a very large number of estimation rounds may be required to find the global maximum. If there are two regimes in the model, $p$ is reasonable, and the dimension of the time series at most four, the required number of estimation rounds typically varies from several hundred to several thousand depending on the model and the data. In the simpler models, less estimation rounds are required. In the larger models, and in particular if $M>2$ or $d>4$, a significantly large number of estimation rounds may be required obtain the MLE. Another thing that makes the estimation more challenging, are exotic parameter constraints that do not reduce the dimension of the parameter much. Constraints that greatly reduce complexity of the parameter space (such as constraining the autoregressive matrices to be identical in all regimes\footnote{Models constrained in this way can often be reliably estimated with a reasonable number of estimation rounds even when $M>2$}), on the other hand, make the estimation easier and reliable estimation of such models thereby require less estimation rounds.
-
+If the model is very large, a very large number of estimation rounds may be required to find the global maximum. If there are two regimes in the model, $p$ is reasonable, and the dimension of the time series at most four, the required number of estimation rounds typically varies from several hundred to several thousand depending on the model and the data. In the simpler models, less estimation rounds are required. In the larger models, and in particular if $M>2$ or $d>4$, a significantly large number of estimation rounds may be required obtain the MLE. Another thing that makes the estimation more challenging, are exotic parameter constraints that do not reduce the dimension of the parameter much. Constraints that greatly reduce complexity of the parameter space (such as constraining the autoregressive matrices to be identical in all regimes\footnote{Models constrained in this way can often be reliably estimated with a reasonable number of estimation rounds even when $M>2$}), on the other hand, make the estimation easier and reliable estimation of such models thereby require less estimation rounds. Constrained estimation is discussed in Section~\ref{sec:examp_const}.
 
 \subsection{Estimation of the structural GSMVAR model}\label{sec:estim_structural}
-As explained, \pkg{gmvarkit} currently supports two types of structural models: structural models identified recursively by the lower triangular Cholesky decomposition and structural models identified by conditional heteroskedasticity. Recursive identification is assumed for reduced form models, and thus do not require any further estimation.  Generalized impulse response functions and generalized forecast error variance decompositions can be estimated for recursively identified models by using the reduced form models directly in the functions \code{GIRF} and \code{GFEVD}. The rest of this section discusses estimation of structural models identified by conditional heteroskedasticity as in \cite{Virolainen2:2021}, which employ a parametrization different to the reduced form models.
+As explained, \pkg{sstvars} currently supports two types of structural models: structural models identified recursively by the lower triangular Cholesky decomposition and structural models identified by conditional heteroskedasticity. In either case, the structural models are estimated with the function \code{fitSTVAR} based on preliminary estimates from a reduced form model. If the structural model is not overidentifying, which is always the case for recursively identified models as well as for models identified by heteroskedasticity when there are two regime and further constraints are not imposed on the impact matrix, there is no need for estimation but at most for a reparametrization of the model. In any case, the \code{fitSTVAR} builds the structural model appropriately.
+
+To exemplify
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> summary(fit12)
+\end{CodeInput}
+\begin{CodeOutput}
+s
+\end{CodeOutput}
+\end{CodeChunk}
+
+
+If the structural model is identified by heteroskedasticity, additional restrictions can be imposed on the impact matrix by setting them in argument \code{B_constraints}.
+
+
+
 
 The structural GSMVAR models are estimated similarly to the reduced form version, expect that the model is parametrized with $W$ and $\lambda_{mi}$, $m=2,...,M$, $i=1,...,d$ instead of the covariance matrices $\Omega_{m}$, $m=1,...,M$. The estimation is can be done with the function \code{fitGSMVAR} but now the argument \code{structural_pars} needs to be supplied with a list providing the constraints on $W$ (which equally imposes the constraints on the B-matrix), and optionally, linear constraints on the $\lambda_{mi}$ parameters or constraints restricting $\lambda_{mi}$ to fixed values.
 
-The list \code{structural_pars} should contain at least the element \code{W} which is a $(dxd)$ matrix matrix with its entries imposing constraints on $W$: \code{NA} indicating that the element is unconstrained, a positive value indicating strict positive sign constraint, a negative value indicating strict negative sign constraint, and zero indicating that the element is constrained to zero. The elements named \code{C_lambda} and \code{fixed_lambdas} are optional (and alternative to each other).
-
-If \code{C_lambda} is specified, it should be a $(d(M-1) \times r)$ constraint matrix that satisfies ($\lambda_{2},...,\lambda_{M}) =C_{\lambda} \gamma$ where $\lambda_{m}=(\lambda_{m1},...,\lambda_{md})$ and $\gamma$ is the new $(r x 1)$ parameter subject to which the model is estimated (similarly to AR parameter constraints). The entries of \code{C_lambda} must be either positive or zero.  Ignore (or set to \code{NULL}) if the eigenvalues $\lambda_{mi}$ should not be constrained. Note that other constraints than constraining some of the $\lambda_{mi}$ to be identical are not recommended but if such constraints are imposed, the argument \code{lambda_scale} in the genetic algorithm (see \code{?GAfit}) should be adjusted accordingly. If some of the $\lambda_{mi}$ are constrained to be identical, make sure the appropriate zero constraints placed in the $W$ matrix, because otherwise the MLE does not identify and you probably won't obtain any useful estimates \citep[see][Proposition 2]{Virolainen2:2021}.
-
-If \code{fixed_lambdas} is specified, it should be a $d(M-1)$ length numeric vector $(\lambda_{2},...,\lambda_{M})$ specifying fixed values for the eigenvalue parameters $\lambda_{mi}$. They should be strictly larger than zero. Ignore (or set to \code{NULL}) if the eigenvalues $\lambda_{mi}$ should not be constrained. Note that you cannot use both \code{C_lambda} and \code{fixed_lambdas} at the same time.
-
-\textbf{Reliable estimation of structural GSMVAR models typically requires much more estimation rounds than the estimation of the reduced form models. However, when $M=2$, every reduced form model has an implied statistically identified structural model, which can be built without any additional estimation (this will be discussed next). We recommend considering this implied model first. Then, if overidentifying constraints are to be imposed on the B-matrix (or equally $W$), we recommend using the unrestricted estimate to create an initial guess for the constrained parameter vector and pass this to the genetic algorithm as an initial population}. See the help page \code{?GAfit} for the arguments that can be passed by \code{fitGSMVAR} to the genetic algorithm. Create the initial guess for the parameter vector by using the form given in documentation of the argument \code{initpop}. If $M\neq 2$, the structural model needs to be estimated in the normal way with \code{fitGSMVAR}, however.
 
 \subsubsection{Building structural model based on a reduced form model}
 If the number of regimes is two ($M=2$), a structural model can be built based on a reduced form model, because the matrix decomposition used in the simultaneous diagonalization of the error term covariance matrices always exists. This can be done with function \code{gsmvar_to_sgsmvar} which should be supplied with the reduced form model, and it then returns a corresponding structural model. After creating the structural model, the columns of $W$ can be reordered with the function \code{reorder_W_columns} which also reorders all $\lambda_{mi}$ accordingly (and hence the resulting model will coincide with the original reduced form model). Also, all signs any column of $W$ can be swapped with the function \code{swap_W_signs}.

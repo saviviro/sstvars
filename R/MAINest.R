@@ -324,7 +324,11 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
        Omegas_ok <- !any(Omega_eigens < 0.002)
 
        # Checks AR matrices
-       boldA_eigens <- get_boldA_eigens(mod)
+       boldA_eigens <- get_boldA_eigens_par(p=p, M=M, d=d, params=pars_std,
+                                            weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                            cond_dist=cond_dist, identification="reduced_form",
+                                            AR_constraints=NULL, mean_constraints=NULL,
+                                            weight_constraints=NULL, B_constraints=NULL)
        stat_ok <- !any(boldA_eigens > 0.9985)
 
        # Check weight parameters

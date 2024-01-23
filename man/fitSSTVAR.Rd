@@ -7,8 +7,8 @@
 \usage{
 fitSSTVAR(
   stvar,
-  new_identification = c("recursive", "heteroskedasticity"),
-  new_B_constraints = NULL,
+  identification = c("recursive", "heteroskedasticity"),
+  B_constraints = NULL,
   maxit = 1000,
   maxit_robust = 1000,
   robust_method = c("Nelder-Mead", "SANN", "none"),
@@ -20,7 +20,7 @@ fitSSTVAR(
 \item{stvar}{a an object of class \code{'stvar'}, created by, e.g., \code{fitSTVAR},
 specifying a reduced form or a structural model}
 
-\item{new_identification}{Which identification should the structural model use?
+\item{identification}{Which identification should the structural model use?
 (see the vignette or the references for details)
  \describe{
    \item{\code{"recursive"}:}{The usual lower-triangular recursive identification of the shocks via their impact responses.}
@@ -28,7 +28,7 @@ specifying a reduced form or a structural model}
      impact responses for each shock.}
  }}
 
-\item{new_B_constraints}{Employ further constraints on the impact matrix?
+\item{B_constraints}{Employ further constraints on the impact matrix?
 A \eqn{(d \times d)} matrix with its entries imposing constraints on the impact matrix \eqn{B_t}:
 \code{NA} indicating that the element is unconstrained, a positive value indicating strict positive sign constraint,
 a negative value indicating strict negative sign constraint, and zero indicating that the element is constrained to zero.
@@ -85,12 +85,12 @@ fit32cm <- fitSTVAR(gdpdef, p=3, M=2, AR_constraints=rbind(diag(3*2^2), diag(3*2
   nrounds=1, seeds=1, use_parallel=FALSE)
 
 # Estimate various structural models based on the reduced form model:
-fit32cms_rec <- fitSSTVAR(fit32cm, new_identification="recursive") # Recursive
-fit32cms_hetsked <- fitSSTVAR(fit32cm, new_identification="heteroskedasticity") # Het.sked.
-fit32cms_hs2 <- fitSSTVAR(fit32cm, new_identification="heteroskedasticity",
- new_B_constraints=matrix(c(1, NA, 0, 1), nrow=2)) # Overidentify by B_constraints
-fit32cms_hs3 <- fitSSTVAR(fit32cms_hs2, new_identification="heteroskedasticity",
- new_B_constraints=matrix(c(1, 0, 0, 1), nrow=2)) # Overidentify more by B_constraints
+fit32cms_rec <- fitSSTVAR(fit32cm, identification="recursive") # Recursive
+fit32cms_hetsked <- fitSSTVAR(fit32cm, identification="heteroskedasticity") # Het.sked.
+fit32cms_hs2 <- fitSSTVAR(fit32cm, identification="heteroskedasticity",
+ B_constraints=matrix(c(1, NA, 0, 1), nrow=2)) # Overidentify by B_constraints
+fit32cms_hs3 <- fitSSTVAR(fit32cms_hs2, identification="heteroskedasticity",
+ B_constraints=matrix(c(1, 0, 0, 1), nrow=2)) # Overidentify more by B_constraints
 
 # p=3, M=3, d=2 Threshold Student STVAR with the means and AR matrices constrained
 # to be identical in both regimes; the first lag of the second variable as the
@@ -101,13 +101,13 @@ fit32cml <- fitSTVAR(gdpdef, p=3, M=3, cond_dist="Student",
  parametrization="mean", nrounds=1, seeds=1, use_parallel=FALSE)
 
 # Estimate various structural models based on the reduced form model:
-fit32cmls_rec <- fitSSTVAR(fit32cml, new_identification="recursive") # Recursive
-fit32cmls_hs <- fitSSTVAR(fit32cml, new_identification="heteroskedasticity") # Het.sked.
-fit32cmls_hs2 <- fitSSTVAR(fit32cmls_hs, new_identification="heteroskedasticity",
- new_B_constraints=matrix(c(NA, 0, NA, NA), nrow=2),
+fit32cmls_rec <- fitSSTVAR(fit32cml, identification="recursive") # Recursive
+fit32cmls_hs <- fitSSTVAR(fit32cml, identification="heteroskedasticity") # Het.sked.
+fit32cmls_hs2 <- fitSSTVAR(fit32cmls_hs, identification="heteroskedasticity",
+ B_constraints=matrix(c(NA, 0, NA, NA), nrow=2),
  robust_method="none") # Overidentified more by B_constraints; no robust estimation
-fit32cmls_hs3 <- fitSSTVAR(fit32cmls_hs2, new_identification="heteroskedasticity",
- new_B_constraints=matrix(c(NA, NA, NA, NA), nrow=2),
+fit32cmls_hs3 <- fitSSTVAR(fit32cmls_hs2, identification="heteroskedasticity",
+ B_constraints=matrix(c(NA, NA, NA, NA), nrow=2),
  robust_method="none") # Relax the B_constraints again; no robust estimation.
 }
 }
