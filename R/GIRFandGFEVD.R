@@ -319,7 +319,7 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 #'   impulse response function (GIRF). See Lanne and Nyberg (2016) for details.
 #'
 #'   If \code{use_data_shocks == TRUE}, the GIRF is estimated for a shock that has the sign and size of the
-#'   corresponding structural shock recovered from the data. This is done for every possible length \eqn{p} history
+#'   corresponding structural shock recovered from the fitted model. This is done for every possible length \eqn{p} history
 #'   in the data. The GFEVD is then calculated as the average of the GFEVDs obtained from the GIRFs estimated for
 #'   the data shocks. The plot and print methods can be used as usual for this GFEVD. However, this feature also
 #'   obtain the contribution of each shock to the variance of the forecast errors at various horizons in specific
