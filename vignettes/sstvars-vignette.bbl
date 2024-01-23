@@ -1,4 +1,4 @@
-\begin{thebibliography}{35}
+\begin{thebibliography}{33}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -90,26 +90,12 @@ Jungers R (2023).
   (\url{https://www.mathworks.com/matlabcentral/fileexchange/33202-the-jsr-toolbox}),
   MATLAB Central File Exchange}.
 
-\bibitem[{Kalliovirta(2012)}]{Kalliovirta:2012}
-Kalliovirta L (2012).
-\newblock \enquote{Misspecification tests based on quantile residuals.}
-\newblock \emph{The Econometrics Journal}, \textbf{15}(2), 358--393.
-\newblock \doi{10.1111/j.1368-423X.2011.00364.x}.
-
 \bibitem[{Kalliovirta \emph{et~al.}(2016)Kalliovirta, Meitz, and
   Saikkonen}]{Kalliovirta+Meitz+Saikkonen:2016}
 Kalliovirta L, Meitz M, Saikkonen P (2016).
 \newblock \enquote{Gaussian mixture vector autoregression.}
 \newblock \emph{Journal of Econometrics}, \textbf{192}(2), 465--498.
 \newblock \doi{10.1016/j.jeconom.2016.02.012}.
-
-\bibitem[{Kalliovirta and Saikkonen(2010)}]{Kalliovirta+Saikkonen:2010}
-Kalliovirta L, Saikkonen P (2010).
-\newblock \enquote{Reliable Residuals for Multivariate Nonlinear Time Series
-  Models.}
-\newblock \emph{Unpublished revision of HECER discussion paper No. 247}.
-\newblock
-  \urlprefix\url{https://blogs.helsinki.fi/lkvaisan/files/2010/08/ReliableResiduals.pdf}.
 
 \bibitem[{Kheifets and Saikkonen(2020)}]{Kheifets+Saikkonen:2020}
 Kheifets I, Saikkonen P (2020).
