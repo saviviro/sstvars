@@ -850,7 +850,7 @@ Regime means: 0.73, 1.71
 \end{CodeChunk}
 %
 
-It is possible to include data in the models built with \code{GSMVAR} by either providing the data in the argument \code{data} when creating the model or by adding the data afterwards with the function \code{add_data}. When the model is supplied with data, the mixing weights, one-step conditional means and variances, and quantile residuals can be calculated and included in the model. The function \code{add_data} can also be used to update data to an estimated GSMVAR model without re-estimating the model.
+It is possible to include data in the models built with \code{STVAR} by either providing the data in the argument \code{data}. When the model is supplied with data, the transition weights and other data dependent statistics are calculated for the model as well.
 
 \section{Simulation and forecasting}\label{sec:simufore}
 
