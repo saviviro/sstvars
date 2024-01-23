@@ -855,17 +855,17 @@ It is possible to include data in the models built with \code{STVAR} by either p
 \section{Simulation and forecasting}\label{sec:simufore}
 
 \subsection{Simulation}\label{sec:simu}
-\pkg{gmvarkit} implements the S3 method \code{simulate} for simulating observations from GSMVAR processes (see \code{?simulate.gsmvar}). The method requires the process to be given as a class \code{gsmvar} object, which are typically created either by estimating a model with the function \code{fitGSMVAR} or by specifying the parameter values by hand and building the model with the constructor function \code{GSMVAR}. The initial values required to simulate the first $p$ observations can be either set by hand (with the argument \code{init_values}) or drawn from the stationary distribution of the process (by default) or from a (mixture of) stationary distribution(s) of given regime(s). The argument \code{nsim} sets the length of the sample path to be simulated.
+\pkg{gmvarkit} implements the S3 method \code{simulate} for simulating observations from STVAR processes (see \code{?simulate.stvar}). The method requires the process to be given as a class \code{stvar} object, which are typically created either by estimating a model with the function \code{fitSTVAR} (or \code{fitSSTVAR}) or by specifying the parameter values by hand and building the model with the constructor function \code{STVAR}. The initial values required to simulate the first $p$ observations can be either set by hand (with the argument \code{init_values}) or drawn from (the stationary distribution of) some regime (with the argument \code{init_regime}). The argument \code{nsim} sets the length of the sample path to be simulated.
 
-To give an example, the following code sets the random number generator seed to one and simulates $500$ observations long sample from the StMVAR process built in Section~\ref{sec:GSMVAR}:
+To give an example, the following code sets the random number generator seed to one and simulates $500$ observations long sample from the StMVAR process built in Section~\ref{sec:STVAR}, drawin initial values from the first regime:
 %
 \begin{CodeChunk}
 \begin{CodeInput}
-R> mysim <- simulate(mod112, nsim=500, seed=1)
+R> mysim <- simulate(mod122, nsim=500, init_regime=1, seed=1)
 \end{CodeInput}
 \end{CodeChunk}
 %
-Our implementation of \code{simulate} returns a list containing the simulated sample path in \code{\$sample}, the mixture component that generated each observation in \code{\$component}, and the mixing weights in \code{\$mixing_weights}.
+Our implementation of \code{simulate} returns a list containing the simulated sample path in \code{\$sample}, the mixture component that generated each observation in \code{\$component}, and the transition weights in \code{\$transition_weights}.
 
 \subsection{Simulation based forecasting}
 Deriving multiple-steps-ahead point predictions and prediction intervals analytically for the GSMVAR models is very complicated, so \pkg{gmvarkit} employs the following simulation-based method. By using the last $p$ observations of the data up to the date of forecasting as initial values, a large number of sample paths for the future values of the process are simulated. Then, sample quantiles from the simulated sample paths are calculated to obtain prediction intervals, and the median or mean is used for point predictions. A similar procedure is also applied to forecast future values of the mixing weights, which might be of interest because the researcher can often associate specific characteristics to different regimes.
