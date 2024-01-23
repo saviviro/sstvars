@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  22 JAN 2024 17:02
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  23 JAN 2024 13:37
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -382,7 +382,8 @@ LaTeX Info: Thecontrolsequence`\]'isalreadyrobust on input line 130.
 )
 \c@condition=\count287
 \c@proposition=\count288
-LaTeX Font Info:    Trying to load font information for T1+lmr on input line 67
+\c@assumption=\count289
+LaTeX Font Info:    Trying to load font information for T1+lmr on input line 69
 .
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/lm/t1lmr.fd
@@ -390,7 +391,7 @@ File: t1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 (/usr/local/texlive/2021/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 File: l3backend-pdftex.def 2021-12-14 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count289
+\l__color_backend_stack_int=\count290
 \l__pdf_internal_box=\box54
 )
 (./sstvars-vignette.aux
@@ -400,36 +401,36 @@ LaTeX Warning: Label `eq:beta_mtj_t' multiply defined.
 )
 \openout1 = `sstvars-vignette.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 67.
-LaTeX Font Info:    ... okay on input line 67.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 67.
-LaTeX Font Info:    ... okay on input line 67.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 67.
-LaTeX Font Info:    ... okay on input line 67.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 67.
-LaTeX Font Info:    ... okay on input line 67.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 67.
-LaTeX Font Info:    ... okay on input line 67.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 67.
-LaTeX Font Info:    ... okay on input line 67.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 67.
-LaTeX Font Info:    ... okay on input line 67.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 67.
-LaTeX Font Info:    ... okay on input line 67.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 67.
-LaTeX Font Info:    ... okay on input line 67.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 69.
+LaTeX Font Info:    ... okay on input line 69.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 69.
+LaTeX Font Info:    ... okay on input line 69.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 69.
+LaTeX Font Info:    ... okay on input line 69.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 69.
+LaTeX Font Info:    ... okay on input line 69.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 69.
+LaTeX Font Info:    ... okay on input line 69.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 69.
+LaTeX Font Info:    ... okay on input line 69.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 69.
+LaTeX Font Info:    ... okay on input line 69.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 69.
+LaTeX Font Info:    ... okay on input line 69.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 69.
+LaTeX Font Info:    ... okay on input line 69.
  (/usr/local/texlive/2021/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count290
+\scratchcounter=\count291
 \scratchdimen=\dimen164
 \scratchbox=\box55
-\nofMPsegments=\count291
-\nofMParguments=\count292
+\nofMPsegments=\count292
+\nofMParguments=\count293
 \everyMPshowfont=\toks22
-\MPscratchCnt=\count293
+\MPscratchCnt=\count294
 \MPscratchDim=\dimen165
-\MPnumerator=\count294
-\makeMPintoPDFobject=\count295
+\MPnumerator=\count295
+\makeMPintoPDFobject=\count296
 \everyMPtoPDFconversion=\toks23
 ) (/usr/local/texlive/2021/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
@@ -440,7 +441,7 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-Package hyperref Info: Link coloring ON on input line 67.
+Package hyperref Info: Link coloring ON on input line 69.
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2021-04-02 v2.47 Cross-referencing by name of section
@@ -452,58 +453,58 @@ Package: refcount 2019/12/15 v3.6 Data extraction from label references (HO)
 ty
 Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 )
-\c@section@level=\count296
+\c@section@level=\count297
 )
-LaTeX Info: Redefining \ref on input line 67.
-LaTeX Info: Redefining \pageref on input line 67.
-LaTeX Info: Redefining \nameref on input line 67.
+LaTeX Info: Redefining \ref on input line 69.
+LaTeX Info: Redefining \pageref on input line 69.
+LaTeX Info: Redefining \nameref on input line 69.
  (./sstvars-vignette.out) (./sstvars-vignette.out)
 \@outlinefile=\write4
 \openout4 = `sstvars-vignette.out'.
 
 LaTeX Font Info:    Trying to load font information for T1+lmss on input line 6
-7.
+9.
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/lm/t1lmss.fd
 File: t1lmss.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 6
-7.
+9.
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OML+lmm on input line 6
-7.
+9.
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 
-67.
+69.
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 
-67.
+69.
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/lm/omxlmex.fd
 File: omxlmex.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10.95> on input line 67.
+(Font)              <10.95> on input line 69.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 67.
+(Font)              <8> on input line 69.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 67.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 67.
+(Font)              <6> on input line 69.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 69.
 
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 67.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 69.
 
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/amsfonts/umsb.fd
@@ -511,17 +512,17 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [1
 
 {/usr/local/texlive/2021/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 7
-8.
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 8
+0.
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 
-LaTeX Warning: Reference `sec:res' on page 2 undefined on input line 80.
+LaTeX Warning: Reference `sec:res' on page 2 undefined on input line 82.
 
 
-LaTeX Warning: Reference `sec:STVAR' on page 2 undefined on input line 80.
+LaTeX Warning: Reference `sec:STVAR' on page 2 undefined on input line 82.
 
 
 Underfull \vbox (badness 1789) has occurred while \output is active []
@@ -532,7 +533,7 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [2]
-Overfull \hbox (3.74004pt too wide) in paragraph at lines 96--97
+Overfull \hbox (3.74004pt too wide) in paragraph at lines 98--99
 []\T1/lmr/m/n/10.95 Conditional on $\OMS/lmsy/m/n/10.95 F[]$\T1/lmr/m/n/10.95 ,
  the con-di-tional mean of the above de-scribed pro-cess is $\OML/lmm/m/it/10.9
 5 ^^V[] \OMS/lmsy/m/n/10.95 ^^Q \OML/lmm/m/it/10.95 E\OT1/lmr/m/n/10.95 [\OML/l
@@ -540,7 +541,7 @@ mm/m/it/10.95 y[]\OMS/lmsy/m/n/10.95 jF[]\OT1/lmr/m/n/10.95 ] =
  []
 
 
-Overfull \hbox (3.70064pt too wide) in paragraph at lines 96--97
+Overfull \hbox (3.70064pt too wide) in paragraph at lines 98--99
 [][] \OML/lmm/m/it/10.95 []^^V[]$\T1/lmr/m/n/10.95 , and the con-di-tional co-
 vari-ance ma-trix is $\OT1/lmr/m/n/10.95 
 [] \OMS/lmsy/m/n/10.95 ^^Q []\OT1/lmr/m/n/10.95 (\OML/lmm/m/it/10.95 y[]\OMS/lm
@@ -560,36 +561,26 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [4]
-Overfull \hbox (16.57954pt too wide) detected at line 150
-[][][]\OML/lmm/m/it/10.95 u[] \OMS/lmsy/m/n/10.95 ^^Q \OML/lmm/m/it/10.95 B[]e[
-] \OT1/lmr/m/n/10.95 = []
- []
 
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 143.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 143.
+
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <12> on input line 143.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <9> on input line 157.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <5> on input line 157.
 
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 5
  []
 
 [5]
-
-Package natbib Warning: Citation `Virolainen:2020' on page 6 undefined on input
- line 177.
-
-
-Package natbib Warning: Citation `Virolainen:2020' on page 6 undefined on input
- line 177.
-
-
-Overfull \hbox (34.69911pt too wide) in paragraph at lines 179--180
-[]\T1/lmr/m/it/10.95 Suppose $\OT1/lmr/m/n/10.95 
-[] = \OML/lmm/m/it/10.95 W\OT1/lmr/m/n/10.95 ^^C[]\OML/lmm/m/it/10.95 W[]$\T1/l
-mr/m/it/10.95 , $\OML/lmm/m/it/10.95 m \OT1/lmr/m/n/10.95 = 1\OML/lmm/m/it/10.9
-5 ; :::; M$\T1/lmr/m/it/10.95 , where the di-ag-o-nal of $\OT1/lmr/m/n/10.95 ^^
-C = [](\OML/lmm/m/it/10.95 ^^U[]; :::; ^^U[]\OT1/lmr/m/n/10.95 )$\T1/lmr/m/it/1
-0.95 ,
- []
-
-
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 6 []
  []
@@ -600,36 +591,11 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [7]
-
-LaTeX Warning: Reference `eq:d_mdp' on page 8 undefined on input line 221.
-
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <9> on input line 229.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 229.
-
-Package natbib Warning: Citation `Meitz+Preve+Saikkonen2:2018' on page 8 undefi
-ned on input line 233.
-
-
-Package natbib Warning: Citation `Meitz+Preve+Saikkonen:2021' on page 8 undefin
-ed on input line 233.
-
-
-Package natbib Warning: Citation `Virolainen:2021' on page 8 undefined on input
- line 233.
-
-
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 8 []
  []
 
 [8]
-
-Package natbib Warning: Citation `Virolainen:2021' on page 9 undefined on input
- line 235.
-
-
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 9
  []
@@ -640,43 +606,45 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [10]
-LaTeX Font Info:    Trying to load font information for TS1+lmtt on input line 
-277.
- (/usr/local/texlive/2021/texmf-dist/tex/latex/lm/ts1lmtt.fd
-File: ts1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 11
  []
 
 [11]
+
+LaTeX Warning: Reference `sec:stvar' on page 12 undefined on input line 284.
+
+
+LaTeX Warning: Reference `cond:stationarity' on page 12 undefined on input line
+ 294.
+
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 12 []
  []
 
 [12]
+
+LaTeX Warning: Reference `sec:STVAR' on page 13 undefined on input line 304.
+
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 13
  []
 
 [13]
-
-LaTeX Warning: Reference `eq:gausmatrices' on page 14 undefined on input line 4
-38.
-
-
+LaTeX Font Info:    Trying to load font information for TS1+lmtt on input line 
+341.
+ (/usr/local/texlive/2021/texmf-dist/tex/latex/lm/ts1lmtt.fd
+File: ts1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 14 []
  []
 
 [14]
 
-LaTeX Warning: Reference `fig:seriesplot' on page 15 undefined on input line 45
-3.
-
-
-LaTeX Warning: Reference `fig:densityplot' on page 15 undefined on input line 4
-70.
+LaTeX Warning: Reference `eq:sigma_mt' on page 15 undefined on input line 405.
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -689,26 +657,40 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [16]
-
-LaTeX Warning: Reference `fig:proflogliks' on page 17 undefined on input line 5
-32.
-
-
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 17
  []
 
 [17]
+
+LaTeX Warning: Reference `eq:gausmatrices' on page 18 undefined on input line 5
+02.
+
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 18 []
  []
 
 [18]
+
+LaTeX Warning: Reference `fig:seriesplot' on page 19 undefined on input line 51
+7.
+
+
+LaTeX Warning: Reference `fig:densityplot' on page 19 undefined on input line 5
+34.
+
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 19
  []
 
 [19]
+
+LaTeX Warning: Reference `fig:proflogliks' on page 20 undefined on input line 5
+96.
+
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 20 []
  []
@@ -734,10 +716,6 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [24]
-
-LaTeX Warning: Reference `eq:def' on page 25 undefined on input line 797.
-
-
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 25
  []
@@ -758,6 +736,10 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [28]
+
+LaTeX Warning: Reference `eq:def' on page 29 undefined on input line 861.
+
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 29
  []
@@ -768,39 +750,6 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [30]
-
-LaTeX Warning: Reference `fig:predplot' on page 31 undefined on input line 957.
-
-
-
-Underfull \hbox (badness 1331) in paragraph at lines 980--981
-[]\T1/lmr/m/n/10.95 Calculate nu-mer-i-cally ap-prox-i-mated
- []
-
-
-Underfull \hbox (badness 3449) in paragraph at lines 981--982
-\T1/lmr/m/n/10.95 ap-prox-i-mated Hes-sian of the log-
- []
-
-
-Underfull \hbox (badness 2173) in paragraph at lines 993--994
-[]\T1/lmr/m/n/10.95 Estimate gen-er-al-ized fore-cast er-ror
- []
-
-
-Underfull \hbox (badness 1527) in paragraph at lines 996--997
-[]\T1/lmr/m/n/10.95 Swap be-tween mean and in-ter-cept
- []
-
-
-Overfull \hbox (30.57797pt too wide) in paragraph at lines 970--999
- [][] 
- []
-
-
-LaTeX Warning: Float too large for page by 93.1917pt on input line 1001.
-
-
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 31
  []
@@ -811,90 +760,113 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [32]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 33
  []
 
-[33] (./sstvars-vignette.bbl
+[33]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 34 []
  []
 
 [34]
 
-LaTeX Font Warning: Font shape `T1/lmr/b/it' in size <10.95> not available
-(Font)              Font shape `T1/lmr/b/sl' tried instead on input line 196.
+LaTeX Warning: Reference `fig:predplot' on page 35 undefined on input line 1021
+.
+
+
+Underfull \hbox (badness 1331) in paragraph at lines 1044--1045
+[]\T1/lmr/m/n/10.95 Calculate nu-mer-i-cally ap-prox-i-mated
+ []
+
+
+Underfull \hbox (badness 3449) in paragraph at lines 1045--1046
+\T1/lmr/m/n/10.95 ap-prox-i-mated Hes-sian of the log-
+ []
+
+
+Underfull \hbox (badness 2173) in paragraph at lines 1057--1058
+[]\T1/lmr/m/n/10.95 Estimate gen-er-al-ized fore-cast er-ror
+ []
+
+
+Underfull \hbox (badness 1527) in paragraph at lines 1060--1061
+[]\T1/lmr/m/n/10.95 Swap be-tween mean and in-ter-cept
+ []
+
+
+Overfull \hbox (30.57797pt too wide) in paragraph at lines 1034--1063
+ [][] 
+ []
+
+
+LaTeX Warning: Float too large for page by 93.1917pt on input line 1065.
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 35
  []
 
-[35])
+[35]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 36 []
  []
 
 [36]
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1018.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1018.
-
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <14.4> on input line 1018.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 1018.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 1018.
-
-Package natbib Warning: Citation `Meitz+Preve+Saikkonen:2021' on page 37 undefi
-ned on input line 1023.
-
-
-Overfull \hbox (3.07483pt too wide) in paragraph at lines 1022--1024
-\T1/lmr/m/n/10.95 Similarly to \T1/lmr/bx/n/10.95 ? \T1/lmr/m/n/10.95 but dif-f
-er-ing from the stan-dard form, we parametrize the Stu-dent's $\OML/lmm/m/it/10
-.95 t$\T1/lmr/m/n/10.95 -distribution
- []
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 37
  []
 
-[37]
+[37] (./sstvars-vignette.bbl
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 38 []
  []
 
 [38]
-Overfull \hbox (16.39037pt too wide) detected at line 1106
-[][][]\OML/lmm/m/it/10.95 ^^L[] \OMS/lmsy/m/n/10.95 ^^Q []
- []
 
-
-Overfull \hbox (16.39037pt too wide) detected at line 1110
-[][][]\OML/lmm/m/it/10.95 ^^L[] \OMS/lmsy/m/n/10.95 ^^Q []
- []
+LaTeX Font Warning: Font shape `T1/lmr/b/it' in size <10.95> not available
+(Font)              Font shape `T1/lmr/b/sl' tried instead on input line 224.
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 39
  []
 
-[39]
+[39])
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 40 []
  []
 
 [40]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1082.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1082.
+
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <14.4> on input line 1082.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <10> on input line 1082.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <7> on input line 1082.
+
+Package natbib Warning: Citation `Meitz+Preve+Saikkonen:2021' on page 41 undefi
+ned on input line 1087.
+
+
+Overfull \hbox (3.07483pt too wide) in paragraph at lines 1086--1088
+\T1/lmr/m/n/10.95 Similarly to \T1/lmr/bx/n/10.95 ? \T1/lmr/m/n/10.95 but dif-f
+er-ing from the stan-dard form, we parametrize the Stu-dent's $\OML/lmm/m/it/10
+.95 t$\T1/lmr/m/n/10.95 -distribution
+ []
+
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 41
  []
@@ -905,15 +877,45 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [42]
+Overfull \hbox (16.39037pt too wide) detected at line 1170
+[][][]\OML/lmm/m/it/10.95 ^^L[] \OMS/lmsy/m/n/10.95 ^^Q []
+ []
 
-Package natbib Warning: There were undefined citations.
+
+Overfull \hbox (16.39037pt too wide) detected at line 1174
+[][][]\OML/lmm/m/it/10.95 ^^L[] \OMS/lmsy/m/n/10.95 ^^Q []
+ []
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 43
  []
 
-[43] (./sstvars-vignette.aux)
+[43]
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+\T1/lmr/m/n/10.95 44 []
+ []
+
+[44]
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[] \T1/lmr/m/n/10.95 45
+ []
+
+[45]
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+\T1/lmr/m/n/10.95 46 []
+ []
+
+[46]
+
+Package natbib Warning: There were undefined citations.
+
+
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[] \T1/lmr/m/n/10.95 47
+ []
+
+[47] (./sstvars-vignette.aux)
 
 LaTeX Warning: There were undefined references.
 
@@ -921,21 +923,21 @@ LaTeX Warning: There were undefined references.
 LaTeX Warning: There were multiply-defined labels.
 
 Package rerunfilecheck Info: File `sstvars-vignette.out' has not changed.
-(rerunfilecheck)             Checksum: 742E7696C21AE18E439B6FDFB9D1823D;11184.
+(rerunfilecheck)             Checksum: 08F975A8BCE6390B2FE3BFD1DD743A36;14080.
  ) 
 Here is how much of TeX's memory you used:
- 12433 strings out of 478353
- 195949 string characters out of 5848086
- 503480 words of memory out of 5000000
- 30098 multiletter control sequences out of 15000+600000
- 525069 words of font info for 107 fonts, out of 8000000 for 9000
+ 12532 strings out of 478353
+ 198741 string characters out of 5848086
+ 504062 words of memory out of 5000000
+ 30159 multiletter control sequences out of 15000+600000
+ 520554 words of font info for 110 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,19n,77p,1776b,510s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 75i,19n,77p,1767b,506s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2021/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/lo
-cal/texlive/2021/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/local/texliv
-e/2021/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/local/texlive/2021/texmf-d
-ist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2021/texmf-dist/fonts/enc/
-dvips/lm/lm-ts1.enc}{/usr/local/texlive/2021/texmf-dist/fonts/enc/dvips/lm/lm-m
+cal/texlive/2021/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/local/texlive/20
+21/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2021/texmf-dist/
+fonts/enc/dvips/lm/lm-ts1.enc}{/usr/local/texlive/2021/texmf-dist/fonts/enc/dvi
+ps/lm/lm-mathit.enc}{/usr/local/texlive/2021/texmf-dist/fonts/enc/dvips/lm/lm-m
 athex.enc}</usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmb10.pfb><
 /usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmbo10.pfb></usr/local
 /texlive/2021/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></usr/local/texlive/2
@@ -962,10 +964,10 @@ exlive/2021/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></usr/local/texlive/202
 1/texmf-dist/fonts/type1/public/lm/lmtti10.pfb></usr/local/texlive/2021/texmf-d
 ist/fonts/type1/public/lm/lmtto10.pfb></usr/local/texlive/2021/texmf-dist/fonts
 /type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on sstvars-vignette.pdf (43 pages, 695872 bytes).
+Output written on sstvars-vignette.pdf (47 pages, 719676 bytes).
 PDF statistics:
- 974 PDF objects out of 1000 (max. 8388607)
- 856 compressed objects within 9 object streams
- 242 named destinations out of 1000 (max. 500000)
- 281 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 1107 PDF objects out of 1200 (max. 8388607)
+ 984 compressed objects within 10 object streams
+ 282 named destinations out of 1000 (max. 500000)
+ 361 words of extra memory for PDF output out of 10000 (max. 10000000)
 

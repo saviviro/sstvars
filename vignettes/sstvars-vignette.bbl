@@ -1,4 +1,4 @@
-\begin{thebibliography}{31}
+\begin{thebibliography}{40}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -16,11 +16,34 @@ Anderson H, Vahid F (1998).
 \newblock \emph{Journal of Econometrics}, \textbf{84}(1), 1--36.
 \newblock \doi{10.1016/S0304-4076(97)00076-6}.
 
+\bibitem[{Angelini \emph{et~al.}(2019)Angelini, Bacchiocchi, Caggiano, and
+  Fanelli}]{Angelini+Bacchiocchi+Caggiano+Fanelli:2019}
+Angelini G, Bacchiocchi E, Caggiano G, Fanelli L (2019).
+\newblock \enquote{Uncertainty across volatility regimes.}
+\newblock \emph{Journal of Applied Econometrics}, \textbf{34}(3), 437--455.
+\newblock \doi{10.1002/jae.2672}.
+
 \bibitem[{Aomoto and Kita(2011)}]{Aomoto+Kita:2011}
 Aomoto K, Kita M (2011).
 \newblock \emph{Theory of Hypergeometric Functions}.
 \newblock 1st edition. Springer-Verlag, Tokyo.
 \newblock \doi{10.1007/978-4-431-53938-4}.
+
+\bibitem[{Bacchiocchi \emph{et~al.}(2016)Bacchiocchi, Castelnuovo, and
+  Fanelli}]{Bacchiocchi+Castelnuovo+Fanelli:2016}
+Bacchiocchi E, Castelnuovo E, Fanelli L (2016).
+\newblock \enquote{Gimme a Break! Identification and Estimation of the
+  Macroeconomic Effects of Monetary Policy Shocks in the U.S.}
+\newblock \emph{Melbourne Institute Working Paper No. 31/16}.
+\newblock \doi{10.2139/ssrn.2851316}.
+
+\bibitem[{Bacchiocchi and Fanelli(2015)}]{Bacchiocchi+Fanelli:2015}
+Bacchiocchi E, Fanelli L (2015).
+\newblock \enquote{Identification in Structural Vector Autoregressive models
+  with Structural Changes, with an Application to US Monetary policy.}
+\newblock \emph{Oxford Bulletin of Economics and Statistics}, \textbf{77}(6),
+  761--779.
+\newblock \doi{10.1111/obes.12092}.
 
 \bibitem[{Blondel and Nesterov(2005)}]{Blondel+Nesterov:2005}
 Blondel V, Nesterov Y (2005).
@@ -29,6 +52,15 @@ Blondel V, Nesterov Y (2005).
 \newblock \emph{SIAM Journal on Matrix Analysis and Applications},
   \textbf{27}(1), 256--272.
 \newblock \doi{10.1137/040607009}.
+
+\bibitem[{Burgard \emph{et~al.}(2019)Burgard, Neuenkirch, and
+  Nöckel}]{Burgard+Neuenkirch+Nockel:2019}
+Burgard J, Neuenkirch M, Nöckel M (2019).
+\newblock \enquote{State-Dependent Transmission of Monetary Policy in the Euro
+  Area.}
+\newblock \emph{Journal of Money, Credit and Banking}, \textbf{51}(7),
+  2053--2070.
+\newblock \doi{10.1111/jmcb.12592}.
 
 \bibitem[{Buse(1982)}]{Buse:1982}
 Buse A (1982).
@@ -50,14 +82,6 @@ Ding P (2016).
   Distribution.}
 \newblock \emph{The American Statistician}, \textbf{70}(3), 293--295.
 \newblock \doi{10.1080/00031305.2016.1164756}.
-
-\bibitem[{Dorsey and Mayer(1995)}]{Dorsey+Mayer:1995}
-Dorsey R, Mayer W (1995).
-\newblock \enquote{Genetic algorithms for estimation problems with multiple
-  optima, nondifferentiability, and other irregular features.}
-\newblock \emph{Journal of Business and Economic Statistics}, \textbf{13}(1),
-  53--66.
-\newblock \doi{10.1080/07350015.1995.10524579}.
 
 \bibitem[{Hankin \emph{et~al.}(2006)Hankin, Clausen, and Murdoch}]{gsl}
 Hankin R, Clausen A, Murdoch D (2006).
@@ -124,14 +148,6 @@ Koop G, Pesaran M, Potter S (1996).
 \newblock \emph{Journal of Econometrics}, \textbf{74}(1), 119--147.
 \newblock \doi{10.1016/0304-4076(95)01753-4}.
 
-\bibitem[{Lanne \emph{et~al.}(2010)Lanne, L{\"u}tkepohl, and
-  Maciejowska}]{Lanne+Lutkepohl+Maciejowska:2010}
-Lanne M, L{\"u}tkepohl H, Maciejowska K (2010).
-\newblock \enquote{Structural vector autoregressions with Markov switching.}
-\newblock \emph{Journal of Economic Dynamics and Control}, \textbf{34}(2),
-  121--131.
-\newblock \doi{10.1016/j.jedc.2009.08.002}.
-
 \bibitem[{Lanne and Nyberg(2016)}]{Lanne+Nyberg:2016}
 Lanne M, Nyberg H (2016).
 \newblock \enquote{Generalized Forecast Error Variance Decomposition for Linear
@@ -140,12 +156,40 @@ Lanne M, Nyberg H (2016).
   595--603.
 \newblock \doi{10.1111/obes.12125}.
 
+\bibitem[{L{\"u}tkepohl(2005)}]{Lutkepohl:2005}
+L{\"u}tkepohl H (2005).
+\newblock \emph{New Introduction to Multiple Time Series Analysis}.
+\newblock 1st edition. Springer, Berlin.
+\newblock \doi{10.1007/978-3-540-27752-1}.
+
+\bibitem[{L{\"u}tkepohl and Netšunajev(2017)}]{Lutkepohl+Netsunajev:2017}
+L{\"u}tkepohl H, Netšunajev A (2017).
+\newblock \enquote{Structural vector autoregressions with smooth transitions in
+  variances.}
+\newblock \emph{Journal of Economic Dynamics \& Control}, \textbf{84}, 43--57.
+\newblock \doi{10.1016/j.jedc.2017.09.001}.
+
+\bibitem[{Meitz \emph{et~al.}(2023)Meitz, Preve, and
+  Saikkonen}]{Meitz+Preve+Saikkonen:2023}
+Meitz M, Preve D, Saikkonen P (2023).
+\newblock \enquote{A mixture autoregressive model based on Student's
+  $t$-distribution.}
+\newblock \emph{Communications in Statistics - Theory and Methods},
+  \textbf{52}(2), 499--515.
+\newblock \doi{10.1080/03610926.2021.1916531}.
+
 \bibitem[{Meitz and Saikkonen(2021)}]{Meitz+Saikkonen:2021}
 Meitz M, Saikkonen P (2021).
 \newblock \enquote{Testing for observation-dependent regime switching in
   mixture autoregressive models.}
 \newblock \emph{Journal of Econometrics}, \textbf{222}(1), 601--624.
 \newblock \doi{10.1016/j.jeconom.2020.04.048}.
+
+\bibitem[{Muirhead(1982)}]{Muirhead:1982}
+Muirhead R (1982).
+\newblock \emph{Aspects of Multivariate Statistical Theory}.
+\newblock 1st edition. John Wiley \& Sons, Hoboken, New Jersey.
+\newblock \doi{10.1002/9780470316559}.
 
 \bibitem[{Nash(1990)}]{Nash:1990}
 Nash J (1990).
@@ -162,40 +206,32 @@ Parrilo P, Jadbabaie A (2008).
   2385--2402.
 \newblock \doi{10.1016/j.laa.2007.12.027}.
 
-\bibitem[{Patnaik and Srinivas(1994)}]{Patnaik+Srinivas:1994}
-Patnaik L, Srinivas M (1994).
-\newblock \enquote{Adaptive Probabilities of Crossover and Mutation in Genetic
-  Algorithms.}
-\newblock \emph{Transactions on Systems, Man and Cybernetics}, \textbf{24}(4),
-  656--667.
-\newblock \doi{10.1109/21.286385}.
-
 \bibitem[{{R Core Team}(2022)}]{R}
 {R Core Team} (2022).
 \newblock \emph{R: A Language and Environment for Statistical Computing}.
 \newblock R Foundation for Statistical Computing, Vienna, Austria.
 \newblock \urlprefix\url{https://www.R-project.org/}.
 
-\bibitem[{Redner and Walker(1984)}]{Redner+Walker:1984}
-Redner R, Walker H (1984).
-\newblock \enquote{Mixture Densities, Maximum Likelihood and the Em Algorithm.}
-\newblock \emph{Society for Industrial and Applied Mathematics},
-  \textbf{26}(2), 195--239.
-\newblock \doi{10.1137/1026034}.
-
-\bibitem[{Smith \emph{et~al.}(1995)Smith, Dike, and
-  Stegmann}]{Smith+Dike+Stegmann:1995}
-Smith R, Dike B, Stegmann S (1995).
-\newblock \enquote{Fitness inheritance in genetic algorithms.}
-\newblock \emph{Proceedings of the 1995 ACM symbosium on Applied Computing},
-  pp. 345--350.
-\newblock \doi{10.1145/315891.316014}.
+\bibitem[{Rigobon(2003)}]{Rigobon:2003}
+Rigobon R (2003).
+\newblock \enquote{Identification through Heteroskedasticity.}
+\newblock \emph{The Review of Economics and Statistics}, \textbf{85}(4),
+  777--792.
+\newblock \doi{10.1162/003465303772815727}.
 
 \bibitem[{Solymos and Zawadzki(2020)}]{Solymos+Zawadzki:2020}
 Solymos P, Zawadzki Z (2020).
 \newblock \emph{\pkg{pbapply}: Adding Progress Bar to '*apply' Functions}.
 \newblock R package version 1.4-3,
   \urlprefix\url{https://CRAN.R-project.org/package=pbapply}.
+
+\bibitem[{Teräsvirta(1994)}]{Terasvirta:1994}
+Teräsvirta T (1994).
+\newblock \enquote{Specification, Estimation, and Evaluation of Smooth
+  Transition Autoregressive Models.}
+\newblock \emph{Journal of the American Statistical Association},
+  \textbf{89}(425), 208--2187.
+\newblock \doi{10.2307/2291217}.
 
 \bibitem[{Tsay(1998)}]{Tsay:1998}
 Tsay R (1998).
@@ -204,20 +240,52 @@ Tsay R (1998).
   \textbf{93}(443), 1188--1202.
 \newblock \doi{10.1080/01621459.1998.10473779}.
 
-\bibitem[{Virolainen(2018)}]{uGMAR}
-Virolainen S (2018).
+\bibitem[{Virolainen(2018{\natexlab{a}})}]{gmvarkit}
+Virolainen S (2018{\natexlab{a}}).
+\newblock \emph{gmvarkit: Estimate Gaussian and Student's $t$ Mixture Vector
+  Autoregressive Models}.
+\newblock R package version 2.1.0 available at CRAN:
+  \url{https://CRAN.R-project.org/package=gmvarkit},
+  \urlprefix\url{https://CRAN.R-project.org/package=gmvarkit}.
+
+\bibitem[{Virolainen(2018{\natexlab{b}})}]{uGMAR}
+Virolainen S (2018{\natexlab{b}}).
 \newblock \emph{uGMAR: Estimate Univariate Gaussian and Student's $t$ Mixture
   Autoregressive Models}.
 \newblock R package version 3.4.2 available at CRAN:
   \url{https://CRAN.R-project.org/package=uGMAR},
   \urlprefix\url{https://CRAN.R-project.org/package=uGMAR}.
 
-\bibitem[{Virolainen(2021)}]{Virolainen2:2021}
-Virolainen S (2021).
+\bibitem[{Virolainen(2021{\natexlab{a}})}]{Virolainen3:2021}
+Virolainen S (2021{\natexlab{a}}).
+\newblock \enquote{Gaussian and Student's $t$ mixture vector autoregressive
+  model with application to the asymmetric effects of monetary policy shocks in
+  the Euro area.}
+\newblock \emph{Unpublished working paper, available as arXiv:2109.13648}.
+\newblock \doi{10.48550/arXiv.2109.13648}.
+\newblock \urlprefix\url{https://doi.org/10.48550/arXiv.2109.13648}.
+
+\bibitem[{Virolainen(2021{\natexlab{b}})}]{Virolainen2:2021}
+Virolainen S (2021{\natexlab{b}}).
 \newblock \enquote{Structural Gaussian Mixture vector autoregressive model with
   application to the asymmetric effects of monetary policy shocks.}
 \newblock \emph{Unpublished working paper, available as arXiv:2007.04713}.
 \newblock \urlprefix\url{https://arxiv.org/abs/2007.04713}.
+
+\bibitem[{Virolainen(2022{\natexlab{a}})}]{Virolainen2:2022}
+Virolainen S (2022{\natexlab{a}}).
+\newblock \emph{Essays on mixture autoregressive models with applications to
+  macroeconomics and finance}.
+\newblock Ph.D. thesis, University of Helsinki.
+\newblock \urlprefix\url{http://hdl.handle.net/10138/350319}.
+
+\bibitem[{Virolainen(2022{\natexlab{b}})}]{Virolainen:2022}
+Virolainen S (2022{\natexlab{b}}).
+\newblock \enquote{A mixture autoregressive model based on Gaussian and
+  Student's $t$-distributions.}
+\newblock \emph{Studies in Nonlinear Dynamics \& Econometrics}, \textbf{26}(4),
+  559--580.
+\newblock \doi{10.1515/snde-2020-0060}.
 
 \bibitem[{Virolainen(2024)}]{sstvars}
 Virolainen S (2024).
