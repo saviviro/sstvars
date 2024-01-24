@@ -132,7 +132,7 @@ $\max\lbrace \rho(\boldsymbol{A}_1),...,\rho(\boldsymbol{A}_M)\rbrace<1$,
 \end{condition}
 where $\rho(\boldsymbol{A}_m)$ is the spectral radius of $\boldsymbol{A}_m$, $m=1,...,M$.
 
-Note that validity Condition~\ref{cond:necessary} does not imply the validity of Condition~\ref{cond:sufficient} that guarantees stationarity of the model. However, in practice models that satisfy Condition~\ref{cond:necessary} and are not very close to breaking this condition should most often satisfy Condition~\ref{cond:sufficient}. For checking the validity of Condition~\ref{cond:sufficient}, \citep{sstvars} implements the formula of \cite{Parrilo+Jadbabaie:2008} for the upper bound proposed by \cite{Blondel+Nesterov:2005} (the function \code{bound_JSR}. But unfortunately the calculations required are computationally very demanding in practice when the model is not small and even a relatively tight upper bound is required to verify Condition~\ref{cond:sufficient}. Therefore, in the cases where Condition~\ref{cond:sufficient} needs to be formally verified, we suggest using the \proglang{MATLAB} toolbox \pkg{JSR} by \cite{Jungers:2023}, as automatically combines several methods for bound the JSR and finds an accurate upper bound with a more reasonable computational effort.
+Note that validity Condition~\ref{cond:necessary} does not imply the validity of Condition~\ref{cond:sufficient} that guarantees stationarity of the model. However, in practice models that satisfy Condition~\ref{cond:necessary} and are not very close to breaking this condition should most often satisfy Condition~\ref{cond:sufficient}. For checking the validity of Condition~\ref{cond:sufficient}, \citep{sstvars} implements the formula of \cite{Parrilo+Jadbabaie:2008} for the upper bound proposed by \cite{Blondel+Nesterov:2005} (the function \code{bound_joint_spectral_radius}. But unfortunately the calculations required are computationally very demanding in practice when the model is not small and even a relatively tight upper bound is required to verify Condition~\ref{cond:sufficient}. Therefore, in the cases where Condition~\ref{cond:sufficient} needs to be formally verified, we suggest using the \proglang{MATLAB} toolbox \pkg{JSR} by \cite{Jungers:2023}, as automatically combines several methods for bound the JSR and finds an accurate upper bound with a more reasonable computational effort.
 
 \subsection{Specifications of the conditional distribution}\label{sec:cond_dist}
 
@@ -771,7 +771,7 @@ Rao's test is implemented to the function \code{Rao_test} (see the function docu
 \section{Residual based model diagnostics}\label{sec:res}
 \pkg{sstvars} employs residual based diagnostics for assessing the adequacy of the fitted model. The usual graphical diagnostics, can be examined with function \code{diagnostic_plot} which plots theresidual time series, auto- and crosscorrelations of the residuals, auto- and crosscorrelations of the squared residuals, and normal quantile-quantile plots as well as histrograms of th residuals. The plots can be created for both unstandardized raw residuals or to standardized residuals by adjusting the argument \code{standardize} to \code{TRUE} or \code{FALSE}. Using unstandardized residuals is advisable when checking for reminaing autocorrelation. But standardized residuals should be used to check for remaining conditional heterokedasticity and to check the model's adequacy to capture the marginal distribution of the series, because the STVAR models are conditionally heteroskedastic and the unstandardized raw residuals do not take into account the time-varying conditional covariance matrix.
 
-Remaining autocorrelation in the residuals can also be tested with the Portmanteau test, which is implemented to the function \code{Portmantau_test}. The test can also be applied to standardized squared residuals to test for remaining conditional heteroskedasticity by setting the argument \code{which_test="het.sked"}. The number of lags that should be taken into account in the test is set with the argument \code{lags}.
+Remaining autocorrelation in the residuals can also be tested with the (adjusted) Portmanteau test, which is implemented to the function \code{Portmantau_test}. The test can also be applied to standardized squared residuals to test for remaining conditional heteroskedasticity by setting the argument \code{which_test="het.sked"}. The number of lags that should be taken into account in the test is set with the argument \code{lags}.
 
 
 \section{Impulse response analysis}\label{sec:impulseresponse}
@@ -868,63 +868,57 @@ R> mysim <- simulate(mod122, nsim=500, init_regime=1, seed=1)
 Our implementation of \code{simulate} returns a list containing the simulated sample path in \code{\$sample}, the mixture component that generated each observation in \code{\$component}, and the transition weights in \code{\$transition_weights}.
 
 \subsection{Simulation based forecasting}
-Deriving multiple-steps-ahead point predictions and prediction intervals analytically for the GSMVAR models is very complicated, so \pkg{gmvarkit} employs the following simulation-based method. By using the last $p$ observations of the data up to the date of forecasting as initial values, a large number of sample paths for the future values of the process are simulated. Then, sample quantiles from the simulated sample paths are calculated to obtain prediction intervals, and the median or mean is used for point predictions. A similar procedure is also applied to forecast future values of the mixing weights, which might be of interest because the researcher can often associate specific characteristics to different regimes.
+Deriving multiple-steps-ahead point predictions and prediction intervals analytically for the STVAR models is very complicated, so \pkg{sstvars} employs the following simulation-based method. By using the last $p$ observations of the data up to the date of forecasting as initial values, a large number of sample paths for the future values of the process are simulated. Then, sample quantiles from the simulated sample paths are calculated to obtain prediction intervals, and the median or mean is used for point predictions. A similar procedure is also applied to forecast future values of the transition weights, which might be of interest because the researcher can often associate specific characteristics to different regimes.
 
-Forecasting is most conveniently done with the \code{predict} method (see \code{?predict.gsmvar}). The available arguments include the number of steps ahead to be predicted (\code{n_ahead}), the number sample paths the forecast is based on (\code{nsim}), possibly multiple confidence levels for prediction intervals (\code{pi}), prediction type (\code{pred_type}), and prediction interval type (\code{pi_type}). The prediction type can be either \code{median}, \code{mean}, or for one-step-ahead forecasts also the exact conditional mean, \code{cond_mean}. The prediction interval type can be any of \code{"two-sided"}, \code{"upper"}, \code{"lower"}, or \code{"none"}.
+Forecasting is most conveniently done with the \code{predict} method (see \code{?predict.stvar}). The available arguments include the number of steps ahead to be predicted (\code{nsteps}), the number sample paths the forecast is based on (\code{nsim}), possibly multiple confidence levels for prediction intervals (\code{pi}), prediction type (\code{pred_type}), and prediction interval type (\code{pi_type}). The prediction type can be either \code{median}, \code{mean} for the point forecast.
 
-To exemplify, the following code forecasts the two-dimensional time-series of U.S. GDP and GDP deflator growth using the G-StMVAR($1, 1, 1$) model \code{fit12gs} estimated in Section~\ref{sec:example_estim}. The forecast is $10$ steps (quarters in this case) ahead, based on $10000$ Monte Carlo repetitions with the point forecast based on the mean of those repetitions. The prediction intervals are two-sided with confidence levels $0.95$ and $0.90$. Finally, the argument \code{mix_weights} states that also future values of the the mixing weights should be forecasted. After completing the forecast, the function plots the results by default.
+To exemplify, the following code forecasts the two-dimensional time-series of U.S. GDP and GDP deflator growth using the logistic Student's $t$ STVAR($1, 2$) model \code{fit12} estimated in Section~\ref{sec:example_estim}. The forecast is $10$ steps (quarters in this case) ahead, based on $10000$ Monte Carlo repetitions with the point forecast based on the mean of those repetitions. The prediction intervals are two-sided with confidence levels $0.95$ and $0.90$.
 %
 \begin{CodeChunk}
 \begin{CodeInput}
-R> mypred <- predict(fit12gs, n_ahead=10, nsim=10000, pred_type="mean",
-+                    pi_type="two-sided", pi=c(0.95, 0.90),
-+                    mix_weights=TRUE)
+R> mypred <- predict(fit12, nsteps=10, nsim=10000, pred_type="mean",
++    pi=c(0.95, 0.90))
 \end{CodeInput}
 \end{CodeChunk}
 %
-The resulting plot is presented in Figure~\ref{fig:predplot}.
-
-
-%\begin{figure}%[p]
-%  \centering
-%  \includegraphics{figures/predplot.png}
-%  \caption{The figure produced by the predict method applied to the model \code{fit12gs}. The first top figures show the point and interval predictions $10$ steps ahaed for the time series, and the bottom figure for the mixing weights. Two-sided prediction intervals with confidence levels $95\%$ and $90\%$, point forecast based on mean. Prediction based on $10000$ Monte Carlo repetitions.}
-%\label{fig:predplot}
-%\end{figure}
+The results can be printed with the print method using the command \code{print(mypred)} or plotted with the plot method using the command \code{plot(mypred)}.
 
 
 \begin{table}
 \centering
+\small
 \begin{tabular}{llp{6.4cm}}
 \hline
 Related to     & Name                      & Description \\ \hline
-Estimation     & \code{fitGSMVAR}          & Estimate a GSMVAR model.\\
-               & \code{alt_gsmvar}         & Build a GSMVAR model based on results from any estimation round.\\
-               & \code{stmvar_to_gstmvar}  & Estimate a G-StMVAR model based on a StMVAR (or G-StMVAR) model with large degrees of freedom parameters.\\
-               & \code{gsmvar_to_sgsmvar}  & Obtain a structural GSMVAR model identified by heteroskedasticity based on a reduced form model.\\
-               & \code{iterate_more}       & Run more iterations of the variable metric algorithm for a preliminary estimated GSMVAR model.\\
-Estimates      & \code{summary} (method)   & Detailed printout of the estimates.\\
-               & \code{plot} (method)      & Plot the series with the estimated mixing weights and a kernel density estimates of the (marginal) series with the (marginal) stationary densities of the model.\\
+Estimation     & \code{fitSTVAR}           & Estimate STVAR models.\\
+               & \code{fitSSTVAR}          & Estimate or construct structural STVAR models.\\
+               & \code{alt_stvar}          & Construct a STVAR model based on any estimation round.\\
+               & \code{iterate_more}       & Run more iterations of the variable metric algorithm for a preliminary estimated STVAR model.\\
+Estimates      & \code{summary} (method)   & Detailed printout of the model.\\
+               & \code{plot} (method)      & Plot the series with the fitted transition weights of the model.\\
                & \code{get_foc}            & Calculate numerically approximated gradient of the log-likelihood function evaluated at the estimate.\\
                & \code{get_soc}            & Calculate eigenvalues of numerically approximated Hessian of the log-likelihood function evaluated at the estimate.\\
-               & \code{profile_logliks}    & Plot the graphs of the profile log-likelihood functions.\\
-               & \code{cond_moment_plot}   & Plot the model implied one-step conditional means or variances.\\
-Diagnostics    & \code{quantile_residual_tests} & Calculate quantile residual tests.\\
-               & \code{diagnostic_plot}    & Plot quantile residual diagnostics.\\
-Forecasting    & \code{predict} (method)   & Forecast future observations and mixing weights of the process.\\
-Simulation     & \code{simulate} (method)  & Simulate from a GSMVAR process.\\
-Create model   & \code{GSMVAR}             & Construct a GSMVAR model based on specific parameter values.\\
+               & \code{profile_logliks}    & Plot the graphs of the profile log-likelihood functions about the estimate.\\
+Diagnostics    & \code{Portmanteau_test}   & Calculate the (adjusted) Portmanteau test.\\
+               & \code{diagnostic_plot}    & Plot residual diagnostics (raw or standardized residuals).\\
+Forecasting    & \code{predict} (method)   & Forecast future observations and transition weights of the process.\\
+Simulation     & \code{simulate} (method)  & Simulate from a STVAR process.\\
+Create model   & \code{STVAR}              & Construct a STVAR model based on given parameter values.\\
 Hypothesis testing & \code{LR_test}        & Calculate likelihood ratio test.\\
                & \code{Wald_test}          & Calculate Wald test.\\
                & \code{Rao_test}           & Calculate Rao's test.\\
 Impulse response analysis & \code{GIRF}    & Estimate generalized impulse response functions.\\
                & \code{GFEVD}              & Estimate generalized forecast error variance decomposition.\\
                & \code{linear_IRF}         & Estimate linear impulse response functions.\\
-Other          & \code{add_data}           & Add data to a GSMVAR model \\
+Other          & \code{bound_joint_spectral_radius} & Calculate an upper bound of the joint spectral radius of the companion form AR matrices of the regimes.\\
                & \code{swap_parametrization} & Swap between mean and intercept parametrizations \\
+%               & \code{uncond_moments}     & Calculate unconditional moments of the regimes.\\
+%               & \code{check_params}       & Check whether given parameter values satisfy our assumptions.\\
+               & \code{swap_W_signs}       & Swap the signs of the columns of the impact matrix of model identified by heteroskedasticity. \\
+               & \code{reorder_W_columns}  & Reorder the columns of the impact matrix of model identified by heteroskedasticity. \\
 \hline
 \end{tabular}
-\caption{Some useful functions in \pkg{gmvarkit} sorted according to their usage. The note "method" in parentheses after the name of a function signifies that it is an S3 method for a class \code{gsmvar} object (often generated by the function \code{fitGSMVAR} or \code{GSMVAR}).}
+\caption{Some useful functions in \pkg{sstvars} sorted according to their usage. The note "method" in parentheses after the name of a function signifies that it is an S3 method for a class \code{stvar} object (often generated by the function \code{fitSTVAR}, \code{fitSSTVAR} or \code{STVAR}).}
 \label{tab:functions}
 \end{table}
 
