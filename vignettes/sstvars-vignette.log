@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  24 JAN 2024 14:10
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  24 JAN 2024 16:37
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -523,7 +523,7 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [2]
-Overfull \hbox (3.74004pt too wide) in paragraph at lines 98--99
+Overfull \hbox (3.74004pt too wide) in paragraph at lines 96--97
 []\T1/lmr/m/n/10.95 Conditional on $\OMS/lmsy/m/n/10.95 F[]$\T1/lmr/m/n/10.95 ,
  the con-di-tional mean of the above de-scribed pro-cess is $\OML/lmm/m/it/10.9
 5 ^^V[] \OMS/lmsy/m/n/10.95 ^^Q \OML/lmm/m/it/10.95 E\OT1/lmr/m/n/10.95 [\OML/l
@@ -531,7 +531,7 @@ mm/m/it/10.95 y[]\OMS/lmsy/m/n/10.95 jF[]\OT1/lmr/m/n/10.95 ] =
  []
 
 
-Overfull \hbox (3.70064pt too wide) in paragraph at lines 98--99
+Overfull \hbox (3.70064pt too wide) in paragraph at lines 96--97
 [][] \OML/lmm/m/it/10.95 []^^V[]$\T1/lmr/m/n/10.95 , and the con-di-tional co-
 vari-ance ma-trix is $\OT1/lmr/m/n/10.95 
 [] \OMS/lmsy/m/n/10.95 ^^Q []\OT1/lmr/m/n/10.95 (\OML/lmm/m/it/10.95 y[]\OMS/lm
@@ -553,14 +553,14 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 [4]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 143.
+(hyperref)                removing `math shift' on input line 142.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 143.
+(hyperref)                removing `math shift' on input line 142.
 
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <12> on input line 143.
+(Font)              <12> on input line 142.
 
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 5
@@ -568,9 +568,9 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 
 [5]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <9> on input line 157.
+(Font)              <9> on input line 156.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 157.
+(Font)              <5> on input line 156.
 
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 6 []
@@ -602,11 +602,6 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [11]
-
-LaTeX Warning: Reference `cond:stationarity' on page 12 undefined on input line
- 294.
-
-
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 12 []
  []
@@ -622,25 +617,25 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [14]
-LaTeX Font Info:    Trying to load font information for TS1+lmtt on input line 
-396.
- (/usr/local/texlive/2021/texmf-dist/tex/latex/lm/ts1lmtt.fd
-File: ts1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 15
  []
 
 [15]
+LaTeX Font Info:    Trying to load font information for TS1+lmtt on input line 
+395.
+ (/usr/local/texlive/2021/texmf-dist/tex/latex/lm/ts1lmtt.fd
+File: ts1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 16 []
  []
 
 [16]
-<figures/seriesplot.png, id=477, 1545.775pt x 1104.125pt>
+<figures/seriesplot.png, id=470, 1545.775pt x 1104.125pt>
 File: figures/seriesplot.png Graphic file (type png)
 <use figures/seriesplot.png>
-Package pdftex.def Info: figures/seriesplot.png  used on input line 447.
+Package pdftex.def Info: figures/seriesplot.png  used on input line 446.
 (pdftex.def)             Requested size: 354.12434pt x 252.9494pt.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -653,10 +648,10 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [18]
-<figures/profilelogliks.png, id=492, 1545.775pt x 1104.125pt>
+<figures/profilelogliks.png, id=485, 1545.775pt x 1104.125pt>
 File: figures/profilelogliks.png Graphic file (type png)
 <use figures/profilelogliks.png>
-Package pdftex.def Info: figures/profilelogliks.png  used on input line 510.
+Package pdftex.def Info: figures/profilelogliks.png  used on input line 509.
 (pdftex.def)             Requested size: 354.12434pt x 252.9494pt.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -674,14 +669,14 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [21]
-Overfull \hbox (1.85449pt too wide) in paragraph at lines 574--576
+Overfull \hbox (1.85449pt too wide) in paragraph at lines 573--575
 \T1/lmr/m/n/10.95 struc-tural model \T1/lmtt/m/n/10.95 fit12het \T1/lmr/m/n/10.
 95 by set-ting the ar-gu-ment \T1/lmtt/m/n/10.95 identification="heteroskedasti
 city"
  []
 
 
-Overfull \hbox (30.47675pt too wide) in paragraph at lines 593--594
+Overfull \hbox (30.47675pt too wide) in paragraph at lines 592--593
 \T1/lmr/m/n/10.95 strained to fixed value or lin-ear con-straints can be im-pos
 e on them (ar-gu-ment \T1/lmtt/m/n/10.95 weight_constraints\T1/lmr/m/n/10.95 ).
 
@@ -736,7 +731,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [30]
-Overfull \hbox (0.55978pt too wide) in paragraph at lines 868--869
+Overfull \hbox (0.55978pt too wide) in paragraph at lines 867--868
 \T1/lmr/m/n/10.95 STVAR mod-els is very com-pli-cated, so \T1/lmr/b/n/10.95 sst
 -vars \T1/lmr/m/n/10.95 em-ploys the fol-low-ing simulation-based method.
  []
@@ -748,36 +743,33 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 
 [31]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 887.
+(Font)              <10> on input line 886.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 887.
+(Font)              <7> on input line 886.
 
-Underfull \hbox (badness 4454) in paragraph at lines 898--899
+Underfull \hbox (badness 4454) in paragraph at lines 897--898
 []\T1/lmr/m/n/10 Plot the graphs of the pro-file log-
  []
 
 
-Underfull \hbox (badness 2961) in paragraph at lines 899--900
+Underfull \hbox (badness 2961) in paragraph at lines 898--899
 []\T1/lmr/m/n/10 Calculate the (ad-justed) Port-man-teau
  []
 
 
-Underfull \hbox (badness 2277) in paragraph at lines 907--908
+Underfull \hbox (badness 2277) in paragraph at lines 906--907
 []\T1/lmr/m/n/10 Estimate gen-er-al-ized im-pulse re-sponse
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 911--913
+Underfull \hbox (badness 10000) in paragraph at lines 910--913
 []\T1/lmr/m/n/10 Swap be-tween mean and in-ter-cept
  []
 
 
-Overfull \hbox (29.44312pt too wide) in paragraph at lines 887--917
+Overfull \hbox (29.44312pt too wide) in paragraph at lines 886--917
  [][] 
  []
-
-
-Underfull \vbox (badness 3514) has occurred while \output is active []
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -810,20 +802,17 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [36] (./sstvars-vignette.aux)
-
-LaTeX Warning: There were undefined references.
-
 Package rerunfilecheck Info: File `sstvars-vignette.out' has not changed.
 (rerunfilecheck)             Checksum: 670CF5013EE0288009EFA6910FEFFC06;10342.
  ) 
 Here is how much of TeX's memory you used:
- 12388 strings out of 478353
- 195609 string characters out of 5848086
- 496652 words of memory out of 5000000
- 30097 multiletter control sequences out of 15000+600000
+ 12377 strings out of 478353
+ 195411 string characters out of 5848086
+ 496586 words of memory out of 5000000
+ 30088 multiletter control sequences out of 15000+600000
  516856 words of font info for 106 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,13n,77p,1626b,504s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 75i,13n,77p,1628b,508s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2021/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/local/
 texlive/2021/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2021/t
 exmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/local/texlive/2021/texmf-dist/fon
@@ -854,10 +843,10 @@ usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></usr/local/
 texlive/2021/texmf-dist/fonts/type1/public/lm/lmtti10.pfb></usr/local/texlive/2
 021/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr/local/texlive/2021/texmf
 -dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on sstvars-vignette.pdf (36 pages, 1030892 bytes).
+Output written on sstvars-vignette.pdf (36 pages, 1029721 bytes).
 PDF statistics:
- 867 PDF objects out of 1000 (max. 8388607)
- 755 compressed objects within 8 object streams
- 196 named destinations out of 1000 (max. 500000)
+ 854 PDF objects out of 1000 (max. 8388607)
+ 742 compressed objects within 8 object streams
+ 194 named destinations out of 1000 (max. 500000)
  307 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -1,4 +1,4 @@
-\begin{thebibliography}{34}
+\begin{thebibliography}{32}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -217,17 +217,8 @@ Virolainen S (2018{\natexlab{b}}).
   \url{https://CRAN.R-project.org/package=uGMAR},
   \urlprefix\url{https://CRAN.R-project.org/package=uGMAR}.
 
-\bibitem[{Virolainen(2021{\natexlab{a}})}]{Virolainen3:2021}
-Virolainen S (2021{\natexlab{a}}).
-\newblock \enquote{Gaussian and Student's $t$ mixture vector autoregressive
-  model with application to the asymmetric effects of monetary policy shocks in
-  the Euro area.}
-\newblock \emph{Unpublished working paper, available as arXiv:2109.13648}.
-\newblock \doi{10.48550/arXiv.2109.13648}.
-\newblock \urlprefix\url{https://doi.org/10.48550/arXiv.2109.13648}.
-
-\bibitem[{Virolainen(2021{\natexlab{b}})}]{Virolainen2:2021}
-Virolainen S (2021{\natexlab{b}}).
+\bibitem[{Virolainen(2021)}]{Virolainen2:2021}
+Virolainen S (2021).
 \newblock \enquote{Structural Gaussian Mixture vector autoregressive model with
   application to the asymmetric effects of monetary policy shocks.}
 \newblock \emph{Unpublished working paper, available as arXiv:2007.04713}.
@@ -247,13 +238,5 @@ Virolainen S (2022{\natexlab{b}}).
 \newblock \emph{Studies in Nonlinear Dynamics \& Econometrics}, \textbf{26}(4),
   559--580.
 \newblock \doi{10.1515/snde-2020-0060}.
-
-\bibitem[{Virolainen(2024)}]{sstvars}
-Virolainen S (2024).
-\newblock \emph{sstvars: Toolkit for Structural Smooth Transition Vector
-  Autoregressive models}.
-\newblock R package version 0.1.0 available at GitHub:
-  \url{https://github.com/saviviro/sstvars},
-  \urlprefix\url{https://github.com/saviviro/sstvars}.
 
 \end{thebibliography}
