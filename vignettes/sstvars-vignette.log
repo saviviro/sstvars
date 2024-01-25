@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  24 JAN 2024 16:37
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  25 JAN 2024 18:58
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -627,6 +627,12 @@ LaTeX Font Info:    Trying to load font information for TS1+lmtt on input line
  (/usr/local/texlive/2021/texmf-dist/tex/latex/lm/ts1lmtt.fd
 File: ts1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
+Overfull \hbox (11.86206pt too wide) in paragraph at lines 431--432
+\T1/lmr/m/n/10.95 no stan-dard er-ror for the in-ter-cepts if mean parametriza-
+tion is used (by set-ting \T1/lmtt/m/n/10.95 parametrization
+ []
+
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 16 []
  []
@@ -669,17 +675,10 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [21]
-Overfull \hbox (1.85449pt too wide) in paragraph at lines 573--575
+Overfull \hbox (1.85449pt too wide) in paragraph at lines 574--576
 \T1/lmr/m/n/10.95 struc-tural model \T1/lmtt/m/n/10.95 fit12het \T1/lmr/m/n/10.
 95 by set-ting the ar-gu-ment \T1/lmtt/m/n/10.95 identification="heteroskedasti
 city"
- []
-
-
-Overfull \hbox (30.47675pt too wide) in paragraph at lines 592--593
-\T1/lmr/m/n/10.95 strained to fixed value or lin-ear con-straints can be im-pos
-e on them (ar-gu-ment \T1/lmtt/m/n/10.95 weight_constraints\T1/lmr/m/n/10.95 ).
-
  []
 
 
@@ -698,6 +697,12 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [24]
+Overfull \hbox (2.91833pt too wide) in paragraph at lines 721--722
+\T1/lmr/m/n/10.95 groups of regimes that have the same mean pa-ram-e-ters us-in
+g the ar-gu-ment \T1/lmtt/m/n/10.95 mean_constraints\T1/lmr/m/n/10.95 .
+ []
+
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 25
  []
@@ -713,9 +718,6 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [27]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 28 []
  []
@@ -731,7 +733,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [30]
-Overfull \hbox (0.55978pt too wide) in paragraph at lines 867--868
+Overfull \hbox (0.55978pt too wide) in paragraph at lines 869--870
 \T1/lmr/m/n/10.95 STVAR mod-els is very com-pli-cated, so \T1/lmr/b/n/10.95 sst
 -vars \T1/lmr/m/n/10.95 em-ploys the fol-low-ing simulation-based method.
  []
@@ -743,31 +745,31 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 
 [31]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 886.
+(Font)              <10> on input line 888.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 886.
+(Font)              <7> on input line 888.
 
-Underfull \hbox (badness 4454) in paragraph at lines 897--898
+Underfull \hbox (badness 4454) in paragraph at lines 899--900
 []\T1/lmr/m/n/10 Plot the graphs of the pro-file log-
  []
 
 
-Underfull \hbox (badness 2961) in paragraph at lines 898--899
+Underfull \hbox (badness 2961) in paragraph at lines 900--901
 []\T1/lmr/m/n/10 Calculate the (ad-justed) Port-man-teau
  []
 
 
-Underfull \hbox (badness 2277) in paragraph at lines 906--907
+Underfull \hbox (badness 2277) in paragraph at lines 908--909
 []\T1/lmr/m/n/10 Estimate gen-er-al-ized im-pulse re-sponse
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 910--913
+Underfull \hbox (badness 10000) in paragraph at lines 912--915
 []\T1/lmr/m/n/10 Swap be-tween mean and in-ter-cept
  []
 
 
-Overfull \hbox (29.44312pt too wide) in paragraph at lines 886--917
+Overfull \hbox (29.44312pt too wide) in paragraph at lines 888--919
  [][] 
  []
 
@@ -781,72 +783,79 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 33
  []
 
-[33] (./sstvars-vignette.bbl
+[33]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 34 []
  []
 
-[34]
+[34] (./sstvars-vignette.bbl
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[] \T1/lmr/m/n/10.95 35
+ []
+
+[35]
 
 LaTeX Font Warning: Font shape `T1/lmr/b/it' in size <10.95> not available
 (Font)              Font shape `T1/lmr/b/sl' tried instead on input line 185.
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
-[] \T1/lmr/m/n/10.95 35
- []
-
-[35])
-Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 36 []
  []
 
-[36] (./sstvars-vignette.aux)
+[36])
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[] \T1/lmr/m/n/10.95 37
+ []
+
+[37] (./sstvars-vignette.aux)
 Package rerunfilecheck Info: File `sstvars-vignette.out' has not changed.
-(rerunfilecheck)             Checksum: 670CF5013EE0288009EFA6910FEFFC06;10342.
+(rerunfilecheck)             Checksum: 9B2198D937A2C21F03CEB72CB56E3E33;10315.
  ) 
 Here is how much of TeX's memory you used:
- 12377 strings out of 478353
- 195411 string characters out of 5848086
- 496586 words of memory out of 5000000
+ 12378 strings out of 478353
+ 195407 string characters out of 5848086
+ 497586 words of memory out of 5000000
  30088 multiletter control sequences out of 15000+600000
  516856 words of font info for 106 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,13n,77p,1628b,508s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 75i,13n,77p,1628b,506s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2021/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/local/
-texlive/2021/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2021/t
-exmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/local/texlive/2021/texmf-dist/fon
+texlive/2021/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/local/texlive/2021/
+texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2021/texmf-dist/fon
 ts/enc/dvips/lm/lm-mathit.enc}{/usr/local/texlive/2021/texmf-dist/fonts/enc/dvi
 ps/lm/lm-mathex.enc}{/usr/local/texlive/2021/texmf-dist/fonts/enc/dvips/lm/lm-m
 athsy.enc}</usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmb10.pfb><
 /usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmbo10.pfb></usr/local
 /texlive/2021/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></usr/local/texlive/2
 021/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></usr/local/texlive/2021/texmf-
-dist/fonts/type1/public/lm/lmbx8.pfb></usr/local/texlive/2021/texmf-dist/fonts/
-type1/public/lm/lmex10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/publ
-ic/lm/lmmi10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmmi
-12.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></us
-r/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></usr/local/tex
-live/2021/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></usr/local/texlive/2021/t
-exmf-dist/fonts/type1/public/lm/lmmib10.pfb></usr/local/texlive/2021/texmf-dist
-/fonts/type1/public/lm/lmr10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type
-1/public/lm/lmr6.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/
-lmr8.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmr9.pfb></u
-sr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmri10.pfb></usr/local/t
-exlive/2021/texmf-dist/fonts/type1/public/lm/lmri12.pfb></usr/local/texlive/202
-1/texmf-dist/fonts/type1/public/lm/lmro10.pfb></usr/local/texlive/2021/texmf-di
-st/fonts/type1/public/lm/lmss10.pfb></usr/local/texlive/2021/texmf-dist/fonts/t
-ype1/public/lm/lmssbx10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/pub
-lic/lm/lmsso10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lm
-sy10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmsy8.pfb></
-usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></usr/local/
-texlive/2021/texmf-dist/fonts/type1/public/lm/lmtti10.pfb></usr/local/texlive/2
-021/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr/local/texlive/2021/texmf
--dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on sstvars-vignette.pdf (36 pages, 1029721 bytes).
+dist/fonts/type1/public/lm/lmex10.pfb></usr/local/texlive/2021/texmf-dist/fonts
+/type1/public/lm/lmmi10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/pub
+lic/lm/lmmi12.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmm
+i6.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></us
+r/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></usr/local/tex
+live/2021/texmf-dist/fonts/type1/public/lm/lmmib10.pfb></usr/local/texlive/2021
+/texmf-dist/fonts/type1/public/lm/lmr10.pfb></usr/local/texlive/2021/texmf-dist
+/fonts/type1/public/lm/lmr6.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1
+/public/lm/lmr8.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/l
+mr9.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmri10.pfb></
+usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmri12.pfb></usr/local/
+texlive/2021/texmf-dist/fonts/type1/public/lm/lmro10.pfb></usr/local/texlive/20
+21/texmf-dist/fonts/type1/public/lm/lmss10.pfb></usr/local/texlive/2021/texmf-d
+ist/fonts/type1/public/lm/lmssbx10.pfb></usr/local/texlive/2021/texmf-dist/font
+s/type1/public/lm/lmsso10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/p
+ublic/lm/lmsy10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/l
+msy8.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtt10.pfb><
+/usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtti10.pfb></usr/loca
+l/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr/local/texlive
+/2021/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
+Output written on sstvars-vignette.pdf (37 pages, 1014589 bytes).
 PDF statistics:
- 854 PDF objects out of 1000 (max. 8388607)
- 742 compressed objects within 8 object streams
- 194 named destinations out of 1000 (max. 500000)
+ 856 PDF objects out of 1000 (max. 8388607)
+ 745 compressed objects within 8 object streams
+ 195 named destinations out of 1000 (max. 500000)
  307 words of extra memory for PDF output out of 10000 (max. 10000000)
 
