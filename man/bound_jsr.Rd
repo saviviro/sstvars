@@ -12,32 +12,10 @@ bound_JSR(stvar, accuracy = c("0.707", "0.840", "0.917", "0.957", "0.978"))
 \item{accuracy}{what should the relative accuracy of the bounds be? Note only upper bound is used
 and that the bound holds with any accuracy (but the bounds get tighter with increased accuracy).}
 }
-\value{
-Returns an upper bound for the joint spectral radius of the "companion form AR matrices" of the regimes.
-}
 \description{
 \code{bound_JSR} calculates an upper bound for the joint spectral radius of the
  "companion form AR matrices" matrices of the regimes as described in Parrilo and Jadbabaie (2008),
   Theorems 4.2 and 4.3 and Equations (8) and (11).
-}
-\details{
-Upper bound calculated the formula presented in Parrilo and Jadbabaie (2008), Equation~(11),
- whereas the accuracy is based on  Parrilo and Jadbabaie (2008), Table 1. Note that the accuracy is
- for the bounds including the lower bound which we do not calculate, as only upper bound used in practice.
- Specifically, Kheifets and Saikkonen (2020) show that if the joint spectral radius is smaller than one,
- the STVAR process is ergodic stationary. Therefore, if the upper bound is smaller than one,
- the process is stationary ergodic. However, as the condition is not necessary but sufficient and also because
- the bound might be too conservative, upper bound larger than one does not imply that the process is not ergodic
- stationary. You can try higher accuracy, and if the bound is still larger than one, the result does not tell
- whether the process is ergodic stationary or not.
-
- Note that due to the extremely large dimenions required in the calculation of the bound, using high accuracy
- might not be feasible for other than very small models (small p*d^2), as one may run out of memory or the
- computations just take very long. \strong{That is, it is advisable to start with low accuracy,
- and only increase it if the sufficient condition for ergodic stationarity is not satisfied in the upper bound,
- i.e., if the bound is larger than one.}
- You can also try other implementations for bounding the joint spectral radius, for instance,
- the JSR toolbox in Matlab (Jungers 2023).
 }
 \examples{
 # p=1, M=2, d=2, relative dens weight function
@@ -64,14 +42,4 @@ bound_JSR(mod122, accuracy="0.840")
 bound_JSR(mod122, accuracy="0.917")
 # bound_JSR(mod122, accuracy="0.957") # Takes a while to compute!
 # bound_JSR(mod122, accuracy="0.978") # Takes much longer to compute!
-}
-\references{
-\itemize{
-   \item I.L. Kheifets, P.J. Saikkonen. 2020. Stationarity and ergodicity of Vector STAR models.
-     \emph{Econometric Reviews}, \strong{39}:4, 407-414.
-   \item P.A. Parrilo, A. Jadbabaie. 2008. Approximation of the joint spectral
-      radius using sum of squares. \emph{Linear Algebra and its Applications}, \strong{428}, 2385-2402.
-   \item R. Jungers (2023). The JSR toolbox (https://www.mathworks.com/matlabcentral/fileexchange/33202-the-jsr-toolbox),
-      MATLAB Central File Exchange.
- }
 }

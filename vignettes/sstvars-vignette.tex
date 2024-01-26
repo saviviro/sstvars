@@ -127,7 +127,7 @@ $\max\lbrace \rho(\boldsymbol{A}_1),...,\rho(\boldsymbol{A}_M)\rbrace<1$,
 \end{condition}
 where $\rho(\boldsymbol{A}_m)$ is the spectral radius of $\boldsymbol{A}_m$, $m=1,...,M$.
 
-Note that validity Condition~\ref{cond:necessary} does not imply the validity of Condition~\ref{cond:sufficient} that guarantees stationarity of the model. However, in practice models that satisfy Condition~\ref{cond:necessary} and are not very close to breaking this condition should most often satisfy Condition~\ref{cond:sufficient}. For checking the validity of Condition~\ref{cond:sufficient}, \pkg{sstvars} implements the formula of \cite{Parrilo+Jadbabaie:2008} for the upper bound proposed by \cite{Blondel+Nesterov:2005} (the function \code{bound_joint_spectral_radius}). But unfortunately the calculations required are computationally very demanding in practice when the model is not small and even a relatively tight upper bound is required to verify Condition~\ref{cond:sufficient}. Therefore, in the cases where Condition~\ref{cond:sufficient} needs to be formally verified, we suggest using the \proglang{MATLAB} toolbox \pkg{JSR} by \cite{Jungers:2023}, which automatically combines several methods for bound the JSR and finds an accurate upper bound with a more reasonable computational effort.
+Note that validity Condition~\ref{cond:necessary} does not imply the validity of Condition~\ref{cond:sufficient} that guarantees stationarity of the model. However, in practice models that satisfy Condition~\ref{cond:necessary} and are not very close to breaking this condition should most often satisfy Condition~\ref{cond:sufficient}. For checking the validity of Condition~\ref{cond:sufficient}, \pkg{sstvars} implements the formula of \cite{Parrilo+Jadbabaie:2008} for the upper bound proposed by \cite{Blondel+Nesterov:2005} (the function \code{bound_JSR}). But unfortunately the calculations required are computationally very demanding in practice when the model is not small and even a relatively tight upper bound is required to verify Condition~\ref{cond:sufficient}. Therefore, in the cases where Condition~\ref{cond:sufficient} needs to be formally verified, we suggest using the \proglang{MATLAB} toolbox \pkg{JSR} by \cite{Jungers:2023}, which automatically combines several methods for bound the JSR and finds an accurate upper bound with a more reasonable computational effort.
 
 \subsection{Specifications of the conditional distribution}\label{sec:cond_dist}
 Currently, \pkg{sstvars} accommodates two types of error distributions: Gaussian and Student's $t$, which are discussed below.
@@ -746,7 +746,7 @@ where $\alpha$ ($a \times 1$) contains the weight funtion parameters, $R$ is a k
 Imposing the weight function parameters to be known fixed values is very straightforward. In this case, the argument \code{weight_constraints} should still be a list including the elements $R$ and $r$, but the former is set to zero, $R=0$, and the latter is set to the desired fixed values. For instance the following argument imposes constraints for the location and location parameters of a logistic STVAR model (in which $\alpha = (c,\gamma)$) such that the location parameter is $0.3$ and the scale parameter is $0.5$: \code{weight_constraints=list(R=0, r=c(0.3, 0.5)}.
 
 \subsection{Testing parameter constraints}\label{sec:testconst}
-One way to asses the validity of the imposed constraints is to compare the values of information criteria of the constrained and unconstrained models. \pkg{sstvars}, however, also provides functions for testing the constraints with the likelihood ratio test, Wald test, and Rao's test, whose applicability requires that the ML estimator of the STVAR model has the conventional asymptotic distribution. As noted before, this is a mere assumption, but given the process is ergodic stationary, there is no particular reason to believe that the standard asymptotic results would not hold. For a discussion on the likelihood ratio and Wald tests, see \citet{Buse:1982} and the references therein, for example.
+One way to asses the validity of the imposed constraints is to compare the values of information criteria of the constrained and unconstrained models. \pkg{sstvars}, however, also provides functions for testing the constraints with the likelihood ratio test, Wald test, and Rao's test, whose applicability requires that the ML estimator of the STVAR model has the conventional asymptotic distribution. As noted before, this is a mere assumption, but given the process is ergodic stationary, there is no particular reason to believe that the standard asymptotic results would not hold. For a discussion on the tests, see \citet{Buse:1982} and the references therein, for example.
 
 The likelihood ratio test considers the null hypothesis that the true parameter value $\boldsymbol{\theta}_0$ satisfies some constraints imposed on these parameters (such that the constrained parameter space is a subset of the parameter space, which is presented in Assumption~\ref{as:mle}). Denoting by $\hat{L}_U$ and $\hat{L}_C$ the (maximized) log-likelihoods based on the unconstrained and constrained ML estimates, respectively, the test statistic takes the form
 \begin{equation}
@@ -907,15 +907,15 @@ Create model   & \code{STVAR}              & Construct a STVAR model based on gi
 Hypothesis testing & \code{LR_test}        & Calculate likelihood ratio test.\\
                & \code{Wald_test}          & Calculate Wald test.\\
                & \code{Rao_test}           & Calculate Rao's test.\\
-Impulse response analysis & \code{GIRF}    & Estimate generalized impulse response functions.\\
+Impulse responses & \code{GIRF}    & Estimate generalized impulse response functions.\\
                & \code{GFEVD}              & Estimate generalized forecast error variance decomposition.\\
                & \code{linear_IRF}         & Estimate linear impulse response functions.\\
-Other          & \code{bound_joint_spectral_radius} & Calculate an upper bound of the joint spectral radius of the companion form AR matrices of the regimes.\\
+Other          & \code{bound_JSR} & Calculate an upper bound of the joint spectral radius of the companion form AR matrices of the regimes.\\
                & \code{swap_parametrization} & Swap between mean and intercept parametrizations \\
 %               & \code{uncond_moments}     & Calculate unconditional moments of the regimes.\\
 %               & \code{check_params}       & Check whether given parameter values satisfy our assumptions.\\
-               & \code{swap_W_signs}       & Swap the signs of the columns of the impact matrix of model identified by heteroskedasticity. \\
-               & \code{reorder_W_columns}  & Reorder the columns of the impact matrix of model identified by heteroskedasticity. \\
+               & \code{swap_W_signs}       & Swap the signs of the columns of the impact matrix of models identified by heteroskedasticity. \\
+               & \code{reorder_W_columns}  & Reorder the columns of the impact matrix of models identified by heteroskedasticity. \\
 \hline
 \end{tabular}
 \caption{Some useful functions in \pkg{sstvars} sorted according to their usage. The note "method" in parentheses after the name of a function signifies that it is an S3 method for a class \code{stvar} object (often generated by the function \code{fitSTVAR}, \code{fitSSTVAR} or \code{STVAR}).}

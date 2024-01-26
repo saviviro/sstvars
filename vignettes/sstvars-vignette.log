@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  26 JAN 2024 14:36
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  26 JAN 2024 15:52
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -607,6 +607,9 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [12]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 13
  []
@@ -617,16 +620,16 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [14]
-Overfull \hbox (10.94998pt too wide) has occurred while \output is active
-[] \T1/lmr/m/n/10.95 15
- []
-
-[15]
 LaTeX Font Info:    Trying to load font information for TS1+lmtt on input line 
 395.
  (/usr/local/texlive/2021/texmf-dist/tex/latex/lm/ts1lmtt.fd
 File: ts1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[] \T1/lmr/m/n/10.95 15
+ []
+
+[15]
 Overfull \hbox (11.86206pt too wide) in paragraph at lines 431--432
 \T1/lmr/m/n/10.95 no stan-dard er-ror for the in-ter-cepts if mean parametriza-
 tion is used (by set-ting \T1/lmtt/m/n/10.95 parametrization
@@ -649,17 +652,17 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [17 <./figures/seriesplot.png>]
-Overfull \hbox (10.94998pt too wide) has occurred while \output is active
-\T1/lmr/m/n/10.95 18 []
- []
-
-[18]
-<figures/profilelogliks.png, id=485, 1545.775pt x 1104.125pt>
+<figures/profilelogliks.png, id=479, 1545.775pt x 1104.125pt>
 File: figures/profilelogliks.png Graphic file (type png)
 <use figures/profilelogliks.png>
 Package pdftex.def Info: figures/profilelogliks.png  used on input line 509.
 (pdftex.def)             Requested size: 354.12434pt x 252.9494pt.
 
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+\T1/lmr/m/n/10.95 18 []
+ []
+
+[18]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 19
  []
@@ -670,11 +673,6 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [20]
-Overfull \hbox (10.94998pt too wide) has occurred while \output is active
-[] \T1/lmr/m/n/10.95 21
- []
-
-[21]
 Overfull \hbox (1.85449pt too wide) in paragraph at lines 574--576
 \T1/lmr/m/n/10.95 struc-tural model \T1/lmtt/m/n/10.95 fit12het \T1/lmr/m/n/10.
 95 by set-ting the ar-gu-ment \T1/lmtt/m/n/10.95 identification="heteroskedasti
@@ -682,6 +680,11 @@ city"
  []
 
 
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[] \T1/lmr/m/n/10.95 21
+ []
+
+[21]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 22 []
  []
@@ -763,9 +766,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 914--917
  []
 
 
-Overfull \hbox (29.44312pt too wide) in paragraph at lines 890--921
- [][] 
- []
+Underfull \vbox (badness 1817) has occurred while \output is active []
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -777,46 +778,38 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 33
  []
 
-[33]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
+[33] (./sstvars-vignette.bbl
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 34 []
  []
 
-[34] (./sstvars-vignette.bbl
-Overfull \hbox (10.94998pt too wide) has occurred while \output is active
-[] \T1/lmr/m/n/10.95 35
- []
-
-[35]
+[34]
 
 LaTeX Font Warning: Font shape `T1/lmr/b/it' in size <10.95> not available
 (Font)              Font shape `T1/lmr/b/sl' tried instead on input line 185.
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[] \T1/lmr/m/n/10.95 35
+ []
+
+[35])
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 36 []
  []
 
-[36])
-Overfull \hbox (10.94998pt too wide) has occurred while \output is active
-[] \T1/lmr/m/n/10.95 37
- []
-
-[37] (./sstvars-vignette.aux)
+[36] (./sstvars-vignette.aux)
 Package rerunfilecheck Info: File `sstvars-vignette.out' has not changed.
 (rerunfilecheck)             Checksum: 9B2198D937A2C21F03CEB72CB56E3E33;10315.
  ) 
 Here is how much of TeX's memory you used:
- 12378 strings out of 478353
- 195407 string characters out of 5848086
+ 12377 strings out of 478353
+ 195400 string characters out of 5848086
  496586 words of memory out of 5000000
  30088 multiletter control sequences out of 15000+600000
  516856 words of font info for 106 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,13n,77p,1628b,506s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 75i,13n,77p,1628b,508s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2021/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/local/
 texlive/2021/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/local/texlive/2021/
 texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2021/texmf-dist/fon
@@ -846,10 +839,10 @@ msy8.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtt10.pfb><
 /usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtti10.pfb></usr/loca
 l/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr/local/texlive
 /2021/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on sstvars-vignette.pdf (37 pages, 1014690 bytes).
+Output written on sstvars-vignette.pdf (36 pages, 1015004 bytes).
 PDF statistics:
- 855 PDF objects out of 1000 (max. 8388607)
- 744 compressed objects within 8 object streams
- 195 named destinations out of 1000 (max. 500000)
+ 847 PDF objects out of 1000 (max. 8388607)
+ 737 compressed objects within 8 object streams
+ 194 named destinations out of 1000 (max. 500000)
  307 words of extra memory for PDF output out of 10000 (max. 10000000)
 
