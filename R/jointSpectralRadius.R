@@ -148,7 +148,7 @@ bound_jsr_int <- function(all_boldA, accuracy=c("0.707", "0.840", "0.917", "0.95
 #'
 #' @inheritParams diagnostic_plot
 #' @inheritParams bound_jsr_int
-#' @inherit bound_jsr details references return
+#' @inherit bound_jsr_int details references return
 #' @examples
 #' # p=1, M=2, d=2, relative dens weight function
 #' theta_122relg <- c(0.734054, 0.225598, 0.705744, 0.187897, 0.259626, -0.000863,
