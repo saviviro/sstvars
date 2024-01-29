@@ -52,10 +52,10 @@ d_lift <- function(A, d) {
   }
 
   # # Below works also for creating the "submatrix" A_submat but is slow as uses loops
-  # A_submat <- matrix(0, nrow = length(alpha), ncol = length(beta))
+  # A_submat <- matrix(0, nrow=length(alpha), ncol=length(beta))
   # # Loop through the elements of a and b and populate matrix B
-  # for (i in 1:length(alpha)) {
-  #   for (j in 1:length(beta)) {
+  # for(i in 1:length(alpha)) {
+  #   for(j in 1:length(beta)) {
   #     A_submat[i, j] <- A[alpha[j], beta[i]]
   #   }
   # }
@@ -140,6 +140,172 @@ bound_jsr_JP <- function(all_boldA, accuracy=c("0.707", "0.840", "0.917", "0.957
 }
 
 
+#' @title Calculate upper bound for the joint spectral radius of a set of matrices
+#'
+#' @description \code{bound_jsr_G} calculates lowr and upper bounds for the joint spectral radious of a set of square matrices,
+#'  typically the "bold A" matrices, using the algorithm by Gripenberg (1996)
+#'
+#' @param S the set of matrices the bounds should be calculated for in an array, in VAR applications, all \eqn{((dp)x(dp))} "bold A" (companion form)
+#'  matrices in a 3D array, so that \code{[, , m]} gives the matrix the regime \code{m}.
+#' @param epsilon a strictly positive real number specifying the absolute accuracy of the bounds. Smaller
+#'  number gives better accuracy but requires more substantial computational effort.
+#' @details The bounds are calculated using the Gripenberg's (1996) branch-and-bound method.
+#'  Specifically, Kheifets and Saikkonen (2020) show that if the joint spectral radius of the companion form AR
+#'  matrices of the regimes is smaller than one, the STVAR process is ergodic stationary. Therefore,
+#'  if the upper bound is smaller than one, the process is stationary ergodic. However, as the condition is not
+#'  necessary but sufficient and also because the bound might be too conservative, upper bound larger than one
+#'  does not imply that the process is not ergodic stationary. You can try higher accuracy, and if the bound is
+#'  still larger than one, the result does not tell whether the process is ergodic stationary or not.
+#'
+#'  Note that with high precision (small \code{epsilon}), the computational effort required are substantial and
+#'  the estimation may take very long.
+#'
+#'  You can also try other implementations for bounding the joint spectral radius, for instance,
+#'  the JSR toolbox in Matlab (Jungers 2023).
+#' @return Returns an upper bound for the joint spectral radius of the "companion form AR matrices" of the regimes.
+#' @references
+#'  \itemize{
+#'    \item I.L. Kheifets, P.J. Saikkonen. 2020. Stationarity and ergodicity of Vector STAR models.
+#'      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
+#'    \item Gripenberg, G. 1996. Computing the joint spectral radius. \emph{Linear Algebra and its Applications},
+#'      234, 43–60.
+#'    \item R. Jungers (2023). The JSR toolbox (https://www.mathworks.com/matlabcentral/fileexchange/33202-the-jsr-toolbox),
+#'       MATLAB Central File Exchange.
+#'  }
+#' @keywords internal
+
+bound_jsr_G <- function(S, epsilon=0.001) {
+  n <- nrow(S[, , 1]) # The dimension of the n x n matrices
+  m <- dim(S)[3] # The number of matrices
+  maxit <- 1000 # Maximum number of iterations (just some large number)
+  all_alpha <- array(NA, dim=maxit) # Storage for the lower bound in each iteration
+  all_beta <- array(NA, dim=maxit)  # Storage for the upper bound in each iteration
+
+  # Function to calculate the Fobelius norm, which we employ as our norm in the algorithm:
+  Fobelius_norm <- function(A) sqrt(sum(A^2))
+
+  ### Step 1, initialize
+
+  # Calculate the initial lower and upper bounds for the joint spectral radius
+  all_alpha[1] <- max(vapply(1:m, function(i1) eigen(S[, , i1])$values, numeric(n))) # Max of the spectral radiusses of the matrices in S
+  all_beta[1] <- max(vapply(1:m, function(i1) Fobelius_norm(S[, , i1]), numeric(1))) # Max of the Fobelius norms of the matrices in S
+
+  ### Step 2, iteration process
+
+  # Function to calculate the mu(MP): takes in the set of matrices that are involved in the concerned matrix product.
+  # in the order they appear in the matrix product
+  mu <- function(MP, k) { # Calculate the mu(MP) for the set of matrices MP in an [n, n, k] array, for iteration k>2
+    all_prods <- array(NA, dim=c(n, n, k))
+    res <- numeric(k)
+    all_prods[, , 1] <- MP[, , 1]
+    res[1] <- Fobelius_norm(MP[, , 1])
+    for(i1 in 2:k) {
+      all_prods[, , i1] <- all_prods[, , i1-1]%*%MP[, , i1]
+      res[i1] <- Fobelius_norm(all_prods[, , i1])^(1/i1)
+    }
+    min(res)
+  }
+
+  mat_prod <- function(P) { # Calculate the product of a set of matrices in P in an [n, n, k] array
+    all_prods <- array(NA, dim=c(n, n, dim(P)[3]))
+    all_prods[, , 1] <- P[, , 1]
+    for(i1 in 2:dim(P)[3]) {
+      all_prods[, , i1] <- all_prods[, , i1-1]%*%P[, , i1]
+    }
+    all_prods[, , dim(P)[3]]
+  }
+
+
+  # First iteration, k=1:
+  # The set MP is just the set S and the "products" are the single matrices in S.
+  all_mu <- vapply(1:m, function(i1) Fobelius_norm(S[, , i1]), numeric(1)) # Calculate the mu(S)
+  all_n_candidates <- array(NA, dim=maxit)  # The number of candidate matrix products in each iteration
+  all_n_candidates[1] <- m # The number of candidate matrix products in the first iteration is the number of matrices in S
+  which_new_candidates <- 1:m # The indices of the new candidate matrix products in the first iteration
+  all_matprod_inds_old <- matrix(1:2, ncol=2) # Initialize matrix for storing the indices of the matrices involved in the matrix products
+  # all_matprods_old <- array(S, dim=c(n, n, m, 1)) # All matrix products used in the previous iteration are just the matrices in S
+
+  for(k in 2:maxit) {
+    # For each iteration, calculate the set MP, i.e., the sets of matrices that are involved in the concerned matrix products.
+    # The set MP is the set of all possible matrix products obtained by pre-multiplying a matrix product from the previous set of
+    # candidate solutions by a matrix from the initial set S. The matrix products involved will consist of k matrices each.
+
+    # Initialize matrix for storing the indices of the matrices involved in the matrix products:
+    # Each column contains a matrix product given by the indices of the matrices in the set S
+    n_new_matprods <- m*all_n_candidates[k-1]
+    all_matprod_inds <- matrix(nrow=k, ncol=n_new_matprods)  # [matrix_indices, index_of_the_product]
+    all_matprod_inds[2:k,] <- all_matprod_inds_old[,which_new_candidates] # Copy the indices from the previous iteration: repeats m times
+    all_matprod_inds[1,] <- c(vapply(1:m, function(i1) rep(i1, times=all_n_candidates[k-1]),
+                                     numeric(all_n_candidates[k-1]))) # Add the indices of the matrices from the initial set S
+    # Note that due to premultiplication, the first row is for the new matrices in the product.
+
+    # # Matrix products from the previous iteration and then we add the new matrix products by adding one pre-multiplication
+    # # by a matrix from the initial set S to a matrix product from the previous iteration.
+    # all_matprods <- array(dim=c(n, n, n_new_matprods, k)) # Initialize array for storing the matrix products:
+    # # [n, n, index_of_the_product, product_up_to_this_row_in_all_mat_prod_inds_from_the_bottom_to_the_top]
+    # # (above, multiplication is still done in the order from the first row to the last row)
+    # for(i1 in 2:k) { # Fill in the old matrix products
+    #   # i1=1 is not included because it is for the new matrix products
+    #   # all_matprods_old[, , , 1] corresponds to the new matrix matrix product of the previous iteration, so it
+    #   # will be filled to the second super-slice, etc.
+    #   all_matprods[, , , i1] <- all_matprods_old[, , , i1-1] # Repeats the array m times to fill the bigger sub-array
+    # }
+    # # Calculate and fill in the new matrix products:
+    # for(i1 in 1:n_new_matprods) {
+    #   all_matprods[, , i1, 1] <- S[, , all_matprod_inds[1, i1]]%*%all_matprods[, , i1, 2]
+    # }
+
+    # Calculate the mu(MP) for the set of matrices MP in an [n, n, k] array, for iteration k>2
+    all_mu <- numeric(n_new_matprods) # Initialize storage for the mu(MP) values
+
+    for(i1 in 1:n_new_matprods) { # The set MP is the matrix products in all_matprods[, , , 1]
+      all_mu[i1] <- mu(S[, , all_matprod_inds[,i1]], k=k) # S[, , all_matprod_inds[,i1]] obtains the matrices in the matrix product
+      # res <- numeric(k)
+      # all_prods <- all_matprods[, , i1, ] # Initialize the first matrix product
+      # res[1] <- Fobelius_norm(all_prods[, , 1]) # Tämä ottaa S times S producting eikä S:ää! Tämä on ongelma
+      # # Eli ongelma on se, että MU käyttää päinvastaisessa järjestyksessä matprodien tuloja, eli vanhoja matprodeja ei saa suoraan hyödynnettyä
+      # for(i2 in 2:k) {
+      #   res[i2] <- Fobelius_norm(all_prods[, , i2])^(1/i2)
+      # }
+      # all_mu[i1] <- min(res)
+    }
+
+    # Construct the new set of candidates MP, i.e., the products for which mu(MP) > alpha_{k-1} + epsilon
+    which_new_candidates <- which(all_mu > all_alpha[k-1] + epsilon)
+    if(length(which_new_candidates) == 0) {
+      # If there are no new candidates, return the best bounds so far
+      print("no new candidates")
+      no_new_cands_break <- TRUE
+      break
+    }
+
+    new_candidates <- all_matprod_inds[, which_new_candidates, drop=FALSE] # New candidate products
+    all_n_candidates[k] <- length(which_new_candidates) # The number of new candidate products
+
+    # Calculate the new lower bound alpha_k
+    all_alpha[k] <- max(all_alpha[k - 1],
+                        max(vapply(1:ncol(new_candidates), function(i1) eigen(mat_prod(S[, , new_candidates]))$values^(1/k), numeric(n)),
+                            na.rm=TRUE)) # Sometimes returns "NaN" possibly due to numerical imprecisions, so we remove them with na.rm=TRUE
+
+    # Calculate the new upper bound beta_k
+    all_beta[k] <- min(all_beta[k - 1], max(all_alpha[k - 1] + epsilon, max(all_mu[which_new_candidates])))
+
+    # Update "old stuff" for the next round
+    all_matprod_inds_old <- all_matprod_inds
+
+    # Stop iteration if the lower and upper bounds are close enough
+    if(all_beta[k] - all_alpha[k] <= epsilon) {
+      no_new_cands_break <- FALSE
+      break
+    }
+  }
+
+  # Return lower and upper bounds for the joint spectral radius
+  c(max(all_alpha, na.rm=TRUE), min(all_beta, na.rm=TRUE))
+}
+
+
+
 #' @title Calculate upper bound for the joint spectral radius of the "companion form AR matrices" of the regimes
 #'
 #' @description \code{bound_JSR} calculates an upper bound for the joint spectral radius of the
@@ -182,3 +348,5 @@ bound_JSR <- function(stvar, accuracy=c("0.707", "0.840", "0.917", "0.957", "0.9
   all_boldA <- form_boldA(p=stvar$model$p, M=stvar$model$M, d=stvar$model$d, all_A=all_A)
   bound_jsr_JP(all_boldA=all_boldA, accuracy=accuracy)
 }
+
+
