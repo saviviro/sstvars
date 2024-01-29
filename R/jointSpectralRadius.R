@@ -67,7 +67,7 @@ d_lift <- function(A, d) {
 
 #' @title Calculate upper bound for the joint spectral radius of the "bold A" matrices
 #'
-#' @description \code{bound_jsr_int} calculates an upper bound for the joint spectral radius of the "bold A" matrices
+#' @description \code{bound_jsr_JP} calculates an upper bound for the joint spectral radius of the "bold A" matrices
 #' as described in Parrilo and Jadbabaie (2008), Theorems 4.2 and 4.3 and Equations (8) and (11).
 #'
 #' @param all_boldA all \eqn{((dp)x(dp))} "bold A" (companion form) matrices in a 3D array,
@@ -103,7 +103,7 @@ d_lift <- function(A, d) {
 #'  }
 #' @keywords internal
 
-bound_jsr_int <- function(all_boldA, accuracy=c("0.707", "0.840", "0.917", "0.957", "0.978")) {
+bound_jsr_JP <- function(all_boldA, accuracy=c("0.707", "0.840", "0.917", "0.957", "0.978")) {
   # Determine "2d" (here d) based on the givas accuracy as in Parrilo & Jadbabaie (2008), Table 1.
   # Note that the upper bound holds at all accuracies; it just becomes tighter when accuracy is increased.
   accuracy <- match.arg(accuracy)
@@ -147,8 +147,8 @@ bound_jsr_int <- function(all_boldA, accuracy=c("0.707", "0.840", "0.917", "0.95
 #'   Theorems 4.2 and 4.3 and Equations (8) and (11).
 #'
 #' @inheritParams diagnostic_plot
-#' @inheritParams bound_jsr_int
-#' @inherit bound_jsr_int details references return
+#' @inheritParams bound_jsr_JP
+#' @inherit bound_jsr_JP details references return
 #' @examples
 #' # p=1, M=2, d=2, relative dens weight function
 #' theta_122relg <- c(0.734054, 0.225598, 0.705744, 0.187897, 0.259626, -0.000863,
@@ -180,5 +180,5 @@ bound_JSR <- function(stvar, accuracy=c("0.707", "0.840", "0.917", "0.957", "0.9
   accuracy <- match.arg(accuracy)
   all_A <- pick_allA(p=stvar$model$p, M=stvar$model$M, d=stvar$model$d, params=stvar$params)
   all_boldA <- form_boldA(p=stvar$model$p, M=stvar$model$M, d=stvar$model$d, all_A=all_A)
-  bound_jsr_int(all_boldA=all_boldA, accuracy=accuracy)
+  bound_jsr_JP(all_boldA=all_boldA, accuracy=accuracy)
 }
