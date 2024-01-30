@@ -145,13 +145,14 @@ bound_jsr_JP <- function(all_boldA, accuracy=c("0.707", "0.840", "0.917", "0.957
 #' @description \code{bound_jsr_G} calculates lowr and upper bounds for the joint spectral radious of a set of square matrices,
 #'  typically the "bold A" matrices, using the algorithm by Gripenberg (1996)
 #'
-#' @param S the set of matrices the bounds should be calculated for in an array, in VAR applications, all \eqn{((dp)x(dp))} "bold A" (companion form)
-#'  matrices in a 3D array, so that \code{[, , m]} gives the matrix the regime \code{m}.
-#' @param epsilon a strictly positive real number specifying the absolute accuracy of the bounds. Smaller
-#'  number gives better accuracy but requires more substantial computational effort.
-#' @details The bounds are calculated using the Gripenberg's (1996) branch-and-bound method.
-#'  Specifically, Kheifets and Saikkonen (2020) show that if the joint spectral radius of the companion form AR
-#'  matrices of the regimes is smaller than one, the STVAR process is ergodic stationary. Therefore,
+#' @param S the set of matrices the bounds should be calculated for in an array, in VAR applications,
+#'  all \eqn{((dp)x(dp))} "bold A" (companion form) matrices in a 3D array, so that \code{[, , m]} gives the matrix
+#'  the regime \code{m}.
+#' @param epsilon a strictly positive real number specifying the absolute accuracy of the bounds (which will be approximate
+#'  in practice). Smaller number gives better accuracy but requires more substantial computational effort.
+#' @details The bounds are calculated using the Gripenberg's (1996) branch-and-bound method, which is also discussed
+#'  in Chand and Blondel (2013). Specifically, Kheifets and Saikkonen (2020) show that if the joint spectral radius
+#'  of the companion form AR matrices of the regimes is smaller than one, the STVAR process is ergodic stationary. Therefore,
 #'  if the upper bound is smaller than one, the process is stationary ergodic. However, as the condition is not
 #'  necessary but sufficient and also because the bound might be too conservative, upper bound larger than one
 #'  does not imply that the process is not ergodic stationary. You can try higher accuracy, and if the bound is
@@ -165,17 +166,19 @@ bound_jsr_JP <- function(all_boldA, accuracy=c("0.707", "0.840", "0.917", "0.957
 #' @return Returns an upper bound for the joint spectral radius of the "companion form AR matrices" of the regimes.
 #' @references
 #'  \itemize{
-#'    \item I.L. Kheifets, P.J. Saikkonen. 2020. Stationarity and ergodicity of Vector STAR models.
-#'      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
+#'  \item C-T Chang and V.D. Blondel. 2013 . An experimental study of approximation algorithms for the joint spectral radius.
+#'      \emph{Numerical algorithms}, \strong{64}, 181-202.
 #'    \item Gripenberg, G. 1996. Computing the joint spectral radius. \emph{Linear Algebra and its Applications},
 #'      234, 43–60.
+#'    \item I.L. Kheifets, P.J. Saikkonen. 2020. Stationarity and ergodicity of Vector STAR models.
+#'      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
 #'    \item R. Jungers (2023). The JSR toolbox (https://www.mathworks.com/matlabcentral/fileexchange/33202-the-jsr-toolbox),
 #'       MATLAB Central File Exchange.
 #'  }
 #' @keywords internal
 
 bound_jsr_G <- function(S, epsilon=0.001) {
-  n <- nrow(S[, , 1]) # The dimension of the n x n matrices
+  n <- dim(S)[1] # The dimension of the n x n matrices
   m <- dim(S)[3] # The number of matrices
   maxit <- 1000 # Maximum number of iterations (just some large number)
   all_alpha <- array(NA, dim=maxit) # Storage for the lower bound in each iteration
@@ -187,7 +190,8 @@ bound_jsr_G <- function(S, epsilon=0.001) {
   ### Step 1, initialize
 
   # Calculate the initial lower and upper bounds for the joint spectral radius
-  all_alpha[1] <- max(vapply(1:m, function(i1) eigen(S[, , i1])$values, numeric(n))) # Max of the spectral radiusses of the matrices in S
+  all_alpha[1] <- max(vapply(1:m, function(i1) max(abs(eigen(S[, , i1])$values)),
+                             numeric(1))) # Max of the spectral radiusses of the matrices in S
   all_beta[1] <- max(vapply(1:m, function(i1) Fobelius_norm(S[, , i1]), numeric(1))) # Max of the Fobelius norms of the matrices in S
 
   ### Step 2, iteration process
@@ -260,21 +264,12 @@ bound_jsr_G <- function(S, epsilon=0.001) {
 
     for(i1 in 1:n_new_matprods) { # The set MP is the matrix products in all_matprods[, , , 1]
       all_mu[i1] <- mu(S[, , all_matprod_inds[,i1]], k=k) # S[, , all_matprod_inds[,i1]] obtains the matrices in the matrix product
-      # res <- numeric(k)
-      # all_prods <- all_matprods[, , i1, ] # Initialize the first matrix product
-      # res[1] <- Fobelius_norm(all_prods[, , 1]) # Tämä ottaa S times S producting eikä S:ää! Tämä on ongelma
-      # # Eli ongelma on se, että MU käyttää päinvastaisessa järjestyksessä matprodien tuloja, eli vanhoja matprodeja ei saa suoraan hyödynnettyä
-      # for(i2 in 2:k) {
-      #   res[i2] <- Fobelius_norm(all_prods[, , i2])^(1/i2)
-      # }
-      # all_mu[i1] <- min(res)
     }
 
     # Construct the new set of candidates MP, i.e., the products for which mu(MP) > alpha_{k-1} + epsilon
     which_new_candidates <- which(all_mu > all_alpha[k-1] + epsilon)
     if(length(which_new_candidates) == 0) {
       # If there are no new candidates, return the best bounds so far
-      print("no new candidates")
       no_new_cands_break <- TRUE
       break
     }
@@ -284,8 +279,8 @@ bound_jsr_G <- function(S, epsilon=0.001) {
 
     # Calculate the new lower bound alpha_k
     all_alpha[k] <- max(all_alpha[k - 1],
-                        max(vapply(1:ncol(new_candidates), function(i1) eigen(mat_prod(S[, , new_candidates]))$values^(1/k), numeric(n)),
-                            na.rm=TRUE)) # Sometimes returns "NaN" possibly due to numerical imprecisions, so we remove them with na.rm=TRUE
+                        max(vapply(1:ncol(new_candidates), function(i1) max(abs(eigen(mat_prod(S[, , new_candidates]))$values))^(1/k),
+                                   numeric(1))))
 
     # Calculate the new upper bound beta_k
     all_beta[k] <- min(all_beta[k - 1], max(all_alpha[k - 1] + epsilon, max(all_mu[which_new_candidates])))
