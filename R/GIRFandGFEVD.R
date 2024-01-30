@@ -112,7 +112,7 @@
 #'  }
 #' @export
 
-GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_regime=1, init_values=NULL,
+GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=500, R2=500, init_regime=1, init_values=NULL,
                  which_cumulative=numeric(0), scale=NULL, scale_type=c("instant", "peak"), scale_horizon=N,
                  ci=c(0.95, 0.80), ncores=2, burn_in=1000, seeds=NULL, use_parallel=TRUE) {
   check_stvar(stvar)

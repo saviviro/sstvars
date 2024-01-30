@@ -108,8 +108,8 @@
 #' fit22cm <- fitSTVAR(gdpdef, p=2, M=2, AR_constraints=C_222, mean_constraints=list(1:2),
 #'   nrounds=1, seeds=1, use_parallel=FALSE)
 #'
-#' # p=3, M=2, d=2, logistic Student's t STVAR with the second variable as switching variable
-#' # with one lag.
+#' # p=3, M=2, d=2, logistic Student's t STVAR with the first lag of the second variable
+#' # as the switching variable:
 #' fitlogistict32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logistic", weightfun_pars=c(2, 1),
 #'  cond_dist="Student", nrounds=1, seeds=1, use_parallel=FALSE)
 #'
