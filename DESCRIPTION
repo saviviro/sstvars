@@ -8,8 +8,7 @@ Maintainer: Savi Virolainen <savi.virolainen@helsinki.fi>
 Description: Toolkit for reduced form and structural smooth transition vector autoregressive
   models and threshold vector autoregressive models. Maximum likelihood estimation of models with
   various types of transition weight functions and Gaussian or Student's t conditional distribution. Constrained
-  estimation employing various types of constraints is available. Several identification methods for identifying
-  the structural models are included.
+  estimation employing various types of constraints is available.
 Depends: R (>= 4.0.0)
 URL: https://github.com/saviviro/sstvars
 BugReports: https://github.com/saviviro/sstvars/issues
