@@ -6,18 +6,17 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-**This software is still in development and does not work yet!**
-
 The goal of `sstvars` is to provide a comprehensive toolkit for maximum
 likelihood (ML) estimation and analysis of reduced form and structural
-smooth transition vector autoregressive (STVAR) models. Various
-transition weight functions, conditional distributions, and
-identification methods are and will be accommodated. Also constrained ML
-estimation is supported with constraints on the autoregressive
-parameters, regimewise means, weight parameters, and the impact matrix.
-The package is, however, is limited to endogenous switching variables to
-ensure that ergodicity and stationarity of the models is verifiable and
-that the true generalized impulse response functions can be estimated.
+smooth transition vector autoregressive (STVAR) models (including
+Threshold VAR models). Various transition weight functions, conditional
+distributions, and identification methods are and will be accommodated.
+Also constrained ML estimation is supported with constraints on the
+autoregressive parameters, regimewise means, weight parameters, and the
+impact matrix. The package is, however, limited to endogenous switching
+variables to ensure that ergodicity and stationarity of the models is
+verifiable and that the true generalized impulse response functions can
+be estimated.
 
 ## Installation
 
@@ -148,5 +147,51 @@ plot(girf3)
 # Estimate the generalized forecast error variance decomposition (GFEVD) for the 
 # recursively identified model with the initial values being all possible length p
 # histories in the data, N=30 steps ahead to one-standard-error positive shocks. 
-gfevd1 <- GFEVD(fitrec, N=30, initval_type="data", )
+gfevd1 <- GFEVD(fitrec, shock_size=1, N=30, initval_type="data")
+plot(gfevd1)
+
+# Estimate the GFEVD for the recursively identified model with the initial values
+# being all possible length p histories in the data AND the signs and sizes of the
+# corresponding shocks being the identified structural shocks recovered from the
+# fitted model.
+gfevd2 <- GFEVD(fitrec, N=30, use_data_shocks=TRUE)
+plot(gfevd2)
+
+# Plot time series of the impact response GFEVDs to the first shock to examine 
+# the contribution of the first shocks to the forecast error variances at impact
+# at each point of time:
+plot(gfevd2, data_shock_pars=c(1, 0))
+
+# Estimate the linear impulse response function for the recursively identified
+# STVAR model based on the first regime, the responses of the second variable
+# accumulated:
+irf1 <- linear_IRF(fitrec, N=30 regime=1, which_cumulative=2)
+plot(irf1)
+# The above model is nonlinear, so confidence bounds (that reflect the uncertainty
+# about the parameter estimate) are not available.
+
+# Bootstrapped confidence bounds can be calculated for models with time-invariant
+# autoregressive coeffients, e.g., the restricted model fitcm estimated above. 
+# Identify the shocks if fitcm by heteroskedasticity:
+fitcmhet <- fitSSTVAR(fitcm, identification="heteroskedasticity")
+fitcmhet
+
+# Estimate the linear impulse reponse function for fitcmhet with bootstrapped
+# 95% confidence bounds that reflect uncertainty about the parameter estimates:
+irf2 <- linear_IRF(fitcmhet, N=30, ci=0.95, bootstrap_reps=250)
+plot(irf2)
 ```
+
+## References
+
+- Anderson H., Vahid F. (1998) Testing multiple equation systems for
+  common nonlinear components. *Journal of Econometrics*, **84**:1,
+  1-36.
+- Hubrich K., Teräsvirta. (2013). Thresholds and Smooth Transitions in
+  Vector Autoregressive Models. *CREATES Research Paper 2013-18, Aarhus
+  University.*
+- Kheifets I., Saikkonen P. (2020). Stationarity and ergodicity of
+  vector STAR models. *Econometrics Review*, **39**:407-414, 1311-1324.
+- Koop G., Pesaran M.H., Potter S.M. (1996). Impulse response analysis
+  in nonlinear multivariate models. *Journal of Econometrics*, **74**:1,
+  119-147.

@@ -91,7 +91,7 @@ bound_JSR(mod122, method="JP", JP_accuracy="0.917")
 }
 \references{
 \itemize{
- \item C-T Chang and V.D. Blondel. 2013 . An experimental study of approximation algorithms for the joint spectral radius.
+ \item Chang C-T, Blondel, V.D. 2013. An experimental study of approximation algorithms for the joint spectral radius.
      \emph{Numerical algorithms}, \strong{64}, 181-202.
    \item Gripenberg, G. 1996. Computing the joint spectral radius. \emph{Linear Algebra and its Applications},
      234, 43–60.
