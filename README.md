@@ -42,7 +42,7 @@ examples how to conduct some further analysis.
 # from 1959Q1 to 2019Q4.
 data(gdpdef, package="sstvars")
 
-## Reduced form STVAR models ##
+### Reduced form STVAR models ###
 
 # Estimate a reduced form two-regime Student's t STVAR p=3 model with logistic transition weight function using the first
 # lag of the second variable (GDP deflator) as the switching variable. The below estimation is based on 20 estimation
@@ -99,7 +99,7 @@ pred <- predict(fit, nsteps=10, ci=c(0.95, 0.80))
 plot(pred)
 
 
-## Structural STVAR models ##
+### Structural STVAR models ###
 
 # stvars implements two identification methods: recursive identification and
 # identification by heteroskedasticity. The structural models are estimated 
@@ -127,5 +127,26 @@ fithet
 # identified model to one-standard-error positive shocks with the starting values
 # generated form the first regime, N=30 steps ahead and 95% confidence intervals 
 # that reflect uncertainty about the initial value within the regime:
-girf1 <- GIRF(fitreg, which_shocks=1:2, shock_size=1, N=30, init_regime=1, ci=0.95)
+girf1 <- GIRF(fitrec, which_shocks=1:2, shock_size=1, N=30, init_regime=1, ci=0.95)
+plot(girf1)
+
+# Estimate the above GIRF but instead of drawing initial values form the first regime,
+# use tha last p observations of the data as the initial values:
+girf2 <- GIRF(fitrec, which_shocks=1:2, shock_size=1, N=30, init_values=fitrec$data)
+plot(girf2)
+
+# Estimate the generalized impulse response function (GIRF) for the recursively
+# identified model to two-standard-error negative shocks with the starting values
+# generated form the second regime, N=30 steps ahead and 95% confidence intervals 
+# that reflect uncertainty about the initial value within the regime. Also, scale
+# the responses to the first shock to correspond to a 0.3 increase of the first variable.
+# Moreover, accumulate the responses of the second variable.
+girf3 <- GIRF(fitrec, which_shocks=1:2, shock_size=-2, N=30, init_regime=2, 
+              scale=c(1, 1, 0.3), which_cumulative=2, ci=0.95)
+plot(girf3)
+
+# Estimate the generalized forecast error variance decomposition (GFEVD) for the 
+# recursively identified model with the initial values being all possible length p
+# histories in the data, N=30 steps ahead to one-standard-error positive shocks. 
+gfevd1 <- GFEVD(fitrec, N=30, initval_type="data", )
 ```

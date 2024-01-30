@@ -388,7 +388,7 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=500, R2=500, init_r
 #' @export
 
 GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "fixed"), use_data_shocks=FALSE,
-                  R1=250, R2=250, init_regime=1, init_values=NULL, which_cumulative=numeric(0), ncores=2,
+                  R1=500, R2=500, init_regime=1, init_values=NULL, which_cumulative=numeric(0), ncores=2,
                   burn_in=1000, seeds=NULL, use_parallel=TRUE) {
   check_stvar(stvar)
   initval_type <- match.arg(initval_type)
