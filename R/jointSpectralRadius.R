@@ -329,7 +329,7 @@ bound_jsr_G <- function(S, epsilon=0.01, print_progress=TRUE) {
 #'  Currently, two methods are implemented: the branch-and-bound method by Gripenberg (1996) and the upper bound by
 #'  Jadbabaie and Parrilo (2008). We highly recommend using the Gripenberg's method, as it is mainly much faster and less prone to
 #'  memory issues than the upper bound by Jadbabaie and Parrilo (2008). Calculation of the latter with good enough accuracy may not be
-#'  feasible for other than very small models. However, for large model's also Gripenberg's method may take very long if tight bounds
+#'  feasible for other than very small models. However, for large models also Gripenberg's method may take very long if tight bounds
 #'  are required. When \code{print_progress == TRUE}, the tightest bounds found so-far are printed in each iteration of Gripenberg's
 #'  algorithm, so you can also just terminate the algorithm when the bounds are tight enough for your purposes. Consider also adjusting
 #'  the argument \code{epsilon}, as larger epsilon does not just make the bounds less tight but also speeds up the algorithm significantly.
