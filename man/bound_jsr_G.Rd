@@ -4,7 +4,7 @@
 \alias{bound_jsr_G}
 \title{Calculate upper bound for the joint spectral radius of a set of matrices}
 \usage{
-bound_jsr_G(S, epsilon = 0.001)
+bound_jsr_G(S, epsilon = 0.01, print_progress = TRUE)
 }
 \arguments{
 \item{S}{the set of matrices the bounds should be calculated for in an array, in VAR applications,

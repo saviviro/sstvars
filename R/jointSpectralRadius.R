@@ -177,7 +177,7 @@ bound_jsr_JP <- function(all_boldA, accuracy=c("0.707", "0.840", "0.917", "0.957
 #'  }
 #' @keywords internal
 
-bound_jsr_G <- function(S, epsilon=0.001) {
+bound_jsr_G <- function(S, epsilon=0.01, print_progress=TRUE) {
   n <- dim(S)[1] # The dimension of the n x n matrices
   m <- dim(S)[3] # The number of matrices
   maxit <- 1000 # Maximum number of iterations (just some large number)
@@ -271,6 +271,7 @@ bound_jsr_G <- function(S, epsilon=0.001) {
     if(length(which_new_candidates) == 0) {
       # If there are no new candidates, return the best bounds so far
       no_new_cands_break <- TRUE
+      if(print_progress) cat("\nFinnished!                                         \n")
       break
     }
 
@@ -288,9 +289,14 @@ bound_jsr_G <- function(S, epsilon=0.001) {
     # Update "old stuff" for the next round
     all_matprod_inds_old <- all_matprod_inds
 
+    if(print_progress) {
+      cat(paste0("Iteration: ", k, ", current bounds: ", round(all_alpha[k], 4), ", ", round(all_beta[k], 4)), "\r")
+    }
+
     # Stop iteration if the lower and upper bounds are close enough
     if(all_beta[k] - all_alpha[k] <= epsilon) {
       no_new_cands_break <- FALSE
+      if(print_progress) cat("\nFinnished!                                         \n")
       break
     }
   }
