@@ -89,8 +89,6 @@ d_lift <- function(A, d) {
 #'  computations just take very long. \strong{That is, it is advisable to start with low accuracy,
 #'  and only increase it if the sufficient condition for ergodic stationarity is not satisfied in the upper bound,
 #'  i.e., if the bound is larger than one.}
-#'  You can also try other implementations for bounding the joint spectral radius, for instance,
-#'  the JSR toolbox in Matlab (Jungers 2023).
 #' @return Returns an upper bound for the joint spectral radius of the "companion form AR matrices" of the regimes.
 #' @references
 #'  \itemize{
@@ -148,8 +146,10 @@ bound_jsr_JP <- function(all_boldA, accuracy=c("0.707", "0.840", "0.917", "0.957
 #' @param S the set of matrices the bounds should be calculated for in an array, in VAR applications,
 #'  all \eqn{((dp)x(dp))} "bold A" (companion form) matrices in a 3D array, so that \code{[, , m]} gives the matrix
 #'  the regime \code{m}.
-#' @param epsilon a strictly positive real number specifying the absolute accuracy of the bounds (which will be approximate
-#'  in practice). Smaller number gives better accuracy but requires more substantial computational effort.
+#' @param epsilon a strictly positive real number that approximately defines the length of the interval between the lower
+#'   and upper bounds in Gripenberg's method. A smaller epsilon value results in a narrower interval, thus providing better
+#'   accuracy for the bounds, but at the cost of increased computational effort.
+#' @param print_progress logical: should the progress of the Gripenberg's algorithm be printed?
 #' @details The bounds are calculated using the Gripenberg's (1996) branch-and-bound method, which is also discussed
 #'  in Chand and Blondel (2013). Specifically, Kheifets and Saikkonen (2020) show that if the joint spectral radius
 #'  of the companion form AR matrices of the regimes is smaller than one, the STVAR process is ergodic stationary. Therefore,
@@ -219,7 +219,6 @@ bound_jsr_G <- function(S, epsilon=0.01, print_progress=TRUE) {
     all_prods[, , dim(P)[3]]
   }
 
-
   # First iteration, k=1:
   # The set MP is just the set S and the "products" are the single matrices in S.
   all_mu <- vapply(1:m, function(i1) Fobelius_norm(S[, , i1]), numeric(1)) # Calculate the mu(S)
@@ -228,6 +227,10 @@ bound_jsr_G <- function(S, epsilon=0.01, print_progress=TRUE) {
   which_new_candidates <- 1:m # The indices of the new candidate matrix products in the first iteration
   all_matprod_inds_old <- matrix(1:2, ncol=2) # Initialize matrix for storing the indices of the matrices involved in the matrix products
   # all_matprods_old <- array(S, dim=c(n, n, m, 1)) # All matrix products used in the previous iteration are just the matrices in S
+
+  if(print_progress) {
+    cat(paste0("Iteration: ", 1, ", current bounds: ", round(all_alpha[1], 4), ", ", round(all_beta[1], 4)), "\r")
+  }
 
   for(k in 2:maxit) {
     # For each iteration, calculate the set MP, i.e., the sets of matrices that are involved in the concerned matrix products.
@@ -270,7 +273,6 @@ bound_jsr_G <- function(S, epsilon=0.01, print_progress=TRUE) {
     which_new_candidates <- which(all_mu > all_alpha[k-1] + epsilon)
     if(length(which_new_candidates) == 0) {
       # If there are no new candidates, return the best bounds so far
-      no_new_cands_break <- TRUE
       if(print_progress) cat("\nFinnished!                                         \n")
       break
     }
@@ -295,9 +297,11 @@ bound_jsr_G <- function(S, epsilon=0.01, print_progress=TRUE) {
 
     # Stop iteration if the lower and upper bounds are close enough
     if(all_beta[k] - all_alpha[k] <= epsilon) {
-      no_new_cands_break <- FALSE
       if(print_progress) cat("\nFinnished!                                         \n")
       break
+    }
+    if(k == maxit) {
+      cat("\nMaximum number of iterations reached!                                         \n")
     }
   }
 
@@ -309,13 +313,41 @@ bound_jsr_G <- function(S, epsilon=0.01, print_progress=TRUE) {
 
 #' @title Calculate upper bound for the joint spectral radius of the "companion form AR matrices" of the regimes
 #'
-#' @description \code{bound_JSR} calculates an upper bound for the joint spectral radius of the
-#'  "companion form AR matrices" matrices of the regimes as described in Parrilo and Jadbabaie (2008),
-#'   Theorems 4.2 and 4.3 and Equations (8) and (11).
+#' @description \code{bound_JSR} calculates an bounds for the joint spectral radius of the
+#'  "companion form AR matrices" matrices of the regimes to assess the validity of the stationarity condition.
 #'
 #' @inheritParams diagnostic_plot
-#' @inheritParams bound_jsr_JP
-#' @inherit bound_jsr_JP details references return
+#' @inheritParams bound_jsr_G
+#' @param method which method should be used for bounding the joint spectral radius? Gripenberg's method is highly recommended
+#'   over JP (see the details section).
+#' @param JP_accuracy what should the relative accuracy of the upper bound of Jadabaie and Parrilo be (for \code{method="JP"})?
+#' @details A sufficient condition for ergodic stationarity of the STVAR processes implemented in \code{sstvars} is that the joint
+#'  spectral radius of the "companion form AR matrices" of the regimes is smaller than one (Kheifets and Saikkonen, 2020). This function
+#'  calculates an upper (and lower) bound for the JSR and is implemented to assess the validity of this condition in practice. If the
+#'  bound is smaller than one, the model is deemed ergodic stationary.
+#'
+#'  Currently, two methods are implemented: the branch-and-bound method by Gripenberg (1996) and the upper bound by
+#'  Jadbabaie and Parrilo (2008). We highly recommend using the Gripenberg's method, as it is mainly much faster and less prone to
+#'  memory issues than the upper bound by Jadbabaie and Parrilo (2008). Calculation of the latter with good enough accuracy may not be
+#'  feasible for other than very small models. However, for large model's also Gripenberg's method may take very long if tight bounds
+#'  are required. When \code{print_progress == TRUE}, the tightest bounds found so-far are printed in each iteration of Gripenberg's
+#'  algorithm, so you can also just terminate the algorithm when the bounds are tight enough for your purposes. Consider also adjusting
+#'  the argument \code{epsilon}, as larger epsilon does not just make the bounds less tight but also speeds up the algorithm significantly.
+#'
+#'  Various methods for bounding the JSR are discussed and compared in Chang and Blondel (2013).
+#' @return Returns lower and upper bounds for the joint spectral radius of the "companion form AR matrices" of the regimes.
+#'   If the upper bound by Jadbabaie and Parrilo (2008) is calculated, only the upper bound is returned.
+#' @references
+#'  \itemize{
+#'  \item C-T Chang and V.D. Blondel. 2013 . An experimental study of approximation algorithms for the joint spectral radius.
+#'      \emph{Numerical algorithms}, \strong{64}, 181-202.
+#'    \item Gripenberg, G. 1996. Computing the joint spectral radius. \emph{Linear Algebra and its Applications},
+#'      234, 43–60.
+#'    \item I.L. Kheifets, P.J. Saikkonen. 2020. Stationarity and ergodicity of Vector STAR models.
+#'      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
+#'    \item P.A. Parrilo, A. Jadbabaie. 2008. Approximation of the joint spectral
+#'       radius using sum of squares. \emph{Linear Algebra and its Applications}, \strong{428}, 2385-2402.
+#'  }
 #' @examples
 #' # p=1, M=2, d=2, relative dens weight function
 #' theta_122relg <- c(0.734054, 0.225598, 0.705744, 0.187897, 0.259626, -0.000863,
@@ -327,26 +359,48 @@ bound_jsr_G <- function(S, epsilon=0.01, print_progress=TRUE) {
 #' # It is a necessary (but not sufficient!) condition for ergodic stationary that
 #' # the spectral radius of the "companion form AR matrices" are smaller than one
 #' # for all of the regimes. A sufficient (but not necessary) condition for
-#' # ergodic stationary is that the joint spectral radius of the #companion form
+#' # ergodic stationary is that the joint spectral radius of the companion form
 #' # AR matrices" of the regimes is smaller than one. Therefore, we calculate
-#' # upper bounds for the joint spectral radius.
+#' # an upper (and lower) bound for the joint spectral radius.
 #'
-#' # Upper bound for the joint spectral radius of the "companion form AR matrices":
-#' bound_JSR(mod122, accuracy="0.707")
+#' ## Bounds by Gripenberg's method (default and recommonded).
+#' # Since the largest modulus of the companion form AR matrices is not very close
+#' # to one, we likely won't need very thight bounds to verify the JSR is smaller
+#' # than one. Thus, we set epsilon=0.01 so that the interval between the lower
+#' # and upper bound is roughly 0.01:
+#' bound_JSR(mod122, epsilon=0.01, method="Gripenberg")
+#' # The upper bound is smaller than one, so the model is ergodic stationary.
+#'
+#' # If we want tighter bounds, we can set smaller epsilon, e.g., epsilon=0.001:
+#' bound_JSR(mod122, epsilon=0.001, method="Gripenberg")
+#'
+#' ## Upper bound by the method of Jadbabaie and Parrilo (2008):
+#' # We start with the lowest relative accuracy to see if it is already enough
+#' # to verify that the JSR is smaller than one:
+#' bound_JSR(mod122, method="JP", JP_accuracy="0.707")
 #' # accuracy "0.707" gives a rough approximation, but the upper bound is already
-#' # smaller than one, so the sufficient condition for ergodic stationarity is satisfied.
+#' # smaller than one, so the sufficient condition for ergodic stationarity is
+#' # satisfied.
 #'
 #' # Higher accuracy gives tighter upper bound:
-#' bound_JSR(mod122, accuracy="0.840")
-#' bound_JSR(mod122, accuracy="0.917")
-#' # bound_JSR(mod122, accuracy="0.957") # Takes a while to compute!
-#' # bound_JSR(mod122, accuracy="0.978") # Takes much longer to compute!
+#' bound_JSR(mod122, method="JP", JP_accuracy="0.840")
+#' bound_JSR(mod122, method="JP", JP_accuracy="0.917")
+#' # bound_JSR(mod122, method="JP", JP_accuracy="0.957") # Takes a while to compute!
 #' @export
 
-bound_JSR <- function(stvar, accuracy=c("0.707", "0.840", "0.917", "0.957", "0.978")) {
-  accuracy <- match.arg(accuracy)
+bound_JSR <- function(stvar, epsilon=0.01, print_progress=TRUE, method=c("Gripenberg", "JP"),
+                      JP_accuracy=c("0.707", "0.840", "0.917", "0.957", "0.978")) {
+  check_stvar(stvar)
+  stopifnot(is.numeric(epsilon) && epsilon > 0)
+  JP_accuracy <- match.arg(JP_accuracy)
+  method <- match.arg(method)
   all_A <- pick_allA(p=stvar$model$p, M=stvar$model$M, d=stvar$model$d, params=stvar$params)
   all_boldA <- form_boldA(p=stvar$model$p, M=stvar$model$M, d=stvar$model$d, all_A=all_A)
+  if(method == "Gripenberg") {
+    return(bound_jsr_G(S=all_boldA, epsilon=epsilon, print_progress=print_progress))
+  } else { # method == "JP"
+    return(bound_jsr_JP(all_boldA=all_boldA, accuracy=JP_accuracy))
+  }
   bound_jsr_JP(all_boldA=all_boldA, accuracy=accuracy)
 }
 

@@ -25,11 +25,19 @@ mod123relg <- STVAR(data=usamone, p=1, M=2, params=theta_123relg, weight_functio
 
 
 test_that("bound_JSR works correctly", {
-  # Relative_dens Gaussian STVAR
-  expect_equal(bound_JSR(mod112relg, accuracy="0.707"), 0.8919073, tol=1e-4)
-  expect_equal(bound_JSR(mod122relg, accuracy="0.707"), 0.9655473, tol=1e-4)
-  expect_equal(bound_JSR(mod122relg, accuracy="0.840"), 0.8537476, tol=1e-4)
-  expect_equal(bound_JSR(mod222relg, accuracy="0.707"), 1.221905, tol=1e-4)
-  expect_equal(bound_JSR(mod123relg, accuracy="0.707"), 1.303169, tol=1e-4)
+  # Lower and upper bound by the Gripenberg's (1996) branch-and-bound method
+  expect_equal(bound_JSR(mod112relg, epsilon=0.01, method="Gripenberg", print_progress=FALSE), c(0.8919073, 0.9024011), tol=1e-4)
+  expect_equal(bound_JSR(mod122relg, epsilon=0.01, method="Gripenberg", print_progress=FALSE), c(0.8288584, 0.8390204), tol=1e-4)
+  expect_equal(bound_JSR(mod122relg, epsilon=0.005, method="Gripenberg", print_progress=FALSE), c(0.8288584, 0.8339489), tol=1e-4)
+  expect_equal(bound_JSR(mod222relg, epsilon=0.02, method="Gripenberg", print_progress=FALSE), c(0.9205818, 0.9421805), tol=1e-4)
+  expect_equal(bound_JSR(mod123relg, epsilon=0.3, method="Gripenberg", print_progress=FALSE), c(0.9609557, 1.3603861), tol=1e-4)
+
+
+  # Upper bound by Jadbabaie and Parrilo (2008)
+  expect_equal(bound_JSR(mod112relg, method="JP", JP_accuracy="0.707"), 0.8919073, tol=1e-4)
+  expect_equal(bound_JSR(mod122relg, method="JP", JP_accuracy="0.707"), 0.9655473, tol=1e-4)
+  expect_equal(bound_JSR(mod122relg, method="JP", JP_accuracy="0.840"), 0.8537476, tol=1e-4)
+  expect_equal(bound_JSR(mod222relg, method="JP", JP_accuracy="0.707"), 1.221905, tol=1e-4)
+  expect_equal(bound_JSR(mod123relg, method="JP", JP_accuracy="0.707"), 1.303169, tol=1e-4)
 })
 

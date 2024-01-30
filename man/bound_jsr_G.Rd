@@ -11,8 +11,11 @@ bound_jsr_G(S, epsilon = 0.01, print_progress = TRUE)
 all \eqn{((dp)x(dp))} "bold A" (companion form) matrices in a 3D array, so that \code{[, , m]} gives the matrix
 the regime \code{m}.}
 
-\item{epsilon}{a strictly positive real number specifying the absolute accuracy of the bounds (which will be approximate
-in practice). Smaller number gives better accuracy but requires more substantial computational effort.}
+\item{epsilon}{a strictly positive real number that approximately defines the length of the interval between the lower
+and upper bounds in Gripenberg's method. A smaller epsilon value results in a narrower interval, thus providing better
+accuracy for the bounds, but at the cost of increased computational effort.}
+
+\item{print_progress}{logical: should the progress of the Gripenberg's algorithm be printed?}
 }
 \value{
 Returns an upper bound for the joint spectral radius of the "companion form AR matrices" of the regimes.

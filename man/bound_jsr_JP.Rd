@@ -39,8 +39,6 @@ Upper bound calculated the formula presented in Parrilo and Jadbabaie (2008), Eq
  computations just take very long. \strong{That is, it is advisable to start with low accuracy,
  and only increase it if the sufficient condition for ergodic stationarity is not satisfied in the upper bound,
  i.e., if the bound is larger than one.}
- You can also try other implementations for bounding the joint spectral radius, for instance,
- the JSR toolbox in Matlab (Jungers 2023).
 }
 \references{
 \itemize{

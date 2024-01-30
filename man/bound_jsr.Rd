@@ -4,40 +4,51 @@
 \alias{bound_JSR}
 \title{Calculate upper bound for the joint spectral radius of the "companion form AR matrices" of the regimes}
 \usage{
-bound_JSR(stvar, accuracy = c("0.707", "0.840", "0.917", "0.957", "0.978"))
+bound_JSR(
+  stvar,
+  epsilon = 0.01,
+  print_progress = TRUE,
+  method = c("Gripenberg", "JP"),
+  JP_accuracy = c("0.707", "0.840", "0.917", "0.957", "0.978")
+)
 }
 \arguments{
 \item{stvar}{object of class \code{"stvar"}}
 
-\item{accuracy}{what should the relative accuracy of the bounds be? Note only upper bound is used
-and that the bound holds with any accuracy (but the bounds get tighter with increased accuracy).}
+\item{epsilon}{a strictly positive real number that approximately defines the length of the interval between the lower
+and upper bounds in Gripenberg's method. A smaller epsilon value results in a narrower interval, thus providing better
+accuracy for the bounds, but at the cost of increased computational effort.}
+
+\item{print_progress}{logical: should the progress of the Gripenberg's algorithm be printed?}
+
+\item{method}{which method should be used for bounding the joint spectral radius? Gripenberg's method is highly recommended
+over JP (see the details section).}
+
+\item{JP_accuracy}{what should the relative accuracy of the upper bound of Jadabaie and Parrilo be (for \code{method="JP"})?}
 }
 \value{
-Returns an upper bound for the joint spectral radius of the "companion form AR matrices" of the regimes.
+Returns lower and upper bounds for the joint spectral radius of the "companion form AR matrices" of the regimes.
+  If the upper bound by Jadbabaie and Parrilo (2008) is calculated, only the upper bound is returned.
 }
 \description{
-\code{bound_JSR} calculates an upper bound for the joint spectral radius of the
- "companion form AR matrices" matrices of the regimes as described in Parrilo and Jadbabaie (2008),
-  Theorems 4.2 and 4.3 and Equations (8) and (11).
+\code{bound_JSR} calculates an bounds for the joint spectral radius of the
+ "companion form AR matrices" matrices of the regimes to assess the validity of the stationarity condition.
 }
 \details{
-Upper bound calculated the formula presented in Parrilo and Jadbabaie (2008), Equation~(11),
- whereas the accuracy is based on  Parrilo and Jadbabaie (2008), Table 1. Note that the accuracy is
- for the bounds including the lower bound which we do not calculate, as only upper bound used in practice.
- Specifically, Kheifets and Saikkonen (2020) show that if the joint spectral radius is smaller than one,
- the STVAR process is ergodic stationary. Therefore, if the upper bound is smaller than one,
- the process is stationary ergodic. However, as the condition is not necessary but sufficient and also because
- the bound might be too conservative, upper bound larger than one does not imply that the process is not ergodic
- stationary. You can try higher accuracy, and if the bound is still larger than one, the result does not tell
- whether the process is ergodic stationary or not.
+A sufficient condition for ergodic stationarity of the STVAR processes implemented in \code{sstvars} is that the joint
+ spectral radius of the "companion form AR matrices" of the regimes is smaller than one (Kheifets and Saikkonen, 2020). This function
+ calculates an upper (and lower) bound for the JSR and is implemented to assess the validity of this condition in practice. If the
+ bound is smaller than one, the model is deemed ergodic stationary.
 
- Note that due to the extremely large dimenions required in the calculation of the bound, using high accuracy
- might not be feasible for other than very small models (small p*d^2), as one may run out of memory or the
- computations just take very long. \strong{That is, it is advisable to start with low accuracy,
- and only increase it if the sufficient condition for ergodic stationarity is not satisfied in the upper bound,
- i.e., if the bound is larger than one.}
- You can also try other implementations for bounding the joint spectral radius, for instance,
- the JSR toolbox in Matlab (Jungers 2023).
+ Currently, two methods are implemented: the branch-and-bound method by Gripenberg (1996) and the upper bound by
+ Jadbabaie and Parrilo (2008). We highly recommend using the Gripenberg's method, as it is mainly much faster and less prone to
+ memory issues than the upper bound by Jadbabaie and Parrilo (2008). Calculation of the latter with good enough accuracy may not be
+ feasible for other than very small models. However, for large model's also Gripenberg's method may take very long if tight bounds
+ are required. When \code{print_progress == TRUE}, the tightest bounds found so-far are printed in each iteration of Gripenberg's
+ algorithm, so you can also just terminate the algorithm when the bounds are tight enough for your purposes. Consider also adjusting
+ the argument \code{epsilon}, as larger epsilon does not just make the bounds less tight but also speeds up the algorithm significantly.
+
+ Various methods for bounding the JSR are discussed and compared in Chang and Blondel (2013).
 }
 \examples{
 # p=1, M=2, d=2, relative dens weight function
@@ -50,28 +61,43 @@ summary(mod122)$abs_boldA_eigens
 # It is a necessary (but not sufficient!) condition for ergodic stationary that
 # the spectral radius of the "companion form AR matrices" are smaller than one
 # for all of the regimes. A sufficient (but not necessary) condition for
-# ergodic stationary is that the joint spectral radius of the #companion form
+# ergodic stationary is that the joint spectral radius of the companion form
 # AR matrices" of the regimes is smaller than one. Therefore, we calculate
-# upper bounds for the joint spectral radius.
+# an upper (and lower) bound for the joint spectral radius.
 
-# Upper bound for the joint spectral radius of the "companion form AR matrices":
-bound_JSR(mod122, accuracy="0.707")
+## Bounds by Gripenberg's method (default and recommonded).
+# Since the largest modulus of the companion form AR matrices is not very close
+# to one, we likely won't need very thight bounds to verify the JSR is smaller
+# than one. Thus, we set epsilon=0.01 so that the interval between the lower
+# and upper bound is roughly 0.01:
+bound_JSR(mod122, epsilon=0.01, method="Gripenberg")
+# The upper bound is smaller than one, so the model is ergodic stationary.
+
+# If we want tighter bounds, we can set smaller epsilon, e.g., epsilon=0.001:
+bound_JSR(mod122, epsilon=0.001, method="Gripenberg")
+
+## Upper bound by the method of Jadbabaie and Parrilo (2008):
+# We start with the lowest relative accuracy to see if it is already enough
+# to verify that the JSR is smaller than one:
+bound_JSR(mod122, method="JP", JP_accuracy="0.707")
 # accuracy "0.707" gives a rough approximation, but the upper bound is already
-# smaller than one, so the sufficient condition for ergodic stationarity is satisfied.
+# smaller than one, so the sufficient condition for ergodic stationarity is
+# satisfied.
 
 # Higher accuracy gives tighter upper bound:
-bound_JSR(mod122, accuracy="0.840")
-bound_JSR(mod122, accuracy="0.917")
-# bound_JSR(mod122, accuracy="0.957") # Takes a while to compute!
-# bound_JSR(mod122, accuracy="0.978") # Takes much longer to compute!
+bound_JSR(mod122, method="JP", JP_accuracy="0.840")
+bound_JSR(mod122, method="JP", JP_accuracy="0.917")
+# bound_JSR(mod122, method="JP", JP_accuracy="0.957") # Takes a while to compute!
 }
 \references{
 \itemize{
+ \item C-T Chang and V.D. Blondel. 2013 . An experimental study of approximation algorithms for the joint spectral radius.
+     \emph{Numerical algorithms}, \strong{64}, 181-202.
+   \item Gripenberg, G. 1996. Computing the joint spectral radius. \emph{Linear Algebra and its Applications},
+     234, 43–60.
    \item I.L. Kheifets, P.J. Saikkonen. 2020. Stationarity and ergodicity of Vector STAR models.
      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
    \item P.A. Parrilo, A. Jadbabaie. 2008. Approximation of the joint spectral
       radius using sum of squares. \emph{Linear Algebra and its Applications}, \strong{428}, 2385-2402.
-   \item R. Jungers (2023). The JSR toolbox (https://www.mathworks.com/matlabcentral/fileexchange/33202-the-jsr-toolbox),
-      MATLAB Central File Exchange.
  }
 }
