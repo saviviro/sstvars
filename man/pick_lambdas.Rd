@@ -89,8 +89,8 @@ Constrained parameter vectors are not supported. Not even constraints in \eqn{W}
 }
 \references{
 \itemize{
-   \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis, \emph{Springer}.
+   \item Lütkepohl H., Netšunajev A. 2017. Structural vector autoregressions with smooth transition in variances.
+     \emp{Journal of Economic Dynamics & Control}, \strong{84}, 43-57.
  }
- @keywords internal
 }
 \keyword{internal}

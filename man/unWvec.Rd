@@ -20,9 +20,4 @@ a \eqn{(d x d)} impact matrix \eqn{W}.
   stacked columns where zeros are removed according to impact
   matrix constraints.
 }
-\section{Warning}{
-
- No argument checks!
-}
-
 \keyword{internal}

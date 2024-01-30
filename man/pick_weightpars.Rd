@@ -121,9 +121,4 @@ See the vignette for more details about the weight functions.}
  No argument checks!
 }
 
-\references{
-\itemize{
-   \item TO BE FILLED IN
- }
-}
 \keyword{internal}

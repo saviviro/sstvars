@@ -192,11 +192,10 @@ The confidence bounds reflect uncertainty about the initial state (but
  plot(girf3) # Plot the GIRFs
  }
 }
-\references{
-\itemize{
-   \item TO BE FILLED IN
- }
-}
 \seealso{
 \code{\link{GFEVD}}, \code{\link{linear_IRF}}, \code{\link{fitSSTVAR}}
+ \itemize{
+   \item Kilian L., Lütkepohl H. 20017. Structural Vector Autoregressive Analysis. 1st edition.
+     \emph{Cambridge University Press}, Cambridge.
+ }
 }

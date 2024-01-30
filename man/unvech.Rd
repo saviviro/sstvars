@@ -18,9 +18,4 @@ a symmetric matrix of size \eqn{(dxd)}.
 \code{unvech} creates a symmetric matrix from the given vector by
   copying the lower triangular part to be the upper triangular part as well.
 }
-\section{Warning}{
-
- No argument checks!
-}
-
 \keyword{internal}

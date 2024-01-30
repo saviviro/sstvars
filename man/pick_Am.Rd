@@ -65,9 +65,4 @@ Does not support constrained parameter vectors.
  No argument checks!
 }
 
-\references{
-\itemize{
-   \item TO BE FILLED IN
- }
-}
 \keyword{internal}

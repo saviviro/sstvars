@@ -19,7 +19,11 @@
 #' @return A list with class "hypotest" containing the test results and arguments used to calculate the test.
 #' @seealso \code{\link{LR_test}}, \code{\link{Rao_test}}, \code{\link{fitSTVAR}}, \code{\link{STVAR}},
 #'   \code{\link{diagnostic_plot}}, \code{\link{profile_logliks}}, \code{\link{Portmanteau_test}}
-#' @inherit in_paramspace references
+#' @references
+#'  \itemize{
+#'    \item Buse A. (1982). The Likelihood Ratio, Wald, and Lagrange Multiplier Tests: An Expository Note.
+#'      \emph{The American Statistician}, 36(3a), 153-157.
+#'  }
 #' @examples
 #'  # Logistic Student's t STVAR with p=1, M=2, and the first lag of the second variable
 #'  # as the switching variable (parameter values were obtained by maximum likelihood estimation;
@@ -280,7 +284,7 @@ Rao_test <- function(stvar) {
     grad0 <- calc_gradient(x=new_stvar$params, fn=foo, which_obs=i1)
     outer_prods[, , i1] <- tcrossprod(grad0)
   }
-  OPG <- apply(outer_prods, 1:2, sum)
+  OPG <- apply(outer_prods, MARGIN=1:2, FUN=sum)
 
   # Invert the OPG matrix
   inv_OPG <- tryCatch(solve(OPG), error=function(e) {
@@ -290,20 +294,6 @@ Rao_test <- function(stvar) {
 
  if(anyNA(inv_OPG)) stop("Couldn't invert the outer product of gradients matrix of the log-likelihood function. Make sure the
                           estimates are ok, e.g., with the function 'profile_logliks'.")
-
-  # # Calculate Hessian matrix at the estimate
-  # Hess <- tryCatch(get_hessian(new_stvar),
-  #                  error=function(e) {
-  #                    print(paste("Failed to calculate the Hessian matrix:", e))
-  #                    return(NA)})
-  #
-  # # Invert the Hessian matrix
-  # inv_Hess <- tryCatch(solve(Hess), error=function(e) {
-  #   print(paste("Failed to invert the Hessian matrix:", e))
-  #   return(NA)
-  # })
-  # if(anyNA(inv_Hess)) stop("Couldn't invert Hessian matrix of the log-likelihood function. Make sure the
-  #                          estimates are ok, e.g., with the function 'profile_logliks'.")
 
   # Calculate the test statistic
   test_stat <- as.numeric(crossprod(Grad, inv_OPG%*%Grad)) # as.numeric(crossprod(Grad, -inv_Hess%*%Grad))

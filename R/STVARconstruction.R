@@ -19,7 +19,16 @@
 #' @seealso \code{\link{fitSTVAR}}, \code{\link{swap_parametrization}}, \code{\link{alt_stvar}}
 #' @references
 #'  \itemize{
-#'    \item TO BE FILLED IN
+#'    \item Anderson H., Vahid F. 1998. Testing multiple equation systems for common nonlinear components.
+#'      \emph{Journal of Econometrics}, \strong{84}:1, 1-36.
+#'    \item Hubrich K., Teräsvirta. T. 2013. Thresholds and Smooth Transitions in Vector Autoregressive Models.
+#'      \emph{CREATES Research Paper 2013-18, Aarhus University.}
+#'    \item Kheifets I.L., Saikkonen P.J. 2020. Stationarity and ergodicity of Vector STAR models.
+#'      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
+#'    \item Lütkepohl H., Netšunajev A. 2017. Structural vector autoregressions with smooth transition in variances.
+#'      \emph{Journal of Economic Dynamics & Control}, \strong{84}, 43-57.
+#'    \item Tsay R. 1998. Testing and Modeling Multivariate Threshold Models.
+#'      \emph{Journal of the American Statistical Association}, \strong{93}:443, 1188-1202.
 #'  }
 #' @examples
 #' # p=1, M=1, d=2, linear VAR
@@ -444,7 +453,11 @@ get_hetsked_sstvar <- function(stvar, calc_std_errors=FALSE) {
 #' @return Returns an object of class \code{'stvar'} defining a structural STVAR model with the columns of \eqn{W}
 #'   reordered.
 #' @seealso \code{\link{GIRF}}, \code{\link{fitSSTVAR}}, \code{\link{swap_W_signs}}
-#' @inherit STVAR references
+#' @references
+#'  \itemize{
+#'    \item Lütkepohl H., Netšunajev A. 2018. Structural vector autoregressions with smooth transition in variances.
+#'      \emp{Journal of Economic Dynamics & Control}, \strong{84}, 43-57.
+#'  }
 #' @examples
 #' # p=2, M=2, d=2, Student's t logistic STVAR model with the first lag of the second
 #'  # variable  as the switching variable and shocks identified by heteroskedasticity.

@@ -59,9 +59,4 @@ Returns the vector \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vech(\Omega_m
 \details{
 Constrained models nor structural models are supported.
 }
-\references{
-\itemize{
-   \item TO BE FILLED IN
- }
-}
 \keyword{internal}

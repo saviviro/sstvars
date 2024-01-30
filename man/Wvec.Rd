@@ -17,9 +17,4 @@ a vector of length \eqn{d^2 - n_zeros} where \eqn{n_zeros} is the
 \code{Wvec} stacks columns of the given matrix to form a vector
   and removes elements that are zeros.
 }
-\section{Warning}{
-
- No argument checks!
-}
-
 \keyword{internal}

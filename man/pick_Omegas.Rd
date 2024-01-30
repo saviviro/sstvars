@@ -69,9 +69,4 @@ Does not work with constraint NOR structural parameter vectors!
  No argument checks!
 }
 
-\references{
-\itemize{
-   \item TO BE FILLED IN
- }
-}
 \keyword{internal}

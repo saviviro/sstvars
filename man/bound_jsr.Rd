@@ -95,9 +95,9 @@ bound_JSR(mod122, method="JP", JP_accuracy="0.917")
      \emph{Numerical algorithms}, \strong{64}, 181-202.
    \item Gripenberg, G. 1996. Computing the joint spectral radius. \emph{Linear Algebra and its Applications},
      234, 43–60.
-   \item I.L. Kheifets, P.J. Saikkonen. 2020. Stationarity and ergodicity of Vector STAR models.
+   \item Kheifets I.L., Saikkonen P.J. 2020. Stationarity and ergodicity of Vector STAR models.
      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
-   \item P.A. Parrilo, A. Jadbabaie. 2008. Approximation of the joint spectral
+   \item Parrilo P.A., Jadbabaie A. 2008. Approximation of the joint spectral
       radius using sum of squares. \emph{Linear Algebra and its Applications}, \strong{428}, 2385-2402.
  }
 }

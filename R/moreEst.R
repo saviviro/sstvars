@@ -12,7 +12,7 @@
 #' @return Returns an object of class \code{'stvar'} defining the estimated model
 #' @seealso \code{\link{fitSTVAR}}, \code{\link{STVAR}}, \code{\link[stats]{optim}},
 #'  \code{\link{swap_W_signs}}, \code{\link{reorder_W_columns}}
-#' @inherit STVAR references
+#' @inherit fitSTVAR references
 #' @examples
 #' \donttest{
 #' ## These are long running examples that use parallel computing!
@@ -143,7 +143,13 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
 #'   algorithms. See \code{?optim} for the documentation on the
 #' @return Returns an object of class \code{'stvar'} defining the structural model
 #' @seealso \code{\link{fitSTVAR}}, \code{\link{STVAR}}, \code{\link[stats]{optim}}
-#' @inherit STVAR references
+#' @references
+#' \itemize{
+#'    \item Kilian L., Lütkepohl H. 20017. Structural Vector Autoregressive Analysis. 1st edition.
+#'    \emph{Cambridge University Press}, Cambridge.
+#'    \item Lütkepohl H., Netšunajev A. 2017. Structural vector autoregressions with smooth transition in variances.
+#'      \emp{Journal of Economic Dynamics & Control}, \strong{84}, 43-57.
+#'  }
 #' @examples
 #' \donttest{
 #' ## These are long running examples that use parallel computing!
@@ -492,7 +498,7 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity")
 #' @return Returns an object of class \code{'stvar'} defining the structural model
 #' @section warning: No argument checks!
 #' @seealso \code{\link{linear_IRF}}, \code{\link[stats]{optim}}
-#' @inherit STVAR references
+#' @inherit fitSSTVAR references
 #' @keywords internal
 
 fitbsSSTVAR <- function(data, p, M, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),

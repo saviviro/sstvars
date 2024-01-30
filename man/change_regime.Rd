@@ -66,6 +66,8 @@ Does not support constrained models or structural models. Weight parameters and 
 }
 \references{
 \itemize{
+   \item Kheifets I.L., Saikkonen P.J. 2020. Stationarity and ergodicity of Vector STAR models.
+     \emph{Econometric Reviews}, \strong{39}:4, 407-414.
    \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis, \emph{Springer}.
  }
  @keywords internal

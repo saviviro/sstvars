@@ -18,9 +18,4 @@ a matrix of size \eqn{(dxd)}.
 \code{unvec} forms a square matrix from a vector of
  stacked columns, stacked by \code{vec}.
 }
-\section{Warning}{
-
- No argument checks!
-}
-
 \keyword{internal}

@@ -15,9 +15,4 @@ a vector of size \eqn{(d^2x1)}.
 \description{
 \code{vec} stacks columns of the given matrix to form a vector.
 }
-\section{Warning}{
-
- No argument checks!
-}
-
 \keyword{internal}

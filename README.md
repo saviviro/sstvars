@@ -16,7 +16,8 @@ autoregressive parameters, regimewise means, weight parameters, and the
 impact matrix. The package is, however, limited to endogenous switching
 variables to ensure that ergodicity and stationarity of the models is
 verifiable and that the true generalized impulse response functions can
-be estimated.
+be estimated. See the vignette for a more detailed description of the
+package.
 
 ## Installation
 

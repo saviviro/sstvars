@@ -163,11 +163,18 @@
 #'   }
 #' @references
 #'  \itemize{
+#'    \item Anderson H., Vahid F. 1998. Testing multiple equation systems for common nonlinear components.
+#'      \emph{Journal of Econometrics}, \strong{84}:1, 1-36.
+#'    \item Kheifets I.L., Saikkonen P.J. 2020. Stationarity and ergodicity of Vector STAR models.
+#'      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
 #'    \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis,
 #'          \emph{Springer}.
 #'    \item McElroy T. 2017. Computation of vector ARMA autocovariances.
 #'          \emph{Statistics and Probability Letters}, \strong{124}, 92-96.
-#'    \item References to the STVAR models TO BE INCLUDED.
+#'    \item Kilian L., Lütkepohl H. 20017. Structural Vector Autoregressive Analysis. 1st edition.
+#'      \emph{Cambridge University Press}, Cambridge.
+#'    \item Tsay R. 1998. Testing and Modeling Multivariate Threshold Models.
+#'      \emph{Journal of the American Statistical Association}, \strong{93}:443, 1188-1202.
 #'  }
 #' @keywords internal
 

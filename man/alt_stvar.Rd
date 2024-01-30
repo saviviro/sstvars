@@ -41,6 +41,15 @@ fit12_alt # Estimate from an alternative local maximum
 }
 \references{
 \itemize{
-   \item TO BE FILLED IN
+   \item Anderson H., Vahid F. 1998. Testing multiple equation systems for common nonlinear components.
+     \emph{Journal of Econometrics}, \strong{84}:1, 1-36.
+   \item Hubrich K., Teräsvirta. T. 2013. Thresholds and Smooth Transitions in Vector Autoregressive Models.
+     \emph{CREATES Research Paper 2013-18, Aarhus University.}
+   \item Kheifets I.L., Saikkonen P.J. 2020. Stationarity and ergodicity of Vector STAR models.
+     \emph{Econometric Reviews}, \strong{39}:4, 407-414.
+   \item Lütkepohl H., Netšunajev A. 2017. Structural vector autoregressions with smooth transition in variances.
+     \emph{Journal of Economic Dynamics & Control}, \strong{84}, 43-57.
+   \item Tsay R. 1998. Testing and Modeling Multivariate Threshold Models.
+     \emph{Journal of the American Statistical Association}, \strong{93}:443, 1188-1202.
  }
 }

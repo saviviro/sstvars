@@ -72,7 +72,11 @@
 #'   obtained from the MC repetitions. Each element is for one shock and results are in
 #'   array of the form \code{[horizon, variables, MC-repetitions]}.
 #' @seealso \code{\link{GFEVD}}, \code{\link{linear_IRF}}, \code{\link{fitSSTVAR}}
-#' @inherit STVAR references
+#'  \itemize{
+#'    \item Kilian L., Lütkepohl H. 20017. Structural Vector Autoregressive Analysis. 1st edition.
+#'      \emph{Cambridge University Press}, Cambridge.
+#'  }
+
 #' @examples
 #'  \donttest{
 #'  # These are long-running examples that use parallel computing.

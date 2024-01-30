@@ -61,9 +61,9 @@ Denoting the true parameter value by \eqn{\theta_{0}}, we test the null hypothes
 }
 \references{
 \itemize{
-   \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis, \emph{Springer}.
+   \item Buse A. (1982). The Likelihood Ratio, Wald, and Lagrange Multiplier Tests: An Expository Note.
+     \emph{The American Statistician}, 36(3a), 153-157.
  }
- @keywords internal
 }
 \seealso{
 \code{\link{LR_test}}, \code{\link{Rao_test}}, \code{\link{fitSTVAR}}, \code{\link{STVAR}},

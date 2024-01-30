@@ -41,10 +41,6 @@
 #' @details Does not support constrained parameter vectors.
 #' @section Warning:
 #'  No argument checks!
-#' @references
-#'  \itemize{
-#'    \item TO BE FILLED IN
-#'  }
 #' @keywords internal
 
 pick_phi0 <- function(M, d, params) {
@@ -62,7 +58,7 @@ pick_phi0 <- function(M, d, params) {
 #' @param i which lag in \eqn{1,...,p}?
 #' @param unvec if \code{FALSE} then vectorized version of \eqn{A_{m,i}} will be returned instead of matrix.
 #'   Default if \code{TRUE}.
-#' @inherit pick_phi0 details references
+#' @inherit pick_phi0 details
 #' @inheritSection pick_phi0 Warning
 #' @return Returns the i:th lag coefficient matrix of m:th regime, \eqn{A_{m,i}}.
 #' @keywords internal
@@ -87,7 +83,7 @@ pick_Ami <- function(p, M, d, params, m, i, unvec=TRUE) {
 #' @inheritParams pick_Ami
 #' @return Returns a 3D array containing the coefficient matrices of the given regime.
 #'  The coefficient matrix \eqn{A_{m,i}} can be obtained by choosing \code{[, , i]}.
-#' @inherit pick_Ami details references
+#' @inherit pick_Ami details
 #' @inheritSection pick_Ami Warning
 #' @keywords internal
 
@@ -105,7 +101,7 @@ pick_Am <- function(p, M, d, params, m, structural_pars=NULL) {
 #' @inheritParams pick_Am
 #' @return Returns a 4D array containing the coefficient matrices of the all components. Coefficient matrix
 #'  \eqn{A_{m,i}} can be obtained by choosing \code{[, , i, m]}.
-#' @inherit pick_Ami details references
+#' @inherit pick_Ami details
 #' @inheritSection pick_Ami Warning
 #' @keywords internal
 
@@ -125,7 +121,6 @@ pick_allA <- function(p, M, d, params) {
 #'  \eqn{\Omega_{m}} can be obtained by choosing \code{[, , m]}.
 #' @details Does not work with constraint NOR structural parameter vectors!
 #' @inheritSection pick_Ami Warning
-#' @inherit pick_Ami references
 #' @keywords internal
 
 pick_Omegas <- function(p, M, d, params, identification=c("reduced_form", "recursive", "heteroskedasticity")) {
@@ -174,7 +169,6 @@ pick_Omegas <- function(p, M, d, params, identification=c("reduced_form", "recur
 #'           \eqn{r_1,...,r_{M-1}} are the threshold values.}
 #'   }
 #' @inheritSection pick_Ami Warning
-#' @inherit pick_Ami references
 #' @keywords internal
 
 pick_weightpars <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
@@ -234,7 +228,6 @@ pick_distpars <- function(params, cond_dist=c("Gaussian", "Student")) {
 #' @details Constrained models nor structural models are supported.
 #' @return Returns the vector \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vech(\Omega_m))}.
 #'   Note that neither weight parameters or distribution parameters are picked.
-#' @inherit pick_Ami references
 #' @keywords internal
 
 pick_regime <- function(p, M, d, params, m) {
@@ -252,7 +245,11 @@ pick_regime <- function(p, M, d, params, m) {
 #' @details Constrained parameter vectors are not supported. Not even constraints in \eqn{W}!
 #' @return Returns a \eqn{(d x d)} matrix \eqn{W} for structural models identified by heteroskedasticity
 #'   and \code{NULL} for other models.
-#' @inherit in_paramspace references
+#' @references
+#' \itemize{
+#'    \item Lütkepohl H., Netšunajev A. 2017. Structural vector autoregressions with smooth transition in variances.
+#'      \emp{Journal of Economic Dynamics & Control}, \strong{84}, 43-57.
+#'  }
 #' @keywords internal
 
 pick_W <- function(p, M, d, params, identification=c("reduced_form", "recursive", "heteroskedasticity")) {

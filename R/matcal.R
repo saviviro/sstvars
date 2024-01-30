@@ -5,8 +5,6 @@
 #'
 #' @param A a size \eqn{(dxd)} square matrix to be vectorized.
 #' @return a vector of size \eqn{(d^2x1)}.
-#' @section Warning:
-#'  No argument checks!
 #' @keywords internal
 
 vec <- function(A) {
@@ -21,8 +19,6 @@ vec <- function(A) {
 #' @param a a size \eqn{(d^2x1)} vector to be unvectorized into a \eqn{(dxd)} matrix.
 #' @param d the number of rows in the square matrix to be formed.
 #' @return a matrix of size \eqn{(dxd)}.
-#' @section Warning:
-#'  No argument checks!
 #' @keywords internal
 
 unvec <- function(d, a) {
@@ -38,8 +34,6 @@ unvec <- function(d, a) {
 #' @param W a size \eqn{(dxd)} square matrix to be vectorized.
 #' @return a vector of length \eqn{d^2 - n_zeros} where \eqn{n_zeros} is the
 #'   number of zero entries in the matrix \code{W}.
-#' @section Warning:
-#'  No argument checks!
 #' @keywords internal
 
 Wvec <- function(W) {
@@ -58,8 +52,6 @@ Wvec <- function(W) {
 #'   number of zero entries in the impact matrix.
 #'
 #' @return a \eqn{(d x d)} impact matrix \eqn{W}.
-#' @section Warning:
-#'  No argument checks!
 #' @keywords internal
 
 unWvec <- function(Wvector, d, B_constraints) {
@@ -78,8 +70,6 @@ unWvec <- function(Wvector, d, B_constraints) {
 #'
 #' @param A a size \eqn{(dxd)} symmetric matrix to be vectorized parsimoniously.
 #' @return a vector of size \eqn{(d(d+1)/2x1)}.
-#' @section Warning:
-#'  No argument checks!
 #' @keywords internal
 
 vech <- function(A) {
@@ -95,8 +85,6 @@ vech <- function(A) {
 #' @param a a size \eqn{(d(d+1)/2x1)} vector to be unvectorized into a symmetric \eqn{(dxd)} matrix.
 #' @param d number of rows the square matrix to be formed.
 #' @return a symmetric matrix of size \eqn{(dxd)}.
-#' @section Warning:
-#'  No argument checks!
 #' @keywords internal
 
 unvech <- function(d, a) {

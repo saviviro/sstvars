@@ -71,9 +71,9 @@ LR_test(fit12, fit12cm)
 }
 \references{
 \itemize{
-   \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis, \emph{Springer}.
+   \item Buse A. (1982). The Likelihood Ratio, Wald, and Lagrange Multiplier Tests: An Expository Note.
+     \emph{The American Statistician}, 36(3a), 153-157.
  }
- @keywords internal
 }
 \seealso{
 \code{\link{Wald_test}}, \code{\link{Rao_test}}, \code{\link{fitSTVAR}}, \code{\link{STVAR}},
