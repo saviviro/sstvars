@@ -4,7 +4,7 @@
 \alias{bound_jsr_G}
 \title{Calculate upper bound for the joint spectral radius of a set of matrices}
 \usage{
-bound_jsr_G(S, epsilon = 0.01, print_progress = TRUE)
+bound_jsr_G(S, epsilon = 0.01, ncores = 2, print_progress = TRUE)
 }
 \arguments{
 \item{S}{the set of matrices the bounds should be calculated for in an array, in VAR applications,
@@ -15,6 +15,8 @@ the regime \code{m}.}
 and upper bounds in Gripenberg's method. A smaller epsilon value results in a narrower interval, thus providing better
 accuracy for the bounds, but at the cost of increased computational effort.}
 
+\item{ncores}{the number of cores to be used in parallel computing in the Gripenberg's algorithm.}
+
 \item{print_progress}{logical: should the progress of the Gripenberg's algorithm be printed?}
 }
 \value{
@@ -22,7 +24,7 @@ Returns an upper bound for the joint spectral radius of the "companion form AR m
 }
 \description{
 \code{bound_jsr_G} calculates lowr and upper bounds for the joint spectral radious of a set of square matrices,
- typically the "bold A" matrices, using the algorithm by Gripenberg (1996)
+ typically the "bold A" matrices, using the algorithm by Gripenberg (1996).
 }
 \details{
 The bounds are calculated using the Gripenberg's (1996) branch-and-bound method, which is also discussed
@@ -34,7 +36,10 @@ The bounds are calculated using the Gripenberg's (1996) branch-and-bound method,
  still larger than one, the result does not tell whether the process is ergodic stationary or not.
 
  Note that with high precision (small \code{epsilon}), the computational effort required are substantial and
- the estimation may take very long.
+ the estimation may take very long, even though the function takes use of parallel computing. This is because
+ with small epsilon the the number of candidate solutions in each iteration may grow exponentially and a large
+ number of iterations may be required. For this reason, the algorithm starts with a large epsilon, and then
+ decreases it when new candidate solutions are not found, until the desired epsilon is reached.
 
  You can also try other implementations for bounding the joint spectral radius, for instance,
  the JSR toolbox in Matlab (Jungers 2023).

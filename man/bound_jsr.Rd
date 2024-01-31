@@ -7,6 +7,7 @@
 bound_JSR(
   stvar,
   epsilon = 0.01,
+  ncores = 2,
   print_progress = TRUE,
   method = c("Gripenberg", "JP"),
   JP_accuracy = c("0.707", "0.840", "0.917", "0.957", "0.978")
@@ -18,6 +19,8 @@ bound_JSR(
 \item{epsilon}{a strictly positive real number that approximately defines the length of the interval between the lower
 and upper bounds in Gripenberg's method. A smaller epsilon value results in a narrower interval, thus providing better
 accuracy for the bounds, but at the cost of increased computational effort.}
+
+\item{ncores}{the number of cores to be used in parallel computing in the Gripenberg's algorithm.}
 
 \item{print_progress}{logical: should the progress of the Gripenberg's algorithm be printed?}
 
@@ -36,17 +39,18 @@ Returns lower and upper bounds for the joint spectral radius of the "companion f
 }
 \details{
 A sufficient condition for ergodic stationarity of the STVAR processes implemented in \code{sstvars} is that the joint
- spectral radius of the "companion form AR matrices" of the regimes is smaller than one (Kheifets and Saikkonen, 2020). This function
- calculates an upper (and lower) bound for the JSR and is implemented to assess the validity of this condition in practice. If the
- bound is smaller than one, the model is deemed ergodic stationary.
+ spectral radius of the "companion form AR matrices" of the regimes is smaller than one (Kheifets and Saikkonen, 2020).
+ This function calculates an upper (and lower) bound for the JSR and is implemented to assess the validity of this condition
+ in practice. If the bound is smaller than one, the model is deemed ergodic stationary.
 
  Currently, two methods are implemented: the branch-and-bound method by Gripenberg (1996) and the upper bound by
  Jadbabaie and Parrilo (2008). We highly recommend using the Gripenberg's method, as it is mainly much faster and less prone to
  memory issues than the upper bound by Jadbabaie and Parrilo (2008). Calculation of the latter with good enough accuracy may not be
  feasible for other than very small models. However, for large models also Gripenberg's method may take very long if tight bounds
  are required. When \code{print_progress == TRUE}, the tightest bounds found so-far are printed in each iteration of Gripenberg's
- algorithm, so you can also just terminate the algorithm when the bounds are tight enough for your purposes. Consider also adjusting
- the argument \code{epsilon}, as larger epsilon does not just make the bounds less tight but also speeds up the algorithm significantly.
+ algorithm, so you can also just terminate the algorithm when the bounds are tight enough for your purposes. Consider also
+ adjusting the argument \code{epsilon}, as larger epsilon does not just make the bounds less tight but also speeds up the algorithm
+ significantly.
 
  Various methods for bounding the JSR are discussed and compared in Chang and Blondel (2013).
 }
