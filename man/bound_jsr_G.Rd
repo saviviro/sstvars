@@ -13,18 +13,19 @@ bound_jsr_G(
 )
 }
 \arguments{
-\item{S}{the set of matrices the bounds should be calculated for in an array, in VAR applications,
+\item{S}{the set of matrices the bounds should be calculated for in an array, in STVAR applications,
 all \eqn{((dp)x(dp))} "bold A" (companion form) matrices in a 3D array, so that \code{[, , m]} gives the matrix
 the regime \code{m}.}
 
 \item{epsilon}{a strictly positive real number that approximately defines the goal of length of the interval between the lower
 and upper bounds. A smaller epsilon value results in a narrower interval, thus providing better accuracy for the bounds,
-but at the cost of increased computational effort.}
+but at the cost of increased computational effort. Note that the bounds are always wider than \code{epsilon} and it is not
+obvious what \code{epsilon} should be chosen obtain bounds of specific tightness.}
 
 \item{adaptive_eps}{logical: if \code{TRUE}, starts with a large epsilon and then decreases it gradually whenever the progress
 of the algorithm requires, until the value given in the argument \code{epsilon} is reached. Substantially speeds up the algorithm
-but is an unconventional approach, and there is no guarantee that the final bounds converge to the tightness of the bounds given by
-the argument \code{epsilon}.}
+but is an unconventional approach, and there is no guarantee that the algorithm converges appropriately towards bounds with the
+tightness given by the argument \code{epsilon}.}
 
 \item{ncores}{the number of cores to be used in parallel computing.}
 
@@ -38,13 +39,14 @@ Returns an upper bound for the joint spectral radius of the "companion form AR m
  typically the "bold A" matrices, using the algorithm by Gripenberg (1996).
 }
 \details{
-The bounds are calculated using the Gripenberg's (1996) branch-and-bound method, which is also discussed
- in Chand and Blondel (2013). Specifically, Kheifets and Saikkonen (2020) show that if the joint spectral radius
- of the companion form AR matrices of the regimes is smaller than one, the STVAR process is ergodic stationary. Therefore,
- if the upper bound is smaller than one, the process is stationary ergodic. However, as the condition is not
- necessary but sufficient and also because the bound might be too conservative, upper bound larger than one
- does not imply that the process is not ergodic stationary. You can try higher accuracy, and if the bound is
- still larger than one, the result does not tell whether the process is ergodic stationary or not.
+The upper and lower bounds are calculated using the Gripenberg's (1996) branch-and-bound method, which is also discussed
+ in Chang and Blondel (2013). This function can be generally used for approximating the JSR of a set of square matrices, but the
+ main intention is STVAR applications (for models created with \code{sstvars}, the function \code{bound_JSR} should be preferred).
+ Specifically, Kheifets and Saikkonen (2020) show that if the joint spectral radius of the companion form AR matrices of the regimes
+ is smaller than one, the STVAR process is ergodic stationary. Therefore, if the upper bound is smaller than one, the process is
+ stationary ergodic. However, as the condition is not necessary but sufficient and also because the bound might be too conservative,
+ upper bound larger than one does not imply that the process is not ergodic stationary. You can try higher accuracy, and if the bound
+ is still larger than one, the result does not tell whether the process is ergodic stationary or not.
 
  Note that with high precision (small \code{epsilon}), the computational effort required are substantial and
  the estimation may take long, even though the function takes use of parallel computing. This is because
@@ -52,6 +54,30 @@ The bounds are calculated using the Gripenberg's (1996) branch-and-bound method,
  number of iterations may be required. For this reason, the function defaults with \code{adaptive_eps=TRUE}
  in which case the algorithm starts with a large epsilon, and then decreases it when new candidate solutions are
  not found, until the epsilon given by the argument \code{epsilon} is reached.
+}
+\examples{
+# A set of two (3x3) square matrices:
+set.seed(1)
+S1 <- array(rnorm(3*3*2), dim=c(3, 3, 2))
+
+# Bound the joint spectral radius of the set of matrices S1, with the
+# approximate tightness epsilon=0.001:
+bound_jsr_G(S1, epsilon=0.001, adaptive_eps=FALSE)
+
+# Obtain bounds faster with adaptive_eps=TRUE:
+bound_jsr_G(S1, epsilon=0.001, adaptive_eps=TRUE)
+# Note that the upper bound is not the same as with adaptive_eps=FALSE.
+
+# A set of three (3x3) square matrices:
+S2 <- array(rnorm(3*3*3), dim=c(3, 3, 3))
+
+# Bound the joint spectral radius of the set of matrices S2, with
+# conventional method, which is relatively slow:
+bound_jsr_G(S2, epsilon=0.02, adaptive_eps=FALSE)
+
+# Substantial speed-up with adaptive_eps=TRUE:
+bound_jsr_G(S2, epsilon=0.02, adaptive_eps=TRUE)
+# Again, the upper bound is not the same as with adaptive_eps=FALSE.
 }
 \references{
 \itemize{
@@ -61,8 +87,8 @@ The bounds are calculated using the Gripenberg's (1996) branch-and-bound method,
      234, 43–60.
    \item I.L. Kheifets, P.J. Saikkonen. 2020. Stationarity and ergodicity of Vector STAR models.
      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
-   \item R. Jungers (2023). The JSR toolbox (https://www.mathworks.com/matlabcentral/fileexchange/33202-the-jsr-toolbox),
-      MATLAB Central File Exchange.
  }
 }
-\keyword{internal}
+\seealso{
+\code{\link{bound_JSR}}
+}

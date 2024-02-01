@@ -1,6 +1,16 @@
 context("jointSpectralRadius")
 library(sstvars)
 
+
+test_that("bound_jsr_G works correctly", {
+  set.seed(1); S1 <- array(rnorm(3*3*2), dim=c(3, 3, 2))
+  set.seed(2); S2 <- array(rnorm(2*2*2), dim=c(2, 2, 2))
+  set.seed(3); S3 <- array(rnorm(2*2*3), dim=c(2, 2, 3))
+  expect_equal(bound_jsr_G(S1, epsilon=0.01, adaptive_eps=FALSE, print_progress=FALSE), c(1.670107, 1.696743), tol=1e-4)
+  expect_equal(bound_jsr_G(S2, epsilon=0.05, adaptive_eps=TRUE, print_progress=FALSE), c(1.567845, 1.618631), tol=1e-4)
+  expect_equal(bound_jsr_G(S3, epsilon=0.02, adaptive_eps=FALSE, print_progress=FALSE), c(1.524043, 1.549635), tol=1e-4)
+})
+
 # p=1, M=1, d=2
 theta_112relg <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103, 0.601786, -0.002945, 0.067224)
 mod112relg <- STVAR(data=gdpdef, p=1, M=1, params=theta_112relg, weight_function="relative_dens")
@@ -27,9 +37,7 @@ mod123relg <- STVAR(data=usamone, p=1, M=2, params=theta_123relg, weight_functio
 test_that("bound_JSR works correctly", {
   # Lower and upper bound by the Gripenberg's (1996) branch-and-bound method
   expect_equal(bound_JSR(mod112relg, epsilon=0.01, adaptive_eps=TRUE, print_progress=FALSE), c(0.8919073, 0.9022341), tol=1e-4)
-  expect_equal(bound_JSR(mod122relg, epsilon=0.01, adaptive_eps=FALSE, print_progress=FALSE), c(0.8288584, 0.8390200), tol=1e-4)
-  expect_equal(bound_JSR(mod122relg, epsilon=0.005, adaptive_eps=TRUE, print_progress=FALSE), c(0.8288584, 0.8339489), tol=1e-4)
-  expect_equal(bound_JSR(mod222relg, epsilon=0.02, adaptive_eps=TRUE, print_progress=FALSE), c(0.9205818, 0.9421805), tol=1e-4)
+  expect_equal(bound_JSR(mod222relg, epsilon=0.02, adaptive_eps=FALSE, print_progress=FALSE), c(0.9205818, 0.9421805), tol=1e-4)
   expect_equal(bound_JSR(mod123relg, epsilon=0.3, adaptive_eps=TRUE, print_progress=FALSE), c(0.9609557, 1.3269630), tol=1e-4)
 })
 

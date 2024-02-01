@@ -3,25 +3,27 @@
 #' @description \code{bound_jsr_G} calculates lowr and upper bounds for the joint spectral radious of a set of square matrices,
 #'  typically the "bold A" matrices, using the algorithm by Gripenberg (1996).
 #'
-#' @param S the set of matrices the bounds should be calculated for in an array, in VAR applications,
+#' @param S the set of matrices the bounds should be calculated for in an array, in STVAR applications,
 #'  all \eqn{((dp)x(dp))} "bold A" (companion form) matrices in a 3D array, so that \code{[, , m]} gives the matrix
 #'  the regime \code{m}.
 #' @param epsilon a strictly positive real number that approximately defines the goal of length of the interval between the lower
 #'   and upper bounds. A smaller epsilon value results in a narrower interval, thus providing better accuracy for the bounds,
-#'   but at the cost of increased computational effort.
+#'   but at the cost of increased computational effort. Note that the bounds are always wider than \code{epsilon} and it is not
+#'   obvious what \code{epsilon} should be chosen obtain bounds of specific tightness.
 #' @param adaptive_eps logical: if \code{TRUE}, starts with a large epsilon and then decreases it gradually whenever the progress
 #'   of the algorithm requires, until the value given in the argument \code{epsilon} is reached. Substantially speeds up the algorithm
-#'   but is an unconventional approach, and there is no guarantee that the final bounds converge to the tightness of the bounds given by
-#'   the argument \code{epsilon}.
+#'   but is an unconventional approach, and there is no guarantee that the algorithm converges appropriately towards bounds with the
+#'   tightness given by the argument \code{epsilon}.
 #' @param ncores the number of cores to be used in parallel computing.
 #' @param print_progress logical: should the progress of the algorithm be printed?
-#' @details The bounds are calculated using the Gripenberg's (1996) branch-and-bound method, which is also discussed
-#'  in Chand and Blondel (2013). Specifically, Kheifets and Saikkonen (2020) show that if the joint spectral radius
-#'  of the companion form AR matrices of the regimes is smaller than one, the STVAR process is ergodic stationary. Therefore,
-#'  if the upper bound is smaller than one, the process is stationary ergodic. However, as the condition is not
-#'  necessary but sufficient and also because the bound might be too conservative, upper bound larger than one
-#'  does not imply that the process is not ergodic stationary. You can try higher accuracy, and if the bound is
-#'  still larger than one, the result does not tell whether the process is ergodic stationary or not.
+#' @details The upper and lower bounds are calculated using the Gripenberg's (1996) branch-and-bound method, which is also discussed
+#'  in Chang and Blondel (2013). This function can be generally used for approximating the JSR of a set of square matrices, but the
+#'  main intention is STVAR applications (for models created with \code{sstvars}, the function \code{bound_JSR} should be preferred).
+#'  Specifically, Kheifets and Saikkonen (2020) show that if the joint spectral radius of the companion form AR matrices of the regimes
+#'  is smaller than one, the STVAR process is ergodic stationary. Therefore, if the upper bound is smaller than one, the process is
+#'  stationary ergodic. However, as the condition is not necessary but sufficient and also because the bound might be too conservative,
+#'  upper bound larger than one does not imply that the process is not ergodic stationary. You can try higher accuracy, and if the bound
+#'  is still larger than one, the result does not tell whether the process is ergodic stationary or not.
 #'
 #'  Note that with high precision (small \code{epsilon}), the computational effort required are substantial and
 #'  the estimation may take long, even though the function takes use of parallel computing. This is because
@@ -30,6 +32,7 @@
 #'  in which case the algorithm starts with a large epsilon, and then decreases it when new candidate solutions are
 #'  not found, until the epsilon given by the argument \code{epsilon} is reached.
 #' @return Returns an upper bound for the joint spectral radius of the "companion form AR matrices" of the regimes.
+#' @seealso \code{\link{bound_JSR}}
 #' @references
 #'  \itemize{
 #'  \item C-T Chang and V.D. Blondel. 2013 . An experimental study of approximation algorithms for the joint spectral radius.
@@ -38,10 +41,31 @@
 #'      234, 43–60.
 #'    \item I.L. Kheifets, P.J. Saikkonen. 2020. Stationarity and ergodicity of Vector STAR models.
 #'      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
-#'    \item R. Jungers (2023). The JSR toolbox (https://www.mathworks.com/matlabcentral/fileexchange/33202-the-jsr-toolbox),
-#'       MATLAB Central File Exchange.
 #'  }
-#' @keywords internal
+#' @examples
+#' # A set of two (3x3) square matrices:
+#' set.seed(1)
+#' S1 <- array(rnorm(3*3*2), dim=c(3, 3, 2))
+#'
+#' # Bound the joint spectral radius of the set of matrices S1, with the
+#' # approximate tightness epsilon=0.001:
+#' bound_jsr_G(S1, epsilon=0.001, adaptive_eps=FALSE)
+#'
+#' # Obtain bounds faster with adaptive_eps=TRUE:
+#' bound_jsr_G(S1, epsilon=0.001, adaptive_eps=TRUE)
+#' # Note that the upper bound is not the same as with adaptive_eps=FALSE.
+#'
+#' # A set of three (3x3) square matrices:
+#' S2 <- array(rnorm(3*3*3), dim=c(3, 3, 3))
+#'
+#' # Bound the joint spectral radius of the set of matrices S2, with
+#' # conventional method, which is relatively slow:
+#' bound_jsr_G(S2, epsilon=0.02, adaptive_eps=FALSE)
+#'
+#' # Substantial speed-up with adaptive_eps=TRUE:
+#' bound_jsr_G(S2, epsilon=0.02, adaptive_eps=TRUE)
+#' # Again, the upper bound is not the same as with adaptive_eps=FALSE.
+#' @export
 
 bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=TRUE, ncores=2, print_progress=TRUE) {
   n <- dim(S)[1] # The dimension of the n x n matrices
@@ -156,7 +180,7 @@ bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=TRUE, ncores=2, print_prog
   all_n_candidates <- array(NA, dim=maxit)  # The number of candidate matrix products in each iteration
   all_n_candidates[1] <- m # The number of candidate matrix products in the first iteration is the number of matrices in S
   which_new_candidates <- 1:m # The indices of the new candidate matrix products in the first iteration
-  all_matprod_inds_old <- matrix(1:2, ncol=2) # Initialize matrix for storing the indices of the matrices involved in the matrix prod
+  all_matprod_inds_old <- matrix(1:m, ncol=m) # Initialize matrix for storing the indices of the matrices involved in the matrix prod
 
   if(print_progress) {
     cat(paste0("Iteration: ", 1, ", current bounds: ", round(all_alpha[1], 4), ", ", round(all_beta[1], 4)), "\r")
@@ -187,7 +211,7 @@ bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=TRUE, ncores=2, print_prog
     ## Construct the new set of candidates MP, i.e., the products for which mu(MP) > alpha_{k-1} + epsilon
     which_new_candidates <- which(all_mu > all_alpha[k-1] + epsilon)
     if(length(which_new_candidates) == 0) {
-      if(epsilon == epsilon_goal) {
+      if(isTRUE(all.equal(epsilon, epsilon_goal))) {
         # If there are no new candidates with epsilon_goal, return the best bounds so far
         if(print_progress) cat("\nFinnished!                                         \n")
         break
@@ -206,18 +230,21 @@ bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=TRUE, ncores=2, print_prog
         # products that potentially copntribute to tighter bounds may have been discarded with the larger epsilon.
         while(TRUE) { # Decrease epsilon until epsilon_goal is obtained or new candidates are found
           if(epsilon/2 > epsilon_goal) {
-            epsilon <- epsilon/2 # Decrease epsilon
+            epsilon <- epsilon/2 # Decrease epsilon until candidates found or epsilon goal is met
           } else {
             epsilon <- epsilon_goal
           }
           which_new_candidates <- which(all_mu > all_alpha[k-1] + epsilon)
           if(length(which_new_candidates) > 0) {
-            break
-          } else if(length(which_new_candidates == 0) && epsilon == epsilon_goal) {
-            # If there are no new candidates with epsilon_goal, return the best bounds so far
-            if(print_progress) cat("\nFinnished!                                         \n")
-            break
+            break # Breaks the inner while loop if new candidates are found
+          } else if(length(which_new_candidates) == 0 && isTRUE(all.equal(epsilon, epsilon_goal))) {
+            break # Breaks the inner while loop if no new candidates are found and epsilon_goal is met
           }
+        }
+        if(length(which_new_candidates) == 0) {
+          # If there are no new candidates with epsilon_goal, return the best bounds so far
+          if(print_progress) cat("\nFinnished!                                         \n")
+          break
         }
       }
     }
@@ -278,6 +305,7 @@ bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=TRUE, ncores=2, print_prog
 #'  less tight but also speeds up the algorithm significantly. See Chang and Blondel (2013) for a discussion on variuous methods for
 #'  bounding the JSR.
 #' @return Returns lower and upper bounds for the joint spectral radius of the "companion form AR matrices" of the regimes.
+#' @seealso \code{\link{bound_jsr_G}}
 #' @references
 #'  \itemize{
 #'  \item Chang C-T, Blondel, V.D. 2013. An experimental study of approximation algorithms for the joint spectral radius.
