@@ -67,38 +67,12 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// get_multisets_Cpp
-arma::mat get_multisets_Cpp(int n, int d, arma::uword N);
-RcppExport SEXP _sstvars_get_multisets_Cpp(SEXP nSEXP, SEXP dSEXP, SEXP NSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< int >::type d(dSEXP);
-    Rcpp::traits::input_parameter< arma::uword >::type N(NSEXP);
-    rcpp_result_gen = Rcpp::wrap(get_multisets_Cpp(n, d, N));
-    return rcpp_result_gen;
-END_RCPP
-}
-// get_permanent_Cpp
-double get_permanent_Cpp(const arma::mat& A);
-RcppExport SEXP _sstvars_get_permanent_Cpp(SEXP ASEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type A(ASEXP);
-    rcpp_result_gen = Rcpp::wrap(get_permanent_Cpp(A));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_sstvars_Gaussian_densities_Cpp", (DL_FUNC) &_sstvars_Gaussian_densities_Cpp, 4},
     {"_sstvars_Gaussian_densities_const_Cpp", (DL_FUNC) &_sstvars_Gaussian_densities_const_Cpp, 3},
     {"_sstvars_Student_densities_Cpp", (DL_FUNC) &_sstvars_Student_densities_Cpp, 5},
     {"_sstvars_get_mu_yt_Cpp", (DL_FUNC) &_sstvars_get_mu_yt_Cpp, 4},
-    {"_sstvars_get_multisets_Cpp", (DL_FUNC) &_sstvars_get_multisets_Cpp, 3},
-    {"_sstvars_get_permanent_Cpp", (DL_FUNC) &_sstvars_get_permanent_Cpp, 1},
     {NULL, NULL, 0}
 };
 

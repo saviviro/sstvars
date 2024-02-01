@@ -7,10 +7,9 @@
 bound_JSR(
   stvar,
   epsilon = 0.01,
+  adaptive_eps = TRUE,
   ncores = 2,
-  print_progress = TRUE,
-  method = c("Gripenberg", "JP"),
-  JP_accuracy = c("0.707", "0.840", "0.917", "0.957", "0.978")
+  print_progress = TRUE
 )
 }
 \arguments{
@@ -20,14 +19,14 @@ bound_JSR(
 and upper bounds in Gripenberg's method. A smaller epsilon value results in a narrower interval, thus providing better
 accuracy for the bounds, but at the cost of increased computational effort.}
 
+\item{adaptive_eps}{logical: if \code{TRUE}, starts with a large epsilon and then decreases it gradually whenever the progress
+of the algorithm requires, until the value given in the argument \code{epsilon} is reached. Substantially speeds up the algorithm
+but is an unconventional approach, and there is no guarantee that the final bounds converge to the tightness of the bounds given by
+the argument \code{epsilon}.}
+
 \item{ncores}{the number of cores to be used in parallel computing in the Gripenberg's algorithm.}
 
 \item{print_progress}{logical: should the progress of the Gripenberg's algorithm be printed?}
-
-\item{method}{which method should be used for bounding the joint spectral radius? Gripenberg's method is highly recommended
-over JP (see the details section).}
-
-\item{JP_accuracy}{what should the relative accuracy of the upper bound of Jadabaie and Parrilo be (for \code{method="JP"})?}
 }
 \value{
 Returns lower and upper bounds for the joint spectral radius of the "companion form AR matrices" of the regimes.
@@ -79,19 +78,6 @@ bound_JSR(mod122, epsilon=0.01, method="Gripenberg")
 
 # If we want tighter bounds, we can set smaller epsilon, e.g., epsilon=0.001:
 bound_JSR(mod122, epsilon=0.001, method="Gripenberg")
-
-## Upper bound by the method of Jadbabaie and Parrilo (2008):
-# We start with the lowest relative accuracy to see if it is already enough
-# to verify that the JSR is smaller than one:
-bound_JSR(mod122, method="JP", JP_accuracy="0.707")
-# accuracy "0.707" gives a rough approximation, but the upper bound is already
-# smaller than one, so the sufficient condition for ergodic stationarity is
-# satisfied.
-
-# Higher accuracy gives tighter upper bound:
-bound_JSR(mod122, method="JP", JP_accuracy="0.840")
-bound_JSR(mod122, method="JP", JP_accuracy="0.917")
-# bound_JSR(mod122, method="JP", JP_accuracy="0.957") # Takes a while to compute!
 }
 \references{
 \itemize{
@@ -101,7 +87,5 @@ bound_JSR(mod122, method="JP", JP_accuracy="0.917")
      234, 43–60.
    \item Kheifets I.L., Saikkonen P.J. 2020. Stationarity and ergodicity of Vector STAR models.
      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
-   \item Parrilo P.A., Jadbabaie A. 2008. Approximation of the joint spectral
-      radius using sum of squares. \emph{Linear Algebra and its Applications}, \strong{428}, 2385-2402.
  }
 }
