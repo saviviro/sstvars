@@ -4,16 +4,27 @@
 \alias{bound_jsr_G}
 \title{Calculate upper bound for the joint spectral radius of a set of matrices}
 \usage{
-bound_jsr_G(S, epsilon = 0.01, ncores = 2, print_progress = TRUE)
+bound_jsr_G(
+  S,
+  epsilon = 0.01,
+  adaptive_eps = TRUE,
+  ncores = 2,
+  print_progress = TRUE
+)
 }
 \arguments{
 \item{S}{the set of matrices the bounds should be calculated for in an array, in VAR applications,
 all \eqn{((dp)x(dp))} "bold A" (companion form) matrices in a 3D array, so that \code{[, , m]} gives the matrix
 the regime \code{m}.}
 
-\item{epsilon}{a strictly positive real number that approximately defines the length of the interval between the lower
+\item{epsilon}{a strictly positive real number that approximately defines the goal of length of the interval between the lower
 and upper bounds in Gripenberg's method. A smaller epsilon value results in a narrower interval, thus providing better
 accuracy for the bounds, but at the cost of increased computational effort.}
+
+\item{adaptive_eps}{logical: if \code{TRUE}, starts with a large epsilon and then decreases it gradually whenever the progress
+of the algorithm requires, until the value given in the argument \code{epsilon} is reached. Substantially speeds up the algorithm
+but is an unconventional approach, and there is no guarantee that the final bounds converge to the tightness of the bounds given by
+the argument \code{epsilon}.}
 
 \item{ncores}{the number of cores to be used in parallel computing in the Gripenberg's algorithm.}
 
@@ -42,7 +53,7 @@ The bounds are calculated using the Gripenberg's (1996) branch-and-bound method,
  decreases it when new candidate solutions are not found, until the desired epsilon is reached.
 
  You can also try other implementations for bounding the joint spectral radius, for instance,
- the JSR toolbox in Matlab (Jungers 2023).
+ the JSR toolbox in MATLAB (Jungers 2023).
 }
 \references{
 \itemize{

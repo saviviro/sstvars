@@ -16,7 +16,7 @@ bound_JSR(
 \arguments{
 \item{stvar}{object of class \code{"stvar"}}
 
-\item{epsilon}{a strictly positive real number that approximately defines the length of the interval between the lower
+\item{epsilon}{a strictly positive real number that approximately defines the goal of length of the interval between the lower
 and upper bounds in Gripenberg's method. A smaller epsilon value results in a narrower interval, thus providing better
 accuracy for the bounds, but at the cost of increased computational effort.}
 

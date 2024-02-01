@@ -146,9 +146,13 @@ bound_jsr_JP <- function(all_boldA, accuracy=c("0.707", "0.840", "0.917", "0.957
 #' @param S the set of matrices the bounds should be calculated for in an array, in VAR applications,
 #'  all \eqn{((dp)x(dp))} "bold A" (companion form) matrices in a 3D array, so that \code{[, , m]} gives the matrix
 #'  the regime \code{m}.
-#' @param epsilon a strictly positive real number that approximately defines the length of the interval between the lower
+#' @param epsilon a strictly positive real number that approximately defines the goal of length of the interval between the lower
 #'   and upper bounds in Gripenberg's method. A smaller epsilon value results in a narrower interval, thus providing better
 #'   accuracy for the bounds, but at the cost of increased computational effort.
+#' @param adaptive_eps logical: if \code{TRUE}, starts with a large epsilon and then decreases it gradually whenever the progress
+#'   of the algorithm requires, until the value given in the argument \code{epsilon} is reached. Substantially speeds up the algorithm
+#'   but is an unconventional approach, and there is no guarantee that the final bounds converge to the tightness of the bounds given by
+#'   the argument \code{epsilon}.
 #' @param ncores the number of cores to be used in parallel computing in the Gripenberg's algorithm.
 #' @param print_progress logical: should the progress of the Gripenberg's algorithm be printed?
 #' @details The bounds are calculated using the Gripenberg's (1996) branch-and-bound method, which is also discussed
@@ -166,7 +170,7 @@ bound_jsr_JP <- function(all_boldA, accuracy=c("0.707", "0.840", "0.917", "0.957
 #'  decreases it when new candidate solutions are not found, until the desired epsilon is reached.
 #'
 #'  You can also try other implementations for bounding the joint spectral radius, for instance,
-#'  the JSR toolbox in Matlab (Jungers 2023).
+#'  the JSR toolbox in MATLAB (Jungers 2023).
 #' @return Returns an upper bound for the joint spectral radius of the "companion form AR matrices" of the regimes.
 #' @references
 #'  \itemize{
@@ -181,7 +185,7 @@ bound_jsr_JP <- function(all_boldA, accuracy=c("0.707", "0.840", "0.917", "0.957
 #'  }
 #' @keywords internal
 
-bound_jsr_G <- function(S, epsilon=0.01, ncores=2, print_progress=TRUE) {
+bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=TRUE, ncores=2, print_progress=TRUE) {
   n <- dim(S)[1] # The dimension of the n x n matrices
   m <- dim(S)[3] # The number of matrices
   maxit <- 1000 # Maximum number of iterations (just some large number)
@@ -193,7 +197,7 @@ bound_jsr_G <- function(S, epsilon=0.01, ncores=2, print_progress=TRUE) {
     cat("ncores was set larger than the number of cores available in the system. Using", ncores, "cores.\n")
   }
   epsilon_goal <- epsilon # The epsilon value that we want to achieve
-  if(epsilon < 0.2) {
+  if(adaptive_eps && epsilon < 0.2) {
     epsilon <- 0.2 # The epsilon value that we use in the algorithm (can be larger than epsilon_goal)
   }
 
@@ -331,6 +335,17 @@ bound_jsr_G <- function(S, epsilon=0.01, ncores=2, print_progress=TRUE) {
         break
       } else {
         # If no new candidates with the larger epsilon, switch to smaller epsilon
+        # NOTE: The bounds obtained with the initial epsilon are valid by Gripenberg's (1996) Theorem 3.
+        # When the epsilon decreases, we kind of restart the algorithm with the difference that instead of
+        # using the matrices in S as the initial set of candidate "products", we use the candidate products found
+        # with the larger epsilon. In the proof of Theorem 3, Gripenberg (1996) shows that the upper bound
+        # is valid for arbitrary set of candidate products comprised of the matrices in S. Smaller epsilon discards
+        # less candidate products, and candidate products that were not discarded by a larger epsilon would anyway be
+        # in the set of candidate products when running the algorithm with the smaller epsilon. Taking max
+        # (or sup) over the mu-values obtained with the decreased set of candidate products that is a subset of the larger set
+        # cannot be larger than the max over the larger set. Therefore, the bounds obtained with the decreased epsilon should
+        # be valid. However, the asymptotic converge to bounds of desired tightness is not guaranteed, since some of the candidate
+        # products that potentially copntribute to tighter bounds may have been discarded with the larger epsilon.
         while(TRUE) { # Decrease epsilon until epsilon_goal is obtained or new candidates are found
           if(epsilon/2 > epsilon_goal) {
             epsilon <- epsilon/2 # Decrease epsilon
