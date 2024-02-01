@@ -73,7 +73,7 @@
 bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=FALSE, ncores=2, print_progress=TRUE) {
   n <- dim(S)[1] # The dimension of the n x n matrices
   m <- dim(S)[3] # The number of matrices
-  maxit <- 7 # Maximum number of iterations (just some large number)
+  maxit <- 1000 # Maximum number of iterations (just some large number)
   all_alpha <- array(NA, dim=maxit) # Storage for the lower bound in each iteration
   all_beta <- array(NA, dim=maxit)  # Storage for the upper bound in each iteration
   stopifnot(length(ncores) == 1 && ncores %% 1 == 0 && ncores > 0)
