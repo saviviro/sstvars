@@ -64,19 +64,19 @@
 #'  }
 #' @examples
 #' \donttest{
-#' ## These are long running examples. A small number of bootstrap replications
-#' ## is used below to shorten the running time (in practice, a larger number of
-#' ## replications should be used).
+#' ## These are long running examples that take approximately 10 seconds to run.
+#' ## A small number of bootstrap replications is used below to shorten the
+#' ## running time (in practice, a larger number of replications should be used).
 #'
 #' # p=1, M=1, d=2, linear Gaussian VAR model, shocks identified recursively.
 #' theta_112relg <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103,
 #'   0.601786, -0.002945, 0.067224)
-#' mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112relg)
+#' mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112relg, identification="recursive")
 #'
 #' # Estimate IRFs 20 periods ahead, bootstrapped 90% confidence bounds based on
 #' # 10 bootstrap replications. Linear model so robust estimation methods are
 #' # not required.
-#' irf1 <- linear_IRF(stvar=mod112, N=20, regime=1, ci=0.90, ncores=1,
+#' irf1 <- linear_IRF(stvar=mod112, N=20, regime=1, ci=0.90,
 #'  bootstrap_reps=10, robust_method="none", seed=1)
 #' plot(irf1)
 #' print(irf1, digits=3)
@@ -86,18 +86,17 @@
 #' theta_122relg <- c(0.734054, 0.225598, 0.705744, 0.187897, 0.259626, -0.000863,
 #'   -0.3124, 0.505251, 0.298483, 0.030096, -0.176925, 0.838898, 0.310863, 0.007512,
 #'   0.018244, 0.949533, -0.016941, 0.121403, 0.573269)
-#' mod122 <- STVAR(data=gdpdef, p=1, M=2, params=theta_122relg)
+#' mod122 <- STVAR(data=gdpdef, p=1, M=2, params=theta_122relg, identification="recursive")
 #'
 #' # Estimate IRF based on the first regime 30 period ahead. Scale IRFs so that
 #' # the instantaneous response of the first variable to the first shock is 0.3,
 #' # and the response of the second variable to the second shock is 0.5.
 #' # response of the Confidence bounds
 #' # are not available since the autoregressive dynamics are nonlinear.
-#' irf2 <- linear_IRF(stvar=mod122, N=30, regime=1, scale=cbind(c(1, 1, 0.3),
-#'                                                              c(2, 2, 0.5)))
+#' irf2 <- linear_IRF(stvar=mod122, N=30, regime=1, scale=cbind(c(1, 1, 0.3), c(2, 2, 0.5)))
 #' plot(irf2)
 #'
-#  # Estimate IRF based on the second regime without scaling the IRFs:
+#'  # Estimate IRF based on the second regime without scaling the IRFs:
 #' irf3 <- linear_IRF(stvar=mod122, N=30, regime=2)
 #' plot(irf3)
 #'
@@ -115,7 +114,7 @@
 #'
 #' ## Estimate IRFs 30 periods ahead, bootstrapped 90% confidence bounds based on
 #' # 10 bootstrap replications. Responses of the second variable are accumulated.
-#' irf4 <- linear_IRF(stvar=mod322, N=30, regime=1, ci=0.90, ncores=1, bootstrap_reps=10,
+#' irf4 <- linear_IRF(stvar=mod322, N=30, regime=1, ci=0.90, bootstrap_reps=10,
 #'  which_cumulative=2, seed=1)
 #' plot(irf4)
 #' }

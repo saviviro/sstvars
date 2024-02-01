@@ -52,11 +52,13 @@ A sufficient condition for ergodic stationarity of the STVAR processes implement
  on variuous methods for bounding the JSR.
 }
 \examples{
-# p=1, M=2, d=2, relative dens weight function
+# Gaussian STVAR p=1, M=2 model with weighted relative stationary densities
+# of the regimes as the transition weight function:
 theta_122relg <- c(0.734054, 0.225598, 0.705744, 0.187897, 0.259626, -0.000863,
   -0.3124, 0.505251, 0.298483, 0.030096, -0.176925, 0.838898, 0.310863, 0.007512,
   0.018244, 0.949533, -0.016941, 0.121403, 0.573269)
 mod122 <- STVAR(data=gdpdef, p=1, M=2, params=theta_122relg)
+
 # Absolute values of the eigenvalues of the "companion form AR matrices":
 summary(mod122)$abs_boldA_eigens
 # It is a necessary (but not sufficient!) condition for ergodic stationary that
@@ -64,20 +66,20 @@ summary(mod122)$abs_boldA_eigens
 # for all of the regimes. A sufficient (but not necessary) condition for
 # ergodic stationary is that the joint spectral radius of the companion form
 # AR matrices" of the regimes is smaller than one. Therefore, we calculate
-# an upper (and lower) bound for the joint spectral radius.
+# bounds for the joint spectral radius.
 
 ## Bounds by Gripenberg's (1996) branch-and-bound method:
 # Since the largest modulus of the companion form AR matrices is not very close
 # to one, we likely won't need very thight bounds to verify the JSR is smaller
-# than one. Thus, we set epsilon=0.01 so that the interval between the lower
-# and upper bound is roughly 0.01:
+# than one. Thus, using a small epsilon would make the algorithm unnecessarily slow,
+# so we use the (still quite small) epsilon=0.01:
 bound_JSR(mod122, epsilon=0.01, adaptive_eps=FALSE)
 # The upper bound is smaller than one, so the model is ergodic stationary.
 
 # If we want tighter bounds, we can set smaller epsilon, e.g., epsilon=0.001:
 bound_JSR(mod122, epsilon=0.001, adaptive_eps=FALSE)
 
-# Using adaptive_eps=TRUE substantially speeds up the algorithm when the model
+# Using adaptive_eps=TRUE usually speeds up the algorithm when the model
 # is large, but with the small model here, the speed-difference is small:
 bound_JSR(mod122, epsilon=0.001, adaptive_eps=TRUE)
 }

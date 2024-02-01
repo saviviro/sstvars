@@ -24,6 +24,8 @@ Tests the constraints imposed in the model given in the argument \code{stvar}.
 }
 \examples{
 \donttest{
+## These are long running examples that take approximately 10 seconds to run.
+
 # Logistic Student's t STVAR with p=1, M=2, and the first lag of the second variable
 # as the switching variable.
 
@@ -40,7 +42,7 @@ fit12w <- STVAR(data=gdpdef, p=1, M=2, params=params12w, weight_function="logist
  weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(1, 0)))
 fit12w
 
-# Test the null:
+# Test the null hypothesis of the location parameter equal 1:
 Rao_test(fit12w)
 
 ## Test whether the means and AR matrices are identical across the regimes:
@@ -55,7 +57,7 @@ fit12cm <- STVAR(data=gdpdef, p=1, M=2, params=params12cm, weight_function="logi
  weightfun_pars=c(2, 1), parametrization="mean", cond_dist="Student",
  mean_constraints=list(1:2), AR_constraints=rbind(diag(4), diag(4)))
 
-# Test the null:
+# Test the null hypothesis of the means and AR matrices being identical across the regimes:
 Rao_test(fit12cm)
 }
 }
