@@ -11,9 +11,9 @@
 #'   but at the cost of increased computational effort. Note that the bounds are always wider than \code{epsilon} and it is not
 #'   obvious what \code{epsilon} should be chosen obtain bounds of specific tightness.
 #' @param adaptive_eps logical: if \code{TRUE}, starts with a large epsilon and then decreases it gradually whenever the progress
-#'   of the algorithm requires, until the value given in the argument \code{epsilon} is reached. Substantially speeds up the algorithm
-#'   but is an unconventional approach, and there is no guarantee that the algorithm converges appropriately towards bounds with the
-#'   tightness given by the argument \code{epsilon}.
+#'   of the algorithm requires, until the value given in the argument \code{epsilon} is reached. Usually speeds up the algorithm
+#'   substantially but is an unconventional approach, and there is no guarantee that the algorithm converges appropriately towards
+#'   bounds with the tightness given by the argument \code{epsilon}.
 #' @param ncores the number of cores to be used in parallel computing.
 #' @param print_progress logical: should the progress of the algorithm be printed?
 #' @details The upper and lower bounds are calculated using the Gripenberg's (1996) branch-and-bound method, which is also discussed
@@ -28,7 +28,7 @@
 #'  Note that with high precision (small \code{epsilon}), the computational effort required are substantial and
 #'  the estimation may take long, even though the function takes use of parallel computing. This is because
 #'  with small epsilon the the number of candidate solutions in each iteration may grow exponentially and a large
-#'  number of iterations may be required. For this reason, the function defaults with \code{adaptive_eps=TRUE}
+#'  number of iterations may be required. For this reason, \code{adaptive_eps=TRUE} can be considered for large matrices,
 #'  in which case the algorithm starts with a large epsilon, and then decreases it when new candidate solutions are
 #'  not found, until the epsilon given by the argument \code{epsilon} is reached.
 #' @return Returns an upper bound for the joint spectral radius of the "companion form AR matrices" of the regimes.
@@ -43,34 +43,37 @@
 #'      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
 #'  }
 #' @examples
-#' # A set of two (3x3) square matrices:
-#' set.seed(1)
-#' S1 <- array(rnorm(3*3*2), dim=c(3, 3, 2))
+#' # A set of two (5x5) square matrices:
+#' set.seed(1); S1 <- array(rnorm(20*20*2), dim=c(5, 5, 2))
 #'
 #' # Bound the joint spectral radius of the set of matrices S1, with the
-#' # approximate tightness epsilon=0.001:
-#' bound_jsr_G(S1, epsilon=0.001, adaptive_eps=FALSE)
+#' # approximate tightness epsilon=0.01:
+#' bound_jsr_G(S1, epsilon=0.01, adaptive_eps=FALSE)
 #'
 #' # Obtain bounds faster with adaptive_eps=TRUE:
-#' bound_jsr_G(S1, epsilon=0.001, adaptive_eps=TRUE)
+#' bound_jsr_G(S1, epsilon=0.01, adaptive_eps=TRUE)
 #' # Note that the upper bound is not the same as with adaptive_eps=FALSE.
 #'
 #' # A set of three (3x3) square matrices:
-#' S2 <- array(rnorm(3*3*3), dim=c(3, 3, 3))
+#' set.seed(2); S2 <- array(rnorm(3*3*3), dim=c(3, 3, 3))
 #'
-#' # Bound the joint spectral radius of the set of matrices S2, with
-#' # conventional method, which is relatively slow:
-#' bound_jsr_G(S2, epsilon=0.02, adaptive_eps=FALSE)
+#' # Bound the joint spectral radius of the set of matrices S2:
+#' bound_jsr_G(S2, epsilon=0.01, adaptive_eps=FALSE)
 #'
-#' # Substantial speed-up with adaptive_eps=TRUE:
-#' bound_jsr_G(S2, epsilon=0.02, adaptive_eps=TRUE)
-#' # Again, the upper bound is not the same as with adaptive_eps=FALSE.
+#' # Larger epsilon terminates the iteration earlier and results in wider bounds:
+#' bound_jsr_G(S2, epsilon=0.05, adaptive_eps=FALSE)
+#'
+#' # A set of eight (2x2) square matrices:
+#' set.seed(3); S3 <- array(rnorm(2*2*8), dim=c(2, 2, 8))
+#'
+#' # Bound the joint spectral radius of the set of matrices S3:
+#' bound_jsr_G(S3, epsilon=0.01, adaptive_eps=FALSE)
 #' @export
 
-bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=TRUE, ncores=2, print_progress=TRUE) {
+bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=FALSE, ncores=2, print_progress=TRUE) {
   n <- dim(S)[1] # The dimension of the n x n matrices
   m <- dim(S)[3] # The number of matrices
-  maxit <- 1000 # Maximum number of iterations (just some large number)
+  maxit <- 7 # Maximum number of iterations (just some large number)
   all_alpha <- array(NA, dim=maxit) # Storage for the lower bound in each iteration
   all_beta <- array(NA, dim=maxit)  # Storage for the upper bound in each iteration
   stopifnot(length(ncores) == 1 && ncores %% 1 == 0 && ncores > 0)
@@ -80,7 +83,7 @@ bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=TRUE, ncores=2, print_prog
   }
   epsilon_goal <- epsilon # The epsilon value that we want to achieve
   if(adaptive_eps && epsilon < 0.2) {
-    epsilon <- 0.2 # The epsilon value that we use in the algorithm (can be larger than epsilon_goal)
+    epsilon <- 0.2 # The initial epsilon value that we use in the algorithm (can be larger than epsilon_goal)
   }
 
   ### Step 0: create functions and storages used in the algorithm
@@ -227,7 +230,9 @@ bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=TRUE, ncores=2, print_prog
         # (or sup) over the mu-values obtained with the decreased set of candidate products that is a subset of the larger set
         # cannot be larger than the max over the larger set. Therefore, the bounds obtained with the decreased epsilon should
         # be valid. However, the asymptotic converge to bounds of desired tightness is not guaranteed, since some of the candidate
-        # products that potentially copntribute to tighter bounds may have been discarded with the larger epsilon.
+        # products that potentially contribute to tighter bounds may have been discarded with the larger epsilon.
+        # ALSO NOTE: Sometimes the algorithm takes longer and converges closer to the desired tightness because the lower bound
+        # increases slower, leading to more iterations that tighten the upper bound.
         while(TRUE) { # Decrease epsilon until epsilon_goal is obtained or new candidates are found
           if(epsilon/2 > epsilon_goal) {
             epsilon <- epsilon/2 # Decrease epsilon until candidates found or epsilon goal is met
@@ -298,12 +303,12 @@ bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=TRUE, ncores=2, print_prog
 #'
 #'  Implements the branch-and-bound method by Gripenberg (1996) in the conventional form (\code{adaptive_eps=FALSE}) and in a form
 #'  incorporating "adaptive tightness" (\code{adaptive_eps=FALSE}). The latter approach is unconventional and does not guarantee
-#'  that the bounds converge close to the desired tightness given in the argument \code{epsilon}, but it substantially speeds up
-#'  the algorithm. When \code{print_progress==TRUE}, the tightest bounds found so-far are printed in each iteration of the algorithm,
-#'  so you can also just terminate the algorithm when the bounds are tight enough for your purposes. Consider also
-#'  adjusting the argument \code{epsilon}, in particular when \code{adaptive_eps=FALSE}, as larger epsilon does not just make the bounds
-#'  less tight but also speeds up the algorithm significantly. See Chang and Blondel (2013) for a discussion on variuous methods for
-#'  bounding the JSR.
+#'  appropriate convergence of the bounds close to the desired tightness given in the argument \code{epsilon}, but it usually
+#'  substantially speeds up the algorithm. When \code{print_progress==TRUE}, the tightest bounds found so-far are printed in each
+#'  iteration of the algorithm, so you can also just terminate the algorithm when the bounds are tight enough for your purposes.
+#'  Consider also adjusting the argument \code{epsilon}, in particular when \code{adaptive_eps=FALSE}, as larger epsilon does not
+#'  just make the bounds less tight but also speeds up the algorithm significantly. See Chang and Blondel (2013) for a discussion
+#'  on variuous methods for bounding the JSR.
 #' @return Returns lower and upper bounds for the joint spectral radius of the "companion form AR matrices" of the regimes.
 #' @seealso \code{\link{bound_jsr_G}}
 #' @references
@@ -346,7 +351,7 @@ bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=TRUE, ncores=2, print_prog
 #' bound_JSR(mod122, epsilon=0.001, adaptive_eps=TRUE)
 #' @export
 
-bound_JSR <- function(stvar, epsilon=0.01, adaptive_eps=TRUE, ncores=2, print_progress=TRUE) {
+bound_JSR <- function(stvar, epsilon=0.01, adaptive_eps=FALSE, ncores=2, print_progress=TRUE) {
   check_stvar(stvar)
   stopifnot(is.numeric(epsilon) && epsilon > 0)
   all_A <- pick_allA(p=stvar$model$p, M=stvar$model$M, d=stvar$model$d, params=stvar$params)

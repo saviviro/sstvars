@@ -7,7 +7,7 @@
 bound_JSR(
   stvar,
   epsilon = 0.01,
-  adaptive_eps = TRUE,
+  adaptive_eps = FALSE,
   ncores = 2,
   print_progress = TRUE
 )
@@ -21,9 +21,9 @@ but at the cost of increased computational effort. Note that the bounds are alwa
 obvious what \code{epsilon} should be chosen obtain bounds of specific tightness.}
 
 \item{adaptive_eps}{logical: if \code{TRUE}, starts with a large epsilon and then decreases it gradually whenever the progress
-of the algorithm requires, until the value given in the argument \code{epsilon} is reached. Substantially speeds up the algorithm
-but is an unconventional approach, and there is no guarantee that the algorithm converges appropriately towards bounds with the
-tightness given by the argument \code{epsilon}.}
+of the algorithm requires, until the value given in the argument \code{epsilon} is reached. Usually speeds up the algorithm
+substantially but is an unconventional approach, and there is no guarantee that the algorithm converges appropriately towards
+bounds with the tightness given by the argument \code{epsilon}.}
 
 \item{ncores}{the number of cores to be used in parallel computing.}
 
@@ -44,12 +44,12 @@ A sufficient condition for ergodic stationarity of the STVAR processes implement
 
  Implements the branch-and-bound method by Gripenberg (1996) in the conventional form (\code{adaptive_eps=FALSE}) and in a form
  incorporating "adaptive tightness" (\code{adaptive_eps=FALSE}). The latter approach is unconventional and does not guarantee
- that the bounds converge close to the desired tightness given in the argument \code{epsilon}, but it substantially speeds up
- the algorithm. When \code{print_progress==TRUE}, the tightest bounds found so-far are printed in each iteration of the algorithm,
- so you can also just terminate the algorithm when the bounds are tight enough for your purposes. Consider also
- adjusting the argument \code{epsilon}, in particular when \code{adaptive_eps=FALSE}, as larger epsilon does not just make the bounds
- less tight but also speeds up the algorithm significantly. See Chang and Blondel (2013) for a discussion on variuous methods for
- bounding the JSR.
+ appropriate convergence of the bounds close to the desired tightness given in the argument \code{epsilon}, but it usually
+ substantially speeds up the algorithm. When \code{print_progress==TRUE}, the tightest bounds found so-far are printed in each
+ iteration of the algorithm, so you can also just terminate the algorithm when the bounds are tight enough for your purposes.
+ Consider also adjusting the argument \code{epsilon}, in particular when \code{adaptive_eps=FALSE}, as larger epsilon does not
+ just make the bounds less tight but also speeds up the algorithm significantly. See Chang and Blondel (2013) for a discussion
+ on variuous methods for bounding the JSR.
 }
 \examples{
 # p=1, M=2, d=2, relative dens weight function

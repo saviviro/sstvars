@@ -7,7 +7,7 @@
 bound_jsr_G(
   S,
   epsilon = 0.01,
-  adaptive_eps = TRUE,
+  adaptive_eps = FALSE,
   ncores = 2,
   print_progress = TRUE
 )
@@ -23,9 +23,9 @@ but at the cost of increased computational effort. Note that the bounds are alwa
 obvious what \code{epsilon} should be chosen obtain bounds of specific tightness.}
 
 \item{adaptive_eps}{logical: if \code{TRUE}, starts with a large epsilon and then decreases it gradually whenever the progress
-of the algorithm requires, until the value given in the argument \code{epsilon} is reached. Substantially speeds up the algorithm
-but is an unconventional approach, and there is no guarantee that the algorithm converges appropriately towards bounds with the
-tightness given by the argument \code{epsilon}.}
+of the algorithm requires, until the value given in the argument \code{epsilon} is reached. Usually speeds up the algorithm
+substantially but is an unconventional approach, and there is no guarantee that the algorithm converges appropriately towards
+bounds with the tightness given by the argument \code{epsilon}.}
 
 \item{ncores}{the number of cores to be used in parallel computing.}
 
@@ -51,33 +51,36 @@ The upper and lower bounds are calculated using the Gripenberg's (1996) branch-a
  Note that with high precision (small \code{epsilon}), the computational effort required are substantial and
  the estimation may take long, even though the function takes use of parallel computing. This is because
  with small epsilon the the number of candidate solutions in each iteration may grow exponentially and a large
- number of iterations may be required. For this reason, the function defaults with \code{adaptive_eps=TRUE}
+ number of iterations may be required. For this reason, \code{adaptive_eps=TRUE} can be considered for large matrices,
  in which case the algorithm starts with a large epsilon, and then decreases it when new candidate solutions are
  not found, until the epsilon given by the argument \code{epsilon} is reached.
 }
 \examples{
-# A set of two (3x3) square matrices:
-set.seed(1)
-S1 <- array(rnorm(3*3*2), dim=c(3, 3, 2))
+# A set of two (5x5) square matrices:
+set.seed(1); S1 <- array(rnorm(20*20*2), dim=c(5, 5, 2))
 
 # Bound the joint spectral radius of the set of matrices S1, with the
-# approximate tightness epsilon=0.001:
-bound_jsr_G(S1, epsilon=0.001, adaptive_eps=FALSE)
+# approximate tightness epsilon=0.01:
+bound_jsr_G(S1, epsilon=0.01, adaptive_eps=FALSE)
 
 # Obtain bounds faster with adaptive_eps=TRUE:
-bound_jsr_G(S1, epsilon=0.001, adaptive_eps=TRUE)
+bound_jsr_G(S1, epsilon=0.01, adaptive_eps=TRUE)
 # Note that the upper bound is not the same as with adaptive_eps=FALSE.
 
 # A set of three (3x3) square matrices:
-S2 <- array(rnorm(3*3*3), dim=c(3, 3, 3))
+set.seed(2); S2 <- array(rnorm(3*3*3), dim=c(3, 3, 3))
 
-# Bound the joint spectral radius of the set of matrices S2, with
-# conventional method, which is relatively slow:
-bound_jsr_G(S2, epsilon=0.02, adaptive_eps=FALSE)
+# Bound the joint spectral radius of the set of matrices S2:
+bound_jsr_G(S2, epsilon=0.01, adaptive_eps=FALSE)
 
-# Substantial speed-up with adaptive_eps=TRUE:
-bound_jsr_G(S2, epsilon=0.02, adaptive_eps=TRUE)
-# Again, the upper bound is not the same as with adaptive_eps=FALSE.
+# Larger epsilon terminates the iteration earlier and results in wider bounds:
+bound_jsr_G(S2, epsilon=0.05, adaptive_eps=FALSE)
+
+# A set of eight (2x2) square matrices:
+set.seed(3); S3 <- array(rnorm(2*2*8), dim=c(2, 2, 8))
+
+# Bound the joint spectral radius of the set of matrices S3:
+bound_jsr_G(S3, epsilon=0.01, adaptive_eps=FALSE)
 }
 \references{
 \itemize{
