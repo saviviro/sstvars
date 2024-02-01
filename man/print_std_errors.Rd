@@ -29,10 +29,15 @@ print_std_errors(stvar, digits = 3)
 }
 \examples{
 \donttest{
-# STVAR p=1, M=2 models
-mod12 <- fitSTVAR(gdpdef, p=1, M=2, nrounds=1, seeds=4)
-mod12
-print_std_errors(mod12)
+## These are long-running examples that take approximately 30 seconds to run.
+
+# Gaussian STVAR p=1, M=2, model with weighted relative stationary densities
+# of the regimes as the transition weight function:
+mod12 <- fitSTVAR(gdpdef, p=1, M=2, nrounds=1, seeds=4) # Estimate the model
+mod12 # Print the estimates
+print_std_errors(mod12) # Print approximate standard errors of the estimates
+# Note that the standard errors are based on the assumption of the standard
+# asymptotic limiting Gaussian distribution of the estimator.
 }
 }
 \references{

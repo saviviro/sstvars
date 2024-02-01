@@ -62,7 +62,7 @@ When the number of parameters is large, it might be better to plot a smaller num
 The red vertical line points the estimate.
 }
 \examples{
-# Threhold STVAR, p=1, M=2, the first lag of the second variable as switching variable:
+# Threshold STVAR with p=1, M=2, the first lag of the second variable as switching variable:
 pars <- c(0.5231, 0.1015, 1.9471, 0.3253, 0.3476, 0.0649, -0.035, 0.7513, 0.1651,
  -0.029, -0.7947, 0.7925, 0.4233, 5e-04, 0.0439, 1.2332, -0.0402, 0.1481, 1.2036)
 mod12thres <- STVAR(data=gdpdef, p=1, M=2, params=pars, weight_function="threshold",

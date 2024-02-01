@@ -226,20 +226,53 @@ The plot displays the time series together with estimated transition weights.
 }
 
 \examples{
-# p=1, M=1, d=2, linear VAR
-theta_112relg <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103,
-  0.601786, -0.002945, 0.067224)
-mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112relg)
-summary(mod112)
+# Below examples use the example data "gdpdef", which is a two-variate quarterly data
+# of U.S. GDP and GDP implicit price deflator covering the period from 1959Q1 to 2019Q4.
 
-# p=1, M=2, d=2, relative dens weight function
+# Gaussian STVAR p=1, M=2, model with the weighted relative stationary densities
+# of the regimes as the transition weight function:
 theta_122relg <- c(0.734054, 0.225598, 0.705744, 0.187897, 0.259626, -0.000863,
   -0.3124, 0.505251, 0.298483, 0.030096, -0.176925, 0.838898, 0.310863, 0.007512,
   0.018244, 0.949533, -0.016941, 0.121403, 0.573269)
 mod122 <- STVAR(data=gdpdef, p=1, M=2, params=theta_122relg)
-summary(mod122)
-plot(mod122)
-plot(mod122, plot_type="cond_mean")
+print(mod122) # Printout of the model
+summary(mod122) # Summary printout
+plot(mod122) # Plot the transition weights
+plot(mod122, plot_type="cond_mean") # Plot one-step conditional means
+
+# Logistic Student's t STVAR with p=1, M=2, and the first lag of the second variable
+# as the switching variable:
+params12 <- c(0.62906848, 0.14245295, 2.41245785, 0.66719269, 0.3534745, 0.06041779, -0.34909745,
+  0.61783824, 0.125769, -0.04094521, -0.99122586, 0.63805416, 0.371575, 0.00314754, 0.03440824,
+  1.29072533, -0.06067807, 0.18737385, 1.21813844, 5.00884263, 7.70111672)
+fit12 <- STVAR(data=gdpdef, p=1, M=2, params=params12, weight_function="logistic",
+  weightfun_pars=c(2, 1), cond_dist="Student")
+summary(fit12) # Summary printout
+plot(fit12) # Plot the transition weights
+
+# Threshold STVAR with p=1, M=2, the first lag of the second variable as switching variable:
+params12thres <- c(0.5231, 0.1015, 1.9471, 0.3253, 0.3476, 0.0649, -0.035, 0.7513, 0.1651,
+ -0.029, -0.7947, 0.7925, 0.4233, 5e-04, 0.0439, 1.2332, -0.0402, 0.1481, 1.2036)
+mod12thres <- STVAR(data=gdpdef, p=1, M=2, params=params12thres, weight_function="threshold",
+  weightfun_pars=c(2, 1))
+mod12thres # Printout of the model
+
+# Student's t logistic STVAR with p=2, M=2 with the second lag of the second variable
+# as the switching variable and structural shocks identified by heteroskedasticity;
+# the model created without data:
+params22log <- c(0.357, 0.107, 0.356, 0.086, 0.14, 0.035, -0.165, 0.387, 0.452,
+ 0.013, 0.228, 0.336, 0.239, 0.024, -0.021, 0.708, 0.063, 0.027, 0.009, 0.197,
+  -0.03, 0.24, -0.76, -0.02, 3.36, 0.86, 0.1, 0.2, 7)
+mod222logtsh <- STVAR(p=2, M=2, d=2, params=params22log,
+weight_function="logistic", weightfun_pars=c(2, 2), cond_dist="Student",
+identification="heteroskedasticity")
+print(mod222logtsh) # Printout of the model
+
+# Linear Gaussian VAR(p=1) model:
+theta_112 <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103,
+  0.601786, -0.002945, 0.067224)
+mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112)
+summary(mod112) # Summary printout
 }
 \references{
 \itemize{
