@@ -60,7 +60,7 @@ mod222logt4
 \references{
 \itemize{
    \item Lütkepohl H., Netšunajev A. 2018. Structural vector autoregressions with smooth transition in variances.
-     \emp{Journal of Economic Dynamics & Control}, \strong{84}, 43-57.
+     \emph{Journal of Economic Dynamics & Control}, \strong{84}, 43-57.
  }
 }
 \seealso{

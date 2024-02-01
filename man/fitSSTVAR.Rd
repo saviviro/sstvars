@@ -116,7 +116,7 @@ fit32cmls_hs3 <- fitSSTVAR(fit32cmls_hs2, identification="heteroskedasticity",
    \item Kilian L., Lütkepohl H. 20017. Structural Vector Autoregressive Analysis. 1st edition.
    \emph{Cambridge University Press}, Cambridge.
    \item Lütkepohl H., Netšunajev A. 2017. Structural vector autoregressions with smooth transition in variances.
-     \emp{Journal of Economic Dynamics & Control}, \strong{84}, 43-57.
+     \emph{Journal of Economic Dynamics & Control}, \strong{84}, 43-57.
  }
 }
 \seealso{

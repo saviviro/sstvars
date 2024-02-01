@@ -148,7 +148,7 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
 #'    \item Kilian L., Lütkepohl H. 20017. Structural Vector Autoregressive Analysis. 1st edition.
 #'    \emph{Cambridge University Press}, Cambridge.
 #'    \item Lütkepohl H., Netšunajev A. 2017. Structural vector autoregressions with smooth transition in variances.
-#'      \emp{Journal of Economic Dynamics & Control}, \strong{84}, 43-57.
+#'      \emph{Journal of Economic Dynamics & Control}, \strong{84}, 43-57.
 #'  }
 #' @examples
 #' \donttest{

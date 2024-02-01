@@ -456,7 +456,7 @@ get_hetsked_sstvar <- function(stvar, calc_std_errors=FALSE) {
 #' @references
 #'  \itemize{
 #'    \item Lütkepohl H., Netšunajev A. 2018. Structural vector autoregressions with smooth transition in variances.
-#'      \emp{Journal of Economic Dynamics & Control}, \strong{84}, 43-57.
+#'      \emph{Journal of Economic Dynamics & Control}, \strong{84}, 43-57.
 #'  }
 #' @examples
 #' # p=2, M=2, d=2, Student's t logistic STVAR model with the first lag of the second
