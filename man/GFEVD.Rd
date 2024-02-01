@@ -153,27 +153,27 @@ The GFEVD is a forecast error variance decomposition calculated with the general
  # GFEVD for one-standard-error positive structural shocks, N=30 steps ahead,
  # with fix initial values assuming all possible histories in the data.
  gfevd1 <- GFEVD(mod32logt, shock_size=1, N=30, initval_type="data", R1=10,
-   use_parallel=FALSE, seeds=1:(nrow(mod32logt$data)-2))
+   seeds=1:(nrow(mod32logt$data)-2))
  print(gfevd1) # Print the results
  plot(gfevd1) # Plot the GFEVD
 
  # GFEVD for one-standard-error positive structural shocks, N=30 steps ahead,
  # with fix initial values that are the last p observations of the data.
  gfevd2 <- GFEVD(mod32logt, shock_size=1, N=30, initval_type="fixed", R1=100,
-   use_parallel=FALSE, seeds=1, init_values=mod32logt$data)
+   seeds=1, init_values=mod32logt$data)
  plot(gfevd2) # Plot the GFEVD
 
  # GFEVD for two-standard-error negative structural shocks, N=50 steps ahead
  # with the inital values drawn from the first regime. The responses of both
  # variables are accumulated.
  gfevd3 <- GFEVD(mod32logt, shock_size=-2, N=50, initval_type="random",
-  R1=50, R2=50, init_regime=1, use_parallel=FALSE)
+  R1=50, R2=50, init_regime=1)
  plot(gfevd3) # Plot the GFEVD
 
  # GFEVD calculated for each lenght p history in the data in such a way that
  # for each history, the structural shock recoved from the fitted model is
  # used.
- gfevd4 <- GFEVD(mod32logt, N=20, use_data_shocks=TRUE, R1=10, use_parallel=FALSE)
+ gfevd4 <- GFEVD(mod32logt, N=20, use_data_shocks=TRUE, R1=10)
  plot(gfevd4) # Usual plot method
 
  # Plot the contribution of the first to the variance of the forecast errors at

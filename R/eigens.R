@@ -147,12 +147,14 @@ warn_eigens <- function(stvar, tol=0.002) {
   if(any(near_singular)) {
     my_string2 <- ifelse(sum(near_singular) == 1,
                          paste("Regime", which(near_singular),"has near-singular error term covariance matrix! "),
-                         paste("Regimes", paste(which(near_singular), collapse=" and ") ,"have near-singular error term covariance matrices! "))
+                         paste("Regimes", paste(which(near_singular), collapse=" and "),
+                               "have near-singular error term covariance matrices! "))
   } else {
     my_string2 <- NULL
   }
   if(any(near_nonstat) || any(near_singular)) {
-    warning(paste0(my_string1, my_string2, "Consider building a model from the next-largest local maximum with the function 'alt_stvar'",
+    warning(paste0(my_string1, my_string2,
+                   "Consider building a model from the next-largest local maximum with the function 'alt_stvar'",
                    "by adjusting its argument 'which_largest'."))
   }
 }

@@ -269,7 +269,8 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                             weight_scale=weight_scale, ar_scale2=ar_scale2))
       ind_loks <- vapply(1:popsize, function(i2) loglikelihood(data=data, p=p, M=M, params=inds[,i2],
                                                                weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                                               cond_dist=cond_dist, parametrization="mean", identification="reduced_form",
+                                                               cond_dist=cond_dist, parametrization="mean",
+                                                               identification="reduced_form",
                                                                AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                                                                weight_constraints=weight_constraints, B_constraints=NULL,
                                                                to_return="loglik", check_params=TRUE,
@@ -343,8 +344,9 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
     if(i1 == 1) {
       # No fitness inheritance
       for(i2 in 1:popsize) {
-        loks_and_tw <- loglikelihood(data=data, p=p, M=M, params=G[,i2], weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                     cond_dist=cond_dist, parametrization="mean", identification="reduced_form",
+        loks_and_tw <- loglikelihood(data=data, p=p, M=M, params=G[,i2], weight_function=weight_function,
+                                     weightfun_pars=weightfun_pars, cond_dist=cond_dist,
+                                     parametrization="mean", identification="reduced_form",
                                      AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                                      weight_constraints=weight_constraints, B_constraints=NULL,
                                      to_return="loglik_and_tw", check_params=TRUE, minval=minval)
@@ -476,7 +478,8 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
       mu_rates <- rep(0.7, popsize) # Massive mutations if converging
     } else {
       # Individually adaptive mutation rates, Patnaik and Srinivas (1994); we only mutate those who did not crossover.
-      mu_rates <- 0.5*vapply(1:popsize, function(i2) min(which_not_co[i2], (max_lik - survivor_liks[i2])/(max_lik - mean_lik)), numeric(1))
+      mu_rates <- 0.5*vapply(1:popsize, function(i2) min(which_not_co[i2], (max_lik - survivor_liks[i2])/(max_lik - mean_lik)),
+                             numeric(1))
     }
 
     mutate <- rbinom(n=popsize, size=1, prob=mu_rates)

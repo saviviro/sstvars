@@ -84,7 +84,7 @@
 #'  # Note that larger R1 and R2 should be used for more reliable results;
 #'  # small R1 and R2 are used here to shorten the estimation time.
 #'
-#'  # Recursively identifed logistic Student's t STVAR(p=3, M=2) model with the first
+#'  # Recursively identified logistic Student's t STVAR(p=3, M=2) model with the first
 #'  # lag of the second variable as the switching variable:
 #'  params32logt <- c(0.5959, 0.0447, 2.6279, 0.2897, 0.2837, 0.0504, -0.2188, 0.4008,
 #'   0.3128, 0.0271, -0.1194, 0.1559, -0.0972, 0.0082, -0.1118, 0.2391, 0.164, -0.0363,
@@ -96,7 +96,7 @@
 #'  # GIRF for one-standard-error positive structural shocks, N=30 steps ahead,
 #'  # with the inital values drawn from the first regime.
 #'  girf1 <- GIRF(mod32logt, which_shocks=1:2, shock_size=1, N=30, R1=50, R2=50,
-#'   init_regime=1, use_parallel=FALSE)
+#'   init_regime=1)
 #'  print(girf1) # Print the results
 #'  plot(girf1) # Plot the GIRFs
 #'
@@ -104,14 +104,14 @@
 #'  # with the inital values drawn from the second regime. The responses of the
 #'  # GDP and GDP deflator growth rates are accumulated.
 #'  girf2 <- GIRF(mod32logt, which_shocks=1:2, which_cumulative=1:2, shock_size=1,
-#'   N=30, R1=50, R2=50, init_regime=2, use_parallel=FALSE)
+#'   N=30, R1=50, R2=50, init_regime=2)
 #'  plot(girf2) # Plot the GIRFs
 #'
 #'  # GIRF for two-standard-error negative structural shock - the first shock only.
 #'  # N=50 steps ahead with the inital values drawn from the first regime. The responses
 #'  # are scaled to correspond an instantanous increase of 0.5 of the first variable.
 #'  girf3 <- GIRF(mod32logt, which_shocks=1, shock_size=-2, N=50, R1=50, R2=50,
-#'   init_regime=1, scale_type="instant", scale=c(1, 1, 0.5), use_parallel=FALSE)
+#'   init_regime=1, scale_type="instant", scale=c(1, 1, 0.5))
 #'  plot(girf3) # Plot the GIRFs
 #'  }
 #' @export
@@ -232,7 +232,7 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=500, R2=500, init_r
 
     # Scale the GIRFs if specified
     if(which_shocks[i1] %in% scale[1,]) { # GIRF of this shock should be scaled
-      which_col <- which(which_shocks[i1] == scale[1,]) # which column of the scale-matrix contains the argument for this specific shock
+      which_col <- which(which_shocks[i1] == scale[1,]) # which col of the scale-matrix contains the argument for this specific shock
       which_var <- scale[2, which_col] # According to initial/peak response of which variable the GIRFs should be scaled
       magnitude <- scale[3, which_col] # What should be the magnitude of the initial/peak response of this variable
 
@@ -360,27 +360,27 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=500, R2=500, init_r
 #'  # GFEVD for one-standard-error positive structural shocks, N=30 steps ahead,
 #'  # with fix initial values assuming all possible histories in the data.
 #'  gfevd1 <- GFEVD(mod32logt, shock_size=1, N=30, initval_type="data", R1=10,
-#'    use_parallel=FALSE, seeds=1:(nrow(mod32logt$data)-2))
+#'    seeds=1:(nrow(mod32logt$data)-2))
 #'  print(gfevd1) # Print the results
 #'  plot(gfevd1) # Plot the GFEVD
 #'
 #'  # GFEVD for one-standard-error positive structural shocks, N=30 steps ahead,
 #'  # with fix initial values that are the last p observations of the data.
 #'  gfevd2 <- GFEVD(mod32logt, shock_size=1, N=30, initval_type="fixed", R1=100,
-#'    use_parallel=FALSE, seeds=1, init_values=mod32logt$data)
+#'    seeds=1, init_values=mod32logt$data)
 #'  plot(gfevd2) # Plot the GFEVD
 #'
 #'  # GFEVD for two-standard-error negative structural shocks, N=50 steps ahead
 #'  # with the inital values drawn from the first regime. The responses of both
 #'  # variables are accumulated.
 #'  gfevd3 <- GFEVD(mod32logt, shock_size=-2, N=50, initval_type="random",
-#'   R1=50, R2=50, init_regime=1, use_parallel=FALSE)
+#'   R1=50, R2=50, init_regime=1)
 #'  plot(gfevd3) # Plot the GFEVD
 #'
 #'  # GFEVD calculated for each lenght p history in the data in such a way that
 #'  # for each history, the structural shock recoved from the fitted model is
 #'  # used.
-#'  gfevd4 <- GFEVD(mod32logt, N=20, use_data_shocks=TRUE, R1=10, use_parallel=FALSE)
+#'  gfevd4 <- GFEVD(mod32logt, N=20, use_data_shocks=TRUE, R1=10)
 #'  plot(gfevd4) # Usual plot method
 #'
 #'  # Plot the contribution of the first to the variance of the forecast errors at

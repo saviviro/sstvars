@@ -161,7 +161,7 @@ The confidence bounds reflect uncertainty about the initial state (but
  # Note that larger R1 and R2 should be used for more reliable results;
  # small R1 and R2 are used here to shorten the estimation time.
 
- # Recursively identifed logistic Student's t STVAR(p=3, M=2) model with the first
+ # Recursively identified logistic Student's t STVAR(p=3, M=2) model with the first
  # lag of the second variable as the switching variable:
  params32logt <- c(0.5959, 0.0447, 2.6279, 0.2897, 0.2837, 0.0504, -0.2188, 0.4008,
   0.3128, 0.0271, -0.1194, 0.1559, -0.0972, 0.0082, -0.1118, 0.2391, 0.164, -0.0363,
@@ -173,7 +173,7 @@ The confidence bounds reflect uncertainty about the initial state (but
  # GIRF for one-standard-error positive structural shocks, N=30 steps ahead,
  # with the inital values drawn from the first regime.
  girf1 <- GIRF(mod32logt, which_shocks=1:2, shock_size=1, N=30, R1=50, R2=50,
-  init_regime=1, use_parallel=FALSE)
+  init_regime=1)
  print(girf1) # Print the results
  plot(girf1) # Plot the GIRFs
 
@@ -181,14 +181,14 @@ The confidence bounds reflect uncertainty about the initial state (but
  # with the inital values drawn from the second regime. The responses of the
  # GDP and GDP deflator growth rates are accumulated.
  girf2 <- GIRF(mod32logt, which_shocks=1:2, which_cumulative=1:2, shock_size=1,
-  N=30, R1=50, R2=50, init_regime=2, use_parallel=FALSE)
+  N=30, R1=50, R2=50, init_regime=2)
  plot(girf2) # Plot the GIRFs
 
  # GIRF for two-standard-error negative structural shock - the first shock only.
  # N=50 steps ahead with the inital values drawn from the first regime. The responses
  # are scaled to correspond an instantanous increase of 0.5 of the first variable.
  girf3 <- GIRF(mod32logt, which_shocks=1, shock_size=-2, N=50, R1=50, R2=50,
-  init_regime=1, scale_type="instant", scale=c(1, 1, 0.5), use_parallel=FALSE)
+  init_regime=1, scale_type="instant", scale=c(1, 1, 0.5))
  plot(girf3) # Plot the GIRFs
  }
 }
