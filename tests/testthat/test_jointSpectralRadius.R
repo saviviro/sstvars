@@ -27,7 +27,7 @@ mod123relg <- STVAR(data=usamone, p=1, M=2, params=theta_123relg, weight_functio
 test_that("bound_JSR works correctly", {
   # Lower and upper bound by the Gripenberg's (1996) branch-and-bound method
   expect_equal(bound_JSR(mod112relg, epsilon=0.01, adaptive_eps=TRUE, print_progress=FALSE), c(0.8919073, 0.9022341), tol=1e-4)
-  expect_equal(bound_JSR(mod122relg, epsilon=0.01, adaptive_eps=TRUE, print_progress=FALSE), c(0.8288584, 0.8390200), tol=1e-4)
+  expect_equal(bound_JSR(mod122relg, epsilon=0.01, adaptive_eps=FALSE, print_progress=FALSE), c(0.8288584, 0.8390200), tol=1e-4)
   expect_equal(bound_JSR(mod122relg, epsilon=0.005, adaptive_eps=TRUE, print_progress=FALSE), c(0.8288584, 0.8339489), tol=1e-4)
   expect_equal(bound_JSR(mod222relg, epsilon=0.02, adaptive_eps=TRUE, print_progress=FALSE), c(0.9205818, 0.9421805), tol=1e-4)
   expect_equal(bound_JSR(mod123relg, epsilon=0.3, adaptive_eps=TRUE, print_progress=FALSE), c(0.9609557, 1.3269630), tol=1e-4)
