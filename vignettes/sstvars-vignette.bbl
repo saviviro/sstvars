@@ -1,4 +1,4 @@
-\begin{thebibliography}{33}
+\begin{thebibliography}{31}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -38,14 +38,6 @@ Bacchiocchi E, Fanelli L (2015).
 \newblock \emph{Oxford Bulletin of Economics and Statistics}, \textbf{77}(6),
   761--779.
 \newblock \doi{10.1111/obes.12092}.
-
-\bibitem[{Blondel and Nesterov(2005)}]{Blondel+Nesterov:2005}
-Blondel V, Nesterov Y (2005).
-\newblock \enquote{Computationally Efficient Approximations of the Joint
-  Spectral Radius.}
-\newblock \emph{SIAM Journal on Matrix Analysis and Applications},
-  \textbf{27}(1), 256--272.
-\newblock \doi{10.1137/040607009}.
 
 \bibitem[{Burgard \emph{et~al.}(2019)Burgard, Neuenkirch, and
   Nöckel}]{Burgard+Neuenkirch+Nockel:2019}
@@ -164,14 +156,6 @@ Nash J (1990).
   Function Minimization}.
 \newblock 2nd edition. Adam Hilger, Bristol and New York.
 \newblock \doi{10.1201/9781315139784}.
-
-\bibitem[{Parrilo and Jadbabaie(2008)}]{Parrilo+Jadbabaie:2008}
-Parrilo P, Jadbabaie A (2008).
-\newblock \enquote{Approximation of the joint spectral radius using sum of
-  squares.}
-\newblock \emph{Linear Algebra and its Applications}, \textbf{428}(10),
-  2385--2402.
-\newblock \doi{10.1016/j.laa.2007.12.027}.
 
 \bibitem[{{R Core Team}(2022)}]{R}
 {R Core Team} (2022).
