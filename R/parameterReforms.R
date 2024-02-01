@@ -108,8 +108,10 @@ change_parametrization <- function(p, M, d, params, weight_function=c("relative_
 #'   \describe{
 #'     \item{If \code{weight_function == "relative_dens"}:}{\eqn{\alpha_{1}>...>\alpha_{M}}.}
 #'     \item{If \code{weight_function == "logistic"}:}{Nothing to sort, so returns the original parameter vector given in \code{param}.}
-#'     \item{If \code{weight_function == "mlogit"}:}{Does not currently sort, so returns the original parameter vector given in \code{param}.}
-#'     \item{If \code{weight_function == "exponential"}:}{Nothing to sort, so returns the original parameter vector given in \code{param}.}
+#'     \item{If \code{weight_function == "mlogit"}:}{Does not currently sort, so returns the original parameter vector given in
+#'       \code{param}.}
+#'     \item{If \code{weight_function == "exponential"}:}{Nothing to sort, so returns the original parameter vector given in
+#'       \code{param}.}
 #'     \item{If \code{weight_function == "threshold"}:}{The increasing ordering of the thresholds is imposed in the parameter space,
 #'           so nothing to sort and thereby returns the original parameter vector given in \code{param}.}
 #'   }

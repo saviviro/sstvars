@@ -74,7 +74,8 @@ The stationary distribution of each regime is not known when \code{cond_dist!="G
   The argument \code{ntimes} is intended for forecasting, which is used by the predict method (see \code{?predict.stvar}).
 }
 \examples{
- # p=2, M=2, d=2, Gaussian relative dens weights
+ # Gaussian STVAR(p=2, M=2) model with weighted relative stationary densities
+ # of the regimes as the transition weight function:
  theta_222relg <- c(0.356914, 0.107436, 0.356386, 0.08633, 0.13996, 0.035172,
    -0.164575, 0.386816, 0.451675, 0.013086, 0.227882, 0.336084, 0.239257, 0.024173,
    -0.021209, 0.707502, 0.063322, 0.027287, 0.009182, 0.197066, 0.205831, 0.005157,
@@ -82,16 +83,35 @@ The stationary distribution of each regime is not known when \code{cond_dist!="G
  mod222relg <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222relg,
    weight_function="relative_dens")
 
- # Simulate T=200 observations using initial values:
+ # Simulate T=200 observations using given initial values:
  init_vals <- matrix(c(0.5, 1.0, 0.5, 1), nrow=2)
  sim1 <- simulate(mod222relg, nsim=200, seed=1, init_values=init_vals)
  plot.ts(sim1$sample) # Sample
  plot.ts(sim1$transition_weights) # Transition weights
 
- # Simulate T=100 observations, with initial values from the 1st regime:
+ # Simulate T=100 observations, with initial values drawn from the stationary
+ # distribution of the 1st regime:
  sim2 <- simulate(mod222relg, nsim=200, seed=1, init_regime=1)
  plot.ts(sim2$sample) # Sample
  plot.ts(sim2$transition_weights) # Transition weights
+
+# Logistic Student's t STVAR with p=1, M=2, and the first lag of the second variable
+# as the switching variable.
+params12 <- c(0.62906848, 0.14245295, 2.41245785, 0.66719269, 0.3534745, 0.06041779, -0.34909745,
+  0.61783824, 0.125769, -0.04094521, -0.99122586, 0.63805416, 0.371575, 0.00314754, 0.03440824,
+  1.29072533, -0.06067807, 0.18737385, 1.21813844, 5.00884263, 7.70111672)
+fit12 <- STVAR(data=gdpdef, p=1, M=2, params=params12, weight_function="logistic",
+  weightfun_pars=c(2, 1), cond_dist="Student")
+
+# Simulate T=100 observations with initial values drawn from the second regime.
+# Since the stationary distribution of the Student's regime is not known, we
+# use a simulation procedure that starts from the unconditional mean of the regime,
+# then simulates a number of observations from the regime for a "burn-in" period,
+# and finally takes the last p observations generated from the regime as the initial
+# values for the simulation from the STVAR model:
+sim3 <- simulate(fit12, nsim=100, seed=1, init_regime=2, burn_in=1000)
+plot.ts(sim3$sample) # Sample
+plot.ts(sim3$transition_weights) # Transition weights
 }
 \references{
 \itemize{

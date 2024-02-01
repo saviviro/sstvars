@@ -26,10 +26,17 @@
 #'  -0.029, -0.7947, 0.7925, 0.4233, 5e-04, 0.0439, 1.2332, -0.0402, 0.1481, 1.2036)
 #' mod12thres <- STVAR(data=gdpdef, p=1, M=2, params=pars, weight_function="threshold",
 #'   weightfun_pars=c(2, 1))
+#'
+#' # Plot the profile log-likelihood functions of all parameters:
 #' profile_logliks(mod12thres, precision=50) # Plots fast with precision=50
 #'
-#' # Plot only the profile log-likelihood function of the threshold parameter:
+#' # Plot only the profile log-likelihood function of the threshold parameter
+#' # (which is the last parameter in the parameter vector):
 #' profile_logliks(mod12thres, which_pars=length(pars), precision=100)
+#'
+#' # Plot only the profile log-likelihood functions of the intercept parameters
+#' # (which are the first four parameters in the parameter vector, as d=2 and M=2):
+#' profile_logliks(mod12thres, which_pars=1:4, precision=100)
 #' @export
 
 profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precision=200,
@@ -170,7 +177,8 @@ profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precisi
         if(identification == "heteroskedasticity") {
           if(i1 <= n_mean_pars + n_ar_pars + d^2 - n_zeros) { # W params
             n_zeros_in_each_column <- vapply(1:d, function(i2) sum(B_constraints[,i2] == 0, na.rm=TRUE), numeric(1))
-            zero_positions <- lapply(1:d, function(i2) (1:d)[B_constraints[,i2] == 0 & !is.na(B_constraints[,i2])]) # zero constr pos in each col
+            zero_positions <- lapply(1:d,
+                                     function(i2) (1:d)[B_constraints[,i2] == 0 & !is.na(B_constraints[,i2])]) # 0 constr pos in each col
             cum_wc <- c(0, cumsum(d - n_zeros_in_each_column)) # Index in W parameters after which a new column in W starts
             posw <- i1 - (n_mean_pars + n_ar_pars) # Index in W parameters
             col_ind <- sum(posw > cum_wc)

@@ -67,10 +67,17 @@ pars <- c(0.5231, 0.1015, 1.9471, 0.3253, 0.3476, 0.0649, -0.035, 0.7513, 0.1651
  -0.029, -0.7947, 0.7925, 0.4233, 5e-04, 0.0439, 1.2332, -0.0402, 0.1481, 1.2036)
 mod12thres <- STVAR(data=gdpdef, p=1, M=2, params=pars, weight_function="threshold",
   weightfun_pars=c(2, 1))
+
+# Plot the profile log-likelihood functions of all parameters:
 profile_logliks(mod12thres, precision=50) # Plots fast with precision=50
 
-# Plot only the profile log-likelihood function of the threshold parameter:
+# Plot only the profile log-likelihood function of the threshold parameter
+# (which is the last parameter in the parameter vector):
 profile_logliks(mod12thres, which_pars=length(pars), precision=100)
+
+# Plot only the profile log-likelihood functions of the intercept parameters
+# (which are the first four parameters in the parameter vector, as d=2 and M=2):
+profile_logliks(mod12thres, which_pars=1:4, precision=100)
 }
 \references{
 \itemize{
