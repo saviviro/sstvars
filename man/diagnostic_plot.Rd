@@ -39,20 +39,42 @@ Auto- and cross-correlations (types \code{"ac"} and \code{"ch"}) are calculated 
  densities and quantiles.
 }
 \examples{
-# p=1, M=1, d=2, linear VAR
-theta_112 <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103,
-  0.601786, -0.002945, 0.067224)
-mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112)
-diagnostic_plot(mod112, resid_type="standardized")
-diagnostic_plot(mod112, resid_type="raw")
-
-# p=1, M=2, d=2, relative dens weight function
+## Gaussian STVAR p=1, M=2 model, with weighted relative stationary densities
+# of the regimes as the transition weight function:
 theta_122relg <- c(0.734054, 0.225598, 0.705744, 0.187897, 0.259626, -0.000863,
   -0.3124, 0.505251, 0.298483, 0.030096, -0.176925, 0.838898, 0.310863, 0.007512,
   0.018244, 0.949533, -0.016941, 0.121403, 0.573269)
 mod122 <- STVAR(data=gdpdef, p=1, M=2, params=theta_122relg)
+
+# Autocorelation function of raw residuals for checking remaining autocorrelation:
 diagnostic_plot(mod122, type="ac", resid_type="raw")
+
+# Autocorelation function of squared standardized residuals for checking remaining
+# conditional heteroskedasticity:
 diagnostic_plot(mod122, type="ch", resid_type="standardized")
+
+# Below, ACF of squared raw residuals, which is not very informative for evaluating
+# adequacy to capture conditional heteroskedasticity, since it doesn't take into account
+# the time-varying conditional covariance matrix of the model:
+diagnostic_plot(mod122, type="ch", resid_type="raw")
+
+# Similarly, below the time series of raw residuals first, and then the
+# time series of standardized residuals. The latter is more informative
+# for evaluating adequacy:
+diagnostic_plot(mod122, type="series", resid_type="raw")
+diagnostic_plot(mod122, type="series", resid_type="standardized")
+
+# Also similarly, histogram and Q-Q plots are more informative for standardized
+# residuals when evaluating model adequacy:
+diagnostic_plot(mod122, type="dist", resid_type="raw") # Bad fit for GDPDEF
+diagnostic_plot(mod122, type="dist", resid_type="standardized") # Good fit for GDPDEF
+
+## Linear Gaussian VAR p=1 model:
+theta_112 <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103,
+  0.601786, -0.002945, 0.067224)
+mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112)
+diagnostic_plot(mod112, resid_type="standardized") # All plots for std. resids
+diagnostic_plot(mod112, resid_type="raw") # All plots for raw residuals
 }
 \references{
 \itemize{

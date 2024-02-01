@@ -27,7 +27,8 @@ The implemented adjusted Portmanteau test is based on Lütkepohl (2005), Section
   heteroskedasticity test requires that the residuals are not autocorrelated.
 }
 \examples{
-# p=2, M=2, d=2, STVAR with relative_dens weight function:
+# Gaussian STVAR p=2, M=2, model with weighted relative stationary densities
+# of the regimes as the transition weight function:
 theta_222relg <- c(0.357, 0.107, 0.356, 0.086, 0.14, 0.035, -0.165, 0.387, 0.452,
  0.013, 0.228, 0.336, 0.239, 0.024, -0.021, 0.708, 0.063, 0.027, 0.009, 0.197,
  0.206, 0.005, 0.026, 1.092, -0.009, 0.116, 0.592)
@@ -40,7 +41,7 @@ Portmanteau_test(mod222relg, nlags=20)
 # Test for remaining heteroskedasticity taking into account the first 20 lags:
 Portmanteau_test(mod222relg, nlags=20, which_test="het.sked")
 
-# p=3, M=2, d=2, Student's t Threhold VAR with the first lag of the second
+# Two-regime Student's t Threhold VAR p=3 model with the first lag of the second
 # variable as the switching variable:
 theta_322thres <- c(0.527, 0.039, 1.922, 0.154, 0.284, 0.053, 0.033, 0.453, 0.291,
  0.024, -0.108, 0.153, -0.108, 0.003, -0.128, 0.219, 0.195, -0.03, -0.893, 0.686,
@@ -49,11 +50,11 @@ theta_322thres <- c(0.527, 0.039, 1.922, 0.154, 0.284, 0.053, 0.033, 0.453, 0.29
 mod322thres <- STVAR(data=gdpdef, p=3, M=2, d=2, params=theta_322thres,
  weight_function="threshold", weightfun_pars=c(2, 1), cond_dist="Student")
 
-# Test for remaining autocorrelation taking into account the first 16 lags:
-Portmanteau_test(mod322thres, nlags=16)
+# Test for remaining autocorrelation taking into account the first 25 lags:
+Portmanteau_test(mod322thres, nlags=25)
 
-# Test for remaining heteroskedasticity taking into account the first 16 lags:
-Portmanteau_test(mod322thres, nlags=16, which_test="het.sked")
+# Test for remaining heteroskedasticity taking into account the first 25 lags:
+Portmanteau_test(mod322thres, nlags=25, which_test="het.sked")
 }
 \references{
 \itemize{
