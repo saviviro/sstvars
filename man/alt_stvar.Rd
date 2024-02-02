@@ -32,11 +32,26 @@ It's sometimes useful to examine other estimates than the one with the highest l
 }
 \examples{
 \donttest{
-# STVAR p=1, M=2 model
-fit12 <- fitSTVAR(gdpdef, p=1, M=2, nrounds=2, seeds=1:2, ngen=20)
-fit12
+## These are long-running examples that take approximately 10 seconds to run.
+
+# Estimate a Gaussian STVAR p=1, M=2 model with exponential weight function and
+# the first lag of the second variable as the switching variables. Run only two
+# estimation rounds:
+fit12 <- fitSTVAR(gdpdef, p=1, M=2, weight_function="exponential", weightfun_pars=c(2, 1),
+ nrounds=2, seeds=c(1, 7))
+fit12$loglik # Log-likelihood of the estimated model
+
+# Print the log-likelihood obtained from each estimation round:
+fit12$all_logliks
+
+# Construct the model based on the second largest log-likelihood found in the
+# estimation procedure:
 fit12_alt <- alt_stvar(fit12, which_largest=2, calc_std_errors=FALSE)
-fit12_alt # Estimate from an alternative local maximum
+fit12_alt$loglik # Log-likelihood of the alternative solution
+
+# Construct a model based on a specific estimation round, the second round:
+fit12_alt2 <- alt_stvar(fit12, which_round=2, calc_std_errors=FALSE)
+fit12_alt2$loglik # Log-likelihood of the alternative solution
 }
 }
 \references{

@@ -24,22 +24,34 @@ Returns an object of class \code{'stvar'} defining the specified reduced form or
  "intercept" parametrization but wish to work with "mean" parametrization in the future, or vice versa.
 }
 \examples{
-## p=1, M=1, d=2, linear VAR
-theta_112relg <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103,
-  0.601786, -0.002945, 0.067224)
-mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112relg, calc_std_errors=TRUE)
-print_std_errors(mod112) # Standard errors for the intercepts
-
-# Swap to mean parametrization:
-mod112mu <- swap_parametrization(mod112, calc_std_errors=TRUE)
-print_std_errors(mod112mu) # Standard errors for the stationary means
-
-## p=1, M=2, d=2, relative dens weight function; not calculating standard errors:
+## Create a Gaussian STVAR p=1, M=2 model with the weighted relative stationary densities
+# of the regimes as the transition weight function; use the intercept parametrization:
 theta_122relg <- c(0.734054, 0.225598, 0.705744, 0.187897, 0.259626, -0.000863,
   -0.3124, 0.505251, 0.298483, 0.030096, -0.176925, 0.838898, 0.310863, 0.007512,
   0.018244, 0.949533, -0.016941, 0.121403, 0.573269)
-mod122 <- STVAR(data=gdpdef, p=1, M=2, params=theta_122relg, calc_std_errors=FALSE)
-mod122mu <- swap_parametrization(mod122, calc_std_errors=FALSE) # mean parametrization
+mod122 <- STVAR(p=1, M=2, d=2, params=theta_122relg, parametrization="intercept")
+mod122$params[1:4] # The intercept parameters
+
+# Swap from the intercept parametrization to mean parametrization:
+mod122mu <- swap_parametrization(mod122)
+mod122mu$params[1:4] # The mean parameters
+
+# Swap back to the intercept parametrization:
+mod122int <- swap_parametrization(mod122mu)
+mod122int$params[1:4] # The intercept parameters
+
+## Create a linear VAR(p=1) model with the intercept parametrization, include
+# the two-variate data gdpdef to the model and calculate approximate standard errors:
+theta_112 <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103,
+  0.601786, -0.002945, 0.067224)
+mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112, parametrization="intercept",
+  calc_std_errors=TRUE)
+print_std_errors(mod112) # Standard errors are printed for the intercepts
+
+# To obtain standard errors for the unconditional means instead of the intercepts,
+# swap to mean parametrization:
+mod112mu <- swap_parametrization(mod112, calc_std_errors=TRUE)
+print_std_errors(mod112mu) # Standard errors are printed for the means
 }
 \references{
 \itemize{

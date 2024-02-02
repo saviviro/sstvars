@@ -35,27 +35,29 @@ All signs in any column of \eqn{W} can be swapped without changing the implied r
   done with the function \code{reorder_W_columns}.
 }
 \examples{
-# p=2, M=2, d=2, Student's t logistic STVAR model with the first lag of the second
-# variable  as the switching variable and shocks identified by heteroskedasticity.
+# Create a structural two-variate Student's t STVAR p=2, M=2, model with logistic transition
+# weights and the first lag of the second variable as the switching variable, and shocks
+# identified by heteroskedasticity:
 theta_222logt <- c(0.356914, 0.107436, 0.356386, 0.086330, 0.139960, 0.035172, -0.164575,
   0.386816, 0.451675, 0.013086, 0.227882, 0.336084, 0.239257, 0.024173, -0.021209, 0.707502,
   0.063322, 0.027287, 0.009182, 0.197066, -0.03, 0.24, -0.76, -0.02, 3.36, 0.86, 0.1, 0.2, 7)
-mod222logt <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logt,
-                               weight_function="logistic", weightfun_pars=c(2, 1),
-                               cond_dist="Student", identification="heteroskedasticity")
+mod222logt <- STVAR(p=2, M=2, d=2, params=theta_222logt, weight_function="logistic",
+  weightfun_pars=c(2, 1), cond_dist="Student", identification="heteroskedasticity")
+
+# Print the parameter values, W and lambdas are printed in the bottom:
 mod222logt
 
-# Swap the signs of the first column of W:
+# Swap the signs of the first column of W (or equally the impact matrix):
 mod222logt2 <- swap_W_signs(mod222logt, which_to_swap=1)
-mod222logt2
+mod222logt2 # The signs of the first column of W are swapped
 
 # Swap the signs of the second column of W:
 mod222logt3 <- swap_W_signs(mod222logt, which_to_swap=2)
-mod222logt3
+mod222logt3 # The signs of the second column of W are swapped
 
 # Swap the signs of both columns of W:
 mod222logt4 <- swap_W_signs(mod222logt, which_to_swap=1:2)
-mod222logt4
+mod222logt4 # The signs of both columns of W are swapped
 }
 \references{
 \itemize{

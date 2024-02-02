@@ -263,11 +263,26 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
 #' @inherit STVAR references return
 #' @examples
 #' \donttest{
-#' # STVAR p=1, M=2 model
-#' fit12 <- fitSTVAR(gdpdef, p=1, M=2, nrounds=2, seeds=1:2, ngen=20)
-#' fit12
+#' ## These are long-running examples that take approximately 10 seconds to run.
+#'
+#' # Estimate a Gaussian STVAR p=1, M=2 model with exponential weight function and
+#' # the first lag of the second variable as the switching variables. Run only two
+#' # estimation rounds:
+#' fit12 <- fitSTVAR(gdpdef, p=1, M=2, weight_function="exponential", weightfun_pars=c(2, 1),
+#'  nrounds=2, seeds=c(1, 7))
+#' fit12$loglik # Log-likelihood of the estimated model
+#'
+#' # Print the log-likelihood obtained from each estimation round:
+#' fit12$all_logliks
+#'
+#' # Construct the model based on the second largest log-likelihood found in the
+#' # estimation procedure:
 #' fit12_alt <- alt_stvar(fit12, which_largest=2, calc_std_errors=FALSE)
-#' fit12_alt # Estimate from an alternative local maximum
+#' fit12_alt$loglik # Log-likelihood of the alternative solution
+#'
+#' # Construct a model based on a specific estimation round, the second round:
+#' fit12_alt2 <- alt_stvar(fit12, which_round=2, calc_std_errors=FALSE)
+#' fit12_alt2$loglik # Log-likelihood of the alternative solution
 #' }
 #' @export
 
@@ -317,22 +332,34 @@ alt_stvar <- function(stvar, which_largest=1, which_round, calc_std_errors=TRUE)
 #'  "intercept" parametrization but wish to work with "mean" parametrization in the future, or vice versa.
 #' @inherit STVAR references return
 #' @examples
-#' ## p=1, M=1, d=2, linear VAR
-#' theta_112relg <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103,
-#'   0.601786, -0.002945, 0.067224)
-#' mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112relg, calc_std_errors=TRUE)
-#' print_std_errors(mod112) # Standard errors for the intercepts
-#'
-#' # Swap to mean parametrization:
-#' mod112mu <- swap_parametrization(mod112, calc_std_errors=TRUE)
-#' print_std_errors(mod112mu) # Standard errors for the stationary means
-#'
-#' ## p=1, M=2, d=2, relative dens weight function; not calculating standard errors:
+#' ## Create a Gaussian STVAR p=1, M=2 model with the weighted relative stationary densities
+#' # of the regimes as the transition weight function; use the intercept parametrization:
 #' theta_122relg <- c(0.734054, 0.225598, 0.705744, 0.187897, 0.259626, -0.000863,
 #'   -0.3124, 0.505251, 0.298483, 0.030096, -0.176925, 0.838898, 0.310863, 0.007512,
 #'   0.018244, 0.949533, -0.016941, 0.121403, 0.573269)
-#' mod122 <- STVAR(data=gdpdef, p=1, M=2, params=theta_122relg, calc_std_errors=FALSE)
-#' mod122mu <- swap_parametrization(mod122, calc_std_errors=FALSE) # mean parametrization
+#' mod122 <- STVAR(p=1, M=2, d=2, params=theta_122relg, parametrization="intercept")
+#' mod122$params[1:4] # The intercept parameters
+#'
+#' # Swap from the intercept parametrization to mean parametrization:
+#' mod122mu <- swap_parametrization(mod122)
+#' mod122mu$params[1:4] # The mean parameters
+#'
+#' # Swap back to the intercept parametrization:
+#' mod122int <- swap_parametrization(mod122mu)
+#' mod122int$params[1:4] # The intercept parameters
+#'
+#' ## Create a linear VAR(p=1) model with the intercept parametrization, include
+#' # the two-variate data gdpdef to the model and calculate approximate standard errors:
+#' theta_112 <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103,
+#'   0.601786, -0.002945, 0.067224)
+#' mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112, parametrization="intercept",
+#'   calc_std_errors=TRUE)
+#' print_std_errors(mod112) # Standard errors are printed for the intercepts
+#'
+#' # To obtain standard errors for the unconditional means instead of the intercepts,
+#' # swap to mean parametrization:
+#' mod112mu <- swap_parametrization(mod112, calc_std_errors=TRUE)
+#' print_std_errors(mod112mu) # Standard errors are printed for the means
 #' @export
 
 swap_parametrization <- function(stvar, calc_std_errors=FALSE) {
@@ -492,26 +519,29 @@ get_hetsked_sstvar <- function(stvar, calc_std_errors=FALSE) {
 #'      \emph{Journal of Economic Dynamics & Control}, \strong{84}, 43-57.
 #'  }
 #' @examples
-#' # p=2, M=2, d=2, Student's t logistic STVAR model with the first lag of the second
-#'  # variable  as the switching variable and shocks identified by heteroskedasticity.
+#' # Create a structural two-variate Student's t STVAR p=2, M=2 model with logistic transition
+#' # weights and the first lag of the second variable  as the switching variable, and shocks
+#' # identified by heteroskedasticity:
 #' theta_222logt <- c(0.356914, 0.107436, 0.356386, 0.086330, 0.139960, 0.035172, -0.164575,
 #'   0.386816, 0.451675, 0.013086, 0.227882, 0.336084, 0.239257, 0.024173, -0.021209, 0.707502,
 #'   0.063322, 0.027287, 0.009182, 0.197066, -0.03, 0.24, -0.76, -0.02, 3.36, 0.86, 0.1, 0.2, 7)
-#' mod222logt <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logt,
-#'                                weight_function="logistic", weightfun_pars=c(2, 1),
-#'                                cond_dist="Student", identification="heteroskedasticity")
+#' mod222logt <- STVAR(p=2, M=2, d=2, params=theta_222logt, weight_function="logistic",
+#'   weightfun_pars=c(2, 1), cond_dist="Student", identification="heteroskedasticity")
+#'
+#' # Print the parameter values, W and lambdas are printed in the bottom:
 #' mod222logt
 #'
-#' # Reverse the ordering of the columns of W:
+#' # Reverse the ordering of the columns of W (or equally the impact matrix):
 #' mod222logt_rev <- reorder_W_columns(mod222logt, perm=c(2, 1))
-#' mod222logt_rev
+#' mod222logt_rev # The columns of W are in a reversed order
 #'
-#' # Swap the ordering back to the original:
+#' # Swap the ordering of the columns of W back to the original:
 #' mod222logt_rev2 <- reorder_W_columns(mod222logt_rev, perm=c(2, 1))
-#' mod222logt_rev2
+#' mod222logt_rev2 # The columns of W are back in the original ordering
 #'
-#' # Does not do anything, as perm=1:2 so the ordering does not change:
-#' reorder_W_columns(mod222logt, perm=c(1, 2))
+#' # Below code does not do anything, as perm=1:2, so the ordering does not change:
+#' mod222logt3 <- reorder_W_columns(mod222logt, perm=c(1, 2))
+#' mod222logt3 # The ordering of the columns did not change from the original
 #' @export
 
 reorder_W_columns <- function(stvar, perm, calc_std_errors=FALSE) {
@@ -602,27 +632,29 @@ reorder_W_columns <- function(stvar, perm, calc_std_errors=FALSE) {
 #' @seealso \code{\link{GIRF}}, \code{\link{fitSSTVAR}}, \code{\link{reorder_W_columns}}
 #' @inherit reorder_W_columns references
 #' @examples
-#' # p=2, M=2, d=2, Student's t logistic STVAR model with the first lag of the second
-#' # variable  as the switching variable and shocks identified by heteroskedasticity.
+#' # Create a structural two-variate Student's t STVAR p=2, M=2, model with logistic transition
+#' # weights and the first lag of the second variable as the switching variable, and shocks
+#' # identified by heteroskedasticity:
 #' theta_222logt <- c(0.356914, 0.107436, 0.356386, 0.086330, 0.139960, 0.035172, -0.164575,
 #'   0.386816, 0.451675, 0.013086, 0.227882, 0.336084, 0.239257, 0.024173, -0.021209, 0.707502,
 #'   0.063322, 0.027287, 0.009182, 0.197066, -0.03, 0.24, -0.76, -0.02, 3.36, 0.86, 0.1, 0.2, 7)
-#' mod222logt <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logt,
-#'                                weight_function="logistic", weightfun_pars=c(2, 1),
-#'                                cond_dist="Student", identification="heteroskedasticity")
+#' mod222logt <- STVAR(p=2, M=2, d=2, params=theta_222logt, weight_function="logistic",
+#'   weightfun_pars=c(2, 1), cond_dist="Student", identification="heteroskedasticity")
+#'
+#' # Print the parameter values, W and lambdas are printed in the bottom:
 #' mod222logt
 #'
-#' # Swap the signs of the first column of W:
+#' # Swap the signs of the first column of W (or equally the impact matrix):
 #' mod222logt2 <- swap_W_signs(mod222logt, which_to_swap=1)
-#' mod222logt2
+#' mod222logt2 # The signs of the first column of W are swapped
 #'
 #' # Swap the signs of the second column of W:
 #' mod222logt3 <- swap_W_signs(mod222logt, which_to_swap=2)
-#' mod222logt3
+#' mod222logt3 # The signs of the second column of W are swapped
 #'
 #' # Swap the signs of both columns of W:
 #' mod222logt4 <- swap_W_signs(mod222logt, which_to_swap=1:2)
-#' mod222logt4
+#' mod222logt4 # The signs of both columns of W are swapped
 #' @export
 
 swap_W_signs <- function(stvar, which_to_swap, calc_std_errors=FALSE) {

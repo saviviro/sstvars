@@ -36,26 +36,29 @@ The order of the columns of \eqn{W} can be changed without changing the implied 
   corresponding columns of \eqn{W}.
 }
 \examples{
-# p=2, M=2, d=2, Student's t logistic STVAR model with the first lag of the second
- # variable  as the switching variable and shocks identified by heteroskedasticity.
+# Create a structural two-variate Student's t STVAR p=2, M=2 model with logistic transition
+# weights and the first lag of the second variable  as the switching variable, and shocks
+# identified by heteroskedasticity:
 theta_222logt <- c(0.356914, 0.107436, 0.356386, 0.086330, 0.139960, 0.035172, -0.164575,
   0.386816, 0.451675, 0.013086, 0.227882, 0.336084, 0.239257, 0.024173, -0.021209, 0.707502,
   0.063322, 0.027287, 0.009182, 0.197066, -0.03, 0.24, -0.76, -0.02, 3.36, 0.86, 0.1, 0.2, 7)
-mod222logt <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logt,
-                               weight_function="logistic", weightfun_pars=c(2, 1),
-                               cond_dist="Student", identification="heteroskedasticity")
+mod222logt <- STVAR(p=2, M=2, d=2, params=theta_222logt, weight_function="logistic",
+  weightfun_pars=c(2, 1), cond_dist="Student", identification="heteroskedasticity")
+
+# Print the parameter values, W and lambdas are printed in the bottom:
 mod222logt
 
-# Reverse the ordering of the columns of W:
+# Reverse the ordering of the columns of W (or equally the impact matrix):
 mod222logt_rev <- reorder_W_columns(mod222logt, perm=c(2, 1))
-mod222logt_rev
+mod222logt_rev # The columns of W are in a reversed order
 
-# Swap the ordering back to the original:
+# Swap the ordering of the columns of W back to the original:
 mod222logt_rev2 <- reorder_W_columns(mod222logt_rev, perm=c(2, 1))
-mod222logt_rev2
+mod222logt_rev2 # The columns of W are back in the original ordering
 
-# Does not do anything, as perm=1:2 so the ordering does not change:
-reorder_W_columns(mod222logt, perm=c(1, 2))
+# Below code does not do anything, as perm=1:2, so the ordering does not change:
+mod222logt3 <- reorder_W_columns(mod222logt, perm=c(1, 2))
+mod222logt3 # The ordering of the columns did not change from the original
 }
 \references{
 \itemize{
