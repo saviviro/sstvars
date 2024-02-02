@@ -119,16 +119,23 @@ unvech <- function(d, a) {
 #'   \item Muirhead R.J. 1982. Aspects of Multivariate Statistical Theory, \emph{Wiley}.
 #' }
 #' @examples
-#' d <- 2
-#' W0 <- matrix(1:(d^2), nrow=2)
-#' lambdas0 <- 1:d
-#' (Omg1 <- W0%*%t(W0))
-#' (Omg2 <- W0%*%diag(lambdas0)%*%t(W0))
+#' # Create two (2x2) coviance matrices using the parameters W and lambdas:
+#' d <- 2 # The dimension
+#' W0 <- matrix(1:(d^2), nrow=2) # W
+#' lambdas0 <- 1:d # The eigenvalues
+#' (Omg1 <- W0%*%t(W0)) # The first covariance matrix
+#' (Omg2 <- W0%*%diag(lambdas0)%*%t(W0)) # The second covariance matrix
+#'
+#' # Then simultaneously diagonalize the covariance matrices:
 #' res <- diag_Omegas(Omg1, Omg2)
+#'
+#' # Recover W:
 #' W <- matrix(res[1:(d^2)], nrow=d, byrow=FALSE)
-#' tcrossprod(W) # == Omg1
+#' tcrossprod(W) # == Omg1, the first covariance matrix
+#'
+#' # Recover lambdas:
 #' lambdas <- res[(d^2 + 1):(d^2 + d)]
-#' W%*%diag(lambdas)%*%t(W) # == Omg2
+#' W%*%diag(lambdas)%*%t(W) # == Omg2, the second covariance matrix
 #' @export
 
 diag_Omegas <- function(Omega1, Omega2) {
@@ -160,11 +167,13 @@ diag_Omegas <- function(Omega1, Omega2) {
 #' @param perm a vector of length \code{M} giving the new order of the covariance matrices
 #'   (relative to the current order)
 #' @details We consider the following decomposition of positive definite covariannce matrices:
-#'  \eqn{\Omega_1 = WW'}, \eqn{\Omega_m = W\Lambda_{m}W'}, \eqn{m=2,..,M} where \eqn{\Lambda_{m} = diag(\lambda_{m1},...,\lambda_{md})}
-#'  contains the strictly postive eigenvalues of \eqn{\Omega_m\Omega_1^{-1}} and the column of the invertible \eqn{W} are the
-#'  corresponding eigenvectors. Note that this decomposition does not necessarily exists for \eqn{M > 2}.
+#'  \eqn{\Omega_1 = WW'}, \eqn{\Omega_m = W\Lambda_{m}W'}, \eqn{m=2,..,M} where
+#'  \eqn{\Lambda_{m} = diag(\lambda_{m1},...,\lambda_{md})} contains the strictly postive eigenvalues of
+#'  \eqn{\Omega_m\Omega_1^{-1}} and the column of the invertible \eqn{W} are the corresponding eigenvectors.
+#'  Note that this decomposition does not necessarily exists for \eqn{M > 2}.
 #'
-#'  See Muirhead (1982), Theorem A9.9 for more details on the decomposition and the source code for more details on the reparametrization.
+#'  See Muirhead (1982), Theorem A9.9 for more details on the decomposition and the source code for more details on the
+#'  reparametrization.
 #' @return Returns a \eqn{d^2 + (M - 1)d \times 1} vector of the form \code{c(vec(new_W), new_lambdas)}
 #'   where the lambdas parameters are in the regimewise order (first regime 2, then 3, etc) and the
 #'   "new W" and "new lambdas" are constitute the new decomposition with the order of the covariance
@@ -177,26 +186,27 @@ diag_Omegas <- function(Omega1, Omega2) {
 #'  one mixture component \eqn{M=1}.
 #' @inherit diag_Omegas references
 #' @examples
-#'  d <- 2
-#'  M <- 2
-#'  Omega1 <- matrix(c(2, 0.5, 0.5, 2), nrow=d)
-#'  Omega2 <- matrix(c(1, -0.2, -0.2, 1), nrow=d)
+#' # Create two (2x2) coviance matrices:
+#' d <- 2 # The dimension
+#' M <- 2 # The number of covariance matrices
+#' Omega1 <- matrix(c(2, 0.5, 0.5, 2), nrow=d)
+#' Omega2 <- matrix(c(1, -0.2, -0.2, 1), nrow=d)
 #'
-#'  # Decomposition with Omega1 as the first covariance matrix:
-#'  decomp1 <- diag_Omegas(Omega1, Omega2)
-#'  W <- matrix(decomp1[1:d^2], nrow=d, ncol=d)
-#'  lambdas <- decomp1[(d^2 + 1):length(decomp1)]
-#'  tcrossprod(W) # = Omega1
-#'  W%*%tcrossprod(diag(lambdas), W) # = Omega2
+#' # The decomposition with Omega1 as the first covariance matrix:
+#' decomp1 <- diag_Omegas(Omega1, Omega2)
+#' W <- matrix(decomp1[1:d^2], nrow=d, ncol=d) # Recover W
+#' lambdas <- decomp1[(d^2 + 1):length(decomp1)] # Recover lambdas
+#' tcrossprod(W) # = Omega1
+#' W%*%tcrossprod(diag(lambdas), W) # = Omega2
 #'
-#'  # Reorder the covariance matrices in the decomposition so that now
-#'  # the first covariance matrix is Omega2:
-#'  decomp2 <- redecompose_Omegas(M=M, d=d, W=as.vector(W), lambdas=lambdas,
-#'                                perm=2:1)
-#'  new_W <- matrix(decomp2[1:d^2], nrow=d, ncol=d)
-#'  new_lambdas <- decomp2[(d^2 + 1):length(decomp2)]
-#'  tcrossprod(new_W) # = Omega2
-#'  new_W%*%tcrossprod(diag(new_lambdas), new_W) # = Omega1
+#' # Reorder the covariance matrices in the decomposition so that now
+#' # the first covariance matrix is Omega2:
+#' decomp2 <- redecompose_Omegas(M=M, d=d, W=as.vector(W), lambdas=lambdas,
+#'                               perm=2:1)
+#' new_W <- matrix(decomp2[1:d^2], nrow=d, ncol=d) # Recover W
+#' new_lambdas <- decomp2[(d^2 + 1):length(decomp2)] # Recover lambdas
+#' tcrossprod(new_W) # = Omega2
+#' new_W%*%tcrossprod(diag(new_lambdas), new_W) # = Omega1
 #' @export
 
 redecompose_Omegas <- function(M, d, W, lambdas, perm=1:M) {

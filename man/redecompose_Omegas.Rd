@@ -35,11 +35,13 @@ Returns a \eqn{d^2 + (M - 1)d \times 1} vector of the form \code{c(vec(new_W), n
 }
 \details{
 We consider the following decomposition of positive definite covariannce matrices:
- \eqn{\Omega_1 = WW'}, \eqn{\Omega_m = W\Lambda_{m}W'}, \eqn{m=2,..,M} where \eqn{\Lambda_{m} = diag(\lambda_{m1},...,\lambda_{md})}
- contains the strictly postive eigenvalues of \eqn{\Omega_m\Omega_1^{-1}} and the column of the invertible \eqn{W} are the
- corresponding eigenvectors. Note that this decomposition does not necessarily exists for \eqn{M > 2}.
+ \eqn{\Omega_1 = WW'}, \eqn{\Omega_m = W\Lambda_{m}W'}, \eqn{m=2,..,M} where
+ \eqn{\Lambda_{m} = diag(\lambda_{m1},...,\lambda_{md})} contains the strictly postive eigenvalues of
+ \eqn{\Omega_m\Omega_1^{-1}} and the column of the invertible \eqn{W} are the corresponding eigenvectors.
+ Note that this decomposition does not necessarily exists for \eqn{M > 2}.
 
- See Muirhead (1982), Theorem A9.9 for more details on the decomposition and the source code for more details on the reparametrization.
+ See Muirhead (1982), Theorem A9.9 for more details on the decomposition and the source code for more details on the
+ reparametrization.
 }
 \section{Warning}{
 
@@ -48,26 +50,27 @@ We consider the following decomposition of positive definite covariannce matrice
 }
 
 \examples{
- d <- 2
- M <- 2
- Omega1 <- matrix(c(2, 0.5, 0.5, 2), nrow=d)
- Omega2 <- matrix(c(1, -0.2, -0.2, 1), nrow=d)
+# Create two (2x2) coviance matrices:
+d <- 2 # The dimension
+M <- 2 # The number of covariance matrices
+Omega1 <- matrix(c(2, 0.5, 0.5, 2), nrow=d)
+Omega2 <- matrix(c(1, -0.2, -0.2, 1), nrow=d)
 
- # Decomposition with Omega1 as the first covariance matrix:
- decomp1 <- diag_Omegas(Omega1, Omega2)
- W <- matrix(decomp1[1:d^2], nrow=d, ncol=d)
- lambdas <- decomp1[(d^2 + 1):length(decomp1)]
- tcrossprod(W) # = Omega1
- W\%*\%tcrossprod(diag(lambdas), W) # = Omega2
+# The decomposition with Omega1 as the first covariance matrix:
+decomp1 <- diag_Omegas(Omega1, Omega2)
+W <- matrix(decomp1[1:d^2], nrow=d, ncol=d) # Recover W
+lambdas <- decomp1[(d^2 + 1):length(decomp1)] # Recover lambdas
+tcrossprod(W) # = Omega1
+W\%*\%tcrossprod(diag(lambdas), W) # = Omega2
 
- # Reorder the covariance matrices in the decomposition so that now
- # the first covariance matrix is Omega2:
- decomp2 <- redecompose_Omegas(M=M, d=d, W=as.vector(W), lambdas=lambdas,
-                               perm=2:1)
- new_W <- matrix(decomp2[1:d^2], nrow=d, ncol=d)
- new_lambdas <- decomp2[(d^2 + 1):length(decomp2)]
- tcrossprod(new_W) # = Omega2
- new_W\%*\%tcrossprod(diag(new_lambdas), new_W) # = Omega1
+# Reorder the covariance matrices in the decomposition so that now
+# the first covariance matrix is Omega2:
+decomp2 <- redecompose_Omegas(M=M, d=d, W=as.vector(W), lambdas=lambdas,
+                              perm=2:1)
+new_W <- matrix(decomp2[1:d^2], nrow=d, ncol=d) # Recover W
+new_lambdas <- decomp2[(d^2 + 1):length(decomp2)] # Recover lambdas
+tcrossprod(new_W) # = Omega2
+new_W\%*\%tcrossprod(diag(new_lambdas), new_W) # = Omega1
 }
 \references{
 \itemize{

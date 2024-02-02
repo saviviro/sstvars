@@ -34,16 +34,23 @@ See the return value and Muirhead (1982), Theorem A9.9 for details.
 }
 
 \examples{
-d <- 2
-W0 <- matrix(1:(d^2), nrow=2)
-lambdas0 <- 1:d
-(Omg1 <- W0\%*\%t(W0))
-(Omg2 <- W0\%*\%diag(lambdas0)\%*\%t(W0))
+# Create two (2x2) coviance matrices using the parameters W and lambdas:
+d <- 2 # The dimension
+W0 <- matrix(1:(d^2), nrow=2) # W
+lambdas0 <- 1:d # The eigenvalues
+(Omg1 <- W0\%*\%t(W0)) # The first covariance matrix
+(Omg2 <- W0\%*\%diag(lambdas0)\%*\%t(W0)) # The second covariance matrix
+
+# Then simultaneously diagonalize the covariance matrices:
 res <- diag_Omegas(Omg1, Omg2)
+
+# Recover W:
 W <- matrix(res[1:(d^2)], nrow=d, byrow=FALSE)
-tcrossprod(W) # == Omg1
+tcrossprod(W) # == Omg1, the first covariance matrix
+
+# Recover lambdas:
 lambdas <- res[(d^2 + 1):(d^2 + d)]
-W\%*\%diag(lambdas)\%*\%t(W) # == Omg2
+W\%*\%diag(lambdas)\%*\%t(W) # == Omg2, the second covariance matrix
 }
 \references{
 \itemize{

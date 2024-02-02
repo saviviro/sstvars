@@ -125,27 +125,29 @@ Returns an object of class \code{'stvar'} defining the estimated reduced form sm
 }
 \details{
 If you wish to estimate a structural model, estimate first the reduced form model and then use the
- use the function \code{fitSSTVAR} to estimate the structural model based on the estimated reduced form model.
+ use the function \code{fitSSTVAR} to create (and estimate if necessary) the structural model
+ based on the estimated reduced form model.
 
  Because of complexity and high multimodality of the log-likelihood function, it is \strong{not certain}
- that the estimation algorithm will end up in the global maximum point. It is expected that most of the
- estimation rounds will end up in some local maximum or saddle point instead. Therefore, a (sometimes large)
- number of estimation rounds is required for reliable results. Because of the nature of the model,
- the estimation may fail especially in the cases where the number of regimes is chosen too large.
+ that the estimation algorithm will end up in the global maximum point. It is expected that many of the
+ estimation rounds will end up in some local maximum or a saddle point instead. Therefore, a (sometimes very large)
+ number of estimation rounds is required for reliable results. Due to identification problems and high complexity of
+ the surface of the log-likelihood function, the estimation may fail especially in the cases where the number of
+ regimes is chosen too large.
 
- The estimation process is computationally heavy and it might take considerably long time for large models with
- large number of observations. If the iteration limit \code{maxit} in the variable metric algorithm is reached,
+ The estimation process is computationally heavy and it might take considerably long time for large models to
+ estimate. If the iteration limit \code{maxit} in the variable metric algorithm is reached,
  one can continue the estimation by iterating more with the function \code{iterate_more}. Alternatively, one may
- use the found estimates as starting values for the genetic algorithm and and employ another round of estimation
+ use the found estimates as starting values for the genetic algorithm and employ another round of estimation
  (see \code{??GAfit} how to set up an initial population with the dot parameters).
 
- \strong{If the estimation algorithm performs poorly (or fails to create an initial population for the genetic algorithm)},
- it usually helps to scale the individual series so that they vary roughly in the same scale.
- This makes it is easier to draw reasonable AR coefficients and (with some weight functions) weight parameter values.
- Even if one is able to create an initial population, it should be preferred to scale the series so that most of the
- AR coefficients will not be very large, as the estimation algorithm works better with relatively small AR coefficients.
- If needed, another package can be used to fit linear VARs to the series to see which scaling of the series results in
- relatively small AR coefficients. You may want to avoid very small (or very high) variability as well.
+ \strong{If the estimation algorithm performs poorly}, it usually helps to scale the individual series so that they
+ vary roughly in the same scale. This makes it is easier to draw reasonable AR coefficients and (with some weight functions)
+ weight parameter values in the genetic algorithm. Even if the estimation algorithm somewhat works, it should be preferred
+ to scale the data so that most of the AR coefficients will not be very large, as the estimation algorithm works better with
+ relatively small AR coefficients. If needed, another package can be used to fit linear VARs to the series to see which scaling
+ of the series results in relatively small AR coefficients. You should avoid very small (or very high) variance in the data as
+ well so that the eigenvalues of the covariance matrices are in a reasonable range.
 
  \strong{weight_constraints:} If you are using weight constraints other than restricting some of the weight parameters to known
  constants, make sure the constraints are sensible. Otherwise, the estimation may fail due to the estimation algorithm not being
@@ -155,11 +157,10 @@ If you wish to estimate a structural model, estimate first the reduced form mode
  through estimates that it deems "inappropriate". That is, estimates that are not likely solutions of interest.
  Specifically, solutions that incorporate a near-singular error term covariance matrix (any eigenvalue less than \eqn{0.002}),
  any modulus of the eigenvalues of the companion form AR matrices larger than $0.9985$ (indicating the necessary condition for
- stationarity is close to break), or transition weights such that they are close to zero for almost all \eqn{t} for at least one regime.
- You are also welcome to set \code{filter_estimates=FALSE} and find the solutions of interest yourself by using the
- function \code{alt_stvar}.
-
- \strong{weight_constraints}
+ stationarity is close to break), or transition weights such that they are close to zero for almost all \eqn{t} for at least
+ one regime. You can also set \code{filter_estimates=FALSE} and find the solutions of interest yourself by using the
+ function \code{alt_stvar} (which can used with \code{filter_estimates=TRUE} as well since results from all estimation rounds
+ are saved).
 }
 \section{S3 methods}{
 
@@ -167,92 +168,92 @@ If you wish to estimate a structural model, estimate first the reduced form mode
    \code{predict}, \code{simulate}, and \code{plot}.
 }
 
-\section{About the warning "chol()}{
- given matrix is not symmetric":
- Sometimes the function may produce warnings "chol(): given matrix is not symmetric" because sometimes the underlying C++ code
- calculating conditional covariance matrices notices that due to numerical error in the float-point representation, the matrix
- is not symmetric. The warning is produced even if symmetricity is forced with arma::symmatu() (and .eval()), so there seems to be some
- issue with the LAPACK library that arma::chol uses to check that the matrix is symmetric. It is necessary to take the decomposition
- in C++ for computational efficiency in order to calculate its inverse for each t in each evaluation of the log-likelihood function.
- These warnings can be ignored.
-}
-
 \examples{
 \donttest{
-## These are long running examples that use parallel computing!
-# Running all the below examples will take approximately FILL IN HOW MANY minutes.
-# When estimating the models to data, typically a large number of estimation
-# rounds (set by the argumetn 'nround') should be used. These examples use
-# only one round to decrease the running time of the examples.
+## These are long running examples. Running all the below examples will take
+## approximately two minutes.
+# When estimating the models in empirical applications, typically a large number
+# of estimationrounds (set by the argument 'nrounds') should be used. These examples
+# use only a small number of rounds to make the running time reasonable.
 
-# p=3, M=2, d=2 relative_dens Gaussian STVAR
+# The below examples make use of the two-variate dataset 'gdpdef' containing
+# the the quarterly U.S. GDP and GDP deflator from 1947Q1 to 2019Q4.
+
+# Estimate Gaussian STVAR model of autoregressive order p=3 and two regimes (M=2),
+# with the weighted relative stationary densities of the regimes as the transition
+# weight function. The estimation is performed with 2 rounds and 2 CPU cores, with
+# the random number generator seeds set for reproducibility.
 fit32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="relative_dens",
- cond_dist="Gaussian", nrounds=1, seeds=1, use_parallel=FALSE)
-fit32
-summary(fit32)
-plot(fit32)
+ cond_dist="Gaussian", nrounds=2, ncores=2, seeds=1:2)
 
-# p=1, M=2, d=2 relative_dens Gaussian STVAR with the AR matrices
-# constrained to be identical in both regimes
-C_122 <- rbind(diag(1*2^2), diag(1*2^2))
-fit12c <- fitSTVAR(gdpdef, p=1, M=2, AR_constraints=C_122, nrounds=1, seeds=1,
-  use_parallel=FALSE)
+# Examine the results:
+fit32 # Printout of the estimates
+summary(fit32) # A more detailed summary printout
+plot(fit32) # Plot the fitted transition weights
+get_foc(fit32) # Gradient of the log-likelihood function about the estimate
+get_soc(fit32) # Eigenvalues of the Hessian of the log-lik. fn. about the estimate
+profile_logliks(fit32) # Profile log-likelihood functions about the estimate
 
-# p=1, M=2, d=2 relative_dens Gaussian STVAR with the means and AR matrices constrained
-# to be identical in both regimes
-fit12cm <- fitSTVAR(gdpdef, p=1, M=2, AR_constraints=C_122, mean_constraints=list(1:2),
- parametrization="mean", nrounds=1, seeds=1, use_parallel=FALSE)
-
-# p=2, M=2, d=2, relative_dens Gaussian STVAR; constrain AR-parameters to be the same
-# for all regimes and constrain the of-diagonal elements of AR-matrices to be zero.
-mat0 <- matrix(c(1, rep(0, 10), 1, rep(0, 8), 1, rep(0, 10), 1), nrow=2*2^2, byrow=FALSE)
-C_222 <- rbind(mat0, mat0)
-fit22c <- fitSTVAR(gdpdef, p=2, M=2, AR_constraints=C_222, nrounds=1, seeds=1, use_parallel=FALSE)
-
-# p=2, M=2, d=2, constrain AR-parameters to be the same for all regimes
-# and constrain the of-diagonal elements of AR-matrices to be zero. Moreover,
-# constrain the means identical in both regimes.
-fit22cm <- fitSTVAR(gdpdef, p=2, M=2, AR_constraints=C_222, mean_constraints=list(1:2),
-  nrounds=1, seeds=1, use_parallel=FALSE)
-
-# p=3, M=2, d=2, logistic Student's t STVAR with the first lag of the second variable
-# as the switching variable:
+# Estimate a two-regime Student's t STVAR p=3 model with logistic transition weights
+# and the first lag of the second variable as the switching variable, only two
+# estimation rounds using two CPU cores:
 fitlogistict32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logistic", weightfun_pars=c(2, 1),
- cond_dist="Student", nrounds=1, seeds=1, use_parallel=FALSE)
+ cond_dist="Student", nrounds=2, ncores=2, seeds=1:2)
+summary(fitlogistict32) # Summary printout of the estimates
 
-# p=3, M=2, d=2, logistic STVAR with the second variable as switching variable
-# with one lag, and the location parameter constrained to 1 and scale parameter unconstrained.
-fitlogistic32w <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logistic", weightfun_pars=c(2, 1),
- weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(1, 0)), nrounds=1, seeds=1,
- use_parallel=FALSE)
-
-# mlogit STVAR, p=3, M=2, d=2, the second variable is the switching variable with one lag.
-fitmlogit32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="mlogit",
- weightfun_pars=list(vars=2, lags=1), nrounds=1, seeds=1, use_parallel=FALSE)
-
-# mlogit Student STVAR, p=3, M=2, d=2, the second variable is the switching variable with two lags,
-# constrain AR matrices equal across the regimes.
-C_322 <- rbind(diag(3*2^2), diag(3*2^2))
-fitmlogit32ct <- fitSTVAR(gdpdef, p=3, M=2, weight_function="mlogit",
- weightfun_pars=list(vars=2, lags=2), cond_dist="Student", AR_constraints=C_322, nrounds=1, seeds=1,
- use_parallel=FALSE)
-
-# relative_dens STVAR, p=1, M=2, d=2, with the weight parameter fixed to the constant r=0.8.
-fit12w <- fitSTVAR(gdpdef, p=1, M=2, weight_constraints=list(R=0, r=0.8), nrounds=1, seeds=9,
- use_parallel=FALSE)
-
-# p=3, M=2, d=2, exponential STVAR with the second variable as switching variable
-# with one lag, and AR parameter constrained identical across the regimes, means constrained
-# identical across the regimes, and the location parameter constrained to 0.5.
-fitexp32cmw <- fitSTVAR(gdpdef, p=3, M=2, weight_function="exponential", weightfun_pars=c(2, 1),
-  AR_constraints=C_322, mean_constraints=list(1:2),
-  weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.5, 0)),
-  cond_dist="Student", nrounds=1, seeds=1, use_parallel=FALSE)
-
-# p=3, M=2, d=2, threshold Student's t STVAR with the second variable as the switching variable
-# with one lag, and the threshold parameter constained to 1.
+# Estimate a two-regime Student's t threshold VAR p=3 model with the first lag of the the second
+# variable as the switching variable, and the threshold parameter constrained to the fixed value 1.
 fitthres32wt <- fitSTVAR(gdpdef, p=3, M=2, weight_function="threshold", weightfun_pars=c(2, 1),
-  cond_dist="Student", weight_constraints=list(R=0, r=1), nrounds=1, seeds=2, use_parallel=FALSE)
+  cond_dist="Student", weight_constraints=list(R=0, r=1), nrounds=2, ncores=2, seeds=1:2)
+plot(fitthres32wt) # Plot the fitted transition weights
+
+# Estimate a two-regime Gaussian STVAR p=1 model with the weighted relative stationary densities
+# of the regimes as the transition weight function, and the AR matrices constrained to be identical
+# across the regimes (i.e., allowing for time-variation in the intercepts and the covariance matrix):
+C_122 <- rbind(diag(1*2^2), diag(1*2^2)) # Create the appropriate constraint matrix
+fit12c <- fitSTVAR(gdpdef, p=1, M=2, weight_function="relative_dens", cond_dist="Gaussian",
+ AR_constraints=C_122, nrounds=2, ncores=2, seeds=1:2)
+fit12c # Print the estimates
+
+# Estimate a two-regime Gaussian STVAR p=1 model with the weighted relative stationary densities
+# of the regimes as the transition weight function, and the means of the regimes
+# and AR matrices constrained to be identical across the regimes (i.e., allowing for time-varying
+# conditional covariance matrix only):
+fit12cm <- fitSTVAR(gdpdef, p=1, M=2, weight_function="relative_dens", cond_dist="Gaussian",
+ AR_constraints=C_122, mean_constraints=list(1:2), parametrization="mean", nrounds=2, seeds=1:2)
+fit12cm # Print the estimates
+
+# Estimate a two-regime Gaussian STVAR p=1 model with the weighted relative stationary densities
+# of the regimes as the transition weight function; constrain AR matrices to be identical
+# across the regimes and also constrain the off-diagonal elements of the AR matrices to be zero.
+mat0 <- matrix(c(1, rep(0, 10), 1, rep(0, 8), 1, rep(0, 10), 1), nrow=2*2^2, byrow=FALSE)
+C_222 <- rbind(mat0, mat0) # The constraint matrix
+fit22c <- fitSTVAR(gdpdef, p=2, M=2, weight_function="relative_dens", cond_dist="Gaussian",
+ AR_constraints=C_222, nrounds=2, seeds=1:2)
+fit22c # Print the estimates
+
+# Estimate a two-regime Student's t STVAR p=3 model with logistic transition weights
+# and the first lag of the second variable as the switching variable. Constraint the location
+# parameter to the fixed value 1 and leave the scale parameter unconstrained.
+fitlogistic32w <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logistic", weightfun_pars=c(2, 1),
+ weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(1, 0)), nrounds=2, seeds=1:2)
+plot(fitlogistic32w) # Plot the fitted transition weights
+
+# Estimate a two-regime Gaussian STVAR p=3 model with multinomial logit transition weights
+# using the second variable is the switching variable with two lags. Constrain the AR matrices
+# identical across the regimes (allowing for time-variation in the intercepts and covariance matrix).
+C_322 <- rbind(diag(3*2^2), diag(3*2^2)) # The constraint matrix
+fitmlogit32c <- fitSTVAR(gdpdef, p=3, M=2, weight_function="mlogit", cond_dist="Gaussian",
+ weightfun_pars=list(vars=2, lags=2), AR_constraints=C_322, nrounds=1, seeds=3, ncores=1)
+plot(fitmlogit32c) # Plot the fitted transition weights
+
+# Estimate a two-regime Gaussian STVAR p=3 model with exponential transition weights and the first lag of the second
+# variable as switching variable, and AR parameter constrained identical across the regimes, means constrained
+# identical across the regimes, and the location parameter constrained to 0.5 (but scale parameter unconstrained).
+fitexp32cmw <- fitSTVAR(gdpdef, p=3, M=2, weight_function="exponential", weightfun_pars=c(2, 1),
+ AR_constraints=C_322, mean_constraints=list(1:2), weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.5, 0)),
+ cond_dist="Student", nrounds=1, seeds=1, ncores=1)
+summary(fitexp32cmw) # Summary printout of the estimates
 }
 }
 \references{
@@ -268,5 +269,5 @@ fitthres32wt <- fitSTVAR(gdpdef, p=3, M=2, weight_function="threshold", weightfu
  }
 }
 \seealso{
-\code{\link{GAfit}},  \code{\link{iterate_more}}
+\code{\link{fitSSTVAR}}, \code{\link{STVAR}}, \code{\link{GAfit}}, \code{\link{iterate_more}}
 }

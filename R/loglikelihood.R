@@ -309,7 +309,8 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
     # for(i1 in 1:T_obs) {
     #    # Calculate the l_t log multistudent density for each observation
     #   all_lt[i1] <- logCd - 0.5*log(det(all_covmats[, , i1])) -
-    #     0.5*(d + distpars)*log(1 + crossprod(obs_minus_cmean[i1,], chol2inv(chol(all_covmats[, , i1]))%*%(obs_minus_cmean[i1,]))/(distpars - 2))
+    #     0.5*(d + distpars)*log(1 + crossprod(obs_minus_cmean[i1,],
+    #                                          chol2inv(chol(all_covmats[, , i1]))%*%(obs_minus_cmean[i1,]))/(distpars - 2))
     # }
   }
   if(to_return == "terms") {
