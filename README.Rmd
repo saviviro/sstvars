@@ -39,6 +39,8 @@ This is a basic example on how to use `sstvars` in time series analysis. The est
 # from 1959Q1 to 2019Q4.
 data(gdpdef, package="sstvars")
 
+# Some of the below examples are computationally demanding. Running them all will take approximately 15 minutes.
+
 ### Reduced form STVAR models ###
 
 # Estimate a reduced form two-regime Student's t STVAR p=3 model with logistic transition weight function using the first
@@ -48,8 +50,21 @@ data(gdpdef, package="sstvars")
 # or thousands).
 fit <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="Student",
                 nrounds=20, ncores=2, seeds=1:20)
+                
+# Information on the estimated model:
+plot(fit) # Plot the estimated transition weight function with data
+summary(fit) # Summary printoout of the estimated model
+print_std_errors(fit) # Print standard errors of the estimated model (assuming the standard asymptotics on the ML estimator)
+get_foc(fit) # The first order condition (gradient of the log-likelihood function)
+get_soc(fit) # The second order condition (eigenvalues of approximated Hessian)
+profile_logliks(fit) # Plot profile log-likelihood functions about the estimate
 
-# Estimate the above model but with the autoregressive matrices restricted to be equal in both regimes:
+# Check the stationarity condition for the estimated model, i.e., that the 
+# upper bound of the joint spectral radius is less than one:
+bound_JSR(fit, epsilon=0.1, ncores=2) # Adjust epsilon for a tighter bound
+
+# Estimate the above model but with the autoregressive matrices restricted to be equal in both regimes
+# (so that only the intercepts and the conditional covariance matrix vary in time):
 C_mat <- rbind(diag(3*2^2), diag(3*2^2))
 fitc <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="Student",
                  AR_constraints=C_mat, nrounds=20, ncores=2, seeds=1:20)
@@ -67,29 +82,17 @@ fitw <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logistic", weightfun_pars=c(
 # Test the constraint on the location parameter with the likelihood ratio test:
 LR_test(fit, fitw) # See also Wald_test and Rao_test
 
-# Further information on the estimated model:
-plot(fit) # Plot the estimated transition weight function with data
-summary(fit) # Summary prinoout of the estimated model
-print_std_errors(fit) # Print standard errors of the estimated model (assuming the standard asymptotics on the ML estimator)
-get_foc(fit) # The first order condition (gradient of the log-likelihood function)
-get_soc(fit) # The second order condition (eigenvalues of approximated Hessian)
-profile_logliks(fit) # Profile log-likelihoods about the estimate
-
-# Check the stationarity condition for the estimated model, i.e., that the 
-# upper bound of the joint spectral radius is less than one:
-bound_JSR(fit, epsilon=0.01) 
-
 # Residual based model diagnostics:
-diagnostics(fit, type="series", resid_type="standardized") # Standardized residual time series
-diagnostics(fit, type="ac", resid_type="raw") # Autocorrelation function of unstandardized residuals
-diagnostics(fit, type="ch", resid_type="standardized") # Autocorrelation function of squared standardized residuals
-diagnostics(fit, type="dist", resid_type="standardized") # Histograms and Q-Q plots of standardized residuals
+diagnostic_plot(fit, type="series", resid_type="standardized") # Standardized residual time series
+diagnostic_plot(fit, type="ac", resid_type="raw") # Autocorrelation function of unstandardized residuals
+diagnostic_plot(fit, type="ch", resid_type="standardized") # Autocorrelation function of squared standardized residuals
+diagnostic_plot(fit, type="dist", resid_type="standardized") # Histograms and Q-Q plots of standardized residuals
 
 Portmanteau_test(fit, nlags=20, which_test="autocorr") # Portmanteau test for remaining autocorrelation
 Portmanteau_test(fit, nlags=20, which_test="het.sked") # Portmanteau test applied for testing cond. het.kedasticity
 
-# Simulate a sample path from the estimated model:
-sim <- simulate(fit, nsim=100)
+# Simulate a sample path from the estimated model, initial drawn from the first regime:
+sim <- simulate(fit, nsim=100, init_regime=1)
 
 # Forecast future values of the process:
 pred <- predict(fit, nsteps=10, ci=c(0.95, 0.80))
@@ -113,7 +116,7 @@ fithet <- fitSSTVAR(fit, identification="heteroskedasticity")
 fithet
 
 # Reorder the columns of the impact matrix of fithet to the reverse ordering:
-fithet <- reorder_impact_matrix(fithet, perm=c(2, 1))
+fithet <- reorder_W_columns(fithet, perm=c(2, 1))
 fithet
 
 # Change all signs of the first column of the impact matrix of fithet:
@@ -163,7 +166,7 @@ plot(gfevd2, data_shock_pars=c(1, 0))
 # Estimate the linear impulse response function for the recursively identified
 # STVAR model based on the first regime, the responses of the second variable
 # accumulated:
-irf1 <- linear_IRF(fitrec, N=30 regime=1, which_cumulative=2)
+irf1 <- linear_IRF(fitrec, N=30, regime=1, which_cumulative=2)
 plot(irf1)
 # The above model is nonlinear, so confidence bounds (that reflect the uncertainty
 # about the parameter estimate) are not available.
