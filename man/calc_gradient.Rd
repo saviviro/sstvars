@@ -55,18 +55,28 @@ In particular, the functions \code{get_foc} and \code{get_soc} can be used to ch
 }
 
 \examples{
-  # Simple function
-  foo <- function(x) x^2 + x
-  calc_gradient(x=1, fn=foo)
-  calc_gradient(x=-0.5, fn=foo)
+# Create a simple function:
+foo <- function(x) x^2 + x
 
-  # More complicated function
-  foo <- function(x, a, b) a*x[1]^2 - b*x[2]^2
-  calc_gradient(x=c(1, 2), fn=foo, a=0.3, b=0.1)
+# Calculate the gradient at x=1 and x=-0.5:
+calc_gradient(x=1, fn=foo)
+calc_gradient(x=-0.5, fn=foo)
 
-  theta_112 <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103,
-    0.601786, -0.002945, 0.067224)
-  mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112)
-  get_foc(mod112)
-  get_soc(mod112)
+# Create a more complicated function
+foo <- function(x, a, b) a*x[1]^2 - b*x[2]^2
+
+# Calculate the gradient at x=c(1, 2) with parameter values a=0.3 and b=0.1:
+calc_gradient(x=c(1, 2), fn=foo, a=0.3, b=0.1)
+
+# Create a linear Gaussian VAR p=1 model:
+theta_112 <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103,
+ 0.601786, -0.002945, 0.067224)
+mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112)
+
+# Calculate the gradient of the log-likelihood function about the parameter values:
+get_foc(mod112)
+
+# Calculate the eigenvalues of the Hessian matrix of the log-likelihood function
+# about the parameter values:
+get_soc(mod112)
 }
