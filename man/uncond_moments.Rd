@@ -31,25 +31,17 @@ Returns a list with three components:
 FILL IN IF ANY
 }
 \examples{
-# p=1, M=1, d=2, linear VAR
-theta_112 <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103,
- 0.601786, -0.002945, 0.067224)
-mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112)
-tmp112 <- uncond_moments(mod112)
-tmp112$regime_means # Unconditional means
-tmp112$regime_vars # Unconditional variances
-tmp112$regime_autocovs # Unconditional autocovariance matrices
-tmp112$regime_autocovs[, , 1, 1] # a.cov. matrix of lag zero (of the first regime)
-tmp112$regime_autocovs[, , 2, 1] # a.cov. matrix of lag one (of the first regime)
-tmp112$regime_autocors # Unconditional autocorrelation matrices
-
-# p=1, M=2, d=2, relative dens weight function
+# Two-variate Gaussian STVAR p=1, M=2 model with the weighted relative stationary
+# densities of the regimes as the transition weight function:
 theta_122relg <- c(0.734054, 0.225598, 0.705744, 0.187897, 0.259626, -0.000863,
 -0.3124, 0.505251, 0.298483, 0.030096, -0.176925, 0.838898, 0.310863, 0.007512,
 0.018244, 0.949533, -0.016941, 0.121403, 0.573269)
-mod122 <- STVAR(data=gdpdef, p=1, M=2, params=theta_122relg,
- weight_function="relative_dens")
+mod122 <- STVAR(data=gdpdef, p=1, M=2, params=theta_122relg, weight_function="relative_dens")
+
+# Calculate the unconditional moments of model:
 tmp122 <- uncond_moments(mod122)
+
+# Print the various unconditional moments calculated:
 tmp122$regime_means[,1] # Unconditional means of the first regime
 tmp122$regime_means[,2] # Unconditional means of the second regime
 tmp122$regime_vars[,1] # Unconditional variances of the first regime
@@ -58,6 +50,22 @@ tmp122$regime_autocovs[, , , 1] # a.cov. matrices of the first regime
 tmp122$regime_autocovs[, , , 2] # a.cov. matrices of the second regime
 tmp122$regime_autocors[, , , 1] # a.cor. matrices of the first regime
 tmp122$regime_autocors[, , , 2] # a.cor. matrices of the second regime
+
+# A two-variate linear Gaussian VAR p=1 model:
+theta_112 <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103,
+ 0.601786, -0.002945, 0.067224)
+mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112)
+
+# Calculate the unconditional moments of model:
+tmp112 <- uncond_moments(mod112)
+
+# Print the various unconditional moments calculated:
+tmp112$regime_means # Unconditional means
+tmp112$regime_vars # Unconditional variances
+tmp112$regime_autocovs # Unconditional autocovariance matrices
+tmp112$regime_autocovs[, , 1, 1] # a.cov. matrix of lag zero (of the first regime)
+tmp112$regime_autocovs[, , 2, 1] # a.cov. matrix of lag one (of the first regime)
+tmp112$regime_autocors # Unconditional autocorrelation matrices
 }
 \references{
 \itemize{
