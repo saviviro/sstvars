@@ -306,6 +306,7 @@ create_J_matrix <- function(d, p) {
 #'  \itemize{
 #'    \item Lütkepohl, H. (2005). New Introduction to Multiple Time Series Analysis. Springer.
 #'  }
+#' @keywords internal
 
 create_Fi_matrix <- function(i, T_obs) {
   Fi <- matrix(0, nrow=T_obs, ncol=T_obs)  # Create a T_obs x T_obs matrix of zeros

@@ -27,17 +27,22 @@ The purpose of \code{iterate_more} is to provide a simple and convenient tool to
 }
 \examples{
 \donttest{
-## These are long running examples that use parallel computing!
-## Running the below examples takes approximately FILL IN HOW MANY minutes
+## These are long running examples that take approximately 20 seconds to run.
 
-# p=1, M=2, d=2 relative_dens Gaussian STVAR, only 5 iterations of
-# the variable matrix algorithm.
-fit12 <- fitSTVAR(gdpdef, p=1, M=2, nrounds=1, seeds=1, maxit=5, use_parallel=FALSE)
-fit12
+# Estimate two-regime Gaussian STVAR p=1 model with the weighted relative stationary densities
+# of the regimes as the transition weight function, but only 5 iterations of the variable matrix
+# algorithm:
+fit12 <- fitSTVAR(gdpdef, p=1, M=2, nrounds=1, seeds=1, ncores=1, maxit=5)
 
-# Iterate more:
+# The iteration limit was reached, so the estimate is not local maximum.
+# The gradient of the log-likelihood function:
+get_foc(fit12) # Not close to zero!
+
+# So, we run more iterations of the variable metric algorithm:
 fit12 <- iterate_more(fit12)
-fit12
+
+# The gradient of the log-likelihood function after iterating more:
+get_foc(fit12) # Close to zero!
 }
 }
 \references{

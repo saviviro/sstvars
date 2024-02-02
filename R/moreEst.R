@@ -15,17 +15,22 @@
 #' @inherit fitSTVAR references
 #' @examples
 #' \donttest{
-#' ## These are long running examples that use parallel computing!
-#' ## Running the below examples takes approximately FILL IN HOW MANY minutes
+#' ## These are long running examples that take approximately 20 seconds to run.
 #'
-#' # p=1, M=2, d=2 relative_dens Gaussian STVAR, only 5 iterations of
-#' # the variable matrix algorithm.
-#' fit12 <- fitSTVAR(gdpdef, p=1, M=2, nrounds=1, seeds=1, maxit=5, use_parallel=FALSE)
-#' fit12
+#' # Estimate two-regime Gaussian STVAR p=1 model with the weighted relative stationary densities
+#' # of the regimes as the transition weight function, but only 5 iterations of the variable matrix
+#' # algorithm:
+#' fit12 <- fitSTVAR(gdpdef, p=1, M=2, nrounds=1, seeds=1, ncores=1, maxit=5)
 #'
-#' # Iterate more:
+#' # The iteration limit was reached, so the estimate is not local maximum.
+#' # The gradient of the log-likelihood function:
+#' get_foc(fit12) # Not close to zero!
+#'
+#' # So, we run more iterations of the variable metric algorithm:
 #' fit12 <- iterate_more(fit12)
-#' fit12
+#'
+#' # The gradient of the log-likelihood function after iterating more:
+#' get_foc(fit12) # Close to zero!
 #' }
 #' @export
 
@@ -152,40 +157,63 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
 #'  }
 #' @examples
 #' \donttest{
-#' ## These are long running examples that use parallel computing!
-#' ## Running the below examples takes approximately FILL IN HOW MANY minutes
+#' ## These are long running examples that take approximately 1 minute to run.
 #'
-#' # p=3, M=2, d=2 relative_dens Gaussian STVAR with the means and AR matrices constrained
-#' # to be identical in both regimes
+#' ## Estimate first a reduced form Gaussian STVAR p=3, M=2 model with the weighted relative
+#' # stationary densities of the regimes as the transition weight function, and the means and
+#' # AR matrices constrained to be identical across the regimes:
 #' fit32cm <- fitSTVAR(gdpdef, p=3, M=2, AR_constraints=rbind(diag(3*2^2), diag(3*2^2)),
 #'   weight_function="relative_dens", mean_constraints=list(1:2), parametrization="mean",
-#'   nrounds=1, seeds=1, use_parallel=FALSE)
+#'   nrounds=1, seeds=1, ncores=1)
 #'
-#' # Estimate various structural models based on the reduced form model:
-#' fit32cms_rec <- fitSSTVAR(fit32cm, identification="recursive") # Recursive
-#' fit32cms_hetsked <- fitSSTVAR(fit32cm, identification="heteroskedasticity") # Het.sked.
+#' # Then, we estimate/create various structural models based on the reduced form model.
+#' # Create a structural model with the shocks identified recursively:
+#' fit32cms_rec <- fitSSTVAR(fit32cm, identification="recursive")
+#'
+#' # Create a structural model with the shocks identified by conditional heteroskedasticity:
+#' fit32cms_hetsked <- fitSSTVAR(fit32cm, identification="heteroskedasticity")
+#' fit32cms_hetsked # Print the estimates
+#'
+#' # Estimate a structural model with the shocks identified by conditional heteroskedasticity
+#' # and overidentifying constraints imposed on the impact matrix: positive diagonal element
+#' # and zero upper right element:
 #' fit32cms_hs2 <- fitSSTVAR(fit32cm, identification="heteroskedasticity",
-#'  B_constraints=matrix(c(1, NA, 0, 1), nrow=2)) # Overidentify by B_constraints
-#' fit32cms_hs3 <- fitSSTVAR(fit32cms_hs2, identification="heteroskedasticity",
-#'  B_constraints=matrix(c(1, 0, 0, 1), nrow=2)) # Overidentify more by B_constraints
+#'  B_constraints=matrix(c(1, NA, 0, 1), nrow=2))
 #'
-#' # p=3, M=3, d=2 Threshold Student STVAR with the means and AR matrices constrained
-#' # to be identical in both regimes; the first lag of the second variable as the
-#' #  switching variable:
+#' # Estimate a structural model with the shocks identified by conditional heteroskedasticity
+#' # and overidentifying constraints imposed on the impact matrix: positive diagonal element
+#' # and zero off-diagonal elements:
+#' fit32cms_hs3 <- fitSSTVAR(fit32cms_hs2, identification="heteroskedasticity",
+#'  B_constraints=matrix(c(1, 0, 0, 1), nrow=2))
+#'
+#' # Estimate first a reduced form three-regime Student's t Threshold VAR p=3 model with
+#' # the first lag of the second variable as the switching variable, the means and AR
+#' # matrices constrained to be identical across the regimes:
 #' fit32cml <- fitSTVAR(gdpdef, p=3, M=3, cond_dist="Student",
 #'  AR_constraints=rbind(diag(3*2^2), diag(3*2^2), diag(3*2^2)),
 #'  weight_function="threshold", weightfun_pars=c(2, 1), mean_constraints=list(1:3),
-#'  parametrization="mean", nrounds=1, seeds=1, use_parallel=FALSE)
+#'  parametrization="mean", nrounds=1, seeds=1, ncores=1)
 #'
-#' # Estimate various structural models based on the reduced form model:
-#' fit32cmls_rec <- fitSSTVAR(fit32cml, identification="recursive") # Recursive
-#' fit32cmls_hs <- fitSSTVAR(fit32cml, identification="heteroskedasticity") # Het.sked.
+#' # Then, we estimate/create various structural models based on the reduced form model.
+#' # Create a structural model with the shocks identified recusively:
+#' fit32cmls_rec <- fitSSTVAR(fit32cml, identification="recursive")
+#'
+#' # Estimate a structural model with the shocks identified by conditional heteroskedasticity,
+#' # the model is overidentifying, as it has more than two regimes:
+#' fit32cmls_hs <- fitSSTVAR(fit32cml, identification="heteroskedasticity")
+#' fit32cmls_hs # Print the estimates
+#'
+#' # Estimate a structural model with the shocks identified by conditional heteroskedasticity
+#' # and overidentifying constraints imposed on the impact matrix: zero lower left element,
+#' # estimation without employing a robust estimation method:
 #' fit32cmls_hs2 <- fitSSTVAR(fit32cmls_hs, identification="heteroskedasticity",
 #'  B_constraints=matrix(c(NA, 0, NA, NA), nrow=2),
-#'  robust_method="none") # Overidentified more by B_constraints; no robust estimation
+#'  robust_method="none")
+#'
+#' # Relax the zero constraint on the impact matrix and re-estimate the model:
 #' fit32cmls_hs3 <- fitSSTVAR(fit32cmls_hs2, identification="heteroskedasticity",
 #'  B_constraints=matrix(c(NA, NA, NA, NA), nrow=2),
-#'  robust_method="none") # Relax the B_constraints again; no robust estimation.
+#'  robust_method="none")
 #' }
 #' @export
 
@@ -289,8 +317,6 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity")
     n_dist_pars <- 1
   }
   n_pars <- n_mean_pars + n_ar_pars + n_covmat_pars + n_weight_pars + n_dist_pars
-
-
 
   # Set up initial values using the obtained parameters
   if(identification == "heteroskedasticity") {

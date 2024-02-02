@@ -26,3 +26,4 @@ Used in \code{Portmanteau_test}. The matrix \eqn{F_i} in Lütkepohl (2005), p.15
    \item Lütkepohl, H. (2005). New Introduction to Multiple Time Series Analysis. Springer.
  }
 }
+\keyword{internal}
