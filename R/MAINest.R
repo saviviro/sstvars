@@ -112,7 +112,8 @@
 #'
 #' # Estimate a two-regime Gaussian STVAR p=1 model with the weighted relative stationary densities
 #' # of the regimes as the transition weight function, and the AR matrices constrained to be identical
-#' # across the regimes (i.e., allowing for time-variation in the intercepts and the covariance matrix):
+#' # across the regimes (i.e., allowing for time-variation in the intercepts and the covariance
+#' # matrix):
 #' C_122 <- rbind(diag(1*2^2), diag(1*2^2)) # Create the appropriate constraint matrix
 #' fit12c <- fitSTVAR(gdpdef, p=1, M=2, weight_function="relative_dens", cond_dist="Gaussian",
 #'  AR_constraints=C_122, nrounds=2, ncores=2, seeds=1:2)
@@ -144,18 +145,20 @@
 #'
 #' # Estimate a two-regime Gaussian STVAR p=3 model with multinomial logit transition weights
 #' # using the second variable is the switching variable with two lags. Constrain the AR matrices
-#' # identical across the regimes (allowing for time-variation in the intercepts and covariance matrix).
+#' # identical across the regimes (allowing for time-variation in the intercepts and covariance
+#' # matrix).
 #' C_322 <- rbind(diag(3*2^2), diag(3*2^2)) # The constraint matrix
 #' fitmlogit32c <- fitSTVAR(gdpdef, p=3, M=2, weight_function="mlogit", cond_dist="Gaussian",
 #'  weightfun_pars=list(vars=2, lags=2), AR_constraints=C_322, nrounds=1, seeds=3, ncores=1)
 #' plot(fitmlogit32c) # Plot the fitted transition weights
 #'
-#' # Estimate a two-regime Gaussian STVAR p=3 model with exponential transition weights and the first lag of the second
-#' # variable as switching variable, and AR parameter constrained identical across the regimes, means constrained
-#' # identical across the regimes, and the location parameter constrained to 0.5 (but scale parameter unconstrained).
+#' # Estimate a two-regime Gaussian STVAR p=3 model with exponential transition weights and the first
+#' # lag of the second variable as switching variable, and AR parameter constrained identical across
+#' # the regimes, means constrained identical across the regimes, and the location parameter
+#' # constrained to 0.5 (but scale parameter unconstrained).
 #' fitexp32cmw <- fitSTVAR(gdpdef, p=3, M=2, weight_function="exponential", weightfun_pars=c(2, 1),
-#'  AR_constraints=C_322, mean_constraints=list(1:2), weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.5, 0)),
-#'  cond_dist="Student", nrounds=1, seeds=1, ncores=1)
+#'  cond_dist="Student", AR_constraints=C_322, mean_constraints=list(1:2),
+#'  weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.5, 0)), nrounds=1, seeds=1, ncores=1)
 #' summary(fitexp32cmw) # Summary printout of the estimates
 #' }
 #' @export
