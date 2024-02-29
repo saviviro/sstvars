@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  1 FEB 2024 13:04
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  29 FEB 2024 17:21
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -803,7 +803,7 @@ Package rerunfilecheck Info: File `sstvars-vignette.out' has not changed.
  ) 
 Here is how much of TeX's memory you used:
  12372 strings out of 478353
- 195228 string characters out of 5848086
+ 195223 string characters out of 5848086
  495535 words of memory out of 5000000
  30084 multiletter control sequences out of 15000+600000
  516856 words of font info for 106 fonts, out of 8000000 for 9000
@@ -838,10 +838,10 @@ msy8.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtt10.pfb><
 /usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtti10.pfb></usr/loca
 l/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr/local/texlive
 /2021/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on sstvars-vignette.pdf (36 pages, 1014578 bytes).
+Output written on sstvars-vignette.pdf (36 pages, 1013794 bytes).
 PDF statistics:
- 839 PDF objects out of 1000 (max. 8388607)
- 729 compressed objects within 8 object streams
+ 840 PDF objects out of 1000 (max. 8388607)
+ 730 compressed objects within 8 object streams
  193 named destinations out of 1000 (max. 500000)
  307 words of extra memory for PDF output out of 10000 (max. 10000000)
 

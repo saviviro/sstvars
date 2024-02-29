@@ -207,13 +207,6 @@ Virolainen S (2018{\natexlab{b}}).
   \url{https://CRAN.R-project.org/package=uGMAR},
   \urlprefix\url{https://CRAN.R-project.org/package=uGMAR}.
 
-\bibitem[{Virolainen(2021)}]{Virolainen2:2021}
-Virolainen S (2021).
-\newblock \enquote{Structural Gaussian Mixture vector autoregressive model with
-  application to the asymmetric effects of monetary policy shocks.}
-\newblock \emph{Unpublished working paper, available as arXiv:2007.04713}.
-\newblock \urlprefix\url{https://arxiv.org/abs/2007.04713}.
-
 \bibitem[{Virolainen(2022{\natexlab{a}})}]{Virolainen2:2022}
 Virolainen S (2022{\natexlab{a}}).
 \newblock \emph{Essays on mixture autoregressive models with applications to
@@ -228,5 +221,12 @@ Virolainen S (2022{\natexlab{b}}).
 \newblock \emph{Studies in Nonlinear Dynamics \& Econometrics}, \textbf{26}(4),
   559--580.
 \newblock \doi{10.1515/snde-2020-0060}.
+
+\bibitem[{Virolainen(2024)}]{Virolainen:2024}
+Virolainen S (2024).
+\newblock \enquote{A statistically identified structural vector autoregression
+  with endogeneously switching volatility regime.}
+\newblock \emph{Journal of Business \& Economic Statistics}.
+\newblock \doi{10.1080/07350015.2024.2322090}.
 
 \end{thebibliography}
