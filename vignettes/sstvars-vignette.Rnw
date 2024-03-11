@@ -434,7 +434,7 @@ The above summary printout shows additional information compared to the print me
 Approximate standard errors can be printed with the function \code{print_std_errors}, which prints the standard errors in the same form as the print method prints the estimates. There is no standard error for the intercepts if mean parametrization is used (by setting \code{parametrization = "mean"} in \code{fitSTVAR}) and vice versa. In order to obtain standard errors for the regimewise unconditional means or intercepts, one can easily swap between the mean and intercept parametrizations with the function \code{swap_parametrization}. Note that approximate standard errors are based on the mere assumption of the standard Gaussian asymptotic distribution of the estimator. Hence, they should be interpreted with caution.
 
 \subsection{Further examination of the estimates}\label{sec:examestim}
-In addition to examining the summary printout, it is often useful to visualize the model by plotting the transition weights together with the time series. That is exactly what the plot method for GSMVAR models does. The following command creates the time series plot along with estimated mixing weights:
+In addition to examining the summary printout, it is often useful to visualize the model by plotting the transition weights together with the time series. That is exactly what the plot method for STVAR models does. The following command creates the time series plot along with estimated mixing weights:
 %
 \begin{CodeChunk}
 \begin{CodeInput}

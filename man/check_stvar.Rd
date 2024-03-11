@@ -15,6 +15,6 @@ check_stvar(object, object_name)
 Throws an error if the object doesn't have the class attribute 'stvar'.
 }
 \description{
-\code{check_gsmvar} checks that the object has class attribute 'stvar'.
+\code{check_stvar} checks that the object has class attribute 'stvar'.
 }
 \keyword{internal}
