@@ -39,8 +39,7 @@ smart_weightpars(
     observation of the \eqn{i}th variable, \eqn{c} is a location parameter, and \eqn{\gamma > 0} is a scale parameter.}
   \item{\code{"mlogit"}:}{\eqn{\alpha_{m,t}=\frac{\exp\lbrace \gamma_m'z_{t-1} \rbrace}
     {\sum_{n=1}^M\exp\lbrace \gamma_n'z_{t-1} \rbrace}}, where \eqn{\gamma_m} are coefficient vectors, \eqn{\gamma_M=0},
-    and \eqn{z_{t-1}} \eqn{(k\times 1)} is the \eqn{\mathcal{F}_{t-1}}-measurable vector containing a constant and
-    the (lagged) switching variables.}
+    and \eqn{z_{t-1}} \eqn{(k\times 1)} is the vector containing a constant and the (lagged) switching variables.}
   \item{\code{"exponential"}:}{\eqn{M=2}, \eqn{\alpha_{1,t}=1-\alpha_{2,t}},
     and \eqn{\alpha_{2,t}=1-\exp\lbrace -\gamma(y_{it-j}-c) \rbrace}, where \eqn{y_{it-j}} is the lag \eqn{j}
     observation of the \eqn{i}th variable, \eqn{c} is a location parameter, and \eqn{\gamma > 0} is a scale parameter.}

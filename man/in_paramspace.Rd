@@ -8,13 +8,15 @@ in_paramspace(
   p,
   M,
   d,
-  weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+  weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold",
+    "exogenous"),
   weightfun_pars = NULL,
-  cond_dist = c("Gaussian", "Student"),
+  cond_dist = c("Gaussian", "Student", "ind_Student"),
   all_boldA,
   all_Omegas,
   weightpars,
   distpars,
+  transition_weights,
   stab_tol = 0.001,
   posdef_tol = 1e-08,
   distpar_tol = 1e-08,
@@ -40,8 +42,7 @@ in_paramspace(
     observation of the \eqn{i}th variable, \eqn{c} is a location parameter, and \eqn{\gamma > 0} is a scale parameter.}
   \item{\code{"mlogit"}:}{\eqn{\alpha_{m,t}=\frac{\exp\lbrace \gamma_m'z_{t-1} \rbrace}
     {\sum_{n=1}^M\exp\lbrace \gamma_n'z_{t-1} \rbrace}}, where \eqn{\gamma_m} are coefficient vectors, \eqn{\gamma_M=0},
-    and \eqn{z_{t-1}} \eqn{(k\times 1)} is the \eqn{\mathcal{F}_{t-1}}-measurable vector containing a constant and
-    the (lagged) switching variables.}
+    and \eqn{z_{t-1}} \eqn{(k\times 1)} is the vector containing a constant and the (lagged) switching variables.}
   \item{\code{"exponential"}:}{\eqn{M=2}, \eqn{\alpha_{1,t}=1-\alpha_{2,t}},
     and \eqn{\alpha_{2,t}=1-\exp\lbrace -\gamma(y_{it-j}-c) \rbrace}, where \eqn{y_{it-j}} is the lag \eqn{j}
     observation of the \eqn{i}th variable, \eqn{c} is a location parameter, and \eqn{\gamma > 0} is a scale parameter.}
@@ -74,15 +75,22 @@ where the latest is the Student's \eqn{t} distribution with independent componen
 \item{all_boldA}{3D array containing the \eqn{((dp)x(dp))} "bold A" (companion form) matrices of each regime,
 obtained from \code{form_boldA}. Will be computed if not given.}
 
-\item{all_Omegas}{3D array containing all covariance matrices \eqn{\Omega_{m}}, obtained from \code{pick_Omegas}.}
+\item{all_Omegas}{A 3D array containing the covariance matrix parameters obtain from \code{pick_Omegas}...
+\describe{
+  \item{If \code{cond_dist \%in\% c("Gaussian", "Student")}:}{all covariance matrices \eqn{\Omega_{m}} in \code{[, , m]}.}
+  \item{If \code{cond_dist=="ind_Student"}:}{all impact matrices \eqn{B_m} of the regimes in \code{[, , m]}.}
+}}
 
 \item{weightpars}{numerical vector containing the transition weight parameters, obtained from \code{pick_weightpars}.}
 
-\item{distpars}{A numeric vector containing the distribution parameters,
+\item{distpars}{A numeric vector containing the distribution parameters...
 \describe{
   \item{If \code{cond_dist=="Gaussian"}:}{Not used, i.e., a numeric vector of length zero.}
   \item{If \code{cond_dist=="Student"}:}{The degrees of freedom parameter, i.e., a numeric vector of length one.}
 }}
+
+\item{transition_weights}{(optional) A \eqn{T \times M} matrix containing the transition weights. If \code{cond_dist="ind_Student"}
+checks that the impact matrix \eqn{\sum_{m=1}^M\alpha_{m,t}^{1/2}B_m} is invertible for all \eqn{t=1,...,T}.}
 
 \item{stab_tol}{numerical tolerance for stability of condition of the regimes: if the "bold A" matrix of any regime
 has eigenvalues larger that \code{1 - stat_tol} the parameter is considered to be outside the parameter space.

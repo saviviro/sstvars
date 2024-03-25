@@ -40,12 +40,18 @@ stab_conds_satisfied <- function(p, M, d, params, all_boldA=NULL, tolerance=1e-3
 #' @inheritParams loglikelihood
 #' @inheritParams stab_conds_satisfied
 #' @param weightpars numerical vector containing the transition weight parameters, obtained from \code{pick_weightpars}.
-#' @param all_Omegas 3D array containing all covariance matrices \eqn{\Omega_{m}}, obtained from \code{pick_Omegas}.
-#' @param distpars A numeric vector containing the distribution parameters,
+#' @param all_Omegas A 3D array containing the covariance matrix parameters obtain from \code{pick_Omegas}...
+#'   \describe{
+#'     \item{If \code{cond_dist \%in\% c("Gaussian", "Student")}:}{all covariance matrices \eqn{\Omega_{m}} in \code{[, , m]}.}
+#'     \item{If \code{cond_dist=="ind_Student"}:}{all impact matrices \eqn{B_m} of the regimes in \code{[, , m]}.}
+#'   }
+#' @param distpars A numeric vector containing the distribution parameters...
 #'   \describe{
 #'     \item{If \code{cond_dist=="Gaussian"}:}{Not used, i.e., a numeric vector of length zero.}
 #'     \item{If \code{cond_dist=="Student"}:}{The degrees of freedom parameter, i.e., a numeric vector of length one.}
 #'   }
+#' @param transition_weights (optional) A \eqn{T \times M} matrix containing the transition weights. If \code{cond_dist="ind_Student"}
+#'   checks that the impact matrix \eqn{\sum_{m=1}^M\alpha_{m,t}^{1/2}B_m} is invertible for all \eqn{t=1,...,T}.
 #' @details The parameter vector in the argument \code{params} should be unconstrained and reduced form.
 #' @return Returns \code{TRUE} if the given parameter values are in the parameter space and \code{FALSE} otherwise.
 #'   This function does NOT consider identification conditions!
@@ -57,9 +63,9 @@ stab_conds_satisfied <- function(p, M, d, params, all_boldA=NULL, tolerance=1e-3
 #'  }
 #'  @keywords internal
 
-in_paramspace <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
-                          weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), all_boldA, all_Omegas, weightpars, distpars,
-                          stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
+in_paramspace <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                          weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), all_boldA, all_Omegas, weightpars, distpars,
+                          transition_weights, stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
   # in_paramspace is internal function that always takes in non-constrained reduced form parameter vector
   # Reform the parameter vectors before checking with in_paramspace
   weight_function <- match.arg(weight_function)
@@ -68,6 +74,10 @@ in_paramspace <- function(p, M, d, weight_function=c("relative_dens", "logistic"
   # Check distribution parameters
   if(cond_dist == "Student") {
     if(distpars <= 2 + distpar_tol) {
+      return(FALSE)
+    }
+  } else if(cond_dist == "ind_Student") {
+    if(any(distpars <= 2 + distpar_tol)) {
       return(FALSE)
     }
   }
@@ -89,6 +99,8 @@ in_paramspace <- function(p, M, d, weight_function=c("relative_dens", "logistic"
     if(!all(order(weightpars, decreasing=FALSE) == seq_len(M - 1))) {
       return(FALSE) # We assume increasing ordering of the thresholds
     }
+  } else if(weight_function == "exogenous") {
+    # No weightpars to test
   }
 
   # Check stability conditions of a linear VAR
@@ -96,10 +108,25 @@ in_paramspace <- function(p, M, d, weight_function=c("relative_dens", "logistic"
     return(FALSE)
   }
 
-  # Check positive definiteness of the covariance matrices
-  for(m in 1:M) {
-    if(any(eigen(all_Omegas[, , m], symmetric=TRUE, only.values=TRUE)$values < posdef_tol)) {
-      return(FALSE)
+  # Check positive definiteness of the covariance matrices / invertibility of the impact matrices and matrix
+  if(cond_dist == "Gaussian" || cond_dist == "Student") {
+    for(m in 1:M) {
+      if(any(eigen(all_Omegas[, , m], symmetric=TRUE, only.values=TRUE)$values < posdef_tol)) {
+        return(FALSE)
+      }
+    }
+  } else { # cond_dist == "ind_Student"
+    for(m in 1:M) { # Check the invertibility of the impact matrices of the regimes
+      if(abs(det(all_Omegas[, , m])) < posdef_tol) {
+        return(FALSE)
+      }
+    }
+    if(!missing(transition_weights)) { # Check the invertibility of the time-varying impact matrix for all t
+      for(i1 in 1:nrow(transition_weights)) { # Impact matrices in all_Omegas
+        if(abs(det(apply(all_Omegas, c(1, 2), function(mat) sum(mat*transition_weights[i1,])))) < posdef_tol) {
+          return(FALSE)
+        }
+      }
     }
   }
   TRUE

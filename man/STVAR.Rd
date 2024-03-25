@@ -62,7 +62,12 @@ where (see exceptions below):
     }
   }
   \item{\eqn{\alpha = } the \eqn{(a\times 1)} vector containing the transition weight parameters.}
-  \item{\eqn{\nu > 2} is the degrees of freedom parameter that is included only if \code{cond_dist="Student"}.}
+  \item{\describe{
+    \item{if \code{cond_dist = "Gaussian")}:}{Omit \eqn{\nu} from the parameter vector.}
+    \item{if \code{cond_dist="Student"}:}{\eqn{\nu > 2} is the single degrees of freedom parameter.}
+    \item{if \code{cond_dist="ind_Student"}:}{\eqn{\nu = (\nu_1,...,\nu_M)} \eqn{(M \times 1)}, \eqn{nu_m > 2}.}
+    }
+  }
 }
 For models with...
 \describe{
@@ -97,8 +102,9 @@ For models with...
         so that the elements that are constrained to zero are not included.}
 }
 Above, \eqn{\phi_{m,0}} is the intercept parameter, \eqn{A_{m,i}} denotes the \eqn{i}th coefficient matrix of the \eqn{m}th
-regime, \eqn{\Omega_{m}} denotes the positive definite error term covariance matrix of the \eqn{m}:th regime, and \eqn{B_m}
-is the invertible \eqn{(d\times d)} impact matrix of the \eqn{m}th regime.
+regime, \eqn{\Omega_{m}} denotes the positive definite error term covariance matrix of the \eqn{m}th regime, and \eqn{B_m}
+is the invertible \eqn{(d\times d)} impact matrix of the \eqn{m}th regime. \eqn{\nu_m} is the degrees of freedom parameter
+of the \eqn{m}th regime.
 If \code{parametrization=="mean"}, just replace each \eqn{\phi_{m,0}} with regimewise mean \eqn{\mu_{m}}.
 \eqn{vec()} is vectorization operator that stacks columns of a given matrix into a vector. \eqn{vech()} stacks columns
 of a given matrix from the principal diagonal downwards (including elements on the diagonal) into a vector. \eqn{Bvec()}
@@ -117,8 +123,7 @@ that are constrained to zero by the argument \code{B_constraints} are excluded.}
     observation of the \eqn{i}th variable, \eqn{c} is a location parameter, and \eqn{\gamma > 0} is a scale parameter.}
   \item{\code{"mlogit"}:}{\eqn{\alpha_{m,t}=\frac{\exp\lbrace \gamma_m'z_{t-1} \rbrace}
     {\sum_{n=1}^M\exp\lbrace \gamma_n'z_{t-1} \rbrace}}, where \eqn{\gamma_m} are coefficient vectors, \eqn{\gamma_M=0},
-    and \eqn{z_{t-1}} \eqn{(k\times 1)} is the \eqn{\mathcal{F}_{t-1}}-measurable vector containing a constant and
-    the (lagged) switching variables.}
+    and \eqn{z_{t-1}} \eqn{(k\times 1)} is the vector containing a constant and the (lagged) switching variables.}
   \item{\code{"exponential"}:}{\eqn{M=2}, \eqn{\alpha_{1,t}=1-\alpha_{2,t}},
     and \eqn{\alpha_{2,t}=1-\exp\lbrace -\gamma(y_{it-j}-c) \rbrace}, where \eqn{y_{it-j}} is the lag \eqn{j}
     observation of the \eqn{i}th variable, \eqn{c} is a location parameter, and \eqn{\gamma > 0} is a scale parameter.}
