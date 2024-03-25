@@ -7,7 +7,8 @@
 random_distpars(cond_dist)
 }
 \arguments{
-\item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"} or \code{"Student"}.}
+\item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"}, \code{"Student"}, or \code{"ind_Student"},
+where the latest is the Student's \eqn{t} distribution with independent components.}
 }
 \value{
 Returns a numeric vector ...

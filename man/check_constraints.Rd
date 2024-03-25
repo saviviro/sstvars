@@ -45,6 +45,7 @@ check_constraints(
   \item{\code{"threshold"}:}{\eqn{\alpha_{m,t} = 1} if \eqn{r_{m-1}<y_{it-j}\leq r_{m}} and \eqn{0} otherwise, where
      \eqn{-\infty\equiv r_0<r_1<\cdots <r_{M-1}<r_M\equiv\infty} are thresholds \eqn{y_{it-j}} is the lag \eqn{j}
      observation of the \eqn{i}th variable.}
+  \item{\code{"exogenous"}:}{Exogenous nonrandom transition weights, spesify the weight series in \code{weightfun_pars}.}
 }
 See the vignette for more details about the weight functions.}
 
@@ -60,6 +61,8 @@ See the vignette for more details about the weight functions.}
         used in the weight function.}
     }
   }
+  \item{If \code{weight_function == "exogenous"}:}{a numeric vector with the length \code{nrow(data) - p} containing the exogenous
+    transition weights.}
 }}
 
 \item{parametrization}{\code{"intercept"} or \code{"mean"} determining whether the model is parametrized with intercept
@@ -68,10 +71,12 @@ parameters \eqn{\phi_{m,0}} or regime means \eqn{\mu_{m}}, m=1,...,M.}
 \item{identification}{is it reduced form model or an identified structural model; if the latter, how is it identified
 (see the vignette or the references for details)?
 \describe{
-  \item{\code{"reduced_form"}:}{Reduced form model, shocks not identified.}
+  \item{\code{"reduced_form"}:}{Reduced form model.}
   \item{\code{"recursive"}:}{The usual lower-triangular recursive identification of the shocks via their impact responses.}
   \item{\code{"heteroskedasticity"}:}{Identification by conditional heteroskedasticity, which imposes constant relative
     impact responses for each shock.}
+  \item{\code{"non-Gaussianity"}:}{Identification by non-Gaussianity; requires mutually independent non-Gaussian shocks, thus,
+    currently available only with the conditional distribution \code{"ind_Student"}.}
 }}
 
 \item{AR_constraints}{a size \eqn{(Mpd^2 x q)} constraint matrix \eqn{C} specifying linear constraints
@@ -85,8 +90,8 @@ For example, to restrict the AR-parameters to be the identical across the regime
 such that each numeric vector contains the regimes that should share the common mean parameters. For instance, if
 \code{M=3}, the argument \code{list(1, 2:3)} restricts the mean parameters of the second and third regime to be
 identical but the first regime has freely estimated (unconditional) mean. Ignore or set to \code{NULL} if mean parameters
-should not be restricted to be the same among any regimes. \strong{This constraint is available only for mean parametrized models;
-that is, when \code{parametrization="mean"}.}}
+should not be restricted to be the same among any regimes. This constraint is available only for mean parametrized models;
+that is, when \code{parametrization="mean"}.}
 
 \item{weight_constraints}{a list of two elements, \eqn{R} in the first element and \eqn{r} in the second element,
 specifying linear constraints on the transition weight parameters \eqn{\alpha}.

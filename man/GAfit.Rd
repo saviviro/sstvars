@@ -62,6 +62,7 @@ a univariate time series. Missing values are not supported.}
   \item{\code{"threshold"}:}{\eqn{\alpha_{m,t} = 1} if \eqn{r_{m-1}<y_{it-j}\leq r_{m}} and \eqn{0} otherwise, where
      \eqn{-\infty\equiv r_0<r_1<\cdots <r_{M-1}<r_M\equiv\infty} are thresholds \eqn{y_{it-j}} is the lag \eqn{j}
      observation of the \eqn{i}th variable.}
+  \item{\code{"exogenous"}:}{Exogenous nonrandom transition weights, spesify the weight series in \code{weightfun_pars}.}
 }
 See the vignette for more details about the weight functions.}
 
@@ -77,9 +78,12 @@ See the vignette for more details about the weight functions.}
         used in the weight function.}
     }
   }
+  \item{If \code{weight_function == "exogenous"}:}{a numeric vector with the length \code{nrow(data) - p} containing the exogenous
+    transition weights.}
 }}
 
-\item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"} or \code{"Student"}.}
+\item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"}, \code{"Student"}, or \code{"ind_Student"},
+where the latest is the Student's \eqn{t} distribution with independent components.}
 
 \item{parametrization}{\code{"intercept"} or \code{"mean"} determining whether the model is parametrized with intercept
 parameters \eqn{\phi_{m,0}} or regime means \eqn{\mu_{m}}, m=1,...,M.}
@@ -95,8 +99,8 @@ For example, to restrict the AR-parameters to be the identical across the regime
 such that each numeric vector contains the regimes that should share the common mean parameters. For instance, if
 \code{M=3}, the argument \code{list(1, 2:3)} restricts the mean parameters of the second and third regime to be
 identical but the first regime has freely estimated (unconditional) mean. Ignore or set to \code{NULL} if mean parameters
-should not be restricted to be the same among any regimes. \strong{This constraint is available only for mean parametrized models;
-that is, when \code{parametrization="mean"}.}}
+should not be restricted to be the same among any regimes. This constraint is available only for mean parametrized models;
+that is, when \code{parametrization="mean"}.}
 
 \item{weight_constraints}{a list of two elements, \eqn{R} in the first element and \eqn{r} in the second element,
 specifying linear constraints on the transition weight parameters \eqn{\alpha}.

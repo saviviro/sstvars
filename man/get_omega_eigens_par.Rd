@@ -31,7 +31,12 @@ where (see exceptions below):
 \itemize{
   \item{\eqn{\phi_{m,0} = } the \eqn{(d \times 1)} intercept (or mean) vector of the \eqn{m}th regime.}
   \item{\eqn{\varphi_m = (vec(A_{m,1}),...,vec(A_{m,p}))} \eqn{(pd^2 \times 1)}.}
-  \item{\eqn{\sigma = (vech(\Omega_1),...,vech(\Omega_M))} \eqn{(Md(d + 1)/2 \times 1)}.}
+  \item{\describe{
+    \item{if \code{cond_dist \%in\% c("Gaussian", "Student")}:}{\eqn{\sigma = (vech(\Omega_1),...,vech(\Omega_M))}
+      \eqn{(Md(d + 1)/2 \times 1)}.}
+    \item{if \code{cond_dist="ind_Student"}:}{\eqn{\sigma = (vec(B_1),...,vec(B_M)} \eqn{(Md^2 \times 1)}.}
+    }
+  }
   \item{\eqn{\alpha = } the \eqn{(a\times 1)} vector containing the transition weight parameters.}
   \item{\eqn{\nu > 2} is the degrees of freedom parameter that is included only if \code{cond_dist="Student"}.}
 }
@@ -52,6 +57,7 @@ For models with...
         \eqn{(2 \times 1)}, where \eqn{c\in\mathbb{R}} is the location parameter and \eqn{\gamma >0} is the scale parameter.}
   \item{\code{weight_function="threshold"}:}{\eqn{\alpha = (r_1,...,r_{M-1})}
         \eqn{(M-1 \times 1)}, where \eqn{r_1,...,r_{M-1}} are the threshold values.}
+  \item{\code{weight_function="exogenous"}:}{Omit \eqn{\alpha} from the parameter vector.}
   \item{AR_constraints:}{Replace \eqn{\varphi_1,...,\varphi_M} with \eqn{\psi} as described in the argument \code{AR_constraints}.}
   \item{mean_constraints:}{Replace \eqn{\phi_{1,0},...,\phi_{M,0}} with \eqn{(\mu_{1},...,\mu_{g})} where
         \eqn{\mu_i, \ (d\times 1)} is the mean parameter for group \eqn{i} and \eqn{g} is the number of groups.}
@@ -67,7 +73,8 @@ For models with...
         so that the elements that are constrained to zero are not included.}
 }
 Above, \eqn{\phi_{m,0}} is the intercept parameter, \eqn{A_{m,i}} denotes the \eqn{i}th coefficient matrix of the \eqn{m}th
-mixture component, and \eqn{\Omega_{m}} denotes the error term covariance matrix of the \eqn{m}:th mixture component.
+regime, \eqn{\Omega_{m}} denotes the positive definite error term covariance matrix of the \eqn{m}:th regime, and \eqn{B_m}
+is the invertible \eqn{(d\times d)} impact matrix of the \eqn{m}th regime.
 If \code{parametrization=="mean"}, just replace each \eqn{\phi_{m,0}} with regimewise mean \eqn{\mu_{m}}.
 \eqn{vec()} is vectorization operator that stacks columns of a given matrix into a vector. \eqn{vech()} stacks columns
 of a given matrix from the principal diagonal downwards (including elements on the diagonal) into a vector. \eqn{Bvec()}
@@ -94,6 +101,7 @@ that are constrained to zero by the argument \code{B_constraints} are excluded.}
   \item{\code{"threshold"}:}{\eqn{\alpha_{m,t} = 1} if \eqn{r_{m-1}<y_{it-j}\leq r_{m}} and \eqn{0} otherwise, where
      \eqn{-\infty\equiv r_0<r_1<\cdots <r_{M-1}<r_M\equiv\infty} are thresholds \eqn{y_{it-j}} is the lag \eqn{j}
      observation of the \eqn{i}th variable.}
+  \item{\code{"exogenous"}:}{Exogenous nonrandom transition weights, spesify the weight series in \code{weightfun_pars}.}
 }
 See the vignette for more details about the weight functions.}
 
@@ -109,9 +117,12 @@ See the vignette for more details about the weight functions.}
         used in the weight function.}
     }
   }
+  \item{If \code{weight_function == "exogenous"}:}{a numeric vector with the length \code{nrow(data) - p} containing the exogenous
+    transition weights.}
 }}
 
-\item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"} or \code{"Student"}.}
+\item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"}, \code{"Student"}, or \code{"ind_Student"},
+where the latest is the Student's \eqn{t} distribution with independent components.}
 
 \item{parametrization}{\code{"intercept"} or \code{"mean"} determining whether the model is parametrized with intercept
 parameters \eqn{\phi_{m,0}} or regime means \eqn{\mu_{m}}, m=1,...,M.}
@@ -119,10 +130,12 @@ parameters \eqn{\phi_{m,0}} or regime means \eqn{\mu_{m}}, m=1,...,M.}
 \item{identification}{is it reduced form model or an identified structural model; if the latter, how is it identified
 (see the vignette or the references for details)?
 \describe{
-  \item{\code{"reduced_form"}:}{Reduced form model, shocks not identified.}
+  \item{\code{"reduced_form"}:}{Reduced form model.}
   \item{\code{"recursive"}:}{The usual lower-triangular recursive identification of the shocks via their impact responses.}
   \item{\code{"heteroskedasticity"}:}{Identification by conditional heteroskedasticity, which imposes constant relative
     impact responses for each shock.}
+  \item{\code{"non-Gaussianity"}:}{Identification by non-Gaussianity; requires mutually independent non-Gaussian shocks, thus,
+    currently available only with the conditional distribution \code{"ind_Student"}.}
 }}
 
 \item{AR_constraints}{a size \eqn{(Mpd^2 x q)} constraint matrix \eqn{C} specifying linear constraints
@@ -136,8 +149,8 @@ For example, to restrict the AR-parameters to be the identical across the regime
 such that each numeric vector contains the regimes that should share the common mean parameters. For instance, if
 \code{M=3}, the argument \code{list(1, 2:3)} restricts the mean parameters of the second and third regime to be
 identical but the first regime has freely estimated (unconditional) mean. Ignore or set to \code{NULL} if mean parameters
-should not be restricted to be the same among any regimes. \strong{This constraint is available only for mean parametrized models;
-that is, when \code{parametrization="mean"}.}}
+should not be restricted to be the same among any regimes. This constraint is available only for mean parametrized models;
+that is, when \code{parametrization="mean"}.}
 
 \item{weight_constraints}{a list of two elements, \eqn{R} in the first element and \eqn{r} in the second element,
 specifying linear constraints on the transition weight parameters \eqn{\alpha}.
