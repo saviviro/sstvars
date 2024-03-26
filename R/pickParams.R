@@ -117,16 +117,26 @@ pick_allA <- function(p, M, d, params) {
 #'  dimension indicating each component.
 #'
 #' @inherit pick_Am
-#' @return Returns a 3D array containing the covariance matrices of the given model. Coefficient matrix
-#'  \eqn{\Omega_{m}} can be obtained by choosing \code{[, , m]}.
-#' @details Does not work with constraint NOR structural parameter vectors!
+#' @return Returns a 3D array containing...
+#'   \describe{
+#'     \item{If \code{identification == "non-Gaussianity"} or \code{cond_dist == "ind_Student"}:}{the impact matrices of the regimes,
+#'       \eqn{B_m} in \code{[, , m]}.}
+#'     \item{If otherwise:}{the covariance matrices of the given model, \eqn{\Omega_m} in \code{[, , m]}.}
+#'   }
+#' @details Constrained parameter vectors are not supported.
 #' @inheritSection pick_Ami Warning
 #' @keywords internal
 
-pick_Omegas <- function(p, M, d, params, identification=c("reduced_form", "recursive", "heteroskedasticity")) {
+pick_Omegas <- function(p, M, d, params, cond_dist=c("Gaussian", "Student", "ind_Student"),
+                        identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity")) {
+  cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
   Omegas <- array(dim=c(d, d, M))
-  if(identification == "heteroskedasticity") {
+  if(identification == "non_Gaussianity" || cond_dist == "ind_Student") {
+    for(m in 1:M) {
+      Omegas[, , m] <- unvec(d=d, a=params[(M*d + d^2*p*M + (m - 1)*d^2 + 1):(M*d + d^2*p*M + m*d^2)])
+    }
+  } else if(identification == "heteroskedasticity") {
     W <- unvec(d=d, a=params[(M*d + d^2*p*M + 1):(M*d + d^2*p*M + d^2)])
     Omegas[, , 1] <- tcrossprod(W)
     for(m in 2:M) {
@@ -167,15 +177,22 @@ pick_Omegas <- function(p, M, d, params, identification=c("reduced_form", "recur
 #'           \eqn{c\in\mathbb{R}} is the location parameter and \eqn{\gamma >0} is the scale parameter.}
 #'     \item{\code{weight_function="threshold"}:}{Returns a length \eqn{M-1} vector \eqn{(r_1,...,r_{M-1})}, where
 #'           \eqn{r_1,...,r_{M-1}} are the threshold values.}
+#'     \item{\code{weight_function="exogenous"}:}{Returns \code{numeric(0)}.}
 #'   }
 #' @inheritSection pick_Ami Warning
 #' @keywords internal
 
-pick_weightpars <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
-                            weightfun_pars=NULL, cond_dist=c("Gaussian", "Student")) {
+pick_weightpars <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                            weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student")) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
-  n_distpars <- ifelse(cond_dist == "Student", 1, 0)
+  if(cond_dist == "Gaussian") {
+    n_distpars <- 0
+  } else if(cond_dist == "Student") {
+    n_distpars <- 1
+  } else { # cond_dist == "ind_Student"
+    n_distpars <- d
+  }
   if(M == 1) {
     if(weight_function == "relative_dens") {
       return(1)
@@ -194,6 +211,8 @@ pick_weightpars <- function(p, M, d, params, weight_function=c("relative_dens", 
                      n_distpars + 1):(length(params) - n_distpars)])
   } else if(weight_function == "threshold") {
     return(params[(length(params) - M - n_distpars + 2):(length(params) - n_distpars)])
+  } else if(weight_function == "exogenous") {
+    return(numeric(0))
   }
 }
 
@@ -204,19 +223,22 @@ pick_weightpars <- function(p, M, d, params, weight_function=c("relative_dens", 
 #'   the parameter vector
 #'
 #' @inheritParams pick_weightpars
-#' @return
+#' @return Returns...
 #'   \describe{
-#'     \item{If \code{cond_dist == "Gaussian"}:}{Returns a numeric vector of length zero.}
-#'     \item{If \code{cond_dist == "Student"}:}{Returns the degrees of freedom parameter.}
+#'     \item{If \code{cond_dist == "Gaussian"}:}{a numeric vector of length zero.}
+#'     \item{If \code{cond_dist == "Student"}:}{the degrees of freedom parameter.}
+#'     \item{If \code{cond_dist == "ind_Student"}:}{a numeric vector of length \eqn{d} containing the degrees of freedom parameters.}
 #'   }
 #' @keywords internal
 
-pick_distpars <- function(params, cond_dist=c("Gaussian", "Student")) {
+pick_distpars <- function(params, cond_dist=c("Gaussian", "Student", "ind_Student")) {
   cond_dist <- match.arg(cond_dist)
   if(cond_dist == "Gaussian") {
     return(numeric(0))
-  } else { # cond_dist == "Student"
+  } else if(cond_dist == "Student") {
     return(params[length(params)])
+  } else { # cond_dist == "ind_Student"
+    return(params[(length(params) - d + 1):length(params)])
   }
 }
 
@@ -227,14 +249,25 @@ pick_distpars <- function(params, cond_dist=c("Gaussian", "Student")) {
 #'   \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vech(\Omega_m))}
 #' @inheritParams pick_Am
 #' @details Constrained models nor structural models are supported.
-#' @return Returns the vector \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vech(\Omega_m))}.
+#' @return Returns the vector...
+#'   \describe{
+#'     \item{If \code{identification == "non-Gaussianity}:}{\eqn{(\phi_{m,0},vec(A_{m,1}),...,vec(A_{m,p}),vec(B_m))}.}
+#'     \item{If otherwise:}{\eqn{(\phi_{m,0},vec(A_{m,1}),...,vec(A_{m,p}),vech(\Omega_m))}.}
+#'   }
 #'   Note that neither weight parameters or distribution parameters are picked.
 #' @keywords internal
 
-pick_regime <- function(p, M, d, params, m) {
-  c(params[((m - 1)*d + 1):(m*d)],
-    params[(M*d + (m - 1)*p*d^2 + 1):(M*d + m*p*d^2)],
-    params[(M*d + M*p*d^2 + (m - 1)*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + m*d*(d + 1)/2)])
+pick_regime <- function(p, M, d, params, m, identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity")) {
+  identification <- match.arg(identification)
+  if(identification == "non-Gaussianity") {
+    return(c(params[((m - 1)*d + 1):(m*d)],
+             params[(M*d + (m - 1)*p*d^2 + 1):(M*d + m*p*d^2)],
+             params[(M*d + M*p*d^2 + (m - 1)*d^2 + 1):(M*d + M*p*d^2 + m*d^2)]))
+  } else {
+    return(c(params[((m - 1)*d + 1):(m*d)],
+             params[(M*d + (m - 1)*p*d^2 + 1):(M*d + m*p*d^2)],
+             params[(M*d + M*p*d^2 + (m - 1)*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + m*d*(d + 1)/2)]))
+  }
 }
 
 
@@ -253,7 +286,7 @@ pick_regime <- function(p, M, d, params, m) {
 #'  }
 #' @keywords internal
 
-pick_W <- function(p, M, d, params, identification=c("reduced_form", "recursive", "heteroskedasticity")) {
+pick_W <- function(p, M, d, params, identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity")) {
   identification <- match.arg(identification)
   if(identification != "heteroskedasticity") return(NULL)
   unvec(d=d, a=params[(M*d + d^2*p*M + 1):(M*d + d^2*p*M + d^2)])
@@ -271,7 +304,7 @@ pick_W <- function(p, M, d, params, identification=c("reduced_form", "recursive"
 #' @inherit pick_W details references
 #' @keywords internal
 
-pick_lambdas <- function(p, M, d, params, identification=c("reduced_form", "recursive", "heteroskedasticity")) {
+pick_lambdas <- function(p, M, d, params, identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussiniaty")) {
   identification <- match.arg(identification)
   if(identification != "heteroskedasticity") {
     return(NULL)

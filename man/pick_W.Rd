@@ -9,7 +9,8 @@ pick_W(
   M,
   d,
   params,
-  identification = c("reduced_form", "recursive", "heteroskedasticity")
+  identification = c("reduced_form", "recursive", "heteroskedasticity",
+    "non-Gaussianity")
 )
 }
 \arguments{

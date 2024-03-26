@@ -4,7 +4,7 @@
 \alias{pick_distpars}
 \title{Pick distribution parameters}
 \usage{
-pick_distpars(params, cond_dist = c("Gaussian", "Student"))
+pick_distpars(params, cond_dist = c("Gaussian", "Student", "ind_Student"))
 }
 \arguments{
 \item{params}{a real valued vector specifying the parameter values.
@@ -44,9 +44,11 @@ of a given matrix from the principal diagonal downwards (including elements on t
 where the latest is the Student's \eqn{t} distribution with independent components.}
 }
 \value{
-\describe{
-    \item{If \code{cond_dist == "Gaussian"}:}{Returns a numeric vector of length zero.}
-    \item{If \code{cond_dist == "Student"}:}{Returns the degrees of freedom parameter.}
+Returns...
+  \describe{
+    \item{If \code{cond_dist == "Gaussian"}:}{a numeric vector of length zero.}
+    \item{If \code{cond_dist == "Student"}:}{the degrees of freedom parameter.}
+    \item{If \code{cond_dist == "ind_Student"}:}{a numeric vector of length \eqn{d} containing the degrees of freedom parameters.}
   }
 }
 \description{

@@ -46,7 +46,7 @@ smart_weightpars(
   \item{\code{"threshold"}:}{\eqn{\alpha_{m,t} = 1} if \eqn{r_{m-1}<y_{it-j}\leq r_{m}} and \eqn{0} otherwise, where
      \eqn{-\infty\equiv r_0<r_1<\cdots <r_{M-1}<r_M\equiv\infty} are thresholds \eqn{y_{it-j}} is the lag \eqn{j}
      observation of the \eqn{i}th variable.}
-  \item{\code{"exogenous"}:}{Exogenous nonrandom transition weights, spesify the weight series in \code{weightfun_pars}.}
+  \item{\code{"exogenous"}:}{Exogenous nonrandom transition weights, specify the weight series in \code{weightfun_pars}.}
 }
 See the vignette for more details about the weight functions.}
 

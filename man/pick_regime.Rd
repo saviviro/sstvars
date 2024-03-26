@@ -4,7 +4,15 @@
 \alias{pick_regime}
 \title{Pick regime parameters}
 \usage{
-pick_regime(p, M, d, params, m)
+pick_regime(
+  p,
+  M,
+  d,
+  params,
+  m,
+  identification = c("reduced_form", "recursive", "heteroskedasticity",
+    "non-Gaussianity")
+)
 }
 \arguments{
 \item{p}{the autoregressive order of the model}
@@ -49,7 +57,11 @@ of a given matrix from the principal diagonal downwards (including elements on t
 \item{m}{which regime?}
 }
 \value{
-Returns the vector \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vech(\Omega_m))}.
+Returns the vector...
+  \describe{
+    \item{If \code{identification == "non-Gaussianity}:}{\eqn{(\phi_{m,0},vec(A_{m,1}),...,vec(A_{m,p}),vec(B_m))}.}
+    \item{If otherwise:}{\eqn{(\phi_{m,0},vec(A_{m,1}),...,vec(A_{m,p}),vech(\Omega_m))}.}
+  }
   Note that neither weight parameters or distribution parameters are picked.
 }
 \description{

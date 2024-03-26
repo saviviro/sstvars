@@ -9,9 +9,10 @@ pick_weightpars(
   M,
   d,
   params,
-  weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+  weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold",
+    "exogenous"),
   weightfun_pars = NULL,
-  cond_dist = c("Gaussian", "Student")
+  cond_dist = c("Gaussian", "Student", "ind_Student")
 )
 }
 \arguments{
@@ -73,7 +74,7 @@ of a given matrix from the principal diagonal downwards (including elements on t
   \item{\code{"threshold"}:}{\eqn{\alpha_{m,t} = 1} if \eqn{r_{m-1}<y_{it-j}\leq r_{m}} and \eqn{0} otherwise, where
      \eqn{-\infty\equiv r_0<r_1<\cdots <r_{M-1}<r_M\equiv\infty} are thresholds \eqn{y_{it-j}} is the lag \eqn{j}
      observation of the \eqn{i}th variable.}
-  \item{\code{"exogenous"}:}{Exogenous nonrandom transition weights, spesify the weight series in \code{weightfun_pars}.}
+  \item{\code{"exogenous"}:}{Exogenous nonrandom transition weights, specify the weight series in \code{weightfun_pars}.}
 }
 See the vignette for more details about the weight functions.}
 
@@ -89,8 +90,9 @@ See the vignette for more details about the weight functions.}
         used in the weight function.}
     }
   }
-  \item{If \code{weight_function == "exogenous"}:}{a numeric vector with the length \code{nrow(data) - p} containing the exogenous
-    transition weights.}
+  \item{If \code{weight_function == "exogenous"}:}{a size (\code{nrow(data) - p} x \code{M}) matrix containing the exogenous
+    transition weights as \code{[t, m]} for time \eqn{t} and regime \eqn{m}. Each row needs to sum to one and only weakly positive
+    values are allowed.}
 }}
 
 \item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"}, \code{"Student"}, or \code{"ind_Student"},
@@ -114,6 +116,7 @@ where the latest is the Student's \eqn{t} distribution with independent componen
           \eqn{c\in\mathbb{R}} is the location parameter and \eqn{\gamma >0} is the scale parameter.}
     \item{\code{weight_function="threshold"}:}{Returns a length \eqn{M-1} vector \eqn{(r_1,...,r_{M-1})}, where
           \eqn{r_1,...,r_{M-1}} are the threshold values.}
+    \item{\code{weight_function="exogenous"}:}{Returns \code{numeric(0)}.}
   }
 }
 \description{

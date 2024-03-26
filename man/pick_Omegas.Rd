@@ -9,7 +9,8 @@ pick_Omegas(
   M,
   d,
   params,
-  identification = c("reduced_form", "recursive", "heteroskedasticity")
+  identification = c("reduced_form", "recursive", "heteroskedasticity",
+    "non-Gaussianity")
 )
 }
 \arguments{
@@ -53,8 +54,11 @@ If \code{parametrization=="mean"}, just replace each \eqn{\phi_{m,0}} with regim
 of a given matrix from the principal diagonal downwards (including elements on the diagonal) into a vector.}
 }
 \value{
-Returns a 3D array containing the covariance matrices of the given model. Coefficient matrix
- \eqn{\Omega_{m}} can be obtained by choosing \code{[, , m]}.
+Returns a 3D array containing...
+  \describe{
+    \item{If \code{identification == "non-Gaussianity}:}{the impact matrices of the regimes, \eqn{B_m} in \code{[, , m]}.}
+    \item{If otherwise:}{the covariance matrices of the given model, \eqn{\Omega_m} in \code{[, , m]}.}
+  }
 }
 \description{
 \code{pick_Omegas} picks the covariance matrices \eqn{\Omega_{m} (m=1,..,M)}
@@ -62,7 +66,7 @@ Returns a 3D array containing the covariance matrices of the given model. Coeffi
  dimension indicating each component.
 }
 \details{
-Does not work with constraint NOR structural parameter vectors!
+Constrained parameter vectors are not supported.
 }
 \section{Warning}{
 

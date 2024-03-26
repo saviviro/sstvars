@@ -259,6 +259,69 @@ df_232_1_1 <- 30
 theta_232threst_1_1 <- c(theta_232thres_1_1, df_232_1_1)
 
 
+## weight_function == "exogenous"
+
+# p=1, M=2, d=3, weight_function="exogenous", weightfun_pars=matrix(cbind(c(0.4, 0.2, 0.9), c(0.6, 0.8, 0.1)))
+theta_123exo <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123), vech(Omega2_123))
+
+# p=2, M=2, d=2,  weight_function="exogenous", weightfun_pars=matrix(cbind(c(0.4, 0, 0.9), c(0.6, 1, 0.1)))
+theta_222exo <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222), vech(Omega1_222), vech(Omega2_222))
+
+# p=1, M=3, d=2, weight_function="exogenous", weightfun_pars=matrix(cbind(c(0.4, 0, 0.5), c(0.3, 1, 0.2), c(0.3, 0, 0.3)))
+theta_132exo <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
+                  vech(Omega2_132), vech(Omega3_132))
+
+# p=2, M=3, d=2, weight_function="exogenous", weightfun_pars=matrix(cbind(c(0.4, 0, 0.5), c(0.3, 1, 0.2), c(0.3, 0, 0.3)))
+theta_232exo <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232), vec(A22_232),
+                  vec(A31_232), vec(A32_232), vech(Omega1_232), vech(Omega2_232), vech(Omega3_232))
+
+# p=2, M=3, d=2, weight_function="exogenous", weightfun_pars=matrix(cbind(c(0.4, 0, 0.5), c(0.3, 1, 0.2), c(0.3, 0, 0.3))), cond_dist="Student"
+theta_232exo <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232), vec(A22_232),
+                  vec(A31_232), vec(A32_232), vech(Omega1_232), vech(Omega2_232), vech(Omega3_232), df_232_1_1 )
+
+###############
+
+### ind_Student
+
+# p=2, M=2, d=2, cond_dist="ind_Student", weight_function="logistic", weightfun_pars=c(2, 1)
+dfs_222_2_1 <- c(3, 7)
+B1_222 <- matrix(c(0.5, 0.2, -0.1, 0.3), nrow=2)
+B2_222 <- matrix(c(0.4, -0.1, -0.2, 0.3), nrow=2)
+theta_222logistit_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                           vec(B1_222), vec(B2_222), c_and_gamma_222_2_1, dfs_222_2_1)
+
+# p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1, lags=1), cond_dist="ind_Student"
+dfs_122_1_1 <- c(4, 13)
+B1_122 <- matrix(c(1.2, -0.3, 0.7, 0.1), nrow=2)
+B2_122 <- matrix(c(0.5, 0.2, -0.1, 3.1), nrow=2)
+theta_122logit_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vec(B1_122), vec(B2_122), gamma1_122_1_1, dfs_122_1_1)
+
+# p=1, M=2, d=3, weight_function="exponential", weightfun_pars=c(1, 1), cond_dist="ind_Student"
+dfs_123_1_1 <- c(10, 12, 3)
+B1_123 <- matrix(c(1.0, 0.3, 0.1, -0.8, 1.1, -0.5, -0.1, -0.2, 0.4), nrow=3)
+B2_123 <- matrix(c(0.3, -0.2, -0.7, -0.8, 1.2, 0.5, 0.1, -0.2, 1.1), nrow=3)
+theta_123expit_1_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vec(B1_123),
+                        vec(B2_123), c_and_gamma_123_1_1, dfs_123_1_1)
+
+# p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="ind_Student"
+dfs_132_1_1 <- c(30, 6)
+B1_132 <- matrix(c(0.6, 0.2, -0.1, 0.7), nrow=2)
+B2_132 <- matrix(c(0.4, -0.1, -0.2, 0.5), nrow=2)
+B3_132 <- matrix(c(0.9, -0.5, 0.2, 0.4), nrow=2)
+theta_132thresit_1_1 <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                          vec(B1_132), vec(B2_132), vec(B3_132), r1_132_1_1, r2_132_1_1, dfs_132_1_1)
+
+# p=2, M=3, d=2, weight_function="exogenous", weightfun_pars=matrix(cbind(c(0.4, 0, 0.5), c(0.3, 1, 0.2), c(0.3, 0, 0.3))),
+# cond_dist="ind_Student"
+dfs_232_1_1 <- c(3, 6)
+B1_232 <- matrix(c(0.6, -0.2, 0.1, 0.7), nrow=2)
+B2_232 <- matrix(c(0.4, 0.1, 0.2, 0.5), nrow=2)
+B3_232 <- matrix(c(0.9, 0.3, -0.2, 0.4), nrow=2)
+theta_232exoit <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232), vec(A22_232),
+                    vec(A31_232), vec(A32_232), vec(B1_232), vec(B2_232), vec(B3_232), dfs_232_1_1)
+
+###############
+
 ### Structural models
 # (recursively identified models use the same parametrization as reduced form models)
 
@@ -293,8 +356,37 @@ theta_232threstsh_1_1 <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A1
                           vec(A31_232), vec(A32_232), vec(W_232), lambdas2_232, lambdas3_232, r1_232_1_1, r2_232_1_1,
                           df_232_1_1)
 
+### ind_Student
+
+# p=2, M=2, d=2, cond_dist="ind_Student", weight_function="logistic", weightfun_pars=c(2, 1), identification="non-Gaussianity"
+theta_222logistitng_2_1 <- theta_222logistit_2_1
+
+# p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1, lags=1), cond_dist="ind_Student", identification="non-Gaussianity"
+theta_122logitng_1_1 <- theta_122logit_1_1
+
+# p=1, M=2, d=3, weight_function="exponential", weightfun_pars=c(1, 1), cond_dist="ind_Student", identification="non-Gaussianity"
+theta_123expitng_1_1 <- theta_123expit_1_1
+
+# p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="ind_Student", identification="non-Gaussianity"
+theta_132thresitng_1_1 <- theta_132thresit_1_1
+
+# p=2, M=3, d=2, weight_function="exogenous", weightfun_pars=matrix(cbind(c(0.4, 0, 0.5), c(0.3, 1, 0.2), c(0.3, 0, 0.3))),
+# cond_dist="ind_Student", identification="non-Gaussianity"
+theta_232exoitng <- theta_232exoit
 
 test_that("pick_phi0 works correctly", {
+
+  expect_equal(pick_phi0(M=2, d=3, params=theta_123exo)[,1], phi10_123)
+  expect_equal(pick_phi0(M=2, d=3, params=theta_123exo)[,2], phi20_123)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_222exo)[,1], phi10_222)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_222exo)[,2], phi20_222)
+  expect_equal(pick_phi0(M=3, d=2, params=theta_132exo)[,1], phi10_132)
+  expect_equal(pick_phi0(M=3, d=2, params=theta_132exo)[,2], phi20_132)
+  expect_equal(pick_phi0(M=3, d=2, params=theta_132exo)[,3], phi30_132)
+  expect_equal(pick_phi0(M=3, d=2, params=theta_232exo)[,1], phi10_232)
+  expect_equal(pick_phi0(M=3, d=2, params=theta_232exo)[,2], phi20_232)
+  expect_equal(pick_phi0(M=3, d=2, params=theta_232exo)[,3], phi30_232)
+
   expect_equal(pick_phi0(M=2, d=2, params=theta_122thres_1_1)[,1], phi10_122)
   expect_equal(pick_phi0(M=2, d=2, params=theta_122thres_1_1)[,2], phi20_122)
   expect_equal(pick_phi0(M=2, d=2, params=theta_222thres_2_2)[,1], phi10_222)
@@ -366,6 +458,20 @@ test_that("pick_phi0 works correctly", {
   expect_equal(pick_phi0(M=2, d=3, params=theta_123logt_1_1)[,2], phi20_123)
   expect_equal(pick_phi0(M=2, d=3, params=theta_123logt_1_1)[,1], phi10_123)
   expect_equal(pick_phi0(M=2, d=3, params=theta_123logt_1_1)[,2], phi20_123)
+
+  # ind_Student
+  expect_equal(pick_phi0(M=2, d=2, params=theta_122logit_1_1)[,1], phi10_122)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_122logit_1_1)[,2], phi20_122)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_222logistit_2_1)[,1], phi10_222)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_222logistit_2_1)[,2], phi20_222)
+  expect_equal(pick_phi0(M=3, d=2, params=theta_132thresit_1_1)[,1], phi10_132)
+  expect_equal(pick_phi0(M=3, d=2, params=theta_132thresit_1_1)[,2], phi20_132)
+  expect_equal(pick_phi0(M=3, d=2, params=theta_132thresit_1_1)[,3], phi30_132)
+  expect_equal(pick_phi0(M=3, d=2, params=theta_232exoit)[,1], phi10_232)
+  expect_equal(pick_phi0(M=3, d=2, params=theta_232exoit)[,2], phi20_232)
+  expect_equal(pick_phi0(M=3, d=2, params=theta_232exoit)[,3], phi30_232)
+  expect_equal(pick_phi0(M=2, d=3, params=theta_123expit_1_1)[,1], phi10_123)
+  expect_equal(pick_phi0(M=2, d=3, params=theta_123expit_1_1)[,2], phi20_123)
 })
 
 test_that("pick_Ami works correctly", {
@@ -423,6 +529,14 @@ test_that("pick_Ami works correctly", {
   expect_equal(pick_Ami(p=1, M=3, d=2, m=2, i=1, params=theta_132thres_1_1), A21_132)
   expect_equal(pick_Ami(p=1, M=3, d=2, m=3, i=1, params=theta_132thres_1_1), A31_132)
 
+  expect_equal(pick_Ami(p=2, M=2, d=2, m=1, i=1, params=theta_222exo), A11_222)
+  expect_equal(pick_Ami(p=2, M=2, d=2, m=1, i=2, params=theta_222exo), A12_222)
+  expect_equal(pick_Ami(p=2, M=2, d=2, m=2, i=1, params=theta_222exo), A21_222)
+  expect_equal(pick_Ami(p=2, M=2, d=2, m=2, i=2, params=theta_222exo), A22_222)
+  expect_equal(pick_Ami(p=1, M=3, d=2, m=1, i=1, params=theta_132exo), A11_132)
+  expect_equal(pick_Ami(p=1, M=3, d=2, m=2, i=1, params=theta_132exo), A21_132)
+  expect_equal(pick_Ami(p=1, M=3, d=2, m=3, i=1, params=theta_132exo), A31_132)
+
   # Student
   expect_equal(pick_Ami(p=1, M=2, d=3, m=1, i=1, params=theta_123logt_1_1), A11_123)
   expect_equal(pick_Ami(p=1, M=2, d=3, m=2, i=1, params=theta_123logt_1_1), A21_123)
@@ -438,6 +552,16 @@ test_that("pick_Ami works correctly", {
   expect_equal(pick_Ami(p=2, M=3, d=2, m=1, i=2, params=theta_232threst_1_1), A12_232)
   expect_equal(pick_Ami(p=2, M=3, d=2, m=2, i=2, params=theta_232threst_1_1), A22_232)
   expect_equal(pick_Ami(p=2, M=3, d=2, m=3, i=2, params=theta_232threst_1_1), A32_232)
+
+  # ind_Student
+  expect_equal(pick_Ami(p=1, M=2, d=3, m=1, i=1, params=theta_123expit_1_1), A11_123)
+  expect_equal(pick_Ami(p=1, M=2, d=3, m=2, i=1, params=theta_123expit_1_1), A21_123)
+  expect_equal(pick_Ami(p=2, M=3, d=2, m=1, i=1, params=theta_232exoit), A11_232)
+  expect_equal(pick_Ami(p=2, M=3, d=2, m=2, i=1, params=theta_232exoit), A21_232)
+  expect_equal(pick_Ami(p=2, M=3, d=2, m=3, i=1, params=theta_232exoit), A31_232)
+  expect_equal(pick_Ami(p=2, M=3, d=2, m=1, i=2, params=theta_232exoit), A12_232)
+  expect_equal(pick_Ami(p=2, M=3, d=2, m=2, i=2, params=theta_232exoit), A22_232)
+  expect_equal(pick_Ami(p=2, M=3, d=2, m=3, i=2, params=theta_232exoit), A32_232)
 
   # unvec=FALSE
   expect_equal(pick_Ami(p=1, M=1, d=2, m=1, i=1, params=theta_112relg, unvec=FALSE), vec(A11_112))
@@ -503,6 +627,16 @@ test_that("pick_Am works correctly", {
   expect_equal(pick_Am(p=1, M=3, d=2, m=2, params=theta_132thres_1_1)[, , 1], A21_132)
   expect_equal(pick_Am(p=1, M=3, d=2, m=3, params=theta_132thres_1_1)[, , 1], A31_132)
 
+  expect_equal(pick_Am(p=1, M=2, d=3, m=1, params=theta_123exo)[, , 1], A11_123)
+  expect_equal(pick_Am(p=1, M=2, d=3, m=2, params=theta_123exo)[, , 1], A21_123)
+  expect_equal(pick_Am(p=2, M=2, d=2, m=1, params=theta_222exo)[, , 1], A11_222)
+  expect_equal(pick_Am(p=2, M=2, d=2, m=1, params=theta_222exo)[, , 2], A12_222)
+  expect_equal(pick_Am(p=2, M=2, d=2, m=2, params=theta_222exo)[, , 1], A21_222)
+  expect_equal(pick_Am(p=2, M=2, d=2, m=2, params=theta_222exo)[, , 2], A22_222)
+  expect_equal(pick_Am(p=1, M=3, d=2, m=1, params=theta_132exo)[, , 1], A11_132)
+  expect_equal(pick_Am(p=1, M=3, d=2, m=2, params=theta_132exo)[, , 1], A21_132)
+  expect_equal(pick_Am(p=1, M=3, d=2, m=3, params=theta_132exo)[, , 1], A31_132)
+
   # Student
   expect_equal(pick_Am(p=2, M=3, d=2, m=1, params=theta_232threst_1_1)[, , 1], A11_232)
   expect_equal(pick_Am(p=2, M=3, d=2, m=2, params=theta_232threst_1_1)[, , 1], A21_232)
@@ -518,6 +652,22 @@ test_that("pick_Am works correctly", {
   expect_equal(pick_Am(p=2, M=2, d=2, m=2, params=theta_222logistict_2_1)[, , 2], A22_222)
   expect_equal(pick_Am(p=1, M=2, d=3, m=1, params=theta_123logt_1_1)[, , 1], A11_123)
   expect_equal(pick_Am(p=1, M=2, d=3, m=2, params=theta_123logt_1_1)[, , 1], A21_123)
+
+  # ind_Student
+  expect_equal(pick_Am(p=2, M=3, d=2, m=1, params=theta_232exoit)[, , 1], A11_232)
+  expect_equal(pick_Am(p=2, M=3, d=2, m=2, params=theta_232exoit)[, , 1], A21_232)
+  expect_equal(pick_Am(p=2, M=3, d=2, m=3, params=theta_232exoit)[, , 1], A31_232)
+  expect_equal(pick_Am(p=2, M=3, d=2, m=1, params=theta_232exoit)[, , 2], A12_232)
+  expect_equal(pick_Am(p=2, M=3, d=2, m=2, params=theta_232exoit)[, , 2], A22_232)
+  expect_equal(pick_Am(p=2, M=3, d=2, m=3, params=theta_232exoit)[, , 2], A32_232)
+  expect_equal(pick_Am(p=1, M=2, d=2, m=1, params=theta_122logit_1_1)[, , 1], A11_122)
+  expect_equal(pick_Am(p=1, M=2, d=2, m=2, params=theta_122logit_1_1)[, , 1], A21_122)
+  expect_equal(pick_Am(p=2, M=2, d=2, m=1, params=theta_222logistit_2_1)[, , 1], A11_222)
+  expect_equal(pick_Am(p=2, M=2, d=2, m=1, params=theta_222logistit_2_1)[, , 2], A12_222)
+  expect_equal(pick_Am(p=2, M=2, d=2, m=2, params=theta_222logistit_2_1)[, , 1], A21_222)
+  expect_equal(pick_Am(p=2, M=2, d=2, m=2, params=theta_222logistit_2_1)[, , 2], A22_222)
+  expect_equal(pick_Am(p=1, M=2, d=3, m=1, params=theta_123expit_1_1)[, , 1], A11_123)
+  expect_equal(pick_Am(p=1, M=2, d=3, m=2, params=theta_123expit_1_1)[, , 1], A21_123)
 })
 
 test_that("pick_allA works correctly", {
@@ -573,6 +723,12 @@ test_that("pick_allA works correctly", {
   expect_equal(pick_allA(p=1, M=3, d=2, params=theta_132thres_1_1)[, , 1, 2], A21_132)
   expect_equal(pick_allA(p=1, M=3, d=2, params=theta_132thres_1_1)[, , 1, 3], A31_132)
 
+  expect_equal(pick_allA(p=1, M=2, d=3, params=theta_123exo)[, , 1, 1], A11_123)
+  expect_equal(pick_allA(p=1, M=2, d=3, params=theta_123exo)[, , 1, 2], A21_123)
+  expect_equal(pick_allA(p=1, M=3, d=2, params=theta_132exo)[, , 1, 2], A11_132)
+  expect_equal(pick_allA(p=1, M=3, d=2, params=theta_132exo)[, , 1, 2], A21_132)
+  expect_equal(pick_allA(p=1, M=3, d=2, params=theta_132exo)[, , 1, 3], A31_132)
+
   # Student
   expect_equal(pick_allA(p=2, M=3, d=2, params=theta_232threst_1_1)[, , 1, 2], A11_232)
   expect_equal(pick_allA(p=2, M=3, d=2, params=theta_232threst_1_1)[, , 1, 2], A21_232)
@@ -588,6 +744,22 @@ test_that("pick_allA works correctly", {
   expect_equal(pick_allA(p=2, M=2, d=2, params=theta_222logistict_2_1)[, , 2, 2], A22_222)
   expect_equal(pick_allA(p=1, M=2, d=3, params=theta_123log_1_1)[, , 1, 1], A11_123)
   expect_equal(pick_allA(p=1, M=2, d=3, params=theta_123log_1_1)[, , 1, 2], A21_123)
+
+  # ind_Student
+  expect_equal(pick_allA(p=2, M=3, d=2, params=theta_232exoit)[, , 1, 2], A11_232)
+  expect_equal(pick_allA(p=2, M=3, d=2, params=theta_232exoit)[, , 1, 2], A21_232)
+  expect_equal(pick_allA(p=2, M=3, d=2, params=theta_232exoit)[, , 1, 3], A31_232)
+  expect_equal(pick_allA(p=2, M=3, d=2, params=theta_232exoit)[, , 2, 2], A12_232)
+  expect_equal(pick_allA(p=2, M=3, d=2, params=theta_232exoit)[, , 2, 2], A22_232)
+  expect_equal(pick_allA(p=2, M=3, d=2, params=theta_232exoit)[, , 2, 3], A32_232)
+  expect_equal(pick_allA(p=1, M=2, d=2, params=theta_122logit_1_1)[, , 1, 1], A11_122)
+  expect_equal(pick_allA(p=1, M=2, d=2, params=theta_122logit_1_1)[, , 1, 2], A21_122)
+  expect_equal(pick_allA(p=2, M=2, d=2, params=theta_222logistit_2_1)[, , 1, 1], A11_222)
+  expect_equal(pick_allA(p=2, M=2, d=2, params=theta_222logistit_2_1)[, , 2, 1], A12_222)
+  expect_equal(pick_allA(p=2, M=2, d=2, params=theta_222logistit_2_1)[, , 1, 2], A21_222)
+  expect_equal(pick_allA(p=2, M=2, d=2, params=theta_222logistit_2_1)[, , 2, 2], A22_222)
+  expect_equal(pick_allA(p=1, M=2, d=3, params=theta_123expit_1_1)[, , 1, 1], A11_123)
+  expect_equal(pick_allA(p=1, M=2, d=3, params=theta_123expit_1_1)[, , 1, 2], A21_123)
 })
 
 test_that("pick_Omegas works correctly", {
@@ -633,16 +805,38 @@ test_that("pick_Omegas works correctly", {
   expect_equal(pick_Omegas(p=1, M=3, d=2, params=theta_132thres_1_1)[, , 2], Omega2_132)
   expect_equal(pick_Omegas(p=1, M=3, d=2, params=theta_132thres_1_1)[, , 3], Omega3_132)
 
+  expect_equal(pick_Omegas(p=1, M=2, d=3, params=theta_123exo)[, , 1], Omega1_123)
+  expect_equal(pick_Omegas(p=1, M=2, d=3, params=theta_123exo)[, , 2], Omega2_123)
+  expect_equal(pick_Omegas(p=2, M=2, d=2, params=theta_222exo)[, , 1], Omega1_222)
+  expect_equal(pick_Omegas(p=2, M=2, d=2, params=theta_222exo)[, , 2], Omega2_222)
+  expect_equal(pick_Omegas(p=1, M=3, d=2, params=theta_132exo, cond_dist="Student")[, , 1], Omega1_132)
+  expect_equal(pick_Omegas(p=1, M=3, d=2, params=theta_132exo, cond_dist="Student")[, , 2], Omega2_132)
+  expect_equal(pick_Omegas(p=1, M=3, d=2, params=theta_132exo, cond_dist="Student")[, , 3], Omega3_132)
+
   # Student
-  expect_equal(pick_Omegas(p=2, M=3, d=2, params=theta_232threst_1_1)[, , 1], Omega1_232)
-  expect_equal(pick_Omegas(p=2, M=3, d=2, params=theta_232threst_1_1)[, , 2], Omega2_232)
-  expect_equal(pick_Omegas(p=2, M=3, d=2, params=theta_232threst_1_1)[, , 3], Omega3_232)
-  expect_equal(pick_Omegas(p=1, M=2, d=2, params=theta_122expt_1_1)[, , 1], Omega1_122)
-  expect_equal(pick_Omegas(p=1, M=2, d=2, params=theta_122expt_1_1)[, , 2], Omega2_122)
-  expect_equal(pick_Omegas(p=2, M=2, d=2, params=theta_222logistict_2_1)[, , 1], Omega1_222)
-  expect_equal(pick_Omegas(p=2, M=2, d=2, params=theta_222logistict_2_1)[, , 2], Omega2_222)
-  expect_equal(pick_Omegas(p=1, M=2, d=3, params=theta_123logt_1_1)[, , 1], Omega1_123)
-  expect_equal(pick_Omegas(p=1, M=2, d=3, params=theta_123logt_1_1)[, , 2], Omega2_123)
+  expect_equal(pick_Omegas(p=2, M=3, d=2, params=theta_232threst_1_1, cond_dist="Student")[, , 1], Omega1_232)
+  expect_equal(pick_Omegas(p=2, M=3, d=2, params=theta_232threst_1_1, cond_dist="Student")[, , 2], Omega2_232)
+  expect_equal(pick_Omegas(p=2, M=3, d=2, params=theta_232threst_1_1, cond_dist="Student")[, , 3], Omega3_232)
+  expect_equal(pick_Omegas(p=1, M=2, d=2, params=theta_122expt_1_1, cond_dist="Student")[, , 1], Omega1_122)
+  expect_equal(pick_Omegas(p=1, M=2, d=2, params=theta_122expt_1_1, cond_dist="Student")[, , 2], Omega2_122)
+  expect_equal(pick_Omegas(p=2, M=2, d=2, params=theta_222logistict_2_1, cond_dist="Student")[, , 1], Omega1_222)
+  expect_equal(pick_Omegas(p=2, M=2, d=2, params=theta_222logistict_2_1, cond_dist="Student")[, , 2], Omega2_222)
+  expect_equal(pick_Omegas(p=1, M=2, d=3, params=theta_123logt_1_1, cond_dist="Student")[, , 1], Omega1_123)
+  expect_equal(pick_Omegas(p=1, M=2, d=3, params=theta_123logt_1_1, cond_dist="Student")[, , 2], Omega2_123)
+
+  # ind_Student
+  expect_equal(pick_Omegas(p=2, M=3, d=2, params=theta_232exoit, cond_dist="ind_Student")[, , 1], B1_232)
+  expect_equal(pick_Omegas(p=2, M=3, d=2, params=theta_232exoit, cond_dist="ind_Student")[, , 2], B2_232)
+  expect_equal(pick_Omegas(p=2, M=3, d=2, params=theta_232exoit, cond_dist="ind_Student")[, , 3], B3_232)
+  expect_equal(pick_Omegas(p=1, M=2, d=2, params=theta_122logit_1_1, cond_dist="ind_Student")[, , 1], B1_122)
+  expect_equal(pick_Omegas(p=1, M=2, d=2, params=theta_122logit_1_1, cond_dist="ind_Student")[, , 2], B2_122)
+  expect_equal(pick_Omegas(p=2, M=2, d=2, params=theta_222logistit_2_1, cond_dist="ind_Student")[, , 1], B1_222)
+  expect_equal(pick_Omegas(p=2, M=2, d=2, params=theta_222logistit_2_1, cond_dist="ind_Student")[, , 2], B2_222)
+  expect_equal(pick_Omegas(p=1, M=2, d=3, params=theta_123expit_1_1, cond_dist="ind_Student")[, , 1], B1_123)
+  expect_equal(pick_Omegas(p=1, M=2, d=3, params=theta_123expit_1_1, cond_dist="ind_Student")[, , 2], B2_123)
+  expect_equal(pick_Omegas(p=1, M=3, d=2, params=theta_132thresit_1_1, cond_dist="ind_Student")[, , 1], B1_132)
+  expect_equal(pick_Omegas(p=1, M=3, d=2, params=theta_132thresit_1_1, cond_dist="ind_Student")[, , 2], B2_132)
+  expect_equal(pick_Omegas(p=1, M=3, d=2, params=theta_132thresit_1_1, cond_dist="ind_Student")[, , 3], B3_132)
 
   # Structural
   expect_equal(pick_Omegas(p=2, M=3, d=2, params=theta_232threst_1_1, identification="recursive")[, , 1], Omega1_232)
@@ -677,9 +871,34 @@ test_that("pick_Omegas works correctly", {
   expect_equal(pick_Omegas(p=2, M=3, d=2, params=theta_232threstsh_1_1, identification="heteroskedasticity")[, , 3],
                W_232%*%tcrossprod(diag(lambdas3_232), W_232), tolerance=1e-4)
 
+  # Ind student structural
+  expect_equal(pick_Omegas(p=2, M=3, d=2, params=theta_232exoitng, cond_dist="ind_Student", identification="non-Gaussianity")[, , 1], B1_232)
+  expect_equal(pick_Omegas(p=2, M=3, d=2, params=theta_232exoitng, cond_dist="ind_Student", identification="non-Gaussianity")[, , 2], B2_232)
+  expect_equal(pick_Omegas(p=2, M=3, d=2, params=theta_232exoitng, cond_dist="ind_Student", identification="non-Gaussianity")[, , 3], B3_232)
+  expect_equal(pick_Omegas(p=1, M=2, d=2, params=theta_122logitng_1_1, cond_dist="ind_Student", identification="non-Gaussianity")[, , 1], B1_122)
+  expect_equal(pick_Omegas(p=1, M=2, d=2, params=theta_122logitng_1_1, cond_dist="ind_Student", identification="non-Gaussianity")[, , 2], B2_122)
+  expect_equal(pick_Omegas(p=2, M=2, d=2, params=theta_222logistitng_2_1, cond_dist="ind_Student", identification="non-Gaussianity")[, , 1], B1_222)
+  expect_equal(pick_Omegas(p=2, M=2, d=2, params=theta_222logistitng_2_1, cond_dist="ind_Student", identification="non-Gaussianity")[, , 2], B2_222)
+  expect_equal(pick_Omegas(p=1, M=2, d=3, params=theta_123expitng_1_1, cond_dist="ind_Student", identification="non-Gaussianity")[, , 1], B1_123)
+  expect_equal(pick_Omegas(p=1, M=2, d=3, params=theta_123expitng_1_1, cond_dist="ind_Student", identification="non-Gaussianity")[, , 2], B2_123)
+  expect_equal(pick_Omegas(p=1, M=3, d=2, params=theta_132thresitng_1_1, cond_dist="ind_Student", identification="non-Gaussianity")[, , 1], B1_132)
+  expect_equal(pick_Omegas(p=1, M=3, d=2, params=theta_132thresitng_1_1, cond_dist="ind_Student", identification="non-Gaussianity")[, , 2], B2_132)
+  expect_equal(pick_Omegas(p=1, M=3, d=2, params=theta_132thresitng_1_1, cond_dist="ind_Student", identification="non-Gaussianity")[, , 3], B3_132)
 })
 
 test_that("pick_weightpars works correctly", {
+  # exogenous
+  expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123exo, weight_function="exogenous", cond_dist="Gaussian",
+                               weightfun_pars=matrix(cbind(c(0.4, 0.2, 0.9), c(0.6, 0.8, 0.1)))), numeric(0))
+  expect_equal(pick_weightpars(p=2, M=2, d=2, params=theta_222exo, weight_function="exogenous", cond_dist="Gaussian",
+                               weightfun_pars=matrix(cbind(c(0.4, 0, 0.9), c(0.6, 1, 0.1)))), numeric(0))
+  expect_equal(pick_weightpars(p=1, M=3, d=2, params=theta_132exo, weight_function="exogenous", cond_dist="Gaussian",
+                               weightfun_pars=matrix(cbind(c(0.4, 0, 0.5), c(0.3, 1, 0.2), c(0.3, 0, 0.3)))), numeric(0))
+  expect_equal(pick_weightpars(p=2, M=3, d=2, params=theta_232exo, weight_function="exogenous", cond_dist="Student",
+                               weightfun_pars=matrix(cbind(c(0.4, 0, 0.5), c(0.3, 1, 0.2), c(0.3, 0, 0.3)))), numeric(0))
+  expect_equal(pick_weightpars(p=2, M=3, d=2, params=theta_232exoit, weight_function="exogenous", cond_dist="ind_Student",
+                               weightfun_pars=matrix(cbind(c(0.4, 0, 0.5), c(0.3, 1, 0.2), c(0.3, 0, 0.3)))), numeric(0))
+
   # threshold
   expect_equal(pick_weightpars(p=1, M=2, d=2, params=theta_122thres_1_1, weight_function="threshold", cond_dist="Gaussian",
                                weightfun_pars=c(1, 1)), r1_122_1_1)
@@ -693,6 +912,8 @@ test_that("pick_weightpars works correctly", {
                                weightfun_pars=c(2, 1)), r1_123_2_1)
   expect_equal(pick_weightpars(p=2, M=3, d=2, params=theta_232threst_1_1, weight_function="threshold", cond_dist="Student",
                                weightfun_pars=c(1, 1)), c(r1_232_1_1, r2_232_1_1))
+  expect_equal(pick_weightpars(p=1, M=3, d=2, params=theta_132thresit_1_1, weight_function="threshold", cond_dist="ind_Student",
+                               weightfun_pars=c(1, 1)), c(r1_132_1_1, r2_132_1_1))
 
   # exponential
   expect_equal(pick_weightpars(p=1, M=2, d=2, params=theta_122exp_1_1, weight_function="exponential", cond_dist="Gaussian",
@@ -705,10 +926,10 @@ test_that("pick_weightpars works correctly", {
                                weightfun_pars=c(1, 2)), c_and_gamma_222_1_2)
   expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123exp_1_1, weight_function="exponential", cond_dist="Gaussian",
                                weightfun_pars=c(1, 1)), c_and_gamma_123_1_1)
-  expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123exp_1_1, weight_function="exponential", cond_dist="Gaussian",
-                               weightfun_pars=c(1, 1)), c_and_gamma_123_1_1)
   expect_equal(pick_weightpars(p=1, M=2, d=2, params=theta_122expt_1_1, weight_function="exponential", cond_dist="Student",
                                weightfun_pars=c(1, 1)), c_and_gamma_122_1_1)
+  expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123expit_1_1, weight_function="exponential", cond_dist="ind_Student",
+                               weightfun_pars=c(1, 1)), c_and_gamma_123_1_1)
 
   # logistic
   expect_equal(pick_weightpars(p=1, M=2, d=2, params=theta_122logistic_1_1, weight_function="logistic", cond_dist="Gaussian",
@@ -724,6 +945,8 @@ test_that("pick_weightpars works correctly", {
   expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123logistic_3_1, weight_function="logistic", cond_dist="Gaussian",
                                weightfun_pars=c(3, 1)), c_and_gamma_123_3_1)
   expect_equal(pick_weightpars(p=2, M=2, d=2, params=theta_222logistict_2_1, weight_function="logistic", cond_dist="Student",
+                               weightfun_pars=c(2, 1)), c_and_gamma_222_2_1)
+  expect_equal(pick_weightpars(p=2, M=2, d=2, params=theta_222logistit_2_1, weight_function="logistic", cond_dist="ind_Student",
                                weightfun_pars=c(2, 1)), c_and_gamma_222_2_1)
 
   # mlogit
@@ -751,6 +974,8 @@ test_that("pick_weightpars works correctly", {
                                weightfun_pars=list(vars=1:3, lags=1)), gamma1_123_123_1)
   expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123logt_1_1, weight_function="mlogit", cond_dist="Student",
                                weightfun_pars=list(vars=1, lags=1)), gamma1_123_1_1)
+  expect_equal(pick_weightpars(p=1, M=2, d=2, params=theta_122logit_1_1, weight_function="mlogit", cond_dist="ind_Student",
+                               weightfun_pars=list(vars=1, lags=1)), gamma1_122_1_1)
 
   # relative_dens
   expect_equal(pick_weightpars(p=1, M=1, d=2, params=theta_112relg, weight_function="relative_dens", cond_dist="Gaussian"), 1)
@@ -768,6 +993,8 @@ test_that("pick_weightpars works correctly", {
                c(alpha1_123, 1 - alpha1_123))
 
 })
+
+# JATKA TÄSTÄ
 
 test_that("pick_regime works correctly", {
   expect_equal(pick_regime(p=1, M=1, d=2, m=1, params=theta_112relg), c(phi10_112, vec(A11_112), vech(Omega1_112)))

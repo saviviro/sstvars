@@ -44,7 +44,7 @@ check_constraints(
   \item{\code{"threshold"}:}{\eqn{\alpha_{m,t} = 1} if \eqn{r_{m-1}<y_{it-j}\leq r_{m}} and \eqn{0} otherwise, where
      \eqn{-\infty\equiv r_0<r_1<\cdots <r_{M-1}<r_M\equiv\infty} are thresholds \eqn{y_{it-j}} is the lag \eqn{j}
      observation of the \eqn{i}th variable.}
-  \item{\code{"exogenous"}:}{Exogenous nonrandom transition weights, spesify the weight series in \code{weightfun_pars}.}
+  \item{\code{"exogenous"}:}{Exogenous nonrandom transition weights, specify the weight series in \code{weightfun_pars}.}
 }
 See the vignette for more details about the weight functions.}
 
@@ -60,8 +60,9 @@ See the vignette for more details about the weight functions.}
         used in the weight function.}
     }
   }
-  \item{If \code{weight_function == "exogenous"}:}{a numeric vector with the length \code{nrow(data) - p} containing the exogenous
-    transition weights.}
+  \item{If \code{weight_function == "exogenous"}:}{a size (\code{nrow(data) - p} x \code{M}) matrix containing the exogenous
+    transition weights as \code{[t, m]} for time \eqn{t} and regime \eqn{m}. Each row needs to sum to one and only weakly positive
+    values are allowed.}
 }}
 
 \item{parametrization}{\code{"intercept"} or \code{"mean"} determining whether the model is parametrized with intercept
@@ -102,8 +103,8 @@ the weight parameter to the constant \eqn{r} (in this case, \eqn{\alpha} is drop
 \item{B_constraints}{a \eqn{(d \times d)} matrix with its entries imposing constraints on the impact matrix \eqn{B_t}:
 \code{NA} indicating that the element is unconstrained, a positive value indicating strict positive sign constraint,
 a negative value indicating strict negative sign constraint, and zero indicating that the element is constrained to zero.
-Currently only available for models with \code{identification="heteroskedasticity"} due to the (in)availability of appropriate
-parametrizations that allow such constraints to be imposed.}
+Currently only available for models with \code{identification="heteroskedasticity"} or \code{"non-Gaussianity} due to the
+(in)availability of appropriate parametrizations that allow such constraints to be imposed.}
 }
 \value{
 Does return anything but checks the constraints and throws an error if something is wrong.

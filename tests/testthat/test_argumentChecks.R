@@ -1020,7 +1020,7 @@ dfs_123_3_1 <- c(11, 3, 20)
 B1_123c_e2 <- matrix(c(1, 0.1, 0.2, 0.1, 1, -0.1, 1, 0.7, 1), nrow=3) # Ok but different to B1_123c
 B2_123c_e2 <- matrix(c(1, 0.1, 0.2, 0.1, 1, -0.1, 2, 0.2, 0.4), nrow=3) # Singular
 theta_123logisticcmitngb_3_1e <- c(phi10_123, vec(A11_123), Wvec(B1_123c), Wvec(B2_123c), c_and_gamma_123_3_1, dfs_123_3_1)
-theta_123logisticcmitngb_3_1e_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), Wvec(B1_123c_e2), Wvec(B2_123c2),
+theta_123logisticcmitngb_3_1e_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), Wvec(B1_123c_e2), Wvec(B2_123c_e2),
                                             c_and_gamma_123_3_1, dfs_123_3_1)
 
 
