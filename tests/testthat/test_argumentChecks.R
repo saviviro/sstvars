@@ -838,6 +838,77 @@ lambdas_123 <- c(1.56, 1.44, 0.59)
 theta_123exoshcwb_1_1 <- c(phi10_123, phi20_123, vec(A11_123), Wvec(W_123b), lambdas_123)
 theta_123exoshcwb_1_1_expanded <- c(phi10_123, phi20_123, vec(A11_123), vec(A11_123), vec(W_123b), lambdas_123)
 
+###############
+
+### ind_Student
+
+# p=2, M=2, d=2, cond_dist="ind_Student", weight_function="logistic", weightfun_pars=c(2, 1), identification="non-Gaussianity",
+# B_constraints=matrix(c(NA, -1, 0, 1), nrow=2)
+B1_222c <- matrix(c(0.5, -0.2, 0, 0.1), nrow=2)
+B2_222c <- matrix(c(-0.4, -0.1, 0, 0.2), nrow=2)
+theta_222logistitngb_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                           Wvec(B1_222c), Wvec(B2_222c), dfs_222_2_1)
+
+# p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1, lags=1), cond_dist="ind_Student", identification="non-Gaussianity",
+# B_constraints=matrix(c(1, NA, -1, 1) , nrow=2)
+dfs_122_1_1 <- c(4, 13)
+B1_122c <- matrix(c(1.2, 0.3, -0.7, 0.1), nrow=2)
+B2_122c <- matrix(c(0.5, -0.9, -0.1, 3.1), nrow=2)
+theta_122logitngb_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), Wvec(B1_122c), Wvec(B2_122c), gamma1_122_1_1, dfs_122_1_1)
+
+# p=1, M=2, d=3, weight_function="exponential", weightfun_pars=c(1, 1), cond_dist="ind_Student", identification="non-Gaussianity",
+# B_constraints=matrix(c(1, NA, NA, 0, 1, NA, 0, NA, 1), nrow=3)
+dfs_123_1_1 <- c(10, 12, 3)
+B1_123c <- matrix(c(1.0, 0.3, 0.1, 0, 1.1, -0.5, 0, -0.2, 0.4), nrow=3)
+B2_123c <- matrix(c(0.3, -0.2, -0.7, 0, 1.2, 0.5, 0, -0.2, 1.1), nrow=3)
+theta_123expitngb_1_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), Wvec(B1_123c),
+                        Wvec(B2_123c), c_and_gamma_123_1_1, dfs_123_1_1)
+
+# p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="ind_Student", identification="non-Gaussianity",
+# B_constraints=matrix(c(1, 0, NA, 1), nrow=2)
+dfs_132_1_1 <- c(30, 6)
+B1_132c <- matrix(c(0.6, 0, -0.1, 0.7), nrow=2)
+B2_132c <- matrix(c(0.4, 0, 0.2, 0.5), nrow=2)
+B3_132c <- matrix(c(0.9, 0, -0.2, 0.4), nrow=2)
+theta_132thresitngb_1_1 <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                          Wvec(B1_132c), Wvec(B2_132c), Wvec(B3_132c), r1_132_1_1, r2_132_1_1, dfs_132_1_1)
+
+# p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), cond_dist="ind_Student",
+# mean_constraints=list(1:2), AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)),
+# identification="non-Gaussianity", matrix(c(NA, -1, 0, 1), nrow=2)
+dfs_222_2_1 <- c(4, 13)
+theta_222expcmwitngb_2_1 <- c(phi10_222, vec(A11_222), vec(A12_222), Wvec(B1_222c), Wvec(B2_222c), xi_222expcmw_2_1, dfs_222_2_1)
+theta_222expcmwitngb_2_1_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                       Wvec(B1_222c), Wvec(B2_222c), c(0.01, 0.33), dfs_222_2_1)
+
+# p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="ind_Student", mean_constraints=list(1, 2:3),
+# weight_constraints=list(R=0, r=c(0, 1.2)), identification="non-Gaussianity", B_constraints=matrix(c(1, 0, NA, 1), nrow=2)
+theta_132thresmwitngb_1_1 <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), Wvec(B1_132c),
+                               Wvec(B2_132c), Wvec(B3_132c), dfs_132_1_1)
+theta_132thresmwitngb_1_1_expanded <- c(phi10_132, phi20_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), Wvec(B1_132c),
+                                        Wvec(B2_132c), Wvec(B3_132c), 0, 1.2, dfs_132_1_1)
+
+# p=1, M=2, p=3, weight_function="logistic", weightfun_pars=c(3, 1), cond_dist="ind_Student", mean_constraints=list(1:2),
+# AR_constraints=C_123, identification="non-Gaussianity", B_constraints=matrix(c(1, NA, NA, 0, 1, NA, 0, NA, 1), nrow=3)
+dfs_123_3_1 <- c(11, 3, 20)
+theta_123logisticcmitngb_3_1 <- c(phi10_123, vec(A11_123), Wvec(B1_123c), Wvec(B2_123c), c_and_gamma_123_3_1, dfs_123_3_1)
+theta_123logisticcmitngb_3_1_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), Wvec(B1_123c), Wvec(B2_123c),
+                                           c_and_gamma_123_3_1, dfs_123_3_1)
+
+# p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1), cond_dist="ind_Student", AR_constraints=C_222,
+# identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, 0, 1), nrow=2)
+theta_222logcitngb_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), Wvec(B1_222c), Wvec(B2_222c), gamma1_222_2_1, dfs_222_2_1)
+theta_222logcitngb_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                 Wvec(B1_222c), Wvec(B2_222c), gamma1_222_2_1, dfs_222_2_1)
+
+# p=2, M=2, d=2, weight_function="exogenous", weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_Student",
+# AR_constraints=C_222, identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, 0, 1), nrow=2)
+theta_222exoitngb_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), Wvec(B1_222c), Wvec(B2_222c), dfs_222_2_1)
+theta_222exoitngb_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                Wvec(B1_222c), Wvec(B2_222c), dfs_222_2_1)
+
+###############
+
 
 ## Structural models with illegal W or lambdas
 
@@ -874,6 +945,85 @@ theta_123expshcwb_1_1_e <- c(phi10_123, phi20_123, vec(A11_123), Wvec(W_123b_e),
 theta_122exoshwb_12_1_e <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), Wvec(W_122b_e), lambdas_122)
 
 
+### Non-Gaussian structural models with illegal impact matrices
+
+# p=2, M=2, d=2, cond_dist="ind_Student", weight_function="logistic", weightfun_pars=c(2, 1), identification="non-Gaussianity",
+# B_constraints=matrix(c(NA, NA, 0, -1), nrow=2)
+B2_222c_e <- matrix(c(0.4, -0.1, 1, -0.2), nrow=2)
+theta_222logistitngb_2_1e <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                               Wvec(B1_222c), Wvec(B2_222c_e), dfs_222_2_1)
+
+# p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1, lags=1), cond_dist="ind_Student", identification="non-Gaussianity",
+# B_constraints=matrix(c(1, NA, -1, 1) , nrow=2)
+dfs_122_1_1 <- c(4, 13)
+B1_122c_e <- matrix(c(1.2, 0.3, 0.7, 0.1), nrow=2)
+theta_122logitngb_1_1e <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), Wvec(B1_122c_e), Wvec(B2_122c), gamma1_122_1_1, dfs_122_1_1)
+
+# p=1, M=2, d=3, weight_function="exponential", weightfun_pars=c(1, 1), cond_dist="ind_Student", identification="non-Gaussianity",
+# B_constraints=matrix(c(1, NA, NA, 0, 1, NA, 0, NA, 1), nrow=3)
+dfs_123_1_1 <- c(10, 12, 3)
+B2_123c_e <- matrix(c(0.3, -0.2, -0.7, 0, 1.2, 0.5, 0, -0.2, -1.1), nrow=3)
+theta_123expitngb_1_1e <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), Wvec(B1_123c),
+                            Wvec(B2_123c), c_and_gamma_123_1_1, dfs_123_1_1)
+
+# p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="ind_Student", identification="non-Gaussianity",
+# B_constraints=matrix(c(1, 0, NA, 1), nrow=2)
+dfs_132_1_1 <- c(30, 6)
+B3_132c_e <- matrix(c(0.9, -0.5, -0.2, 0.4), nrow=2)
+theta_132thresitngb_1_1e <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                              Wvec(B1_132c), Wvec(B2_132c), Wvec(B3_132c_e), r1_132_1_1, r2_132_1_1, dfs_132_1_1)
+
+# p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), cond_dist="ind_Student",
+# mean_constraints=list(1:2), AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)),
+# identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, 0, 1), nrow=2)
+dfs_122_2_1 <- c(4, 13)
+B1_222c_e <- matrix(c(0, 1, 0, 0.1), nrow=2)
+theta_222expcmwitngb_2_1e <- c(phi10_222, vec(A11_222), vec(A12_222), Wvec(B1_222c), Wvec(B2_222c), xi_222expcmw_2_1, dfs_122_2_1)
+theta_222expcmwitngb_2_1e_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                        Wvec(B1_222c_e), Wvec(B2_222c), c(0.01, 0.33), dfs_122_2_1)
+
+# p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="ind_Student", mean_constraints=list(1, 2:3),
+# weight_constraints=list(R=0, r=c(0, 1.2)), identification="non-Gaussianity", B_constraints=matrix(c(1, 0, NA, 1), nrow=2)
+B1_132c_e <- matrix(c(-0.9, 0, -0.2, 0.4), nrow=2)
+theta_132thresmwitngb_1_1e <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), Wvec(B1_132c),
+                                Wvec(B2_132c), Wvec(B3_132c), dfs_132_1_1)
+theta_132thresmwitngb_1_1e_expanded <- c(phi10_132, phi20_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), Wvec(B1_132c_e),
+                                         Wvec(B2_132c), Wvec(B3_132c), 0, 1.2, dfs_132_1_1)
+
+# p=1, M=2, p=3, weight_function="logistic", weightfun_pars=c(3, 1), cond_dist="ind_Student", mean_constraints=list(1:2),
+# AR_constraints=C_123, identification="non-Gaussianity", B_constraints=matrix(c(1, NA, NA, 0, 1, NA, 0, NA, 1), nrow=3)
+dfs_123_3_1 <- c(11, 3, 20)
+B1_123c_e <- matrix(c(1, 0.1, 0.2, 0, 1, -0.1, 1, 0.7, 1), nrow=3)
+theta_123logisticcmitngb_3_1e <- c(phi10_123, vec(A11_123), Wvec(B1_123c), Wvec(B2_123c), c_and_gamma_123_3_1, dfs_123_3_1)
+theta_123logisticcmitngb_3_1e_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), Wvec(B1_123c_e), Wvec(B2_123c),
+                                            c_and_gamma_123_3_1, dfs_123_3_1)
+
+# p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1), cond_dist="ind_Student", AR_constraints=C_222,
+# identification="non-Gaussianity", matrix(c(1, NA, NA, 1), nrow=2)
+B1_222c_e2 <- matrix(c(0.4, -0.1, 1, 0.2), nrow=2) # Ok but different to B1_222c
+B2_222c_e2 <- matrix(c(0.4, 0.2, 0.2, 0.1), nrow=2) # Singular
+theta_222logcitngb_2_1e <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), Wvec(B1_222c), Wvec(B2_222c), gamma1_222_2_1, dfs_222_2_1)
+theta_222logcitngbe_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                  Wvec(B1_222c_e2), Wvec(B2_222c_e2), gamma1_222_2_1, dfs_222_2_1)
+
+# p=2, M=2, d=2, weight_function="exogenous", weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_Student",
+# AR_constraints=C_222, identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, NA, NA), nrow=2)
+B1_222c_e3 <- B2_222c_e2 # Singular
+B2_222c_e3 <- B2_222c_e2 # Ok
+theta_222exoitngb_2_1e <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), Wvec(B1_222c), Wvec(B2_222c), dfs_222_2_1)
+theta_222exoitngbe_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                 Wvec(B1_222c_e3), Wvec(B2_222c_e3), dfs_222_2_1)
+
+# p=1, M=2, p=3, weight_function="logistic", weightfun_pars=c(3, 1), cond_dist="ind_Student", mean_constraints=list(1:2),
+# AR_constraints=C_123, identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, NA, NA, NA, NA, NA, NA, NA), nrow=3)
+dfs_123_3_1 <- c(11, 3, 20)
+B1_123c_e2 <- matrix(c(1, 0.1, 0.2, 0.1, 1, -0.1, 1, 0.7, 1), nrow=3) # Ok but different to B1_123c
+B2_123c_e2 <- matrix(c(1, 0.1, 0.2, 0.1, 1, -0.1, 2, 0.2, 0.4), nrow=3) # Singular
+theta_123logisticcmitngb_3_1e <- c(phi10_123, vec(A11_123), Wvec(B1_123c), Wvec(B2_123c), c_and_gamma_123_3_1, dfs_123_3_1)
+theta_123logisticcmitngb_3_1e_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), Wvec(B1_123c_e2), Wvec(B2_123c2),
+                                            c_and_gamma_123_3_1, dfs_123_3_1)
+
+
 Omegas_112 <- pick_Omegas(p=1, M=1, d=2, params=theta_112relg)
 Omegas_112_notpd <- pick_Omegas(p=1, M=1, d=2, params=theta_112relg_notpd)
 Omegas_212 <- pick_Omegas(p=2, M=1, d=2, params=theta_212relg_notstab)
@@ -888,6 +1038,8 @@ Omegas_113_notpd <- pick_Omegas(p=1, M=1, d=3, params=theta_113relg_notpd)
 Omegas_213 <- pick_Omegas(p=2, M=1, d=3, params=theta_213relg_notstab)
 Omegas_123 <- pick_Omegas(p=1, M=2, d=3, params=theta_123relg_notstab)
 Omegas_123_notpd <- pick_Omegas(p=1, M=2, d=3, params=theta_123relg_notpd)
+
+# TÄYDENNÄ IND STUDENT JA EXO PICK OMEGAS, JA IND STUDENT PICK DIST PARS!
 
 boldA_112 <- form_boldA(p=1, M=1, d=2, all_A=pick_allA(p=1, M=1, d=2, params=theta_112relg))
 boldA_212_notstab <- form_boldA(p=2, M=1, d=2, all_A=pick_allA(p=2, M=1, d=2, params=theta_212relg_notstab))
