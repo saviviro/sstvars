@@ -9,6 +9,7 @@ pick_Omegas(
   M,
   d,
   params,
+  cond_dist = c("Gaussian", "Student", "ind_Student"),
   identification = c("reduced_form", "recursive", "heteroskedasticity",
     "non-Gaussianity")
 )
@@ -56,7 +57,8 @@ of a given matrix from the principal diagonal downwards (including elements on t
 \value{
 Returns a 3D array containing...
   \describe{
-    \item{If \code{identification == "non-Gaussianity}:}{the impact matrices of the regimes, \eqn{B_m} in \code{[, , m]}.}
+    \item{If \code{identification == "non-Gaussianity"} or \code{cond_dist == "ind_Student"}:}{the impact matrices of the regimes,
+      \eqn{B_m} in \code{[, , m]}.}
     \item{If otherwise:}{the covariance matrices of the given model, \eqn{\Omega_m} in \code{[, , m]}.}
   }
 }

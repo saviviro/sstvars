@@ -251,15 +251,17 @@ pick_distpars <- function(params, cond_dist=c("Gaussian", "Student", "ind_Studen
 #' @details Constrained models nor structural models are supported.
 #' @return Returns the vector...
 #'   \describe{
-#'     \item{If \code{identification == "non-Gaussianity}:}{\eqn{(\phi_{m,0},vec(A_{m,1}),...,vec(A_{m,p}),vec(B_m))}.}
+#'     \item{If \code{identification == "non-Gaussianity} or \code{cond_dist == "ind_Student"}:}{\eqn{(\phi_{m,0},vec(A_{m,1}),...,vec(A_{m,p}),vec(B_m))}.}
 #'     \item{If otherwise:}{\eqn{(\phi_{m,0},vec(A_{m,1}),...,vec(A_{m,p}),vech(\Omega_m))}.}
 #'   }
 #'   Note that neither weight parameters or distribution parameters are picked.
 #' @keywords internal
 
-pick_regime <- function(p, M, d, params, m, identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity")) {
+pick_regime <- function(p, M, d, params, m, cond_dist=c("Gaussian", "Student", "ind_Student"),
+                        identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity")) {
   identification <- match.arg(identification)
-  if(identification == "non-Gaussianity") {
+  cond_dist <- match.arg(cond_dist)
+  if(identification == "non-Gaussianity" || cond_dist == "ind_Student") {
     return(c(params[((m - 1)*d + 1):(m*d)],
              params[(M*d + (m - 1)*p*d^2 + 1):(M*d + m*p*d^2)],
              params[(M*d + M*p*d^2 + (m - 1)*d^2 + 1):(M*d + M*p*d^2 + m*d^2)]))

@@ -991,10 +991,8 @@ test_that("pick_weightpars works correctly", {
   expect_equal(pick_weightpars(p=2, M=1, d=3, params=theta_213relg, weight_function="relative_dens", cond_dist="Gaussian"), 1)
   expect_equal(pick_weightpars(p=1, M=2, d=3, params=theta_123relg, weight_function="relative_dens", cond_dist="Gaussian"),
                c(alpha1_123, 1 - alpha1_123))
-
 })
 
-# JATKA TÄSTÄ
 
 test_that("pick_regime works correctly", {
   expect_equal(pick_regime(p=1, M=1, d=2, m=1, params=theta_112relg), c(phi10_112, vec(A11_112), vech(Omega1_112)))
@@ -1042,6 +1040,14 @@ test_that("pick_regime works correctly", {
   expect_equal(pick_regime(p=1, M=2, d=3, m=1, params=theta_123thres_2_1), c(phi10_123, vec(A11_123), vech(Omega1_123)))
   expect_equal(pick_regime(p=1, M=2, d=3, m=2, params=theta_123thres_2_1), c(phi20_123, vec(A21_123), vech(Omega2_123)))
 
+  expect_equal(pick_regime(p=2, M=2, d=2, m=1, params=theta_222exo), c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222)))
+  expect_equal(pick_regime(p=2, M=2, d=2, m=2, params=theta_222exo), c(phi20_222, vec(A21_222), vec(A22_222), vech(Omega2_222)))
+  expect_equal(pick_regime(p=1, M=3, d=2, m=1, params=theta_132exo), c(phi10_132, vec(A11_132), vech(Omega1_132)))
+  expect_equal(pick_regime(p=1, M=3, d=2, m=2, params=theta_132exo), c(phi20_132, vec(A21_132), vech(Omega2_132)))
+  expect_equal(pick_regime(p=1, M=3, d=2, m=3, params=theta_132exo), c(phi30_132, vec(A31_132), vech(Omega3_132)))
+  expect_equal(pick_regime(p=1, M=2, d=3, m=1, params=theta_123exo), c(phi10_123, vec(A11_123), vech(Omega1_123)))
+  expect_equal(pick_regime(p=1, M=2, d=3, m=2, params=theta_123exo), c(phi20_123, vec(A21_123), vech(Omega2_123)))
+
   # Student
   expect_equal(pick_regime(p=2, M=3, d=2, m=1, params=theta_232threst_1_1), c(phi10_232, vec(A11_232), vec(A12_232), vech(Omega1_232)))
   expect_equal(pick_regime(p=2, M=3, d=2, m=2, params=theta_232threst_1_1), c(phi20_232, vec(A21_232), vec(A22_232), vech(Omega2_232)))
@@ -1052,6 +1058,22 @@ test_that("pick_regime works correctly", {
   expect_equal(pick_regime(p=2, M=2, d=2, m=2, params=theta_222logistict_2_1), c(phi20_222, vec(A21_222), vec(A22_222), vech(Omega2_222)))
   expect_equal(pick_regime(p=1, M=2, d=3, m=1, params=theta_123log_1_1), c(phi10_123, vec(A11_123), vech(Omega1_123)))
   expect_equal(pick_regime(p=1, M=2, d=3, m=2, params=theta_123log_1_1), c(phi20_123, vec(A21_123), vech(Omega2_123)))
+
+  # ind_Student
+  expect_equal(pick_regime(p=2, M=3, d=2, m=1, params=theta_232exoit, cond_dist="ind_Student"),
+               c(phi10_232, vec(A11_232), vec(A12_232), vec(B1_232)))
+  expect_equal(pick_regime(p=2, M=3, d=2, m=2, params=theta_232exoit, cond_dist="ind_Student"),
+               c(phi20_232, vec(A21_232), vec(A22_232), vec(B2_232)))
+  expect_equal(pick_regime(p=2, M=3, d=2, m=3, params=theta_232exoit, cond_dist="ind_Student"),
+               c(phi30_232, vec(A31_232), vec(A32_232), vec(B3_232)))
+  expect_equal(pick_regime(p=1, M=2, d=2, m=1, params=theta_122logit_1_1, cond_dist="ind_Student"), c(phi10_122, vec(A11_122), vec(B1_122)))
+  expect_equal(pick_regime(p=1, M=2, d=2, m=2, params=theta_122logit_1_1, cond_dist="ind_Student"), c(phi20_122, vec(A21_122), vec(B2_122)))
+  expect_equal(pick_regime(p=2, M=2, d=2, m=1, params=theta_222logistit_2_1, cond_dist="ind_Student"),
+               c(phi10_222, vec(A11_222), vec(A12_222), vec(B1_222)))
+  expect_equal(pick_regime(p=2, M=2, d=2, m=2, params=theta_222logistit_2_1, cond_dist="ind_Student"),
+               c(phi20_222, vec(A21_222), vec(A22_222), vec(B2_222)))
+  expect_equal(pick_regime(p=1, M=2, d=3, m=1, params=theta_123expit_1_1, cond_dist="ind_Student"), c(phi10_123, vec(A11_123), vec(B1_123)))
+  expect_equal(pick_regime(p=1, M=2, d=3, m=2, params=theta_123expit_1_1, cond_dist="ind_Student"), c(phi20_123, vec(A21_123), vec(B2_123)))
 })
 
 
