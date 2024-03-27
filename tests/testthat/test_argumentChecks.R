@@ -1738,7 +1738,8 @@ test_that("check_constraints works correctly", {
                                  weight_constraints=list(R=matrix(1:6, nrow=2), r=c(0.1, 0.13))))
   expect_error(check_constraints(p=2, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1),
                                  weight_constraints=list(R=matrix(1:4, nrow=2), r=c(0.13))))
-
+  expect_warning(check_constraints(data=matrix(NA, nrow=3), p=2, M=2, d=2, weight_function="exogenous",
+                                   weightfun_pars=cbind(0, 1), weight_constraints=list(R=0, r=c(0.13, 0.1))))
 
   expect_error(check_constraints(p=1, M=1, d=2, AR_constraints=cbind(C_112, C_112)))
   expect_error(check_constraints(p=1, M=1, d=2, AR_constraints=rbind(C_112, C_112)))
@@ -1767,6 +1768,13 @@ test_that("check_constraints works correctly", {
                                  B_constraints=matrix(c(1, 0, NA, NA, 0, 1, 1, 0, NA), nrow=3)))
   expect_error(check_constraints(p=1, M=2, d=3, identification="heteroskedasticity", B_constraints=matrix(1:4, nrow=2)))
   expect_error(check_constraints(p=2, M=2, d=2, identification="heteroskedasticity", B_constraints=1:4))
+
+  expect_error(check_constraints(p=1, M=2, d=2, identification="non-Gaussianity", B_constraints=matrix(1:9, nrow=3)))
+  expect_error(check_constraints(p=1, M=2, d=2, identification="non-Gaussianity", B_constraints=matrix(c(0, 0, 1, NA), nrow=2)))
+  expect_error(check_constraints(p=2, M=2, d=3, identification="non-Gaussianity",
+                                 B_constraints=matrix(c(1, 0, NA, NA, 0, 1, 1, 0, NA), nrow=3)))
+  expect_error(check_constraints(p=1, M=2, d=3, identification="non-Gaussianity", B_constraints=matrix(1:4, nrow=2)))
+  expect_error(check_constraints(p=2, M=2, d=2, identification="non-Gaussianity", B_constraints=1:4))
 })
 
 

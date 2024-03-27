@@ -406,16 +406,15 @@ n_params <- function(p, M, d, weight_function=c("relative_dens", "logistic", "ml
 #' @return Does return anything but checks the constraints and throws an error if something is wrong.
 #' @keywords internal
 
-check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+check_constraints <- function(data, p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                               weightfun_pars=NULL, parametrization=c("intercept", "mean"),
-                              identification=c("reduced_form", "recursive", "heteroskedasticity"),
+                              identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                               AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
   weight_function <- match.arg(weight_function)
   parametrization <- match.arg(parametrization)
   identification <- match.arg(identification)
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function,
-                                         weightfun_pars=weightfun_pars,
-                                         cond_dist="Gaussian")
+  weightfun_pars <- check_weightfun_pars(data=data, p=p, M=M, d=d, weight_function=weight_function,
+                                         weightfun_pars=weightfun_pars, cond_dist="Gaussian")
   # cond_dist="Gaussian" used above since we dont want to check rel_dens distribution here
 
   # Check AR_constraints
@@ -466,25 +465,25 @@ check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logis
       n_nonconstr_weightpars <- 2
     } else if(weight_function == "mlogit") {
       n_nonconstr_weightpars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
-    } else {
-      stop("Unknown weight_function in check_constraints")
     }
-    if(!all(weight_constraints[[1]] == 0)) { # R != 0
-      if(!is.matrix(weight_constraints[[1]]) || !is.numeric(weight_constraints[[1]])) {
-        stop("The first element of the argument weight_constraints should be a numeric matrix R (or 0 or NULL)")
-      } else if(nrow(weight_constraints[[1]]) != n_nonconstr_weightpars) {
-        stop("The first element of weight_constraints (matrix R) has incorrect number of rows")
-      } else if(ncol(weight_constraints[[1]]) > nrow(weight_constraints[[1]])) {
-        stop("The first element of weight_constraints (matrix R) has more columns than rows! What are you doing??")
-      } else if(qr(weight_constraints[[1]])$rank != ncol(weight_constraints[[1]])) {
-        stop("The first element of weight_constraints (matrix R) should have full column rank (or it should equal to zero)")
+    if(weight_function != "exogenous") {
+      if(!all(weight_constraints[[1]] == 0)) { # R != 0
+        if(!is.matrix(weight_constraints[[1]]) || !is.numeric(weight_constraints[[1]])) {
+          stop("The first element of the argument weight_constraints should be a numeric matrix R (or 0 or NULL)")
+        } else if(nrow(weight_constraints[[1]]) != n_nonconstr_weightpars) {
+          stop("The first element of weight_constraints (matrix R) has incorrect number of rows")
+        } else if(ncol(weight_constraints[[1]]) > nrow(weight_constraints[[1]])) {
+          stop("The first element of weight_constraints (matrix R) has more columns than rows! What are you doing??")
+        } else if(qr(weight_constraints[[1]])$rank != ncol(weight_constraints[[1]])) {
+          stop("The first element of weight_constraints (matrix R) should have full column rank (or it should equal to zero)")
+        }
       }
-    }
-    # Check r
-    if(!is.numeric(weight_constraints[[2]]) || !is.vector(weight_constraints[[2]])) {
-      stop("The second element of the argument weight_constraints should be a numeric vector r")
-    } else if(length(weight_constraints[[2]]) != n_nonconstr_weightpars) {
-      stop("The second element of the argument weight_constraints (vector r) has wrong dimension")
+      # Check r
+      if(!is.numeric(weight_constraints[[2]]) || !is.vector(weight_constraints[[2]])) {
+        stop("The second element of the argument weight_constraints should be a numeric vector r")
+      } else if(length(weight_constraints[[2]]) != n_nonconstr_weightpars) {
+        stop("The second element of the argument weight_constraints (vector r) has wrong dimension")
+      }
     }
 
     # Warnings if no errors
@@ -508,12 +507,15 @@ check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logis
                       "implying that the estimation may fail."))
       }
     }
+    if(weight_function == "exogenous" && !is.null(weight_constraints)) {
+      warning("weight_constraints cannot be used with the exogenous weight function")
+    }
   }
 
   # Check B_constraints
   if(!is.null(B_constraints)) {
-    if(identification != "heteroskedasticity") {
-      stop("B_constraints are currently available only for models with identication = 'heteroskedasticity'.")
+    if(identification != "heteroskedasticity" && identification != "non-Gaussianity") {
+      stop("B_constraints are currently available only for models with identication = 'heteroskedasticity' or 'non-Gaussianity'.")
     }
     if(!is.matrix(B_constraints) || any(dim(B_constraints) != d)) {
       stop("B_constraints should be a (d x d) matrix")
@@ -521,7 +523,7 @@ check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logis
     n_zeros1 <- vapply(1:d, function(i1) sum(B_constraints[i1,] == 0, na.rm=TRUE), numeric(1))
     n_zeros2 <- vapply(1:d, function(i1) sum(B_constraints[,i1] == 0, na.rm=TRUE), numeric(1))
     if(any(n_zeros1 == d) || any(n_zeros2 == d)) {
-      stop("The matrix 'W' should be non-singular, so you cannot constrain it to be singular via B_constraints")
+      stop("The impact matrix/matrices should be invertible, so you cannot constrain it/them to be singular via B_constraints")
     }
   }
 }
