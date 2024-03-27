@@ -5,15 +5,18 @@
 \title{Check whether the parameter vector is in the parameter space and throw error if not}
 \usage{
 check_params(
+  data,
   p,
   M,
   d,
   params,
-  weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+  weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold",
+    "exogenous"),
   weightfun_pars = NULL,
-  cond_dist = c("Gaussian", "Student"),
+  cond_dist = c("Gaussian", "Student", "ind_Student"),
   parametrization = c("intercept", "mean"),
-  identification = c("reduced_form", "recursive", "heteroskedasticity"),
+  identification = c("reduced_form", "recursive", "heteroskedasticity",
+    "non-Gaussianity"),
   AR_constraints = NULL,
   mean_constraints = NULL,
   weight_constraints = NULL,
@@ -25,6 +28,9 @@ check_params(
 )
 }
 \arguments{
+\item{data}{a matrix or class \code{'ts'} object with \code{d>1} columns. Each column is taken to represent
+a univariate time series. Missing values are not supported.}
+
 \item{p}{a positive integer specifying the autoregressive order}
 
 \item{M}{a positive integer specifying the number of regimes}

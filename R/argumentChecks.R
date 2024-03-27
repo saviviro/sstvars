@@ -159,9 +159,9 @@ in_paramspace <- function(p, M, d, weight_function=c("relative_dens", "logistic"
 #'  }
 #' @export
 
-check_params <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
-                         weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
-                         identification=c("reduced_form", "recursive", "heteroskedasticity"),
+check_params <- function(data, p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                         weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), parametrization=c("intercept", "mean"),
+                         identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                          AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                          stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
   weight_function <- match.arg(weight_function)
@@ -169,7 +169,7 @@ check_params <- function(p, M, d, params, weight_function=c("relative_dens", "lo
   parametrization <- match.arg(parametrization)
   identification <- match.arg(identification)
   check_pMd(p=p, M=M, d=d, weight_function=weight_function, identification=identification)
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
+  weightfun_pars <- check_weightfun_pars(data=data, p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                          cond_dist=cond_dist)
   if(n_params(p=p, M=M, d=d, weight_function=weight_function, cond_dist=cond_dist,
               identification=identification, AR_constraints=AR_constraints,
@@ -202,11 +202,25 @@ check_params <- function(p, M, d, params, weight_function=c("relative_dens", "lo
     if(any(lambdas <= 0)) {
       stop("The eigenvalues 'lambdas' should be strictly positive")
     }
+  } else if(identification == "non-Gaussianity" || cond_dist == "ind_Student") { # Check B matrices
+    for(i1 in 1:M) {
+      if(any(all_Omegas[B_constraints == 0] != 0, na.rm=TRUE)) {
+        stop(paste0("The impact matrix of Regime ", i1, " doesn't satisfy the zero constraints in B_constraints"))
+      } else if(any(all_Omegas[B_constraints > 0] <= 0, na.rm=TRUE) || any(all_Omegas[B_constraints < 0] >= 0, na.rm=TRUE)) {
+        stop(paste0("The impact matrix of Regime ", i1, " doesn't satisfy the strict sign constraints in B_constraints"))
+      } else if(abs(det(all_Omegas[, , i1])) < posdef_tol) {
+        stop(paste0("The impact matrix of Regime ", i1, " is not invertible"))
+      }
+    }
   }
 
   if(cond_dist == "Student") { # Check degrees of freedom parameter
     if(distpars <= 2 + distpar_tol) {
       stop("The degrees of freedom parameter needs to be strictly larger than two (with large enough numerical tolerance)!")
+    }
+  } else if(cond_dist == "ind_Student") {
+    if(any(distpars <= 2 + distpar_tol)) {
+      stop("The degrees of freedom parameters need to be strictly larger than two (with large enough numerical tolerance)!")
     }
   }
   if(weight_function == "relative_dens") {
@@ -226,14 +240,19 @@ check_params <- function(p, M, d, params, weight_function=c("relative_dens", "lo
     if(!all(order(weightpars, decreasing=FALSE) == seq_len(M - 1))) {
       stop("The threshold parameters need be in an increasing ordering with threshold weight function")
     }
+  } else if(weight_function == "exogenous") {
+    # No weightpars to test
   }
   if(!stab_conds_satisfied(p=p, M=M, d=d, all_boldA=all_boldA, tolerance=stab_tol)) {
     stop("At least one of the regimes does not satisfy the stability condition (with large enough numerical tolerance)!")
   }
-  for(m in 1:M) {
-    if(any(eigen(all_Omegas[, , m], symmetric=TRUE, only.values=TRUE)$values < posdef_tol)) {
-      stop(paste0("The conditional covariance matrix of Regime ", m,
-                  " is not positive definite (with large enough numerical tolerance)!"))
+
+  if(cond_dist != "ind_Student" && identification != "non-Gaussianity") {
+    for(m in 1:M) {
+      if(any(eigen(all_Omegas[, , m], symmetric=TRUE, only.values=TRUE)$values < posdef_tol)) {
+        stop(paste0("The conditional covariance matrix of Regime ", m,
+                    " is not positive definite (with large enough numerical tolerance)!"))
+      }
     }
   }
 }
