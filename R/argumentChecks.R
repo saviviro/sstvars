@@ -260,8 +260,8 @@ all_pos_ints <- function(x) {
 #' @return Throws an error if something is wrong.
 #' @keywords internal
 
-check_pMd <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
-                      identification=c("reduced_form", "recursive", "heteroskedasticity")) {
+check_pMd <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                      identification=c("reduced_form", "recursive", "heteroskedasticity", "ind_Student")) {
   weight_function <- match.arg(weight_function)
   identification <- match.arg(identification)
   if(!all_pos_ints(M) || length(M) != 1) {
