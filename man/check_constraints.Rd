@@ -103,7 +103,7 @@ the weight parameter to the constant \eqn{r} (in this case, \eqn{\alpha} is drop
 \item{B_constraints}{a \eqn{(d \times d)} matrix with its entries imposing constraints on the impact matrix \eqn{B_t}:
 \code{NA} indicating that the element is unconstrained, a positive value indicating strict positive sign constraint,
 a negative value indicating strict negative sign constraint, and zero indicating that the element is constrained to zero.
-Currently only available for models with \code{identification="heteroskedasticity"} or \code{"non-Gaussianity} due to the
+Currently only available for models with \code{identification="heteroskedasticity"} or \code{"non-Gaussianity"} due to the
 (in)availability of appropriate parametrizations that allow such constraints to be imposed.}
 }
 \value{

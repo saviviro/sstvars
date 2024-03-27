@@ -537,10 +537,11 @@ check_constraints <- function(p, M, d, weight_function=c("relative_dens", "logis
 #'   a corrected version of the argument if possible.
 #' @keywords internal
 
-check_weightfun_pars <- function(p, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
-                                 weightfun_pars=NULL, cond_dist=c("Gaussian", "Student")) {
+check_weightfun_pars <- function(data, p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                                 weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student")) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
+
   if(weight_function == "relative_dens") {   # weightfun_pars are not used in weight_function == "relative_dens"
     weightfun_pars <- NULL
     if(cond_dist != "Gaussian") {
@@ -581,6 +582,15 @@ check_weightfun_pars <- function(p, d, weight_function=c("relative_dens", "logis
     } else if(!all(names(weightfun_pars) == c("vars", "lags"))) {
       names(weightfun_pars) <- c("vars", "lags")
     }
+  } else if(weight_function == "exogenous") {
+     if(!is.numeric(weightfun_pars) || !is.matrix(weightfun_pars) || ncol(weightfun_pars) != M || nrow(weightfun_pars) != nrow(data) - p) {
+       stop("When weight_function == 'exogenous', the argument weightfun_pars should be a numeric (nrow(data)-p x M) matrix.")
+     } else if(any(weightfun_pars < 0)) {
+       stop("When weight_function == 'exogenous', the argument weightfun_pars should not contain strictly negative elements.")
+     } else if(!isTRUE(all.equal(rowSums(weightfun_pars), rep(1, times=nrow(weightfun_pars))))) {
+       warning("The each row of the matrix weightfun_pars should sum to one, normalizing them to sum to one.")
+       weightfun_pars <- weightfun_pars/rowSums(weightfun_pars)
+     }
   }
   weightfun_pars
 }

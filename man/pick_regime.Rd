@@ -60,7 +60,7 @@ of a given matrix from the principal diagonal downwards (including elements on t
 \value{
 Returns the vector...
   \describe{
-    \item{If \code{identification == "non-Gaussianity} or \code{cond_dist == "ind_Student"}:}{\eqn{(\phi_{m,0},vec(A_{m,1}),...,vec(A_{m,p}),vec(B_m))}.}
+    \item{If \code{identification == "non-Gaussianity"} or \code{cond_dist == "ind_Student"}:}{\eqn{(\phi_{m,0},vec(A_{m,1}),...,vec(A_{m,p}),vec(B_m))}.}
     \item{If otherwise:}{\eqn{(\phi_{m,0},vec(A_{m,1}),...,vec(A_{m,p}),vech(\Omega_m))}.}
   }
   Note that neither weight parameters or distribution parameters are picked.

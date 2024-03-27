@@ -5,15 +5,23 @@
 \title{Check the argument \code{weightfun_pars}}
 \usage{
 check_weightfun_pars(
+  data,
   p,
+  M,
   d,
-  weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+  weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold",
+    "exogenous"),
   weightfun_pars = NULL,
-  cond_dist = c("Gaussian", "Student")
+  cond_dist = c("Gaussian", "Student", "ind_Student")
 )
 }
 \arguments{
+\item{data}{a matrix or class \code{'ts'} object with \code{d>1} columns. Each column is taken to represent
+a univariate time series. Missing values are not supported.}
+
 \item{p}{a positive integer specifying the autoregressive order}
+
+\item{M}{a positive integer specifying the number of regimes}
 
 \item{weight_function}{What type of transition weights \eqn{\alpha_{m,t}} should be used?
 \describe{

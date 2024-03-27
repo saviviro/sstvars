@@ -226,17 +226,17 @@ theta_232threst_1_1 <- c(theta_232thres_1_1, df_232_1_1)
 
 ## weight_function == "exogenous"
 
-# p=1, M=2, d=3, weight_function="exogenous", weightfun_pars=matrix(cbind(c(0.4, 0.2, 0.9), c(0.6, 0.8, 0.1)))
+# p=1, M=2, d=3, weight_function="exogenous", weightfun_pars=cbind(c(0.4, 0.2, 0.9), c(0.6, 0.8, 0.1))
 theta_123exo <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vech(Omega1_123), vech(Omega2_123))
 
-# p=2, M=2, d=2,  weight_function="exogenous", weightfun_pars=matrix(cbind(c(0.4, 0, 0.9), c(0.6, 1, 0.1)))
+# p=2, M=2, d=2,  weight_function="exogenous", weightfun_pars=cbind(c(0.4, 0, 0.9), c(0.6, 1, 0.1))
 theta_222exo <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222), vech(Omega1_222), vech(Omega2_222))
 
-# p=1, M=3, d=2, weight_function="exogenous", weightfun_pars=matrix(cbind(c(0.4, 0, 0.5), c(0.3, 1, 0.2), c(0.3, 0, 0.3)))
+# p=1, M=3, d=2, weight_function="exogenous", weightfun_pars=cbind(c(0.4, 0, 0.5), c(0.3, 1, 0.2), c(0.3, 0, 0.3))
 theta_132exo <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132), vech(Omega1_132),
                   vech(Omega2_132), vech(Omega3_132))
 
-# p=2, M=3, d=2, weight_function="exogenous", weightfun_pars=matrix(cbind(c(0.4, 0, 0.5), c(0.3, 1, 0.2), c(0.3, 0, 0.3)))
+# p=2, M=3, d=2, weight_function="exogenous", weightfun_pars=cbind(c(0.4, 0, 0.5), c(0.3, 1, 0.2), c(0.3, 0, 0.3))
 theta_232exo <- c(phi10_232, phi20_232, phi30_232, vec(A11_232), vec(A12_232), vec(A21_232), vec(A22_232),
                         vec(A31_232), vec(A32_232), vech(Omega1_232), vech(Omega2_232), vech(Omega3_232))
 
@@ -513,7 +513,7 @@ theta_123threscm_2_1 <- c(phi10_123, vec(A11_123), vech(Omega1_123), vech(Omega2
 theta_123threscm_2_1_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123), r1_123_2_1)
 
 ## weight_function == "exogenous"
-# p=1, M=2, p=3, weight_function="exogenous", weightfun_pars=matrix(c(0, 0.4, 0.9), c(1, 0.6, 0.1)), mean_constraints=list(1:2),
+# p=1, M=2, p=3, weight_function="exogenous", weightfun_pars=cbind(c(0, 0.4, 0.9), c(1, 0.6, 0.1)), mean_constraints=list(1:2),
 # AR_constraints=C_123
 theta_123exocm <- c(phi10_123, vec(A11_123), vech(Omega1_123), vech(Omega2_123))
 theta_123exocm_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), vech(Omega1_123), vech(Omega2_123))
@@ -1190,7 +1190,7 @@ test_that("in_paramspace work correctly", {
                             transition_weights=cbind(c(0.1, 0.2, 0.3), c(0.9, 0.8, 0.7))))
   Omegas_222it_singt <- array(c(1:4, -(1:4)), dim=c(2, 2, 2))
   expect_false(in_paramspace(p=2, M=2, d=2, weight_function="logistic", cond_dist="ind_Student", all_boldA=boldA_222,
-                             all_Omegas=Omegas222it_singt, weightpars=weightpars_222logit, distpars=dfs_222_2_1,
+                             all_Omegas=Omegas_222it_singt , weightpars=weightpars_222logit, distpars=dfs_222_2_1,
                              transition_weights=cbind(c(0.1, 0.2, 0.5), c(0.9, 0.8, 0.5))))
   expect_false(in_paramspace(p=2, M=2, d=2, weight_function="logistic", cond_dist="ind_Student", all_boldA=boldA_222,
                              all_Omegas=Omegas_222it_singt, weightpars=weightpars_222logit, distpars=dfs_222_2_1,
@@ -1203,7 +1203,7 @@ test_that("in_paramspace work correctly", {
                             all_Omegas=Omegas_123it, weightpars=weightpars_123expit, distpars=dfs_123_1_1,
                             transition_weights=cbind(c(0.1, 0.5, 0), c(0.9, 0.5, 1))))
   expect_false(in_paramspace(p=1, M=2, d=3, weight_function="exponential", cond_dist="ind_Student", all_boldA=boldA_123,
-                            all_Omegas=Omegas123it_singt, weightpars=weightpars_123expit, distpars=dfs_123_1_1,
+                            all_Omegas=Omegas_123it_singt, weightpars=weightpars_123expit, distpars=dfs_123_1_1,
                             transition_weights=cbind(c(0.1, 0.5, 0), c(0.9, 0.5, 1))))
   expect_false(in_paramspace(p=1, M=2, d=3, weight_function="exponential", cond_dist="ind_Student", all_boldA=boldA_123,
                              all_Omegas=Omegas_123it_singt, weightpars=weightpars_123expit, distpars=dfs_123_1_1,
@@ -1605,9 +1605,9 @@ test_that("n_params works correctly", {
   expect_equal(n_params(p=1, M=2, d=3, weight_function="mlogit", weightfun_pars=list(vars=1:3, lags=1), cond_dist="Gaussian",
                         AR_constraints=C_123, mean_constraints=list(1:2)), 28)
 
-  expect_equal(n_params(p=1, M=2, d=3, weight_function="exogenous", weightfun_pars=matrix(cbind(c(0.4, 0.2, 0.9), c(0.6, 0.8, 0.1)))), 36)
-  expect_equal(n_params(p=2, M=2, d=2, weight_function="exogenous", weightfun_pars=matrix(cbind(c(0.4, 0.2, 0.9), c(0.6, 0.8, 0.1)))), 26)
-  expect_equal(n_params(p=2, M=3, d=2, weight_function="exogenous", weightfun_pars=matrix(cbind(c(0.4, 0, 0.5), c(0.3, 1, 0.2), c(0.3, 0, 0.3)))),
+  expect_equal(n_params(p=1, M=2, d=3, weight_function="exogenous", weightfun_pars=cbind(c(0.4, 0.2, 0.9), c(0.6, 0.8, 0.1))), 36)
+  expect_equal(n_params(p=2, M=2, d=2, weight_function="exogenous", weightfun_pars=cbind(c(0.4, 0.2, 0.9), c(0.6, 0.8, 0.1))), 26)
+  expect_equal(n_params(p=2, M=3, d=2, weight_function="exogenous", weightfun_pars=cbind(c(0.4, 0, 0.5), c(0.3, 1, 0.2), c(0.3, 0, 0.3))),
                39)
   expect_equal(n_params(p=2, M=2, d=2, weight_function="exogenous", weightfun_pars=cbind(c(1, 0.6, 0.3), c(0, 0.4, 07)), AR_constraints=C_222), 18)
   expect_equal(n_params(p=1, M=3, d=2, weight_function="exogenous", weightfun_pars=cbind(c(1, 0.6, 0.0), c(0, 0.3, 07), c(0, 0.1, 0.3)),
@@ -1822,6 +1822,38 @@ test_that("check_weightfun_pars works correctly", {
   expect_error(check_weightfun_pars(p=2, d=2, weight_function="threshold", weightfun_pars=c(1, 1, 1)))
   expect_error(check_weightfun_pars(p=2, d=2, weight_function="threshold", weightfun_pars=c(3, 1)))
   expect_error(check_weightfun_pars(p=2, d=2, weight_function="threshold", weightfun_pars=c(1, 3)))
+
+  # Exogenous
+  expect_equal(check_weightfun_pars(data=matrix(NA, nrow=4, ncol=3), p=1, M=2, d=3, weight_function="exogenous",
+                                    weightfun_pars=cbind(c(0.4, 0.2, 0.9), c(0.6, 0.8, 0.1))),
+               cbind(c(0.4, 0.2, 0.9), c(0.6, 0.8, 0.1)))
+  expect_error(check_weightfun_pars(data=matrix(NA, nrow=4, ncol=3), p=1, M=2, d=3, weight_function="exogenous",
+                                    weightfun_pars=cbind(c(0.4, 0.2), c(0.6, 0.8))))
+  expect_error(check_weightfun_pars(data=matrix(NA, nrow=4, ncol=3), p=1, M=2, d=3, weight_function="exogenous",
+                                    weightfun_pars=cbind(c(0.4, 0.2, -0.9), c(0.6, 0.8, 0.1))))
+  expect_equal(check_weightfun_pars(data=matrix(NA, nrow=4), p=2, M=2, d=2, weight_function="exogenous",
+                                    weightfun_pars=cbind(c(0.4, 0.2), c(0.6, 0.8))), cbind(c(0.4, 0.2), c(0.6, 0.8)))
+  expect_equal(check_weightfun_pars(data=matrix(NA, nrow=4), p=2, M=2, d=2, weight_function="exogenous",
+                                    weightfun_pars=cbind(c(0, 0), c(1, 1))), cbind(c(0, 0), c(1, 1)))
+  expect_error(check_weightfun_pars(data=matrix(NA, nrow=4), p=2, M=2, d=2, weight_function="exogenous",
+                                    weightfun_pars=cbind(c("1", "a"), c(1, 1))))
+  expect_warning(check_weightfun_pars(data=matrix(NA, nrow=4), p=2, M=2, d=2, weight_function="exogenous",
+                                       weightfun_pars=cbind(c(0, 1), c(1, 1))))
+  expect_equal(check_weightfun_pars(data=matrix(NA, nrow=2, ncol=3), p=1, M=3, d=2, weight_function="exogenous",
+                                    weightfun_pars=cbind(c(0.4), c(0.6), c(0))), cbind(c(0.4), c(0.6), c(0)))
+  expect_error(check_weightfun_pars(data=matrix(NA, nrow=2, ncol=3), p=1, M=3, d=2, weight_function="exogenous",
+                                    weightfun_pars=cbind(c(0.4), c(0.6))))
+  expect_error(check_weightfun_pars(data=matrix(NA, nrow=2, ncol=3), p=1, M=3, d=2, weight_function="exogenous",
+                                    weightfun_pars=cbind(c(0.4), c(0.6), 0, 0)))
+  expect_equal(check_weightfun_pars(data=matrix(NA, nrow=4, ncol=3), p=2, M=3, d=2, weight_function="exogenous",
+                                    weightfun_pars=cbind(c(0.4, 0.5), c(0.6, 0.4), c(0, 0.1))),
+               cbind(c(0.4, 0.5), c(0.6, 0.4), c(0, 0.1)))
+  expect_warning(check_weightfun_pars(data=matrix(NA, nrow=4, ncol=3), p=2, M=3, d=2, weight_function="exogenous",
+                                    weightfun_pars=cbind(c(0.4, 0.5), c(0.6, 0.4), c(0, 0))))
+  expect_error(check_weightfun_pars(data=matrix(NA, nrow=4, ncol=3), p=2, M=3, d=2, weight_function="exogenous",
+                                      weightfun_pars=cbind(c(0.4, 0.5, 0.1), c(0.6, 0.4, 0.9), c(0, 0.1, 0))))
+  expect_error(check_weightfun_pars(data=matrix(NA, nrow=4, ncol=3), p=2, M=3, d=2, weight_function="exogenous",
+                                    weightfun_pars=cbind(c(0.4, 0.5), c(-0.6, 0.4), c(0, 0.1))))
 })
 
 
