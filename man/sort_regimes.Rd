@@ -9,10 +9,12 @@ sort_regimes(
   M,
   d,
   params,
-  weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+  weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold",
+    "exogenous"),
   weightfun_pars = NULL,
-  cond_dist = c("Gaussian", "Student"),
-  identification = c("reduced_form", "recursive", "heteroskedasticity"),
+  cond_dist = c("Gaussian", "Student", "ind_Student"),
+  identification = c("reduced_form", "recursive", "heteroskedasticity",
+    "non-Gaussianity"),
   B_constraints = NULL
 )
 }
@@ -155,6 +157,7 @@ Returns sorted parameter vector of the form described for the argument \code{par
       \code{param}.}
     \item{If \code{weight_function == "threshold"}:}{The increasing ordering of the thresholds is imposed in the parameter space,
           so nothing to sort and thereby returns the original parameter vector given in \code{param}.}
+    \item{If \code{weight_function == "exogenous"}:}{Does not sort but returns the original parameter vector.}
   }
 }
 \description{

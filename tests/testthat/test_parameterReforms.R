@@ -1619,8 +1619,7 @@ test_that("change_parametrization works correctly", {
                calc_mu(p=1, M=2, d=3, params=theta_123expshcwb_1_1, weight_function="exponential",
                        weightfun_pars=c(1, 1), identification="heteroskedasticity",
                        AR_constraints=C_123, weight_constraints=list(R=matrix(c(1, 0.5), nrow=2), r=c(0, 0)),
-                       B_constraints=matrix(c(-0.47, -0.40, 0, 0.58, -1.01, -0.66, 0, -0.91, -1.19),
-                                            nrow=3, ncol=3, byrow=FALSE)))
+                       B_constraints=matrix(c(-0.47, -0.40, 0, 0.58, -1.01, -0.66, 0, -0.91, -1.19), nrow=3, ncol=3, byrow=FALSE)))
   expect_equal(change_parametrization(p=1, M=2, d=3, params=theta_123expshcwb_1_1_mu, weight_function="exponential",
                                       weightfun_pars=c(1, 1), identification="heteroskedasticity",
                                       AR_constraints=C_123, weight_constraints=list(R=matrix(c(1, 0.5), nrow=2), r=c(0, 0)),
@@ -1633,22 +1632,18 @@ test_that("change_parametrization works correctly", {
                        B_constraints=matrix(c(0.1, 0.2, -0.3, 0), nrow=2)))
   expect_equal(change_parametrization(p=2, M=3, d=2, params=theta_232threstshb_1_1_mu, weight_function="threshold",
                                       weightfun_pars=c(1, 1), cond_dist="Student", identification="heteroskedasticity",
-                                      B_constraints=matrix(c(0.1, 0.2, -0.3, 0), nrow=2),
-                                      change_to="intercept"), theta_232threstshb_1_1)
+                                      B_constraints=matrix(c(0.1, 0.2, -0.3, 0), nrow=2), change_to="intercept"), theta_232threstshb_1_1)
 
   expect_equal(pick_phi0(M=2, d=2, params=theta_222logistitngb_2_1_mu),
-               calc_mu(p=2, M=2, d=2, params=theta_222logistitngb_2_1, cond_dist="ind_Student",
-                       weight_function="logistic", weightfun_pars=c(2, 1), identification="non-Gaussianity",
-                       B_constraints=matrix(c(NA, -1, 0, 1), nrow=2)))
+               calc_mu(p=2, M=2, d=2, params=theta_222logistitngb_2_1, cond_dist="ind_Student", weight_function="logistic",
+                       weightfun_pars=c(2, 1), identification="non-Gaussianity", B_constraints=matrix(c(NA, -1, 0, 1), nrow=2)))
   expect_equal(change_parametrization(p=2, M=2, d=2, params=theta_222logistitngb_2_1_mu, cond_dist="ind_Student",
                                       weight_function="logistic", weightfun_pars=c(2, 1), identification="non-Gaussianity",
-                                      B_constraints=matrix(c(NA, -1, 0, 1), nrow=2),
-                                      change_to="intercept"), theta_222logistitngb_2_1)
+                                      B_constraints=matrix(c(NA, -1, 0, 1), nrow=2), change_to="intercept"), theta_222logistitngb_2_1)
   expect_equal(pick_phi0(M=2, d=2, params=theta_222exoitngb_2_1_mu),
                calc_mu(p=2, M=2, d=2, params=theta_222exoitngb_2_1, weight_function="exogenous",
                        weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_Student",
-                       AR_constraints=C_222, identification="non-Gaussianity",
-                       B_constraints=matrix(c(NA, NA, 0, 1), nrow=2)))
+                       AR_constraints=C_222, identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, 0, 1), nrow=2)))
   expect_equal(change_parametrization(p=2, M=2, d=2, params=theta_222exoitngb_2_1_mu, weight_function="exogenous",
                                       weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_Student",
                                       AR_constraints=C_222, identification="non-Gaussianity",
@@ -1739,7 +1734,9 @@ test_that("sort_regimes works correctly", {
   expect_equal(sort_regimes(p=1, M=2, d=3, params=theta_123expsh_1_1, weight_function="exponential", weightfun_pars=c(1, 1),
                             identification="heteroskedasticity"), theta_123expsh_1_1)
   expect_equal(sort_regimes(p=2, M=3, d=2, params=theta_232threstsh_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
-                            cond_dist="Student",
-                            identification="heteroskedasticity"), theta_232threstsh_1_1)
+                            cond_dist="Student", identification="heteroskedasticity"), theta_232threstsh_1_1)
+  expect_equal(sort_regimes(p=1, M=2, d=3, params=theta_123exo, weight_function="exogenous",
+                            weightfun_pars=cbind(c(0.4, 0.2, 0.9), c(0.6, 0.8, 0.1))), theta_123exo)
+
 })
 

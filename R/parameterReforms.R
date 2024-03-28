@@ -115,21 +115,21 @@ change_parametrization <- function(p, M, d, params,
 #'       \code{param}.}
 #'     \item{If \code{weight_function == "threshold"}:}{The increasing ordering of the thresholds is imposed in the parameter space,
 #'           so nothing to sort and thereby returns the original parameter vector given in \code{param}.}
+#'     \item{If \code{weight_function == "exogenous"}:}{Does not sort but returns the original parameter vector.}
 #'   }
 #' @keywords internal
 
-sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
-                         weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"),
-                         identification=c("reduced_form", "recursive", "heteroskedasticity"), B_constraints=NULL) {
+sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                         weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"),
+                         identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"), B_constraints=NULL) {
   weight_function <- match.arg(weight_function)
-  if(M == 1 || weight_function %in% c("logistic", "mlogit", "exponential", "threshold")) {
+  if(M == 1 || weight_function %in% c("logistic", "mlogit", "exponential", "threshold", "exogenous")) {
     return(params) # Does not sort / nothing to sort
   }
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
 
-  all_weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function,
-                                    cond_dist=cond_dist)
+  all_weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist)
   if(weight_function == "relative_dens") {
     new_order <- order(all_weightpars, decreasing=TRUE)
     if(all(new_order == 1:M)) {
@@ -138,6 +138,10 @@ sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "lo
     new_weightpars <- all_weightpars[new_order][-M]
   } else {
     return(params) # Other weight functions do not have sorting implemented
+  }
+  if(cond_dist %in% c("Student", "ind_Student") || identification == "non-Gaussianity") {
+    # Should never end up here, but exists to detect errors in a flawed update
+    stop("cond_dist or identification in sort regime implies a weight function that does not support sorting!")
   }
 
   all_phi0 <- pick_phi0(M=M, d=d, params=params)
