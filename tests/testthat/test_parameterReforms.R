@@ -662,8 +662,8 @@ theta_222logct_2_1 <- c(theta_222logc_2_1, df_222_2_1)
 theta_222logct_expanded <- c(theta_222logc_2_1_expanded , df_222_2_1)
 
 # p=2, M=2, d=2, weight_function="exogenous", weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="Student", AR_constraints=C_222
-theta_222exot_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), df_222_2_1)
-theta_222exot_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+theta_222exoct <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vech(Omega1_222), vech(Omega2_222), df_222_2_1)
+theta_222exoct_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
                             vech(Omega1_222), vech(Omega2_222), df_222_2_1)
 
 
@@ -731,7 +731,7 @@ theta_222logcit_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), 
                               vec(B1_222), vec(B2_222), gamma1_222_2_1, dfs_222_2_1)
 
 # p=2, M=2, d=2, weight_function="exogenous", weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_Student", AR_constraints=C_222
-theta_222exoit_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(B1_222), vec(B2_222), dfs_222_2_1)
+theta_222exoit <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(B1_222), vec(B2_222), dfs_222_2_1)
 theta_222exoit_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
                              vec(B1_222), vec(B2_222), dfs_222_2_1)
 
@@ -1323,9 +1323,9 @@ test_that("form_boldA works correctly", {
 })
 
 
-calc_mu <- function(p, M, d, params, weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
-                    cond_dist = c("Gaussian", "Student"),
-                    identification = c("reduced_form", "recursive", "heteroskedasticity"),
+calc_mu <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                    cond_dist = c("Gaussian", "Student", "ind_Student"),
+                    identification = c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                     AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                     weightfun_pars=NULL) {
   weight_function <- match.arg(weight_function)
@@ -1387,6 +1387,13 @@ theta_232thresw_1_1_mu <- change_parametrization(p=2, M=3, d=2, params=theta_232
                                                  weightfun_pars=c(1, 1), weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.1, 0)),
                                                  change_to="mean")
 
+theta_123exo_mu <- change_parametrization(p=1, M=2, d=3, params=theta_123exo, weight_function="exogenous",
+                                          weightfun_pars=cbind(c(0.4, 0.2, 0.9), c(0.6, 0.8, 0.1)), change_to="mean")
+theta_222exoct_mu <- change_parametrization(p=2, M=2, d=2, params=theta_222exoct, weight_function="exogenous",
+                                            weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)),
+                                            cond_dist="Student", AR_constraints=C_222, change_to="mean")
+
+
 # Student
 theta_122logt_1_1_mu <- change_parametrization(p=1, M=2, d=2, params=theta_122logt_1_1, weight_function="mlogit",
                                               weightfun_pars=list(vars=1, lags=1), cond_dist="Student", change_to="mean")
@@ -1397,6 +1404,14 @@ theta_222logistict_2_1_mu <- change_parametrization(p=2, M=2, d=2, params=theta_
                                                     weightfun_pars=c(2, 1), cond_dist="Student", change_to="mean")
 theta_123expt_1_1_mu <- change_parametrization(p=1, M=2, d=3, params=theta_123expt_1_1, weight_function="exponential",
                                                weightfun_pars=c(1, 1), cond_dist="Student", change_to="mean")
+
+# Ind student
+theta_132thresit_1_1_mu <- change_parametrization(p=1, M=3, d=2, params=theta_132thresit_1_1, weight_function="threshold",
+                                                  weightfun_pars=c(1, 1), cond_dist="ind_Student", change_to="mean")
+theta_222exoit_2_1_mu <- change_parametrization(p=2, M=2, d=2, params=theta_222exoit_2_1, weight_function="exogenous",
+                                                weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_Student",
+                                                AR_constraints=C_222, change_to="mean")
+
 
 ## Structural
 theta_122relgshc_mu <- change_parametrization(p=1, M=2, d=2, params=theta_122relgshc, weight_function="relative_dens",
@@ -1417,7 +1432,15 @@ theta_232threstshb_1_1_mu <- change_parametrization(p=2, M=3, d=2, params=theta_
                                                     weightfun_pars=c(1, 1), cond_dist="Student",
                                                     identification="heteroskedasticity",
                                                     B_constraints=matrix(c(0.1, 0.2, -0.3, 0), nrow=2),
-                                              change_to="mean")
+                                                    change_to="mean")
+
+theta_222logistitngb_2_1_mu <- change_parametrization(p=2, M=2, d=2, params=theta_222logistitngb_2_1, cond_dist="ind_Student",
+                                                      weight_function="logistic", weightfun_pars=c(2, 1), identification="non-Gaussianity",
+                                                      B_constraints=matrix(c(NA, -1, 0, 1), nrow=2), change_to="mean")
+theta_222exoitngb_2_1_mu <- change_parametrization(p=2, M=2, d=2, params=theta_222exoitngb_2_1, weight_function="exogenous",
+                                                   weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_Student",
+                                                   AR_constraints=C_222, identification="non-Gaussianity",
+                                                   B_constraints=matrix(c(NA, NA, 0, 1), nrow=2), change_to="mean")
 
 
 test_that("change_parametrization works correctly", {
@@ -1515,6 +1538,14 @@ test_that("change_parametrization works correctly", {
                                       weightfun_pars=list(vars=1:3, lags=1), AR_constraints=C_123,
                                       change_to="intercept"), theta_123logc_123_1)
 
+  expect_equal(pick_phi0(M=2, d=3, params=theta_123exo_mu),
+               calc_mu(p=1, M=2, d=3, params=theta_123exo, weight_function="exogenous",
+                       weightfun_pars=cbind(c(0.4, 0.2, 0.9), c(0.6, 0.8, 0.1))))
+  expect_equal(change_parametrization(p=1, M=2, d=3, params=theta_123exo_mu, weight_function="exogenous",
+                                      weightfun_pars=cbind(c(0.4, 0.2, 0.9), c(0.6, 0.8, 0.1)),
+                                      change_to="intercept"), theta_123exo)
+
+
   # Student
   expect_equal(pick_phi0(M=3, d=2, params=theta_232threswt_1_1_mu),
                calc_mu(p=2, M=3, d=2, params=theta_232threswt_1_1, weight_function="threshold", weightfun_pars=c(1, 1)),
@@ -1540,6 +1571,26 @@ test_that("change_parametrization works correctly", {
   expect_equal(change_parametrization(p=1, M=2, d=3, params=theta_123expt_1_1_mu, weight_function="exponential",
                                       weightfun_pars=c(1, 1), cond_dist="Student",
                                       change_to="intercept"), theta_123expt_1_1)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_222exoct_mu),
+               calc_mu(p=2, M=2, d=2, params=theta_222exoct, weight_function="exogenous",
+                       weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)),
+                       cond_dist="Student", AR_constraints=C_222))
+  expect_equal(change_parametrization(p=2, M=2, d=2, params=theta_222exoct_mu,weight_function="exogenous",
+                                      weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="Student",
+                                      AR_constraints=C_222, change_to="intercept"), theta_222exoct)
+
+  # Ind student
+  expect_equal(pick_phi0(M=3, d=2, params=theta_132thresit_1_1_mu),
+               calc_mu(p=1, M=3, d=2, params=theta_132thresit_1_1, weight_function="threshold",
+                       weightfun_pars=c(1, 1), cond_dist="ind_Student"))
+  expect_equal(change_parametrization(p=1, M=3, d=2, params=theta_132thresit_1_1_mu, weight_function="threshold",
+                                      weightfun_pars=c(1, 1), cond_dist="ind_Student", change_to="intercept"), theta_132thresit_1_1)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_222exoit_2_1_mu),
+               calc_mu(p=2, M=2, d=2, params=theta_222exoit_2_1, weight_function="exogenous",
+                       weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_Student", AR_constraints=C_222))
+  expect_equal(change_parametrization(p=2, M=2, d=2, params=theta_222exoit_2_1_mu, weight_function="exogenous",
+                                      weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_Student",
+                                      AR_constraints=C_222), theta_222exoit_2_1)
 
   # Structural
   expect_equal(pick_phi0(M=2, d=2, params=theta_122relgshc_mu),
@@ -1584,6 +1635,24 @@ test_that("change_parametrization works correctly", {
                                       weightfun_pars=c(1, 1), cond_dist="Student", identification="heteroskedasticity",
                                       B_constraints=matrix(c(0.1, 0.2, -0.3, 0), nrow=2),
                                       change_to="intercept"), theta_232threstshb_1_1)
+
+  expect_equal(pick_phi0(M=2, d=2, params=theta_222logistitngb_2_1_mu),
+               calc_mu(p=2, M=2, d=2, params=theta_222logistitngb_2_1, cond_dist="ind_Student",
+                       weight_function="logistic", weightfun_pars=c(2, 1), identification="non-Gaussianity",
+                       B_constraints=matrix(c(NA, -1, 0, 1), nrow=2)))
+  expect_equal(change_parametrization(p=2, M=2, d=2, params=theta_222logistitngb_2_1_mu, cond_dist="ind_Student",
+                                      weight_function="logistic", weightfun_pars=c(2, 1), identification="non-Gaussianity",
+                                      B_constraints=matrix(c(NA, -1, 0, 1), nrow=2),
+                                      change_to="intercept"), theta_222logistitngb_2_1)
+  expect_equal(pick_phi0(M=2, d=2, params=theta_222exoitngb_2_1_mu),
+               calc_mu(p=2, M=2, d=2, params=theta_222exoitngb_2_1, weight_function="exogenous",
+                       weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_Student",
+                       AR_constraints=C_222, identification="non-Gaussianity",
+                       B_constraints=matrix(c(NA, NA, 0, 1), nrow=2)))
+  expect_equal(change_parametrization(p=2, M=2, d=2, params=theta_222exoitngb_2_1_mu, weight_function="exogenous",
+                                      weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_Student",
+                                      AR_constraints=C_222, identification="non-Gaussianity",
+                                      B_constraints=matrix(c(NA, NA, 0, 1), nrow=2), change_to="intercept"), theta_222exoitngb_2_1)
 })
 
 

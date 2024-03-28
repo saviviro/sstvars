@@ -63,9 +63,10 @@ form_boldA <- function(p, M, d, all_A) {
 #'  No argument checks!
 #' @keywords internal
 
-change_parametrization <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
-                                   weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"),
-                                   identification=c("reduced_form", "recursive", "heteroskedasticity"),
+change_parametrization <- function(p, M, d, params,
+                                   weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                                   weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"),
+                                   identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                                    AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                                    change_to=c("intercept", "mean")) {
   weight_function <- match.arg(weight_function)
@@ -210,7 +211,8 @@ change_regime <- function(p, M, d, params, m, regime_pars) {
 #' @inherit in_paramspace references
 #' @keywords internal
 
-reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+reform_constrained_pars <- function(p, M, d, params,
+                                    weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                                     weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"),
                                     identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                                     AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
