@@ -210,9 +210,9 @@ change_regime <- function(p, M, d, params, m, regime_pars) {
 #' @inherit in_paramspace references
 #' @keywords internal
 
-reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
-                                    weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"),
-                                    identification=c("reduced_form", "recursive", "heteroskedasticity"),
+reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                                    weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"),
+                                    identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                                     AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                                     other_constraints=NULL, change_na=FALSE) {
   weight_function <- match.arg(weight_function)
@@ -262,9 +262,19 @@ reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative
   }
 
   ## Obtain the covariance matrix parameters ##
-  if(identification == "reduced_form" || identification == "recursive") {
-    covmatpars <- params[(d*M - less_pars + q + 1):(d*M - less_pars + q + M*d*(d + 1)/2)]
-    less_covmatpars <- 0 # How much covmats pars less are there in the constrained param vector relative to the expanded one
+  if(identification == "non-Gaussianity" || cond_dist == "ind_Student") {
+    if(is.null(B_constraints)) {
+      covmatpars <- params[(d*M - less_pars + q + 1):(d*M - less_pars + q + M*d^2)]
+      less_covmatpars <- 0
+    } else {
+      n_zeros <- sum(B_constraints == 0, na.rm=TRUE)
+      less_covmatpars <- M*n_zeros # The same zero constraints are imposed on each impact matrix
+      all_B_m <- array(0, dim=c(d, d, M))
+      for(m in 1:M) { # Fill the non-zero parameters to the correct places
+        all_B_m[, , m][B_constraints != 0] <- params[(d*M - less_pars + q + (m - 1)*(d^2 - n_zeros) + 1):(d*M - less_pars + q + m*(d^2 - n_zeros))]
+      }
+      covmatpars <- as.vector(all_B_m)
+    }
   } else if(identification == "heteroskedasticity") {
     if(is.null(B_constraints)) {
       if(is.null(other_constraints$fixed_lambdas)) {
@@ -292,11 +302,14 @@ reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative
       }
       covmatpars <- c(new_W, lambdas)
     }
+  } else { # identification == "reduced_form" || identification == "recursive" and cond_dist is Gaussian or Student
+    covmatpars <- params[(d*M - less_pars + q + 1):(d*M - less_pars + q + M*d*(d + 1)/2)]
+    less_covmatpars <- 0 # How much covmats pars less are there in the constrained param vector relative to the expanded one
   }
   n_covmatpars <- length(covmatpars) - less_covmatpars
 
   ## Obtain the weight parameters ##
-  if(M > 1) {
+  if(M > 1 && weight_function != "exogenous") {
     if(weight_function == "relative_dens" || weight_function == "threshold") {
       n_nonconstr_weightpars <- M - 1
     } else if(weight_function == "logistic" || weight_function == "exponential") {
@@ -315,15 +328,17 @@ reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative
         weightpars <- weight_constraints[[1]]%*%xi + weight_constraints[[2]] # alpha = R%*%xi + r
       }
     }
-  } else { # No weightpars if M == 1
+  } else { # No weightpars if M == 1 or weight_function == "exogenous"
     weightpars <- numeric(0)
   }
 
   ## Obtain the distribution parameters ##
   if(cond_dist == "Gaussian") {
     distpars <- numeric(0)
-  } else { # cond_dist == "Student"
+  } else if(cond_dist == "Student") {
     distpars <- params[length(params)]
+  } else { # cond_dist == "ind_Student"
+    distpars <- params[(length(params) - d + 1):length(params)]
   }
 
   c(all_phi0, psi_expanded, covmatpars, weightpars, distpars)
