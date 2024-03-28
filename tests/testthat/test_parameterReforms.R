@@ -909,7 +909,6 @@ theta_132thresitngb_1_1_expanded <- c(phi10_132, phi20_132, phi30_132, vec(A11_1
 # p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), cond_dist="ind_Student",
 # mean_constraints=list(1:2), AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)),
 # identification="non-Gaussianity", B_constraints=matrix(c(NA, -1, 0, 1), nrow=2)
-dfs_222_2_1 <- c(4, 13)
 theta_222expcmwitngb_2_1 <- c(phi10_222, vec(A11_222), vec(A12_222), Wvec(B1_222c), Wvec(B2_222c), xi_222expcmw_2_1, dfs_222_2_1)
 theta_222expcmwitngb_2_1_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
                                        vec(B1_222c), vec(B2_222c), c(0.01, 0.33), dfs_222_2_1)
@@ -1125,7 +1124,7 @@ test_that("reform_constrained_pars works correctly", {
   expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222logcit_2_1, weight_function="mlogit",
                                        weightfun_pars=list(vars=2, lags=1), cond_dist="ind_Student", AR_constraints=C_222),
                theta_222logcit_expanded)
-  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222exoit_2_1, weight_function="exogenous",
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222exoit, weight_function="exogenous",
                                        weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_Student", AR_constraints=C_222),
                theta_222exoit_expanded)
 
@@ -1434,7 +1433,7 @@ theta_123expt_1_1_mu <- change_parametrization(p=1, M=2, d=3, params=theta_123ex
 # Ind student
 theta_132thresit_1_1_mu <- change_parametrization(p=1, M=3, d=2, params=theta_132thresit_1_1, weight_function="threshold",
                                                   weightfun_pars=c(1, 1), cond_dist="ind_Student", change_to="mean")
-theta_222exoit_2_1_mu <- change_parametrization(p=2, M=2, d=2, params=theta_222exoit_2_1, weight_function="exogenous",
+theta_222exoit_mu <- change_parametrization(p=2, M=2, d=2, params=theta_222exoit, weight_function="exogenous",
                                                 weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_Student",
                                                 AR_constraints=C_222, change_to="mean")
 
@@ -1611,12 +1610,12 @@ test_that("change_parametrization works correctly", {
                        weightfun_pars=c(1, 1), cond_dist="ind_Student"))
   expect_equal(change_parametrization(p=1, M=3, d=2, params=theta_132thresit_1_1_mu, weight_function="threshold",
                                       weightfun_pars=c(1, 1), cond_dist="ind_Student", change_to="intercept"), theta_132thresit_1_1)
-  expect_equal(pick_phi0(M=2, d=2, params=theta_222exoit_2_1_mu),
-               calc_mu(p=2, M=2, d=2, params=theta_222exoit_2_1, weight_function="exogenous",
+  expect_equal(pick_phi0(M=2, d=2, params=theta_222exoit_mu),
+               calc_mu(p=2, M=2, d=2, params=theta_222exoit, weight_function="exogenous",
                        weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_Student", AR_constraints=C_222))
-  expect_equal(change_parametrization(p=2, M=2, d=2, params=theta_222exoit_2_1_mu, weight_function="exogenous",
+  expect_equal(change_parametrization(p=2, M=2, d=2, params=theta_222exoit_mu, weight_function="exogenous",
                                       weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_Student",
-                                      AR_constraints=C_222), theta_222exoit_2_1)
+                                      AR_constraints=C_222), theta_222exoit)
 
   # Structural
   expect_equal(pick_phi0(M=2, d=2, params=theta_122relgshc_mu),
