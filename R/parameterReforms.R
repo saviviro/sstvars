@@ -177,27 +177,37 @@ sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "lo
 }
 
 
-#' @title Change regime parameters \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vech(\Omega_m))}
-#'   of the given parameter vector
+#' @title Change the parameters of a specific regime of the given parameter vector
 #'
 #' @description \code{change_regime} changes the regime parameters
-#'   \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vech(\Omega_m))} of the given regime
-#'   to the new given parameters.
+#'   \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vech(\Omega_m))} (replace \eqn{vech(\Omega_m)}
+#'   by \eqn{vec(B_m)} for \code{cond_dist="ind_Student"})
+#'   of the given regime to the new given parameters.
 #'
 #' @inheritParams pick_regime
-#' @param regime_pars the \eqn{(dp + pd^2 + d(d+1)/2 \times 1)} vector
-#'   \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vech(\Omega_m))}
+#' @param regime_pars
+#'   \describe{
+#'     \item{If \code{cond_dist="Gaussian"} or \code{cond_dist="Student"}:}{rhe \eqn{(dp + pd^2 + d(d+1)/2)} vector
+#'      \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vech(\Omega_m))}.}
+#'     \item{If \code{cond_dist="ind_Student"}:}{the \eqn{(dp + pd^2 + d^2 + 1)} vector
+#'      \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vec(B_m))}.}
+#'   }
 #' @return Returns parameter vector with \code{m}:th regime changed to \code{regime_pars}.
 #' @details Does not support constrained models or structural models. Weight parameters and distribution
 #'   parameters are not changed.
 #' @inherit in_paramspace references
 #' @keywords internal
 
-change_regime <- function(p, M, d, params, m, regime_pars) {
+change_regime <- function(p, M, d, params, m, regime_pars, cond_dist=c("Gaussian", "Student", "ind_Student")) {
+  cond_dist <- match.arg(cond_dist)
   new_pars <- params
   new_pars[((m - 1)*d + 1):(m*d)] <- regime_pars[1:d]
   new_pars[(M*d + (m - 1)*p*d^2 + 1):(M*d + m*p*d^2)] <- regime_pars[(d + 1):(d + p*d^2)]
-  new_pars[(M*d + M*p*d^2 + (m - 1)*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + m*d*(d + 1)/2)] <- regime_pars[(d + p*d^2 + 1):length(regime_pars)]
+  if(cond_dist == "ind_Student") {
+    new_pars[(M*d + M*p*d^2 + (m - 1)*d^2 + 1):(M*d + M*p*d^2 + m*d^2)] <- regime_pars[(d + p*d^2 + 1):(d + p*d^2 + d^2)]
+  } else {
+    new_pars[(M*d + M*p*d^2 + (m - 1)*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + m*d*(d + 1)/2)] <- regime_pars[(d + p*d^2 + 1):length(regime_pars)]
+  }
   new_pars
 }
 

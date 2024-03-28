@@ -2,10 +2,17 @@
 % Please edit documentation in R/parameterReforms.R
 \name{change_regime}
 \alias{change_regime}
-\title{Change regime parameters \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vech(\Omega_m))}
-  of the given parameter vector}
+\title{Change the parameters of a specific regime of the given parameter vector}
 \usage{
-change_regime(p, M, d, params, m, regime_pars)
+change_regime(
+  p,
+  M,
+  d,
+  params,
+  m,
+  regime_pars,
+  cond_dist = c("Gaussian", "Student", "ind_Student")
+)
 }
 \arguments{
 \item{p}{the autoregressive order of the model}
@@ -49,16 +56,21 @@ of a given matrix from the principal diagonal downwards (including elements on t
 
 \item{m}{which regime?}
 
-\item{regime_pars}{the \eqn{(dp + pd^2 + d(d+1)/2 \times 1)} vector
-\eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vech(\Omega_m))}}
+\item{regime_pars}{\describe{
+  \item{If \code{cond_dist="Gaussian"} or \code{cond_dist="Student"}:}{rhe \eqn{(dp + pd^2 + d(d+1)/2)} vector
+   \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vech(\Omega_m))}.}
+  \item{If \code{cond_dist="ind_Student"}:}{the \eqn{(dp + pd^2 + d^2 + 1)} vector
+   \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vec(B_m))}.}
+}}
 }
 \value{
 Returns parameter vector with \code{m}:th regime changed to \code{regime_pars}.
 }
 \description{
 \code{change_regime} changes the regime parameters
-  \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vech(\Omega_m))} of the given regime
-  to the new given parameters.
+  \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vech(\Omega_m))} (replace \eqn{vech(\Omega_m)}
+  by \eqn{vec(B_m)} for \code{cond_dist="ind_Student"})
+  of the given regime to the new given parameters.
 }
 \details{
 Does not support constrained models or structural models. Weight parameters and distribution

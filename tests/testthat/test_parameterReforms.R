@@ -681,7 +681,7 @@ dfs_222_2_1 <- c(3, 7)
 B1_222 <- matrix(c(0.5, 0.2, -0.1, 0.3), nrow=2)
 B2_222 <- matrix(c(0.4, -0.1, -0.2, 0.3), nrow=2)
 theta_222logistit_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
-                           vec(B1_222), vec(B2_222), dfs_222_2_1)
+                           vec(B1_222), vec(B2_222), c_and_gamma_222_2_1, dfs_222_2_1)
 
 # p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1, lags=1), cond_dist="ind_Student"
 dfs_122_1_1 <- c(4, 13)
@@ -1272,6 +1272,12 @@ test_that("change_regime works correctly", {
                  vec(A31_232), vec(A32_232), vech(Omega1_232), vech(Omega1_232), vech(Omega3_232),
                  r1_232_1_1, r2_232_1_1))
 
+  expect_equal(change_regime(p=1, M=2, d=3, params=theta_123exo, m=1, regime_pars=c(phi20_123, A21_123, vech(Omega2_123))),
+               c(phi20_123, phi20_123, vec(A21_123), vec(A21_123), vech(Omega2_123), vech(Omega2_123)))
+  expect_equal(change_regime(p=2, M=3, d=2, params=theta_232exo, m=3, regime_pars=c(phi10_232, A11_232, A12_232, vech(Omega1_232))),
+               c(phi10_232, phi20_232, phi10_232, vec(A11_232), vec(A12_232), vec(A21_232), vec(A22_232),
+                 vec(A11_232), vec(A12_232), vech(Omega1_232), vech(Omega2_232), vech(Omega1_232)))
+
   # Student
   expect_equal(change_regime(p=2, M=2, d=2, params=theta_222logistict_2_1, m=1, regime_pars=c(phi10_112, A11_112, A11_122, vech(Omega1_112))),
                c(phi10_112, phi20_222, A11_112, A11_122, A21_222, A22_222, vech(Omega1_112), vech(Omega2_222), c_and_gamma_222_2_1, df_222_2_1))
@@ -1286,6 +1292,26 @@ test_that("change_regime works correctly", {
                  vec(A31_232), vec(A32_232), vech(Omega1_232), vech(Omega1_232), vech(Omega3_232),
                  r1_232_1_1, r2_232_1_1, df_232_1_1))
 
+  # ind_Student
+  expect_equal(change_regime(p=2, M=2, d=2, params=theta_222logistit_2_1, m=1, regime_pars=c(1:2, 3:10, 11:14), cond_dist="ind_Student"),
+               c(1:2, phi20_222, 3:10, A21_222, A22_222, 11:14, vec(B2_222), c_and_gamma_222_2_1, dfs_222_2_1))
+  expect_equal(change_regime(p=1, M=2, d=2, params=theta_122logit_1_1, m=1, regime_pars=c(phi10_112, A11_112, vec(B1_112)),
+                             cond_dist="ind_Student"),
+               c(phi10_112, phi20_122, A11_112, A21_122, vec(B1_112), vec(B2_122), gamma1_122_1_1, dfs_122_1_1))
+  expect_equal(change_regime(p=1, M=2, d=3, params=theta_123expit_1_1, m=2, regime_pars=c(1:3, 3:11, 12:20), cond_dist="ind_Student"),
+               c(phi10_123, 1:3, A11_123, 3:11, vec(B1_123), 12:20, c_and_gamma_123_1_1, dfs_123_1_1))
+  expect_equal(change_regime(p=1, M=3, d=2, params=theta_132thresit_1_1, m=2, regime_pars=c(phi10_112, A11_112, vec(B1_112)),
+                             cond_dist="ind_Student"),
+               c(phi10_132, phi10_112, phi30_132, vec(A11_132), vec(A11_112), vec(A31_132),
+                 vec(B1_132), vec(B1_112), vec(B3_132), r1_132_1_1, r2_132_1_1, dfs_132_1_1))
+  expect_equal(change_regime(p=1, M=3, d=2, params=theta_132thresit_1_1, m=1, regime_pars=c(phi10_112, A11_112, vec(B1_112)),
+                             cond_dist="ind_Student"),
+               c(phi10_112, phi20_132, phi30_132, vec(A11_112), vec(A21_132), vec(A31_132),
+                 vec(B1_112), vec(B2_132), vec(B3_132), r1_132_1_1, r2_132_1_1, dfs_132_1_1))
+  expect_equal(change_regime(p=1, M=3, d=2, params=theta_132thresit_1_1, m=3, regime_pars=c(phi10_112, A11_112, vec(B1_112)),
+                             cond_dist="ind_Student"),
+               c(phi10_132, phi20_132, phi10_112, vec(A11_132), vec(A21_132), vec(A11_112),
+                 vec(B1_132), vec(B2_132), vec(B1_112), r1_132_1_1, r2_132_1_1, dfs_132_1_1))
 })
 
 
