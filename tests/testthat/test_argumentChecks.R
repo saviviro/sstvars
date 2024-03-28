@@ -645,7 +645,7 @@ dfs_222_2_1 <- c(3, 7)
 B1_222 <- matrix(c(0.5, 0.2, -0.1, 0.3), nrow=2)
 B2_222 <- matrix(c(0.4, -0.1, -0.2, 0.3), nrow=2)
 theta_222logistit_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
-                           vec(B1_222), vec(B2_222), dfs_222_2_1)
+                           vec(B1_222), vec(B2_222), c_and_gamma_222_2_1, dfs_222_2_1)
 
 # p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1, lags=1), cond_dist="ind_Student"
 dfs_122_1_1 <- c(4, 13)
@@ -988,47 +988,47 @@ dfs_122_2_1 <- c(4, 13)
 B1_222c_e <- matrix(c(0, 1, 0, 0.1), nrow=2)
 theta_222expcmwitngb_2_1e <- c(phi10_222, vec(A11_222), vec(A12_222), Wvec(B1_222c), Wvec(B2_222c), xi_222expcmw_2_1, dfs_122_2_1)
 theta_222expcmwitngb_2_1e_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
-                                        Wvec(B1_222c_e), Wvec(B2_222c), c(0.01, 0.33), dfs_122_2_1)
+                                        vec(B1_222c_e), vec(B2_222c), c(0.01, 0.33), dfs_122_2_1)
 
 # p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="ind_Student", mean_constraints=list(1, 2:3),
 # weight_constraints=list(R=0, r=c(0, 1.2)), identification="non-Gaussianity", B_constraints=matrix(c(1, 0, NA, 1), nrow=2)
 B1_132c_e <- matrix(c(-0.9, 0, -0.2, 0.4), nrow=2)
 theta_132thresmwitngb_1_1e <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), Wvec(B1_132c),
                                 Wvec(B2_132c), Wvec(B3_132c), dfs_132_1_1)
-theta_132thresmwitngb_1_1e_expanded <- c(phi10_132, phi20_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), Wvec(B1_132c_e),
-                                         Wvec(B2_132c), Wvec(B3_132c), 0, 1.2, dfs_132_1_1)
+theta_132thresmwitngb_1_1e_expanded <- c(phi10_132, phi20_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vec(B1_132c_e),
+                                         vec(B2_132c), vec(B3_132c), 0, 1.2, dfs_132_1_1)
 
 # p=1, M=2, p=3, weight_function="logistic", weightfun_pars=c(3, 1), cond_dist="ind_Student", mean_constraints=list(1:2),
 # AR_constraints=C_123, identification="non-Gaussianity", B_constraints=matrix(c(1, NA, NA, 0, 1, NA, 0, NA, 1), nrow=3)
 dfs_123_3_1 <- c(11, 3, 20)
 B1_123c_e <- matrix(c(1, 0.1, 0.2, 0, 1, -0.1, 1, 0.7, 1), nrow=3)
 theta_123logisticcmitngb_3_1e <- c(phi10_123, vec(A11_123), Wvec(B1_123c), Wvec(B2_123c), c_and_gamma_123_3_1, dfs_123_3_1)
-theta_123logisticcmitngb_3_1e_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), Wvec(B1_123c_e), Wvec(B2_123c),
+theta_123logisticcmitngb_3_1e_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), vec(B1_123c_e), vec(B2_123c),
                                             c_and_gamma_123_3_1, dfs_123_3_1)
 
 # p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1), cond_dist="ind_Student", AR_constraints=C_222,
-# identification="non-Gaussianity", matrix(c(1, NA, NA, 1), nrow=2)
+# identification="non-Gaussianity", B_constraints=matrix(c(1, NA, NA, 1), nrow=2)
 B1_222c_e2 <- matrix(c(0.4, -0.1, 1, 0.2), nrow=2) # Ok but different to B1_222c
 B2_222c_e2 <- matrix(c(0.4, 0.2, 0.2, 0.1), nrow=2) # Singular
-theta_222logcitngb_2_1e <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), Wvec(B1_222c), Wvec(B2_222c), gamma1_222_2_1, dfs_222_2_1)
+theta_222logcitngb_2_1e <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(B1_222c_e2), vec(B2_222c_e2), gamma1_222_2_1, dfs_222_2_1)
 theta_222logcitngbe_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
-                                  Wvec(B1_222c_e2), Wvec(B2_222c_e2), gamma1_222_2_1, dfs_222_2_1)
+                                  vec(B1_222c_e2), vec(B2_222c_e2), gamma1_222_2_1, dfs_222_2_1)
 
 # p=2, M=2, d=2, weight_function="exogenous", weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_Student",
 # AR_constraints=C_222, identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, NA, NA), nrow=2)
 B1_222c_e3 <- B2_222c_e2 # Singular
 B2_222c_e3 <- B1_222c_e2 # Ok
-theta_222exoitngb_2_1e <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), Wvec(B1_222c), Wvec(B2_222c), dfs_222_2_1)
+theta_222exoitngb_2_1e <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(B1_222c_e3), vec(B2_222c_e3), dfs_222_2_1)
 theta_222exoitngbe_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
-                                 Wvec(B1_222c_e3), Wvec(B2_222c_e3), dfs_222_2_1)
+                                 vec(B1_222c_e3), vec(B2_222c_e3), dfs_222_2_1)
 
 # p=1, M=2, p=3, weight_function="logistic", weightfun_pars=c(3, 1), cond_dist="ind_Student", mean_constraints=list(1:2),
 # AR_constraints=C_123, identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, NA, NA, NA, NA, NA, NA, NA), nrow=3)
 dfs_123_3_1 <- c(11, 3, 20)
 B1_123c_e2 <- matrix(c(1, 0.1, 0.2, 0.1, 1, -0.1, 1, 0.7, 1), nrow=3) # Ok but different to B1_123c
 B2_123c_e2 <- matrix(c(1, 0.1, 0.2, 0.1, 1, -0.1, 2, 0.2, 0.4), nrow=3) # Singular
-theta_123logisticcmitngb_3_1e <- c(phi10_123, vec(A11_123), Wvec(B1_123c), Wvec(B2_123c), c_and_gamma_123_3_1, dfs_123_3_1)
-theta_123logisticcmitngb_3_1e_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), Wvec(B1_123c_e2), Wvec(B2_123c_e2),
+theta_123logisticcmitngb_3_1e <- c(phi10_123, vec(A11_123), vec(B1_123c), vec(B2_123c), c_and_gamma_123_3_1, dfs_123_3_1)
+theta_123logisticcmitngb_3_1e_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), vec(B1_123c_e2), vec(B2_123c_e2),
                                             c_and_gamma_123_3_1, dfs_123_3_1)
 
 
@@ -1379,6 +1379,11 @@ test_that("check_params work correctly", {
                B_constraints=matrix(c(-0.47, -0.40, 0, 0.58, -1.01, -0.66, 0, -0.91, -1.19), nrow=3, ncol=3, byrow=FALSE))
 
   check_params(p=1, M=1, d=2, params=theta_112it, cond_dist="ind_Student", weight_function="threshold", weightfun_pars=c(1, 1))
+  check_params(p=2, M=2, d=2, params=theta_222logistit_2_1, cond_dist="ind_Student", weight_function="logistic", weightfun_pars=c(2, 1))
+  check_params(p=2, M=2, d=2, params=theta_222logcit_2_1,  weight_function="mlogit", weightfun_pars=list(vars=2, lags=1), cond_dist="ind_Student",
+               AR_constraints=C_222)
+  check_params(data=matrix(0, nrow=5, ncol=2), p=2, M=2, d=2, params=theta_222exoit_2_1, weight_function="exogenous",
+               weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_Student", AR_constraints=C_222)
 
   # Checks stability conditions
   check_params(p=1, M=1, d=2, params=theta_112relg, weight_function="relative_dens", cond_dist="Gaussian")
@@ -1400,6 +1405,12 @@ test_that("check_params work correctly", {
                             identification="heteroskedasticity"))
   expect_error(check_params(p=2, M=3, d=2, params=theta_232threstshb_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
                             cond_dist="Student", identification="heteroskedasticity", B_constraints=matrix(c(0.1, 0.2, -0.3, 0), nrow=2)))
+  expect_error(check_params(p=1, M=2, d=3, params=theta_123expit_1_1, weight_function="exponential", weightfun_pars=c(1, 1),
+                            cond_dist="ind_Student"))
+  expect_error(check_params(p=1, M=3, d=2, params=theta_132thresmwit_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
+                            cond_dist="ind_Student", mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2))))
+  expect_error(check_params(p=1, M=3, d=2, params=theta_132thresitngb_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
+                            cond_dist="ind_Student", identification="non-Gaussianity", B_constraints=matrix(c(1, 0, NA, 1), nrow=2)))
 
   # Check with AR_constraints (reform params used inside so just checks that the function goes through)
   check_params(p=1, M=1, d=2, params=theta_112relgc, weight_function="relative_dens", cond_dist="Gaussian",
@@ -1422,6 +1433,30 @@ test_that("check_params work correctly", {
   expect_error(check_params(p=1, M=2, d=3, params=theta_123relg_notpd, weight_function="relative_dens", cond_dist="Gaussian"))
   expect_error(check_params(p=1, M=3, d=2, params=theta_132relgw_notpd, weight_function="relative_dens",
                             weight_constraints=list(R=matrix(c(0.9, 0.5), nrow=2), r=c(0.13, 0.13)), cond_dist="Gaussian"))
+
+  # Check the impact matrices of the regimes
+  check_params(p=2, M=2, d=2, params=theta_222logistitngb_2_1, cond_dist="ind_Student", weight_function="logistic", weightfun_pars=c(2, 1),
+               identification="non-Gaussianity", B_constraints=matrix(c(NA, -1, 0, 1), nrow=2))
+  expect_error(check_params(p=1, M=1, d=2, params=theta_112itnge, cond_dist="ind_Student", weight_function="threshold", weightfun_pars=c(1, 1)))
+  expect_error(check_params(p=1, M=2, d=2, params=theta_122logitngb_1_1e, weight_function="mlogit", weightfun_pars=list(vars=1, lags=1),
+                            cond_dist="ind_Student", identification="non-Gaussianity", B_constraints=matrix(c(1, NA, -1, 1) , nrow=2)))
+  expect_error(check_params(p=2, M=2, d=2, params=theta_222logcitngb_2_1e, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1),
+                            cond_dist="ind_Student", AR_constraints=C_222, identification="non-Gaussianity", matrix(c(1, NA, NA, 1), nrow=2)))
+  expect_error(check_params(data=matrix(0, nrow=5, ncol=2), p=2, M=2, d=2, params=theta_222exoitngb_2_1e,  weight_function="exogenous",
+                            weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_Student",
+                            AR_constraints=C_222, identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, NA, NA), nrow=2)))
+
+  # Check invertibility of B_t for all t
+  check_params(p=2, M=2, d=2, params=theta_222logistit_2_1, weight_function="logistic", cond_dist="ind_Student", weightfun_pars=c(2, 1),
+               transition_weights=cbind(c(0.1, 0.2, 0.3), c(0.9, 0.8, 0.7)))
+  Omegas_222it_singt <- array(c(1:4, -(1:4)), dim=c(2, 2, 2))
+  theta_222logistit_2_1_singular <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                                      vec(Omegas_222it_singt), c_and_gamma_222_2_1, dfs_222_2_1)
+  expect_error(check_params(p=2, M=2, d=2, params=theta_222logistit_2_1_singular, weight_function="logistic", cond_dist="ind_Student",
+                            weightfun_pars=c(2, 1), transition_weights=cbind(c(0.1, 0.2, 0.5), c(0.9, 0.8, 0.5))))
+  expect_error(check_params(p=2, M=2, d=2, params=theta_222logistit_2_1_singular, weight_function="logistic", cond_dist="ind_Student",
+                            weightfun_pars=c(2, 1), transition_weights=cbind(c(0.1, 0.5, 0.7), c(0.9, 0.5, 0.3))))
+
 
   # Check W, lambdas, in B_constraints
   expect_error(check_params(p=1, M=2, d=2, params=theta_122relgsh_e, weight_function="relative_dens", identification="heteroskedasticity"))
@@ -1693,6 +1728,9 @@ test_that("n_params works correctly", {
                         AR_constraints=C_222, identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, 0, 1), nrow=2)), 22)
   expect_equal(n_params(p=2, M=2, d=2, weight_function="exogenous", weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_Student",
                         AR_constraints=C_222, identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, 0, 1), nrow=2)), 20)
+
+  expect_equal(n_params(p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1), cond_dist="ind_Student",
+                        AR_constraints=C_222, identification="non-Gaussianity", B_constraints=matrix(c(1, NA, NA, 1), nrow=2)), 24)
 })
 
 

@@ -10,7 +10,8 @@ check_pMd(
   d,
   weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold",
     "exogenous"),
-  identification = c("reduced_form", "recursive", "heteroskedasticity", "ind_Student")
+  identification = c("reduced_form", "recursive", "heteroskedasticity",
+    "non-Gaussianity")
 )
 }
 \arguments{

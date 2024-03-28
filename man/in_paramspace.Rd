@@ -90,8 +90,9 @@ obtained from \code{form_boldA}. Will be computed if not given.}
   \item{If \code{cond_dist=="Student"}:}{The degrees of freedom parameter, i.e., a numeric vector of length one.}
 }}
 
-\item{transition_weights}{(optional) A \eqn{T \times M} matrix containing the transition weights. If \code{cond_dist="ind_Student"}
-checks that the impact matrix \eqn{\sum_{m=1}^M\alpha_{m,t}^{1/2}B_m} is invertible for all \eqn{t=1,...,T}.}
+\item{transition_weights}{(optional; only for models with \code{cond_dist="ind_Student"} or \code{identification="non-Gaussianity"})
+A \eqn{T \times M} matrix containing the transition weights. If \code{cond_dist="ind_Student"} checks that the impact matrix
+\eqn{\sum_{m=1}^M\alpha_{m,t}^{1/2}B_m} is invertible for all \eqn{t=1,...,T}.}
 
 \item{stab_tol}{numerical tolerance for stability of condition of the regimes: if the "bold A" matrix of any regime
 has eigenvalues larger that \code{1 - stat_tol} the parameter is considered to be outside the parameter space.

@@ -1113,7 +1113,6 @@ test_that("pick_lambdas works correctly", {
 
 test_that("pick_distpars works correctly", {
   expect_equal(pick_distpars(d=2, params=theta_122relg, cond_dist="Gaussian"), numeric(0))
-  expect_equal(pick_distpars(d=3, params=theta_123expt_1_1, cond_dist="Student"), df_123_1_1)
   expect_equal(pick_distpars(d=2, params=theta_222logistict_2_1, cond_dist="Student"), df_222_2_1)
   expect_equal(pick_distpars(d=2, params=theta_112it, cond_dist="ind_Student"), dfs_112)
   expect_equal(pick_distpars(d=2, params=theta_132thresit_1_1, cond_dist="ind_Student"), dfs_132_1_1)

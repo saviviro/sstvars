@@ -171,7 +171,7 @@ sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "lo
   # Weight and dist pars
   all_weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function,
                                     weightfun_pars=weightfun_pars, cond_dist=cond_dist)
-  all_distpars <- pick_distpars(params=params, cond_dist=cond_dist)
+  all_distpars <- pick_distpars(d=d, params=params, cond_dist=cond_dist)
 
   c(all_phi0[,new_order], all_A[,new_order], new_covmatpars, new_weightpars, all_distpars)
 }

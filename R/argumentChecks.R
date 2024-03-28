@@ -50,8 +50,9 @@ stab_conds_satisfied <- function(p, M, d, params, all_boldA=NULL, tolerance=1e-3
 #'     \item{If \code{cond_dist=="Gaussian"}:}{Not used, i.e., a numeric vector of length zero.}
 #'     \item{If \code{cond_dist=="Student"}:}{The degrees of freedom parameter, i.e., a numeric vector of length one.}
 #'   }
-#' @param transition_weights (optional) A \eqn{T \times M} matrix containing the transition weights. If \code{cond_dist="ind_Student"}
-#'   checks that the impact matrix \eqn{\sum_{m=1}^M\alpha_{m,t}^{1/2}B_m} is invertible for all \eqn{t=1,...,T}.
+#' @param transition_weights (optional; only for models with \code{cond_dist="ind_Student"} or \code{identification="non-Gaussianity"})
+#'   A \eqn{T \times M} matrix containing the transition weights. If \code{cond_dist="ind_Student"} checks that the impact matrix
+#'   \eqn{\sum_{m=1}^M\alpha_{m,t}^{1/2}B_m} is invertible for all \eqn{t=1,...,T}.
 #' @details The parameter vector in the argument \code{params} should be unconstrained and reduced form.
 #' @return Returns \code{TRUE} if the given parameter values are in the parameter space and \code{FALSE} otherwise.
 #'   This function does NOT consider identification conditions!
@@ -123,7 +124,7 @@ in_paramspace <- function(p, M, d, weight_function=c("relative_dens", "logistic"
     }
     if(!missing(transition_weights)) { # Check the invertibility of the time-varying impact matrix for all t
       for(i1 in 1:nrow(transition_weights)) { # Impact matrices in all_Omegas
-        if(abs(det(apply(all_Omegas, c(1, 2), function(mat) sum(mat*transition_weights[i1,])))) < posdef_tol) {
+        if(abs(det(apply(X=all_Omegas, MARGIN=c(1, 2), FUN=function(mat) sum(mat*transition_weights[i1,])))) < posdef_tol) {
           return(FALSE)
         }
       }
@@ -162,7 +163,7 @@ in_paramspace <- function(p, M, d, weight_function=c("relative_dens", "logistic"
 check_params <- function(data, p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                          weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), parametrization=c("intercept", "mean"),
                          identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
-                         AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
+                         AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL, transition_weights,
                          stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -185,11 +186,11 @@ check_params <- function(data, p, M, d, params, weight_function=c("relative_dens
   # Pick params
   all_phi0 <- pick_phi0(M=M, d=d, params=params) # phi0 or mean parameters
   all_A <- pick_allA(p=p, M=M, d=d, params=params) # [d, d, p, M]
-  all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params, identification=identification) # [d, d, M]
+  all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params, cond_dist=cond_dist, identification=identification) # [d, d, M]
   weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
                                 weightfun_pars=weightfun_pars)
   all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
-  distpars <- pick_distpars(params=params, cond_dist=cond_dist)
+  distpars <- pick_distpars(d=d, params=params, cond_dist=cond_dist)
 
   if(identification == "heteroskedasticity") { # Check W lambdas
     W <- pick_W(p=p, M=M, d=d, params=params, identification=identification)
@@ -204,12 +205,19 @@ check_params <- function(data, p, M, d, params, weight_function=c("relative_dens
     }
   } else if(identification == "non-Gaussianity" || cond_dist == "ind_Student") { # Check B matrices
     for(i1 in 1:M) {
-      if(any(all_Omegas[B_constraints == 0] != 0, na.rm=TRUE)) {
+      if(any(all_Omegas[, , i1][B_constraints == 0] != 0, na.rm=TRUE)) {
         stop(paste0("The impact matrix of Regime ", i1, " doesn't satisfy the zero constraints in B_constraints"))
-      } else if(any(all_Omegas[B_constraints > 0] <= 0, na.rm=TRUE) || any(all_Omegas[B_constraints < 0] >= 0, na.rm=TRUE)) {
+      } else if(any(all_Omegas[, , i1][B_constraints > 0] <= 0, na.rm=TRUE) || any(all_Omegas[B_constraints < 0] >= 0, na.rm=TRUE)) {
         stop(paste0("The impact matrix of Regime ", i1, " doesn't satisfy the strict sign constraints in B_constraints"))
       } else if(abs(det(all_Omegas[, , i1])) < posdef_tol) {
         stop(paste0("The impact matrix of Regime ", i1, " is not invertible"))
+      }
+    }
+    if(!missing(transition_weights)) { # Check the invertibility of the time-varying impact matrix for all t
+      for(i1 in 1:nrow(transition_weights)) { # Impact matrices in all_Omegas
+        if(abs(det(apply(X=all_Omegas, MARGIN=c(1, 2), FUN=function(mat) sum(mat*transition_weights[i1,])))) < posdef_tol) {
+          stop("The impact matrix B_t is not invertible for all t")
+        }
       }
     }
   }
@@ -280,7 +288,7 @@ all_pos_ints <- function(x) {
 #' @keywords internal
 
 check_pMd <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
-                      identification=c("reduced_form", "recursive", "heteroskedasticity", "ind_Student")) {
+                      identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity")) {
   weight_function <- match.arg(weight_function)
   identification <- match.arg(identification)
   if(!all_pos_ints(M) || length(M) != 1) {

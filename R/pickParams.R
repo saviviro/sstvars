@@ -132,7 +132,7 @@ pick_Omegas <- function(p, M, d, params, cond_dist=c("Gaussian", "Student", "ind
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
   Omegas <- array(dim=c(d, d, M))
-  if(identification == "non_Gaussianity" || cond_dist == "ind_Student") {
+  if(identification == "non-Gaussianity" || cond_dist == "ind_Student") {
     for(m in 1:M) {
       Omegas[, , m] <- unvec(d=d, a=params[(M*d + d^2*p*M + (m - 1)*d^2 + 1):(M*d + d^2*p*M + m*d^2)])
     }
