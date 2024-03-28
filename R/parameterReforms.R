@@ -269,9 +269,11 @@ reform_constrained_pars <- function(p, M, d, params, weight_function=c("relative
     } else {
       n_zeros <- sum(B_constraints == 0, na.rm=TRUE)
       less_covmatpars <- M*n_zeros # The same zero constraints are imposed on each impact matrix
+      B_constraints[is.na(B_constraints)] <- 1 # Insert some nonzero value to replace the NA values
       all_B_m <- array(0, dim=c(d, d, M))
       for(m in 1:M) { # Fill the non-zero parameters to the correct places
-        all_B_m[, , m][B_constraints != 0] <- params[(d*M - less_pars + q + (m - 1)*(d^2 - n_zeros) + 1):(d*M - less_pars + q + m*(d^2 - n_zeros))]
+        all_B_m[, , m][B_constraints != 0] <- params[(d*M - less_pars + q + (m - 1)*(d^2 - n_zeros)
+                                                      + 1):(d*M - less_pars + q + m*(d^2 - n_zeros))]
       }
       covmatpars <- as.vector(all_B_m)
     }
