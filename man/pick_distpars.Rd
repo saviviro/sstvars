@@ -4,9 +4,11 @@
 \alias{pick_distpars}
 \title{Pick distribution parameters}
 \usage{
-pick_distpars(params, cond_dist = c("Gaussian", "Student", "ind_Student"))
+pick_distpars(d, params, cond_dist = c("Gaussian", "Student", "ind_Student"))
 }
 \arguments{
+\item{d}{the number of time series in the system, i.e., the dimension}
+
 \item{params}{a real valued vector specifying the parameter values.
 Should have the form \eqn{\theta = (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\sigma,\alpha,\nu)},
 where

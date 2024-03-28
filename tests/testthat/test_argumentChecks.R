@@ -880,7 +880,6 @@ theta_132thresitngb_1_1 <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(
 # p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), cond_dist="ind_Student",
 # mean_constraints=list(1:2), AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)),
 # identification="non-Gaussianity", matrix(c(NA, -1, 0, 1), nrow=2)
-dfs_222_2_1 <- c(4, 13)
 theta_222expcmwitngb_2_1 <- c(phi10_222, vec(A11_222), vec(A12_222), Wvec(B1_222c), Wvec(B2_222c), xi_222expcmw_2_1, dfs_222_2_1)
 theta_222expcmwitngb_2_1_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
                                        Wvec(B1_222c), Wvec(B2_222c), c(0.01, 0.33), dfs_222_2_1)
@@ -1378,6 +1377,8 @@ test_that("check_params work correctly", {
   check_params(p=1, M=2, d=3, params=theta_123expshcwb_1_1, weight_function="exponential", weightfun_pars=c(1, 1),
                identification="heteroskedasticity", AR_constraints=C_123, weight_constraints=list(R=matrix(c(1, 0.5), nrow=2), r=c(0, 0)),
                B_constraints=matrix(c(-0.47, -0.40, 0, 0.58, -1.01, -0.66, 0, -0.91, -1.19), nrow=3, ncol=3, byrow=FALSE))
+
+  check_params(p=1, M=1, d=2, params=theta_112it, cond_dist="ind_Student", weight_function="threshold", weightfun_pars=c(1, 1))
 
   # Checks stability conditions
   check_params(p=1, M=1, d=2, params=theta_112relg, weight_function="relative_dens", cond_dist="Gaussian")

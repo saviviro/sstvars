@@ -231,7 +231,7 @@ pick_weightpars <- function(p, M, d, params, weight_function=c("relative_dens", 
 #'   }
 #' @keywords internal
 
-pick_distpars <- function(params, cond_dist=c("Gaussian", "Student", "ind_Student")) {
+pick_distpars <- function(d, params, cond_dist=c("Gaussian", "Student", "ind_Student")) {
   cond_dist <- match.arg(cond_dist)
   if(cond_dist == "Gaussian") {
     return(numeric(0))

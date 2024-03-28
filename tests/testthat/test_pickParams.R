@@ -1110,3 +1110,13 @@ test_that("pick_lambdas works correctly", {
   expect_equal(pick_lambdas(p=2, M=3, d=2, params=theta_232threstsh_1_1, identification="heteroskedasticity"),
                c(lambdas2_232, lambdas3_232))
 })
+
+test_that("pick_distpars works correctly", {
+  expect_equal(pick_distpars(d=2, params=theta_122relg, cond_dist="Gaussian"), numeric(0))
+  expect_equal(pick_distpars(d=3, params=theta_123expt_1_1, cond_dist="Student"), df_123_1_1)
+  expect_equal(pick_distpars(d=2, params=theta_222logistict_2_1, cond_dist="Student"), df_222_2_1)
+  expect_equal(pick_distpars(d=2, params=theta_112it, cond_dist="ind_Student"), dfs_112)
+  expect_equal(pick_distpars(d=2, params=theta_132thresit_1_1, cond_dist="ind_Student"), dfs_132_1_1)
+  expect_equal(pick_distpars(d=2, params=theta_132thresit_1_1, cond_dist="ind_Student"), dfs_132_1_1)
+  expect_equal(pick_distpars(d=2, params=theta_222logistit_2_1, cond_dist="ind_Student"), dfs_222_2_1)
+})
