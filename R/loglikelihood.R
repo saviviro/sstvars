@@ -300,10 +300,14 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
     #return(matrix(rowSums(vapply(1:M, function(m) alpha_mt[,m]*mu_mt[, , m], numeric(d*T_obs))), nrow=T_obs, ncol=d, byrow=FALSE))
     return(mu_yt)
   } else if(to_return == "total_ccovs") {
-    if(cond_dist == "ind_Student" || identification == "non-Gaussianity") {
+    if(cond_dist == "ind_Student" || identification == "non-Gaussianity") { # Parametrization via impact matrices
       # Cond covariance matrices of the process: B_tB_t' for each t
-
-    } else {
+      all_Bt <- get_Bt_Cpp(all_Omegas=all_Omegas, alpha_mt=alpha_mt)
+      all_covmats <- array(dim=c(d, d, T_obs))
+      for(i1 in 1:T_obs) {
+        all_covmats[, , i1] <- tcrossprod(all_Bt[, , i1])
+      }
+    } else { # Conventional parametrization of the conditional covariance matrix
       # Cond covariance matrices of the process: weighted sum of regime-specific cond cov mats
       all_covmats <- array(rowSums(vapply(1:M, function(m) rep(alpha_mt[, m], each=d*d)*as.vector(all_Omegas[, , m]),
                                           numeric(d*d*T_obs))), dim=c(d, d, T_obs))
@@ -346,6 +350,22 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
     #     0.5*(d + distpars)*log(1 + crossprod(obs_minus_cmean[i1,],
     #                                          chol2inv(chol(all_covmats[, , i1]))%*%(obs_minus_cmean[i1,]))/(distpars - 2))
     # }
+  } else if(cond_dist == "ind_Student") {
+    I_d <- diag(d)
+    logCd <- sum(lgamma(0.5*(d + distpars)) - 0.5*d*log(base::pi) - 0.5*d*log(distpars - 2) - lgamma(0.5*distpars))
+
+    ## R IMPLEMENTATION FOR SPEED COMPARISONS
+    all_Bt <- get_Bt_Cpp(all_Omegas=all_Omegas, alpha_mt=alpha_mt)
+    obs_minus_cmean <- data[(p+1):nrow(data),] - mu_yt
+    all_lt <- numeric(T_obs)
+    for(i1 in 1:T_obs) {
+      tdens_i1 <- numeric(d)
+      invBt_obs_minus_cmean <- solve(all_Bt[, , i1], obs_minus_cmean[i1,])
+      for(i2 in 1:d) {
+        tdens_i1[i1] <- 0.5*(1 + distpars[i1])*log(1 + (crossprod(I_d[,i1], invBt_obs_minus_cmean))^2/(distpars[i1] - 2))
+      }
+     all_lt[i1] <- -log(abs(det(all_Bt[, , i1]))) + logCd - sum(tdens_i1)
+    }
   }
   if(to_return == "terms") {
     return(all_lt)
