@@ -217,8 +217,8 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   n_obs <- nrow(data)
   T_obs <- n_obs - p
 
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                         cond_dist=cond_dist)
+  weightfun_pars <- check_weightfun_pars(data=data, p=p, M=M, d=d, weight_function=weight_function,
+                                         weightfun_pars=weightfun_pars, cond_dist=cond_dist)
 
   # Collect the parameter values
   # First remove all constraints, if any; also switch to reduced form parameter vector;
@@ -235,11 +235,11 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
     all_mu <- pick_phi0(M=M, d=d, params=params) # mean parameters instead of intercepts
   }
   all_A <- pick_allA(p=p, M=M, d=d, params=params) # [d, d, p, M]
-  all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params, identification=identification) # [d, d, M]
+  all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params, cond_dist=cond_dist, identification=identification) # [d, d, M]
   weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function,
                                 cond_dist=cond_dist, weightfun_pars=weightfun_pars)
   all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
-  distpars <- pick_distpars(params=params, cond_dist=cond_dist)
+  distpars <- pick_distpars(d=d, params=params, cond_dist=cond_dist)
 
   # Check that the parameter vector lies in the parameter space
   if(check_params) {
@@ -272,6 +272,16 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
     return(alpha_mt)
   }
 
+  # For models with cond_dist="ind_Student" or identification="non-Gaussianity", check that the impact matrix B_t is invertible for all t.
+  if(cond_dist == "ind_Student" || identification == "non-Gaussianity") {
+    for(i1 in 1:nrow(alpha_mt)) { # Impact matrices in all_Omegas
+      if(abs(det(apply(X=all_Omegas, MARGIN=c(1, 2), FUN=function(mat) sum(mat*alpha_mt[i1,])))) < posdef_tol) {
+        return(minval)
+      }
+    }
+    #if(!check_Bt_Cpp(all_Omegas=all_Omegas, alpha_mt=alpha_mt, posdef_tol=posdef_tol)) return(minval)
+  }
+
   # Calculate the conditional means mu_{m,t}
   # The dimensions of mu_mt will be: [t, p, m]
   all_A2 <- array(all_A, dim=c(d, d*p, M)) # cbind coefficient matrices of each component: m:th component is obtained at [, , m]
@@ -289,9 +299,15 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
     #mu_mt <- array(vapply(1:M, function(m) t(all_phi0[, m] + tcrossprod(all_A2[, , m], Y2)), numeric(d*T_obs)), dim=c(T_obs, d, M)) # [, , m]
     #return(matrix(rowSums(vapply(1:M, function(m) alpha_mt[,m]*mu_mt[, , m], numeric(d*T_obs))), nrow=T_obs, ncol=d, byrow=FALSE))
     return(mu_yt)
-  } else if(to_return == "total_ccovs") { # Cond covariance matrices of the process: weighted sum of regime-specific cond cov mats
-    all_covmats <- array(rowSums(vapply(1:M, function(m) rep(alpha_mt[, m], each=d*d)*as.vector(all_Omegas[, , m]),
-                                        numeric(d*d*T_obs))), dim=c(d, d, T_obs))
+  } else if(to_return == "total_ccovs") {
+    if(cond_dist == "ind_Student" || identification == "non-Gaussianity") {
+      # Cond covariance matrices of the process: B_tB_t' for each t
+
+    } else {
+      # Cond covariance matrices of the process: weighted sum of regime-specific cond cov mats
+      all_covmats <- array(rowSums(vapply(1:M, function(m) rep(alpha_mt[, m], each=d*d)*as.vector(all_Omegas[, , m]),
+                                          numeric(d*d*T_obs))), dim=c(d, d, T_obs))
+    }
     return(all_covmats)
   }
 
@@ -360,9 +376,12 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
 #' @inherit in_paramspace references
 #' @keywords internal
 
-get_alpha_mt <- function(data, Y2, p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+get_alpha_mt <- function(data, Y2, p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                          weightfun_pars=NULL, all_A, all_boldA, all_Omegas, weightpars, all_mu, epsilon, log_mvdvalues=NULL) {
   weight_function <- match.arg(weight_function)
+  if(weight_function == "exogenous") {
+    return(weightfun_pars)
+  }
   if(is.null(log_mvdvalues)) {
     T_obs <- ifelse(missing(data), 1, nrow(data) - p) # simulate.stvar uses without data, needs to return 1 if M=1.
     if(M == 1) {

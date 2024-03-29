@@ -60,6 +60,47 @@ Student_densities_Cpp <- function(obs, means, covmats, alpha_mt, df) {
     .Call('_sstvars_Student_densities_Cpp', PACKAGE = 'sstvars', obs, means, covmats, alpha_mt, df)
 }
 
+#' @name check_Bt_Cpp
+#' @title Check Matrix B Invertibility with C++ (Internal Function)
+#'
+#' @description This internal function takes a cube of matrices (\code{all_Omegas}),
+#' a matrix of weights (\code{alpha_mt}), and a numerical tolerance (\code{posdef_tol})
+#' to check the invertibility of weighted sums of the matrices in the cube. For each row
+#' in \code{alpha_mt}, it computes a weighted sum of matrices, and checks if this sum is
+#' invertible by verifying that its determinant is not within the specified tolerance of zero.
+#'
+#' @param all_Omegas A cube (3D array) of matrices, with each slice being a square matrix.
+#' @param alpha_mt A matrix of weights, with as many columns as there are slices in \code{all_Omegas}.
+#' @param posdef_tol A strictly positive small number used as a tolerance for checking
+#'        the invertibility of the matrix. The matrix is considered non-invertible if
+#'        its determinant is less than this tolerance.
+#'
+#' @return A boolean value: `TRUE` if all weighted sums are invertible up to the specified
+#'         tolerance, `FALSE` otherwise.
+#'
+#' @keywords internal
+check_Bt_Cpp <- function(all_Omegas, alpha_mt, posdef_tol) {
+    .Call('_sstvars_check_Bt_Cpp', PACKAGE = 'sstvars', all_Omegas, alpha_mt, posdef_tol)
+}
+
+#' @name get_Bt_Cpp
+#' @title Calculate the impact matrix \eqn{B_t} for all \eqn{t} for models with a non-Gaussian
+#'  conditional distribution with mutually independent shocks.
+#'
+#' @description This internal function takes a cube of matrices (\code{all_Omegas}) and a matrix of weights (\code{alpha_mt}),
+#' and calculates the weighted sums of the matrices in the cube. For each row in \code{alpha_mt}, it computes
+#' a weighted sum of matrices, and returns the
+#'
+#' @inheritParams check_Bt_Cpp
+#'
+#' @return An arma::cube value (3D array in R) such that each slice contains the weighted sum of the matrices,
+#'   i.e, the impact matrix \eqn{B_t} for all \eqn{t}.
+#'
+#' @keywords internal
+get_Bt_Cpp <- function(all_Omegas, alpha_mt) {
+    .Call('_sstvars_get_Bt_Cpp', PACKAGE = 'sstvars', all_Omegas, alpha_mt)
+}
+
 #' @name get_mu_yt_Cpp
 #' @title Calculate the conditional means of the process
 #' @description Calculates the conditional means \eqn{\mu_{y,t}} of the process

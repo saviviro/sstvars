@@ -1,6 +1,5 @@
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
-using namespace Rcpp;
 
 //' @name get_mu_yt_Cpp
 //' @title Calculate the conditional means of the process

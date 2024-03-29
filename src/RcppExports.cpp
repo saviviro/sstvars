@@ -53,6 +53,31 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// check_Bt_Cpp
+bool check_Bt_Cpp(const arma::cube& all_Omegas, const arma::mat& alpha_mt, double posdef_tol);
+RcppExport SEXP _sstvars_check_Bt_Cpp(SEXP all_OmegasSEXP, SEXP alpha_mtSEXP, SEXP posdef_tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::cube& >::type all_Omegas(all_OmegasSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type alpha_mt(alpha_mtSEXP);
+    Rcpp::traits::input_parameter< double >::type posdef_tol(posdef_tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(check_Bt_Cpp(all_Omegas, alpha_mt, posdef_tol));
+    return rcpp_result_gen;
+END_RCPP
+}
+// get_Bt_Cpp
+arma::cube get_Bt_Cpp(const arma::cube& all_Omegas, const arma::mat& alpha_mt);
+RcppExport SEXP _sstvars_get_Bt_Cpp(SEXP all_OmegasSEXP, SEXP alpha_mtSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::cube& >::type all_Omegas(all_OmegasSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type alpha_mt(alpha_mtSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_Bt_Cpp(all_Omegas, alpha_mt));
+    return rcpp_result_gen;
+END_RCPP
+}
 // get_mu_yt_Cpp
 arma::mat get_mu_yt_Cpp(arma::mat obs, arma::mat all_phi0, arma::cube all_A, arma::mat alpha_mt);
 RcppExport SEXP _sstvars_get_mu_yt_Cpp(SEXP obsSEXP, SEXP all_phi0SEXP, SEXP all_ASEXP, SEXP alpha_mtSEXP) {
@@ -72,6 +97,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_sstvars_Gaussian_densities_Cpp", (DL_FUNC) &_sstvars_Gaussian_densities_Cpp, 4},
     {"_sstvars_Gaussian_densities_const_Cpp", (DL_FUNC) &_sstvars_Gaussian_densities_const_Cpp, 3},
     {"_sstvars_Student_densities_Cpp", (DL_FUNC) &_sstvars_Student_densities_Cpp, 5},
+    {"_sstvars_check_Bt_Cpp", (DL_FUNC) &_sstvars_check_Bt_Cpp, 3},
+    {"_sstvars_get_Bt_Cpp", (DL_FUNC) &_sstvars_get_Bt_Cpp, 2},
     {"_sstvars_get_mu_yt_Cpp", (DL_FUNC) &_sstvars_get_mu_yt_Cpp, 4},
     {NULL, NULL, 0}
 };
