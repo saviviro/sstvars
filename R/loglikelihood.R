@@ -351,7 +351,7 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
     #                                          chol2inv(chol(all_covmats[, , i1]))%*%(obs_minus_cmean[i1,]))/(distpars - 2))
     # }
   } else if(cond_dist == "ind_Student") {
-    I_d <- diag(d)
+    #Id <- diag(nrow=d) # Created earlier elseqhere
     logCd <- sum(lgamma(0.5*(d + distpars)) - 0.5*d*log(base::pi) - 0.5*d*log(distpars - 2) - lgamma(0.5*distpars))
 
     ## R IMPLEMENTATION FOR SPEED COMPARISONS
@@ -362,7 +362,7 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
       tdens_i1 <- numeric(d)
       invBt_obs_minus_cmean <- solve(all_Bt[, , i1], obs_minus_cmean[i1,])
       for(i2 in 1:d) {
-        tdens_i1[i1] <- 0.5*(1 + distpars[i1])*log(1 + (crossprod(I_d[,i1], invBt_obs_minus_cmean))^2/(distpars[i1] - 2))
+        tdens_i1[i2] <- 0.5*(1 + distpars[i2])*log(1 + (crossprod(Id[,i2], invBt_obs_minus_cmean))^2/(distpars[i2] - 2))
       }
      all_lt[i1] <- -log(abs(det(all_Bt[, , i1]))) + logCd - sum(tdens_i1)
     }
