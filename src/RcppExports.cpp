@@ -92,6 +92,23 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// ind_Student_densities_Cpp
+arma::vec ind_Student_densities_Cpp(const arma::mat& obs, const arma::mat& means, const arma::cube& impact_matrices, const arma::mat& alpha_mt, const arma::vec& distpars, const arma::vec& minval, const double posdef_tol);
+RcppExport SEXP _sstvars_ind_Student_densities_Cpp(SEXP obsSEXP, SEXP meansSEXP, SEXP impact_matricesSEXP, SEXP alpha_mtSEXP, SEXP distparsSEXP, SEXP minvalSEXP, SEXP posdef_tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type obs(obsSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type means(meansSEXP);
+    Rcpp::traits::input_parameter< const arma::cube& >::type impact_matrices(impact_matricesSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type alpha_mt(alpha_mtSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type distpars(distparsSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type minval(minvalSEXP);
+    Rcpp::traits::input_parameter< const double >::type posdef_tol(posdef_tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(ind_Student_densities_Cpp(obs, means, impact_matrices, alpha_mt, distpars, minval, posdef_tol));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_sstvars_Gaussian_densities_Cpp", (DL_FUNC) &_sstvars_Gaussian_densities_Cpp, 4},
@@ -100,6 +117,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_sstvars_check_Bt_Cpp", (DL_FUNC) &_sstvars_check_Bt_Cpp, 3},
     {"_sstvars_get_Bt_Cpp", (DL_FUNC) &_sstvars_get_Bt_Cpp, 2},
     {"_sstvars_get_mu_yt_Cpp", (DL_FUNC) &_sstvars_get_mu_yt_Cpp, 4},
+    {"_sstvars_ind_Student_densities_Cpp", (DL_FUNC) &_sstvars_ind_Student_densities_Cpp, 7},
     {NULL, NULL, 0}
 };
 

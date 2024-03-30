@@ -7,18 +7,18 @@
 Student_densities_Cpp(obs, means, covmats, alpha_mt, df)
 }
 \arguments{
-\item{obs}{a \eqn{(T \times d)} matrix such that the i:th row contains the vector
+\item{obs}{a \eqn{(T \times d)} matrix such that the \eqn{i}th row contains the vector
 \eqn{y_{i}=(y_{1i},...,y_{di})} \eqn{(dx1)}. That is, the initial values are
 excluded but the last observations is included.}
 
-\item{means}{a \eqn{(T \times d)} matrix such that the i:th row contains the
+\item{means}{a \eqn{(T \times d)} matrix such that the \eqn{i}th row contains the
 conditional mean of the process \eqn{\mu_{y,i}}.}
 
 \item{covmats}{a \eqn{(d \times d \times M)} array such that the slice \code{[, , m]}
 contains the conditional covariance matrix of regime m.}
 
 \item{alpha_mt}{a \eqn{(T \times M)} matrix such that \code{[t, m]} contains the time t
-transition weights of the m:th regime.}
+transition weights of the \eqn{m}th regime.}
 
 \item{df}{the degrees of freedom parameter value (assumed larger than two).}
 }

@@ -351,21 +351,32 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
     #                                          chol2inv(chol(all_covmats[, , i1]))%*%(obs_minus_cmean[i1,]))/(distpars - 2))
     # }
   } else if(cond_dist == "ind_Student") {
-    #Id <- diag(nrow=d) # Created earlier elseqhere
+    # Invertibilty of Bt for all t is checked in ind_Student_densities_Cpp, and it returns minval if not invertible for some t.
     logCd <- sum(lgamma(0.5*(d + distpars)) - 0.5*d*log(base::pi) - 0.5*d*log(distpars - 2) - lgamma(0.5*distpars))
+    obs <- data[(p+1):nrow(data),]
+    if(is.null(minval) || !is.numeric(minval)) minval <- -999999999 # Cpp function expects minval to be numerical, will cause an error if not
+    t_dens <- ind_Student_densities_Cpp(obs=obs, means=mu_yt, impact_matrices=all_Omegas, alpha_mt=alpha_mt, distpars=distpars,
+                                        minval=minval, posdef_tol=posdef_tol)
+    if(length(t_dens) == 1) {
+      if(all.equal(t.dens, minval)) {
+        return(minval)
+      }
+    }
+    all_lt <- logCd + t_dens
 
     ## R IMPLEMENTATION FOR SPEED COMPARISONS
-    all_Bt <- get_Bt_Cpp(all_Omegas=all_Omegas, alpha_mt=alpha_mt)
-    obs_minus_cmean <- data[(p+1):nrow(data),] - mu_yt
-    all_lt <- numeric(T_obs)
-    for(i1 in 1:T_obs) {
-      tdens_i1 <- numeric(d)
-      invBt_obs_minus_cmean <- solve(all_Bt[, , i1], obs_minus_cmean[i1,])
-      for(i2 in 1:d) {
-        tdens_i1[i2] <- 0.5*(1 + distpars[i2])*log(1 + (crossprod(Id[,i2], invBt_obs_minus_cmean))^2/(distpars[i2] - 2))
-      }
-     all_lt[i1] <- -log(abs(det(all_Bt[, , i1]))) + logCd - sum(tdens_i1)
-    }
+    # #Id <- diag(nrow=d) # Created earlier elsewhere
+    #obs_minus_cmean <- obs - mu_yt
+    #all_lt <- numeric(T_obs)
+    #for(i1 in 1:T_obs) {
+    #  tdens_i1 <- numeric(d)
+    #  Bt <- apply(X=all_Omegas, MARGIN=c(1, 2), FUN=function(mat) sum(mat*alpha_mt[i1,]))
+    #  invBt_obs_minus_cmean <- solve(Bt, obs_minus_cmean[i1,])
+    #  for(i2 in 1:d) {
+    #    tdens_i1[i2] <- 0.5*(1 + distpars[i2])*log(1 + (crossprod(Id[,i2], invBt_obs_minus_cmean))^2/(distpars[i2] - 2))
+    #  }
+    # all_lt[i1] <- -log(abs(det(Bt))) + logCd - sum(tdens_i1)
+    #}
   }
   if(to_return == "terms") {
     return(all_lt)

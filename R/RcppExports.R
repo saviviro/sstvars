@@ -9,15 +9,15 @@
 #'   matrix is calculated within the function from the regime covariance matrices and
 #'   transition weights.
 #'
-#' @param obs a \eqn{(T \times d)} matrix such that the i:th row contains the vector
+#' @param obs a \eqn{(T \times d)} matrix such that the \eqn{i}th row contains the vector
 #'  \eqn{y_{i}=(y_{1i},...,y_{di})} \eqn{(dx1)}. That is, the initial values are
 #'  excluded but the last observations is included.
-#' @param means a \eqn{(T \times d)} matrix such that the i:th row contains the
+#' @param means a \eqn{(T \times d)} matrix such that the \eqn{i}th row contains the
 #'   conditional mean of the process \eqn{\mu_{y,i}}.
 #' @param covmats a \eqn{(d \times d \times M)} array such that the slice \code{[, , m]}
 #'   contains the conditional covariance matrix of regime m.
 #' @param alpha_mt a \eqn{(T \times M)} matrix such that \code{[t, m]} contains the time t
-#'   transition weights of the m:th regime.
+#'   transition weights of the \eqn{m}th regime.
 #' @return a numeric vector containing the multivariate Gaussian densities, excluding the constant term.
 #' @keywords internal
 Gaussian_densities_Cpp <- function(obs, means, covmats, alpha_mt) {
@@ -119,5 +119,24 @@ get_Bt_Cpp <- function(all_Omegas, alpha_mt) {
 #' @keywords internal
 get_mu_yt_Cpp <- function(obs, all_phi0, all_A, alpha_mt) {
     .Call('_sstvars_get_mu_yt_Cpp', PACKAGE = 'sstvars', obs, all_phi0, all_A, alpha_mt)
+}
+
+#' @name ind_Student_densities_Cpp
+#' @title Calculate log independent multivariate Student's t densities
+#' @description Calculates logs of independent multivariate Student t densities with varying mean
+#'   and impact matrix AND EXCLUDING the constant term of the density
+#'   (the constant is calculated and added in R code). The varying impact matrix is calculated within
+#'   the function from the impact matrices of the regimes and transition weights.
+#'
+#' @inheritParams Student_densities_Cpp
+#' @inheritParams loglikelihood
+#' @param impact_matrices A a size \eqn{d\times d \times M} \code{arma::cube} (3D array in R), where each slice contains an
+#'  invertible (d x d) impact matrix of each regime.
+#' @param distpars A numeric vector of length \eqn{d}, containing the degrees of freedom parameters for each component.
+#' @details Returns \code{minval} if the impact matrix \eqn{B_t} is not invertible for some t up to the numerical tolerance \code{posdef_tol}.
+#' @return A numeric vector of length \eqn{T}, where each element represents the computed density component for the corresponding observation.
+#' @keywords internal
+ind_Student_densities_Cpp <- function(obs, means, impact_matrices, alpha_mt, distpars, minval, posdef_tol) {
+    .Call('_sstvars_ind_Student_densities_Cpp', PACKAGE = 'sstvars', obs, means, impact_matrices, alpha_mt, distpars, minval, posdef_tol)
 }
 
