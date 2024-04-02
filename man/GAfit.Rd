@@ -23,6 +23,7 @@ GAfit(
   mu_scale,
   mu_scale2,
   omega_scale,
+  B_scale,
   weight_scale,
   ar_scale = 0.2,
   upper_ar_scale = 1,
@@ -194,6 +195,12 @@ Note that for \code{d>4} this scale may need to be chosen carefully. Default in 
 \code{var(stats::ar(data[,i], order.max=10)$resid, na.rm=TRUE), i=1,...,d}. This argument is ignored if
 \code{cond_dist == "ind_Student"}.}
 
+\item{B_scale}{a size \eqn{(d \times 1)} strictly positive vector specifying the mean and variability of the
+random impact matrices in random mutations. The elements should be in a decreasing ordering. The mean of the
+random impact matrix will be \code{diag(omega_scale)}, and the variability increases with \code{omega_scale}.
+Default in \code{GAfit} is \code{vapply(1:d, function(i1) sort(sd(stats::ar(data[,i1], order.max=10)$resid, na.rm=TRUE),
+decreasing=TRUE), numeric(1))}. This argument is ignored if \code{cond_dist != "ind_Student"}.}
+
 \item{weight_scale}{For...
 \describe{
   \item{\code{weight_function \%in\% c("relative_dens", "exogenous")}:}{not used.}
@@ -254,12 +261,6 @@ never survive. The default is \code{-(10^(ceiling(log10(n_obs)) + d) - 1)}.}
 \item{seed}{a single value, interpreted as an integer, or NULL, that sets seed for the random number generator in
 the beginning of the function call. If calling \code{GAfit} from \code{fitSTVAR}, use the argument \code{seeds}
 instead of passing the argument \code{seed}.}
-
-\item{B_scale}{a size \eqn{(d \times 1)} strictly positive vector specifying the mean and variability of the
-random impact matrices in random mutations. The elements should be in a decreasing ordering. The mean of the
-random impact matrix will be \code{diag(omega_scale)}, and the variability increases with \code{omega_scale}.
-Default in \code{GAfit} is \code{vapply(1:d, function(i1) sort(sd(stats::ar(data[,i1], order.max=10)$resid, na.rm=TRUE),
-decreasing=TRUE), numeric(1))}. This argument is ignored if \code{cond_dist != "ind_Student"}.}
 }
 \value{
 Returns the estimated parameter vector which has the form described in \code{initpop}.

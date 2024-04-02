@@ -179,7 +179,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                   weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), parametrization=c("intercept", "mean"),
                   AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
                   ngen=200, popsize, smart_mu=min(100, ceiling(0.5*ngen)), initpop=NULL,
-                  mu_scale, mu_scale2, omega_scale, weight_scale,
+                  mu_scale, mu_scale2, omega_scale, B_scale, weight_scale,
                   ar_scale=0.2, upper_ar_scale=1, ar_scale2=1, regime_force_scale=1, red_criteria=c(0.05, 0.01),
                   pre_smart_mu_prob=0, to_return=c("alt_ind", "best_ind"), minval, seed=NULL) {
 

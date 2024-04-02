@@ -5,7 +5,7 @@
 \title{Create a random VAR model \eqn{(dxd)} error impact matrix \eqn{B}
   fairly close to the given \strong{invertible} impact matrix.}
 \usage{
-smart_impactmat(d, B, accuracy)
+smart_impactmat(d, B, accuracy, m)
 }
 \arguments{
 \item{B}{an invertible \eqn{(dxd)} impact matrix specifying
@@ -14,6 +14,9 @@ a decreasing order.}
 
 \item{accuracy}{a positive real number adjusting how close to the given impact matrix
 the returned individual should be. Larger value implies higher accuracy.}
+
+\item{m}{which regime? Regime 1 impact matrix is constrained so the elements in its first row
+are in a decreasing ordering and the diagonal elements are strictly positive.}
 }
 \value{
 Returns a \eqn{(d^2 \times 1)} vector containing the vectorized impact matrix \eqn{B}.

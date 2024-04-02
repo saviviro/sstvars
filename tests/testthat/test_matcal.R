@@ -327,3 +327,29 @@ test_that("create_Fi_matrix returns zero matrix for T_obs equal to i", {
   }
 })
 
+
+test_that("order_B works correctly", {
+  B <- matrix(c(-1, 2, 3, -4), nrow=2)
+  expected <- matrix(c(3, -4, 1, -2), nrow=2)
+  expect_equal(order_B(B), expected)
+
+  B <- matrix(c(-2, -3, 4, 5), nrow=2)
+  expected <- matrix(c(4, 5, 2, 3), nrow=2)
+  expect_equal(order_B(B), expected)
+  expect_equal(order_B(expected), expected)
+
+  B <- matrix(c(-10, 20, -30, 40, -50, 60, -70, 80, 90), nrow=3)
+  expected <- matrix(c(70, -80, -90, 40, -50, 60, 10, -20, 30), nrow=3)
+  expect_equal(order_B(B), expected)
+
+  B <- matrix(c(-50, 20, -30, 40, -50, 60, -70, 80, 90), nrow=3)
+  expected <- matrix(c(70, -80, -90, 50, -20, 30, 40, -50, 60), nrow=3)
+  expect_equal(order_B(B), expected)
+
+  B <- matrix(c(-10, 20, -30, 40, -50, 60, 20, 80, 90), nrow=3)
+  expected <- matrix(c(40, -50, 60, 20, 80, 90, 10, -20, 30), nrow=3)
+  expect_equal(order_B(B), expected)
+})
+
+
+

@@ -143,21 +143,28 @@ smart_covmat <- function(d, Omega, accuracy) {
 
 #' @title Create random VAR model impact matrix
 #'
-#' @description \code{random_covmat} generates random VAR model \eqn{(dxd)} impact matrix \eqn{B}
-#'   with its diagonal entries normalized to be positive. The impact matrix is generaged from a
-#'   custom distribution related to the Wishart distribution.
+#' @description \code{random_impactmat} generates random VAR model \eqn{(dxd)} impact matrix \eqn{B}
+#'   from a custom distribution related to the Wishart distribution.
 #'
 #' @inheritParams loglikelihood
 #' @inheritParams GAfit
+#' @param m which regime? Regime 1 impact matrix is constrained so the elements in its first row
+#'   are in a decreasing ordering and the diagonal elements are strictly positive.
 #' @return Returns a \eqn{(d^2 \times 1)} vector containing the vectorized impact matrix \eqn{B}.
 #' @keywords internal
 
-random_impactmat <- function(d, B_scale) {
+random_impactmat <- function(d, B_scale, m) {
   tmp <- matrix(nrow=d, ncol=d)
   diagmat <- diag(sqrt(B_scale))
   for(i1 in 1:d) {
     tmp[,i1] <- diagmat%*%rnorm(d)
   }
+  Bm <- tmp%*%tmp
+  if(m == 1) {
+    Bm <- Bm[order(Bm[1,], decreasing=TRUE),]
+    diag(Bm) <- abs(diag(Bm)) # Make sure the diagonal is strictly positive
+  }
+
   Bm <- as.vector(tmp%*%tmp)
   diag(Bm) <- abs(diag(Bm)) # Make sure the diagonal is strictly positive
 }
@@ -169,7 +176,7 @@ random_impactmat <- function(d, B_scale) {
 #' @description \code{smart_impactmat} generates a random VAR model \eqn{(dxd)} error impact matrix \eqn{B}
 #'   fairly close to the given \strong{invertible} impact matrix.
 #'
-#' @inheritParams loglikelihood
+#' @inheritParams random_impactmat
 #' @param B an invertible \eqn{(dxd)} impact matrix specifying
 #'   expected value of the matrix to be generated. Should have strictly positive diagonal entries in
 #'   a decreasing order.
@@ -178,9 +185,11 @@ random_impactmat <- function(d, B_scale) {
 #' @inherit random_impactmat return
 #' @keywords internal
 
-smart_impactmat <- function(d, B, accuracy) {
+smart_impactmat <- function(d, B, accuracy, m) {
   new_B <- matrix(rnorm(d^2, mean=B, sd=pmax(0.2, abs(B))/accuracy), nrow=d)
-  diag(new_B) <- abs(diag(new_B)) # Make sure the diagonal is strictly positive
+  if(m == 1) {
+    return(order_B) # First element in each column normalized to positive and columns ordered to a decreasing order
+  }
 }
 
 

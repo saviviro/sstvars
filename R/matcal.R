@@ -317,3 +317,28 @@ create_Fi_matrix <- function(i, T_obs) {
   } # Matrix of zeros if i=T_obs.
   Fi
 }
+
+
+#' @title Reorder columns of a square matrix so that the first nonzero elements are
+#'  in decreasing order
+#'
+#' @description \code{order_B} takes a square matrix \code{B} as input and reorders its columns
+#' so that the diagonal entries of \code{B} are in decreasing order. The function
+#' is designed to be computationally efficient and ensures that the input is a square matrix.
+#'
+#' @param B A square numeric matrix.
+#' @return A square matrix \code{B} with columns reordered so that its
+#' diagonal entries are in a decreasing order.
+#' @keywords internal
+
+order_B <- function(B) {
+  # Step 1: Change signs of columns so that the first element of each column is positive
+  for(i1 in 1:ncol(B)) {
+    if(B[1, i1] < 0) {
+      B[, i1] <- -B[, i1]
+    }
+  }
+
+  # Reorder the columns of B so that the diagonal elements are in decreasing order
+  B[, order(B[1, ], decreasing = TRUE), drop=FALSE]
+}
