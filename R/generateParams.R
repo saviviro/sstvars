@@ -154,19 +154,15 @@ smart_covmat <- function(d, Omega, accuracy) {
 #' @keywords internal
 
 random_impactmat <- function(d, B_scale, m) {
-  tmp <- matrix(nrow=d, ncol=d)
-  diagmat <- diag(sqrt(B_scale))
+  new_B <- matrix(nrow=d, ncol=d)
   for(i1 in 1:d) {
-    tmp[,i1] <- diagmat%*%rnorm(d)
+    new_B[i1,] <- rnorm(d, sd=sqrt(B_scale[i1]/d)) # Random elements to each row
   }
-  Bm <- tmp%*%tmp
   if(m == 1) {
-    Bm <- Bm[order(Bm[1,], decreasing=TRUE),]
-    diag(Bm) <- abs(diag(Bm)) # Make sure the diagonal is strictly positive
+    return(order_B(new_B)) # First element in each column normalized to positive and columns ordered to a decreasing order
+  } else {
+    return(new_B) # No constraints since not the first impact matrix
   }
-
-  Bm <- as.vector(tmp%*%tmp)
-  diag(Bm) <- abs(diag(Bm)) # Make sure the diagonal is strictly positive
 }
 
 
@@ -188,7 +184,9 @@ random_impactmat <- function(d, B_scale, m) {
 smart_impactmat <- function(d, B, accuracy, m) {
   new_B <- matrix(rnorm(d^2, mean=B, sd=pmax(0.2, abs(B))/accuracy), nrow=d)
   if(m == 1) {
-    return(order_B) # First element in each column normalized to positive and columns ordered to a decreasing order
+    return(order_B(new_B)) # First element in each column normalized to positive and columns ordered to a decreasing order
+  } else {
+    return(new_B) # No constraints since not the first impact matrix
   }
 }
 

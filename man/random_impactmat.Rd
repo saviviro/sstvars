@@ -8,10 +8,10 @@ random_impactmat(d, B_scale, m)
 }
 \arguments{
 \item{B_scale}{a size \eqn{(d \times 1)} strictly positive vector specifying the mean and variability of the
-random impact matrices in random mutations. The elements should be in a decreasing ordering. The mean of the
-random impact matrix will be \code{diag(omega_scale)}, and the variability increases with \code{omega_scale}.
-Default in \code{GAfit} is \code{vapply(1:d, function(i1) sort(sd(stats::ar(data[,i1], order.max=10)$resid, na.rm=TRUE),
-decreasing=TRUE), numeric(1))}. This argument is ignored if \code{cond_dist != "ind_Student"}.}
+random impact matrices in random mutations. In each regime, the mean of the error term covariance matrix
+implied by the random impact matrix will be \code{diag(B_scale)}, and the variability increases with \code{B_scale}.
+Default in \code{GAfit} is \code{var(stats::ar(data[,i], order.max=10)$resid, na.rm=TRUE), i=1,...,d}.
+This argument is ignored if \code{cond_dist != "ind_Student"}.}
 
 \item{m}{which regime? Regime 1 impact matrix is constrained so the elements in its first row
 are in a decreasing ordering and the diagonal elements are strictly positive.}

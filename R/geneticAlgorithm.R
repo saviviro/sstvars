@@ -85,10 +85,10 @@
 #'   \code{var(stats::ar(data[,i], order.max=10)$resid, na.rm=TRUE), i=1,...,d}. This argument is ignored if
 #'   \code{cond_dist == "ind_Student"}.
 #' @param B_scale a size \eqn{(d \times 1)} strictly positive vector specifying the mean and variability of the
-#'   random impact matrices in random mutations. The elements should be in a decreasing ordering. The mean of the
-#'   random impact matrix will be \code{diag(omega_scale)}, and the variability increases with \code{omega_scale}.
-#'   Default in \code{GAfit} is \code{vapply(1:d, function(i1) sort(sd(stats::ar(data[,i1], order.max=10)$resid, na.rm=TRUE),
-#'   decreasing=TRUE), numeric(1))}. This argument is ignored if \code{cond_dist != "ind_Student"}.
+#'   random impact matrices in random mutations. In each regime, the mean of the error term covariance matrix
+#'   implied by the random impact matrix will be \code{diag(B_scale)}, and the variability increases with \code{B_scale}.
+#'   Default in \code{GAfit} is \code{var(stats::ar(data[,i], order.max=10)$resid, na.rm=TRUE), i=1,...,d}.
+#'   This argument is ignored if \code{cond_dist != "ind_Student"}.
 #' @param ar_scale a positive real number between zero and one adjusting how large AR parameter values are typically
 #'   proposed in construction of the initial population: larger value implies larger coefficients (in absolute value).
 #'   After construction of the initial population, a new scale is drawn from \code{(0, upper_ar_scale)} uniform
@@ -231,10 +231,9 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
     stop("omega_scale must be numeric vector with length d and positive elements")
   }
   if(missing(B_scale)) {
-    B_scale <- vapply(1:d, function(i1) sort(sd(stats::ar(data[,i1], order.max=10)$resid, na.rm=TRUE), decreasing=TRUE),
-                      numeric(1))
-  } else if(!(length(B_scale) == d && all(B_scale > 0) && order(B_scale, decreasing=TRUE) == 1:d)) {
-    stop("B_scale must be numeric vector with length d and strictly positive elements in a decreasing order")
+    B_scale <- vapply(1:d, function(i1) var(stats::ar(data[,i1], order.max=10)$resid, na.rm=TRUE), numeric(1))
+  } else if(!(length(B_scale) == d && all(B_scale > 0))) {
+    stop("B_scale must be numeric vector with length d and strictly positive elements")
   }
   if(missing(weight_scale)) {
     if(weight_function == "logistic" || weight_function == "exponential") {
