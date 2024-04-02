@@ -144,7 +144,7 @@ smart_covmat <- function(d, Omega, accuracy) {
 #' @title Create random VAR model impact matrix
 #'
 #' @description \code{random_impactmat} generates random VAR model \eqn{(dxd)} impact matrix \eqn{B}
-#'   from a custom distribution related to the Wishart distribution.
+#'   with its elements drawn from specific normal distributions (see the source code).
 #'
 #' @inheritParams loglikelihood
 #' @inheritParams GAfit
@@ -407,7 +407,7 @@ smart_weightpars <- function(M, weight_pars,
 random_ind <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                        weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), AR_constraints=NULL, mean_constraints=NULL,
                        weight_constraints=NULL, force_stability=is.null(AR_constraints),
-                       mu_scale, mu_scale2, omega_scale, weight_scale, ar_scale=1, ar_scale2=1) {
+                       mu_scale, mu_scale2, omega_scale, B_scale, weight_scale, ar_scale=1, ar_scale2=1) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   g <- ifelse(is.null(mean_constraints), M, length(mean_constraints)) # Number of groups of regimes with the same mean parameters
@@ -435,8 +435,8 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logistic", "
 
   # Generate covmat params
   if(cond_dist == "ind_Student") { # Covmat pars impact matrix params
-    covmat_pars <- c(random_impactmat(d=d, B_scale=omega_scale, is_regime1=TRUE), # Regime 1 impact matrix is constrained
-                     replicate(n=M-1, expr=random_impactmat(d=d, B_scale=omega_scale, is_regime1=FALSE))) #
+    covmat_pars <- c(random_impactmat(d=d, B_scale=B_scale, is_regime1=TRUE), # Regime 1 impact matrix is constrained
+                     replicate(n=M-1, expr=random_impactmat(d=d, B_scale=B_scale, is_regime1=FALSE))) # Regime 2,...,M impact matrices
   } else { # cond_dist == "Gaussian" or "Student"
     covmat_pars <- as.vector(replicate(n=M, expr=random_covmat(d=d, omega_scale=omega_scale)))
   }
@@ -451,7 +451,7 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logistic", "
   }
 
   # Generate distribution params (df etc)
-  dist_pars <- random_distpars(cond_dist=cond_dist)
+  dist_pars <- random_distpars(d=d, cond_dist=cond_dist)
 
   # Return the parameter vector
   c(mean_pars, coefmat_pars, covmat_pars, weight_pars, dist_pars)
@@ -475,10 +475,10 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logistic", "
 #' @inherit random_ind return references
 #' @keywords internal
 
-smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
-                      weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), AR_constraints=NULL, mean_constraints=NULL,
+smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                      weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), AR_constraints=NULL, mean_constraints=NULL,
                       weight_constraints=NULL,  accuracy=1, which_random=numeric(0),
-                      mu_scale, mu_scale2, omega_scale, ar_scale=1, ar_scale2=1) {
+                      mu_scale, mu_scale2, omega_scale, B_scale, ar_scale=1, ar_scale2=1) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   scale_A <- ar_scale2*(1 + log(2*mean(c((p - 0.2)^(1.25), d))))
@@ -486,12 +486,14 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logis
                                         cond_dist=cond_dist, identification="reduced_form", AR_constraints=AR_constraints,
                                         mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                                         B_constraints=NULL) # Used so that pick_pars-functions works
-  dist_pars <- pick_distpars(params=params_std, cond_dist=cond_dist)
-  all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params_std, identification="reduced_form")
+  dist_pars <- pick_distpars(d=d, params=params_std, cond_dist=cond_dist)
+  all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params_std, cond_dist=cond_dist,
+                           identification="reduced_form") # Impact matrices for cond_dist == "ind_Student"
   new_pars <- numeric(length(params))
   if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(weight_constraints)) {
     all_means_and_A <- params[1:(d*M + M*p*d^2)] # all mu + A if called from GAfit
-    new_pars[1:(d*M + M*p*d^2)] <- rnorm(n=length(all_means_and_A), mean=all_means_and_A, sd=pmax(0.2, abs(all_means_and_A))/accuracy)
+    new_pars[1:(d*M + M*p*d^2)] <- rnorm(n=length(all_means_and_A), # Fills in smart means and A, later replaced with random if random regime
+                                         mean=all_means_and_A, sd=pmax(0.2, abs(all_means_and_A))/accuracy)
     for(m in 1:M) {
       if(any(which_random) == m) { # Not a smart regime
         new_pars[((m - 1)*d + 1):(m*d)] <- rnorm(d, mean=mu_scale, sd=mu_scale2) # Random mean
@@ -500,14 +502,23 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logis
         } else {
           new_pars[(M*d + (m - 1)*p*d^2 + 1):(M*d + m*p*d^2)] <- random_coefmats2(p=p, d=d, ar_scale=ar_scale) # Use the algorithm
         }
-        new_pars[(M*d + M*p*d^2 + (m - 1)*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + m*d*(d + 1)/2)] <- random_covmat(d=d,
-                                                                                                             omega_scale=omega_scale)
-      } else { # Smart_regime
-        new_pars[(M*d + M*p*d^2 + (m - 1)*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + m*d*(d + 1)/2)] <- smart_covmat(d=d, Omega=all_Omega[, , m],
-                                                                                                            accuracy=accuracy)
+        if(cond_dist == "ind_Student") { # Impact matrix parameters
+          new_pars[(M*d + M*p*d^2 + (m - 1)*d^2 + 1):(M*d + M*p*d^2 + m*d^2)] <- random_impactmat(d=d, B_scale=B_scale, is_regime1=(m == 1))
+        } else { # cond_dist == "Gaussian" or "Student", cov mat parameters
+          new_pars[(M*d + M*p*d^2 + (m - 1)*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + m*d*(d + 1)/2)] <- random_covmat(d=d, omega_scale=omega_scale)
+        }
+      } else { # Smart_regime, smart mean and AR parameters already generated
+        if(cond_dist == "ind_Student") {  # Impact matrix parameters
+          new_pars[(M*d + M*p*d^2 + (m - 1)*d^2 + 1):(M*d + M*p*d^2 + m*d^2)] <- smart_impactmat(d=d, B=all_Omega[, , m],
+                                                                                                 accuracy=accuracy,
+                                                                                                 is_regime1=(m == 1))
+        } else { # cond_dist == "Gaussian" or "Student", cov mat parameters
+          new_pars[(M*d + M*p*d^2 + (m - 1)*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + m*d*(d + 1)/2)] <- smart_covmat(d=d, Omega=all_Omega[, , m],
+                                                                                                              accuracy=accuracy)
+        }
       }
     }
-    if(M > 1) {
+    if(M > 1 && weight_function != "exogenous") {
       weight_pars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                      cond_dist=cond_dist)
       if(weight_function == "relative_dens") {
@@ -520,7 +531,6 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logis
                                                                                             weight_constraints=weight_constraints,
                                                                                             accuracy=accuracy)
     }
-
   } else { # AR, mean, or weight constraints employed
     # mean parameters
     g <- ifelse(is.null(mean_constraints), M, length(mean_constraints)) # Number of groups of regimes with the same mean parameters
@@ -560,17 +570,27 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logis
       AR_pars <- rnorm(q, mean=psi, sd=pmax(0.2, abs(psi))/accuracy)
     }
 
-    # Covariance matrix parameters
-    covmat_pars <- as.vector(vapply(1:M, function(m) {
-      if(any(which_random == m)) {
-        random_covmat(d=d, omega_scale=omega_scale)
-      } else {
-        smart_covmat(d=d, Omega=all_Omega[, , m], accuracy=accuracy)
-      }
-    }, numeric(d*(d + 1)/2)))
+    # Covariance matrix / impact matrix parameters
+    if(cond_dist == "ind_Student") { # impact mat params
+      covmat_pars <- as.vector(vapply(1:M, function(m) {
+        if(any(which_random == m)) {
+          random_impactmat(d=d, B_scale=B_scale, is_regime1=(m == 1))
+        } else {
+          smart_impactmat(d=d, B=all_Omega[, , m], accuracy=accuracy, is_regime1=(m == 1))
+        }
+      }, numeric(d^2)))
+    } else { # cond_dist == "Gaussian" or "Student", cov mat params
+      covmat_pars <- as.vector(vapply(1:M, function(m) {
+        if(any(which_random == m)) {
+          random_covmat(d=d, omega_scale=omega_scale)
+        } else {
+          smart_covmat(d=d, Omega=all_Omega[, , m], accuracy=accuracy)
+        }
+      }, numeric(d*(d + 1)/2)))
+    }
 
     # Weight function parameters
-    if(M > 1) {
+    if(M > 1 && weight_function != "exogenous") {
       if(is.null(weight_constraints)) {
         weight_pars <- pick_weightpars(p=p, M=M, d=d, params=params_std, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                        cond_dist=cond_dist)
@@ -590,16 +610,17 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logis
                                           weight_constraints=weight_constraints, accuracy=accuracy)
         }
       }
-
     } else {
       weight_pars <- numeric(0)
     }
-
-    new_pars[1:(d*g + q + M*d*(d + 1)/2 + length(weight_pars))] <- c(mean_pars, AR_pars, covmat_pars, weight_pars)
+    new_pars[1:(d*g + q + length(covmat_pars) + length(weight_pars))] <- c(mean_pars, AR_pars, covmat_pars, weight_pars)
   }
   if(cond_dist == "Student") {
     # Add degrees of freedom parameter
     new_pars[length(new_pars)] <- smart_distpars(distpars=dist_pars, accuracy=accuracy, cond_dist=cond_dist)
+  } else if(cond_dist == "ind_Student") {
+    # Add degrees of freedom parameters
+    new_pars[(length(new_pars) - d + 1):length(new_pars)] <- smart_distpars(distpars=dist_pars, accuracy=accuracy, cond_dist=cond_dist)
   }
   new_pars
 }

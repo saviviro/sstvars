@@ -9,9 +9,10 @@ smart_ind(
   M,
   d,
   params,
-  weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+  weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold",
+    "exogenous"),
   weightfun_pars = NULL,
-  cond_dist = c("Gaussian", "Student"),
+  cond_dist = c("Gaussian", "Student", "ind_Student"),
   AR_constraints = NULL,
   mean_constraints = NULL,
   weight_constraints = NULL,
@@ -20,6 +21,7 @@ smart_ind(
   mu_scale,
   mu_scale2,
   omega_scale,
+  B_scale,
   ar_scale = 1,
   ar_scale2 = 1
 )
@@ -178,6 +180,12 @@ and for non-diagonal elements they are \code{sqrt(1/d*omega_scale[i]*omega_scale
 Note that for \code{d>4} this scale may need to be chosen carefully. Default in \code{GAfit} is
 \code{var(stats::ar(data[,i], order.max=10)$resid, na.rm=TRUE), i=1,...,d}. This argument is ignored if
 \code{cond_dist == "ind_Student"}.}
+
+\item{B_scale}{a size \eqn{(d \times 1)} strictly positive vector specifying the mean and variability of the
+random impact matrices in random mutations. In each regime, the mean of the error term covariance matrix
+implied by the random impact matrix will be \code{diag(B_scale)}, and the variability increases with \code{B_scale}.
+Default in \code{GAfit} is \code{var(stats::ar(data[,i], order.max=10)$resid, na.rm=TRUE), i=1,...,d}.
+This argument is ignored if \code{cond_dist != "ind_Student"}.}
 
 \item{ar_scale}{a positive real number between zero and one adjusting how large AR parameter values are typically
 proposed in construction of the initial population: larger value implies larger coefficients (in absolute value).

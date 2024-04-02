@@ -21,6 +21,6 @@ Returns a \eqn{(d^2 \times 1)} vector containing the vectorized impact matrix \e
 }
 \description{
 \code{random_impactmat} generates random VAR model \eqn{(dxd)} impact matrix \eqn{B}
-  from a custom distribution related to the Wishart distribution.
+  with its elements drawn from specific normal distributions (see the source code).
 }
 \keyword{internal}
