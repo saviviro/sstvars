@@ -4,7 +4,7 @@
 \alias{random_impactmat}
 \title{Create random VAR model impact matrix}
 \usage{
-random_impactmat(d, B_scale, m)
+random_impactmat(d, B_scale, is_regime1 = TRUE)
 }
 \arguments{
 \item{B_scale}{a size \eqn{(d \times 1)} strictly positive vector specifying the mean and variability of the
@@ -13,8 +13,8 @@ implied by the random impact matrix will be \code{diag(B_scale)}, and the variab
 Default in \code{GAfit} is \code{var(stats::ar(data[,i], order.max=10)$resid, na.rm=TRUE), i=1,...,d}.
 This argument is ignored if \code{cond_dist != "ind_Student"}.}
 
-\item{m}{which regime? Regime 1 impact matrix is constrained so the elements in its first row
-are in a decreasing ordering and the diagonal elements are strictly positive.}
+\item{is_regime1}{is the impact matrix for Regime 1? Regime 1 impact matrix is constrained so the elements
+in its first row are in a decreasing ordering and the diagonal elements are strictly positive.}
 }
 \value{
 Returns a \eqn{(d^2 \times 1)} vector containing the vectorized impact matrix \eqn{B}.

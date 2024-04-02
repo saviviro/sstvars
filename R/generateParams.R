@@ -148,17 +148,17 @@ smart_covmat <- function(d, Omega, accuracy) {
 #'
 #' @inheritParams loglikelihood
 #' @inheritParams GAfit
-#' @param m which regime? Regime 1 impact matrix is constrained so the elements in its first row
-#'   are in a decreasing ordering and the diagonal elements are strictly positive.
+#' @param is_regime1 is the impact matrix for Regime 1? Regime 1 impact matrix is constrained so the elements
+#'   in its first row are in a decreasing ordering and the diagonal elements are strictly positive.
 #' @return Returns a \eqn{(d^2 \times 1)} vector containing the vectorized impact matrix \eqn{B}.
 #' @keywords internal
 
-random_impactmat <- function(d, B_scale, m) {
+random_impactmat <- function(d, B_scale, is_regime1=TRUE) {
   new_B <- matrix(nrow=d, ncol=d)
   for(i1 in 1:d) {
     new_B[i1,] <- rnorm(d, sd=sqrt(B_scale[i1]/d)) # Random elements to each row
   }
-  if(m == 1) {
+  if(is_regime1) {
     return(order_B(new_B)) # First element in each column normalized to positive and columns ordered to a decreasing order
   } else {
     return(new_B) # No constraints since not the first impact matrix
@@ -181,9 +181,9 @@ random_impactmat <- function(d, B_scale, m) {
 #' @inherit random_impactmat return
 #' @keywords internal
 
-smart_impactmat <- function(d, B, accuracy, m) {
+smart_impactmat <- function(d, B, accuracy, is_regime1=TRUE) {
   new_B <- matrix(rnorm(d^2, mean=B, sd=pmax(0.2, abs(B))/accuracy), nrow=d)
-  if(m == 1) {
+  if(is_regime1) {
     return(order_B(new_B)) # First element in each column normalized to positive and columns ordered to a decreasing order
   } else {
     return(new_B) # No constraints since not the first impact matrix
@@ -404,8 +404,8 @@ smart_weightpars <- function(M, weight_pars,
 #'  }
 #' @keywords internal
 
-random_ind <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
-                       weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), AR_constraints=NULL, mean_constraints=NULL,
+random_ind <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                       weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), AR_constraints=NULL, mean_constraints=NULL,
                        weight_constraints=NULL, force_stability=is.null(AR_constraints),
                        mu_scale, mu_scale2, omega_scale, weight_scale, ar_scale=1, ar_scale2=1) {
   weight_function <- match.arg(weight_function)
@@ -434,7 +434,12 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logistic", "
   }
 
   # Generate covmat params
-  covmat_pars <- as.vector(replicate(n=M, expr=random_covmat(d=d, omega_scale=omega_scale)))
+  if(cond_dist == "ind_Student") { # Covmat pars impact matrix params
+    covmat_pars <- c(random_impactmat(d=d, B_scale=omega_scale, is_regime1=TRUE), # Regime 1 impact matrix is constrained
+                     replicate(n=M-1, expr=random_impactmat(d=d, B_scale=omega_scale, is_regime1=FALSE))) #
+  } else { # cond_dist == "Gaussian" or "Student"
+    covmat_pars <- as.vector(replicate(n=M, expr=random_covmat(d=d, omega_scale=omega_scale)))
+  }
 
   # Generate weight params
   if(M > 1) {
@@ -444,7 +449,6 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logistic", "
   } else {
     weight_pars <- numeric(0) # Replicate returns a list if the value is numeric(0)
   }
-
 
   # Generate distribution params (df etc)
   dist_pars <- random_distpars(cond_dist=cond_dist)
