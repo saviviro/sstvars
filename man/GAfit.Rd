@@ -256,10 +256,10 @@ the beginning of the function call. If calling \code{GAfit} from \code{fitSTVAR}
 instead of passing the argument \code{seed}.}
 
 \item{B_scale}{a size \eqn{(d \times 1)} strictly positive vector specifying the mean and variability of the
-random impact matrices in random mutations. The mean of the random impact matrix will be
-\code{diag(omega_scale)}, and the variability increases with \code{omega_scale}. Default in \code{GAfit}
-is \code{sd(stats::ar(data[,i], order.max=10)$resid, na.rm=TRUE), i=1,...,d}. This argument is ignored if
-\code{cond_dist != "ind_Student"}.}
+random impact matrices in random mutations. The elements should be in a decreasing ordering. The mean of the
+random impact matrix will be \code{diag(omega_scale)}, and the variability increases with \code{omega_scale}.
+Default in \code{GAfit} is \code{vapply(1:d, function(i1) sort(sd(stats::ar(data[,i1], order.max=10)$resid, na.rm=TRUE),
+decreasing=TRUE), numeric(1))}. This argument is ignored if \code{cond_dist != "ind_Student"}.}
 }
 \value{
 Returns the estimated parameter vector which has the form described in \code{initpop}.

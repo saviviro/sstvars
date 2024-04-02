@@ -109,10 +109,10 @@ random_covmat <- function(d, omega_scale) {
 
 
 #' @title Create random VAR model \eqn{(dxd)} error term covariance matrix \eqn{\Omega}
-#'   fairly close to a given \strong{positive definite} covariance matrix using (scaled)
+#'   fairly close to the given \strong{positive definite} covariance matrix using (scaled)
 #'   Wishart distribution
 #'
-#' @description \code{random_covmat} generates random VAR model \eqn{(dxd)} error term covariance matrix \eqn{\Omega}
+#' @description \code{smart_covmat} generates random VAR model \eqn{(dxd)} error term covariance matrix \eqn{\Omega}
 #'   from (scaled) Wishart distribution that is fairly close to the given matrix.
 #'
 #' @inheritParams loglikelihood
@@ -121,8 +121,7 @@ random_covmat <- function(d, omega_scale) {
 #' @param accuracy a positive real number adjusting how close to the given covariance matrix
 #'   the returned individual should be.
 #'
-#'   For \strong{reduced form models} standard deviation of each diagonal element is for reduced form
-#'   models
+#'   The standard deviation of each diagonal element is...
 #'   \itemize{
 #'     \item \eqn{\omega_{i,i}/}\code{accuracy} when \code{accuracy > d/2}
 #'     \item and \code{sqrt(2/d)*}\eqn{\omega_{i,i}} when \code{accuracy <= d/2}.
@@ -150,7 +149,7 @@ smart_covmat <- function(d, Omega, accuracy) {
 #'
 #' @inheritParams loglikelihood
 #' @inheritParams GAfit
-#' @return Returns a \eqn{(d^2 \times 1)} vector containing vectorized impact matrix \eqn{B}.
+#' @return Returns a \eqn{(d^2 \times 1)} vector containing the vectorized impact matrix \eqn{B}.
 #' @keywords internal
 
 random_impactmat <- function(d, B_scale) {
@@ -159,8 +158,31 @@ random_impactmat <- function(d, B_scale) {
   for(i1 in 1:d) {
     tmp[,i1] <- diagmat%*%rnorm(d)
   }
-  as.vector(tmp%*%tmp)
+  Bm <- as.vector(tmp%*%tmp)
+  diag(Bm) <- abs(diag(Bm)) # Make sure the diagonal is strictly positive
 }
+
+
+#' @title Create a random VAR model \eqn{(dxd)} error impact matrix \eqn{B}
+#'   fairly close to the given \strong{invertible} impact matrix.
+#'
+#' @description \code{smart_impactmat} generates a random VAR model \eqn{(dxd)} error impact matrix \eqn{B}
+#'   fairly close to the given \strong{invertible} impact matrix.
+#'
+#' @inheritParams loglikelihood
+#' @param B an invertible \eqn{(dxd)} impact matrix specifying
+#'   expected value of the matrix to be generated. Should have strictly positive diagonal entries in
+#'   a decreasing order.
+#' @param accuracy a positive real number adjusting how close to the given impact matrix
+#'   the returned individual should be. Larger value implies higher accuracy.
+#' @inherit random_impactmat return
+#' @keywords internal
+
+smart_impactmat <- function(d, B, accuracy) {
+  new_B <- matrix(rnorm(d^2, mean=B, sd=pmax(0.2, abs(B))/accuracy), nrow=d)
+  diag(new_B) <- abs(diag(new_B)) # Make sure the diagonal is strictly positive
+}
+
 
 #' @title Create random distribution parameter values
 #'
