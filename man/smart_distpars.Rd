@@ -18,6 +18,8 @@ Returns a numeric vector ...
     \item{If \code{cond_dist == "Gaussian"}:}{of length zero.}
     \item{If \code{cond_dist == "Student"}:}{of length one containing a degrees of freedom parameter value
      (strictly larger than two).}
+    \item{If \code{cond_dist == "ind_Student"}:}{of length d containing a degrees of freedom parameter values
+     (strictly larger than two).}
   }
 }
 \description{

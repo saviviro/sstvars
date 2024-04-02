@@ -228,13 +228,15 @@ random_distpars <- function(d, cond_dist) {
 #'     \item{If \code{cond_dist == "Gaussian"}:}{of length zero.}
 #'     \item{If \code{cond_dist == "Student"}:}{of length one containing a degrees of freedom parameter value
 #'      (strictly larger than two).}
+#'     \item{If \code{cond_dist == "ind_Student"}:}{of length d containing a degrees of freedom parameter values
+#'      (strictly larger than two).}
 #'   }
 #' @keywords internal
 
 smart_distpars <- function(distpars, accuracy, cond_dist) {
   if(cond_dist == "Gaussian") {
     return(numeric(0))
-  } else if(cond_dist == "Student") {
+  } else if(cond_dist == "Student" || cond_dist == "ind_Student") {
     new_distpars <- rnorm(length(distpars), mean=distpars, sd=pmax(0.2, abs(distpars))/accuracy) # smart df
     return(pmax(2.01, new_distpars)) # Make sure all df are above the strict lower bound 2
   }
