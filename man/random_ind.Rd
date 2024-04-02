@@ -116,7 +116,7 @@ structural model is considered.}
 
 \item{weight_scale}{For...
 \describe{
-  \item{\code{weight_function == "relative_dens"}:}{not used.}
+  \item{\code{weight_function \%in\% c("relative_dens", "exogenous)}:}{not used.}
   \item{\code{weight_function \%in\% c("logistic", "exponential")}:}{length three vector with the mean (in the first element)
      and standard deviation (in the second element) of the normal distribution the location parameter is drawn from
      in random mutations. The third element is the standard deviation of the normal distribution from whose absolute value

@@ -22,22 +22,53 @@
 #'   \itemize{
 #'     \item{\eqn{\phi_{m,0} = } the \eqn{(d \times 1)} intercept (or mean) vector of the \eqn{m}th regime.}
 #'     \item{\eqn{\varphi_m = (vec(A_{m,1}),...,vec(A_{m,p}))} \eqn{(pd^2 \times 1)}.}
-#'     \item{\eqn{\sigma = (vech(\Omega_1),...,vech(\Omega_M)} \eqn{(Md(d + 1)/2 \times 1)}.}
-#'     \item{\eqn{\alpha} contains the transition weights parameters}
-#'     \item{\eqn{\nu > 2} is the degrees of freedom parameter that is included only if \code{cond_dist="Student"}.}
+#'     \item{\describe{
+#'       \item{if \code{cond_dist="Gaussian"} or \code{"Student"}:}{\eqn{\sigma = (vech(\Omega_1),...,vech(\Omega_M))}
+#'         \eqn{(Md(d + 1)/2 \times 1)}.}
+#'       \item{if \code{cond_dist="ind_Student"}:}{\eqn{\sigma = (vec(B_1),...,vec(B_M)} \eqn{(Md^2 \times 1)}.}
+#'       }
+#'     }
+#'     \item{\eqn{\alpha} contains the transition weights parameters (see below)}
+#'     \item{\describe{
+#'       \item{if \code{cond_dist = "Gaussian")}:}{Omit \eqn{\nu} from the parameter vector.}
+#'       \item{if \code{cond_dist="Student"}:}{\eqn{\nu > 2} is the single degrees of freedom parameter.}
+#'       \item{if \code{cond_dist="ind_Student"}:}{\eqn{\nu = (\nu_1,...,\nu_M)} \eqn{(M \times 1)}, \eqn{nu_m > 2}.}
+#'       }
+#'     }
 #'   }
 #'   \describe{
-#'     \item{For models with \code{weight_function="relative_dens"}:}{\eqn{\alpha = (\alpha_1,...,\alpha_{M-1})}
+#'     \item{\code{weight_function="relative_dens"}:}{\eqn{\alpha = (\alpha_1,...,\alpha_{M-1})}
 #'           \eqn{(M - 1 \times 1)}, where \eqn{\alpha_m} \eqn{(1\times 1), m=1,...,M-1} are the transition weight parameters.}
-#'     \item{For models with \code{weight_function="mlogit"}:}{\eqn{\alpha = (\gamma_1,...,\gamma_M)} \eqn{((M-1)k\times 1)},
-#'           where \eqn{\gamma_m} \eqn{(k\times 1), m=1,...,M-1} contains the mlogit-regression coefficients of the \eqn{m}th
-#'            regime.}
+#'    \item{\code{weight_function="logistic"}:}{\eqn{\alpha = (c,\gamma)}
+#'           \eqn{(2 \times 1)}, where \eqn{c\in\mathbb{R}} is the location parameter and \eqn{\gamma >0} is the scale parameter.}
+#'     \item{\code{weight_function="mlogit"}:}{\eqn{\alpha = (\gamma_1,...,\gamma_M)} \eqn{((M-1)k\times 1)},
+#'           where \eqn{\gamma_m} \eqn{(k\times 1)}, \eqn{m=1,...,M-1} contains the multinomial logit-regression coefficients
+#'           of the \eqn{m}th regime. Specifically, for switching variables with indices in \eqn{I\subset\lbrace 1,...,d\rbrace}, and with
+#'          \eqn{\tilde{p}\in\lbrace 1,...,p\rbrace} lags included, \eqn{\gamma_m} contains the coefficients for the vector
+#'          \eqn{z_{t-1} = (1,\tilde{z}_{\min\lbrace I\rbrace},...,\tilde{z}_{\max\lbrace I\rbrace})}, where
+#'          \eqn{\tilde{z}_{i} =(y_{it-1},...,y_{it-\tilde{p}})}, \eqn{i\in I}. So \eqn{k=1+|I|\tilde{p}}
+#'          where \eqn{|I|} denotes the number of elements in \eqn{I}.}
+#'     \item{\code{weight_function="exponential"}:}{\eqn{\alpha = (c,\gamma)}
+#'           \eqn{(2 \times 1)}, where \eqn{c\in\mathbb{R}} is the location parameter and \eqn{\gamma >0} is the scale parameter.}
+#'     \item{\code{weight_function="threshold"}:}{\eqn{\alpha = (r_1,...,r_{M-1})}
+#'           \eqn{(M-1 \times 1)}, where \eqn{r_1,...,r_{M-1}} are the threshold values.}
+#'     \item{\code{weight_function="exogenous"}:}{Omit \eqn{\alpha} from the parameter vector.}
+#'     \item{AR_constraints:}{Replace \eqn{\varphi_1,...,\varphi_M} with \eqn{\psi} as described in the argument \code{AR_constraints}.}
+#'     \item{mean_constraints:}{Replace \eqn{\phi_{1,0},...,\phi_{M,0}} with \eqn{(\mu_{1},...,\mu_{g})} where
+#'           \eqn{\mu_i, \ (d\times 1)} is the mean parameter for group \eqn{i} and \eqn{g} is the number of groups.}
+#'     \item{weight_constraints:}{If linear constraints are imposed, replace \eqn{\alpha} with \eqn{\xi} as described in the
+#'      argument \code{weigh_constraints}. If weight functions parameters are imposed to be fixed values, simply drop \eqn{\alpha}
+#'      from the parameter vector.}
 #'   }
 #'   Above, \eqn{\phi_{m,0}} is the intercept parameter, \eqn{A_{m,i}} denotes the \eqn{i}th coefficient matrix of the \eqn{m}th
-#'   mixture component, and \eqn{\Omega_{m}} denotes the error term covariance matrix of the \eqn{m}:th mixture component.
+#'   regime, \eqn{\Omega_{m}} denotes the positive definite error term covariance matrix of the \eqn{m}th regime, and \eqn{B_m}
+#'   is the invertible \eqn{(d\times d)} impact matrix of the \eqn{m}th regime. \eqn{\nu_m} is the degrees of freedom parameter
+#'   of the \eqn{m}th regime.
 #'   If \code{parametrization=="mean"}, just replace each \eqn{\phi_{m,0}} with regimewise mean \eqn{\mu_{m}}.
 #'   \eqn{vec()} is vectorization operator that stacks columns of a given matrix into a vector. \eqn{vech()} stacks columns
-#'   of a given matrix from the principal diagonal downwards (including elements on the diagonal) into a vector.
+#'   of a given matrix from the principal diagonal downwards (including elements on the diagonal) into a vector. \eqn{Bvec()}
+#'   is a vectorization operator that stacks the columns of a given impact matrix \eqn{B_m} into a vector so that the elements
+#'   that are constrained to zero by the argument \code{B_constraints} are excluded.
 #' @param mu_scale a size \eqn{(dx1)} vector defining \strong{means} of the normal distributions from which each
 #'   mean parameter \eqn{\mu_{m}} is drawn from in random mutations. Default is \code{colMeans(data)}. Note that
 #'   mean-parametrization is always used for optimization in \code{GAfit} - even when \code{parametrization=="intercept"}.
@@ -59,7 +90,7 @@
 #'   distribution in each iteration.
 #' @param weight_scale For...
 #'   \describe{
-#'     \item{\code{weight_function == "relative_dens"}:}{not used.}
+#'     \item{\code{weight_function \%in\% c("relative_dens", "exogenous)}:}{not used.}
 #'     \item{\code{weight_function \%in\% c("logistic", "exponential")}:}{length three vector with the mean (in the first element)
 #'        and standard deviation (in the second element) of the normal distribution the location parameter is drawn from
 #'        in random mutations. The third element is the standard deviation of the normal distribution from whose absolute value
@@ -139,8 +170,8 @@
 #'          \emph{Proceedings of the 1995 ACM Symposium on Applied Computing}, 345-350.
 #'  }
 
-GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
-                  weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
+GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                  weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), parametrization=c("intercept", "mean"),
                   AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
                   ngen=200, popsize, smart_mu=min(100, ceiling(0.5*ngen)), initpop=NULL,
                   mu_scale, mu_scale2, omega_scale, weight_scale,
@@ -157,9 +188,9 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
   data <- check_data(data=data, p=p)
   d <- ncol(data)
   n_obs <- nrow(data)
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                         cond_dist=cond_dist)
-  check_constraints(p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
+  weightfun_pars <- check_weightfun_pars(data=data, p=p, d=d, M=M, weight_function=weight_function,
+                                         weightfun_pars=weightfun_pars, cond_dist=cond_dist)
+  check_constraints(data=data, p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
                     parametrization=parametrization, identification="reduced_form",
                     AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                     weight_constraints=weight_constraints, B_constraints=NULL)

@@ -1779,6 +1779,10 @@ test_that("check_constraints works correctly", {
                                  weight_constraints=list(R=matrix(1:4, nrow=2), r=c(0.13))))
   expect_warning(check_constraints(data=matrix(NA, nrow=3), p=2, M=2, d=2, weight_function="exogenous",
                                    weightfun_pars=cbind(0, 1), weight_constraints=list(R=0, r=c(0.13, 0.1))))
+  expect_warning(check_constraints(p=2, M=2, d=2, weight_function="exogenous", weightfun_pars=cbind(0, 1),
+                                   weight_constraints=list(R=0, r=c(0.13, 0.1))))
+  check_constraints(p=2, M=2, d=2, weight_function="exogenous", weightfun_pars=cbind(0, 1))
+  check_constraints(data=NULL, p=2, M=2, d=2, weight_function="exogenous", weightfun_pars=cbind(0, 1))
 
   expect_error(check_constraints(p=1, M=1, d=2, AR_constraints=cbind(C_112, C_112)))
   expect_error(check_constraints(p=1, M=1, d=2, AR_constraints=rbind(C_112, C_112)))
@@ -1901,6 +1905,16 @@ test_that("check_weightfun_pars works correctly", {
                                       weightfun_pars=cbind(c(0.4, 0.5, 0.1), c(0.6, 0.4, 0.9), c(0, 0.1, 0))))
   expect_error(check_weightfun_pars(data=matrix(NA, nrow=4, ncol=3), p=2, M=3, d=2, weight_function="exogenous",
                                     weightfun_pars=cbind(c(0.4, 0.5), c(-0.6, 0.4), c(0, 0.1))))
+
+  # Exogenous without data
+  expect_equal(check_weightfun_pars(data=NULL, p=2, M=3, d=2, weight_function="exogenous",
+                                    weightfun_pars=cbind(c(0.4, 0.5), c(0.6, 0.4), c(0, 0.1))),
+               cbind(c(0.4, 0.5), c(0.6, 0.4), c(0, 0.1)))
+  expect_equal(check_weightfun_pars(p=2, M=3, d=2, weight_function="exogenous",
+                                    weightfun_pars=cbind(c(0.4, 0.5), c(0.6, 0.4), c(0, 0.1))),
+               cbind(c(0.4, 0.5), c(0.6, 0.4), c(0, 0.1)))
+  expect_error(check_weightfun_pars(data=NULL, p=2, M=3, d=2, weight_function="exogenous",
+                                    weightfun_pars=cbind(c(0.4, 0.5), c(0.6, 0.4))))
 })
 
 

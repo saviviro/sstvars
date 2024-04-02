@@ -612,9 +612,16 @@ check_weightfun_pars <- function(data, p, M, d, weight_function=c("relative_dens
       names(weightfun_pars) <- c("vars", "lags")
     }
   } else if(weight_function == "exogenous") {
-     if(!is.numeric(weightfun_pars) || !is.matrix(weightfun_pars) || ncol(weightfun_pars) != M || nrow(weightfun_pars) != nrow(data) - p) {
-       stop("When weight_function == 'exogenous', the argument weightfun_pars should be a numeric (nrow(data)-p x M) matrix.")
-     } else if(any(weightfun_pars < 0)) {
+    if(missing(data) || is.null(data)) { # Does not check data
+      if(!is.numeric(weightfun_pars) || !is.matrix(weightfun_pars) || ncol(weightfun_pars) != M) {
+        stop("When weight_function == 'exogenous' and there is no data, the argument weightfun_pars should be a numeric matrix with M columns.")
+      }
+    } else {
+      if(!is.numeric(weightfun_pars) || !is.matrix(weightfun_pars) || ncol(weightfun_pars) != M || nrow(weightfun_pars) != nrow(data) - p) {
+        stop("When weight_function == 'exogenous', the argument weightfun_pars should be a numeric (nrow(data)-p x M) matrix.")
+      }
+    }
+    if(any(weightfun_pars < 0)) {
        stop("When weight_function == 'exogenous', the argument weightfun_pars should not contain strictly negative elements.")
      } else if(!isTRUE(all.equal(rowSums(weightfun_pars), rep(1, times=nrow(weightfun_pars))))) {
        warning("The each row of the matrix weightfun_pars should sum to one, normalizing them to sum to one.")
