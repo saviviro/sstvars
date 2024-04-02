@@ -4,7 +4,7 @@
 \alias{random_distpars}
 \title{Create random distribution parameter values}
 \usage{
-random_distpars(cond_dist)
+random_distpars(d, cond_dist)
 }
 \arguments{
 \item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"}, \code{"Student"}, or \code{"ind_Student"},
@@ -15,6 +15,7 @@ Returns a numeric vector ...
   \describe{
     \item{If \code{cond_dist == "Gaussian"}:}{of length zero.}
     \item{If \code{cond_dist == "Student"}:}{of length one containing a df param strictly larger than two.}
+    \item{If \code{cond_dist == "ind_Student"}:}{of length d containing a df params strictly larger than two.}
   }
 }
 \description{

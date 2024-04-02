@@ -200,14 +200,17 @@ smart_impactmat <- function(d, B, accuracy, m) {
 #'   \describe{
 #'     \item{If \code{cond_dist == "Gaussian"}:}{of length zero.}
 #'     \item{If \code{cond_dist == "Student"}:}{of length one containing a df param strictly larger than two.}
+#'     \item{If \code{cond_dist == "ind_Student"}:}{of length d containing a df params strictly larger than two.}
 #'   }
 #' @keywords internal
 
-random_distpars <- function(cond_dist) {
+random_distpars <- function(d, cond_dist) {
   if(cond_dist == "Gaussian") {
     return(numeric(0))
   } else if(cond_dist == "Student") {
     return(2.000001 + rgamma(1, shape=0.3, rate=0.007))
+  } else if(cond_dist == "ind_Student") {
+    return(2.000001 + rgamma(d, shape=0.3, rate=0.007))
   }
 }
 
