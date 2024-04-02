@@ -83,14 +83,19 @@
 #'   and for non-diagonal elements they are \code{sqrt(1/d*omega_scale[i]*omega_scale[j])}.
 #'   Note that for \code{d>4} this scale may need to be chosen carefully. Default in \code{GAfit} is
 #'   \code{var(stats::ar(data[,i], order.max=10)$resid, na.rm=TRUE), i=1,...,d}. This argument is ignored if
-#'   structural model is considered.
+#'   \code{cond_dist == "ind_Student"}.
+#' @param B_scale a size \eqn{(d \times 1)} strictly positive vector specifying the mean and variability of the
+#'   random impact matrices in random mutations. The mean of the random impact matrix will be
+#'   \code{diag(omega_scale)}, and the variability increases with \code{omega_scale}. Default in \code{GAfit}
+#'   is \code{sd(stats::ar(data[,i], order.max=10)$resid, na.rm=TRUE), i=1,...,d}. This argument is ignored if
+#'   \code{cond_dist != "ind_Student"}.
 #' @param ar_scale a positive real number between zero and one adjusting how large AR parameter values are typically
 #'   proposed in construction of the initial population: larger value implies larger coefficients (in absolute value).
 #'   After construction of the initial population, a new scale is drawn from \code{(0, upper_ar_scale)} uniform
 #'   distribution in each iteration.
 #' @param weight_scale For...
 #'   \describe{
-#'     \item{\code{weight_function \%in\% c("relative_dens", "exogenous)}:}{not used.}
+#'     \item{\code{weight_function \%in\% c("relative_dens", "exogenous")}:}{not used.}
 #'     \item{\code{weight_function \%in\% c("logistic", "exponential")}:}{length three vector with the mean (in the first element)
 #'        and standard deviation (in the second element) of the normal distribution the location parameter is drawn from
 #'        in random mutations. The third element is the standard deviation of the normal distribution from whose absolute value
@@ -224,6 +229,11 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
     omega_scale <- vapply(1:d, function(i1) var(stats::ar(data[,i1], order.max=10)$resid, na.rm=TRUE), numeric(1))
   } else if(!(length(omega_scale) == d & all(omega_scale > 0))) {
     stop("omega_scale must be numeric vector with length d and positive elements")
+  }
+  if(missing(B_scale)) {
+    B_scale <- vapply(1:d, function(i1) sd(stats::ar(data[,i1], order.max=10)$resid, na.rm=TRUE), numeric(1))
+  } else if(!(length(B_scale) == d & all(B_scale > 0))) {
+    stop("B_scale must be numeric vector with length d and positive elements")
   }
   if(missing(weight_scale)) {
     if(weight_function == "logistic" || weight_function == "exponential") {

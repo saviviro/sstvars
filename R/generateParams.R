@@ -141,6 +141,27 @@ smart_covmat <- function(d, Omega, accuracy) {
 }
 
 
+
+#' @title Create random VAR model impact matrix
+#'
+#' @description \code{random_covmat} generates random VAR model \eqn{(dxd)} impact matrix \eqn{B}
+#'   with its diagonal entries normalized to be positive. The impact matrix is generaged from a
+#'   custom distribution related to the Wishart distribution.
+#'
+#' @inheritParams loglikelihood
+#' @inheritParams GAfit
+#' @return Returns a \eqn{(d^2 \times 1)} vector containing vectorized impact matrix \eqn{B}.
+#' @keywords internal
+
+random_impactmat <- function(d, B_scale) {
+  tmp <- matrix(nrow=d, ncol=d)
+  diagmat <- diag(sqrt(B_scale))
+  for(i1 in 1:d) {
+    tmp[,i1] <- diagmat%*%rnorm(d)
+  }
+  as.vector(tmp%*%tmp)
+}
+
 #' @title Create random distribution parameter values
 #'
 #' @description \code{random_distpars} generates random distribution parameter values

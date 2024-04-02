@@ -177,7 +177,7 @@ deviations of the diagonal elements are \code{sqrt(2/d)*omega_scale[i]}
 and for non-diagonal elements they are \code{sqrt(1/d*omega_scale[i]*omega_scale[j])}.
 Note that for \code{d>4} this scale may need to be chosen carefully. Default in \code{GAfit} is
 \code{var(stats::ar(data[,i], order.max=10)$resid, na.rm=TRUE), i=1,...,d}. This argument is ignored if
-structural model is considered.}
+\code{cond_dist == "ind_Student"}.}
 
 \item{ar_scale}{a positive real number between zero and one adjusting how large AR parameter values are typically
 proposed in construction of the initial population: larger value implies larger coefficients (in absolute value).

@@ -112,11 +112,11 @@ deviations of the diagonal elements are \code{sqrt(2/d)*omega_scale[i]}
 and for non-diagonal elements they are \code{sqrt(1/d*omega_scale[i]*omega_scale[j])}.
 Note that for \code{d>4} this scale may need to be chosen carefully. Default in \code{GAfit} is
 \code{var(stats::ar(data[,i], order.max=10)$resid, na.rm=TRUE), i=1,...,d}. This argument is ignored if
-structural model is considered.}
+\code{cond_dist == "ind_Student"}.}
 
 \item{weight_scale}{For...
 \describe{
-  \item{\code{weight_function \%in\% c("relative_dens", "exogenous)}:}{not used.}
+  \item{\code{weight_function \%in\% c("relative_dens", "exogenous")}:}{not used.}
   \item{\code{weight_function \%in\% c("logistic", "exponential")}:}{length three vector with the mean (in the first element)
      and standard deviation (in the second element) of the normal distribution the location parameter is drawn from
      in random mutations. The third element is the standard deviation of the normal distribution from whose absolute value
