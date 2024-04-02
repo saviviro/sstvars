@@ -264,14 +264,17 @@ smart_distpars <- function(distpars, accuracy, cond_dist) {
 #'           where \eqn{c\in\mathbb{R}} is the location parameter and \eqn{\gamma >0} is the scale parameter.}
 #'     \item{If \code{weight_function == "threshold"}:}{a length \eqn{M-1} vector \eqn{(r_1,...,r_{M-1})},
 #'           where \eqn{r_1,...,r_{M-1}} are the threshold values in an increasing order.}
+#'     \item{If \code{weight_function == "exogenouz"}:}{of length zero.}
 #'   }
 #' @keywords internal
 
-random_weightpars <- function(M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+random_weightpars <- function(M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                               weightfun_pars=NULL, AR_constraints=NULL, mean_constraints=NULL,
                               weight_constraints=NULL, weight_scale) {
   weight_function <- match.arg(weight_function)
-  if(M == 1) return(numeric(0))
+  if(M == 1 || weight_function == "exogenous") {
+    return(numeric(0))
+  }
   if(weight_function == "relative_dens") {
     if(is.null(weight_constraints)) {
       alphas <- runif(n=M, min=0.00, max=1)

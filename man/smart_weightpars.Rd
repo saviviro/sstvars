@@ -77,6 +77,7 @@ Returns a numeric vector ...
           where \eqn{c\in\mathbb{R}} is the location parameter and \eqn{\gamma >0} is the scale parameter.}
     \item{If \code{weight_function == "threshold"}:}{a length \eqn{M-1} vector \eqn{(r_1,...,r_{M-1})},
           where \eqn{r_1,...,r_{M-1}} are the threshold values in an increasing order.}
+    \item{If \code{weight_function == "exogenouz"}:}{of length zero.}
   }
 }
 \description{
