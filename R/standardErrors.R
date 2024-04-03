@@ -10,23 +10,22 @@
 #' @inherit in_paramspace references
 #' @keywords internal
 
-standard_errors <- function(data, p, M, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
-                            weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
-                            identification=c("reduced_form", "recursive", "heteroskedasticity"),
-                            AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
-                            minval) {
+standard_errors <- function(data, p, M, params,
+                            weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                            weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), parametrization=c("intercept", "mean"),
+                            identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
+                            AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL, minval) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
   identification <- match.arg(identification)
   d <- ncol(data)
   check_pMd(p=p, M=M, d=d, weight_function=weight_function, identification=identification)
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                         cond_dist=cond_dist)
-  check_constraints(p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                    parametrization=parametrization, identification=identification,
-                    AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                    weight_constraints=weight_constraints, B_constraints=B_constraints)
+  weightfun_pars <- check_weightfun_pars(data=data, p=p, M=M, d=d, weight_function=weight_function,
+                                         weightfun_pars=weightfun_pars, cond_dist=cond_dist)
+  check_constraints(data=data, p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                    parametrization=parametrization, identification=identification, AR_constraints=AR_constraints,
+                    mean_constraints=mean_constraints, weight_constraints=weight_constraints, B_constraints=B_constraints)
   if(missing(minval)) {
     minval <- get_minval(data)
   }
