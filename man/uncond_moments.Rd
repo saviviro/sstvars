@@ -27,9 +27,6 @@ Returns a list with three components:
 \code{uncond_moments} calculates the unconditional means, variances, the first p autocovariances,
  and the first p autocorrelations of the regimes of the model.
 }
-\details{
-FILL IN IF ANY
-}
 \examples{
 # Two-variate Gaussian STVAR p=1, M=2 model with the weighted relative stationary
 # densities of the regimes as the transition weight function:

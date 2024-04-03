@@ -30,7 +30,8 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   d <- stvar$model$d
   params <- stvar$params
   weight_function <- stvar$model$weight_function
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=stvar$model$weightfun_pars)
+  weightfun_pars <- check_weightfun_pars(p=p, M=M, d=d, weight_function=weight_function,
+                                         weightfun_pars=stvar$model$weightfun_pars)
   cond_dist <- stvar$model$cond_dist
   parametrization <- stvar$model$parametrization
   identification <- stvar$model$identification
@@ -56,10 +57,10 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   }
   all_phi0 <- pick_phi0(M=M, d=d, params=params)
   all_A <- pick_allA(p=p, M=M, d=d, params=params)
-  all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params, identification=identification)
+  all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params, cond_dist=cond_dist, identification=identification)
   weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                 cond_dist=cond_dist)
-  distpars <- pick_distpars(params=params, cond_dist=cond_dist)
+  distpars <- pick_distpars(d=d, params=params, cond_dist=cond_dist)
 
   if(weight_function == "mlogit") {
     all_gamma_m <- cbind(matrix(weightpars, ncol=M-1), 0) # Column per gamma_m, m=1,...,M-1, gamma_M=0.
@@ -84,7 +85,7 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
     cat("\n ", paste0("Switching variable: ", paste0(var_names[weightfun_pars[1]], collapse=", "), " with lag ",
                       weightfun_pars[2], "."))
   }
-  if(is.na(T_obs) && weight_function == "relative_dens") {
+  if(is.na(T_obs) && weight_function %in% c("relative_dens", "exogenous")) {
     cat("\n")
   } else {
     cat("\n\n")
@@ -110,9 +111,9 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   for(m in seq_len(M)) {
     count <- 1
     cat(paste("Regime", m), "\n")
-    if(cond_dist == "Student") {
+    if(cond_dist == "Student" || cond_dist == "ind_Student") {
       if(m == 1) {
-        cat(paste0("Degrees of freedom: ", format_value(distpars), " (for all regimes)"), "\n")
+        cat(paste0("Degrees of freedom: ", paste0(format_value(distpars), collapse=", "), " (for all regimes)"), "\n")
       }
     }
     if(summary_print) {
@@ -158,9 +159,13 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
       df <- cbind(df, plus)
     }
     df[, tmp_names[p*(d + 2) + 1]] <- left_brackets
-    df[, c("Omega", tmp_names[(p*(d + 2) + 2):(p*(d + 2) + d)])] <- format_value(all_Omega[, , m])
+    if(cond_dist == "ind_Student") {
+      df[, c("B", tmp_names[(p*(d + 2) + 2):(p*(d + 2) + d)])] <- format_value(all_Omega[, , m])
+    } else { # cond_dist == "Gaussian" or "Student"
+      df[, c("Omega", tmp_names[(p*(d + 2) + 2):(p*(d + 2) + d)])] <- format_value(all_Omega[, , m])
+    }
     df[, tmp_names[p*(d + 2) + d + 1]] <- rep("]", times=d)
-    df[, "1/2"] <- rep(" ", d)
+    if(cond_dist != "ind_Student") df[, "1/2"] <- rep(" ", d)
     df[, tmp_names[p*(d + 2) + d + 2]] <- paste0("eps", 1:d)
     names_to_omit <- unlist(lapply(c("plus", "eq", "round_lbrackets", "round_rbrackets", tmp_names),
                                    function(nam) grep(nam, colnames(df))))
@@ -169,11 +174,15 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
     cat("\n")
     if(summary_print) {
       cat("Error term correlation matrix:\n")
-      print(cov2cor(all_Omega[, , m]), digits=digits)
+      if(cond_dist == "ind_Student") {
+        print(cov2cor(tcrossprod(all_Omega[, , m])), digits=digits) # Cov mat obtained from the impact matrix
+      } else {
+        print(cov2cor(all_Omega[, , m]), digits=digits)
+      }
       cat("\n")
     }
   }
-  if(!identification %in% c("reduced_form", "recursive")) { # No separate struct pars for recursively identified models
+  if(!identification %in% c("reduced_form", "recursive", "non-Gaussianity")) { # No separate structural pars for these models
     cat("Structural parameters:\n")
     if(identification == "heteroskedasticity") {
       W <- format_value(pick_W(p=p, M=M, d=d, params=params, identification=identification))
