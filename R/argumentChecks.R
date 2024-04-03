@@ -391,7 +391,7 @@ n_params <- function(p, M, d, weight_function=c("relative_dens", "logistic", "ml
   }
 
   # Weight pars
-  if(weight_function == "exogenous") {
+  if(weight_function == "exogenous" || M == 1) {
     n_weight_pars <- 0
   } else {
     if(is.null(weight_constraints)) {

@@ -387,13 +387,12 @@ sort_impactmats <- function(p, M, d, params, weight_function=c("relative_dens", 
                             AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
-  identification <- match.arg(identification)
   if(cond_dist != "ind_Student") {
     return(params) # No impact matrices whose columns to sort
   }
 
   # The number of weight pars
-  if(weight_function == "exogenous") {
+  if(weight_function == "exogenous" || M == 1) {
     n_weight_pars <- 0
   } else {
     if(is.null(weight_constraints)) {
@@ -415,15 +414,17 @@ sort_impactmats <- function(p, M, d, params, weight_function=c("relative_dens", 
   # The number of degrees of freedom parameters is d for cond_dist == "ind_Student"
 
   # Obtain the impact matrices
-  all_B_m <- array(params[(length(params) - n_weight_pars - d - M*d^2 + 1):(length(params) - n_weights_pars - d)], dim=c(d, d, M))
+  all_B_m <- array(params[(length(params) - n_weight_pars - d - M*d^2 + 1):(length(params) - n_weight_pars - d)], dim=c(d, d, M))
 
   # Determine which columns should go through sign change, and change the signs of those columns
   for(i1 in 1:d) {
     if(all_B_m[1, i1, 1] < 0) {
-      all_B_mB[, i1, 1] <- -all_B_mB[, i1, 1]
+      all_B_m[, i1, 1] <- -all_B_m[, i1, 1]
       # Change the signs of the corresponding columns in the rest of the impact matrices
-      for(m in 2:M) {
-        all_B_m[, i1, m] <- -all_B_m[, i1, m]
+      if(M > 1) {
+        for(m in 2:M) {
+          all_B_m[, i1, m] <- -all_B_m[, i1, m]
+        }
       }
     }
   }
@@ -436,7 +437,7 @@ sort_impactmats <- function(p, M, d, params, weight_function=c("relative_dens", 
   }
 
   # Fill in the new impact matrices to the parameter vector
-  params[(length(params) - n_weight_pars - d - M*d^2 + 1):(length(params) - n_weights_pars - d)] <- as.vector(all_B_m)
+  params[(length(params) - n_weight_pars - d - M*d^2 + 1):(length(params) - n_weight_pars - d)] <- as.vector(all_B_m)
 
   # Return the new parameter vector
   params
