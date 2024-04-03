@@ -117,6 +117,15 @@ theta_222thres_2_1 <- c(theta_222relg[-length(theta_222relg)], 1)
 mod222thres_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222thres_2_1, weight_function="threshold",
                          weightfun_pars=c(2, 1))
 
+## weight_function == "exogenous"
+
+# p=2, M=2, d=2, weight_function="exogenous", weighfun_pars=weightfun_pars222, cond_dist="Student"
+set.seed(2); tw1 <- runif(nrow(gdpdef) - 2)
+weightfun_pars222 <- cbind(tw1, 1-tw1)
+theta_222exo <- c(theta_222relg[-length(theta_222relg)], 7)
+mod222exo <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222exo, weight_function="exogenous",
+                   weightfun_pars=weightfun_pars222, cond_dist="Student")
+
 
 ## Constrained models
 rbind_diags <- function(p, M, d) {
@@ -218,6 +227,27 @@ mod222logisticcmwt_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logi
                                 weightfun_pars=c(2, 1), cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_222,
                                 weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean")
 
+# ind_Student
+
+# p=1, M=2, d=3, weight_function="exogenous", weighfun_pars=weightfun_pars123, cond_dist="ind_Student"
+set.seed(3); tw1 <- runif(nrow(usamone) - 1)
+weightfun_pars123 <- cbind(tw1, 1-tw1)
+set.seed(4); Bmatpars123 <- round(rnorm(18), 3)
+theta_123exoit <- c(0.10741, 0.13813, -0.12092, 3.48957, 0.60615, 0.45646, 0.87227, -0.01595, 0.14124,
+                    -0.08611, 0.61865, 0.34311, -0.02047, 0.025, 0.97548, 0.74976, 0.02187, 0.29213,
+                    -1.55165, 0.58245, -0.00696, -0.07261, 0.02021, 0.96883, Bmatpars123, 7, 3, 13)
+mod123exoit <- STVAR(data=usamone, p=1, M=2, d=3, params=theta_123exoit, weight_function="exogenous",
+                     weightfun_pars=weightfun_pars123, cond_dist="ind_Student")
+
+# p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="ind_Student", mean_constraints=list(1:2),
+# AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean"
+set.seed(5); Bmatpars222 <- round(rnorm(8), 3)
+theta_222logistit <- c(0.7209658, 0.810858, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01, 0.08, 0.3, Bmatpars222, 0.4, 7, 3)
+mod222logistit <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logistit, weight_function="logistic", weightfun_pars=c(2, 1),
+                        cond_dist="ind_Student", mean_constraints=list(1:2), AR_constraints=C_222,
+                        weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean")
+
+
 
 ## Structural models
 
@@ -258,6 +288,18 @@ mod222expcmwtsh_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222expcmwt
                              weightfun_pars=c(2, 1), identification="heteroskedasticity", cond_dist="Student", mean_constraints=list(1:2),
                              AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean")
 
+# p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="ind_Student", mean_constraints=list(1:2),
+# AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean",
+# B_constraints=matrix(c(1, NA, 0, 1), nrow=2, ncol=2)
+set.seed(5); Bmatpars222 <- round(rnorm(8), 3)
+theta_222logistitb <- c(0.7209658, 0.810858, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01, 0.08, 0.3, # mu + A
+                        0.1, 0.2, 0.3, 0.11, -0.22, 0.33, # B mats
+                        0.4, 7, 3)
+mod222logistitb <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logistitb, weight_function="logistic", weightfun_pars=c(2, 1),
+                         cond_dist="ind_Student", mean_constraints=list(1:2), AR_constraints=C_222,
+                         weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), identification="non-Gaussianity",
+                         parametrization="mean", B_constraints=matrix(c(1, NA, 0, 1), nrow=2, ncol=2))
+
 
 
 test_that("get_boldA_eigens work correctly", {
@@ -295,6 +337,10 @@ test_that("get_boldA_eigens work correctly", {
   expect_equal(get_boldA_eigens(mod222expcmw_2_1)[,1], c(0.7667397, 0.7667397, 0.5076821, 0.4147943), tol=1e-3)
   expect_equal(get_boldA_eigens(mod222expcmw_2_1)[,2], c(0.7667397, 0.7667397, 0.5076821, 0.4147943), tol=1e-3)
 
+  expect_equal(get_boldA_eigens(mod222exo)[,1], c(0.7667397, 0.7667397, 0.5076821, 0.4147943), tol=1e-3)
+  expect_equal(get_boldA_eigens(mod222exo)[,2], c(0.9198650, 0.4317946, 0.2541513, 0.1575083), tol=1e-3)
+
+
   # Student
   expect_equal(get_boldA_eigens(mod222threst_2_1)[,1], c(0.7667397, 0.7667397, 0.5076821, 0.4147943), tol=1e-3)
   expect_equal(get_boldA_eigens(mod222threst_2_1)[,2], c(0.9198650, 0.4317946, 0.2541513, 0.1575083), tol=1e-3)
@@ -305,6 +351,12 @@ test_that("get_boldA_eigens work correctly", {
   expect_equal(get_boldA_eigens(mod222logisticcmwt_2_1)[,1], c(0.7667397, 0.7667397, 0.5076821, 0.4147943), tol=1e-3)
   expect_equal(get_boldA_eigens(mod222logisticcmwt_2_1)[,2], c(0.7667397, 0.7667397, 0.5076821, 0.4147943), tol=1e-3)
 
+  # ind_Student
+  expect_equal(get_boldA_eigens(mod123exoit)[,1], c(0.9609557, 0.9149672, 0.5904771), tol=1e-3)
+  expect_equal(get_boldA_eigens(mod123exoit)[,2], c(0.8588946, 0.8588946, 0.6225743), tol=1e-3)
+  expect_equal(get_boldA_eigens(mod222logistit)[,1], c(0.7667397, 0.7667397, 0.5076821, 0.4147943), tol=1e-3)
+  expect_equal(get_boldA_eigens(mod222logistit)[,2], c(0.7667397, 0.7667397, 0.5076821, 0.4147943), tol=1e-3)
+
   # Structural models
   expect_equal(get_boldA_eigens(mod222thressr_2_1)[,1], c(0.7667397, 0.7667397, 0.5076821, 0.4147943), tol=1e-3)
   expect_equal(get_boldA_eigens(mod222thressr_2_1)[,2], c(0.9198650, 0.4317946, 0.2541513, 0.1575083), tol=1e-3)
@@ -314,6 +366,8 @@ test_that("get_boldA_eigens work correctly", {
   expect_equal(get_boldA_eigens(mod222logistictsh_2_1)[,2], c(0.9205818, 0.3981026, 0.2208400, 0.1510854), tol=1e-3)
   expect_equal(get_boldA_eigens(mod222expcmwtsh_2_1)[,1], c(0.7667397, 0.7667397, 0.5076821, 0.4147943), tol=1e-3)
   expect_equal(get_boldA_eigens(mod222expcmwtsh_2_1)[,2], c(0.7667397, 0.7667397, 0.5076821, 0.4147943), tol=1e-3)
+  expect_equal(get_boldA_eigens(mod222logistitb)[,1], c(0.7667397, 0.7667397, 0.5076821, 0.4147943), tol=1e-3)
+  expect_equal(get_boldA_eigens(mod222logistitb)[,2], c(0.7667397, 0.7667397, 0.5076821, 0.4147943), tol=1e-3)
 })
 
 
@@ -352,6 +406,9 @@ test_that("get_omega_eigens work correctly", {
   expect_equal(get_omega_eigens(mod222expcmw_2_1)[,1], c(0.21055385, 0.02944615), tol=1e-3)
   expect_equal(get_omega_eigens(mod222expcmw_2_1)[,2], c(1.100101, 0.109899), tol=1e-3)
 
+  expect_equal(get_omega_eigens(mod222exo)[,1], c(0.21055385, 0.02944615), tol=1e-3)
+  expect_equal(get_omega_eigens(mod222exo)[,2], c(1.100101, 0.109899), tol=1e-3)
+
   # Student
   expect_equal(get_omega_eigens(mod222threst_2_1)[,1], c(0.21055385, 0.02944615), tol=1e-3)
   expect_equal(get_omega_eigens(mod222threst_2_1)[,2], c(1.100101, 0.109899), tol=1e-3)
@@ -362,6 +419,12 @@ test_that("get_omega_eigens work correctly", {
   expect_equal(get_omega_eigens(mod222logisticcmwt_2_1)[,1], c(0.21055385, 0.02944615), tol=1e-3)
   expect_equal(get_omega_eigens(mod222logisticcmwt_2_1)[,2], c(1.100101, 0.109899), tol=1e-3)
 
+  # ind_Student
+  expect_equal(get_omega_eigens(mod123exoit)[,1], c(2.317211, 0.755054, -1.570265), tol=1e-3)
+  expect_equal(get_omega_eigens(mod123exoit)[,2], c(2.009935, 1.196301, -2.694236), tol=1e-3)
+  expect_equal(get_omega_eigens(mod222logistit)[,1], c(0.3513945, -2.4473945), tol=1e-3)
+  expect_equal(get_omega_eigens(mod222logistit)[,2], c(1.477276, -2.010276), tol=1e-3)
+
   # Structural
   expect_equal(get_omega_eigens(mod222thressr_2_1)[,1], c(0.21055385, 0.02944615), tol=1e-3)
   expect_equal(get_omega_eigens(mod222thressr_2_1)[,2], c(1.100101, 0.109899), tol=1e-3)
@@ -371,4 +434,6 @@ test_that("get_omega_eigens work correctly", {
   expect_equal(get_omega_eigens(mod222logistictsh_2_1)[,2], c(0.5001637, 0.1934763), tol=1e-3)
   expect_equal(get_omega_eigens(mod222expcmwtsh_2_1)[,1], c(0.57862293, 0.05787707), tol=1e-3)
   expect_equal(get_omega_eigens(mod222expcmwtsh_2_1)[,2], c(0.5001637, 0.1934763), tol=1e-3)
+  expect_equal(get_omega_eigens(mod222logistitb)[,1], c(0.4236068, -0.0236068), tol=1e-3)
+  expect_equal(get_omega_eigens(mod222logistitb)[,2], c(0.46596748, -0.02596748), tol=1e-3)
 })

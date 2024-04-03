@@ -43,6 +43,7 @@ mod222thres_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222thres_2_1, 
                          weightfun_pars=c(2, 1))
 
 ## weight_function == "exogenous"
+
 # p=2, M=2, d=2, weight_function="exogenous", weighfun_pars=weightfun_pars222, cond_dist="Student"
 set.seed(2); tw1 <- runif(nrow(gdpdef) - 2)
 weightfun_pars222 <- cbind(tw1, 1-tw1)
