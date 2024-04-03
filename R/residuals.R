@@ -89,31 +89,36 @@ get_residuals <- function(data, p, M, params, weight_function=c("relative_dens",
                               cond_dist=cond_dist, parametrization=parametrization, identification=identification,
                               AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                               weight_constraints=weight_constraints, B_constraints=B_constraints,
-                              check_params=TRUE, to_return="alpha_mt")
+                              check_params=TRUE, to_return="tw")
     all_Bt <- get_Bt_Cpp(all_Omegas=all_Omegas, alpha_mt=alpha_mt)
   }
 
   # Go through each point of time and calculate the residuals/shocks
   for(i1 in 1:T_obs) {
-    if(structural_shocks) { # Structural shock:
-      # Calculate the impact matrix
-      if(identification == "recursive") {
-        B_t <- t(chol(Omega_t[, , i1])) # Lower triangular Cholesky decomposition of Omega_t
-      } else if(identification == "heteroskedasticity") {
-        if(M == 1) {
-          B_t <- W
-        } else {
-          tmp <- array(dim=c(d, d, M))
-          for(m in 1:M) {
-            tmp[, , m] <- transition_weights[i1, m]*diag(lambdas[, m])
+    if(cond_dist == "ind_Student") {
+      # Structural shocks and standardized errors are the same thing here due to statistical identification
+      all_residuals[i1,] <- solve(all_Bt[, , i1], y_minus_mu[i1, ])
+    } else {
+      if(structural_shocks) { # Structural shock:
+        # Calculate the impact matrix
+        if(identification == "recursive") {
+          B_t <- t(chol(Omega_t[, , i1])) # Lower triangular Cholesky decomposition of Omega_t
+        } else if(identification == "heteroskedasticity") {
+          if(M == 1) {
+            B_t <- W
+          } else {
+            tmp <- array(dim=c(d, d, M))
+            for(m in 1:M) {
+              tmp[, , m] <- transition_weights[i1, m]*diag(lambdas[, m])
+            }
+            B_t <- W%*%sqrt(apply(tmp, MARGIN=1:2, FUN=sum))
           }
-          B_t <- W%*%sqrt(apply(tmp, MARGIN=1:2, FUN=sum))
         }
+        # Recover the structural shock
+        all_residuals[i1,] <- solve(B_t, y_minus_mu[i1, ])
+      } else { # Standardized Pearson residual:
+        all_residuals[i1,] <- solve(unvec(d=d, a=get_symmetric_sqrt(Omega_t[, , i1])), y_minus_mu[i1,])
       }
-      # Recover the structural shock
-      all_residuals[i1,] <- solve(B_t, y_minus_mu[i1, ])
-    } else { # Standardized Pearson residual:
-      all_residuals[i1,] <- solve(unvec(d=d, a=get_symmetric_sqrt(Omega_t[, , i1])), y_minus_mu[i1,])
     }
   }
   all_residuals
