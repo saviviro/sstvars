@@ -332,13 +332,13 @@ create_Fi_matrix <- function(i, T_obs) {
 #' @keywords internal
 
 order_B <- function(B) {
-  # Step 1: Change signs of columns so that the first element of each column is positive
+  # Change signs of columns so that the first element of each column is positive:
   for(i1 in 1:ncol(B)) {
     if(B[1, i1] < 0) {
       B[, i1] <- -B[, i1]
     }
   }
 
-  # Reorder the columns of B so that the diagonal elements are in decreasing order
-  B[, order(B[1, ], decreasing = TRUE), drop=FALSE]
+  # Reorder the columns of B so that the diagonal elements are in decreasing order:
+  B[, order(B[1, ], decreasing=TRUE), drop=FALSE]
 }

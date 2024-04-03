@@ -96,7 +96,7 @@ change_parametrization <- function(p, M, d, params,
 }
 
 
-#' @title Sort regimes in parameter vector according to mixing weights into a decreasing order
+#' @title Sort regimes in parameter vector according to transition weights into a decreasing order
 #'
 #' @description \code{sort_regimes} sorts regimes in the parameter vector according to
 #'   the transition weight parameters.
@@ -360,4 +360,84 @@ reform_constrained_pars <- function(p, M, d, params,
   }
 
   c(all_phi0, psi_expanded, covmatpars, weightpars, distpars)
+}
+
+
+
+#' @title Sort and sign change the columns of the impact matrices of the regimes so that the first element in each column of \eqn{B_1}
+#'   is positive and in a decreasing order.
+#'
+#' @description \code{sort_impactmats} sorts and sign changes the columns of the impact matrices of the regimes so that the first element
+#'   in each column of \eqn{B_1} is positive and in a decreasing order. The same reordering and sign changes performed to the
+#'   columns of \eqn{B_1} are applied to the rest of the impact matrices to obtain an observationally equivalent model.
+#'
+#' @inheritParams loglikelihood
+#' @details This function is internally used by \code{GAfit} and \code{fitSTVAR}, so structural models or \code{B_constraints} are not supported.
+#' @return Returns sorted parameter vector of the form described for the argument \code{params},
+#'   with the regimes sorted so that...
+#'   \describe{
+#'     \item{If \code{cond_dist == "ind_Student"}:}{The parameter vector with the columns of the impact matrices sorted and sign changed so
+#'           that the first element in each column of \eqn{B_1} is positive and in a decreasing order.}
+#'     \item{Otherwise:}{Nothing to sort, so returns the original parameter vector given in \code{param}.}
+#'   }
+#' @keywords internal
+
+sort_impactmats <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                            weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"),
+                            AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL) {
+  weight_function <- match.arg(weight_function)
+  cond_dist <- match.arg(cond_dist)
+  identification <- match.arg(identification)
+  if(cond_dist != "ind_Student") {
+    return(params) # No impact matrices whose columns to sort
+  }
+
+  # The number of weight pars
+  if(weight_function == "exogenous") {
+    n_weight_pars <- 0
+  } else {
+    if(is.null(weight_constraints)) {
+      if(weight_function == "relative_dens" || weight_function == "threshold") {
+        n_weight_pars <- M - 1
+      } else if(weight_function == "logistic" || weight_function == "exponential") {
+        n_weight_pars <- 2
+      } else if(weight_function == "mlogit") {
+        n_weight_pars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
+      }
+    } else { # Constraints on the weight parameters
+      if(all(weight_constraints[[1]] == 0)) {
+        n_weight_pars <- 0 # alpha = r, not in the parameter vector
+      } else {
+        n_weight_pars <- ncol(weight_constraints[[1]]) # The dimension of xi
+      }
+    }
+  }
+  # The number of degrees of freedom parameters is d for cond_dist == "ind_Student"
+
+  # Obtain the impact matrices
+  all_B_m <- array(params[(length(params) - n_weight_pars - d - M*d^2 + 1):(length(params) - n_weights_pars - d)], dim=c(d, d, M))
+
+  # Determine which columns should go through sign change, and change the signs of those columns
+  for(i1 in 1:d) {
+    if(all_B_m[1, i1, 1] < 0) {
+      all_B_mB[, i1, 1] <- -all_B_mB[, i1, 1]
+      # Change the signs of the corresponding columns in the rest of the impact matrices
+      for(m in 2:M) {
+        all_B_m[, i1, m] <- -all_B_m[, i1, m]
+      }
+    }
+  }
+
+  # Sort the columns of the impact matrices so that the first element in each column of B_1 is in a decreasing order,
+  # i.e., the first row is in a decreasing order (note: the first element is positive due to the above sign changes).
+  new_ordering <- order(all_B_m[1, , 1], decreasing=TRUE)
+  for(m in 1:M) {
+    all_B_m[, , m] <- all_B_m[, new_ordering, m]
+  }
+
+  # Fill in the new impact matrices to the parameter vector
+  params[(length(params) - n_weight_pars - d - M*d^2 + 1):(length(params) - n_weights_pars - d)] <- as.vector(all_B_m)
+
+  # Return the new parameter vector
+  params
 }

@@ -306,7 +306,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                             weight_constraints=weight_constraints,
                                             force_stability=is.null(AR_constraints),
                                             mu_scale=mu_scale, mu_scale2=mu_scale2,
-                                            omega_scale=omega_scale, ar_scale=ar_scale,
+                                            omega_scale=omega_scale, B_scale=B_scale, ar_scale=ar_scale,
                                             weight_scale=weight_scale, ar_scale2=ar_scale2))
       ind_loks <- vapply(1:popsize, function(i2) loglikelihood(data=data, p=p, M=M, params=inds[,i2],
                                                                weight_function=weight_function, weightfun_pars=weightfun_pars,
@@ -335,10 +335,10 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
     stopifnot(is.list(initpop))
     for(i1 in 1:length(initpop)) {
       ind <- initpop[[i1]]
-      tryCatch(check_params(p=p, M=M, d=d, params=ind, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                            cond_dist=cond_dist, parametrization=parametrization, identification="reduced_form",
-                            AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                            weight_constraints=weight_constraints, B_constraints=NULL),
+      tryCatch(check_params(data=data, p=p, M=M, d=d, params=ind, weight_function=weight_function,
+                            weightfun_pars=weightfun_pars, cond_dist=cond_dist, parametrization=parametrization,
+                            identification="reduced_form", AR_constraints=AR_constraints,
+                            mean_constraints=mean_constraints, weight_constraints=weight_constraints, B_constraints=NULL),
                error=function(e) stop(paste("Problem with individual", i1, "in the initial population: "), e))
       if(parametrization == "intercept") {
         ind <- change_parametrization(p=p, M=M, d=d, params=ind, weight_function=weight_function, weightfun_pars=weightfun_pars,
