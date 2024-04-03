@@ -163,10 +163,9 @@
 #' }
 #' @export
 
-fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
-                     weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
-                     AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
-                     nrounds=(M + 1)^5, ncores=2, maxit=1000,
+fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                     weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), parametrization=c("intercept", "mean"),
+                     AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, nrounds=(M + 1)^5, ncores=2, maxit=1000,
                      seeds=NULL, print_res=TRUE, use_parallel=TRUE, filter_estimates=TRUE, ...) {
   # Initial checks etc
   weight_function <- match.arg(weight_function)
@@ -180,13 +179,13 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   data <- check_data(data=data, p=p)
   d <- ncol(data)
   n_obs <- nrow(data)
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                         cond_dist=cond_dist)
+  weightfun_pars <- check_weightfun_pars(data=data, p=p, d=d, M=M, weight_function=weight_function,
+                                         weightfun_pars=weightfun_pars, cond_dist=cond_dist)
   if(!is.null(mean_constraints) && parametrization == "intercept") {
     if(!no_prints) cat("mean_constraints can be applied for mean-parametrized models only. Switching to parametrization = 'mean'.\n")
     parametrization <- "mean"
   }
-  check_constraints(p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
+  check_constraints(data=data, p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
                     parametrization=parametrization, identification="reduced_form",
                     AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                     weight_constraints=weight_constraints, B_constraints=NULL)
@@ -393,6 +392,20 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                                                                        cond_dist=cond_dist,
                                                                        identification="reduced_form"))
   }
+  # Sort and sign change the columns of the impact matrices if cond_dist == "ind_Student"
+  if(cond_dist == "ind_Student") {
+    params <- sort_impactmats(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                              cond_dist=cond_dist, AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                              weight_constraints=weight_constraints)
+    all_estimates <- lapply(all_estimates, function(pars) sort_impactmats(p=p, M=M, d=d, params=pars,
+                                                                          weight_function=weight_function,
+                                                                          weightfun_pars=weightfun_pars,
+                                                                          cond_dist=cond_dist,
+                                                                          AR_constraints=AR_constraints,
+                                                                          mean_constraints=mean_constraints,
+                                                                          weight_constraints=weight_constraints))
+  }
+
 
   if(NEWTONresults[[which_best_fit]]$convergence == 1) {
     if(!no_prints) message(paste("Iteration limit was reached when estimating the best fitting individual!",
