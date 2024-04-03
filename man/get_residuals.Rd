@@ -9,11 +9,13 @@ get_residuals(
   p,
   M,
   params,
-  weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
+  weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold",
+    "exogenous"),
   weightfun_pars = NULL,
-  cond_dist = c("Gaussian", "Student"),
+  cond_dist = c("Gaussian", "Student", "ind_Student"),
   parametrization = c("intercept", "mean"),
-  identification = c("reduced_form", "recursive", "heteroskedasticity"),
+  identification = c("reduced_form", "recursive", "heteroskedasticity",
+    "non-Gaussianity"),
   AR_constraints = NULL,
   mean_constraints = NULL,
   weight_constraints = NULL,
@@ -189,7 +191,7 @@ Returns a \eqn{(T \times d)} matrix containing...
      \item{If \code{standardize == FALSE}:}{the nonstandardized residuals.}
      \item{If \code{structural_shocks == TRUE}:}{the structural shocks.}
    }
-  Note that the starting time is the start time of data plus \eqn{p + 1},
+  Note that the starting time is \eqn{p + 1} counted from the beginning of the starting time of the data,
   as the first \eqn{p} observations are used as initial values.
 }
 \description{

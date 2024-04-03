@@ -69,7 +69,7 @@ Student_densities_Cpp <- function(obs, means, covmats, alpha_mt, df) {
 #' in \code{alpha_mt}, it computes a weighted sum of matrices, and checks if this sum is
 #' invertible by verifying that its determinant is not within the specified tolerance of zero.
 #'
-#' @param all_Omegas A cube (3D array) of matrices, with each slice being a square matrix.
+#' @param all_Omegas A cube (3D array) of impact matrices, with each slice being an inveritble square matrix.
 #' @param alpha_mt A matrix of weights, with as many columns as there are slices in \code{all_Omegas}.
 #' @param posdef_tol A strictly positive small number used as a tolerance for checking
 #'        the invertibility of the matrix. The matrix is considered non-invertible if

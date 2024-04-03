@@ -7,7 +7,7 @@
 check_Bt_Cpp(all_Omegas, alpha_mt, posdef_tol)
 }
 \arguments{
-\item{all_Omegas}{A cube (3D array) of matrices, with each slice being a square matrix.}
+\item{all_Omegas}{A cube (3D array) of impact matrices, with each slice being an inveritble square matrix.}
 
 \item{alpha_mt}{A matrix of weights, with as many columns as there are slices in \code{all_Omegas}.}
 
