@@ -56,16 +56,17 @@ get_omega_eigens <- function(stvar) {
 #' @inherit stab_conds_satisfied references
 #' @keywords internal
 
-get_boldA_eigens_par <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
-                                 weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
-                                 identification=c("reduced_form", "recursive", "heteroskedasticity"),
+get_boldA_eigens_par <- function(p, M, d, params,
+                                 weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                                 weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), parametrization=c("intercept", "mean"),
+                                 identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                                  AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
   parametrization <- match.arg(parametrization)
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                         cond_dist=cond_dist)
+  weightfun_pars <- check_weightfun_pars(p=p, d=d, M=M, weight_function=weight_function,
+                                         weightfun_pars=weightfun_pars, cond_dist=cond_dist)
   check_constraints(p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
                     parametrization=parametrization, identification=identification,
                     AR_constraints=AR_constraints, mean_constraints=mean_constraints,
@@ -95,16 +96,17 @@ get_boldA_eigens_par <- function(p, M, d, params, weight_function=c("relative_de
 #' @inherit get_boldA_eigens references
 #' @keywords internal
 
-get_omega_eigens_par <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
-                                 weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
-                                 identification=c("reduced_form", "recursive", "heteroskedasticity"),
+get_omega_eigens_par <- function(p, M, d, params,
+                                 weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                                 weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), parametrization=c("intercept", "mean"),
+                                 identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                                  AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
   parametrization <- match.arg(parametrization)
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                         cond_dist=cond_dist)
+  weightfun_pars <- check_weightfun_pars(p=p, d=d, M=M, weight_function=weight_function,
+                                         weightfun_pars=weightfun_pars, cond_dist=cond_dist)
   check_constraints(p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
                     parametrization=parametrization, identification=identification,
                     AR_constraints=AR_constraints, mean_constraints=mean_constraints,
