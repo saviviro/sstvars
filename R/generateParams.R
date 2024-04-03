@@ -435,8 +435,12 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logistic", "
 
   # Generate covmat params
   if(cond_dist == "ind_Student") { # Covmat pars impact matrix params
-    covmat_pars <- c(random_impactmat(d=d, B_scale=B_scale, is_regime1=TRUE), # Regime 1 impact matrix is constrained
-                     replicate(n=M-1, expr=random_impactmat(d=d, B_scale=B_scale, is_regime1=FALSE))) # Regime 2,...,M impact matrices
+    if(M == 1) {
+      covmat_pars <- as.vector(random_impactmat(d=d, B_scale=B_scale, is_regime1=TRUE))
+    } else {
+      covmat_pars <- c(random_impactmat(d=d, B_scale=B_scale, is_regime1=TRUE), # Regime 1 impact matrix is constrained
+                               replicate(n=M-1, expr=random_impactmat(d=d, B_scale=B_scale, is_regime1=FALSE))) # Regime 2,...,M impact matrices
+    }
   } else { # cond_dist == "Gaussian" or "Student"
     covmat_pars <- as.vector(replicate(n=M, expr=random_covmat(d=d, omega_scale=omega_scale)))
   }
