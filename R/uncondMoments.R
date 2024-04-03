@@ -213,16 +213,17 @@ get_regime_means <- function(p, M, d, params,
 #'   }
 #' @keywords internal
 
-get_regime_autocovs <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
-                                weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"),
-                                identification=c("reduced_form", "recursive", "heteroskedasticity"),
+get_regime_autocovs <- function(p, M, d, params,
+                                weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                                weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"),
+                                identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                                 AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
   # Match args
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
 
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function,
+  weightfun_pars <- check_weightfun_pars(p=p, M=M, d=d, weight_function=weight_function,
                                          weightfun_pars=weightfun_pars, cond_dist=cond_dist)
 
   # Collect the required parameter values
@@ -232,7 +233,7 @@ get_regime_autocovs <- function(p, M, d, params, weight_function=c("relative_den
                                     weight_constraints=weight_constraints, B_constraints=B_constraints,
                                     weightfun_pars=weightfun_pars)
   all_A <- pick_allA(p=p, M=M, d=d, params=params) # [d, d, p, M]
-  all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params, identification=identification) # [d, d, M]
+  all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params, cond_dist=cond_dist, identification=identification) # [d, d, M]
   all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
 
   # Calculate teh regimewise autocovarinces
