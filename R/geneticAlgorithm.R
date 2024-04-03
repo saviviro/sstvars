@@ -346,6 +346,11 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                       mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                                       B_constraints=NULL, change_to="mean")
       }
+      if(cond_dist == "ind_Student") { # Sort and sign change columns so that the first row of B_1 is positive and in a decreasing order.
+        ind <- sort_impactmats(p=p, M=M, d=d, params=ind, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                              cond_dist=cond_dist, AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                              weight_constraints=weight_constraints)
+      }
       if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(weight_constraints)) {
         initpop[[i1]] <- sort_regimes(p=p, M=M, d=d, params=ind, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                       cond_dist=cond_dist, identification="reduced_form")
@@ -500,10 +505,10 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
     best_index <- best_index0[order(best_index0[,1], decreasing=FALSE)[1],] # First generation when the best loglik occurred
     best_ind <- generations[, best_index[2], best_index[1]]
     best_mw <- loglikelihood(data=data, p=p, M=M, params=best_ind, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                             cond_dist=cond_dist, parametrization="mean", identification="reduced_form",
-                             AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                             weight_constraints=weight_constraints, B_constraints=NULL,
+                             cond_dist=cond_dist, parametrization="mean", identification="reduced_form", AR_constraints=AR_constraints,
+                             mean_constraints=mean_constraints, weight_constraints=weight_constraints, B_constraints=NULL,
                              to_return="tw", check_params=FALSE, minval=minval)
+
     # Which regimes are wasted:
     which_redundant <- which(vapply(1:M, function(i2) sum(best_mw[,i2] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
 
@@ -528,9 +533,9 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
     pre_smart_mu <- runif(1, min=1e-6, max=1-1e-6) < pre_smart_mu_prob
     ar_scale <- runif(1, min=1e-6, max=upper_ar_scale - 1e-6) # Random AR scale
     if(i1 <= smart_mu & length(which_mutate) >= 1 & !pre_smart_mu) { # Random mutations
-      if(!is.null(AR_constraints) | runif(1, min=1e-6, max=1 - 1e-6) > 0.5) { # Does not always satisfy the stability conditions
+      if(!is.null(AR_constraints) || runif(1, min=1e-6, max=1 - 1e-6) > 0.5) { # Does not always satisfy the stability conditions
         stat_mu <- FALSE
-      } else { # For stationarity with algorithm (slower but can skip stationarity test), Ansley and Kohn (1986)
+      } else { # Force stability condition with an algorithm (slower but can skip stability check), Ansley and Kohn (1986)
         stat_mu <- TRUE
       }
       H2[,which_mutate] <- vapply(1:length(which_mutate), function(x) random_ind(p=p, M=M, d=d,
@@ -544,10 +549,10 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                                                                  mu_scale=mu_scale,
                                                                                  mu_scale2=mu_scale2,
                                                                                  omega_scale=omega_scale,
+                                                                                 B_scale=B_scale,
                                                                                  ar_scale=ar_scale,
                                                                                  weight_scale=weight_scale,
                                                                                  ar_scale2=ar_scale2), numeric(npars))
-
 
     } else if(length(which_mutate) >= 1) { # Smart mutations
       stat_mu <- FALSE
@@ -592,15 +597,16 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
         which_to_change <- which_redundant[1]
 
         # Pick the nonredundant regimes of best_ind and alt_ind
-        non_red_regs_best <- vapply((1:M)[-which_redundant], function(i2) pick_regime(p=p, M=M, d=d, params=best_ind, m=i2),
-                                    numeric(p*d^2 + d + d*(d+1)/2))
+        n_regpars <- p*d^2 + d + ifelse(cond_dist == "ind_Student", d^2, d*(d+1)/2)
+        non_red_regs_best <- vapply((1:M)[-which_redundant], function(i2) pick_regime(p=p, M=M, d=d, params=best_ind, cond_dist=cond_dist,
+                                                                                      m=i2), numeric(n_regpars))
 
         alt_regs_to_pick  <- 1:M
         if(length(which_redundant_alt) != 0) { # Needed because (1:M)[-numeric(0)] = integer(0)
           alt_regs_to_pick <- alt_regs_to_pick[-which_redundant_alt]
         }
-        non_red_regs_alt <- vapply(alt_regs_to_pick, function(i2) pick_regime(p=p, M=M, d=d, params=alt_ind, m=i2),
-                                   numeric(p*d^2 + d + d*(d+1)/2))
+        non_red_regs_alt <- vapply(alt_regs_to_pick, function(i2) pick_regime(p=p, M=M, d=d, params=alt_ind, cond_dist=cond_dist,
+                                                                              m=i2), numeric(n_regpars))
 
         # Calculate the "distances" between the nonredundant regimes
         #  Row for each non-red-reg-best and column for each non-red-reg-al:
@@ -620,7 +626,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
         reg_to_use <- non_red_regs_alt[,which_reg_to_use]
 
         # Change the chosen regime of best_ind to be the one chosen from alt_ind
-        ind_to_use <- change_regime(p=p, M=M, d=d, params=best_ind, m=which_to_change, regime_pars=reg_to_use)
+        ind_to_use <- change_regime(p=p, M=M, d=d, params=best_ind, cond_dist=cond_dist, m=which_to_change, regime_pars=reg_to_use)
 
         # Should some regimes still be random?
         rand_to_use <- which_redundant[which_redundant != which_to_change]
@@ -639,15 +645,24 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                                                                  mu_scale=mu_scale,
                                                                                  mu_scale2=mu_scale2,
                                                                                  omega_scale=omega_scale,
+                                                                                 B_scale=B_scale,
                                                                                  ar_scale=ar_scale,
                                                                                  ar_scale2=ar_scale2), numeric(npars))
     }
 
-    # Sort components according to the transition weight parameters. No sorting if constraints are employed.
+    # Sort components according to the transition weight parameters (for some weight functions). No sorting if constraints are employed.
     if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(weight_constraints)) {
       H2 <- vapply(1:popsize, function(i2) sort_regimes(p=p, M=M, d=d, params=H2[,i2], weight_function=weight_function,
                                                         weightfun_pars=weightfun_pars, cond_dist=cond_dist,
                                                         identification="reduced_form"), numeric(npars))
+    }
+
+    # Sort and sign change the columns of the impact matrices so that the first row of B_1 is positive and in a decreasing order.
+    if(cond_dist == "ind_Student") {
+      H2 <- vapply(1:popsize, function(i2) sort_impactmats(p=p, M=M, d=d, params=H2[,i2], weight_function=weight_function,
+                                                           weightfun_pars=weightfun_pars, cond_dist=cond_dist,
+                                                           AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                                           weight_constraints=weight_constraints), numeric(npars))
     }
 
     # Save the results and set up new generation
