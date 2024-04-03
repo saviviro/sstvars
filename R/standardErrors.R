@@ -105,7 +105,7 @@ print_std_errors <- function(stvar, digits=3) {
   mean_constraints <- stvar$model$mean_constraints
   weight_constraints <- stvar$model$weight_constraints
   B_constraints <- stvar$model$B_constraints
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=stvar$model$weightfun_pars)
+  weightfun_pars <- check_weightfun_pars(p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=stvar$model$weightfun_pars)
   npars <- length(stvar$params)
   pars <- stvar$std_errors
   pars <- reform_constrained_pars(p=p, M=M, d=d, params=pars, weight_function=weight_function,
@@ -115,22 +115,20 @@ print_std_errors <- function(stvar, digits=3) {
                                   B_constraints=B_constraints)
   all_phi0_or_mu <- pick_phi0(M=M, d=d, params=pars)
   all_A <- pick_allA(p=p, M=M, d=d, params=pars)
-  distpars <- pick_distpars(params=pars, cond_dist=cond_dist)
-  if(identification == "reduced_form") {
-    all_Omega <- pick_Omegas(p=p, M=M, d=d, params=pars, identification=identification)
-  } else {
+  distpars <- pick_distpars(d=d, params=pars, cond_dist=cond_dist)
+  if(identification == "heteroskedasticity") {
     # No standard errors for cov. mats. as the model is parametrized with W and lambdas
     all_Omega <- array(" ", dim=c(d, d, M))
+  } else {
+    all_Omega <- pick_Omegas(p=p, M=M, d=d, params=pars, cond_dist=cond_dist, identification=identification)
   }
   weightpars <- pick_weightpars(p=p, M=M, d=d, params=pars, weight_function=weight_function, weightfun_pars=weightfun_pars)
   if(weight_function == "relative_dens") {
     weightpars[M] <- NA # No standard error for the last alpha
-  } else if(weight_function == "logistic") {
+  } else if(weight_function %in% c("logistic", "exponential", "threshold", "exogenous")) {
     # Weightpars are ok as is.
   } else if(weight_function == "mlogit") {
     all_gamma_m <- matrix(weightpars, ncol=M-1) # Column per gamma_m, m=1,...,M-1, gamma_M=0.
-  } else {
-    stop("Unkown weight function in print_std_errors")
   }
 
   if(parametrization == "mean") {
@@ -161,8 +159,8 @@ print_std_errors <- function(stvar, digits=3) {
       ifelse(is.null(AR_constraints), "no AR_constraints,", "AR_constraints used,"),
       ifelse(is.null(mean_constraints), paste0("no mean_constraints,", ifelse(is.null(B_constraints), "", ",")),
              paste0("mean_constraints used,", ifelse(is.null(B_constraints), "", ","))),
-      ifelse(identification %in% c("reduced_form", "recursive"), "", ifelse(is.null(B_constraints),
-                                                                            "no B_constraints,", "B_constraints used,")))
+      ifelse(identification %in% c("reduced_form", "recursive"), "",
+             ifelse(is.null(B_constraints), "no B_constraints,", "B_constraints used,")))
   cat("\n", paste0(" p = ", p, ", "))
   cat(paste0("M = ", M, ", "))
   cat(paste0("d = ", d, ", #parameters = " , npars, ","))
@@ -174,7 +172,7 @@ print_std_errors <- function(stvar, digits=3) {
                       weightfun_pars[2], "."))
   }
   cat("\n\n")
-  cat("APPROXIMATE STANDARD ERRORS ASSUMING ASYMPTOTIC NORMALITY\n\n")
+  cat("APPROXIMATE STANDARD ERRORS ASSUMING STANDARD ASYMPTOTICS\n\n")
 
   left_brackets <- rep("[", times=d)
   right_brackets <- rep("]", times=d)
@@ -188,9 +186,9 @@ print_std_errors <- function(stvar, digits=3) {
     count <- 1
     cat(paste("Regime", m))
     cat("\n")
-    if(cond_dist == "Student") {
+    if(cond_dist == "Student" || cond_dist == "ind_Student") {
       if(m == 1) {
-        cat(paste0("Degrees of freedom: ", format_value(distpars), " (for all regimes)"), "\n")
+        cat(paste0("Degrees of freedom: ", paste0(format_value(distpars), collapse=", "), " (for all regimes)"), "\n")
       }
     }
     if(weight_function == "relative_dens") {
@@ -224,9 +222,13 @@ print_std_errors <- function(stvar, digits=3) {
       df <- cbind(df, plus)
     }
     df[, tmp_names[p*(d + 2) + 1]] <- left_brackets
-    df[, c("Omega", tmp_names[(p*(d + 2) + 2):(p*(d + 2) + d)])] <- format_value(all_Omega[, , m])
+    if(cond_dist == "ind_Student") {
+      df[, c("B", tmp_names[(p*(d + 2) + 2):(p*(d + 2) + d)])] <- format_value(all_Omega[, , m])
+    } else {
+      df[, c("Omega", tmp_names[(p*(d + 2) + 2):(p*(d + 2) + d)])] <- format_value(all_Omega[, , m])
+    }
     df[, tmp_names[p*(d + 2) + d + 1]] <- right_brackets
-    df[, "1/2"] <- rep(" ", d)
+    if(cond_dist != "ind_Student") df[, "1/2"] <- rep(" ", d)
     df[, tmp_names[p*(d + 2) + d + 2]] <- paste0("eps", 1:d)
     names_to_omit <- unlist(lapply(c("plus", "eq", "round_lbrackets", "round_rbrackets", tmp_names),
                                    function(nam) grep(nam, colnames(df))))
@@ -236,7 +238,7 @@ print_std_errors <- function(stvar, digits=3) {
   }
   if(sep_AR) cat(paste0("AR parameters: ", paste0(format_value(AR_stds), collapse=", ")), "\n\n")
 
-  if(!identification %in% c("reduced_form", "recursive")) {
+  if(!identification %in% c("reduced_form", "recursive", "non-Gaussianity")) { # No separate structural params for these models
     cat("Structural parameters:\n")
     if(identification == "heteroskedasticity") {
       W <- format_value(pick_W(p=p, M=M, d=d, params=pars, identification=identification))
