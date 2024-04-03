@@ -96,6 +96,12 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
   identification <- match.arg(identification)
+  if(cond_dist == "ind_Student" && !(identification %in% c("reduced_form", "non-Gaussianity"))) {
+    stop(paste("If cond_dist='ind_Student', identification must be 'reduced_form' or 'non-Gaussianity'",
+               "(note that short-run restriction can be imposed by specifying the argument 'B_constraints')"))
+  } else if(cond_dist != "ind_Student" && identification == "non-Gaussianity") {
+    stop("Identification by 'non-Gaussianity' is not available for models with cond_dist='Gaussian' or 'Student'.")
+  }
   if(missing(data) & missing(d)) stop("data or d must be provided")
   if(missing(data) || is.null(data)) {
     data <- NULL
