@@ -42,6 +42,14 @@ theta_222thres_2_1 <- c(theta_222relg[-length(theta_222relg)], 1)
 mod222thres_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222thres_2_1, weight_function="threshold",
                          weightfun_pars=c(2, 1))
 
+## weight_function == "exogenous"
+# p=2, M=2, d=2, weight_function="exogenous", weighfun_pars=weightfun_pars222, cond_dist="Student"
+set.seed(2); tw1 <- runif(nrow(gdpdef) - 2)
+weightfun_pars222 <- cbind(tw1, 1-tw1)
+theta_222exo <- c(theta_222relg[-length(theta_222relg)], 7)
+mod222exo <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222exo, weight_function="exogenous",
+                   weightfun_pars=weightfun_pars222, cond_dist="Student")
+
 ## Constrained models
 rbind_diags <- function(p, M, d) {
   I <- diag(p*d^2)
@@ -117,6 +125,27 @@ mod222expcmwt_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222expcmwt_2
                            weightfun_pars=c(2, 1), cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_222,
                            weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean")
 
+## ind_Student
+
+# p=1, M=2, d=3, weight_function="exogenous", weighfun_pars=weightfun_pars123, cond_dist="ind_Student"
+set.seed(3); tw1 <- runif(nrow(usamone) - 1)
+weightfun_pars123 <- cbind(tw1, 1-tw1)
+set.seed(4); Bmatpars123 <- round(rnorm(18), 3)
+theta_123exoit <- c(0.10741, 0.13813, -0.12092, 3.48957, 0.60615, 0.45646, 0.87227, -0.01595, 0.14124,
+                  -0.08611, 0.61865, 0.34311, -0.02047, 0.025, 0.97548, 0.74976, 0.02187, 0.29213,
+                  -1.55165, 0.58245, -0.00696, -0.07261, 0.02021, 0.96883, Bmatpars123, 7, 3, 13)
+mod123exoit <- STVAR(data=usamone, p=1, M=2, d=3, params=theta_123exoit, weight_function="exogenous",
+                   weightfun_pars=weightfun_pars123, cond_dist="ind_Student")
+
+# p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="ind_Student", mean_constraints=list(1:2),
+# AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean"
+set.seed(5); Bmatpars222 <- round(rnorm(8), 3)
+theta_222logistit <- c(0.7209658, 0.810858, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01, 0.08, 0.3, Bmatpars222, xi_222logisticcmw_2_1, 7, 3)
+mod222logistit <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logistit, weight_function="logistic", weightfun_pars=c(2, 1),
+                        cond_dist="ind_Student", mean_constraints=list(1:2), AR_constraints=C_222,
+                        weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean")
+
+
 ## Structural models
 
 # p=2, M=2, d=2, weight_function="threshold", weighfun_pars=c(2, 1), identification="recursive"
@@ -171,6 +200,19 @@ mod222expcmwbtsh_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222expcmw
                               weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)),
                               B_constraints=matrix(c(-0.03, 0.24, 0, -0.02), nrow=2, ncol=2), parametrization="mean")
 
+# p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="ind_Student", mean_constraints=list(1:2),
+# AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean",
+# B_constraints=matrix(c(1, NA, 0, 1), nrow=2, ncol=2)
+set.seed(5); Bmatpars222 <- round(rnorm(8), 3)
+theta_222logistitb <- c(0.7209658, 0.810858, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01, 0.08, 0.3, # mu + A
+                        0.1, 0.2, 0.3, 0.11, -0.22, 0.33, # B mats
+                        xi_222logisticcmw_2_1, 7, 3)
+mod222logistitb <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logistitb, weight_function="logistic", weightfun_pars=c(2, 1),
+                        cond_dist="ind_Student", mean_constraints=list(1:2), AR_constraints=C_222,
+                        weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), identification="non-Gaussianity",
+                        parametrization="mean", B_constraints=matrix(c(1, NA, 0, 1), nrow=2, ncol=2))
+
+
 test_that("STVAR works correctly", {
   # Relative_dens Gaussian STVAR
   expect_equal(mod112relg$params, theta_112relg)
@@ -193,11 +235,18 @@ test_that("STVAR works correctly", {
   # Threshold
   expect_equal(mod222thres_2_1$params, theta_222thres_2_1)
 
+  # Exogenous
+  expect_equal(mod222exo$params, theta_222exo)
+
   # Student
   expect_equal(mod222logisticcmwt_2_1$params, theta_222logisticcmwt_2_1)
   expect_equal(mod222logcmt_12_2$params, theta_222logcmt_12_2)
   expect_equal(mod222expcmwt_2_1$params, theta_222expcmwt_2_1)
   expect_equal(mod222threst_2_1$params, theta_222threst_2_1)
+
+  # ind_Student
+  expect_equal(mod123exoit$params, theta_123exoit)
+  expect_equal(mod222logistit$params, theta_222logistit)
 
   # Structural
   expect_equal(mod222thressr_2_1$params, theta_222thres_2_1)
@@ -205,6 +254,7 @@ test_that("STVAR works correctly", {
   expect_equal(mod222logistictsh_2_1$params, theta_222logistictsh_2_1)
   expect_equal(mod222expcmwtsh_2_1$params, theta_222expcmwtsh_2_1)
   expect_equal(mod222expcmwbtsh_2_1$params, theta_222expcmwbtsh_2_1)
+  expect_equal(mod222logistitb$params, theta_222logistitb)
 })
 
 test_that("swap_parametrization works correctly", {
