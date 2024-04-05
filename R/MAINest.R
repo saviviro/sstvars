@@ -13,7 +13,7 @@
 #'  for each call to the genetic algorithm, or \code{NULL} for not initializing the seed.
 #' @param print_res should summaries of estimation results be printed?
 #' @param use_parallel employ parallel computing? If \code{use_parallel=FALSE && print_res=FALSE},
-#'  nothing is printed.
+#'  nothing is printed during the estimation process.
 #' @param filter_estimates should the likely inappropriate estimates be filtered? See details.
 #' @param ... additional settings passed to the function \code{GAfit} employing the genetic algorithm.
 #' @details
@@ -74,10 +74,10 @@
 #' @examples
 #' \donttest{
 #' ## These are long running examples. Running all the below examples will take
-#' ## approximately two minutes.
+#' ## approximately two minutes. UPDATE RUNNING TIME
 #' # When estimating the models in empirical applications, typically a large number
-#' # of estimationrounds (set by the argument 'nrounds') should be used. These examples
-#' # use only a small number of rounds to make the running time reasonable.
+#' # of estimation rounds (set by the argument 'nrounds') should be used. These examples
+#' # use only a small number of rounds to make the running time of the examples reasonable.
 #'
 #' # The below examples make use of the two-variate dataset 'gdpdef' containing
 #' # the the quarterly U.S. GDP and GDP deflator from 1947Q1 to 2019Q4.
@@ -104,12 +104,21 @@
 #'  cond_dist="Student", nrounds=2, ncores=2, seeds=1:2)
 #' summary(fitlogistict32) # Summary printout of the estimates
 #'
-#' # Estimate a two-regime Student's t threshold VAR p=3 model with the first lag of the the second
-#' # variable as the switching variable, and the threshold parameter constrained to the fixed value 1.
+#' # Estimate a two-regime threshold VAR p=3 model with independent Student's t shocks.
+#' # The first lag of the the second variable is specified as the switching variable,
+#' # and the threshold parameter constrained to the fixed value 1.
 #' fitthres32wt <- fitSTVAR(gdpdef, p=3, M=2, weight_function="threshold", weightfun_pars=c(2, 1),
-#'   cond_dist="Student", weight_constraints=list(R=0, r=1), nrounds=2, ncores=2, seeds=1:2)
+#'   cond_dist="Student", weight_constraints=list(R=0, r=1), nrounds=2, ncores=1, seeds=1:2)
 #' plot(fitthres32wt) # Plot the fitted transition weights
 #'
+#' fitthres31wt <- fitSTVAR(gdpdef, p=3, M=1, weight_function="threshold", weightfun_pars=c(2, 1),
+#'   cond_dist="ind_Student", nrounds=2, ncores=1, seeds=1:2)
+#'
+#' # Estimate a two-regime STVAR p=3 model with exogenous transition weights defined as a linear
+#' # time trend (t/T) and mutually independent Student's t shocks.
+#' tw1 <- (1:nrow(gdpdef))
+#'
+#' # VAIHDA ALLA OLEVA JHONBKI
 #' # Estimate a two-regime Gaussian STVAR p=1 model with the weighted relative stationary densities
 #' # of the regimes as the transition weight function, and the AR matrices constrained to be identical
 #' # across the regimes (i.e., allowing for time-variation in the intercepts and the covariance

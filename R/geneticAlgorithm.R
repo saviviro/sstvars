@@ -1,9 +1,10 @@
 #' @import stats
 #'
-#' @title Genetic algorithm for preliminary estimation of a GMVAR, StMVAR, or G-StMVAR model
+#' @title Genetic algorithm for preliminary estimation of a STVAR models
 #'
-#' @description \code{GAfit} estimates the specified GMVAR, StMVAR, or G-StMVAR model using a genetic algorithm.
-#'   It's designed to find starting values for gradient based methods.
+#' @description \code{GAfit} estimates the specified STVAR model using a genetic algorithm.
+#'   It is designed to find starting values for gradient based methods and NOT to obtain
+#'   final estimates constituting a local maximum.
 #'
 #' @inheritParams loglikelihood
 #' @inheritParams random_covmat

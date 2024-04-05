@@ -28,6 +28,10 @@ arma::vec ind_Student_densities_Cpp(const arma::mat& obs,
   int d = obs.n_cols; // Dimension
   arma::vec all_lt(T_obs, arma::fill::zeros); // Vector to store results
 
+  // Precompute parts of the formula that don't change with each observation
+  arma::vec inverse_distpars_minus_two = 1/(distpars - 2);
+  arma::vec one_plus_distpars_times_half = 0.5*(1 + distpars);
+
   for(int i1 = 0; i1 < T_obs; ++i1) {
     arma::vec tdens_i1(d, arma::fill::zeros);
     arma::mat Bt = arma::zeros<arma::mat>(d, d);
@@ -41,7 +45,7 @@ arma::vec ind_Student_densities_Cpp(const arma::mat& obs,
     arma::vec invBt_obs_minus_cmean = arma::solve(Bt, (obs.row(i1) - means.row(i1)).t()); // Solve for invBt_obs_minus_cmean
 
     for(int i2 = 0; i2 < d; ++i2) {
-      tdens_i1(i2) = 0.5*(1 + distpars(i2))*log(1 + std::pow(invBt_obs_minus_cmean(i2), 2)/(distpars(i2) - 2));
+      tdens_i1(i2) = one_plus_distpars_times_half(i2)*log(1 + std::pow(invBt_obs_minus_cmean(i2), 2)*inverse_distpars_minus_two(i2));
     }
     double absdetBt = std::abs(arma::det(Bt));
     if(absdetBt < posdef_tol) {

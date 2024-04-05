@@ -334,7 +334,7 @@ check_data <- function(data, p) {
     if(anyNA(data)) stop("The data contains NA values!")
     if(!is.numeric(data)) stop("The data must be numeric!")
     if(ncol(data) < 2) stop("The data matrix must contain at least two columns!")
-    if(nrow(data) < p + 1) stop("The data must contain at least p+1 observations!")
+    if(nrow(data) < p + 2) stop("The data must contain at least p+2 observations!")
   }
   data
 }
