@@ -93,7 +93,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // ind_Student_densities_Cpp
-arma::vec ind_Student_densities_Cpp(const arma::mat& obs, const arma::mat& means, const arma::cube& impact_matrices, const arma::mat& alpha_mt, const arma::vec& distpars, const arma::vec& minval, const double posdef_tol);
+arma::vec ind_Student_densities_Cpp(const arma::mat& obs, const arma::mat& means, const arma::cube& impact_matrices, arma::mat& alpha_mt, const arma::vec& distpars, const arma::vec& minval, const double posdef_tol);
 RcppExport SEXP _sstvars_ind_Student_densities_Cpp(SEXP obsSEXP, SEXP meansSEXP, SEXP impact_matricesSEXP, SEXP alpha_mtSEXP, SEXP distparsSEXP, SEXP minvalSEXP, SEXP posdef_tolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -101,7 +101,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type obs(obsSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type means(meansSEXP);
     Rcpp::traits::input_parameter< const arma::cube& >::type impact_matrices(impact_matricesSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type alpha_mt(alpha_mtSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type alpha_mt(alpha_mtSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type distpars(distparsSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type minval(minvalSEXP);
     Rcpp::traits::input_parameter< const double >::type posdef_tol(posdef_tolSEXP);

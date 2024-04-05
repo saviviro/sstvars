@@ -108,7 +108,7 @@
 #' # The first lag of the the second variable is specified as the switching variable,
 #' # and the threshold parameter constrained to the fixed value 1.
 #' fitthres32wt <- fitSTVAR(gdpdef, p=3, M=2, weight_function="threshold", weightfun_pars=c(2, 1),
-#'   cond_dist="Student", weight_constraints=list(R=0, r=1), nrounds=2, ncores=1, seeds=1:2)
+#'   cond_dist="ind_Student", weight_constraints=list(R=0, r=1), nrounds=2, ncores=1, seeds=1:2)
 #' plot(fitthres32wt) # Plot the fitted transition weights
 #'
 #' fitthres31wt <- fitSTVAR(gdpdef, p=3, M=1, weight_function="threshold", weightfun_pars=c(2, 1),

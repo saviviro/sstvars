@@ -358,8 +358,9 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
     if(is.null(minval) || !is.numeric(minval)) minval <- -999999999 # Cpp function expects minval to be numerical, will cause an error if not
     t_dens <- ind_Student_densities_Cpp(obs=obs, means=mu_yt, impact_matrices=all_Omegas, alpha_mt=alpha_mt, distpars=distpars,
                                         minval=minval, posdef_tol=posdef_tol)
+
     if(length(t_dens) == 1) {
-      if(all.equal(t.dens, minval)) {
+      if(all.equal(c(t_dens), minval)) {
         return(minval)
       }
     }

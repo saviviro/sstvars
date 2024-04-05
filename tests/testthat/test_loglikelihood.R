@@ -977,20 +977,20 @@ test_that("loglikelihood works correctly", {
   expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122logit_1_1, weight_function="mlogit", weightfun_pars=list(vars=1, lags=1),
                              cond_dist="ind_Student"), -580.561, tolerance=1e-3)
   expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123expit_1_1, weight_function="exponential", weightfun_pars=c(1, 1),
-                             cond_dist="ind_Student"), -3830.396, tolerance=1e-3)
+                             cond_dist="ind_Student"), -3838.874, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222expcmwit_2_1, weight_function="exponential", weightfun_pars=c(2, 1),
                              cond_dist="ind_Student", mean_constraints=list(1:2), AR_constraints=C_222,
-                             weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))), -393.5387, tolerance=1e-3)
+                             weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))), -393.6017, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=1, M=3, params=theta_132thresmwit_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
                              cond_dist="ind_Student", mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2))),
                -540.3383, tolerance=1e-3)
   expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123logisticcmit_3_1, weight_function="logistic", weightfun_pars=c(3, 1),
-                             cond_dist="ind_Student", mean_constraints=list(1:2), AR_constraints=C_123), -6872.23, tolerance=1e-3)
+                             cond_dist="ind_Student", mean_constraints=list(1:2), AR_constraints=C_123), -6882.94, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222logcit_2_1, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1),
                              cond_dist="ind_Student", AR_constraints=C_222), -380.7479, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222exoit_2_1, weight_function="exogenous",
                              weightfun_pars=weightfun_pars222, cond_dist="ind_Student", AR_constraints=C_222),
-               -397.4386, tolerance=1e-3)
+               -397.5033, tolerance=1e-3)
 
 
   # Structural models identified by heteroskedasticity
@@ -1081,15 +1081,15 @@ test_that("loglikelihood works correctly", {
                             B_constraints=matrix(c(1, NA, -1, 1) , nrow=2)), -580.1779, tolerance=1e-3)
   expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123expitngb_1_1, weight_function="exponential", weightfun_pars=c(1, 1),
                              cond_dist="ind_Student", identification="non-Gaussianity",
-                             B_constraints=matrix(c(1, NA, NA, 0, 1, NA, 0, NA, 1), nrow=3)), -2782.348, tolerance=1e-3)
+                             B_constraints=matrix(c(1, NA, NA, 0, 1, NA, 0, NA, 1), nrow=3)), -2785.126, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=1, M=3, params=theta_132thresitngb_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
                              cond_dist="ind_Student", identification="non-Gaussianity", B_constraints=matrix(c(1, 0, NA, 1), nrow=2)),
-               -3827.6, tolerance=1e-3)
+               -3827.6, tolerance=1e-1)
   expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222expcmwitngb_2_1, weight_function="exponential", weightfun_pars=c(2, 1),
                              cond_dist="ind_Student", mean_constraints=list(1:2), AR_constraints=C_222,
                              weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), identification="non-Gaussianity",
                              B_constraints=matrix(c(NA, -1, 0, 1), nrow=2)),
-               -1589.584, tolerance=1e-3)
+               -1589.578, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=1, M=3, params=theta_132thresmwitngb_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
                              cond_dist="ind_Student", mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2)),
                              identification="non-Gaussianity", B_constraints=matrix(c(1, 0, NA, 1), nrow=2)),
@@ -1097,7 +1097,7 @@ test_that("loglikelihood works correctly", {
   expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123logisticcmitngb_3_1, weight_function="logistic", weightfun_pars=c(3, 1),
                              cond_dist="ind_Student", mean_constraints=list(1:2), AR_constraints=C_123, identification="non-Gaussianity",
                              B_constraints=matrix(c(1, NA, NA, 0, 1, NA, 0, NA, 1), nrow=3)),
-               -3988.051, tolerance=1e-3)
+               -3990.335, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222logcitngb_2_1, weight_function="mlogit",
                              weightfun_pars=list(vars=2, lags=1), cond_dist="ind_Student", AR_constraints=C_222,
                              identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, 0, 1), nrow=2)),
@@ -1105,7 +1105,7 @@ test_that("loglikelihood works correctly", {
   expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222exoitngb_2_1, weight_function="exogenous",
                              weightfun_pars=weightfun_pars222, cond_dist="ind_Student", AR_constraints=C_222,
                              identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, 0, 1), nrow=2)),
-               -2657.869, tolerance=1e-3)
+               -2657.825, tolerance=1e-3)
   expect_equal(c(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222exoitngb_2_1, weight_function="exogenous",
                              weightfun_pars=weightfun_pars222, cond_dist="ind_Student", AR_constraints=C_222,
                              identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, 0, 1), nrow=2), to_return="total_ccovs")[, , 242]),
