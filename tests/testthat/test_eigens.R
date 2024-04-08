@@ -420,10 +420,10 @@ test_that("get_omega_eigens work correctly", {
   expect_equal(get_omega_eigens(mod222logisticcmwt_2_1)[,2], c(1.100101, 0.109899), tol=1e-3)
 
   # ind_Student
-  expect_equal(get_omega_eigens(mod123exoit)[,1], c(2.317211, 0.755054, -1.570265), tol=1e-3)
-  expect_equal(get_omega_eigens(mod123exoit)[,2], c(2.009935, 1.196301, -2.694236), tol=1e-3)
-  expect_equal(get_omega_eigens(mod222logistit)[,1], c(0.3513945, -2.4473945), tol=1e-3)
-  expect_equal(get_omega_eigens(mod222logistit)[,2], c(1.477276, -2.010276), tol=1e-3)
+  expect_equal(get_omega_eigens(mod123exoit)[,1], c(5.7953010, 3.5112566, 0.6195484), tol=1e-3)
+  expect_equal(get_omega_eigens(mod123exoit)[,2], c(3.9532377105, 1.0633073581, 0.0005209314), tol=1e-3)
+  expect_equal(get_omega_eigens(mod222logistit)[,1], c(3.3661394, 0.8365226), tol=1e-3)
+  expect_equal(get_omega_eigens(mod222logistit)[,2], c(3.3571676, 0.5599714), tol=1e-3)
 
   # Structural
   expect_equal(get_omega_eigens(mod222thressr_2_1)[,1], c(0.21055385, 0.02944615), tol=1e-3)
@@ -434,6 +434,6 @@ test_that("get_omega_eigens work correctly", {
   expect_equal(get_omega_eigens(mod222logistictsh_2_1)[,2], c(0.5001637, 0.1934763), tol=1e-3)
   expect_equal(get_omega_eigens(mod222expcmwtsh_2_1)[,1], c(0.57862293, 0.05787707), tol=1e-3)
   expect_equal(get_omega_eigens(mod222expcmwtsh_2_1)[,2], c(0.5001637, 0.1934763), tol=1e-3)
-  expect_equal(get_omega_eigens(mod222logistitb)[,1], c(0.4236068, -0.0236068), tol=1e-3)
-  expect_equal(get_omega_eigens(mod222logistitb)[,2], c(0.46596748, -0.02596748), tol=1e-3)
+  expect_equal(get_omega_eigens(mod222logistitb)[,1], c(0.133245553, 0.006754447), tol=1e-3)
+  expect_equal(get_omega_eigens(mod222logistitb)[,2], c(0.161227119, 0.008172881), tol=1e-3)
 })

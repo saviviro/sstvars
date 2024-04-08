@@ -2,7 +2,7 @@
 % Please edit documentation in R/geneticAlgorithm.R
 \name{GAfit}
 \alias{GAfit}
-\title{Genetic algorithm for preliminary estimation of a GMVAR, StMVAR, or G-StMVAR model}
+\title{Genetic algorithm for preliminary estimation of a STVAR models}
 \usage{
 GAfit(
   data,
@@ -266,8 +266,9 @@ instead of passing the argument \code{seed}.}
 Returns the estimated parameter vector which has the form described in \code{initpop}.
 }
 \description{
-\code{GAfit} estimates the specified GMVAR, StMVAR, or G-StMVAR model using a genetic algorithm.
-  It's designed to find starting values for gradient based methods.
+\code{GAfit} estimates the specified STVAR model using a genetic algorithm.
+  It is designed to find starting values for gradient based methods and NOT to obtain
+  final estimates constituting a local maximum.
 }
 \details{
 Only reduced form models are supported!
