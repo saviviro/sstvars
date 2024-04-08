@@ -141,10 +141,14 @@ If you wish to estimate a structural model, estimate first the reduced form mode
  regimes is chosen too large.
 
  The estimation process is computationally heavy and it might take considerably long time for large models to
- estimate. If the iteration limit \code{maxit} in the variable metric algorithm is reached,
- one can continue the estimation by iterating more with the function \code{iterate_more}. Alternatively, one may
- use the found estimates as starting values for the genetic algorithm and employ another round of estimation
- (see \code{??GAfit} how to set up an initial population with the dot parameters).
+ estimate. Note that estimation of model with \code{cond_dist == "ind_Student"} is computationally substantially
+ more demanding than standard Gaussian and Student's t models due to the different structure of the log-likelihood
+ function (parametrized directly via impact matrices rather than covariance matrices of the regimes).
+
+ If the iteration limit \code{maxit} in the variable metric algorithm is reached, one can continue the estimation by
+ iterating more with the function \code{iterate_more}. Alternatively, one may use the found estimates as starting values
+ for the genetic algorithm and employ another round of estimation (see \code{??GAfit} how to set up an initial population
+ with the dot parameters).
 
  \strong{If the estimation algorithm performs poorly}, it usually helps to scale the individual series so that they
  vary roughly in the same scale. This makes it is easier to draw reasonable AR coefficients and (with some weight functions)
@@ -176,7 +180,7 @@ If you wish to estimate a structural model, estimate first the reduced form mode
 \examples{
 \donttest{
 ## These are long running examples. Running all the below examples will take
-## approximately two minutes. UPDATE RUNNING TIME
+## approximately four minutes.
 # When estimating the models in empirical applications, typically a large number
 # of estimation rounds (set by the argument 'nrounds') should be used. These examples
 # use only a small number of rounds to make the running time of the examples reasonable.
@@ -209,26 +213,40 @@ summary(fitlogistict32) # Summary printout of the estimates
 # Estimate a two-regime threshold VAR p=3 model with independent Student's t shocks.
 # The first lag of the the second variable is specified as the switching variable,
 # and the threshold parameter constrained to the fixed value 1.
-fitthres32wt <- fitSTVAR(gdpdef, p=3, M=2, weight_function="threshold", weightfun_pars=c(2, 1),
-  cond_dist="ind_Student", weight_constraints=list(R=0, r=1), nrounds=2, ncores=1, seeds=1:2)
-plot(fitthres32wt) # Plot the fitted transition weights
+fitthres32wit <- fitSTVAR(gdpdef, p=3, M=2, weight_function="threshold", weightfun_pars=c(2, 1),
+  cond_dist="ind_Student", weight_constraints=list(R=0, r=1), nrounds=2, ncores=2, seeds=1:2)
+plot(fitthres32wit) # Plot the fitted transition weights
 
-fitthres31wt <- fitSTVAR(gdpdef, p=3, M=1, weight_function="threshold", weightfun_pars=c(2, 1),
-  cond_dist="ind_Student", nrounds=2, ncores=1, seeds=1:2)
+# Estimate a two-regime STVAR p=1 model with exogenous transition weights defined as the indicator
+# of NBER based U.S. recessions (source: St. Louis Fed database). Moreover, restrict the AR matrices
+# to be identical across the regimes (i.e., allowing for time-variation in the intercepts and the
+# covariance matrix only):
 
-# Estimate a two-regime STVAR p=3 model with exogenous transition weights defined as a linear
-# time trend (t/T) and mutually independent Student's t shocks.
-tw1 <- (1:nrow(gdpdef))
+# Step 1: Define transition weights of Regime 1 as the indicator of NBER based U.S. recessions
+# (the start date of weights is start of data + p, since the first p values are used as the initial
+# values):
+tw1 <- c(0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+ 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1,
+ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+ 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+ 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
-# VAIHDA ALLA OLEVA JHONBKI
-# Estimate a two-regime Gaussian STVAR p=1 model with the weighted relative stationary densities
-# of the regimes as the transition weight function, and the AR matrices constrained to be identical
-# across the regimes (i.e., allowing for time-variation in the intercepts and the covariance
-# matrix):
+# Step 2: Define the transition weights of Regime 2 as one minus the weights of Regime 1, and
+# and combine the weights to matrix of transition weights:
+twmat <- cbind(tw1, 1 - tw1)
+
+# Step 3: Create the appropriate constraint matrix:
 C_122 <- rbind(diag(1*2^2), diag(1*2^2)) # Create the appropriate constraint matrix
-fit12c <- fitSTVAR(gdpdef, p=1, M=2, weight_function="relative_dens", cond_dist="Gaussian",
- AR_constraints=C_122, nrounds=2, ncores=2, seeds=1:2)
-fit12c # Print the estimates
+
+# Step 3: Estimate the model by specifying the weights in the argument 'weightfun_pars'
+# and the constraint matrix in the arugment 'AR_constraints':
+fitexo12cit <- fitSTVAR(gdpdef, p=1, M=2, weight_function="exogenous", weightfun_pars=twmat,
+  cond_dist="ind_Student", AR_constraints=C_122, nrounds=2, ncores=2, seeds=1:2)
+plot(fitexo12cit) # Plot the transition weights
+summary(fitexo12cit) # Summary printout of the estimates
 
 # Estimate a two-regime Gaussian STVAR p=1 model with the weighted relative stationary densities
 # of the regimes as the transition weight function, and the means of the regimes

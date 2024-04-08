@@ -49,7 +49,7 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
   mean_constraints <- stvar$model$mean_constraints
   weight_constraints <- stvar$model$weight_constraints
   B_constraints <- stvar$model$B_constraints
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function,
+  weightfun_pars <- check_weightfun_pars(data=data, p=p, M=M, d=d, weight_function=weight_function,
                                          weightfun_pars=stvar$model$weightfun_pars, cond_dist=cond_dist)
   minval <- get_minval(stvar$data)
   npars <- length(stvar$params)
