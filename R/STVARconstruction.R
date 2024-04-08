@@ -272,6 +272,7 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
 #'   If specified, then \code{which_largest} is ignored.
 #' @details It's sometimes useful to examine other estimates than the one with the highest log-likelihood. This function
 #'   is wrapper around \code{STVAR} that picks the correct estimates from an object returned by \code{fitSTVAR}.
+#' @seealso \code{\link{STVAR}}
 #' @inherit STVAR references return
 #' @examples
 #' \donttest{
@@ -507,29 +508,33 @@ get_hetsked_sstvar <- function(stvar, calc_std_errors=FALSE) {
 }
 
 
-#' @title Reorder columns of the W-matrix and lambda parameters of a structural STVAR model
-#'   that is identified by heteroskedasticity.
+#' @title Reorder columns of impact matrix B (and lambda parameters if any) of a structural STVAR model
+#'   that is identified by heteroskedasticity or non-Gaussianity.
 #'
-#' @description \code{reorder_W_columns} reorder columns of the W-matrix and lambda parameters
-#'   of a structural STVAR model that is identified by heteroskedasticity.
+#' @description \code{reorder_B_columns} reorder columns of impact matrix B (and lambda parameters if any) of
+#'   a structural STVAR model that is identified by heteroskedasticity or non-Gaussianity.
 #'
 #' @inheritParams STVAR
-#' @param stvar a class 'stvar' object defining a structural STVAR model that is identified by heteroskedasticity,
-#'   typically created with \code{fitSSTVAR}.
-#' @param perm an integer vector of length \eqn{d} specifying the new order of the columns of \eqn{W}.
-#'   Also lambda parameters of each regime will be reordered accordingly.
-#' @details The order of the columns of \eqn{W} can be changed without changing the implied reduced
-#'   form model as long as the order of lambda parameters is also changed accordingly. Note that the
-#'   constraints imposed on \eqn{W} (or the  impact matrix) will also be modified accordingly.
+#' @param stvar a class 'stvar' object defining a structural STVAR model that is identified by heteroskedasticity
+#'   or non-Gaussianity, typically created with \code{fitSSTVAR}.
+#' @param perm an integer vector of length \eqn{d} specifying the new order of the columns of the impact matrix.
+#'   For model identified by...
+#'   \describe{
+#'     \item{heteroskedasticity}{also lambda parameters of each regime will be reordered accordingly.}
+#'     \item{non-Gaussianity}{the columns of the impact matrices of all the regimes and the component specific distribution
+#'       parameters (degrees of freedom parameters) are reordered accordingly.}
+#'   }
+#' @details The order of the columns of the impact matrix can be changed without changing the implied reduced
+#'   form model (as long as, for models identified by heteroskedasticity, the order of lambda parameters is also changed accordingly;
+#'   and for model identified by non-Gaussianity, ordering of the columns of all the impact matrices and the component specific
+#'   distribution  parameters is also changed accordingly). Note that constraints imposed on the impact matrix via \code{B_constraints}
+#'   will also be modified accordingly.
 #'
-#'   This function does not support models with constraints imposed on the lambda parameters!
-#'
-#'   Also all signs in any column of \eqn{W} can be swapped (without changing the implied reduced form model)
-#'   with the function \code{swap_W_signs} but this obviously also swaps the sign constraints in the
-#'   corresponding columns of \eqn{W}.
-#' @return Returns an object of class \code{'stvar'} defining a structural STVAR model with the columns of \eqn{W}
-#'   reordered.
-#' @seealso \code{\link{GIRF}}, \code{\link{fitSSTVAR}}, \code{\link{swap_W_signs}}
+#'   Also all signs in any column of impact matrix can be swapped (without changing the implied reduced form model)
+#'   with the function \code{swap_B_signs}. This obviously also swaps the sign constraints (if any) in the corresponding columns of
+#'   the impact matrix.
+#' @return Returns an object of class \code{'stvar'} defining a structural STVAR model with the columns of the impact matrix reordered.
+#' @seealso \code{\link{GIRF}}, \code{\link{fitSSTVAR}}, \code{\link{swap_B_signs}}
 #' @references
 #'  \itemize{
 #'    \item Lütkepohl H., Netšunajev A. 2018. Structural vector autoregressions with smooth transition in variances.
@@ -549,28 +554,33 @@ get_hetsked_sstvar <- function(stvar, calc_std_errors=FALSE) {
 #' mod222logt
 #'
 #' # Reverse the ordering of the columns of W (or equally the impact matrix):
-#' mod222logt_rev <- reorder_W_columns(mod222logt, perm=c(2, 1))
-#' mod222logt_rev # The columns of W are in a reversed order
+#' mod222logt_rev <- reorder_B_columns(mod222logt, perm=c(2, 1))
+#' mod222logt_rev # The columns of the impact matrix are in a reversed order
 #'
-#' # Swap the ordering of the columns of W back to the original:
-#' mod222logt_rev2 <- reorder_W_columns(mod222logt_rev, perm=c(2, 1))
-#' mod222logt_rev2 # The columns of W are back in the original ordering
+#' # Swap the ordering of the columns of the impact matrix back to the original:
+#' mod222logt_rev2 <- reorder_B_columns(mod222logt_rev, perm=c(2, 1))
+#' mod222logt_rev2 # The columns of the impact matrix are back in the original ordering
 #'
 #' # Below code does not do anything, as perm=1:2, so the ordering does not change:
-#' mod222logt3 <- reorder_W_columns(mod222logt, perm=c(1, 2))
+#' mod222logt3 <- reorder_B_columns(mod222logt, perm=c(1, 2))
 #' mod222logt3 # The ordering of the columns did not change from the original
 #' @export
 
-reorder_W_columns <- function(stvar, perm, calc_std_errors=FALSE) {
+reorder_B_columns <- function(stvar, perm, calc_std_errors=FALSE) {
   check_stvar(stvar)
-  if(stvar$model$identification != "heteroskedasticity") stop("Only model identified by heteroskedasticity are supported!")
+  cond_dist <- stvar$model$cond_dist
+  identification <- stvar$model$identification
+  if(cond_dist == "ind_Student") identification <- "non-Gaussianity" # ind_Student models are readily identified
+  if(identification != "heteroskedasticity" && identification != "non-Gaussianity") {
+    stop("Only model identified by heteroskedasticity or non-Gaussianity are supported!")
+  }
   p <- stvar$model$p
   M <- stvar$model$M
   d <- stvar$model$d
   weight_function <- stvar$model$weight_function
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=stvar$model$weightfun_pars)
-  cond_dist <- stvar$model$cond_dist
-  identification <- stvar$model$identification
+  weightfun_pars <- check_weightfun_pars(data=stvar$data, p=p, M=M, d=d, weight_function=weight_function,
+                                         weightfun_pars=stvar$model$weightfun_pars)
+
   AR_constraints <- stvar$model$AR_constraints
   mean_constraints <- stvar$model$mean_constraints
   weight_constraints <- stvar$model$weight_constraints
@@ -580,44 +590,78 @@ reorder_W_columns <- function(stvar, perm, calc_std_errors=FALSE) {
                                     cond_dist=cond_dist, identification=identification,
                                     AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                                     weight_constraints=weight_constraints, B_constraints=B_constraints)
-  W <- pick_W(p=p, M=M, d=d, params=params, identification=identification)
-  lambdas <- pick_lambdas(p=p, M=M, d=d, params=params, identification=identification)
-  n_distpars <- length(pick_distpars(params=params, cond_dist=cond_dist))
 
-  # Calculate the number of weight parameters
-  if(is.null(weight_constraints)) {
-    if(weight_function == "relative_dens" || weight_function == "threshold") {
-      n_weight_pars <- M - 1
-    } else if(weight_function == "logistic" || weight_function == "exponential") {
-      n_weight_pars <- 2
-    } else if(weight_function == "mlogit") {
-      n_weight_pars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
+  ## The impact matrix and distribution parameters
+  if(identification == "heteroskedasticity") {
+    W <- pick_W(p=p, M=M, d=d, params=params, identification=identification)
+    lambdas <- pick_lambdas(p=p, M=M, d=d, params=params, identification=identification)
+  } else { # identification == "non-Gaussianity"
+    all_B <- pick_Omegas(p=p, M=M, d=d, params=params, cond_dist=cond_dist, identification=identification)
+    distpars <- pick_distpars(d=d, params=params, cond_dist=cond_dist)
+  }
+  n_distpars <- length(pick_distpars(d=d, params=params, cond_dist=cond_dist))
+
+  ## Calculate the number of weight parameters
+  if(weight_function == "exogenous") {
+    n_weight_pars <- 0
+  } else {
+    if(is.null(weight_constraints)) {
+      if(weight_function == "relative_dens" || weight_function == "threshold") {
+        n_weight_pars <- M - 1
+      } else if(weight_function == "logistic" || weight_function == "exponential") {
+        n_weight_pars <- 2
+      } else if(weight_function == "mlogit") {
+        n_weight_pars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
+      }
+    } else { # Constraints on the weight parameters
+      if(all(weight_constraints[[1]] == 0)) {
+        n_weight_pars <- 0 # alpha = r, not in the parameter vector
+      } else {
+        n_weight_pars <- ncol(weight_constraints[[1]]) # The dimension of xi
+      }
     }
-  } else { # Constraints on the weight parameters
-    if(all(weight_constraints[[1]] == 0)) {
-      n_weight_pars <- 0 # alpha = r, not in the parameter vector
+  }
+
+  ## Create the new parameter vector
+  if(identification == "heteroskedasticity") {
+    W <- W[, perm]
+    if(is.null(B_constraints)) {
+      W <- vec(W) # If any zeros, they are specified by hand and included in the param vector
     } else {
-      n_weight_pars <- ncol(weight_constraints[[1]]) # The dimension of xi
+      W <- Wvec(W) # Zeros removed
     }
+    if(M > 1) {
+      lambdas <- matrix(lambdas, nrow=d, ncol=M - 1, byrow=FALSE)
+      lambdas <- vec(lambdas[perm,])
+    }
+    new_params <- stvar$params
+    new_params[(length(new_params) - (n_weight_pars + length(W) + length(lambdas) + n_distpars)
+                + 1):(length(new_params) - (n_weight_pars + n_distpars))] <- c(W, lambdas)
+  } else { # identification == "non-Gaussianity"
+    new_all_B <- numeric(0)
+    for(m in 1:M) { # Reorder the columns of the impact matrices
+      if(is.null(B_constraints)) {
+        new_all_B <- c(new_all_B, vec(all_B[, perm, m])) # If any zeros, they are specified by hand and included in the param vector
+      } else {
+        new_all_B <- c(new_all_B, Wvec(all_B[, perm, m])) # Zeros removed (assumes no exact zeros in the estimates)
+      }
+    }
+    new_params <- stvar$params
+    new_params[(length(new_params) - (n_weight_pars + length(new_all_B) + n_distpars)
+                + 1):(length(new_params) - (n_weight_pars + n_distpars))] <- new_all_B # New impact matrix params
+
+    new_distpars <- distpars[perm] # Reorder the distribution parameters (degrees of freedom params here)
+    new_params[(length(new_params) - n_distpars + 1):length(new_params)] <- new_distpars # New distribution parameters
   }
 
-  # Create the new parameter vector
-  W <- W[, perm]
-  W <- Wvec(W) # Zeros removed
-  if(M > 1) {
-    lambdas <- matrix(lambdas, nrow=d, ncol=M - 1, byrow=FALSE)
-    lambdas <- vec(lambdas[perm,])
-  }
-  new_params <- stvar$params
-  new_params[(length(new_params) - (n_weight_pars + length(W) + length(lambdas)
-                                    + n_distpars) + 1):(length(new_params) - (n_weight_pars + n_distpars))] <- c(W, lambdas)
+  ## Reorder the columns of the B_constraints accordingly
   if(!is.null(B_constraints)) {
     new_B_constraints <- B_constraints[, perm]
   } else {
     new_B_constraints <- NULL
   }
 
-  # Construct the Sstvar model based on the obtained structural parameters
+  ## Construct the STVAR model based on the obtained structural parameters
   STVAR(data=stvar$data, p=p, M=M, d=d, params=new_params, weight_function=weight_function,
         weightfun_pars=weightfun_pars, cond_dist=cond_dist, parametrization=stvar$model$parametrization,
         identification=identification, AR_constraints=AR_constraints, mean_constraints=mean_constraints,
@@ -627,27 +671,27 @@ reorder_W_columns <- function(stvar, perm, calc_std_errors=FALSE) {
 
 
 
-#' @title Swap all signs in pointed columns a the \eqn{W} matrix of a structural STVAR model
-#'   that is identified by heteroskedasticity.
+#' @title Swap all signs in pointed columns of the impact matrix of a structural STVAR model
+#'   that is identified by heteroskedasticity or non-Gaussianity
 #'
-#' @description \code{swap_W_signs} swaps all signs in pointed columns a the \eqn{W} matrix
-#'  a structural STVAR model that is identified by heteroskedasticity. Consequently, signs in
-#'   the columns of the impact matrix are also swapped accordingly.
+#' @description \code{swap_B_signs} swaps all signs in pointed columns of the impact matrix of
+#'   a structural STVAR model that is identified by heteroskedasticity or non-Gaussianity.
 #'
-#' @inheritParams reorder_W_columns
+#' @inheritParams reorder_B_columns
 #' @param which_to_swap a numeric vector of length at most \eqn{d} and elemnts in \eqn{1,..,d}
-#'   specifying the columns of \eqn{W} whose sign should be swapped.
-#' @details All signs in any column of \eqn{W} can be swapped without changing the implied reduced form model.
-#'   Consequently, also the signs in the columns of the impact matrix are swapped. Note that the sign constraints
-#'   imposed on \eqn{W} (or the impact matrix) are also swapped in the corresponding columns accordingly.
+#'   specifying the columns of the impact matrix whose sign should be swapped.
+#' @details All signs in any column of the impact matrix can be swapped without changing the implied reduced form model.
+#'   For model identified by non-Gaussianity, the signs of the columns of the impact matrices of all the regimes are
+#'   swapped accordingly. Note that the sign constraints imposed on the impact matrix via \code{B_constraints} are also
+#'   swapped in the corresponding columns accordingly.
 #'
-#'   Also the order of the columns of \eqn{W} can be changed (without changing the implied reduced
-#'   form model) as long as the order of lambda parameters is also changed accordingly. This can be
-#'   done with the function \code{reorder_W_columns}.
+#'   Also the order of the columns of the impact matrix can be changed (without changing the implied reduced
+#'   form model) as long as the ordering of other related parameters is also changed accordingly. This can be
+#'   done with the function \code{reorder_B_columns}.
 #' @return Returns an object of class \code{'stvar'} defining a structural STVAR model with the signs of the
-#'   columns of \eqn{W} swapped.
-#' @seealso \code{\link{GIRF}}, \code{\link{fitSSTVAR}}, \code{\link{reorder_W_columns}}
-#' @inherit reorder_W_columns references
+#'   columns of the impact matrix swapped.
+#' @seealso \code{\link{GIRF}}, \code{\link{fitSSTVAR}}, \code{\link{reorder_B_columns}}
+#' @inherit reorder_B_columns references
 #' @examples
 #' # Create a structural two-variate Student's t STVAR p=2, M=2, model with logistic transition
 #' # weights and the first lag of the second variable as the switching variable, and shocks
@@ -662,28 +706,32 @@ reorder_W_columns <- function(stvar, perm, calc_std_errors=FALSE) {
 #' mod222logt
 #'
 #' # Swap the signs of the first column of W (or equally the impact matrix):
-#' mod222logt2 <- swap_W_signs(mod222logt, which_to_swap=1)
-#' mod222logt2 # The signs of the first column of W are swapped
+#' mod222logt2 <- swap_B_signs(mod222logt, which_to_swap=1)
+#' mod222logt2 # The signs of the first column of the impact matrix are swapped
 #'
-#' # Swap the signs of the second column of W:
-#' mod222logt3 <- swap_W_signs(mod222logt, which_to_swap=2)
-#' mod222logt3 # The signs of the second column of W are swapped
+#' # Swap the signs of the second column of the impact matrix:
+#' mod222logt3 <- swap_B_signs(mod222logt, which_to_swap=2)
+#' mod222logt3 # The signs of the second column of the impact matrix are swapped
 #'
-#' # Swap the signs of both columns of W:
-#' mod222logt4 <- swap_W_signs(mod222logt, which_to_swap=1:2)
-#' mod222logt4 # The signs of both columns of W are swapped
+#' # Swap the signs of both columns of the impact matrix:
+#' mod222logt4 <- swap_B_signs(mod222logt, which_to_swap=1:2)
+#' mod222logt4 # The signs of both columns of the impact matrix are swapped
 #' @export
 
-swap_W_signs <- function(stvar, which_to_swap, calc_std_errors=FALSE) {
+swap_B_signs <- function(stvar, which_to_swap, calc_std_errors=FALSE) {
   check_stvar(stvar)
-  if(stvar$model$identification != "heteroskedasticity") stop("Only model identified by heteroskedasticity are supported!")
+  cond_dist <- stvar$model$cond_dist
+  identification <- stvar$model$identification
+  if(cond_dist == "ind_Student") identification <- "non-Gaussianity" # ind_Student models are readily identified
+  if(identification != "heteroskedasticity" && identification != "non-Gaussianity") {
+    stop("Only model identified by heteroskedasticity or non-Gaussianity are supported!")
+  }
   p <- stvar$model$p
   M <- stvar$model$M
   d <- stvar$model$d
   weight_function <- stvar$model$weight_function
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=stvar$model$weightfun_pars)
-  cond_dist <- stvar$model$cond_dist
-  identification <- stvar$model$identification
+  weightfun_pars <- check_weightfun_pars(stvar$data, p=p, M=M, d=d, weight_function=weight_function,
+                                         weightfun_pars=stvar$model$weightfun_pars)
   AR_constraints <- stvar$model$AR_constraints
   mean_constraints <- stvar$model$mean_constraints
   weight_constraints <- stvar$model$weight_constraints
@@ -693,35 +741,67 @@ swap_W_signs <- function(stvar, which_to_swap, calc_std_errors=FALSE) {
                                     cond_dist=cond_dist, identification=identification,
                                     AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                                     weight_constraints=weight_constraints, B_constraints=B_constraints)
-  W <- pick_W(p=p, M=M, d=d, params=params, identification=identification)
-  lambdas <- pick_lambdas(p=p, M=M, d=d, params=params, identification=identification)
-  n_distpars <- length(pick_distpars(params=params, cond_dist=cond_dist))
 
-  # Calculate the number of weight parameters
-  if(is.null(weight_constraints)) {
-    if(weight_function == "relative_dens" || weight_function == "threshold") {
-      n_weight_pars <- M - 1
-    } else if(weight_function == "logistic" || weight_function == "exponential") {
-      n_weight_pars <- 2
-    } else if(weight_function == "mlogit") {
-      n_weight_pars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
-    }
-  } else { # Constraints on the weight parameters
-    if(all(weight_constraints[[1]] == 0)) {
-      n_weight_pars <- 0 # alpha = r, not in the parameter vector
-    } else {
-      n_weight_pars <- ncol(weight_constraints[[1]]) # The dimension of xi
+  ## The impact matrix and distribution parameters
+  if(identification == "heteroskedasticity") {
+    W <- pick_W(p=p, M=M, d=d, params=params, identification=identification)
+    lambdas <- pick_lambdas(p=p, M=M, d=d, params=params, identification=identification)
+  } else { # identification == "non-Gaussianity"
+    all_B <- pick_Omegas(p=p, M=M, d=d, params=params, cond_dist=cond_dist, identification=identification)
+    distpars <- pick_distpars(d=d, params=params, cond_dist=cond_dist)
+  }
+  n_distpars <- length(pick_distpars(d=d, params=params, cond_dist=cond_dist))
+
+  ## Calculate the number of weight parameters
+  if(weight_function == "exogenous") {
+    n_weight_pars <- 0
+  } else {
+    if(is.null(weight_constraints)) {
+      if(weight_function == "relative_dens" || weight_function == "threshold") {
+        n_weight_pars <- M - 1
+      } else if(weight_function == "logistic" || weight_function == "exponential") {
+        n_weight_pars <- 2
+      } else if(weight_function == "mlogit") {
+        n_weight_pars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
+      }
+    } else { # Constraints on the weight parameters
+      if(all(weight_constraints[[1]] == 0)) {
+        n_weight_pars <- 0 # alpha = r, not in the parameter vector
+      } else {
+        n_weight_pars <- ncol(weight_constraints[[1]]) # The dimension of xi
+      }
     }
   }
 
-  # Create the new parameter vector
-  W[, which_to_swap] <- -W[, which_to_swap]
-  W <- Wvec(W) # Zeros removed
-  r <- d*(M - 1) # The number of lambda parameters
+  ## Create the new parameter vector
+  if(identification == "heteroskedasticity") {
+    W[, which_to_swap] <- -W[, which_to_swap]
+    if(is.null(B_constraints)) {
+      W <- vec(W) # If any zeros, they are specified by hand and included in the param vector
+    } else {
+      W <- Wvec(W) # Zeros removed
+    }
+    r <- d*(M - 1) # The number of lambda parameters
+    new_params <- stvar$params
+    new_params[(length(new_params) - (n_weight_pars + length(W) + r
+                                      + n_distpars) + 1):(length(new_params) - (n_weight_pars + r + n_distpars))] <- W
+  } else { # identification by non-Gaussianity
+    new_all_B <- numeric(0)
+    for(m in 1:M) { # Swap the signs of the columns of the impact matrices
+      all_B[, which_to_swap, m] <- -all_B[, which_to_swap, m]
+      if(is.null(B_constraints)) {
+        new_all_B <- c(new_all_B, vec(all_B[, , m])) # If any zeros, they are specified by hand and included in the param vector
+      } else {
+        new_all_B <- c(new_all_B, Wvec(all_B[, , m])) # Zeros removed (assumes no exact zeros in the estimates)
+      }
+    }
+    new_params <- stvar$params
+    new_params[(length(new_params) - (n_weight_pars + length(new_all_B) + n_distpars)
+                + 1):(length(new_params) - (n_weight_pars + n_distpars))] <- new_all_B # New impact matrix params
+  }
 
-  new_params <- stvar$params
-  new_params[(length(new_params) - (n_weight_pars + length(W) + r
-                                    + n_distpars) + 1):(length(new_params) - (n_weight_pars + r + n_distpars))] <- W
+
+  ## Swap the sign constraints accordingly
   if(!is.null(B_constraints)) {
     new_B_constraints <- B_constraints
     new_B_constraints[, which_to_swap] <- -new_B_constraints[, which_to_swap]

@@ -78,7 +78,7 @@
 #' @examples
 #' \donttest{
 #' ## These are long running examples. Running all the below examples will take
-#' ## approximately four minutes.
+#' ## approximately three minutes.
 #' # When estimating the models in empirical applications, typically a large number
 #' # of estimation rounds (set by the argument 'nrounds') should be used. These examples
 #' # use only a small number of rounds to make the running time of the examples reasonable.

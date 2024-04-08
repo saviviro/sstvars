@@ -68,3 +68,6 @@ fit12_alt2$loglik # Log-likelihood of the alternative solution
      \emph{Journal of the American Statistical Association}, \strong{93}:443, 1188-1202.
  }
 }
+\seealso{
+\code{\link{STVAR}}
+}
