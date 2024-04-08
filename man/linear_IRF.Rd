@@ -185,5 +185,5 @@ plot(irf4)
 }
 \seealso{
 \code{\link{GIRF}}, \code{\link{GFEVD}}, \code{\link{fitSTVAR}}, \code{\link{STVAR}},
-  \code{\link{reorder_W_columns}}, \code{\link{swap_W_signs}}
+  \code{\link{reorder_B_columns}}, \code{\link{swap_B_signs}}
 }

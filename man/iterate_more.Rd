@@ -59,5 +59,5 @@ get_foc(fit12) # Close to zero!
 }
 \seealso{
 \code{\link{fitSTVAR}}, \code{\link{STVAR}}, \code{\link[stats]{optim}},
- \code{\link{swap_W_signs}}, \code{\link{reorder_W_columns}}
+ \code{\link{swap_B_signs}}, \code{\link{reorder_B_columns}}
 }

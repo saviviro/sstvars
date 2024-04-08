@@ -355,7 +355,7 @@ test_that("reorder_B_columns works correctly", {
 })
 
 
-test_that("swap_W_signs works correctly", {
+test_that("swap_B_signs works correctly", {
   expect_equal(swap_B_signs(mod122relgsh, which_to_swap=2, calc_std_errors=FALSE)$params,
                c(0.734054, 0.225598, 0.705744, 0.187897, 0.259626, -0.000863, -0.312400, 0.505251, 0.298483, 0.030096, -0.176925,
                  0.838898, -0.030000, 0.240000, 0.760000, 0.020000, 3.360000, 0.860000, 0.600000), tolerance=1e-4)

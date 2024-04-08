@@ -11,7 +11,7 @@
 #'   with the main estimation function \code{fitSTVAR} or \code{fitSSTVAR}.
 #' @return Returns an object of class \code{'stvar'} defining the estimated model
 #' @seealso \code{\link{fitSTVAR}}, \code{\link{STVAR}}, \code{\link[stats]{optim}},
-#'  \code{\link{swap_W_signs}}, \code{\link{reorder_W_columns}}
+#'  \code{\link{swap_B_signs}}, \code{\link{reorder_B_columns}}
 #' @inherit fitSTVAR references
 #' @examples
 #' \donttest{
@@ -417,7 +417,7 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity")
     if(n_sign_changes > 0) {
       cat(paste0("There was ", n_sign_changes, " sign changes in W when creating preliminary estimates for the new model. ",
                   "The sign changes make the results more unrealiable. To obtain more reliable results, consider using ",
-                  "the function 'swap_W_signs' to create a model that has the sign constraints readily satisfied and ",
+                  "the function 'swap_B_signs' to create a model that has the sign constraints readily satisfied and ",
                   "then applying this function.\n\n"))
     }
   } else {
