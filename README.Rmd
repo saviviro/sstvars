@@ -116,11 +116,11 @@ fithet <- fitSSTVAR(fit, identification="heteroskedasticity")
 fithet
 
 # Reorder the columns of the impact matrix of fithet to the reverse ordering:
-fithet <- reorder_W_columns(fithet, perm=c(2, 1))
+fithet <- reorder_B_columns(fithet, perm=c(2, 1))
 fithet
 
 # Change all signs of the first column of the impact matrix of fithet:
-fithet <- swap_W_signs(fithet, which_to_swap=1)
+fithet <- swap_B_signs(fithet, which_to_swap=1)
 fithet
 
 # Estimate the generalized impulse response function (GIRF) for the recursively

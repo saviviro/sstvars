@@ -284,6 +284,15 @@ test_that("swap_parametrization works correctly", {
                  -0.0212090, 0.7075020, 0.0633220, 0.0272870, 0.0091820, 0.1970660, -0.0300000,
                  0.2400000, -0.7600000, -0.0200000, 3.3600000, 0.8600000, 0.1000000, 0.2000000, 7.0000000),
                tolerance=1e-3)
+
+  # ind_Student exo
+  expect_equal(swap_parametrization(mod123exoit, calc_std_errors=FALSE)$params,
+               c(0.01872735, 0.54692881, 2.82960017, -0.50345541, 1.88535674, 9.50476379, 0.87227000, -0.01595000, 0.14124000,
+                 -0.08611000, 0.61865000, 0.34311000, -0.02047000, 0.02500000, 0.97548000, 0.74976000, 0.02187000, 0.29213000,
+                 -1.55165000, 0.58245000, -0.00696000, -0.07261000, 0.02021000, 0.96883000, 0.21700000, -0.54200000, 0.89100000,
+                 0.59600000, 1.63600000, 0.68900000, -1.28100000, -0.21300000, 1.89700000, 1.77700000, 0.56700000, 0.01600000,
+                 0.38300000, -0.04500000, 0.03400000, 0.16900000, 1.16500000, -0.04400000, 7.00000000, 3.00000000, 13.00000000),
+               tolerance=1e-3)
 })
 
 
@@ -296,10 +305,6 @@ test_that("get_hetsked_sstvar works correctly", {
                  0.61865, 0.34311, -0.02047, 0.025, 0.97548, 0.74976, 0.02187, 0.29213, -1.55165, 0.58245,
                  -0.00696, -0.07261, 0.02021, 0.96883, 0.0325296, 0.0298782, 0.339136, -0.0670146, 0.2290013,
                  -0.0541424, 0.8099018, 0.0458877, 0.0955791, 29.4434945, 3.98537, 1.1237683, 0.77357), tolerance=1e-4)
-
-  # diag_Omegas(Omega1=unvech(d=3, a=c(0.66149, 0.02279, 0.09207, 0.05544, 0.00212, 0.12708)),
-  #             Omega2=unvech(d=3, a=c(0.78618, 0.00922, 0.42627, 0.23765, 0.25386, 3.40834)))
-
 
   # Logistic
   expect_equal(get_hetsked_sstvar(mod222logisticcmw_2_1)$params,
@@ -323,30 +328,60 @@ test_that("get_hetsked_sstvar works correctly", {
                  0.4046369, -0.0624318, 0.2051828, 0.1482541, 5.5613353, 4.3119004, 1, 13), tolerance=4)
 })
 
-test_that("reorder_W_columns works correctly", {
-  expect_equal(reorder_W_columns(mod222logistictsh_2_1, perm=1:2, calc_std_errors=FALSE)$params,
+test_that("reorder_B_columns works correctly", {
+  expect_equal(reorder_B_columns(mod222logistictsh_2_1, perm=1:2, calc_std_errors=FALSE)$params,
                mod222logistictsh_2_1$params, tolerance=1e-4)
-  expect_equal(reorder_W_columns(mod222logistictsh_2_1, perm=2:1, calc_std_errors=FALSE)$params,
+  expect_equal(reorder_B_columns(mod222logistictsh_2_1, perm=2:1, calc_std_errors=FALSE)$params,
                c(0.356914, 0.107436, 0.356386, 0.086330, 0.139960, 0.035172, -0.164575, 0.386816, 0.451675, 0.013086,
                  0.227882, 0.336084, 0.239257, 0.024173, -0.021209, 0.707502, 0.063322, 0.027287, 0.009182, 0.197066,
                  -0.760000, -0.020000, -0.030000, 0.240000, 0.860000, 3.360000, 0.100000, 0.200000, 7.000000), tolerance=1e-4)
 
-  expect_equal(reorder_W_columns(mod222expcmwbtsh_2_1, perm=2:1, calc_std_errors=FALSE)$params,
+  expect_equal(reorder_B_columns(mod222expcmwbtsh_2_1, perm=2:1, calc_std_errors=FALSE)$params,
                c(0.7209658, 0.8108580, 0.2200000, 0.0600000, -0.1500000, 0.3900000, 0.4100000, -0.0100000, 0.0800000, 0.3000000,
                  -0.0200000, -0.0300000, 0.2400000, 0.8600000, 3.3600000, 0.3300000, 4.0000000), tolerance=1e-4)
+
+  expect_equal(reorder_B_columns(mod123exoit, perm=c(3, 1, 2), calc_std_errors=FALSE)$params,
+               c(0.10741, 0.13813, -0.12092, 3.48957, 0.60615, 0.45646, 0.87227, -0.01595, 0.14124, -0.08611, 0.61865, 0.34311,
+                 -0.02047, 0.025, 0.97548, 0.74976, 0.02187, 0.29213, -1.55165, 0.58245, -0.00696, -0.07261, 0.02021, 0.96883,
+                 -1.281, -0.213, 1.897, 0.217, -0.542, 0.891, 0.596, 1.636, 0.689, 0.169, 1.165, -0.044, 1.777, 0.567, 0.016,
+                 0.383, -0.045, 0.034, 13, 7, 3), tolerance=1e-4)
+
+  expect_equal(reorder_B_columns(mod222logistitb, perm=c(2, 1), calc_std_errors=FALSE)$params,
+               c(0.720966, 0.810858, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01, 0.08, 0.3, 0.7, 0.1,
+                 0.2, 0.73, 0.11, -0.22, 0.4, 3, 7), tolerance=1e-4)
+
+  expect_equal(reorder_B_columns(mod222logistitb, perm=c(2, 1), calc_std_errors=FALSE)$model$B_constraints,
+               matrix(c(0, 1, 1, NA), nrow=2), tolerance=1e-4)
 })
 
 
 test_that("swap_W_signs works correctly", {
-  expect_equal(swap_W_signs(mod122relgsh, which_to_swap=2, calc_std_errors=FALSE)$params,
+  expect_equal(swap_B_signs(mod122relgsh, which_to_swap=2, calc_std_errors=FALSE)$params,
                c(0.734054, 0.225598, 0.705744, 0.187897, 0.259626, -0.000863, -0.312400, 0.505251, 0.298483, 0.030096, -0.176925,
                  0.838898, -0.030000, 0.240000, 0.760000, 0.020000, 3.360000, 0.860000, 0.600000), tolerance=1e-4)
 
-  expect_equal(swap_W_signs(mod222expcmwbtsh_2_1, which_to_swap=c(2, 1), calc_std_errors=FALSE)$params,
+  expect_equal(swap_B_signs(mod222expcmwbtsh_2_1, which_to_swap=c(2, 1), calc_std_errors=FALSE)$params,
                c(0.7209658, 0.8108580, 0.2200000, 0.0600000, -0.1500000, 0.3900000, 0.4100000, -0.0100000, 0.0800000, 0.3000000,
                  0.0300000, -0.2400000, 0.0200000, 3.3600000, 0.8600000, 0.3300000, 4.0000000), tolerance=1e-4)
 
-  expect_equal(swap_W_signs(mod222expcmwbtsh_2_1, which_to_swap=1, calc_std_errors=FALSE)$params,
+  expect_equal(swap_B_signs(mod222expcmwbtsh_2_1, which_to_swap=1, calc_std_errors=FALSE)$params,
                c(0.7209658, 0.8108580, 0.2200000, 0.0600000, -0.1500000, 0.3900000, 0.4100000, -0.0100000, 0.0800000, 0.3000000,
                  0.0300000, -0.2400000, -0.0200000, 3.3600000, 0.8600000, 0.3300000, 4.0000000), tolerance=1e-4)
+
+  expect_equal(swap_B_signs(mod123exoit, which_to_swap=1, calc_std_errors=FALSE)$params,
+               c(0.10741, 0.13813, -0.12092, 3.48957, 0.60615, 0.45646, 0.87227, -0.01595, 0.14124, -0.08611, 0.61865, 0.34311,
+                 -0.02047, 0.025, 0.97548, 0.74976, 0.02187, 0.29213, -1.55165, 0.58245, -0.00696, -0.07261, 0.02021, 0.96883,
+                 -0.217, 0.542, -0.891, 0.596, 1.636, 0.689, -1.281, -0.213, 1.897, -1.777, -0.567, -0.016, 0.383, -0.045, 0.034,
+                 0.169, 1.165, -0.044, 7, 3, 13), tolerance=1e-4)
+
+  expect_equal(swap_B_signs(mod222logistitb, which_to_swap=2, calc_std_errors=FALSE)$params,
+               c(0.720966, 0.810858, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01, 0.08, 0.3, 0.1, 0.2, -0.7, 0.11, -0.22, -0.73, 0.4, 7, 3),
+               tolerance=1e-4)
+
+  expect_equal(swap_B_signs(mod222logistitb, which_to_swap=2, calc_std_errors=FALSE)$model$B_constraints,
+               matrix(c(1, NA, 0, -1), nrow=2), tolerance=1e-4)
+  expect_equal(swap_B_signs(mod222logistitb, which_to_swap=1:2, calc_std_errors=FALSE)$model$B_constraints,
+               matrix(c(-1, NA, 0, -1), nrow=2), tolerance=1e-4)
+  expect_equal(swap_B_signs(mod222logistitb, which_to_swap=1, calc_std_errors=FALSE)$model$B_constraints,
+               matrix(c(-1, NA, 0, 1), nrow=2), tolerance=1e-4)
 })
