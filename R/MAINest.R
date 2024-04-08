@@ -107,16 +107,16 @@
 #' # Estimate a two-regime threshold VAR p=3 model with independent Student's t shocks.
 #' # The first lag of the the second variable is specified as the switching variable,
 #' # and the threshold parameter constrained to the fixed value 1.
-#' fitthres32wt <- fitSTVAR(gdpdef, p=3, M=2, weight_function="threshold", weightfun_pars=c(2, 1),
-#'   cond_dist="ind_Student", weight_constraints=list(R=0, r=1), nrounds=2, ncores=1, seeds=1:2)
-#' plot(fitthres32wt) # Plot the fitted transition weights
+#' fitthres32wit <- fitSTVAR(gdpdef, p=3, M=2, weight_function="threshold", weightfun_pars=c(2, 1),
+#'   cond_dist="ind_Student", weight_constraints=list(R=0, r=1), nrounds=2, ncores=2, seeds=1:2)
+#' plot(fitthres32wit) # Plot the fitted transition weights
 #'
-#' fitthres31wt <- fitSTVAR(gdpdef, p=3, M=1, weight_function="threshold", weightfun_pars=c(2, 1),
-#'   cond_dist="ind_Student", nrounds=2, ncores=1, seeds=1:2)
-#'
-#' # Estimate a two-regime STVAR p=3 model with exogenous transition weights defined as a linear
+#' # Estimate a two-regime STVAR p=2 model with exogenous transition weights defined as a linear
 #' # time trend (t/T) and mutually independent Student's t shocks.
-#' tw1 <- (1:nrow(gdpdef))
+#' tw1 <- (1:(nrow(gdpdef) - 2))/(nrow(gdpdef) - 2) # Transition weights of Regime 1
+#' fitexog22it <- fitSTVAR(gdpdef, p=2, M=2, weight_function="exogenous",
+#'   weightfun_pars=cbind(tw1, 1-tw1), # The transition weights specified in weightfun_pars
+#'   cond_dist="ind_Student", nrounds=2, ncores=1, seeds=1:2)
 #'
 #' # VAIHDA ALLA OLEVA JHONBKI
 #' # Estimate a two-regime Gaussian STVAR p=1 model with the weighted relative stationary densities

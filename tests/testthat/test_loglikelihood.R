@@ -454,62 +454,6 @@ theta_222exotcm <- c(phi10_222, vec(A11_222), vec(A12_222), vech(Omega1_222), ve
 theta_222exotcm_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
                                        vech(Omega1_222), vech(Omega2_222), 13)
 
-#############################################################
-# loglikelihood(data=gdpdef[1:5,], p=3, M=1, params=fitthres31wt$params, cond_dist="ind_Student", weight_function="threshold",
-#               weightfun_pars=c(2, 1), to_return="terms")
-#
-#
-# print_vals <- function(Bpars, distpars) {
-#   loglik_terms <- loglikelihood(data=gdpdef[1:3,], p=1, M=1, params=c(phi10_112, vec(A11_112), Bpars, distpars), cond_dist="ind_Student",
-#                                 weight_function="threshold", weightfun_pars=c(1, 1), to_return="terms")
-#   logCd <- sum(lgamma(0.5*(d + distpars)) - 0.5*d*log(base::pi) - 0.5*d*log(distpars - 2) - lgamma(0.5*distpars))
-#   B <- matrix(Bpars, nrow=2)
-#   detterm <- -log(abs(det(B)))
-#   print(paste("Det-term:", round(detterm, 4)))
-#   print(paste("LogCd-term:", round(logCd, 4)))
-#   print(paste("Last-term:", round(loglik_terms-detterm-logCd, 4)))
-#   print(paste("loglik:", round(sum(loglik_terms), 4)))
-# }
-#
-# print_vals(Bpars=c(0.8, 0.0, 0.0, 0.26), distpars=c(2.5000100003773, 2.5000100007186))
-#
-# print_vals(Bpars=c(94, -19, 34, 15), distpars=c(2.1000100003773, 2.1000100007186))
-#
-#
-# solve(matrix(c(0.8, 0.0, 0.0, 0.26), nrow=2), c(0.6, -0.2))/(2.01 - 2)
-# solve(matrix(c(94, -19, 34, 15), nrow=2), c(0.6, -0.2))/(2.001 - 2)
-#
-#
-# loglikelihood(data=gdpdef[1:3,], p=1, M=1, params=c(phi10_112, vec(A11_112), c(94, -19, 34, 15), c(2.100003773, 2.100007186)),
-#               cond_dist="ind_Student", weight_function="threshold", weightfun_pars=c(1, 1), to_return="terms")
-#
-#
-#
-#
-# theta_112t <- c(phi10_112, vec(A11_112), c(0.74, -0.11, 0.13), 3)
-# loglikelihood(data=gdpdef, p=1, M=1, params=theta_112t, cond_dist="Student", weight_function="threshold", weightfun_pars=c(1, 1))
-#
-#
-#
-# distpars <- c(2.3800003773, 2.3800007186)
-# lgamma(0.5*(d + distpars)) - 0.5*d*log(base::pi) - 0.5*d*log(distpars - 2) - lgamma(0.5*distpars)
-#
-# -log(abs(det(matrix(c(94.656217708, -19.783693821, 34.895993490, 15.561126963), nrow=2))))
-#
-# -log(abs(1e-15))
-#
-# solve(matrix(c(94.656217708, -19.783693821, 34.895993490, 15.561126963), nrow=2))
-#
-# tcrossprod(B1_112)
-#
-#
-# loglikelihood(data=gdpdef, p=2, M=1, params=c(phi10_212, vec(A11_212), vec(A12_212), c(1, 0, 0, 1), 3, 3), cond_dist="ind_Student",
-#               weight_function="threshold", weightfun_pars=c(1, 1))
-# loglikelihood(data=gdpdef, p=2, M=1, params=c(phi10_212, vec(A11_212), vec(A12_212), c(1, 0, 1), 3), cond_dist="Student",
-#               weight_function="threshold", weightfun_pars=c(1, 1))
-
-
-###################################################
 
 ###############
 ### ind_Student

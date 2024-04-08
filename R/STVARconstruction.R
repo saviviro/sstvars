@@ -425,13 +425,18 @@ get_hetsked_sstvar <- function(stvar, calc_std_errors=FALSE) {
   cond_dist <- stvar$model$cond_dist
   parametrization <- stvar$model$parametrization
   identification <- stvar$model$identification
-  stopifnot(identification == "reduced_form")
-  stopifnot(M == 2)
+  if(identification != "reduced_form") {
+    stop("Only reduced form models are supported")
+  } else if(M != 2) {
+    stop("Only two-regime models are supported")
+  } else if(cond_dist == "ind_Student") {
+    stop("Models with independent Student's t errors are not supported (they are readily statistically identified)")
+  }
   AR_constraints <- stvar$model$AR_constraints
   mean_constraints <- stvar$model$mean_constraints
   weight_constraints <- stvar$model$weight_constraints
   B_constraints <- stvar$model$B_constraints
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function,
+  weightfun_pars <- check_weightfun_pars(data=data, p=p, M=M, d=d, weight_function=weight_function,
                                          weightfun_pars=stvar$model$weightfun_pars, cond_dist=cond_dist)
   params <- reform_constrained_pars(p=p, M=M, d=d, params=pars_orig,
                                     weight_function=weight_function, weightfun_pars=weightfun_pars,
@@ -440,7 +445,7 @@ get_hetsked_sstvar <- function(stvar, calc_std_errors=FALSE) {
                                     weight_constraints=weight_constraints, B_constraints=B_constraints)
 
   # Obtain and simultaneously diagonalize the covariance matrices
-  all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params, identification=identification)
+  all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params, cond_dist=cond_dist, identification=identification)
   tmp <- diag_Omegas(Omega1=all_Omega[, , 1], Omega2=all_Omega[, , 2])
   W <- matrix(tmp[1:(d^2)], nrow=d, ncol=d, byrow=FALSE)
   lambdas <- tmp[(d^2 + 1):(d^2 + d)]
