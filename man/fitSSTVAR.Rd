@@ -7,7 +7,7 @@
 \usage{
 fitSSTVAR(
   stvar,
-  identification = c("recursive", "heteroskedasticity"),
+  identification = c("recursive", "heteroskedasticity", "non-Gaussianity"),
   B_constraints = NULL,
   maxit = 1000,
   maxit_robust = 1000,

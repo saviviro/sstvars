@@ -51,7 +51,8 @@ profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precisi
   d <- stvar$model$d
   params <- stvar$params
   weight_function <- stvar$model$weight_function
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=stvar$model$weightfun_pars)
+  weightfun_pars <- check_weightfun_pars(data=stvar$dat, p=p, M=M, d=d, weight_function=weight_function,
+                                         weightfun_pars=stvar$model$weightfun_pars)
   cond_dist <- stvar$model$cond_dist
   parametrization <- stvar$model$parametrization
   identification <- stvar$model$identification
@@ -89,7 +90,14 @@ profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precisi
   } else { # AR matrices constrained
     n_ar_pars <- ncol(AR_constraints)
   }
-  if(identification %in% c("reduced_form", "recursive")) {
+  if(cond_dist == "ind_Student" || identification == "non-Gaussianity") {
+    if(is.null(B_constraints)) {
+      n_zeros <- 0
+    } else {
+      n_zeros <- sum(B_constraints == 0, na.rm=TRUE)
+    }
+    n_covmat_pars <- M*d^2 - n_zeros
+  } else if(identification %in% c("reduced_form", "recursive")) {
     n_covmat_pars <- M*d*(d + 1)/2
   } else if(identification == "heteroskedasticity") {
     if(is.null(B_constraints)) {
@@ -100,27 +108,32 @@ profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precisi
     n_covmat_pars <- d^2 + d*(M - 1) - n_zeros
     W_row_ind <- rep(1, times=d) # row for each column
   }
-  if(is.null(weight_constraints)) {
-    if(weight_function == "relative_dens" || weight_function == "threshold") {
-      n_weight_pars <- M - 1
-    } else if(weight_function == "logistic" || weight_function == "exponential") {
-      n_weight_pars <- 2
-    } else if(weight_function == "mlogit") {
-      n_weight_pars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
-    } else {
-      stop("Unknown weightfunction in n_params")
-    }
-  } else { # Constraints on the weight parameters
-    if(all(weight_constraints[[1]] == 0)) {
-      n_weight_pars <- 0 # alpha = r, not in the parameter vector
-    } else {
-      n_weight_pars <- ncol(weight_constraints[[1]]) # The dimension of xi
+  if(weight_function == "exogenous") {
+    n_weight_pars <- 0
+  } else {
+    if(is.null(weight_constraints)) {
+      if(weight_function == "relative_dens" || weight_function == "threshold") {
+        n_weight_pars <- M - 1
+      } else if(weight_function == "logistic" || weight_function == "exponential") {
+        n_weight_pars <- 2
+      } else if(weight_function == "mlogit") {
+        n_weight_pars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
+      }
+    } else { # Constraints on the weight parameters
+      if(all(weight_constraints[[1]] == 0)) {
+        n_weight_pars <- 0 # alpha = r, not in the parameter vector
+      } else {
+        n_weight_pars <- ncol(weight_constraints[[1]]) # The dimension of xi
+      }
     }
   }
+
   if(cond_dist == "Gaussian") {
     n_dist_pars <- 0
-  } else { # cond_dist == "Student"
+  } else if(cond_dist == "Student") {
     n_dist_pars <- 1 # degrees of freedom param
+  } else { # cond_dist == "ind_Student"
+    n_dist_pars <- d # df params
   }
 
   # Go though the parameters in which_pars
@@ -165,7 +178,7 @@ profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precisi
         main <- substitute(psi(foo), list(foo=i1 - n_mean_pars))
       }
     } else if(i1 <= n_mean_pars + n_ar_pars + n_covmat_pars) { # Covariance matrix parameter
-      if(identification %in% c("reduced_form", "recursive")) {
+      if(identification %in% c("reduced_form", "recursive") && cond_dist != "ind_Student") {
         cum_o <- n_mean_pars + n_ar_pars + (0:(M - 1))*d*(d + 1)/2 # The indeces after which regime changes
         m <- sum(i1 > cum_o) # Which regime
         cum_col <- cum_o[m] + c(0, cumsum(d - 0:(d - 1))) # The indeces after which column changes in vech(Omega_m)
@@ -173,12 +186,11 @@ profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precisi
         row_inds <- unlist(lapply(1:d, function(i2) i2:d)) # At which row are we in for each pos in vech(Omega_m)
         row_ind <- row_inds[i1 - cum_o[m]] # Row in Omega_m
         main <- substitute(Omega[foo](foo2), list(foo=m, foo2=paste0(row_ind, ",", col_ind)))
-      } else { # Structural model with different params than reduced form models
+      } else { # Structural model with different params than reduced form models, or cond_dist=ind_Student
         if(identification == "heteroskedasticity") {
           if(i1 <= n_mean_pars + n_ar_pars + d^2 - n_zeros) { # W params
             n_zeros_in_each_column <- vapply(1:d, function(i2) sum(B_constraints[,i2] == 0, na.rm=TRUE), numeric(1))
-            zero_positions <- lapply(1:d,
-                                     function(i2) (1:d)[B_constraints[,i2] == 0 & !is.na(B_constraints[,i2])]) # 0 constr pos in each col
+            zero_positions <- lapply(1:d, function(i2) (1:d)[B_constraints[,i2] == 0 & !is.na(B_constraints[,i2])]) # 0 constr pos in each col
             cum_wc <- c(0, cumsum(d - n_zeros_in_each_column)) # Index in W parameters after which a new column in W starts
             posw <- i1 - (n_mean_pars + n_ar_pars) # Index in W parameters
             col_ind <- sum(posw > cum_wc)
@@ -197,9 +209,29 @@ profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precisi
             pos <- i1 - cum_lamb[m - 1] # which i=1,...,d in lambda_{mi}
             main <- substitute(lambda[foo](foo2), list(foo=m, foo2=pos))
           }
+        } else { # identification by non-Gaussianity (also cond_dist="ind_Student"): B_m params for m=1,...,M
+          cum_b <- n_mean_pars + n_ar_pars + (0:(M - 1))*(d^2 - n_zeros) # Index after which the regime changes
+          if(any(i1 == cum_b + 1)) {
+            B_row_ind <- rep(1, times=d) # row for each column, resets whenever a new regime starts
+          }
+          m <- sum(i1 > cum_b) # Which regime
+          n_zeros_in_each_column <- vapply(1:d, function(i2) sum(B_constraints[,i2] == 0, na.rm=TRUE), numeric(1))
+          zero_positions <- lapply(1:d, function(i2) (1:d)[B_constraints[,i2] == 0 & !is.na(B_constraints[,i2])]) # 0 constr pos in each col
+          cum_bc <- c(0, cumsum(d - n_zeros_in_each_column)) # Index in B_m parameters after which a new column in B_m starts
+          posb <- i1 - (n_mean_pars + n_ar_pars + (m - 1)*(d^2 - n_zeros)) # Index in B_m parameters
+          col_ind <- sum(posb > cum_bc)
+          while(TRUE) {
+            if(B_row_ind[col_ind] %in% zero_positions[[col_ind]]) {
+              B_row_ind[col_ind] <- B_row_ind[col_ind] + 1
+            } else {
+              break
+            }
+          }
+          main <- substitute(B(foo), list(foo=paste0(B_row_ind[col_ind], ", ", col_ind)))
+          B_row_ind[col_ind] <- B_row_ind[col_ind] + 1
         }
       }
-    } else if(i1 <= n_mean_pars + n_ar_pars + n_covmat_pars + n_weight_pars) { # Transition weight parameter
+    } else if(i1 <= n_mean_pars + n_ar_pars + n_covmat_pars + n_weight_pars) { # Transition weight parameter: never here for exo mods
       pos <- i1 - n_mean_pars - n_ar_pars - n_covmat_pars # Position in weightpars
       if(is.null(weight_constraints)) {
         if(weight_function == "relative_dens") {
@@ -225,7 +257,12 @@ profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precisi
         }
       }
     } else { # Must be a distribution parameter
-      main <- substitute(nu) # Must be the only df parameter
+      if(cond_dist == "Student") {
+        main <- substitute(nu) # Must be the only df parameter
+      } else { # cond_dist == "ind_Student"
+        which_df <- i1 - n_mean_pars - n_ar_pars - n_covmat_pars - n_weight_pars # Which df parameter (related to which time series)
+        main <- substitute(nu[foo], list(foo=which_df))
+      }
     }
     plot(x=vals, y=logliks, type="l", main=main, xlab="", ylab="")
     abline(v=pars[i1], col="red") # Points the estimate
