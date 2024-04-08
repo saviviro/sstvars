@@ -139,7 +139,7 @@
 #' # Step 3: Create the appropriate constraint matrix:
 #' C_122 <- rbind(diag(1*2^2), diag(1*2^2)) # Create the appropriate constraint matrix
 #'
-#' # Step 3: Estimate the model by specifying the weights in the argument 'weightfun_pars'
+#' # Step 4: Estimate the model by specifying the weights in the argument 'weightfun_pars'
 #' # and the constraint matrix in the arugment 'AR_constraints':
 #' fitexo12cit <- fitSTVAR(gdpdef, p=1, M=2, weight_function="exogenous", weightfun_pars=twmat,
 #'   cond_dist="ind_Student", AR_constraints=C_122, nrounds=2, ncores=2, seeds=1:2)
