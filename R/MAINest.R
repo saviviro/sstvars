@@ -133,7 +133,7 @@
 #'  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 #'
 #' # Step 2: Define the transition weights of Regime 2 as one minus the weights of Regime 1, and
-#' # and combine the weights to matrix of transition weights:
+#' # combine the weights to matrix of transition weights:
 #' twmat <- cbind(tw1, 1 - tw1)
 #'
 #' # Step 3: Create the appropriate constraint matrix:
