@@ -60,10 +60,9 @@ Wald_test <- function(stvar, A, c) {
   if(qr(A)$rank != nrow(A)) stop("The constraint matrix 'A' should have full row rank")
 
   # Calculate Hessian matrix at the estimate
-  Hess <- tryCatch(get_hessian(stvar),
-                   error=function(e) {
-                     print(paste("Failed to calculate Hessian matrix:", e))
-                     return(NA)})
+  Hess <- tryCatch(get_hessian(stvar), error=function(e) {
+    print(paste("Failed to calculate Hessian matrix:", e))
+    return(NA)})
 
   # Invert the Hessian matrix
   inv_Hess <- tryCatch(solve(Hess), error=function(e) {
@@ -237,7 +236,8 @@ Rao_test <- function(stvar) {
   d <- stvar$model$d
   params <- stvar$params
   weight_function <- stvar$model$weight_function
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=stvar$model$weightfun_pars)
+  weightfun_pars <- check_weightfun_pars(data=stvar$data, p=p, M=M, d=d, weight_function=weight_function,
+                                         weightfun_pars=stvar$model$weightfun_pars)
   cond_dist <- stvar$model$cond_dist
   parametrization <- stvar$model$parametrization
   identification <- stvar$model$identification
