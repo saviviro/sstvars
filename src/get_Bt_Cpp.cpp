@@ -20,13 +20,16 @@ arma::cube get_Bt_Cpp(const arma::cube& all_Omegas, const arma::mat& alpha_mt) {
   // Create a storage for the weighted sums of matrices
   arma::cube weightedSums = arma::zeros<arma::cube>(all_Omegas.n_rows, all_Omegas.n_cols, alpha_mt.n_rows);
 
+  // Compute the element-wise square root of alpha_mt
+  arma::mat alpha_mt_sqrt = arma::sqrt(alpha_mt);
+
   // Iterate through each row of alpha_mt
-  for(unsigned int i = 0; i < alpha_mt.n_rows; ++i) {
+  for(unsigned int i = 0; i < alpha_mt_sqrt.n_rows; ++i) {
     arma::mat weightedSum = arma::zeros<arma::mat>(all_Omegas.n_rows, all_Omegas.n_cols);
 
     // Compute the weighted sum of matrices in all_Omegas
-    for(unsigned int j = 0; j < alpha_mt.n_cols; ++j) {
-      weightedSum += all_Omegas.slice(j)*alpha_mt(i, j);
+    for(unsigned int j = 0; j < alpha_mt_sqrt.n_cols; ++j) {
+      weightedSum += all_Omegas.slice(j)*alpha_mt_sqrt(i, j);
     }
 
     // Store the weighted sum of the matrices to weightedSums

@@ -13,8 +13,10 @@
 //' @param impact_matrices A a size \eqn{d\times d \times M} \code{arma::cube} (3D array in R), where each slice contains an
 //'  invertible (d x d) impact matrix of each regime.
 //' @param distpars A numeric vector of length \eqn{d}, containing the degrees of freedom parameters for each component.
-//' @details Returns \code{minval} if the impact matrix \eqn{B_t} is not invertible for some t up to the numerical tolerance \code{posdef_tol}.
-//' @return A numeric vector of length \eqn{T}, where each element represents the computed density component for the corresponding observation.
+//' @details Returns \code{minval} if the impact matrix \eqn{B_t} is not invertible for some t up to the numerical tolerance
+//'  \code{posdef_tol}.
+//' @return A numeric vector of length \eqn{T}, where each element represents the computed density component for
+//'  the corresponding observation.
 //' @keywords internal
 // [[Rcpp::export]]
 arma::vec ind_Student_densities_Cpp(const arma::mat& obs,
@@ -43,6 +45,11 @@ arma::vec ind_Student_densities_Cpp(const arma::mat& obs,
     }
   }
 
+  // Compute the element-wise square root of alpha_mt
+  // Sqrt computed after the above approximation so that it result in 0 or 1 weights for each row,
+  // and so corresponding rows of alpha_mt_sqrt also have 0 or 1 elements.
+  arma::mat alpha_mt_sqrt = arma::sqrt(alpha_mt);
+
   // Placeholder for potential Bt precalculations (consider using map or vector of matrices)
   std::vector<arma::mat> precalculatedBt(T_obs);
   std::vector<arma::mat> precalculatedInvBt(T_obs);
@@ -51,8 +58,8 @@ arma::vec ind_Student_densities_Cpp(const arma::mat& obs,
 
   // Precalculate Bt and invBt for simplified rows
   for(int i1 = 0; i1 < T_obs; ++i1) {
-    for(int i2 = 0; i2 < alpha_mt.n_cols; ++i2) {
-      if(alpha_mt(i1, i2) == 1) { // One weight is 1 and the rest are 0, so need to calculate for the one with 1 only.
+    for(int i2 = 0; i2 < alpha_mt_sqrt.n_cols; ++i2) {
+      if(alpha_mt_sqrt(i1, i2) == 1) { // One weight is 1 and the rest are 0, so need to calculate for the one with 1 only.
         precalculatedBt[i1] = impact_matrices.slice(i2);
         precalculatedlogAbsDetBt[i1] = -log(std::abs(arma::det(precalculatedBt[i1])));
         precalculatedInvBt[i1] = arma::inv(precalculatedBt[i1]); // Bt is always invertible here since it is just B_m
@@ -75,7 +82,7 @@ arma::vec ind_Student_densities_Cpp(const arma::mat& obs,
     } else {
       // Compute Bt as the weighted sum of impact_matrices (weights are not approximately 0 or 1)
       for(int i2 = 0; i2 < impact_matrices.n_slices; ++i2) {
-        Bt += impact_matrices.slice(i2)*alpha_mt(i1, i2);
+        Bt += impact_matrices.slice(i2)*alpha_mt_sqrt(i1, i2);
       }
 
       //arma::vec obs_minus_cmean = (obs.row(i1) - means.row(i1)).t(); // Compute obs_minus_cmean for the current observation

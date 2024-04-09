@@ -39,7 +39,8 @@ to be outside the parameter space. Note that if the tolerance is too small, nume
 log-likelihood might fail and cause error.}
 }
 \value{
-A numeric vector of length \eqn{T}, where each element represents the computed density component for the corresponding observation.
+A numeric vector of length \eqn{T}, where each element represents the computed density component for
+ the corresponding observation.
 }
 \description{
 Calculates logs of independent multivariate Student t densities with varying mean
@@ -48,6 +49,7 @@ Calculates logs of independent multivariate Student t densities with varying mea
   the function from the impact matrices of the regimes and transition weights.
 }
 \details{
-Returns \code{minval} if the impact matrix \eqn{B_t} is not invertible for some t up to the numerical tolerance \code{posdef_tol}.
+Returns \code{minval} if the impact matrix \eqn{B_t} is not invertible for some t up to the numerical tolerance
+ \code{posdef_tol}.
 }
 \keyword{internal}

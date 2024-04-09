@@ -13,6 +13,7 @@
   init_regime,
   ntimes = 1,
   burn_in = 1000,
+  exo_weights = NULL,
   drop = TRUE,
   girf_pars = NULL
 )
@@ -41,6 +42,10 @@ use a simulation procedure with a burn-in period. See the details section.}
 
 \item{burn_in}{Burn-in period for simulating initial values from a regime when \code{cond_dist!="Gaussian"}.
 See the details section.}
+
+\item{exo_weights}{if \code{weight_function="exogenous"}, provide a size \eqn{(nsim x M)} matrix of exogenous
+transition weights for the regimes: \code{[t, m]} for a time \eqn{t} and regime \eqn{m} weight. Ignored
+if \code{weight_function!="exogenous"}.}
 
 \item{drop}{if \code{TRUE} (default) then the components of the returned list are coerced to lower dimension if
 \code{ntimes==1}, i.e., \code{$sample} and \code{$transition_weights} will be matrices, and \code{$component}

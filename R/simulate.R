@@ -18,6 +18,9 @@
 #' @param ntimes how many sets of simulations should be performed?
 #' @param burn_in Burn-in period for simulating initial values from a regime when \code{cond_dist!="Gaussian"}.
 #'  See the details section.
+#' @param exo_weights if \code{weight_function="exogenous"}, provide a size \eqn{(nsim x M)} matrix of exogenous
+#'  transition weights for the regimes: \code{[t, m]} for a time \eqn{t} and regime \eqn{m} weight. Ignored
+#'  if \code{weight_function!="exogenous"}.
 #' @param drop if \code{TRUE} (default) then the components of the returned list are coerced to lower dimension if
 #'  \code{ntimes==1}, i.e., \code{$sample} and \code{$transition_weights} will be matrices, and \code{$component}
 #'   will be vector.
@@ -85,7 +88,7 @@
 #' @export
 
 simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, init_regime, ntimes=1, burn_in=1000,
-                           drop=TRUE, girf_pars=NULL) {
+                           exo_weights=NULL, drop=TRUE, girf_pars=NULL) {
   # girf_pars$shock_numb - which shock?
   # girf_pars$shock_size - size of the structural shock?
   # Returns a size (N+1 x d+M) vector containing the estimated GIRFs for the variables and
@@ -108,6 +111,17 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   mean_constraints <- stvar$model$mean_constraints
   weight_constraints <- stvar$model$weight_constraints
   B_constraints <- stvar$model$B_constraints
+
+  # Check the exogenous weights given for simulation
+  if(weight_function == "exogenous") {
+    if(is.null(exo_weights)) stop("Exogenous weights must be provided in the argument 'exo_weights' when weight_function is 'exogenous'")
+    if(!is.matrix(exo_weights)) stop("Exogenous weights 'exo_weights' must be a matrix")
+    if(nrow(exo_weights) != nsim) stop("Exogenous weights 'exo_weights' must have nsim rows")
+    if(ncol(exo_weights) != M) stop("Exogenous weights 'exo_weights' must have M columns")
+    if(any(exo_weights < 0) || any(exo_weights > 1)) stop("Exogenous weights 'exo_weights' must be in [0, 1]")
+    # Check that exogenous weights sum to one at each row withing a numerical accuracy:
+    if(!all(abs(rowSums(exo_weights) - 1) < 1e-10)) stop("Exogenous weights 'exo_weights' must sum to one at each row")
+  }
 
   if(is.null(init_values) & missing(init_regime)) {
     stop("Either init_values or init_regime needs to be specified")
@@ -176,7 +190,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
     vars <- weightfun_pars[[1]]
     lags <- weightfun_pars[[2]]
     lowers <- (1:lags - 1)*d # We want add vars to each of these
-    # Indices of switchign variables in cbind(1, Y): we add +1 to the indices since the column of ones on the left,
+    # Indices of switching variables in cbind(1, Y): we add +1 to the indices since the column of ones on the left,
     # and then the index is added to always account for the constant term.
     inds_of_switching_vars <- c(1, as.vector(matrix(lowers, nrow=length(vars), ncol=length(lowers), byrow=TRUE) + vars + 1))
   }
@@ -216,6 +230,9 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
     sample2 <- array(dim=c(nsim, d, ntimes))
     transition_weights2 <- array(dim=c(nsim, M, ntimes))
   }
+  if(weight_function == "exogenous") { # Fill in the exogenous weights
+    transition_weights <- array(exo_weights, dim=c(nsim, M, ntimes))
+  }
 
   # Some functions to be used
   if(weight_function == "relative_dens") {
@@ -237,6 +254,8 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
         }
         regressions_mt
      }
+  } else if(weight_function == "exogenous") {
+    # Nothing to do here, uses exo_weights directly
   }
 
   # Run through the time periods and repetitions
@@ -257,19 +276,28 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
           regression_values <- get_regression_values(Y=Y, i1=i1) # Uses regressions as logmvd values in relative_dens fun
           alpha_mt <- get_alpha_mt(M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                    weightpars=rep(1, times=M), log_mvdvalues=regression_values, epsilon=epsilon)
+        } else if(weight_function == "exogenous") {
+          alpha_mt <- exo_weights[i1, , drop=FALSE]
         }
       }
-
       transition_weights[i1, , j1] <- alpha_mt
 
       # Calculate conditional mean
       mu_yt <- get_mu_yt_Cpp(obs=matrix(Y[i1,], nrow=1), all_phi0=all_phi0, all_A=all_A2, alpha_mt=alpha_mt)
 
       # Calculate conditional covariance matrix
-      Omega_yt <- matrix(rowSums(vapply(1:M, function(m) alpha_mt[, m]*as.vector(all_Omegas[, , m]),
-                                        numeric(d*d))), nrow=d, ncol=d)
+      if(cond_dist == "ind_Student" || identification == "non-Gaussianity") { # Parametrization with impact matrices
+        # Omega_yt is not used anywhere so no need to calculate it
+      } else { # Parametrization with covariance matrices
+        Omega_yt <- matrix(rowSums(vapply(1:M, function(m) alpha_mt[, m]*as.vector(all_Omegas[, , m]), numeric(d*d))),
+                           nrow=d, ncol=d)
+      }
+
       # Calculate B_t
-      if(identification == "reduced_form") {
+      if(cond_dist == "ind_Student" || identification == "non-Gaussianity") { # Also reduced form ind_Student models here
+        B_t <- matrix(rowSums(vapply(1:M, function(m) sqrt(alpha_mt[, m])*as.vector(all_Omegas[, , m]), numeric(d*d))),
+                      nrow=d, ncol=d) # weighted sum of the impact matrices.
+      } else if(identification == "reduced_form") {
         B_t <- matrix(get_symmetric_sqrt(Omega_yt), nrow=d, ncol=d)
       } else if(identification == "recursive") {
         B_t <- t(chol(Omega_yt))

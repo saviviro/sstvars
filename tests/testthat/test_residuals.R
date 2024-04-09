@@ -116,13 +116,13 @@ test_that("get_residuals works correctly", {
                c(-1.72187357, -1.77134204, -0.16040969, -0.70595177, -0.07764988, -0.35084729, 0.16804125, -0.16616452), tolerance=1e-3)
   expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222exoit, weight_function="exogenous",
                                weightfun_pars=weightfun_pars222, cond_dist="ind_Student", standardize=TRUE)[c(1, 4, 211, 242),]),
-               c(-9.1271938, -35.5238379, 2.2777582, -3.4403451, -4.0396570, -2.8173797, -0.2085455, -1.8803190), tolerance=1e-3)
+               c(-8.9708941, -18.7879268, 6.8425582, -3.3460597, -2.6765782, -2.3064257, -0.3814236, -1.2578586), tolerance=1e-3)
   expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222logistit, weight_function="logistic", weightfun_pars=c(2, 1),
                                cond_dist="ind_Student", standardize=FALSE)[c(1, 5, 212, 242),]),
                c(-1.58310517, -0.72319699, -0.65773933, -0.61862850, -0.07319559, -0.13840029, -0.21880463, -0.16385961), tolerance=1e-3)
   expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222logistit, weight_function="logistic", weightfun_pars=c(2, 1),
                                cond_dist="ind_Student", standardize=TRUE)[c(1, 5, 212, 242),]),
-               c(-21.009310, -9.210099, -8.864146, -7.759104, -2.739508, -1.408796, -1.374498, -1.270225), tolerance=1e-3)
+               c(-14.7168932, -6.3343018, -5.6635850, -5.2642547, -1.9446117, -1.0060306, -1.0051900, -0.9106291), tolerance=1e-3)
 
   # Exogenous
   expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222exo, weight_function="exogenous",
@@ -297,8 +297,8 @@ test_that("get_residuals works correctly", {
 
   expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222exoit, weight_function="exogenous",
                                weightfun_pars=weightfun_pars222, cond_dist="ind_Student", structural_shocks=TRUE)[c(1, 4, 211, 242),]),
-               c(-9.1271938, -35.5238379, 2.2777582, -3.4403451, -4.0396570, -2.8173797, -0.2085455, -1.8803190), tolerance=1e-3)
+               c(-8.9708941, -18.7879268, 6.8425582, -3.3460597, -2.6765782, -2.3064257, -0.3814236, -1.2578586), tolerance=1e-3)
   expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222logistit, weight_function="logistic", weightfun_pars=c(2, 1),
                                cond_dist="ind_Student", structural_shocks=TRUE)[c(1, 5, 212, 242),]),
-               c(-21.009310, -9.210099, -8.864146, -7.759104, -2.739508, -1.408796, -1.374498, -1.270225), tolerance=1e-3)
+               c(-14.7168932, -6.3343018, -5.6635850, -5.2642547, -1.9446117, -1.0060306, -1.0051900, -0.9106291), tolerance=1e-3)
 })

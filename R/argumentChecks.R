@@ -128,7 +128,7 @@ in_paramspace <- function(p, M, d, params,
     }
     if(!missing(transition_weights)) { # Check the invertibility of the time-varying impact matrix for all t
       for(i1 in 1:nrow(transition_weights)) { # Impact matrices in all_Omegas
-        if(abs(det(apply(X=all_Omegas, MARGIN=c(1, 2), FUN=function(mat) sum(mat*transition_weights[i1,])))) < posdef_tol) {
+        if(abs(det(apply(X=all_Omegas, MARGIN=c(1, 2), FUN=function(mat) sum(mat*sqrt(transition_weights[i1,]))))) < posdef_tol) {
           return(FALSE)
         }
       }

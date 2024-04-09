@@ -133,8 +133,10 @@ get_mu_yt_Cpp <- function(obs, all_phi0, all_A, alpha_mt) {
 #' @param impact_matrices A a size \eqn{d\times d \times M} \code{arma::cube} (3D array in R), where each slice contains an
 #'  invertible (d x d) impact matrix of each regime.
 #' @param distpars A numeric vector of length \eqn{d}, containing the degrees of freedom parameters for each component.
-#' @details Returns \code{minval} if the impact matrix \eqn{B_t} is not invertible for some t up to the numerical tolerance \code{posdef_tol}.
-#' @return A numeric vector of length \eqn{T}, where each element represents the computed density component for the corresponding observation.
+#' @details Returns \code{minval} if the impact matrix \eqn{B_t} is not invertible for some t up to the numerical tolerance
+#'  \code{posdef_tol}.
+#' @return A numeric vector of length \eqn{T}, where each element represents the computed density component for
+#'  the corresponding observation.
 #' @keywords internal
 ind_Student_densities_Cpp <- function(obs, means, impact_matrices, alpha_mt, distpars, minval, posdef_tol) {
     .Call('_sstvars_ind_Student_densities_Cpp', PACKAGE = 'sstvars', obs, means, impact_matrices, alpha_mt, distpars, minval, posdef_tol)
