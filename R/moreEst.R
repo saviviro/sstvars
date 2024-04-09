@@ -244,10 +244,18 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
   old_npars <- length(stvar$params) # old npars, B_constraints not adjusted!
 
   # Check identification
+  if(identification == "recursive" && cond_dist == "ind_Student") {
+    warning(paste("Only identification by non-Gaussianity is supported with independent Student's t-distributed errors.",
+                  "Using identification by non-Gaussianity. Note that recursive structure and other overidentifying",
+                  "constraints can by imposed by the argument B_constraints."))
+    identification <- "non-Gaussianity"
+  }
+
   if(old_identification != "reduced_form" && cond_dist != "ind_Student") {
     if(old_identification == "recursive") {
       warning(paste("Recursively identified model supplied (not possible to impose overidentifying restrictions,",
                     "so the original model is returned"))
+
       return(stvar)
     } else if(old_identification != identification) {
       # Old model structural but identification changes
@@ -260,6 +268,7 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
   if(identification == "recursive") {
     # Old identification reduced form, recursively identified model should be returned.
     if(!is.null(B_constraints)) warning("Cannot impose B_constraints on recursively identified models")
+
     return(STVAR(data=data, p=p, M=M, d=d, params=params, cond_dist=cond_dist,
                  weight_function=weight_function, weightfun_pars=weightfun_pars,
                  parametrization=parametrization, identification=identification,
@@ -436,8 +445,8 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
                   "then applying this function.\n\n"))
     }
   } else { # identification == "non-Gaussianity"
-    if(is.null(old_B_constraints) || is.null(B_constraints)) {
-      return(stvar)# Nothing to do here, return the original model
+    if(is.null(old_B_constraints) && is.null(B_constraints)) {
+      return(stvar) # Nothing to do here, return the original model
     } else {
       ## If arrived here, there are new B_constraints or the old ones are relaxed.
       if(is.null(old_B_constraints)) {
@@ -496,7 +505,7 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
                     params[(n_mean_pars + n_ar_pars + M*d^2 - M*n_zeros_in_B + 1):length(params)])
 
     if(n_sign_changes > 0) {
-      cat(paste0("There was in total of", n_sign_changes,
+      cat(paste0("There was in total of ", n_sign_changes,
                  " sign changes in the impact matrices of the regimes when creating preliminary estimates for the new model. ",
                  "The sign changes make the results more unrealiable. To obtain more reliable results, consider using ",
                  "the function 'swap_B_signs' to create a model that has the sign constraints readily satisfied and ",

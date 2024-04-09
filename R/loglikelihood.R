@@ -243,11 +243,10 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
 
   # Check that the parameter vector lies in the parameter space
   if(check_params) {
-    if(!in_paramspace(p=p, M=M, d=d, weight_function=weight_function, cond_dist=cond_dist,
-                      all_boldA=all_boldA, all_Omegas=all_Omegas, weightpars=weightpars,
-                      distpars=distpars, weightfun_pars=weightfun_pars,
-                      stab_tol=stab_tol, posdef_tol=posdef_tol,
-                      distpar_tol=distpar_tol, weightpar_tol=weightpar_tol)) {
+    if(!in_paramspace(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
+                      identification=identification, B_constraints=B_constraints, all_boldA=all_boldA,
+                      all_Omegas=all_Omegas, weightpars=weightpars, distpars=distpars, weightfun_pars=weightfun_pars,
+                      stab_tol=stab_tol, posdef_tol=posdef_tol, distpar_tol=distpar_tol, weightpar_tol=weightpar_tol)) {
       return(minval)
     }
   }

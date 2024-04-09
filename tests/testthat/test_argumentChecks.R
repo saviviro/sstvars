@@ -931,6 +931,8 @@ theta_222logistictsh_2_1_e <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222)
 W_222b_e <- matrix(c(0.12, 0, 0, -0.001), nrow=2)
 theta_222logistictshmb_2_1_e <- c(phi10_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
                                   Wvec(W_222b_e), lambdas_222, c_and_gamma_222_2_1, df_222_2_1)
+theta_222logistictshmb_2_1_e_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                                           vec(W_222b_e), lambdas_222, c_and_gamma_222_2_1, df_222_2_1)
 
 # p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=1), identification="heteroskedasticity",
 # weight_constraints=list(R=0, r=c(0.1, 0.2, 0.3)), B_constraints=matrix(c(0.1, 0.2, 0.3, 0), nrow=2)
@@ -942,6 +944,8 @@ theta_122logshwb_12_1_e <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), W
 # B_constraints=matrix(c(-0.47, -0.40, 0, 0.58, -1.01, -0.66, 0, -0.91, -1.19), nrow=3, ncol=3, byrow=FALSE)
 W_123b_e <- matrix(c(-0.47, -0.40, 0, 0.58, -1.01, -0.66, 0, -0.91, 0.19), nrow=3, ncol=3, byrow=FALSE)
 theta_123expshcwb_1_1_e <- c(phi10_123, phi20_123, vec(A11_123), Wvec(W_123b_e), lambdas_123, 0.6)
+theta_123expshcwb_1_1_e_expanded <- c(phi10_123, phi20_123, vec(A11_123), vec(A11_123), vec(W_123b_e), lambdas_123, 0.6, 0.3)
+
 
 # p=1, M=2, d=2, weight_function="exogenous", weightfun_pars=list(vars=1:2, lags=1), identification="heteroskedasticity",
 # weight_constraints=list(R=0, r=c(0.1, 0.2, 0.3)), B_constraints=matrix(c(0.1, 0.2, 0.3, 0), nrow=2)
@@ -966,13 +970,16 @@ theta_222logistitngb_2_1e <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222),
 dfs_122_1_1 <- c(4, 13)
 B1_122c_e <- matrix(c(1.2, 0.3, 0.7, 0.1), nrow=2)
 theta_122logitngb_1_1e <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), Wvec(B1_122c_e), Wvec(B2_122c), gamma1_122_1_1, dfs_122_1_1)
+theta_122logitngb_1_1e_expanded <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), Wvec(B1_122c_e), Wvec(B2_122c), gamma1_122_1_1, dfs_122_1_1)
 
 # p=1, M=2, d=3, weight_function="exponential", weightfun_pars=c(1, 1), cond_dist="ind_Student", identification="non-Gaussianity",
 # B_constraints=matrix(c(1, NA, NA, 0, 1, NA, 0, NA, 1), nrow=3)
 dfs_123_1_1 <- c(10, 12, 3)
 B2_123c_e <- matrix(c(0.3, -0.2, -0.7, 0, 1.2, 0.5, 0, -0.2, -1.1), nrow=3)
 theta_123expitngb_1_1e <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), Wvec(B1_123c),
-                            Wvec(B2_123c), c_and_gamma_123_1_1, dfs_123_1_1)
+                            Wvec(B2_123c_e), c_and_gamma_123_1_1, dfs_123_1_1)
+theta_123expitngb_1_1e_expanded <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vec(B1_123c), vec(B2_123c_e),
+                                     c_and_gamma_123_1_1, dfs_123_1_1)
 
 # p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="ind_Student", identification="non-Gaussianity",
 # B_constraints=matrix(c(1, 0, NA, 1), nrow=2)
@@ -1056,6 +1063,10 @@ Omegas_222it_singular2 <- pick_Omegas(p=2, M=2, d=2, params=theta_222exoitngbe_e
 Omegas_123it <- pick_Omegas(p=1, M=2, d=3, params=theta_123expit_1_1, cond_dist="ind_Student")
 Omegas_123it_singular <- pick_Omegas(p=1, M=2, d=3, params=theta_123logisticcmitngb_3_1e_expanded, cond_dist="ind_Student")
 Omegas_132it <- pick_Omegas(p=1, M=3, d=2, params=theta_132thresit_1_1, cond_dist="ind_Student")
+
+Omegas_122ite <- pick_Omegas(p=1, M=2, d=2, params=theta_122logitngb_1_1e_expanded, cond_dist="ind_Student", identification="non-Gaussianity")
+Omegas_123ite <- pick_Omegas(p=1, M=2, d=3, params=theta_123expitngb_1_1e_expanded, cond_dist="ind_Student", identification="non-Gaussianity")
+Omegas_132ite <- pick_Omegas(p=1, M=3, d=2, params=theta_132thresmwitngb_1_1e_expanded, cond_dist="ind_Student", identification="non-Gaussianity")
 
 
 boldA_112 <- form_boldA(p=1, M=1, d=2, all_A=pick_allA(p=1, M=1, d=2, params=theta_112relg))
@@ -1182,6 +1193,28 @@ test_that("in_paramspace work correctly", {
                             all_Omegas=Omegas_123it_singular, weightpars=weightpars_123expit, distpars=dfs_123_1_1))
   expect_true(in_paramspace(p=1, M=3, d=2, weight_function="threshold", cond_dist="ind_Student", all_boldA=boldA_132,
                             all_Omegas=Omegas_132it, weightpars=weightpars_132thresit, distpars=dfs_132_1_1))
+
+  # Check sign constraints in B_1,...,B_M
+  expect_false(in_paramspace(p=1, M=2, d=2, params=theta_122logitngb_1_1e_expanded, weight_function="mlogit", weightfun_pars=list(vars=1, lags=1),
+                             cond_dist="ind_Student", identification="non-Gaussianity", B_constraints=matrix(c(1, NA, -1, 1), nrow=2),
+                             all_boldA=boldA_122, all_Omegas=Omegas_122ite, weightpars=weightpars_122logit, distpars=dfs_122_1_1))
+  expect_false(in_paramspace(p=1, M=2, d=3, params=theta_123expitngb_1_1e_expanded, weight_function="exponential", weightfun_pars=c(1, 1),
+                             cond_dist="ind_Student", identification="non-Gaussianity",
+                             B_constraints=matrix(c(1, NA, NA, 0, 1, NA, 0, NA, 1), nrow=3),
+                             all_boldA=boldA_123, all_Omegas=Omegas_123ite, weightpars=weightpars_123expit, distpars=dfs_123_1_1))
+  expect_false(in_paramspace(p=1, M=3, d=2, params=theta_132thresmwitngb_1_1e_expanded, weight_function="threshold", weightfun_pars=c(1, 1),
+                             cond_dist="ind_Student", identification="non-Gaussianity", B_constraints=matrix(c(1, 0, NA, 1), nrow=2),
+                             all_boldA=boldA_132, all_Omegas=Omegas_132ite, weightpars=weightpars_132thresit, distpars=dfs_132_1_1))
+
+  # Check signs constraints in W
+  expect_false(in_paramspace(p=2, M=2, d=2, params=theta_222logistictshmb_2_1_e_expanded, weight_function="logistic",
+                             weightfun_pars=c(2, 1), cond_dist="Student", identification="heteroskedasticity",
+                             B_constraints=matrix(c(0.1, 0, 0, 0.3), nrow=2), all_boldA=boldA_222, all_Omegas=Omegas_222,
+                             weightpars=weightpars_222logit, distpars=df_222_2_1))
+  expect_false(in_paramspace(p=1, M=2, d=3, params=theta_123expshcwb_1_1_e_expanded, weight_function="exponential",
+                             cond_dist="Gaussian", weightfun_pars=c(1, 1), identification="heteroskedasticity",
+                             B_constraints=matrix(c(-0.47, -0.40, 0, 0.58, -1.01, -0.66, 0, -0.91, -1.19), nrow=3, ncol=3, byrow=FALSE),
+                             all_boldA=boldA_123, all_Omegas=Omegas_123, weightpars=c(0.6, 0.3), distpars=numeric(0)))
 
   # Check invertibility of B_t for all t
   expect_true(in_paramspace(p=2, M=2, d=2, weight_function="logistic", cond_dist="ind_Student", all_boldA=boldA_222,

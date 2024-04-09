@@ -64,13 +64,17 @@ stab_conds_satisfied <- function(p, M, d, params, all_boldA=NULL, tolerance=1e-3
 #'  }
 #'  @keywords internal
 
-in_paramspace <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
-                          weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), all_boldA, all_Omegas, weightpars, distpars,
-                          transition_weights, stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
+in_paramspace <- function(p, M, d, params,
+                          weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                          weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"),
+                          identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
+                          B_constraints=NULL, all_boldA, all_Omegas, weightpars, distpars, transition_weights,
+                          stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
   # in_paramspace is internal function that always takes in non-constrained reduced form parameter vector
   # Reform the parameter vectors before checking with in_paramspace
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
+  identification <- match.arg(identification)
 
   # Check distribution parameters
   if(cond_dist == "Student") {
@@ -130,6 +134,22 @@ in_paramspace <- function(p, M, d, weight_function=c("relative_dens", "logistic"
       }
     }
   }
+  # Check that sign constraints in B_constraints are satisfied, if imposed
+  if(!is.null(B_constraints)) {
+    if(identification == "non-Gaussianity" || cond_dist == "ind_Student") {
+      for(m in 1:M) {
+        if(any(all_Omegas[, , m][B_constraints > 0] <= 0, na.rm=TRUE) || any(all_Omegas[B_constraints < 0] >= 0, na.rm=TRUE)) {
+          return(FALSE)
+        }
+      }
+    } else if(identification == "heteroskedasticity") {
+      W <- pick_W(p=p, M=M, d=d, params=params, identification=identification)
+      if(any(W[B_constraints > 0] <= 0, na.rm=TRUE) || any(W[B_constraints < 0] >= 0, na.rm=TRUE)) {
+        return(FALSE)
+      }
+    }
+  }
+
   TRUE
 }
 
