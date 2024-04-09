@@ -615,9 +615,10 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
 #' @inherit fitSSTVAR references
 #' @keywords internal
 
-fitbsSSTVAR <- function(data, p, M, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold"),
-                        weightfun_pars=NULL, cond_dist=c("Gaussian", "Student"), parametrization=c("intercept", "mean"),
-                        identification=c("reduced_form", "recursive", "heteroskedasticity"),
+fitbsSSTVAR <- function(data, p, M, params,
+                        weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                        weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), parametrization=c("intercept", "mean"),
+                        identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                         AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                         other_constraints=NULL, robust_method=c("Nelder-Mead", "SANN", "none"),
                         maxit=1000, maxit_robust=1000, seed=NULL) {
