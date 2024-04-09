@@ -1,14 +1,17 @@
 #' @title Predict method for class 'stvar' objects
 #'
-#' @description \code{predict.stvar} is a predict method for class \code{'stvar'} objects. The forecasts
-#'   are computed by simulating multiple sample paths of the future observations and using the
-#'   sample medians or means as point forecasts and empirical quantiles as prediction intervals.
+#' @description \code{predict.stvar} is a predict method for class \code{'stvar'} objects.
 #'
 #' @inheritParams simulate.stvar
 #' @param nsteps how many steps ahead should be predicted?
 #' @param nsim to how many independent simulations should the forecast be based on?
 #' @param pi a numeric vector specifying the confidence levels of the prediction intervals.
 #' @param pred_type should the pointforecast be based on sample "median" or "mean"?
+#' @param exo_weights if \code{weight_function="exogenous"}, provide a size \eqn{(nsteps x M)} matrix of exogenous
+#'  transition weights for the regimes: \code{[step, m]} for \eqn{step} steps ahead and regime \eqn{m} weight. Ignored
+#'  if \code{weight_function!="exogenous"}.
+#' @details The forecasts are computed by simulating multiple sample paths of the future observations and
+#'   using the sample medians or means as point forecasts and empirical quantiles as prediction intervals.
 #' @return Returns a class '\code{stvarpred}' object containing, among the specifications,...
 #'  \describe{
 #'    \item{$pred}{Point forecasts}
@@ -41,7 +44,8 @@
 #'  plot(pred2)
 #' @export
 
-predict.stvar <- function(object, ..., nsteps, nsim=1000, pi=c(0.95, 0.80), pred_type=c("mean", "median")) {
+predict.stvar <- function(object, ..., nsteps, nsim=1000, pi=c(0.95, 0.80), pred_type=c("mean", "median"),
+                          exo_weights=NULL) {
   check_stvar(object, object_name="object")
   stvar <- object
   if(is.null(stvar$data)) stop("The model needs to contain data")
@@ -50,8 +54,19 @@ predict.stvar <- function(object, ..., nsteps, nsim=1000, pi=c(0.95, 0.80), pred
   pred_type <- match.arg(pred_type)
   if(!all_pos_ints(c(nsim, nsteps))) stop("nsim and n_ahaed should be positive integers")
 
+  # Check the exogenous weights given for simulation
+  if(stvar$model$weight_function == "exogenous") {
+    if(is.null(exo_weights)) stop("Exogenous weights must be provided in the argument 'exo_weights' when weight_function is 'exogenous'")
+    if(!is.matrix(exo_weights)) stop("Exogenous weights 'exo_weights' must be a matrix")
+    if(nrow(exo_weights) != nsteps) stop("Exogenous weights 'exo_weights' must have nsteps rows")
+    if(ncol(exo_weights) != M) stop("Exogenous weights 'exo_weights' must have M columns")
+    if(any(exo_weights < 0) || any(exo_weights > 1)) stop("Exogenous weights 'exo_weights' must be in [0, 1]")
+    # Check that exogenous weights sum to one at each row withing a numerical accuracy:
+    if(!all(abs(rowSums(exo_weights) - 1) < 1e-10)) stop("Exogenous weights 'exo_weights' must sum to one at each row")
+  }
+
   # Simulations
-  simulations <- simulate.stvar(stvar, nsim=nsteps, init_values=dat, ntimes=nsim, drop=FALSE)
+  simulations <- simulate.stvar(stvar, nsim=nsteps, init_values=dat, ntimes=nsim, drop=FALSE, exo_weights=exo_weights)
   sample <- simulations$sample
   alpha_mt <- simulations$transition_weights
   colnames(sample) <- colnames(dat)

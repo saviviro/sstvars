@@ -76,6 +76,34 @@ alpha1_122 <- 0.6
 theta_122relgsh <- c(all_phi_122, all_A_122, vec(W_122), lambdas_122, alpha1_122)
 mod122relgsh <- STVAR(data=gdpdef, p=1, M=2, d=2, params=theta_122relgsh, weight_function="relative_dens", identification="heteroskedasticity")
 
+## ind_Student
+
+# p=1, M=2, d=2, weight_function="exogenous", cond_dist="ind_Student", weightfun_pars=twmat, AR_constraints=C_122,
+tw1 <- c(0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+         1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1,
+         1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+twmat <- cbind(tw1, 1 - tw1)
+C_122 <- rbind(diag(1*2^2), diag(1*2^2))
+params122exocit <- c(-0.25329555, 0.10340501, 0.73585978, 0.05335907, 0.18282378, 0.03478017, -0.01629061, 0.87424509, 0.83939713,
+                     0.20970725, 0.47256152, -0.23555538, 0.59277160, 0.09901218, -0.29605914, 0.23895480, 6.72161948, 4.10403450)
+
+mod122exocit <- STVAR(data=gdpdef, p=1, M=2, d=2, params=params122exocit, weight_function="exogenous", cond_dist="ind_Student",
+                      weightfun_pars=twmat, AR_constraints=C_122)
+
+# p=3, M=2, weight_function="threshold", cond_dist="ind_Student", weightfun_pars=c(2, 1), identification="non-Gaussianity"
+params322thresit <- c(0.53077, 0.003653, 1.299719, -0.004862, 0.276631, 0.045029, -0.029358, 0.427229, 0.296498, 0.027308,
+                     -0.098684, 0.160642, -0.121114, 0.021843, -0.06632, 0.283899, 0.186097, -0.017753, -0.361943, 0.782694,
+                     0.155553, 0.023192, 0.153155, 0.051293, -0.068252, 0.02092, -0.310782, 0.115128, 0.626432, 0.037041,
+                     0.081263, -0.186364, -0.878845, -0.141764, 0.479942, -0.314881, 1, 4.7304, 9.933647)
+
+mod322thresit <- STVAR(gdpdef, p=3, M=2, params=params32thresit, weight_function="threshold", weightfun_pars=c(2, 1),
+                      cond_dist="ind_Student", identification="non-Gaussianity")
+
 
 set.seed(1); p112 <- predict(mod112relg, nsteps=1, nsim=1, pred_type="mean")
 set.seed(2); p122 <- predict(mod122relg, nsteps=3, nsim=3, pred_type="median")
@@ -94,6 +122,9 @@ set.seed(5); p322threst <- predict(mod322threst, nsteps=3, nsim=5, pred_type="me
 set.seed(6); p322thresr <- predict(mod322thres, nsteps=3, nsim=5, pred_type="mean", pi=c(0.7, 0.99))
 set.seed(6); p122relgsh <- predict(mod122relgsh, nsteps=4, nsim=3, pred_type="median", pi=c(0.7, 0.98))
 
+set.seed(7); p122exocit <- predict(mod122exocit, nsteps=3, nsim=5, pred_type="mean", pi=0.9,
+                                   exo_weights=cbind(c(0.1, 0.6, 0.9), c(0.9, 0.4, 0.1)))
+set.seed(8); p322thresit <- predict(mod322thresit, nsteps=2, nsim=3, pred_type="median", pi=0.49)
 
 test_that("simulate.stvar works correctly", {
   # Relative_dens Gaussian STVAR
@@ -137,5 +168,10 @@ test_that("simulate.stvar works correctly", {
   expect_equal(unname(p122relgsh$pred[4,]), c(0.8342902, 0.8843367), tol=1e-4)
   expect_equal(unname(p122relgsh$pred_ints[4, 1,]), c(0.3007967, 0.3969968), tol=1e-4)
 
+  # ind_Student
+  expect_equal(unname(p122exocit$pred[3,]), c(0.3905351, 0.5286072), tol=1e-4)
+  expect_equal(c(unname(p122exocit$pred_ints[3, ,])), c(-0.4037876, 1.6666051, 0.3249548, 0.8071590), tol=1e-4)
+  expect_equal(c(unname(p322thresit$pred[2,])), c(0.0383185, 0.4116402), tol=1e-4)
+  expect_equal(c(unname(p122exocit$pred_ints[2, ,])), c(-0.9132711, 2.3588997, 0.3251623, 0.8177336), tol=1e-4)
 })
 

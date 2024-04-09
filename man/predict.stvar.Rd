@@ -14,7 +14,8 @@
   nsteps,
   nsim = 1000,
   pi = c(0.95, 0.8),
-  pred_type = c("mean", "median")
+  pred_type = c("mean", "median"),
+  exo_weights = NULL
 )
 
 \method{print}{stvarpred}(x, ..., digits = 2)
@@ -39,6 +40,10 @@ along with the forecast.}
 
 \item{pred_type}{should the pointforecast be based on sample "median" or "mean"?}
 
+\item{exo_weights}{if \code{weight_function="exogenous"}, provide a size \eqn{(nsteps x M)} matrix of exogenous
+transition weights for the regimes: \code{[step, m]} for \eqn{step} steps ahead and regime \eqn{m} weight. Ignored
+if \code{weight_function!="exogenous"}.}
+
 \item{digits}{the number of decimals to print}
 }
 \value{
@@ -51,9 +56,11 @@ Returns a class '\code{stvarpred}' object containing, among the specifications,.
  }
 }
 \description{
-\code{predict.stvar} is a predict method for class \code{'stvar'} objects. The forecasts
-  are computed by simulating multiple sample paths of the future observations and using the
-  sample medians or means as point forecasts and empirical quantiles as prediction intervals.
+\code{predict.stvar} is a predict method for class \code{'stvar'} objects.
+}
+\details{
+The forecasts are computed by simulating multiple sample paths of the future observations and
+  using the sample medians or means as point forecasts and empirical quantiles as prediction intervals.
 }
 \section{Functions}{
 \itemize{
