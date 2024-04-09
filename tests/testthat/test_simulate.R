@@ -49,6 +49,33 @@ theta_122relgsh <- c(all_phi_122, all_A_122, vec(W_122), lambdas_122, alpha1_122
 mod122relgsh <- STVAR(data=gdpdef, p=1, M=2, d=2, params=theta_122relgsh, weight_function="relative_dens", identification="heteroskedasticity")
 
 
+# p=1, M=2, d=2, weight_function="exogenous", cond_dist="ind_Student", weightfun_pars=twmat, AR_constraints=C_122,
+tw1 <- c(0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+ 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1,
+ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+ 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+ 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+twmat <- cbind(tw1, 1 - tw1)
+C_122 <- rbind(diag(1*2^2), diag(1*2^2))
+params122exocit <- c(-0.25329555, 0.10340501, 0.73585978, 0.05335907, 0.18282378, 0.03478017, -0.01629061, 0.87424509, 0.83939713,
+                     0.20970725, 0.47256152, -0.23555538, 0.59277160, 0.09901218, -0.29605914, 0.23895480, 6.72161948, 4.10403450)
+
+mod122exocit <- STVAR(data=gdpdef, p=1, M=2, d=2, params=params122exocit, weight_function="exogenous", cond_dist="ind_Student",
+                      weightfun_pars=twmat, AR_constraints=C_122)
+
+# p=3, M=2, weight_function="threshold", cond_dist="ind_Student", weightfun_pars=c(2, 1), identification="non-Gaussianity"
+params32thresit <- c(0.53077, 0.003653, 1.299719, -0.004862, 0.276631, 0.045029, -0.029358, 0.427229, 0.296498, 0.027308,
+                     -0.098684, 0.160642, -0.121114, 0.021843, -0.06632, 0.283899, 0.186097, -0.017753, -0.361943, 0.782694,
+                     0.155553, 0.023192, 0.153155, 0.051293, -0.068252, 0.02092, -0.310782, 0.115128, 0.626432, 0.037041,
+                     0.081263, -0.186364, -0.878845, -0.141764, 0.479942, -0.314881, 1, 4.7304, 9.933647)
+
+mod32thresit <- STVAR(gdpdef, p=3, M=2, params=params32thresit, weight_function="threshold", weightfun_pars=c(2, 1),
+                      cond_dist="ind_Student", identification="non-Gaussianity")
+
+
 test_that("simulate.stvar works correctly", {
   s112 <- simulate(mod112relg, nsim=1, seed=1, init_regime=1)
   s112_2 <- simulate(mod112relg, nsim=2, seed=1, init_regime=1)
@@ -62,6 +89,8 @@ test_that("simulate.stvar works correctly", {
   s322t_2 <- simulate(mod322logt, nsim=3, seed=3, init_regime=2)
   s322tr <- simulate(mod322logtr_2_1, nsim=4, seed=3, init_values=gdpdef)
   s122relgsh <- simulate(mod122relgsh, nsim=3, seed=4, init_regime=2)
+  s122exocit <- simulate(mod122exocit, nsim=3, seed=5, init_regime=2, exo_weights=cbind(c(0.9, 0.5, 0.2), c(0.1, 0.5, 0.8)))
+  s322thresit <- simulate(mod32thresit, nsim=4, seed=6, init_regime=1)
 
   # Relative_dens Gaussian STVAR
   expect_equal(s112$sample[1,], c(-0.07206511, 1.343205), tol=1e-4)
@@ -91,6 +120,12 @@ test_that("simulate.stvar works correctly", {
   expect_equal(s322t_2$sample[3,], c(-0.5229988, 0.3237579), tol=1e-4)
   expect_equal(s322t_2$transition_weights[1,], c(0.01405111, 0.98594889), tol=1e-4)
 
+  # ind_Student
+  expect_equal(s122exocit$sample[3,], c(3.5667338, 0.5874035), tol=1e-4)
+  expect_equal(s122exocit$transition_weights, cbind(c(0.9, 0.5, 0.2), c(0.1, 0.5, 0.8)), tol=1e-4)
+  expect_equal(s322thresit$sample[4,], c(1.329187, -0.290043), tol=1e-4)
+  expect_equal(s322thresit$transition_weights[4,], c(1, 0), tol=1e-4)
+
   # Structural
   expect_equal(s322tr$sample[4,], c(-0.05019288, -0.07683787), tol=1e-4)
   expect_equal(s322tr$transition_weights[4,], c(0.01415435, 0.985845655), tol=1e-4)
@@ -109,6 +144,8 @@ test_that("simulate_from_regime works correctly", {
   set.seed(5); sim_reg322t_1 <- simulate_from_regime(mod322logt, regime=2, nsim=5)
   set.seed(5); sim_regs322tr_1 <- simulate_from_regime(mod322logtr_2_1, regime=2, nsim=1)
   set.seed(6); sim_regs122relgsh_1 <- simulate_from_regime(mod122relgsh, regime=1, nsim=6)
+  set.seed(1); sim_reg122exocit_1 <- simulate_from_regime(mod122exocit, regime=2, nsim=2)
+  set.seed(2); sim_reg322thresit_1 <- simulate_from_regime(mod32thresit, regime=1, nsim=3)
 
   # Relative_dens Gaussian STVAR
   expect_equal(sim_reg112_1[1,], c(0.2634843, 0.8543901), tol=1e-4)
@@ -121,6 +158,10 @@ test_that("simulate_from_regime works correctly", {
 
   # Student
   expect_equal(sim_reg322t_1[5,], c(1.7992914, 0.7365507), tol=1e-4)
+
+  # ind_Student
+  expect_equal(sim_reg122exocit_1[2,], c(2.5533783, 0.5194208), tol=1e-4)
+  expect_equal(sim_reg322thresit_1[3,], c(1.0182935, 0.5337868), tol=1e-4)
 
   # Structural
   expect_equal(sim_regs322tr_1[1,], c(0.05300774, 0.8396193), tol=1e-4)

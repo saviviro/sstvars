@@ -320,6 +320,8 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
       if(cond_dist == "Student") {
         Z <- sqrt((distpars - 2)/distpars)*e_t # Sample from N(0, (df-2)/df*I_d) # df == distpars
         e_t <- Z*sqrt(distpars/rchisq(n=1, df=distpars)) # Sample from t_d(0, I_d, df)
+      } else if(cond_dist == "ind_Student") {
+        e_t <- rt(n=d, df=distpars) # Sample from independent Student's t distributions
       }
 
       # Calculate the current observation
@@ -349,16 +351,27 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
             regression_values2 <- get_regression_values(Y=Y2, i1=i1) # Uses regressions as logmvd values in relative_dens fun
             alpha_mt2 <- get_alpha_mt(M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                       weightpars=rep(1, times=M), log_mvdvalues=regression_values2, epsilon=epsilon)
+          } else if(weight_function == "exogenous") {
+            alpha_mt2 <- exo_weights[i1, , drop=FALSE]
           }
         }
         transition_weights2[i1, , j1] <- alpha_mt2
 
         # Calculate conditional mean and conditional covariance matrix
         mu_yt2 <- get_mu_yt_Cpp(obs=matrix(Y2[i1,], nrow=1), all_phi0=all_phi0, all_A=all_A2, alpha_mt=alpha_mt2)
+
+        if(cond_dist == "ind_Student" || identification == "non-Gaussianity") { # Parametrization with impact matrices
+          # Omega_yt2 is not used anywhere so no need to calculate it
+        } else { # Parametrization with covariance matrices
         Omega_yt2 <- matrix(rowSums(vapply(1:M, function(m) alpha_mt2[, m]*as.vector(all_Omegas[, , m]),
                                            numeric(d*d))), nrow=d, ncol=d)
+        }
+
         # Calculate B_t
-        if(identification == "reduced_form") {
+        if(cond_dist == "ind_Student" || identification == "non-Gaussianity") { # Also reduced form ind_Student models here
+          B_t2 <- matrix(rowSums(vapply(1:M, function(m) sqrt(alpha_mt2[, m])*as.vector(all_Omegas[, , m]),
+                                        numeric(d*d))), nrow=d, ncol=d) # weighted sum of the impact matrices.
+        } else if(identification == "reduced_form") {
           B_t2 <- matrix(get_symmetric_sqrt(Omega_yt2), nrow=d, ncol=d)
         } else if(identification == "recursive") {
           B_t2 <- t(chol(Omega_yt2))
