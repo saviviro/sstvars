@@ -94,7 +94,7 @@ profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precisi
     if(is.null(B_constraints)) {
       n_zeros <- 0
     } else {
-      n_zeros <- sum(B_constraints == 0, na.rm=TRUE)
+      n_zeros <- M*sum(B_constraints == 0, na.rm=TRUE) # Zeros for all B_m
     }
     n_covmat_pars <- M*d^2 - n_zeros
   } else if(identification %in% c("reduced_form", "recursive")) {
@@ -210,16 +210,16 @@ profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precisi
             main <- substitute(lambda[foo](foo2), list(foo=m, foo2=pos))
           }
         } else { # identification by non-Gaussianity (also cond_dist="ind_Student"): B_m params for m=1,...,M
-          cum_b <- n_mean_pars + n_ar_pars + (0:(M - 1))*(d^2 - n_zeros) # Index after which the regime changes
-          if(any(i1 == cum_b + 1)) {
+          cum_b <- n_mean_pars + n_ar_pars + (0:(M - 1))*(d^2 - n_zeros/M) # Index after which the regime changes
+          if(any(i1 == cum_b + 1)) { # Above n_zeros is the total number for all B_m, so divided by M
             B_row_ind <- rep(1, times=d) # row for each column, resets whenever a new regime starts
           }
           m <- sum(i1 > cum_b) # Which regime
           n_zeros_in_each_column <- vapply(1:d, function(i2) sum(B_constraints[,i2] == 0, na.rm=TRUE), numeric(1))
           zero_positions <- lapply(1:d, function(i2) (1:d)[B_constraints[,i2] == 0 & !is.na(B_constraints[,i2])]) # 0 constr pos in each col
           cum_bc <- c(0, cumsum(d - n_zeros_in_each_column)) # Index in B_m parameters after which a new column in B_m starts
-          posb <- i1 - (n_mean_pars + n_ar_pars + (m - 1)*(d^2 - n_zeros)) # Index in B_m parameters
-          col_ind <- sum(posb > cum_bc)
+          posb <- i1 - (n_mean_pars + n_ar_pars + (m - 1)*(d^2 - n_zeros/M)) # Index in B_m parameters
+          col_ind <- sum(posb > cum_bc) # Above n_zeros is the total number for all B_m, so divided by M
           while(TRUE) {
             if(B_row_ind[col_ind] %in% zero_positions[[col_ind]]) {
               B_row_ind[col_ind] <- B_row_ind[col_ind] + 1
