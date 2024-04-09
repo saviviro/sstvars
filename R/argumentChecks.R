@@ -467,13 +467,13 @@ check_constraints <- function(data, p, M, d, weight_function=c("relative_dens", 
   # Check AR_constraints
   if(!is.null(AR_constraints)) {
     if(!is.matrix(AR_constraints) | !is.numeric(AR_constraints)) {
-      stop("The argument AR_constraints should be a numeric matrix (or NULL if no constraints should be employed)")
+      stop("The argument AR_constraints should be a numeric matrix (or NULL if no constraints should be employed).")
     } else if(nrow(AR_constraints) != M*p*d^2) {
-      stop("The AR constraint matrix should have M*p*d^2 rows")
+      stop("The AR constraint matrix should have M*p*d^2 rows.")
     } else if(ncol(AR_constraints) > nrow(AR_constraints)) {
       stop("The AR constraint matrix has more columns than rows! What are you doing??")
     } else if(qr(AR_constraints)$rank != ncol(AR_constraints)) {
-      stop("The AR constraint matrix should have full column rank")
+      stop("The AR constraint matrix should have full column rank.")
     }
   }
 
@@ -483,28 +483,28 @@ check_constraints <- function(data, p, M, d, weight_function=c("relative_dens", 
       stop("mean_constraints are available only for models with parametrization = 'mean'.")
     }
     if(!is.list(mean_constraints)) {
-      stop("The argument mean_constraints should a list (or null if mean parameters are not constrained)")
+      stop("The argument mean_constraints should a list (or null if mean parameters are not constrained).")
     } else if(length(mean_constraints) == 0) {
-      stop("The argument mean_constraints should not of length zero")
+      stop("The argument mean_constraints should not of length zero.")
     }
     for(i1 in 1:length(mean_constraints)) {
       if(!is.numeric(mean_constraints[[i1]]) || length(mean_constraints[[i1]]) == 0) {
-        stop("The elements of mean_constraints should be numeric vectors with strictly positive length")
+        stop("The elements of mean_constraints should be numeric vectors with strictly positive length.")
       }
     }
     tmp <- sort(unlist(mean_constraints), decreasing=FALSE)
     if(length(tmp) != M || !all(tmp == 1:M)) {
-      stop("The argument mean_constraints should contains all regimes in some group exactly once")
+      stop("The argument mean_constraints should contains all regimes in some group exactly once.")
     }
   }
 
   # Check weight_constraints
   if(!is.null(weight_constraints)) {
     if(M == 1) {
-      stop("weight_constraints cannot be employed for models with M=1 (because there are no weight parameters)")
+      stop("weight_constraints cannot be employed for models with M=1 (because there are no weight parameters).")
     }
     if(!is.list(weight_constraints) || length(weight_constraints) != 2) {
-      stop("The argument weight_constraints should be a list of length two")
+      stop("The argument weight_constraints should be a list of length two.")
     }
     if(weight_function == "relative_dens" || weight_function == "threshold") {
       n_nonconstr_weightpars <- M - 1
@@ -516,20 +516,20 @@ check_constraints <- function(data, p, M, d, weight_function=c("relative_dens", 
     if(weight_function != "exogenous") {
       if(!all(weight_constraints[[1]] == 0)) { # R != 0
         if(!is.matrix(weight_constraints[[1]]) || !is.numeric(weight_constraints[[1]])) {
-          stop("The first element of the argument weight_constraints should be a numeric matrix R (or 0 or NULL)")
+          stop("The first element of the argument weight_constraints should be a numeric matrix R (or 0 or NULL).")
         } else if(nrow(weight_constraints[[1]]) != n_nonconstr_weightpars) {
-          stop("The first element of weight_constraints (matrix R) has incorrect number of rows")
+          stop("The first element of weight_constraints (matrix R) has incorrect number of rows.")
         } else if(ncol(weight_constraints[[1]]) > nrow(weight_constraints[[1]])) {
           stop("The first element of weight_constraints (matrix R) has more columns than rows! What are you doing??")
         } else if(qr(weight_constraints[[1]])$rank != ncol(weight_constraints[[1]])) {
-          stop("The first element of weight_constraints (matrix R) should have full column rank (or it should equal to zero)")
+          stop("The first element of weight_constraints (matrix R) should have full column rank (or it should equal to zero).")
         }
       }
       # Check r
       if(!is.numeric(weight_constraints[[2]]) || !is.vector(weight_constraints[[2]])) {
-        stop("The second element of the argument weight_constraints should be a numeric vector r")
+        stop("The second element of the argument weight_constraints should be a numeric vector r.")
       } else if(length(weight_constraints[[2]]) != n_nonconstr_weightpars) {
-        stop("The second element of the argument weight_constraints (vector r) has wrong dimension")
+        stop("The second element of the argument weight_constraints (vector r) has wrong dimension.")
       }
     }
 
@@ -555,7 +555,7 @@ check_constraints <- function(data, p, M, d, weight_function=c("relative_dens", 
       }
     }
     if(weight_function == "exogenous" && !is.null(weight_constraints)) {
-      warning("weight_constraints cannot be used with the exogenous weight function")
+      warning("weight_constraints cannot be used with the exogenous weight function.")
     }
   }
 
@@ -570,7 +570,7 @@ check_constraints <- function(data, p, M, d, weight_function=c("relative_dens", 
     n_zeros1 <- vapply(1:d, function(i1) sum(B_constraints[i1,] == 0, na.rm=TRUE), numeric(1))
     n_zeros2 <- vapply(1:d, function(i1) sum(B_constraints[,i1] == 0, na.rm=TRUE), numeric(1))
     if(any(n_zeros1 == d) || any(n_zeros2 == d)) {
-      stop("The impact matrix/matrices should be invertible, so you cannot constrain it/them to be singular via B_constraints")
+      stop("The impact matrix/matrices should be invertible, so you cannot constrain it/them to be singular via B_constraints.")
     }
   }
 }
