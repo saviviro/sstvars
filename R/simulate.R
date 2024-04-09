@@ -100,7 +100,8 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   M <- stvar$model$M
   d <- stvar$model$d
   weight_function <- stvar$model$weight_function
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=stvar$model$weightfun_pars)
+  weightfun_pars <- check_weightfun_pars(data=stvar$data, p=p, M=M, d=d, weight_function=weight_function,
+                                         weightfun_pars=stvar$model$weightfun_pars)
   cond_dist <- stvar$model$cond_dist
   identification <- stvar$model$identification
   AR_constraints <- stvar$model$AR_constraints
@@ -143,14 +144,14 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   all_phi0 <- pick_phi0(M=M, d=d, params=params)
   all_A <- pick_allA(p=p, M=M, d=d, params=params)
   all_A2 <- array(all_A, dim=c(d, d*p, M)) # cbind coefficient matrices of each component: m:th component is obtained at [, , m]
-  all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params, identification=identification)
+  all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params, cond_dist=cond_dist, identification=identification)
   all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
   weightpars <- pick_weightpars(p=p, M=M, d=d, params=params,
                                 weight_function=weight_function, weightfun_pars=weightfun_pars,
                                 cond_dist=cond_dist)
-  distpars <- pick_distpars(params=params, cond_dist=cond_dist)
+  distpars <- pick_distpars(d=d, params=params, cond_dist=cond_dist)
 
-  # Structural pars (recursive just takes Cholesky)
+  # Structural pars (recursive just takes Cholesky and model identified by non-Gaussianity have B_m in all_Omegas)
   if(identification == "heteroskedasticity") {
     W <- pick_W(p=p, M=M, d=d, params=params, identification=identification)
     lambdas <- matrix(pick_lambdas(p=p, M=M, d=d, params=params, identification=identification), nrow=d, ncol=M-1)
@@ -419,7 +420,8 @@ simulate_from_regime <- function(stvar, regime=1, nsim=1, init_values=NULL) {
   M <- stvar$model$M
   d <- stvar$model$d
   weight_function <- stvar$model$weight_function
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function, weightfun_pars=stvar$model$weightfun_pars)
+  weightfun_pars <- check_weightfun_pars(data=stvar$data, p=p, M=M, d=d, weight_function=weight_function,
+                                         weightfun_pars=stvar$model$weightfun_pars)
   cond_dist <- stvar$model$cond_dist
   identification <- stvar$model$identification
   AR_constraints <- stvar$model$AR_constraints
@@ -428,8 +430,7 @@ simulate_from_regime <- function(stvar, regime=1, nsim=1, init_values=NULL) {
   B_constraints <- stvar$model$B_constraints
 
   # Collect parameter values
-  params <- stvar$params
-  params <- reform_constrained_pars(p=p, M=M, d=d, params=params,
+  params <- reform_constrained_pars(p=p, M=M, d=d, params=stvar$params,
                                     weight_function=weight_function, weightfun_pars=weightfun_pars,
                                     cond_dist=cond_dist, identification=identification,
                                     AR_constraints=AR_constraints, mean_constraints=mean_constraints,
@@ -443,12 +444,18 @@ simulate_from_regime <- function(stvar, regime=1, nsim=1, init_values=NULL) {
   }
   all_phi0 <- pick_phi0(M=M, d=d, params=params)
   all_A <- pick_allA(p=p, M=M, d=d, params=params)
-  all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params, identification=identification)
-  distpars <- pick_distpars(params=params, cond_dist=cond_dist)
+  all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params, cond_dist=cond_dist, identification=identification)
+  distpars <- pick_distpars(d=d, params=params, cond_dist=cond_dist)
 
-  # Note that structural models not implemented here: no need here because just simulates initial values to the simulator funciton
-  new_params <- c(all_phi0[, regime], all_A[, , , regime],
-                  vech(all_Omegas[, , regime]), distpars) # VAR params corresponding the given regime
+  # Create VAR params corresponding the given regime
+  # Note that structural models not implemented here: no need here because just simulates initial values to the simulator function
+  if(cond_dist == "ind_Student" || identification == "non-Gaussianity") {
+    new_params <- c(all_phi0[, regime], all_A[, , , regime],
+                    vec(all_Omegas[, , regime]), distpars)
+  } else {
+    new_params <- c(all_phi0[, regime], all_A[, , , regime],
+                    vech(all_Omegas[, , regime]), distpars)
+  }
 
   # Note that weight_function does not matter because there is just one regime; also, all constraints are removed prior
   # to building the model.
