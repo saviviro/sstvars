@@ -102,9 +102,9 @@ the GIRF won't thus be estimated multiple times).}
 See the details section.}
 
 \item{exo_weights}{if \code{weight_function="exogenous"}, provide a size
-\eqn{(N x M)} matrix of exogenous transition weights for the regimes: \code{[t, m]}
-for the (after-the-mpact) period \eqn{t} and regime \eqn{m} weight. Ignored if
-\code{weight_function!="exogenous"}.}
+\eqn{(N+1 x M)} matrix of exogenous transition weights for the regimes: \code{[h, m]}
+for the (after-the-impact) period \eqn{h-1} and regime \eqn{m} weight (\code{[1, m]}
+is for the impact period). Ignored if \code{weight_function!="exogenous"}.}
 
 \item{seeds}{a length \code{R2} vector containing the random number generator
 seed for estimation of each GIRF. A single number of an initial value is
@@ -152,6 +152,11 @@ The confidence bounds reflect uncertainty about the initial state (but
 
   Note that if the argument \code{scale} is used, the scaled responses of
   the transition weights might be more than one in absolute value.
+
+  If \code{weight_function="exogenous"}, exogenous transition weights used in
+  the Monte Carlo simulations for the future sample paths of the process must
+  the given in the argument \code{exo_weights}. The same weights are used as
+  the transition weights across the Monte Carlo repetitions.
 }
 \section{Functions}{
 \itemize{

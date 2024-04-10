@@ -28,6 +28,29 @@ mod123relgh <- STVAR(data=usamone, p=1, M=2, params=theta_123relgh, weight_funct
 mod123relgh2 <- STVAR(data=usamone[1:50,], p=1, M=2, params=theta_123relgh, weight_function="relative_dens",
                       identification="heteroskedasticity")
 
+# p=1, M=2, d=2, weight_function="exogenous", cond_dist="ind_Student", weightfun_pars=twmat, AR_constraints=C_122,
+tw1 <- c(0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+         1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1,
+         1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+twmat <- cbind(tw1, 1 - tw1)
+C_122 <- rbind(diag(1*2^2), diag(1*2^2))
+params122exocit <- c(-0.25329555, 0.10340501, 0.73585978, 0.05335907, 0.18282378, 0.03478017, -0.01629061, 0.87424509, 0.83939713,
+                     0.20970725, 0.47256152, -0.23555538, 0.59277160, 0.09901218, -0.29605914, 0.23895480, 6.72161948, 4.10403450)
+
+mod122exocit <- STVAR(data=gdpdef, p=1, M=2, d=2, params=params122exocit, weight_function="exogenous", cond_dist="ind_Student",
+                      weightfun_pars=twmat, AR_constraints=C_122)
+
+# p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="ind_Student", identification="non-Gaussianity"
+params222logit <- c(0.428924, 0.153884, 1.455217, 0.264533, 0.314288, 0.124903, -2.633578, -0.313929, 0.293621, 0.036355, -0.273429,
+                    0.053141, 0.210305, -0.023328, -0.516816, 0.501481, 0.190278, 0.035209, -0.054981, 0.340776, 1.384283, -0.159169,
+                    0.449031, 0.522074, -1.213738, -0.086115, 0.353828, -0.442951, 0.313206, 2.807629, 4.924918, 7.722209)
+mod222logit <- STVAR(data=gdpdef, p=2, M=2, params=params222logit, weight_function="logistic", weightfun_pars=c(2, 1),
+                     cond_dist="ind_Student", identification="non-Gaussianity")
 
 test_that("GIRF works correctly", {
   girf1 <- GIRF(mod112rec, which_shocks=1:2, shock_size=1, N=3, R1=2, R2=4, init_regime=1, which_cumulative=2,
@@ -37,6 +60,11 @@ test_that("GIRF works correctly", {
   girf3 <- GIRF(mod123relgh, which_shocks=2:3, shock_size=-2, N=2, R1=3, R2=4, init_regime=1, which_cumulative=1:2,
                 ci=c(0.95, 0.2), scale_type="instant", scale=cbind(c(2, 1, 0.5), c(3, 3, -0.25)), use_parallel=FALSE,
                 seeds=1:4)
+  girf4 <- GIRF(mod122exocit, which_shocks=2, shock_size=1.3, N=3, R1=2, R2=2, init_regime=1, which_cumulative=1:2,
+                ci=c(0.95), scale_type="instant", scale=c(2, 1, 0.3), use_parallel=FALSE, exo_weights=twmat[3:6,],
+                seeds=1:2)
+  girf5 <- GIRF(mod222logit, which_shocks=1:2, shock_size=0.4, N=2, R1=2, R2=3, init_regime=1, which_cumulative=1,
+                ci=c(0.99, 0.2), scale_type="peak", scale=cbind(c(2, 1, 0.5), c(1, 1, -0.25)), use_parallel=FALSE, seeds=1:3)
 
   expect_equal(unname(girf1$girf_res$shock1$point_est[4, ]), c(0.00851552, 0.02350278, 0.00000000), tol=1e-4)
   expect_equal(c(unname(girf1$girf_res$shock1$conf_ints[4, , ])), c(0.0006007925, 0.0181154039, 0.0016581835, 0.0499984036,
@@ -55,10 +83,19 @@ test_that("GIRF works correctly", {
                c(0.666611, 2.107406, 2.107406, 2.107406, 2.113058, 2.113058, 2.113058, 2.327494, -0.120025, -0.076973, -0.076973,
                  -0.076973, 0, 0, 0, 0.402271, -0.402271, 0, 0, 0), tol=1e-4)
 
+  expect_equal(unname(girf4$girf_res$shock2$point_est[4, ]), c(0.3782161, -0.7688280, 0.0000000, 0.0000000), tol=1e-4)
+  expect_equal(c(unname(girf4$girf_res$shock2$conf_ints[4, ,])), c(0.3782161, 0.3782161, -0.7688280, -0.7688280, 0.0000000,
+                                                                   0.0000000, 0.0000000, 0.0000000), tol=1e-4)
+  expect_equal(unname(girf5$girf_res$shock1$point_est[3, ]), c(-0.22940917, 0.04673078, 0.06539298, -0.06539298), tol=1e-4)
+  expect_equal(c(unname(girf5$girf_res$shock2$conf_ints[3, ,])),
+               c(0.437599633, 0.487393865, 0.500000000, 0.500000000, -0.049290543, 0.036247007, 0.066518157, 0.100551650,
+                 -0.075287965, -0.015962564, 0.003916559, 0.023113695, -0.023113695, -0.003916559, 0.015962564, 0.075287965),
+               tol=1e-4)
+
 })
 
 
-test_that("GIRF works correctly", {
+test_that("GFEVD works correctly", {
   gfevd1 <- GFEVD(mod112rec, shock_size=1, N=3, initval_type="data", R1=2, R2=4, which_cumulative=2,
                   use_parallel=FALSE, seeds=1:nrow(mod112rec$data))
   gfevd2 <- GFEVD(mod322logt, shock_size=-2.2, N=2, initval_type="random", R1=5, R2=3, init_regime=2,

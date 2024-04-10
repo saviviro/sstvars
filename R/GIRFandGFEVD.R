@@ -48,9 +48,9 @@
 #'   single core computing is supported if an initial value is specified (and
 #'   the GIRF won't thus be estimated multiple times).
 #' @param exo_weights if \code{weight_function="exogenous"}, provide a size
-#'  \eqn{(N x M)} matrix of exogenous transition weights for the regimes: \code{[t, m]}
-#'  for the (after-the-mpact) period \eqn{t} and regime \eqn{m} weight. Ignored if
-#'  \code{weight_function!="exogenous"}.
+#'  \eqn{(N+1 x M)} matrix of exogenous transition weights for the regimes: \code{[h, m]}
+#'  for the (after-the-impact) period \eqn{h-1} and regime \eqn{m} weight (\code{[1, m]}
+#'  is for the impact period). Ignored if \code{weight_function!="exogenous"}.
 #' @param seeds a length \code{R2} vector containing the random number generator
 #'   seed for estimation of each GIRF. A single number of an initial value is
 #'   specified. or \code{NULL} for not initializing the seed. Exists for
@@ -130,12 +130,11 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
                  ci=c(0.95, 0.80), ncores=2, burn_in=1000, exo_weights=NULL, seeds=NULL, use_parallel=TRUE) {
   check_stvar(stvar)
   scale_type <- match.arg(scale_type)
-  if(stvar$model$identification == "reduced_form" || stvar$model$cond_dist != "ind_Student") {
+  if(stvar$model$identification == "reduced_form" && stvar$model$cond_dist != "ind_Student") {
     warning(paste("Reduced form model supplied, so using recursive identification"))
     stvar$model$identification <- "recursive"
-  } else if(stvar$model$identification == "reduced_form" || stvar$model$cond_dist == "ind_Student") {
+  } else if(stvar$model$identification == "reduced_form" && stvar$model$cond_dist == "ind_Student") {
     stvar$model$identification <- "non-Gaussianity" # Readily identified by non-Gaussianity
-
   }
 
   p <- stvar$model$p
@@ -147,7 +146,7 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 
   # Check the exogenous weights given for simulation
   if(stvar$model$weight_function == "exogenous") {
-    check_exoweights(M=M, exo_weights=exo_weights, how_many_rows=nsim, name_of_row_number="nsim")
+    check_exoweights(M=M, exo_weights=exo_weights, how_many_rows=N+1, name_of_row_number="N+1")
   }
 
   if(identification == "recursive") {
