@@ -148,6 +148,9 @@
 #'     \item{$fixed_lambdas (only if \code{identification="heteroskedasticity"}):}{a length \eqn{d(M-1)} numeric vector
 #'       (\strong{\eqn{\lambda}}\eqn{_{2}}\eqn{,...,} \strong{\eqn{\lambda}}\eqn{_{M})} with elements strictly larger
 #'       than zero specifying the fixed parameter values for the parameters \eqn{\lambda_{mi}} should be constrained to.}
+#'     \item{$B1_constraints (only if \code{identification="non-Gaussianity"}):}{set to the string "fixed_sign_and_order"
+#'       to impose the constraints that the elements of the first impact matrix \eqn{B_1} are strictly positive and that they
+#'       are in a decreasing order.}
 #'   }
 #' @param to_return should the returned object be the log-likelihood, which is the default, or something else?
 #'   See the section "Value" for all the options.
@@ -244,9 +247,10 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   # Check that the parameter vector lies in the parameter space
   if(check_params) {
     if(!in_paramspace(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
-                      identification=identification, B_constraints=B_constraints, all_boldA=all_boldA,
-                      all_Omegas=all_Omegas, weightpars=weightpars, distpars=distpars, weightfun_pars=weightfun_pars,
-                      stab_tol=stab_tol, posdef_tol=posdef_tol, distpar_tol=distpar_tol, weightpar_tol=weightpar_tol)) {
+                      identification=identification, B_constraints=B_constraints, other_constraints=other_constraints,
+                      all_boldA=all_boldA, all_Omegas=all_Omegas, weightpars=weightpars, distpars=distpars,
+                      weightfun_pars=weightfun_pars, stab_tol=stab_tol, posdef_tol=posdef_tol, distpar_tol=distpar_tol,
+                      weightpar_tol=weightpar_tol)) {
       return(minval)
     }
   }

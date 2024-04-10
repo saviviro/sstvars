@@ -68,8 +68,8 @@ in_paramspace <- function(p, M, d, params,
                           weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                           weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"),
                           identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
-                          B_constraints=NULL, all_boldA, all_Omegas, weightpars, distpars, transition_weights,
-                          stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
+                          B_constraints=NULL, other_constraints=NULL, all_boldA, all_Omegas, weightpars, distpars,
+                          transition_weights, stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
   # in_paramspace is internal function that always takes in non-constrained reduced form parameter vector
   # Reform the parameter vectors before checking with in_paramspace
   weight_function <- match.arg(weight_function)
@@ -145,6 +145,20 @@ in_paramspace <- function(p, M, d, params,
     } else if(identification == "heteroskedasticity") {
       W <- pick_W(p=p, M=M, d=d, params=params, identification=identification)
       if(any(W[B_constraints > 0] <= 0, na.rm=TRUE) || any(W[B_constraints < 0] >= 0, na.rm=TRUE)) {
+        return(FALSE)
+      }
+    }
+  }
+  # Check other constraints if applied
+  if(identification == "non-Gaussianity" || cond_dist == "ind_Student") {
+    if(!is.null(other_constraints$B1_constraints)) {
+      # The first non-zero entry in each column of B_1 is constrained strictly positive and they
+      # are constrained to be in a decreasing ordering.
+      first_non_zero <- vapply(1:d, function(i1) which(all_Omegas[, i1, 1] != 0)[1], numeric(1))
+      first_non_zero_entries <- vapply(1:d, function(i1) all_Omegas[first_non_zero[i1], i1, 1], numeric(1))
+      if(any(first_non_zero_entries <= 0)) {
+        return(FALSE)
+      } else if(!all(order(first_non_zero_entries, decreasing=TRUE) == seq_len(d))) {
         return(FALSE)
       }
     }

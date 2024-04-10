@@ -109,6 +109,10 @@ If the autoregressive dynamics of the model are linear (i.e., either M == 1 or m
   Employs the estimation function \code{optim} from the package \code{stats} that implements the optimization
   algorithms. The robust optimization method Nelder-Mead is much faster than SANN but can get stuck at a local
   solution. See \code{?optim} and the references therein for further details.
+
+  For model identified by non-Gaussianity, the signs and ordering of the shocks are normalized by assuming
+  that the first non-zero element of each column of the impact matrix of Regime 1 is strictly positive and they are
+  in a decreasing order. Use the argument \code{scale} to obtain IRFs scaled for specific impact responses.
 }
 \section{Functions}{
 \itemize{
@@ -123,10 +127,12 @@ If the autoregressive dynamics of the model are linear (i.e., either M == 1 or m
 ## A small number of bootstrap replications is used below to shorten the
 ## running time (in practice, a larger number of replications should be used).
 
-# p=1, M=1, d=2, linear Gaussian VAR model, shocks identified recursively.
-theta_112relg <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103,
-  0.601786, -0.002945, 0.067224)
-mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112relg, identification="recursive")
+# p=1, M=1, d=2, linear VAR model with independent Student's t shocks identified
+# by non-Gaussianity (arbitrary weight function applied here):
+theta_112it <- c(0.644, 0.065, 0.291, 0.021, -0.124, 0.884, 0.717, 0.105, 0.322,
+  -0.25, 4.413, 3.912)
+mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112it, cond_dist="ind_Student",
+ identification="non-Gaussianity", weight_function="threshold", weightfun_pars=c(1, 1))
 
 # Estimate IRFs 20 periods ahead, bootstrapped 90\% confidence bounds based on
 # 10 bootstrap replications. Linear model so robust estimation methods are

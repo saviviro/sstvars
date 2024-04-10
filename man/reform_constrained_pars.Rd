@@ -176,6 +176,9 @@ Currently only available for models with \code{identification="heteroskedasticit
    \item{$fixed_lambdas (only if \code{identification="heteroskedasticity"}):}{a length \eqn{d(M-1)} numeric vector
      (\strong{\eqn{\lambda}}\eqn{_{2}}\eqn{,...,} \strong{\eqn{\lambda}}\eqn{_{M})} with elements strictly larger
      than zero specifying the fixed parameter values for the parameters \eqn{\lambda_{mi}} should be constrained to.}
+   \item{$B1_constraints (only if \code{identification="non-Gaussianity"}):}{set to the string "fixed_sign_and_order"
+     to impose the constraints that the elements of the first impact matrix \eqn{B_1} are strictly positive and that they
+     are in a decreasing order.}
  }}
 
 \item{change_na}{change NA parameter values of constrained models to -9.999?}

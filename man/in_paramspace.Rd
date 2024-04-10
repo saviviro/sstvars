@@ -16,6 +16,7 @@ in_paramspace(
   identification = c("reduced_form", "recursive", "heteroskedasticity",
     "non-Gaussianity"),
   B_constraints = NULL,
+  other_constraints = NULL,
   all_boldA,
   all_Omegas,
   weightpars,
@@ -155,6 +156,16 @@ where the latest is the Student's \eqn{t} distribution with independent componen
 a negative value indicating strict negative sign constraint, and zero indicating that the element is constrained to zero.
 Currently only available for models with \code{identification="heteroskedasticity"} or \code{"non-Gaussianity"} due to the
 (in)availability of appropriate parametrizations that allow such constraints to be imposed.}
+
+\item{other_constraints}{A list containing internally used additional type of constraints (see the options below).
+\describe{
+   \item{$fixed_lambdas (only if \code{identification="heteroskedasticity"}):}{a length \eqn{d(M-1)} numeric vector
+     (\strong{\eqn{\lambda}}\eqn{_{2}}\eqn{,...,} \strong{\eqn{\lambda}}\eqn{_{M})} with elements strictly larger
+     than zero specifying the fixed parameter values for the parameters \eqn{\lambda_{mi}} should be constrained to.}
+   \item{$B1_constraints (only if \code{identification="non-Gaussianity"}):}{set to the string "fixed_sign_and_order"
+     to impose the constraints that the elements of the first impact matrix \eqn{B_1} are strictly positive and that they
+     are in a decreasing order.}
+ }}
 
 \item{all_boldA}{3D array containing the \eqn{((dp)x(dp))} "bold A" (companion form) matrices of each regime,
 obtained from \code{form_boldA}. Will be computed if not given.}

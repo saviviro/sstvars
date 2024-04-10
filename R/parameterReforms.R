@@ -238,6 +238,9 @@ reform_constrained_pars <- function(p, M, d, params,
   if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(weight_constraints) &&
      is.null(B_constraints) && is.null(other_constraints)) {
     return(params)
+  } else if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(weight_constraints) &&
+            is.null(B_constraints) && identification == "non-Gaussianity") {
+    return(params) # Other constraints do not affect the parameter vector here
   }
 
   ## Obtain the mean parameters ##

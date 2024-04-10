@@ -39,6 +39,10 @@
 #'   Employs the estimation function \code{optim} from the package \code{stats} that implements the optimization
 #'   algorithms. The robust optimization method Nelder-Mead is much faster than SANN but can get stuck at a local
 #'   solution. See \code{?optim} and the references therein for further details.
+#'
+#'   For model identified by non-Gaussianity, the signs and ordering of the shocks are normalized by assuming
+#'   that the first non-zero element of each column of the impact matrix of Regime 1 is strictly positive and they are
+#'   in a decreasing order. Use the argument \code{scale} to obtain IRFs scaled for specific impact responses.
 #' @return Returns a class \code{'irf'} list with  with the following elements:
 #'   \describe{
 #'     \item{\code{$point_est}:}{a 3D array \code{[variables, shock, horizon]} containing the point estimates of the IRFs.
@@ -68,10 +72,12 @@
 #' ## A small number of bootstrap replications is used below to shorten the
 #' ## running time (in practice, a larger number of replications should be used).
 #'
-#' # p=1, M=1, d=2, linear Gaussian VAR model, shocks identified recursively.
-#' theta_112relg <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103,
-#'   0.601786, -0.002945, 0.067224)
-#' mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112relg, identification="recursive")
+#' # p=1, M=1, d=2, linear VAR model with independent Student's t shocks identified
+#' # by non-Gaussianity (arbitrary weight function applied here):
+#' theta_112it <- c(0.644, 0.065, 0.291, 0.021, -0.124, 0.884, 0.717, 0.105, 0.322,
+#'   -0.25, 4.413, 3.912)
+#' mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112it, cond_dist="ind_Student",
+#'  identification="non-Gaussianity", weight_function="threshold", weightfun_pars=c(1, 1))
 #'
 #' # Estimate IRFs 20 periods ahead, bootstrapped 90% confidence bounds based on
 #' # 10 bootstrap replications. Linear model so robust estimation methods are
@@ -128,13 +134,16 @@ linear_IRF <- function(stvar, N=30, regime=1, which_cumulative=numeric(0), scale
   stopifnot(regime <= stvar$model$M)
   stopifnot(!is.null(stvar$data))
   if(!is.null(seed)) stopifnot(is.numeric(seed) && length(seed) == 1)
+  if(stvar$model$identification == "reduced_form" && stvar$model$cond_dist == "ind_Student") {
+    stvar$model$identification <- "non-Gaussianity" # Readily identified by non-Gaussianity
+  }
   data <- stvar$data
   p <- stvar$model$p
   M <- stvar$model$M
   d <- stvar$model$d
   params <- stvar$params
   weight_function <- stvar$model$weight_function
-  weightfun_pars <- check_weightfun_pars(p=p, d=d, weight_function=weight_function,
+  weightfun_pars <- check_weightfun_pars(data=data, p=p, M=M, d=d, weight_function=weight_function,
                                          weightfun_pars=stvar$model$weightfun_pars)
   cond_dist <- stvar$model$cond_dist
   parametrization <- stvar$model$parametrization
@@ -164,14 +173,15 @@ linear_IRF <- function(stvar, N=30, regime=1, which_cumulative=numeric(0), scale
                              weight_constraints=NULL, B_constraints=NULL)
   all_phi0 <- pick_phi0(M=M, d=d, params=params)
   all_A <- pick_allA(p=p, M=M, d=d, params=params)
-  all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params, identification=identification)
+  all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params, cond_dist=cond_dist,
+                           identification=identification)
   all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
   weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function,
-                            weightfun_pars=weightfun_pars, cond_dist=cond_dist)
-  distpars <- pick_distpars(params=params, cond_dist=cond_dist)
+                                weightfun_pars=weightfun_pars, cond_dist=cond_dist)
+  distpars <- pick_distpars(d=d, params=params, cond_dist=cond_dist)
 
   # Check the argument scale and which_cumulative
-  if(identification == "heteroskedasticity") {
+  if(identification == "heteroskedasticity" || identification == "non-Gaussianity") { # ind_Students mods ident set to non-Gaus
     if(is.null(B_constraints)) {
       B_constrs <- matrix(NA, nrow=d, ncol=d)
     } else {
@@ -219,6 +229,8 @@ linear_IRF <- function(stvar, N=30, regime=1, which_cumulative=numeric(0), scale
     } else { # regime == 1
       B_matrix <- W
     }
+  } else if(identification == "non-Gaussianity") { # ind_Student mods ident set to non-Gaus
+    B_matrix <- all_Omega[, , regime] # impact matrix readily parametrized
   } else { # identification == "reduced_form" or "recursive"
     if(identification == "reduced_form") {
       message("Reduced form model supplied, using lower triangular recursive identification.")
@@ -268,19 +280,21 @@ linear_IRF <- function(stvar, N=30, regime=1, which_cumulative=numeric(0), scale
 
     # For all models, bootstrapping conditions on the estimated transition weight parameters,
     # so they need to be removed:
-    if(is.null(weight_constraints) && M > 1) { # No weight constraints
+    if(is.null(weight_constraints) && M > 1 && weight_function != "exogenous") { # No weight constraints
       n_weightpars <- length(weightpars) - ifelse(weight_function=="relative_dens", 1, 0)
       new_params <- c(new_params[1:(length(new_params) - n_weightpars - length(distpars))],
                       distpars) # Removes weight params
-    } else if(M > 1) { # Weight constraints employed
+    } else if(M > 1 && weight_function != "exogenous") { # Weight constraints employed
       if(weight_constraints$R != 0) { # Linear weight constraints (no changes if R == 0)
         new_params <- c(new_params[1:(length(new_params) - nrow(weight_constraints$R) - length(distpars))],
                         distpars) # Removes weight params
       }
-    } # If M==1 no changes
+    } # If M==1 or weight_function=="exogenous", no changes
 
     # Set the new fixed weight constraints to be the originally fitted weights params
-    if(weight_function == "relative_dens") {
+    if(weight_function == "exogenous") {
+      new_weight_constraints <- NULL
+    } else if(weight_function == "relative_dens") {
       new_weight_constraints <- list(R=0, r=weightpars[-length(weightpars)]) # Removes alpha_M
     } else {
       new_weight_constraints <- list(R=0, r=weightpars)
@@ -333,6 +347,24 @@ linear_IRF <- function(stvar, N=30, regime=1, which_cumulative=numeric(0), scale
       # New params with the new W that corresponds to new_B_constraints. Note that AR parameters are assumed
       # identical across the regimes here.
       new_params <- c(stvar$params[1:(d + p*d^2)], Wvec(W), distpars) # No lambdas or weightpars
+    } else if(identification == "non-Gaussianity") {
+      # For models identified by non-Gaussianity, we keep the shocks in a fixed ordering by assuming that the
+      # first non-zero element of each column of the impact matrix of Regime 1 is strictly positive and they are
+      # in a decreasing order.
+
+      # Mark that the param space should be constrained to the fixed signs and ordering of the columns of B_1:
+      other_constraints <- list(B1_constraints="fixed_sign_and_order")
+
+      # Determine which columns should swap signs.
+      cols_to_swap <- vapply(1:d, function(i1) which(all_Omega[, i1, 1] != 0)[1], numeric(1))
+
+      # Swap the signs of the corresponding columns of the impact matrices
+      new_stvar <- swap_B_signs(stvar, which_to_swap=cols_to_swap, calc_std_errors=FALSE)
+      new_params <- new_stvar$params
+      new_B_constraints <- new_stvar$model$B_constraints
+      # Note that we don't impose sign constraints via B_constraints here, which would impose them to
+      # all B_m. Instead, we impose the sign constraints to the first regime's B matrix and restrict
+      # the parameter space by other_constraints.
     } else { # No changes
       new_B_constraints <- B_constraints
       other_constraints <- NULL
@@ -385,6 +417,8 @@ linear_IRF <- function(stvar, N=30, regime=1, which_cumulative=numeric(0), scale
         } else { # regime == 1
           tmp_B_matrix <- tmp_W
         }
+      } else if(identification == "non-Gaussianity") { # ind_Student models always here
+        tmp_B_matrix <- tmp_all_Omega[, , regime] # impact matrix readily parametrized
       } else { # identification == "reduced_form" or "recursive"
         tmp_B_matrix <- t(chol(tmp_all_Omega[, , regime])) # Shocks identified by lower-triangular Cholesky decomposition
       }
