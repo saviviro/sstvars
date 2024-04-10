@@ -56,13 +56,7 @@ predict.stvar <- function(object, ..., nsteps, nsim=1000, pi=c(0.95, 0.80), pred
 
   # Check the exogenous weights given for simulation
   if(stvar$model$weight_function == "exogenous") {
-    if(is.null(exo_weights)) stop("Exogenous weights must be provided in the argument 'exo_weights' when weight_function is 'exogenous'")
-    if(!is.matrix(exo_weights)) stop("Exogenous weights 'exo_weights' must be a matrix")
-    if(nrow(exo_weights) != nsteps) stop("Exogenous weights 'exo_weights' must have nsteps rows")
-    if(ncol(exo_weights) != M) stop("Exogenous weights 'exo_weights' must have M columns")
-    if(any(exo_weights < 0) || any(exo_weights > 1)) stop("Exogenous weights 'exo_weights' must be in [0, 1]")
-    # Check that exogenous weights sum to one at each row withing a numerical accuracy:
-    if(!all(abs(rowSums(exo_weights) - 1) < 1e-10)) stop("Exogenous weights 'exo_weights' must sum to one at each row")
+    check_exoweights(M=M, exo_weights=exo_weights, how_many_rows=nsim, name_of_row_number="nsim")
   }
 
   # Simulations

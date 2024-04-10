@@ -670,3 +670,27 @@ check_stvar <- function(object, object_name) {
   }
 }
 
+
+#' @title Checks whether the given exogenous transition weights for simulation are correctly specified.
+#'
+#' @description \code{check_exoweights} checks whether the given exogenous transition weights for
+#'  simulation are correctly specified.
+#'
+#' @param exo_weights Exogenous transition weights weights given for simulation in some context.
+#' @param how_many_rows how many rows the exogenous weights should have?
+#' @param name_of_row_number what is the name of the object whose value should determine the
+#'   the number of rows in the exogenous weights?
+#' @details Used by simulate.stvar, predict.stvar, GIRF, and GFEVD.
+#' @return Throws an error if the exogenous weights are incorrectly specified.
+#' @keywords internal
+
+check_exoweights <- function(M, exo_weights, how_many_rows, name_of_row_number) {
+  # Check the exogenous weights given for simulation
+  if(is.null(exo_weights)) stop("Exogenous weights must be provided in the argument 'exo_weights' when weight_function is 'exogenous'.")
+  if(!is.matrix(exo_weights)) stop("Exogenous weights 'exo_weights' must be a matrix.")
+  if(nrow(exo_weights) != how_many_rows) stop(paste0("Exogenous weights 'exo_weights' must have '", name_of_row_number, "' rows."))
+  if(ncol(exo_weights) != M) stop("Exogenous weights 'exo_weights' must have M columns.")
+  if(any(exo_weights < 0) || any(exo_weights > 1)) stop("Exogenous weights 'exo_weights' must be in [0, 1].")
+  # Check that exogenous weights sum to one at each row withing a numerical accuracy:
+  if(!all(abs(rowSums(exo_weights) - 1) < 1e-10)) stop("Exogenous weights 'exo_weights' must sum to one at each row.")
+}

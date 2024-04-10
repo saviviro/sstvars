@@ -24,6 +24,7 @@ GIRF(
   ci = c(0.95, 0.8),
   ncores = 2,
   burn_in = 1000,
+  exo_weights = NULL,
   seeds = NULL,
   use_parallel = TRUE
 )
@@ -99,6 +100,11 @@ the GIRF won't thus be estimated multiple times).}
 
 \item{burn_in}{Burn-in period for simulating initial values from a regime when \code{cond_dist!="Gaussian"}.
 See the details section.}
+
+\item{exo_weights}{if \code{weight_function="exogenous"}, provide a size
+\eqn{(N x M)} matrix of exogenous transition weights for the regimes: \code{[t, m]}
+for the (after-the-mpact) period \eqn{t} and regime \eqn{m} weight. Ignored if
+\code{weight_function!="exogenous"}.}
 
 \item{seeds}{a length \code{R2} vector containing the random number generator
 seed for estimation of each GIRF. A single number of an initial value is

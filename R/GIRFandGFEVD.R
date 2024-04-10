@@ -47,6 +47,10 @@
 #' @param ncores the number CPU cores to be used in parallel computing. Only
 #'   single core computing is supported if an initial value is specified (and
 #'   the GIRF won't thus be estimated multiple times).
+#' @param exo_weights if \code{weight_function="exogenous"}, provide a size
+#'  \eqn{(N x M)} matrix of exogenous transition weights for the regimes: \code{[t, m]}
+#'  for the (after-the-mpact) period \eqn{t} and regime \eqn{m} weight. Ignored if
+#'  \code{weight_function!="exogenous"}.
 #' @param seeds a length \code{R2} vector containing the random number generator
 #'   seed for estimation of each GIRF. A single number of an initial value is
 #'   specified. or \code{NULL} for not initializing the seed. Exists for
@@ -60,6 +64,11 @@
 #'
 #'   Note that if the argument \code{scale} is used, the scaled responses of
 #'   the transition weights might be more than one in absolute value.
+#'
+#'   If \code{weight_function="exogenous"}, exogenous transition weights used in
+#'   the Monte Carlo simulations for the future sample paths of the process must
+#'   the given in the argument \code{exo_weights}. The same weights are used as
+#'   the transition weights across the Monte Carlo repetitions.
 #' @return Returns a class \code{'girf'} list with the GIRFs in the first
 #'   element (\code{$girf_res}) and the used arguments the rest. The first
 #'   element containing the GIRFs is a list with the \eqn{m}th element
@@ -118,24 +127,34 @@
 
 GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_regime=1, init_values=NULL,
                  which_cumulative=numeric(0), scale=NULL, scale_type=c("instant", "peak"), scale_horizon=N,
-                 ci=c(0.95, 0.80), ncores=2, burn_in=1000, seeds=NULL, use_parallel=TRUE) {
+                 ci=c(0.95, 0.80), ncores=2, burn_in=1000, exo_weights=NULL, seeds=NULL, use_parallel=TRUE) {
   check_stvar(stvar)
   scale_type <- match.arg(scale_type)
-  if(stvar$model$identification == "reduced_form") {
+  if(stvar$model$identification == "reduced_form" || stvar$model$cond_dist != "ind_Student") {
     warning(paste("Reduced form model supplied, so using recursive identification"))
     stvar$model$identification <- "recursive"
+  } else if(stvar$model$identification == "reduced_form" || stvar$model$cond_dist == "ind_Student") {
+    stvar$model$identification <- "non-Gaussianity" # Readily identified by non-Gaussianity
+
   }
+
   p <- stvar$model$p
   M <- stvar$model$M
   d <- stvar$model$d
   identification <- stvar$model$identification
   stopifnot(N %% 1 == 0 && N > 0)
   stopifnot(scale_horizon %in% 0:N)
+
+  # Check the exogenous weights given for simulation
+  if(stvar$model$weight_function == "exogenous") {
+    check_exoweights(M=M, exo_weights=exo_weights, how_many_rows=nsim, name_of_row_number="nsim")
+  }
+
   if(identification == "recursive") {
     B_constrs <- matrix(NA, nrow=d, ncol=d)
     B_constrs[upper.tri(B_constrs)] <- 0
     diag(B_constrs) <- 1 # Lower triangular Cholesky constraints
-  } else if(identification == "heteroskedasticity") {
+  } else if(identification == "heteroskedasticity" || identification == "non-Gaussianity") {
     if(is.null(stvar$model$B_constraints)) {
       B_constrs <- matrix(NA, nrow=d, ncol=d)
     } else {
@@ -179,7 +198,7 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
   # Function that estimates GIRF
   get_one_girf <- function(shock_numb, shock_size, seed) {
     simulate.stvar(stvar, nsim=N+1, seed=seed, init_values=init_values, init_regime=init_regime, ntimes=R1,
-                   burn_in=burn_in, girf_pars=list(shock_numb=shock_numb, shock_size=shock_size))
+                   burn_in=burn_in, exo_weights=exo_weights, girf_pars=list(shock_numb=shock_numb, shock_size=shock_size))
   }
 
   GIRF_shocks <- vector("list", length=length(which_shocks)) # Storage for the GIRFs [[shock]]
@@ -283,6 +302,7 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
                  init_values=init_values,
                  seeds=seeds,
                  burn_in=burn_in,
+                 exo_weights=exo_weights,
                  stvar=stvar),
             class="girf")
 }

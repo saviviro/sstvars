@@ -1959,3 +1959,12 @@ test_that("check_stvar works correctly", {
    check_stvar(mod112relg)
    expect_error(check_stvar(theta_112relg))
 })
+
+
+test_that("check_exoweights works correctly", {
+  expect_error(check_exoweights(M=2, exo_weights=NULL, how_many_rows=2, name_of_row_number="tmp"))
+  expect_error(check_exoweights(M=2, exo_weights=cbind(c(0.5, 0.6), c(0.5, 0.4)), how_many_rows=3, name_of_row_number="tmp"))
+  expect_error(check_exoweights(M=3, exo_weights=cbind(c(0.5, 0.6), c(0.5, 0.4)), how_many_rows=2, name_of_row_number="tmp"))
+  expect_error(check_exoweights(M=2, exo_weights=cbind(c(0.5, 0.6), c(0.5, 0.401)), how_many_rows=2, name_of_row_number="tmp"))
+  expect_error(check_exoweights(M=2, exo_weights=c(0.5, 0.6, 0.5, 0.4), how_many_rows=2, name_of_row_number="tmp"))
+})
