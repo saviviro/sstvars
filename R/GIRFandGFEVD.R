@@ -412,16 +412,24 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 
 GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "fixed"), use_data_shocks=FALSE,
                   R1=250, R2=250, init_regime=1, init_values=NULL, which_cumulative=numeric(0), ncores=2,
-                  burn_in=1000, seeds=NULL, use_parallel=TRUE) {
+                  burn_in=1000, exo_weights=NULL, seeds=NULL, use_parallel=TRUE) {
   check_stvar(stvar)
   initval_type <- match.arg(initval_type)
-  if(stvar$model$identification == "reduced_form") {
+  if(stvar$model$identification == "reduced_form" && stvar$model$cond_dist != "ind_Student") {
     warning(paste("Reduced form model supplied, so using recursive identification"))
     stvar$model$identification <- "recursive"
+  } else if(stvar$model$identification == "reduced_form" && stvar$model$cond_dist == "ind_Student") {
+    stvar$model$identification <- "non-Gaussianity" # Readily identified by non-Gaussianity
   }
   p <- stvar$model$p
   M <- stvar$model$M
   d <- stvar$model$d
+
+  # Check the exogenous weights given for simulation
+  if(stvar$model$weight_function == "exogenous") {
+    check_exoweights(M=M, exo_weights=exo_weights, how_many_rows=N+1, name_of_row_number="N+1")
+  }
+
   if(use_data_shocks) {
     initval_type <- "data" # Initval_type always data with data shocks
   }
@@ -457,26 +465,25 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
 
   # Calculate the shock sizes for each history in the data
   if(use_data_shocks) {
-    if(stvar$model$identification == "heteroskedasticity") {
-      # Pick W and lambdas from the parameter vector
-      params_std <- reform_constrained_pars(p=p, M=M, d=d, params=stvar$params, weight_function=stvar$model$weight_function,
-                                            weightfun_pars=stvar$model$weightfun_pars, cond_dist=stvar$model$cond_dist,
-                                            identification=stvar$model$identification, B_constraints=stvar$model$B_constraints,
-                                            mean_constraints=stvar$model$mean_constraints, AR_constraints=stvar$model$AR_constraints,
-                                            weight_constraints=stvar$model$weight_constraints)
-      W <- pick_W(p=p, M=M, d=d, params=params_std, identification=stvar$model$identification)
-      lambdas <- pick_lambdas(p=p, M=M, d=d, params=params_std, identification=stvar$model$identification)
-      if(M > 1) lambdas <- cbind(1, matrix(lambdas, nrow=d, ncol=M-1)) # First column is column of ones for the first regime
-    }
     # Recover the structural shocks for each initial value in all_initvals:
-    data_shocks <- stvar$structural_shocks
+    if(stvar$model$identification == "reduced_form" && cond_dist != "ind_Student") {
+      # Recover the structural shocks from the reduced form shocks using recursive identification:
+      data_shocks <- get_residuals(data=stvar$data, p=p, M=M, d=d, params=stvar$params, weight_function=stvar$model$weight_function,
+                                   weightfun_pars=stvar$model$weightfun_pars, cond_dist=stvar$model$cond_dist,
+                                   parametrization=stvar$model$parametrization, identification="recursive",
+                                   B_constraints=stvar$model$B_constraints, mean_constraints=stvar$model$mean_constraints,
+                                   AR_constraints=stvar$model$AR_constraints, weight_constraints=stvar$model$weight_constraints,
+                                   structural_shocks=TRUE)
+    } else {
+      data_shocks <- stvar$structural_shocks
+    }
   }
 
   # Function that estimates GIRF
   get_one_girf <- function(shock_numb, shock_size, seed, init_values_for_1girf) {
     if(initval_type == "random") init_values_for_1girf <- NULL
     simulate.stvar(stvar, nsim=N+1, init_values=init_values_for_1girf, ntimes=R1, seed=seed, init_regime=init_regime,
-                   burn_in=burn_in, girf_pars=list(shock_numb=shock_numb, shock_size=shock_size))
+                   burn_in=burn_in, exo_weights=exo_weights, girf_pars=list(shock_numb=shock_numb, shock_size=shock_size))
   }
 
   GIRF_shocks <- vector("list", length=d) # Storage for the GIRFs [[shock]]
@@ -504,9 +511,7 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
       cat(paste0("Estimating GIRFs for structural shock ", i1, "..."), "\n")
       GIRF_shocks[[i1]] <- pbapply::pblapply(1:R2,
                                              function(i2) get_one_girf(shock_numb=i1,
-                                                                       shock_size=ifelse(use_data_shocks,
-                                                                                         data_shocks[i2, i1],
-                                                                                         shock_size),
+                                                                       shock_size=ifelse(use_data_shocks, data_shocks[i2, i1], shock_size),
                                                                        seed=seeds[i2],
                                                                        init_values_for_1girf=matrix(all_initvals[, , i2],
                                                                                                     nrow=p, ncol=d)), cl=cl)
@@ -515,12 +520,9 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
   } else { # No parallel computing
     for(i1 in 1:d) {
       GIRF_shocks[[i1]] <- lapply(1:R2, function(i2) get_one_girf(shock_numb=i1,
-                                                                  shock_size=ifelse(use_data_shocks,
-                                                                                    data_shocks[i2, i1],
-                                                                                    shock_size),
+                                                                  shock_size=ifelse(use_data_shocks, data_shocks[i2, i1], shock_size),
                                                                   seed=seeds[i2],
-                                                                  init_values_for_1girf=matrix(all_initvals[, , i2],
-                                                                                               nrow=p, ncol=d)))
+                                                                  init_values_for_1girf=matrix(all_initvals[, , i2], nrow=p, ncol=d)))
     }
   }
 

@@ -105,6 +105,10 @@ test_that("GFEVD works correctly", {
   gfevd4 <- GFEVD(mod322logt2, use_data_shocks=TRUE, R1=1, N=2, use_parallel=FALSE, seeds=1:(nrow(mod322logt2$data)-3))
   gfevd5 <- GFEVD(mod123relgh2, use_data_shocks=TRUE, R1=2, N=3, which_cumulative=1:2,
                   use_parallel=FALSE, seeds=1:(nrow(mod123relgh2$data)-1))
+  gfevd6 <- GFEVD(mod122exocit, use_data_shocks=TRUE, R1=2, N=3, which_cumulative=2,
+                  use_parallel=FALSE, seeds=1:(nrow(mod122exocit$data)-1), exo_weights=twmat[3:6,])
+  gfevd7 <- GFEVD(mod222logit, use_data_shocks=FALSE, R1=3, R2=2, N=2, which_cumulative=1, init_regime=1,
+                  initval_type="random", use_parallel=FALSE, seeds=1:2)
 
   expect_equal(c(unname(gfevd1$gfevd_res[4, , 1:2])), c(0.993349651, 0.006650349, 0.001999672, 0.998000328), tol=1e-4)
   expect_equal(c(unname(gfevd2$gfevd_res[3, ,])), c(0.96153505, 0.03846495, 0.01188139, 0.98811861, 0.00125927,
@@ -118,4 +122,8 @@ test_that("GFEVD works correctly", {
   expect_equal(c(unname(gfevd5$gfevd_res[1, 1:3, 1:3])), c(0.663734461, 0.316968251, 0.019297288, 0.429773671, 0.142054266,
                                                            0.428172063, 0.201048548, 0.797946741, 0.001004711), tol=1e-4)
   expect_equal(c(unname(gfevd5$data_gfevd_res[2, 3, 2, 1:2])), c(0.9447989, 0.8897515), tol=1e-4)
+
+  expect_equal(c(unname(gfevd6$gfevd_res[3, 1:2, 1:2])), c(0.8345445, 0.1654555, 0.2280664, 0.7719336), tol=1e-4)
+  expect_equal(c(unname(gfevd6$data_gfevd_res[4, 1:2, 1:2, 20])), c(0.51732221, 0.06254266, 0.48267779, 0.93745734), tol=1e-4)
+  expect_equal(c(unname(gfevd7$gfevd_res[3, 1:2, 1:3])), c(0.8568345, 0.1431655, 0.1618674, 0.8381326, 0.2349961, 0.7650039), tol=1e-4)
 })

@@ -21,6 +21,7 @@ GFEVD(
   which_cumulative = numeric(0),
   ncores = 2,
   burn_in = 1000,
+  exo_weights = NULL,
   seeds = NULL,
   use_parallel = TRUE
 )
@@ -76,6 +77,11 @@ the GIRF won't thus be estimated multiple times).}
 
 \item{burn_in}{Burn-in period for simulating initial values from a regime when \code{cond_dist!="Gaussian"}.
 See the details section.}
+
+\item{exo_weights}{if \code{weight_function="exogenous"}, provide a size
+\eqn{(N+1 x M)} matrix of exogenous transition weights for the regimes: \code{[h, m]}
+for the (after-the-impact) period \eqn{h-1} and regime \eqn{m} weight (\code{[1, m]}
+is for the impact period). Ignored if \code{weight_function!="exogenous"}.}
 
 \item{seeds}{a numeric vector containing the random number generator seed for estimation
 of each GIRF. Should have the length...
