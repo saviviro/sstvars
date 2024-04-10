@@ -50,51 +50,48 @@ arma::vec ind_Student_densities_Cpp(const arma::mat& obs,
   // and so corresponding rows of alpha_mt_sqrt also have 0 or 1 elements.
   arma::mat alpha_mt_sqrt = arma::sqrt(alpha_mt);
 
-  // Placeholder for potential Bt precalculations (consider using map or vector of matrices)
-  std::vector<arma::mat> precalculatedBt(T_obs);
-  std::vector<arma::mat> precalculatedInvBt(T_obs);
-  std::vector<bool> precalculationAvailable(T_obs, false);
-  std::vector<double> precalculatedlogAbsDetBt(T_obs, 0);
+  // Placeholder for potential Bt precalculations
+  std::vector<arma::mat> precalculatedInvBt(impact_matrices.n_slices);
+  std::vector<double> precalculatedLogAbsDetBt(impact_matrices.n_slices);
 
   // Precalculate Bt and invBt for simplified rows
-  for(int i1 = 0; i1 < T_obs; ++i1) {
-    for(int i2 = 0; i2 < alpha_mt_sqrt.n_cols; ++i2) {
-      if(alpha_mt_sqrt(i1, i2) == 1) { // One weight is 1 and the rest are 0, so need to calculate for the one with 1 only.
-        precalculatedBt[i1] = impact_matrices.slice(i2);
-        precalculatedlogAbsDetBt[i1] = -log(std::abs(arma::det(precalculatedBt[i1])));
-        precalculatedInvBt[i1] = arma::inv(precalculatedBt[i1]); // Bt is always invertible here since it is just B_m
-        precalculationAvailable[i1] = true;
-        break; // No need to check other weights for this row
-      }
-    }
+  for(arma::uword i2 = 0; i2 < impact_matrices.n_slices; ++i2) {
+    precalculatedInvBt[i2] = arma::inv(impact_matrices.slice(i2));
+    precalculatedLogAbsDetBt[i2] = -log(std::abs(arma::det(impact_matrices.slice(i2))));
   }
 
   arma::vec invBt_obs_minus_cmean; // Placeholder for invBt_obs_minus_cmean
   double absdetBt = 0.0; // Placeholder for abs det
+  int which_weight_is_one = 0; // Placeholder for which weight is one
 
   for(int i1 = 0; i1 < T_obs; ++i1) {
     arma::vec tdens_i1(d, arma::fill::zeros);
     arma::mat Bt = arma::zeros<arma::mat>(d, d);
 
-    if(precalculationAvailable[i1]) { // B_t and its inverse already calculated
-      Bt = precalculatedBt[i1];
-      invBt_obs_minus_cmean = precalculatedInvBt[i1]*(obs.row(i1) - means.row(i1)).t();
-    } else {
+    bool precalc_used = false;
+    for(int i2 = 0; i2 < alpha_mt_sqrt.n_cols; ++i2) {
+      if(alpha_mt_sqrt(i1, i2) == 1) {
+        invBt_obs_minus_cmean = precalculatedInvBt[i2]*(obs.row(i1) - means.row(i1)).t();
+        which_weight_is_one = i2;
+        precalc_used = true;
+        break; // The rest of the weights are zero
+      }
+    }
+    if(!precalc_used) {
       // Compute Bt as the weighted sum of impact_matrices (weights are not approximately 0 or 1)
       for(int i2 = 0; i2 < impact_matrices.n_slices; ++i2) {
         Bt += impact_matrices.slice(i2)*alpha_mt_sqrt(i1, i2);
       }
-
-      //arma::vec obs_minus_cmean = (obs.row(i1) - means.row(i1)).t(); // Compute obs_minus_cmean for the current observation
       invBt_obs_minus_cmean = arma::solve(Bt, (obs.row(i1) - means.row(i1)).t()); // Solve for invBt_obs_minus_cmean
     }
 
+    // Calculate the exp-part of the density
     for(int i2 = 0; i2 < d; ++i2) {
       tdens_i1(i2) = one_plus_distpars_times_half(i2)*log(1 + std::pow(invBt_obs_minus_cmean(i2), 2)*inverse_distpars_minus_two(i2));
     }
 
-    if(precalculationAvailable[i1]) { // The determinant of Bt already calculated, always abs det pos here
-      all_lt(i1) = precalculatedlogAbsDetBt[i1] - arma::sum(tdens_i1); // Store the results, logCd is handled outside
+    if(precalc_used) { // The determinant of Bt already calculated, always abs det pos here
+      all_lt(i1) = precalculatedLogAbsDetBt[which_weight_is_one] - arma::sum(tdens_i1); // Store the results, logCd is handled in R
     } else {
       absdetBt = std::abs(arma::det(Bt));
       if(absdetBt < posdef_tol) {
