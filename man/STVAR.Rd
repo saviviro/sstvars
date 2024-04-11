@@ -294,7 +294,7 @@ set.seed(1); tw1 <- runif(nrow(gdpdef)-2) # Transition weights of Regime 1
 params22exoit <- c(0.357, 0.107, 0.356, 0.086, 0.14, 0.035, -0.165, 0.387, 0.452,
  0.013, 0.228, 0.336, 0.239, 0.024, -0.021, 0.708, 0.063, 0.027, 0.009, 0.197,
  -0.1, 0.2, -0.15, 0.13, 0.21, 0.15, 0.11, -0.09, 3, 4)
-mod222exoit <- STVAR(p=2, M=2, d=2, params=params22exo, weight_function="exogenous",
+mod222exoit <- STVAR(p=2, M=2, d=2, params=params22exoit, weight_function="exogenous",
  weightfun_pars=cbind(tw1, 1-tw1), cond_dist="ind_Student")
 print(mod222exoit) # Printout of the model
 

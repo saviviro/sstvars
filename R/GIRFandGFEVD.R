@@ -466,9 +466,9 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
   # Calculate the shock sizes for each history in the data
   if(use_data_shocks) {
     # Recover the structural shocks for each initial value in all_initvals:
-    if(stvar$model$identification == "reduced_form" && cond_dist != "ind_Student") {
+    if(stvar$model$identification == "reduced_form" && stvar$model$cond_dist != "ind_Student") {
       # Recover the structural shocks from the reduced form shocks using recursive identification:
-      data_shocks <- get_residuals(data=stvar$data, p=p, M=M, d=d, params=stvar$params, weight_function=stvar$model$weight_function,
+      data_shocks <- get_residuals(data=stvar$data, p=p, M=M, params=stvar$params, weight_function=stvar$model$weight_function,
                                    weightfun_pars=stvar$model$weightfun_pars, cond_dist=stvar$model$cond_dist,
                                    parametrization=stvar$model$parametrization, identification="recursive",
                                    B_constraints=stvar$model$B_constraints, mean_constraints=stvar$model$mean_constraints,

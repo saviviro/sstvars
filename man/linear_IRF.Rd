@@ -138,7 +138,8 @@ mod112 <- swap_B_signs(mod112, which_to_swap=1:2)
 # Estimate IRFs 20 periods ahead, bootstrapped 90\% confidence bounds based on
 # 10 bootstrap replications. Linear model so robust estimation methods are
 # not required.
-irf1 <- linear_IRF(stvar=mod112, N=20, regime=1, ci=0.90, bootstrap_reps=1, robust_method="none", seed=1, ncores=1)
+irf1 <- linear_IRF(stvar=mod112, N=20, regime=1, ci=0.90, bootstrap_reps=1,
+ robust_method="none", seed=1, ncores=1)
 plot(irf1)
 print(irf1, digits=3)
 
