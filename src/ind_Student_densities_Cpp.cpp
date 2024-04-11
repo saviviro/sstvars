@@ -64,12 +64,12 @@ arma::vec ind_Student_densities_Cpp(const arma::mat& obs,
   double absdetBt = 0.0; // Placeholder for abs det
   int which_weight_is_one = 0; // Placeholder for which weight is one
 
-  for(int i1 = 0; i1 < T_obs; ++i1) {
+  for(arma::uword i1 = 0; i1 < T_obs; ++i1) {
     arma::vec tdens_i1(d, arma::fill::zeros);
     arma::mat Bt = arma::zeros<arma::mat>(d, d);
 
     bool precalc_used = false;
-    for(int i2 = 0; i2 < alpha_mt_sqrt.n_cols; ++i2) {
+    for(arma::uword i2 = 0; i2 < alpha_mt_sqrt.n_cols; ++i2) {
       if(alpha_mt_sqrt(i1, i2) == 1) {
         invBt_obs_minus_cmean = precalculatedInvBt[i2]*(obs.row(i1) - means.row(i1)).t();
         which_weight_is_one = i2;
