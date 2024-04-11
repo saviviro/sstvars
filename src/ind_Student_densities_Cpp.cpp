@@ -64,7 +64,7 @@ arma::vec ind_Student_densities_Cpp(const arma::mat& obs,
   double absdetBt = 0.0; // Placeholder for abs det
   int which_weight_is_one = 0; // Placeholder for which weight is one
 
-  for(arma::uword i1 = 0; i1 < T_obs; ++i1) {
+  for(int i1 = 0; i1 < T_obs; ++i1) {
     arma::vec tdens_i1(d, arma::fill::zeros);
     arma::mat Bt = arma::zeros<arma::mat>(d, d);
 
@@ -79,7 +79,7 @@ arma::vec ind_Student_densities_Cpp(const arma::mat& obs,
     }
     if(!precalc_used) {
       // Compute Bt as the weighted sum of impact_matrices (weights are not approximately 0 or 1)
-      for(int i2 = 0; i2 < impact_matrices.n_slices; ++i2) {
+      for(arma::uword i2 = 0; i2 < impact_matrices.n_slices; ++i2) {
         Bt += impact_matrices.slice(i2)*alpha_mt_sqrt(i1, i2);
       }
       invBt_obs_minus_cmean = arma::solve(Bt, (obs.row(i1) - means.row(i1)).t()); // Solve for invBt_obs_minus_cmean
