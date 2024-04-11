@@ -110,6 +110,9 @@ Note that we index the time series as \eqn{-p+1,...,0,1,...,T}.
    \item Kheifets I.L., Saikkonen P.J. 2020. Stationarity and ergodicity of Vector STAR models.
      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
    \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis, \emph{Springer}.
+   \item Lanne M., Virolainen S. 2024. A Gaussian smooth transition vector autoregressive model:
+      An application to the macroeconomic effects of severe weather shocks. Unpublished working
+      paper, available as \url{https://doi.org/10.48550/arXiv.2403.14216}.
  }
  @keywords internal
 }

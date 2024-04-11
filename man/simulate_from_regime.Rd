@@ -38,6 +38,9 @@ Does not take random number generator seed as an argument to avoid unwanted beha
      \emph{Journal of Econometrics}, \strong{84}:1, 1-36.
    \item Kheifets I.L., Saikkonen P.J. 2020. Stationarity and ergodicity of Vector STAR models.
      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
+   \item Lanne M., Virolainen S. 2024. A Gaussian smooth transition vector autoregressive model:
+      An application to the macroeconomic effects of severe weather shocks. Unpublished working
+      paper, available as \url{https://doi.org/10.48550/arXiv.2403.14216}.
    \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis,
          \emph{Springer}.
    \item McElroy T. 2017. Computation of vector ARMA autocovariances.

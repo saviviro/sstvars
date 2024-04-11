@@ -239,10 +239,10 @@ tw1 <- c(0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 twmat <- cbind(tw1, 1 - tw1)
 
 # Step 3: Create the appropriate constraint matrix:
-C_122 <- rbind(diag(1*2^2), diag(1*2^2)) # Create the appropriate constraint matrix
+C_122 <- rbind(diag(1*2^2), diag(1*2^2))
 
 # Step 4: Estimate the model by specifying the weights in the argument 'weightfun_pars'
-# and the constraint matrix in the arugment 'AR_constraints':
+# and the constraint matrix in the argument 'AR_constraints':
 fitexo12cit <- fitSTVAR(gdpdef, p=1, M=2, weight_function="exogenous", weightfun_pars=twmat,
   cond_dist="ind_Student", AR_constraints=C_122, nrounds=2, ncores=2, seeds=1:2)
 plot(fitexo12cit) # Plot the transition weights
@@ -297,6 +297,9 @@ summary(fitexp32cmw) # Summary printout of the estimates
      \emph{Journal of Econometrics}, \strong{84}:1, 1-36.
    \item Hubrich K., Teräsvirta. T. 2013. Thresholds and Smooth Transitions in Vector Autoregressive Models.
      \emph{CREATES Research Paper 2013-18, Aarhus University.}
+   \item Lanne M., Virolainen S. 2024. A Gaussian smooth transition vector autoregressive model:
+      An application to the macroeconomic effects of severe weather shocks. Unpublished working
+      paper, available as \url{https://doi.org/10.48550/arXiv.2403.14216}.
    \item Kheifets I.L., Saikkonen P.J. 2020. Stationarity and ergodicity of Vector STAR models.
      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
    \item Tsay R. 1998. Testing and Modeling Multivariate Threshold Models.

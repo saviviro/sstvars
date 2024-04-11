@@ -189,6 +189,9 @@
 #'      \emph{Journal of Econometrics}, \strong{84}:1, 1-36.
 #'    \item Kheifets I.L., Saikkonen P.J. 2020. Stationarity and ergodicity of Vector STAR models.
 #'      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
+#'    \item Lanne M., Virolainen S. 2024. A Gaussian smooth transition vector autoregressive model:
+#'       An application to the macroeconomic effects of severe weather shocks. Unpublished working
+#'       paper, available as \url{https://doi.org/10.48550/arXiv.2403.14216}.
 #'    \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis,
 #'          \emph{Springer}.
 #'    \item McElroy T. 2017. Computation of vector ARMA autocovariances.
@@ -292,7 +295,7 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
 
   mu_yt <- get_mu_yt_Cpp(obs=Y2, all_phi0=all_phi0, all_A=all_A2, alpha_mt=alpha_mt)
 
-  # R implementation saved below for speed comparisons
+  # R implementation below
   #mu_mt <- array(vapply(1:M, function(m) t(all_phi0[, m] + tcrossprod(all_A2[, , m], Y2)), numeric(d*T_obs)), dim=c(T_obs, d, M)) # [, , m]
   #mu_yt <- vapply(1:d, function(i1) rowSums(alpha_mt*mu_mt[,i1,]), numeric(T_obs)) # [T_obs, d]
 
@@ -323,7 +326,7 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   if(cond_dist == "Gaussian") { # Gaussian conditional distribution
     all_lt <- -0.5*d*log(2*pi) + Gaussian_densities_Cpp(obs=data[(p+1):nrow(data),], means=mu_yt, covmats=all_Omegas, alpha_mt=alpha_mt)
 
-    # BELOW IS THE R IMPLEMENTATION FOR SPEED COMPARISONS
+    # BELOW IS AN R IMPLEMENTATION
     #all_covmats <- array(rowSums(vapply(1:M, function(m) rep(alpha_mt[, m], each=d*d)*as.vector(all_Omegas[, , m]),
     # numeric(d*d*T_obs))), dim=c(d, d, T_obs))
     #obs_minus_cmean <- data[(p+1):nrow(data),] - mu_yt
@@ -343,7 +346,7 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
     logCd <- lgamma(0.5*(d + distpars)) - 0.5*d*log(base::pi) - 0.5*d*log(distpars - 2) - lgamma(0.5*distpars)
     all_lt <- logCd + Student_densities_Cpp(obs=data[(p+1):nrow(data),], means=mu_yt, covmats=all_Omegas, alpha_mt=alpha_mt, df=distpars)
 
-    # # BELOW AN R IMPLEMENTATION FOR SPEED COMPARISONS
+    # # BELOW IS AN R IMPLEMENTATION
     # all_covmats <- array(rowSums(vapply(1:M, function(m) rep(alpha_mt[, m], each=d*d)*as.vector(all_Omegas[, , m]),
     #                                     numeric(d*d*T_obs))), dim=c(d, d, T_obs))
     # obs_minus_cmean <- data[(p+1):nrow(data),] - mu_yt
@@ -369,7 +372,7 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
     }
     all_lt <- logC1 + t_dens
 
-    ## R IMPLEMENTATION FOR SPEED COMPARISONS
+    ## R IMPLEMENTATION BELOW
     # #Id <- diag(nrow=d) # Created earlier elsewhere
     # obs_minus_cmean <- obs - mu_yt
     # all_lt <- numeric(T_obs)
