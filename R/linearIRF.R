@@ -78,12 +78,12 @@
 #'   -0.25, 4.413, 3.912)
 #' mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112it, cond_dist="ind_Student",
 #'  identification="non-Gaussianity", weight_function="threshold", weightfun_pars=c(1, 1))
+#' mod112 <- swap_B_signs(mod112, which_to_swap=1:2)
 #'
 #' # Estimate IRFs 20 periods ahead, bootstrapped 90% confidence bounds based on
 #' # 10 bootstrap replications. Linear model so robust estimation methods are
 #' # not required.
-#' irf1 <- linear_IRF(stvar=mod112, N=20, regime=1, ci=0.90,
-#'  bootstrap_reps=10, robust_method="none", seed=1)
+#' irf1 <- linear_IRF(stvar=mod112, N=20, regime=1, ci=0.90, bootstrap_reps=1, robust_method="none", seed=1, ncores=1)
 #' plot(irf1)
 #' print(irf1, digits=3)
 #'
@@ -180,6 +180,11 @@ linear_IRF <- function(stvar, N=30, regime=1, which_cumulative=numeric(0), scale
                                 weightfun_pars=weightfun_pars, cond_dist=cond_dist)
   distpars <- pick_distpars(d=d, params=params, cond_dist=cond_dist)
 
+  # Check whether it is possible to calculate confidence intervals by wild residual bootstrap
+  AR_mats_identical <- all(apply(all_boldA, MARGIN=3, FUN=function(x) identical(x, all_boldA[,,1])))
+  means_identical <- !is.null(mean_constraints) && length(mean_constraints) == 1 && all(mean_constraints[[1]] == 1:M)
+  ci_possible <- (means_identical && AR_mats_identical) || M == 1
+
   # Check the argument scale and which_cumulative
   if(identification == "heteroskedasticity" || identification == "non-Gaussianity") { # ind_Students mods ident set to non-Gaus
     if(is.null(B_constraints)) {
@@ -230,7 +235,27 @@ linear_IRF <- function(stvar, N=30, regime=1, which_cumulative=numeric(0), scale
       B_matrix <- W
     }
   } else if(identification == "non-Gaussianity") { # ind_Student mods ident set to non-Gaus
-    B_matrix <- all_Omega[, , regime] # impact matrix readily parametrized
+    if(is.null(ci) || !ci_possible) {
+      B_matrix <- all_Omega[, , regime] # impact matrix readily parametrized
+    } else {
+      # ci calculated, so impact matrices normalized so that the first nonzero element
+      # in each column of B_1 is strictly positive and they are in a decreasing order.
+      # Determine which columns should swap signs:
+      first_non_zero_entries <- vapply(1:d, function(i1) all_Omega[, i1, 1][all_Omega[, i1, 1] != 0][1], numeric(1))
+      cols_to_swap <- which(first_non_zero_entries < 0) # Swap signs of the columns with negative first non-zero element
+
+      # Swap the signs of the corresponding columns of the impact matrices
+      new_stvar <- swap_B_signs(stvar, which_to_swap=cols_to_swap, calc_std_errors=FALSE)
+      tmp_params <- reform_constrained_pars(p=p, M=M, d=d, params=new_stvar$params,
+                                            weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                            cond_dist=cond_dist, identification=identification,
+                                            AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                            weight_constraints=weight_constraints, B_constraints=B_constraints)
+      B_matrix <- pick_Omegas(p=p, M=M, d=d, params=tmp_params, cond_dist=cond_dist,
+                              identification=identification)[, , regime]
+      # No need to swap the ordering of the df params, as they do not affect the linear IRF.
+    }
+
   } else { # identification == "reduced_form" or "recursive"
     if(identification == "reduced_form") {
       message("Reduced form model supplied, using lower triangular recursive identification.")
@@ -267,10 +292,6 @@ linear_IRF <- function(stvar, N=30, regime=1, which_cumulative=numeric(0), scale
   # all_Theta_i[variable, shock, horizon] -> all_Theta_i[variable, shock, ] subsets the IRF!
 
   ## Fixed design wild residual bootstrap for calculating confidence bounds
-  AR_mats_identical <- all(apply(all_boldA, MARGIN=3, FUN=function(x) identical(x, all_boldA[,,1])))
-  means_identical <- !is.null(mean_constraints) && length(mean_constraints) == 1 && all(mean_constraints[[1]] == 1:M)
-  ci_possible <- (means_identical && AR_mats_identical) || M == 1
-
   if(!is.null(ci) && !ci_possible) {
     warning("Confidence bounds are not available as the autoregressive dynamics are not linear")
     all_bootstrap_IRF <- NULL
@@ -350,16 +371,12 @@ linear_IRF <- function(stvar, N=30, regime=1, which_cumulative=numeric(0), scale
     } else if(identification == "non-Gaussianity") {
       # For models identified by non-Gaussianity, we keep the shocks in a fixed ordering by assuming that the
       # first non-zero element of each column of the impact matrix of Regime 1 is strictly positive and they are
-      # in a decreasing order.
+      # in a decreasing order. This already done in the "new_stvar" object above.
 
       # Mark that the param space should be constrained to the fixed signs and ordering of the columns of B_1:
       other_constraints <- list(B1_constraints="fixed_sign_and_order")
 
-      # Determine which columns should swap signs.
-      cols_to_swap <- vapply(1:d, function(i1) which(all_Omega[, i1, 1] != 0)[1], numeric(1))
-
-      # Swap the signs of the corresponding columns of the impact matrices
-      new_stvar <- swap_B_signs(stvar, which_to_swap=cols_to_swap, calc_std_errors=FALSE)
+      # Obtain the new parameters and B_constraints:
       new_params <- new_stvar$params
       new_B_constraints <- new_stvar$model$B_constraints
       # Note that we don't impose sign constraints via B_constraints here, which would impose them to
@@ -405,7 +422,7 @@ linear_IRF <- function(stvar, N=30, regime=1, which_cumulative=numeric(0), scale
                                             other_constraints=other_constraints)
       tmp_all_A <- pick_allA(p=p, M=M, d=d, params=tmp_params)
       tmp_all_boldA <- form_boldA(p=p, M=M, d=d, all_A=tmp_all_A)
-      tmp_all_Omega <- pick_Omegas(p=p, M=M, d=d, params=tmp_params, identification=identification)
+      tmp_all_Omega <- pick_Omegas(p=p, M=M, d=d, params=tmp_params, cond_dist=cond_dist, identification=identification)
 
       # Obtain the impact matrix of the regime the IRF is to calculated for
       if(identification == "heteroskedasticity") { # Shocks identified by heteroskedasticity

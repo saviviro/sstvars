@@ -133,12 +133,12 @@ theta_112it <- c(0.644, 0.065, 0.291, 0.021, -0.124, 0.884, 0.717, 0.105, 0.322,
   -0.25, 4.413, 3.912)
 mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112it, cond_dist="ind_Student",
  identification="non-Gaussianity", weight_function="threshold", weightfun_pars=c(1, 1))
+mod112 <- swap_B_signs(mod112, which_to_swap=1:2)
 
 # Estimate IRFs 20 periods ahead, bootstrapped 90\% confidence bounds based on
 # 10 bootstrap replications. Linear model so robust estimation methods are
 # not required.
-irf1 <- linear_IRF(stvar=mod112, N=20, regime=1, ci=0.90,
- bootstrap_reps=10, robust_method="none", seed=1)
+irf1 <- linear_IRF(stvar=mod112, N=20, regime=1, ci=0.90, bootstrap_reps=1, robust_method="none", seed=1, ncores=1)
 plot(irf1)
 print(irf1, digits=3)
 

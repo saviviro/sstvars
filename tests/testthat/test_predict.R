@@ -101,7 +101,7 @@ params322thresit <- c(0.53077, 0.003653, 1.299719, -0.004862, 0.276631, 0.045029
                      0.155553, 0.023192, 0.153155, 0.051293, -0.068252, 0.02092, -0.310782, 0.115128, 0.626432, 0.037041,
                      0.081263, -0.186364, -0.878845, -0.141764, 0.479942, -0.314881, 1, 4.7304, 9.933647)
 
-mod322thresit <- STVAR(gdpdef, p=3, M=2, params=params32thresit, weight_function="threshold", weightfun_pars=c(2, 1),
+mod322thresit <- STVAR(gdpdef, p=3, M=2, params=params322thresit, weight_function="threshold", weightfun_pars=c(2, 1),
                       cond_dist="ind_Student", identification="non-Gaussianity")
 
 

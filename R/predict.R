@@ -56,7 +56,7 @@ predict.stvar <- function(object, ..., nsteps, nsim=1000, pi=c(0.95, 0.80), pred
 
   # Check the exogenous weights given for simulation
   if(stvar$model$weight_function == "exogenous") {
-    check_exoweights(M=M, exo_weights=exo_weights, how_many_rows=nsteps, name_of_row_number="nsteps")
+    check_exoweights(M=stvar$model$M, exo_weights=exo_weights, how_many_rows=nsteps, name_of_row_number="nsteps")
   }
 
   # Simulations
