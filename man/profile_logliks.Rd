@@ -10,7 +10,7 @@ profile_logliks(
   scale = 0.02,
   nrows,
   ncols,
-  precision = 200,
+  precision = 50,
   stab_tol = 0.001,
   posdef_tol = 1e-08,
   distpar_tol = 1e-08,
