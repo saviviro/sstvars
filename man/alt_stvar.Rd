@@ -4,7 +4,7 @@
 \alias{alt_stvar}
 \title{Construct a STVAR model based on results from an arbitrary estimation round of \code{fitSTVAR}}
 \usage{
-alt_stvar(stvar, which_largest = 1, which_round, calc_std_errors = TRUE)
+alt_stvar(stvar, which_largest = 1, which_round, calc_std_errors = FALSE)
 }
 \arguments{
 \item{stvar}{object of class \code{"stvar"}}

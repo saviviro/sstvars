@@ -344,9 +344,9 @@ check_pMd <- function(p, M, d, weight_function=c("relative_dens", "logistic", "m
       stop("The argument d, the number of columns in the data matrix, has to be a positive integer larger than one!")
     }
   }
-  if(weight_function == "logistic" && M > 2) {
+  if(weight_function == "logistic" && M != 2) {
     stop("Only two regime (M=2) models are accommodated by the logistic weight function. Use weight_function = 'mlogit' for M>2.")
-  } else if(weight_function == "exponential" && M > 2) {
+  } else if(weight_function == "exponential" && M != 2) {
     stop("Only two regime (M=2) models are accommodated by the exponential weight function.")
   }
 }

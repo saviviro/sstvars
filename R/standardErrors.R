@@ -153,6 +153,7 @@ print_std_errors <- function(stvar, digits=3) {
     sep_AR <- FALSE # No constraints imposed
   }
 
+  if(M == 1) weight_function <- "linear"
   cat(weight_function, cond_dist, "STVAR model,",
       ifelse(identification == "reduced_form", "reduced form model",
              ifelse(identification == "recursive", "recursive identification,", paste0("identified by ", identification, ","))),

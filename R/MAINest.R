@@ -201,6 +201,12 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
+  if(length(M) != 1 && !all_pos_ints(M)) stop("Argument M must be a positive integer")
+  if(M == 1 && weight_function %in% c("logistic", "mlogit", "exponential")) {
+    # Set to threshold if only regime (we assume two regimes for logistic and exponential weights)
+    weight_function <- "threshold"
+    weightfun_pars <- c(1, 1) # There have no affect with M == 1
+  }
   check_pMd(p=p, M=M, weight_function=weight_function, identification="reduced_form")
   no_prints <- !use_parallel && !print_res
   if(!all_pos_ints(c(nrounds, ncores, maxit))) stop("Arguments nrounds, ncores, and maxit must be positive integers")

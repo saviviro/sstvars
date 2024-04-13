@@ -65,7 +65,7 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   if(weight_function == "mlogit") {
     all_gamma_m <- cbind(matrix(weightpars, ncol=M-1), 0) # Column per gamma_m, m=1,...,M-1, gamma_M=0.
   }
-
+  if(M == 1) weight_function <- "linear"
   cat(weight_function, cond_dist, "STVAR model,",
       ifelse(identification == "reduced_form", "reduced form model,",
              ifelse(identification == "recursive", "recursive identification,", paste0("identified by ", identification, ","))),
@@ -85,7 +85,7 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
     cat("\n ", paste0("Switching variable: ", paste0(var_names[weightfun_pars[1]], collapse=", "), " with lag ",
                       weightfun_pars[2], "."))
   }
-  if(is.na(T_obs) && weight_function %in% c("relative_dens", "exogenous")) {
+  if(is.na(T_obs) && weight_function %in% c("relative_dens", "exogenous", "linear")) {
     cat("\n")
   } else {
     cat("\n\n")

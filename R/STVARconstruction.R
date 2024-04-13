@@ -118,6 +118,12 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
       d <- ncol(data)
     }
   }
+  if(length(M) != 1 && !all_pos_ints(M)) stop("Argument M must be a positive integer")
+  if(M == 1 && weight_function %in% c("logistic", "mlogit", "exponential")) {
+    # Set to threshold if only regime (we assume two regimes for logistic and exponential weights)
+    weight_function <- "threshold"
+    weightfun_pars <- c(1, 1) # There have no affect with M == 1
+  }
   check_pMd(p=p, M=M, d=d, weight_function=weight_function, identification=identification)
   weightfun_pars <- check_weightfun_pars(data=data, p=p, d=d, M=M, weight_function=weight_function,
                                          weightfun_pars=weightfun_pars, cond_dist=cond_dist)
@@ -302,7 +308,7 @@ STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "log
 #' }
 #' @export
 
-alt_stvar <- function(stvar, which_largest=1, which_round, calc_std_errors=TRUE) {
+alt_stvar <- function(stvar, which_largest=1, which_round, calc_std_errors=FALSE) {
   check_stvar(stvar)
   stopifnot(!is.null(stvar$all_estimates))
   if(missing(which_round)) {
