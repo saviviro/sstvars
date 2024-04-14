@@ -37,9 +37,9 @@ arma::vec ind_Student_densities_Cpp(const arma::mat& obs,
   // Adjust weights in alpha_mt: values close to 1 or 0 are set to 1 or 0 to improve computation speed
   for(arma::uword i = 0; i < alpha_mt.n_rows; ++i) {
     for(arma::uword j = 0; j < alpha_mt.n_cols; ++j) {
-      if(alpha_mt(i, j) > 0.99) {
+      if(alpha_mt(i, j) > 0.999) {
         alpha_mt(i, j) = 1;
-      } else if(alpha_mt(i, j) < 0.01) {
+      } else if(alpha_mt(i, j) < 0.001) {
         alpha_mt(i, j) = 0;
       }
     }
