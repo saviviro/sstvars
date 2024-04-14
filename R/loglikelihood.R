@@ -156,6 +156,8 @@
 #'   See the section "Value" for all the options.
 #' @param check_params should it be checked that the parameter vector satisfies the model assumptions? Can be skipped to save
 #'   computation time if it does for sure.
+#' @param indt_R If \code{TRUE} calculates the independent Student's t density in R instead of C++ without any approximations
+#'   employed for speed-up.
 #' @param minval the value that will be returned if the parameter vector does not lie in the parameter space
 #'   (excluding the identification condition).
 #' @param stab_tol numerical tolerance for stability of condition of the regimes: if the "bold A" matrix of any regime
@@ -208,7 +210,7 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
                           identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                           AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL, other_constraints=NULL,
                           to_return=c("loglik", "tw", "loglik_and_tw", "terms", "regime_cmeans", "total_cmeans", "total_ccovs"),
-                          check_params=TRUE, minval=NULL, stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
+                          check_params=TRUE, indt_R=FALSE, minval=NULL, stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
 
   # Match args
   weight_function <- match.arg(weight_function)
@@ -261,7 +263,7 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   # i:th row denotes the vector \bold{y_{i-1}} = (y_{i-1},...,y_{i-p}) (dpx1),
   # assuming the observed data is y_{-p+1},...,y_0,y_1,...,y_{T}
   Y <- reform_data(data, p)
-  Y2 <- Y[1:T_obs,] # Last row removed; not needed when calculating something based on lagged observations
+  Y2 <- Y[1:T_obs, , drop=FALSE] # Last row removed; not needed when calculating something based on lagged observations
 
   # Calculate unconditional regime-specific expected values (column per component) or phi0-parameters if using mean-parametrization
   Id <- diag(nrow=d)
@@ -277,16 +279,6 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
 
   if(to_return == "tw") {
     return(alpha_mt)
-  }
-
-  # For models with cond_dist="ind_Student" or identification="non-Gaussianity", check that the impact matrix B_t is invertible for all t.
-  if(cond_dist == "ind_Student" || identification == "non-Gaussianity") {
-    for(i1 in 1:nrow(alpha_mt)) { # Impact matrices in all_Omegas
-      if(abs(det(apply(X=all_Omegas, MARGIN=c(1, 2), FUN=function(mat) sum(mat*alpha_mt[i1,])))) < posdef_tol) {
-        return(minval)
-      }
-    }
-    #if(!check_Bt_Cpp(all_Omegas=all_Omegas, alpha_mt=alpha_mt, posdef_tol=posdef_tol)) return(minval)
   }
 
   # Calculate the conditional means mu_{m,t}
@@ -361,30 +353,31 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
     # Invertibilty of Bt for all t is checked in ind_Student_densities_Cpp, and it returns minval if not invertible for some t.
     logC1 <- sum(lgamma(0.5*(1 + distpars)) - 0.5*log(base::pi) - 0.5*log(distpars - 2) - lgamma(0.5*distpars))
     obs <- data[(p+1):nrow(data),]
-    if(is.null(minval) || !is.numeric(minval)) minval <- -999999999 # Cpp function expects minval to be numerical, will cause an error if not
-    t_dens <- ind_Student_densities_Cpp(obs=obs, means=mu_yt, impact_matrices=all_Omegas, alpha_mt=alpha_mt, distpars=distpars,
-                                        minval=minval, posdef_tol=posdef_tol)
+    if(!indt_R) {
+      if(is.null(minval) || !is.numeric(minval)) minval <- -999999999 # Cpp function expects minval to be numerical, will cause an error if not
+      t_dens <- ind_Student_densities_Cpp(obs=obs, means=mu_yt, impact_matrices=all_Omegas, alpha_mt=alpha_mt, distpars=distpars,
+                                          minval=minval, posdef_tol=posdef_tol)
 
-    if(length(t_dens) == 1) {
-      if(all.equal(c(t_dens), minval)) {
-        return(minval)
+      if(length(t_dens) == 1) {
+        if(all.equal(c(t_dens), minval)) {
+          return(minval)
+        }
+      }
+      all_lt <- logC1 + t_dens
+    } else { # indt_R
+      ## R IMPLEMENTATION BELOW
+      obs_minus_cmean <- obs - mu_yt
+      all_lt <- numeric(T_obs)
+      for(i1 in 1:T_obs) {
+        tdens_i1 <- numeric(d)
+        Bt <- apply(X=all_Omegas, MARGIN=c(1, 2), FUN=function(mat) sum(mat*sqrt(alpha_mt[i1,])))
+        invBt_obs_minus_cmean <- solve(Bt, obs_minus_cmean[i1,])
+        for(i2 in 1:d) {
+          tdens_i1[i2] <- 0.5*(1 + distpars[i2])*log(1 + invBt_obs_minus_cmean[i2]^2/(distpars[i2] - 2))
+        }
+        all_lt[i1] <- -log(abs(det(Bt))) + logC1 - sum(tdens_i1)
       }
     }
-    all_lt <- logC1 + t_dens
-
-    ## R IMPLEMENTATION BELOW
-    # #Id <- diag(nrow=d) # Created earlier elsewhere
-    # obs_minus_cmean <- obs - mu_yt
-    # all_lt <- numeric(T_obs)
-    # for(i1 in 1:T_obs) {
-    #  tdens_i1 <- numeric(d)
-    #  Bt <- apply(X=all_Omegas, MARGIN=c(1, 2), FUN=function(mat) sum(mat*alpha_mt[i1,]))
-    #  invBt_obs_minus_cmean <- solve(Bt, obs_minus_cmean[i1,])
-    #  for(i2 in 1:d) {
-    #    tdens_i1[i2] <- 0.5*(1 + distpars[i2])*log(1 + invBt_obs_minus_cmean[i2]^2/(distpars[i2] - 2))
-    #  }
-    # all_lt[i1] <- -log(abs(det(Bt))) + logC1 - sum(tdens_i1)
-    # }
   }
   if(to_return == "terms") {
     return(all_lt)

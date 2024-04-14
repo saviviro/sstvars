@@ -24,6 +24,7 @@ loglikelihood(
   to_return = c("loglik", "tw", "loglik_and_tw", "terms", "regime_cmeans",
     "total_cmeans", "total_ccovs"),
   check_params = TRUE,
+  indt_R = FALSE,
   minval = NULL,
   stab_tol = 0.001,
   posdef_tol = 1e-08,
@@ -200,6 +201,9 @@ See the section "Value" for all the options.}
 
 \item{check_params}{should it be checked that the parameter vector satisfies the model assumptions? Can be skipped to save
 computation time if it does for sure.}
+
+\item{indt_R}{If \code{TRUE} calculates the independent Student's t density in R instead of C++ without any approximations
+employed for speed-up.}
 
 \item{minval}{the value that will be returned if the parameter vector does not lie in the parameter space
 (excluding the identification condition).}
