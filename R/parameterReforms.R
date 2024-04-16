@@ -53,11 +53,19 @@ form_boldA <- function(p, M, d, all_A) {
 #'
 #' @inheritParams loglikelihood
 #' @inheritParams form_boldA
-#' @param change_to either "intercept" or "mean" specifying to which parametrization it should be switched to.
-#'   If set to \code{"intercept"}, it's assumed that \code{params} is mean parametrized, and if set to \code{"mean"}
-#'   it's assumed that \code{params} is intercept parametrized.
-#' @return Returns parameter vector described in \code{params}, but with parametrization changed from intercept to mean
-#'   (when \code{change_to == "mean"}) or from mean to intercept (when \code{change_to == "intercept"}).
+#' @param change_to
+#'   \describe{
+#'     \item{If you want to switch between mean and intercept parametrizations:}{either "intercept" or "mean" specifying
+#'       to which parametrization it should be switched to. If set to \code{"intercept"}, it's assumed that \code{params}
+#'       is mean parametrized, and if set to \code{"mean"} it's assumed that \code{params} is intercept parametrized.}
+#'     \item{If you want to switch between the paramterizations \eqn{B_{y,t}=\sum_{m=1}^M\alpha_{m,t}B_m} and
+#'           \eqn{B_{y,t}=B_1 + \sum_{m=2}^M\alpha_{m,t}B_m^{*}}, \eqn{B_m^{*} = B_m - B_1}:}{either "orig"
+#'            (with \enq{B_m}) or "alt" (with \enq{B_m^{*}}). It is assumed that the parameter vector is in the
+#'            other parametrization than the one specified in \code{change_to}.}
+#'   }
+#'
+#' @return Returns parameter vector described in \code{params}, but with parametrization changed according
+#'   to \code{change_to}.
 #' @details Parametrization cannot be changed for models with mean constraints!
 #' @section Warning:
 #'  No argument checks!
@@ -68,7 +76,7 @@ change_parametrization <- function(p, M, d, params,
                                    weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"),
                                    identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                                    AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
-                                   change_to=c("intercept", "mean")) {
+                                   change_to=c("intercept", "mean", "orig", "alt")) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
@@ -84,14 +92,89 @@ change_parametrization <- function(p, M, d, params,
   all_phi0_or_mu <- pick_phi0(M=M, d=d, params=params)
   # Nothing to change in distpars or weightpars, already in place
 
-  # Calculate means/intercepts and insert them to re_params
-  if(change_to == "mean") { # params has original parametrization with intercept
-    re_params[1:(M*d)] <- vapply(1:M, function(m) solve(Id - rowSums(all_A[, , , m, drop=FALSE], dims=2), all_phi0_or_mu[,m]),
-                                 numeric(d))
-  } else { # mean parameters instead of phi0
-    re_params[1:(M*d)] <- vapply(1:M, function(m) (Id - rowSums(all_A[, , , m, drop=FALSE], dims=2))%*%all_phi0_or_mu[,m],
-                                 numeric(d))
+  if(change_to == "mean" || change_to == "intercept") {
+    # Calculate means/intercepts and insert them to re_params
+    if(change_to == "mean") { # params has original parametrization with intercept
+      re_params[1:(M*d)] <- vapply(1:M, function(m) solve(Id - rowSums(all_A[, , , m, drop=FALSE], dims=2), all_phi0_or_mu[,m]),
+                                   numeric(d))
+    } else if(change_to == "intercept") { # params has mean parameters instead of phi0
+      re_params[1:(M*d)] <- vapply(1:M, function(m) (Id - rowSums(all_A[, , , m, drop=FALSE], dims=2))%*%all_phi0_or_mu[,m],
+                                   numeric(d))
+    }
+  } else { # Change between nong_orig and nong_alt
+    # HUOM! TÄSSÄ TÄYTYY HUOMIOIDA, ETTÄ ALKUPERÄISESSÄ PARAMETRIVEKTORISSA VOI OLLA RAJOITTEITA,
+    # JA UUDEN PARAMETRIVEKTORIN PITÄÄ PALAUTETTUNA TOTEUTTAA NÄMÄ SAMAT RAJOITTEET!
+
+    ## Calculate the numbers of parameters:
+    # Mean pars
+    if(is.null(mean_constraints)) {
+      n_mean_pars <- M*d
+    } else { # Means constrained
+      n_mean_pars <- d*length(mean_constraints)
+    }
+    if(is.null(AR_constraints)) {
+      n_ar_pars <- M*p*d^2
+    } else { # AR matrices constrained
+      n_ar_pars <- ncol(AR_constraints)
+    }
+
+    # Covmat pars
+    if(identification == "non-Gaussianity" || cond_dist == "ind_Student") { # impact matrices parametrized directly
+      if(is.null(B_constraints)) {
+        n_zeros <- 0
+      } else {
+        n_zeros <- M*sum(B_constraints == 0, na.rm=TRUE) # Same number zeros for all the regimes
+      }
+      n_covmat_pars <- M*d^2 - n_zeros
+    } else if(identification == "heteroskedasticity") {
+      if(is.null(B_constraints)) {
+        n_zeros <- 0
+      } else {
+        n_zeros <- sum(B_constraints == 0, na.rm=TRUE)
+      }
+      n_covmat_pars <- d^2 + d*(M - 1) - n_zeros
+    } else { # identification == "reduced_form" or "recursive"
+      n_covmat_pars <- M*d*(d + 1)/2 # No B_constraints available here
+    }
+
+    # Weight pars
+    if(weight_function == "exogenous" || M == 1) {
+      n_weight_pars <- 0
+    } else {
+      if(is.null(weight_constraints)) {
+        if(weight_function == "relative_dens" || weight_function == "threshold") {
+          n_weight_pars <- M - 1
+        } else if(weight_function == "logistic" || weight_function == "exponential") {
+          n_weight_pars <- 2
+        } else if(weight_function == "mlogit") {
+          n_weight_pars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
+        }
+      } else { # Constraints on the weight parameters
+        if(all(weight_constraints[[1]] == 0)) {
+          n_weight_pars <- 0 # alpha = r, not in the parameter vector
+        } else {
+          n_weight_pars <- ncol(weight_constraints[[1]]) # The dimension of xi
+        }
+      }
+    }
+
+    # dist pars
+    if(cond_dist == "Gaussian") {
+      n_dist_pars <- 0
+    } else if(cond_dist == "Student") {
+      n_dist_pars <- 1 # degrees of freedom param
+    } else { # cond_dist == "ind_Student"
+      n_dist_pars <- d # Degrees of freedom for each component
+    }
+
+    if(change_to == "orig") {
+
+    } else { # change_to == "alt"
+
+    }
+
   }
+
   re_params
 }
 

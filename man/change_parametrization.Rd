@@ -19,7 +19,7 @@ change_parametrization(
   mean_constraints = NULL,
   weight_constraints = NULL,
   B_constraints = NULL,
-  change_to = c("intercept", "mean")
+  change_to = c("intercept", "mean", "orig", "alt")
 )
 }
 \arguments{
@@ -172,13 +172,19 @@ a negative value indicating strict negative sign constraint, and zero indicating
 Currently only available for models with \code{identification="heteroskedasticity"} or \code{"non-Gaussianity"} due to the
 (in)availability of appropriate parametrizations that allow such constraints to be imposed.}
 
-\item{change_to}{either "intercept" or "mean" specifying to which parametrization it should be switched to.
-If set to \code{"intercept"}, it's assumed that \code{params} is mean parametrized, and if set to \code{"mean"}
-it's assumed that \code{params} is intercept parametrized.}
+\item{change_to}{\describe{
+  \item{If you want to switch between mean and intercept parametrizations:}{either "intercept" or "mean" specifying
+    to which parametrization it should be switched to. If set to \code{"intercept"}, it's assumed that \code{params}
+    is mean parametrized, and if set to \code{"mean"} it's assumed that \code{params} is intercept parametrized.}
+  \item{If you want to switch between the paramterizations \eqn{B_{y,t}=\sum_{m=1}^M\alpha_{m,t}B_m} and
+        \eqn{B_{y,t}=B_1 + \sum_{m=2}^M\alpha_{m,t}B_m^{*}}, \eqn{B_m^{*} = B_m - B_1}:}{either "orig"
+         (with \enq{B_m}) or "alt" (with \enq{B_m^{*}}). It is assumed that the parameter vector is in the
+         other parametrization than the one specified in \code{change_to}.}
+}}
 }
 \value{
-Returns parameter vector described in \code{params}, but with parametrization changed from intercept to mean
-  (when \code{change_to == "mean"}) or from mean to intercept (when \code{change_to == "intercept"}).
+Returns parameter vector described in \code{params}, but with parametrization changed according
+  to \code{change_to}.
 }
 \description{
 \code{change_parametrization} changes the parametrization of the given parameter
