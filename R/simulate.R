@@ -289,7 +289,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
 
       # Calculate B_t
       if(cond_dist == "ind_Student" || identification == "non-Gaussianity") { # Also reduced form ind_Student models here
-        B_t <- matrix(rowSums(vapply(1:M, function(m) sqrt(alpha_mt[, m])*as.vector(all_Omegas[, , m]), numeric(d*d))),
+        B_t <- matrix(rowSums(vapply(1:M, function(m) alpha_mt[, m]*as.vector(all_Omegas[, , m]), numeric(d*d))),
                       nrow=d, ncol=d) # weighted sum of the impact matrices.
       } else if(identification == "reduced_form") {
         B_t <- matrix(get_symmetric_sqrt(Omega_yt), nrow=d, ncol=d)
@@ -333,7 +333,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
         # Calculate transition weights
         if(M == 1) {
           alpha_mt2 <- matrix(1)
-        } else { # JATKA KAKKOSIEN PÄIVITTELYÄ
+        } else {
           if(weight_function == "relative_dens") {
             log_mvdvalues2 <- get_logmvdvalues(Y=Y2, i1=i1)
             alpha_mt2 <- get_alpha_mt(M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
@@ -363,7 +363,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
 
         # Calculate B_t
         if(cond_dist == "ind_Student" || identification == "non-Gaussianity") { # Also reduced form ind_Student models here
-          B_t2 <- matrix(rowSums(vapply(1:M, function(m) sqrt(alpha_mt2[, m])*as.vector(all_Omegas[, , m]),
+          B_t2 <- matrix(rowSums(vapply(1:M, function(m) alpha_mt2[, m]*as.vector(all_Omegas[, , m]),
                                         numeric(d*d))), nrow=d, ncol=d) # weighted sum of the impact matrices.
         } else if(identification == "reduced_form") {
           B_t2 <- matrix(get_symmetric_sqrt(Omega_yt2), nrow=d, ncol=d)

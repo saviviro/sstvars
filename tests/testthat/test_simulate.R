@@ -121,7 +121,7 @@ test_that("simulate.stvar works correctly", {
   expect_equal(s322t_2$transition_weights[1,], c(0.01405111, 0.98594889), tol=1e-4)
 
   # ind_Student
-  expect_equal(s122exocit$sample[3,], c(3.5667338, 0.5874035), tol=1e-4)
+  expect_equal(s122exocit$sample[3,], c(2.6418525, 0.4479334), tol=1e-4)
   expect_equal(s122exocit$transition_weights, cbind(c(0.9, 0.5, 0.2), c(0.1, 0.5, 0.8)), tol=1e-4)
   expect_equal(s322thresit$sample[4,], c(1.329187, -0.290043), tol=1e-4)
   expect_equal(s322thresit$transition_weights[4,], c(1, 0), tol=1e-4)

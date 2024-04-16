@@ -370,7 +370,7 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
       all_lt <- numeric(T_obs)
       for(i1 in 1:T_obs) {
         tdens_i1 <- numeric(d)
-        Bt <- apply(X=all_Omegas, MARGIN=c(1, 2), FUN=function(mat) sum(mat*sqrt(alpha_mt[i1,])))
+        Bt <- apply(X=all_Omegas, MARGIN=c(1, 2), FUN=function(mat) sum(mat*alpha_mt[i1,]))
         invBt_obs_minus_cmean <- solve(Bt, obs_minus_cmean[i1,])
         for(i2 in 1:d) {
           tdens_i1[i2] <- 0.5*(1 + distpars[i2])*log(1 + invBt_obs_minus_cmean[i2]^2/(distpars[i2] - 2))

@@ -45,11 +45,6 @@ arma::vec ind_Student_densities_Cpp(const arma::mat& obs,
     }
   }
 
-  // Compute the element-wise square root of alpha_mt
-  // Sqrt computed after the above approximation so that it result in 0 or 1 weights for each row,
-  // and so corresponding rows of alpha_mt_sqrt also have 0 or 1 elements.
-  arma::mat alpha_mt_sqrt = arma::sqrt(alpha_mt);
-
   // Placeholder for potential Bt precalculations
   std::vector<arma::mat> precalculatedInvBt(impact_matrices.n_slices);
   std::vector<double> precalculatedLogAbsDetBt(impact_matrices.n_slices);
@@ -69,8 +64,8 @@ arma::vec ind_Student_densities_Cpp(const arma::mat& obs,
     arma::mat Bt = arma::zeros<arma::mat>(d, d);
 
     bool precalc_used = false;
-    for(arma::uword i2 = 0; i2 < alpha_mt_sqrt.n_cols; ++i2) {
-      if(alpha_mt_sqrt(i1, i2) == 1) {
+    for(arma::uword i2 = 0; i2 < alpha_mt.n_cols; ++i2) {
+      if(alpha_mt(i1, i2) == 1) {
         invBt_obs_minus_cmean = precalculatedInvBt[i2]*(obs.row(i1) - means.row(i1)).t();
         which_weight_is_one = i2;
         precalc_used = true;
@@ -80,7 +75,7 @@ arma::vec ind_Student_densities_Cpp(const arma::mat& obs,
     if(!precalc_used) {
       // Compute Bt as the weighted sum of impact_matrices (weights are not approximately 0 or 1)
       for(arma::uword i2 = 0; i2 < impact_matrices.n_slices; ++i2) {
-        Bt += impact_matrices.slice(i2)*alpha_mt_sqrt(i1, i2);
+        Bt += impact_matrices.slice(i2)*alpha_mt(i1, i2);
       }
       invBt_obs_minus_cmean = arma::solve(Bt, (obs.row(i1) - means.row(i1)).t()); // Solve for invBt_obs_minus_cmean
     }

@@ -22,16 +22,14 @@
 //' @keywords internal
 // [[Rcpp::export(name = "check_Bt_Cpp")]]
 bool check_Bt_Cpp(const arma::cube& all_Omegas, const arma::mat& alpha_mt, double posdef_tol) {
-  // Compute the element-wise square root of alpha_mt
-  arma::mat alpha_mt_sqrt = arma::sqrt(alpha_mt);
 
-  // Iterate through each row of alpha_mt_sqrt
-  for(unsigned int i = 0; i < alpha_mt_sqrt.n_rows; ++i) {
+  // Iterate through each row of alpha_mt
+  for(unsigned int i = 0; i < alpha_mt.n_rows; ++i) {
     arma::mat weightedSum = arma::zeros<arma::mat>(all_Omegas.n_rows, all_Omegas.n_cols);
 
     // Compute the weighted sum of matrices in all_Omegas
-    for(unsigned int j = 0; j < alpha_mt_sqrt.n_cols; ++j) {
-      weightedSum += all_Omegas.slice(j)*alpha_mt_sqrt(i, j);
+    for(unsigned int j = 0; j < alpha_mt.n_cols; ++j) {
+      weightedSum += all_Omegas.slice(j)*alpha_mt(i, j);
     }
 
     // Check if the determinant of the resulting matrix is within the tolerance
