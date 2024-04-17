@@ -191,7 +191,10 @@ Returns parameter vector described in \code{params}, but with parametrization ch
   vector to \code{change_to}.
 }
 \details{
-Parametrization cannot be changed for models with mean constraints!
+Parametrization cannot be changed for models with mean constraints! Note that changing between "orig" and "alt"
+  changes the meaning of sign constraints in \code{B_constraints} (sign constraints imposed on "alt" is very different to
+  those imposed on "orig"). Thus, this function should not be used to switch between "orig" and "alt" when sign constraints
+  are imposed!
 }
 \section{Warning}{
 

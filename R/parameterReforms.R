@@ -63,10 +63,12 @@ form_boldA <- function(p, M, d, all_A) {
 #'            (with \enq{B_m}) or "alt" (with \enq{B_m^{*}}). It is assumed that the parameter vector is in the
 #'            other parametrization than the one specified in \code{change_to}.}
 #'   }
-#'
+#' @details Parametrization cannot be changed for models with mean constraints! Note that changing between "orig" and "alt"
+#'   changes the meaning of sign constraints in \code{B_constraints} (sign constraints imposed on "alt" is very different to
+#'   those imposed on "orig"). Thus, this function should not be used to switch between "orig" and "alt" when sign constraints
+#'   are imposed!
 #' @return Returns parameter vector described in \code{params}, but with parametrization changed according
 #'   to \code{change_to}.
-#' @details Parametrization cannot be changed for models with mean constraints!
 #' @section Warning:
 #'  No argument checks!
 #' @keywords internal
@@ -81,7 +83,6 @@ change_parametrization <- function(p, M, d, params,
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
   change_to <- match.arg(change_to)
-  stopifnot(is.null(mean_constraints))
   re_params <- params
   params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
                                     identification=identification, AR_constraints=AR_constraints,
@@ -93,6 +94,7 @@ change_parametrization <- function(p, M, d, params,
   # Nothing to change in distpars or weightpars, already in place
 
   if(change_to == "mean" || change_to == "intercept") {
+    stopifnot(is.null(mean_constraints))
     # Calculate means/intercepts and insert them to re_params
     if(change_to == "mean") { # params has original parametrization with intercept
       re_params[1:(M*d)] <- vapply(1:M, function(m) solve(Id - rowSums(all_A[, , , m, drop=FALSE], dims=2), all_phi0_or_mu[,m]),
@@ -102,11 +104,41 @@ change_parametrization <- function(p, M, d, params,
                                    numeric(d))
     }
   } else { # Change between nong_orig and nong_alt
-    # HUOM! TÄSSÄ TÄYTYY HUOMIOIDA, ETTÄ ALKUPERÄISESSÄ PARAMETRIVEKTORISSA VOI OLLA RAJOITTEITA,
-    # JA UUDEN PARAMETRIVEKTORIN PITÄÄ PALAUTETTUNA TOTEUTTAA NÄMÄ SAMAT RAJOITTEET!
+    if(M == 1) return(re_params) # B_1 = B_1*, so nothing to change
+    # All B_m or B_m^* matrices:
+    all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params, cond_dist=cond_dist,
+                              identification=identification)
 
-    ## Calculate the numbers of parameters:
-    # Mean pars
+    if(change_to == "orig") {
+      # Matrices in all_Omegas are B_m* (B_1=B_1*). Obtain B_m from them:
+      for(m in 2:M) {
+        all_Omegas[, , m] <- all_Omegas[, , m] + all_Omegas[, , 1]
+      }
+    } else { # change_to == "alt"
+      # Matrices in all_Omegas are B_m (B_1=B_1*). Obtain B_m* from them:
+      for(m in 2:M) {
+        all_Omegas[, , m] <- all_Omegas[, , m] - all_Omegas[, , 1]
+      }
+    }
+    # Removed elements from the B matrices that nonparametrized zeros constrainted
+    # to zero by B_constraints, and collect the remaining elements to a vector:
+    if(is.null(B_constraints)) {
+      new_B_pars <- c(all_Omegas)
+    } else {
+      # Removed elements from the B matrices that nonparametrized zeros constrainted
+      # to zero by B_constraints, and collect the remaining elements to a vector.
+      n_zeros <- sum(B_constraints == 0, na.rm=TRUE) # n zeros in each B matrix
+      new_B_pars <- numeric(M*(d^2 - n_zeros))
+      for(m in 1:M) {
+        new_B_pars[((m - 1)*(d^2 - n_zeros) + 1):(m*(d^2 - n_zeros))] <- all_Omegas[, , m][B_constraints != 0 | is.na(B_constraints)]
+      }
+      # # Remove sign constraints from B_constraints:
+      # tmp <- matrix(NA, nrow=d, ncol=d)
+      # tmp[B_constraints == 0 & !is.na(B_constraints)] <- 0
+      # B_constraints <- tmp
+    }
+
+    # Calculate the number of mean and AR parameters:
     if(is.null(mean_constraints)) {
       n_mean_pars <- M*d
     } else { # Means constrained
@@ -118,61 +150,8 @@ change_parametrization <- function(p, M, d, params,
       n_ar_pars <- ncol(AR_constraints)
     }
 
-    # Covmat pars
-    if(identification == "non-Gaussianity" || cond_dist == "ind_Student") { # impact matrices parametrized directly
-      if(is.null(B_constraints)) {
-        n_zeros <- 0
-      } else {
-        n_zeros <- M*sum(B_constraints == 0, na.rm=TRUE) # Same number zeros for all the regimes
-      }
-      n_covmat_pars <- M*d^2 - n_zeros
-    } else if(identification == "heteroskedasticity") {
-      if(is.null(B_constraints)) {
-        n_zeros <- 0
-      } else {
-        n_zeros <- sum(B_constraints == 0, na.rm=TRUE)
-      }
-      n_covmat_pars <- d^2 + d*(M - 1) - n_zeros
-    } else { # identification == "reduced_form" or "recursive"
-      n_covmat_pars <- M*d*(d + 1)/2 # No B_constraints available here
-    }
-
-    # Weight pars
-    if(weight_function == "exogenous" || M == 1) {
-      n_weight_pars <- 0
-    } else {
-      if(is.null(weight_constraints)) {
-        if(weight_function == "relative_dens" || weight_function == "threshold") {
-          n_weight_pars <- M - 1
-        } else if(weight_function == "logistic" || weight_function == "exponential") {
-          n_weight_pars <- 2
-        } else if(weight_function == "mlogit") {
-          n_weight_pars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
-        }
-      } else { # Constraints on the weight parameters
-        if(all(weight_constraints[[1]] == 0)) {
-          n_weight_pars <- 0 # alpha = r, not in the parameter vector
-        } else {
-          n_weight_pars <- ncol(weight_constraints[[1]]) # The dimension of xi
-        }
-      }
-    }
-
-    # dist pars
-    if(cond_dist == "Gaussian") {
-      n_dist_pars <- 0
-    } else if(cond_dist == "Student") {
-      n_dist_pars <- 1 # degrees of freedom param
-    } else { # cond_dist == "ind_Student"
-      n_dist_pars <- d # Degrees of freedom for each component
-    }
-
-    if(change_to == "orig") {
-
-    } else { # change_to == "alt"
-
-    }
-
+    # Insert the new B_pars to re_params:
+    re_params[(n_mean_pars + n_ar_pars + 1):(n_mean_pars + n_ar_pars + length(new_B_pars))] <- new_B_pars
   }
 
   re_params
