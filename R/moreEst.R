@@ -661,7 +661,7 @@ fitbsSSTVAR <- function(data, p, M, params,
   identification <- match.arg(identification)
   robust_method <- match.arg(robust_method)
   minval <- get_minval(data)
-
+  d <- ncol(data)
 
   if(cond_dist == "ind_Student" || identification == "non-Gaussianity") {
     if(!is.null(B_constraints) && length(which(B_constraints != 0)) != 0) {
