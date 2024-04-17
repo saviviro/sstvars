@@ -136,10 +136,6 @@ change_parametrization <- function(p, M, d, params,
       for(m in 1:M) {
         new_B_pars[((m - 1)*(d^2 - n_zeros) + 1):(m*(d^2 - n_zeros))] <- all_Omegas[, , m][B_constraints != 0 | is.na(B_constraints)]
       }
-      # # Remove sign constraints from B_constraints:
-      # tmp <- matrix(NA, nrow=d, ncol=d)
-      # tmp[B_constraints == 0 & !is.na(B_constraints)] <- 0
-      # B_constraints <- tmp
     }
 
     # Calculate the number of mean and AR parameters:
