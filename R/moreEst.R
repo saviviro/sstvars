@@ -712,7 +712,7 @@ fitbsSSTVAR <- function(data, p, M, params,
 
   # Change back to original parametrization
   if(alt_par) {
-    new_params <- change_parametrization(p=p, M=M, d=d, params=new_params, cond_dist=cond_dist,
+    new_params <- change_parametrization(p=p, M=M, d=d, params=params, cond_dist=cond_dist,
                                          weight_function=weight_function, weightfun_pars=weightfun_pars,
                                          identification=identification, AR_constraints=AR_constraints,
                                          mean_constraints=mean_constraints, weight_constraints=weight_constraints,
