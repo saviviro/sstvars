@@ -158,6 +158,8 @@
 #'   computation time if it does for sure.
 #' @param indt_R If \code{TRUE} calculates the independent Student's t density in R instead of C++ without any approximations
 #'   employed for speed-up.
+#' @param alt_par If \code{TRUE} assumes that models identified by non-Gaussianiaty (or \code{cond_dist="Student}) are
+#'   parametrized as \eqn{B_{y,t}=B_1 + \sum_{m=2}^M\alpha_{m,t}B_m^*}, where \eqn{B_m^* = B_m - B_1}.
 #' @param minval the value that will be returned if the parameter vector does not lie in the parameter space
 #'   (excluding the identification condition).
 #' @param stab_tol numerical tolerance for stability of condition of the regimes: if the "bold A" matrix of any regime
@@ -210,7 +212,8 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
                           identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                           AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL, other_constraints=NULL,
                           to_return=c("loglik", "tw", "loglik_and_tw", "terms", "regime_cmeans", "total_cmeans", "total_ccovs"),
-                          check_params=TRUE, indt_R=FALSE, minval=NULL, stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
+                          check_params=TRUE, indt_R=FALSE, alt_par=FALSE, minval=NULL,
+                          stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
 
   # Match args
   weight_function <- match.arg(weight_function)
@@ -235,6 +238,15 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
                                     AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                                     weight_constraints=weight_constraints, B_constraints=B_constraints,
                                     other_constraints=other_constraints, weightfun_pars=weightfun_pars)
+
+
+  if(cond_dist == "ind_Student" || identification == "non-Gaussianity") {
+    if(alt_par) { # Change to the parametrization with impact matrices of the regimes parametrized directly.
+      params <- change_parametrization(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                       cond_dist=cond_dist, identification=identification, AR_constraints=NULL, mean_constraints=NULL,
+                                       weight_constraints=NULL, B_constraints=NULL, change_to="orig")
+    }
+  }
 
   # Pick params
   if(parametrization == "intercept") { # [d, M]

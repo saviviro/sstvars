@@ -469,12 +469,17 @@ B1_222 <- matrix(c(0.5, 0.2, -0.1, 0.3), nrow=2)
 B2_222 <- matrix(c(0.4, -0.1, -0.2, 0.3), nrow=2)
 theta_222logistit_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
                            vec(B1_222), vec(B2_222), c_and_gamma_222_2_1, dfs_222_2_1)
+theta_222logistit_2_1_alt <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                               vec(B1_222), vec(B2_222)-vec(B1_222), c_and_gamma_222_2_1, dfs_222_2_1)
 
 # p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1, lags=1), cond_dist="ind_Student"
 dfs_122_1_1 <- c(4, 13)
 B1_122 <- matrix(c(1.2, -0.3, 0.7, 0.1), nrow=2)
 B2_122 <- matrix(c(0.5, 0.2, -0.1, 3.1), nrow=2)
 theta_122logit_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vec(B1_122), vec(B2_122), gamma1_122_1_1, dfs_122_1_1)
+theta_122logit_1_1_alt <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vec(B1_122), vec(B2_122)-vec(B1_122),
+                            gamma1_122_1_1, dfs_122_1_1)
+
 
 # p=1, M=2, d=3, weight_function="exponential", weightfun_pars=c(1, 1), cond_dist="ind_Student"
 dfs_123_1_1 <- c(10, 12, 3)
@@ -482,6 +487,8 @@ B1_123 <- matrix(c(1.0, 0.3, 0.1, -0.8, 1.1, -0.5, -0.1, -0.2, 0.4), nrow=3)
 B2_123 <- matrix(c(0.3, -0.2, -0.7, -0.8, 1.2, 0.5, 0.1, -0.2, 1.1), nrow=3)
 theta_123expit_1_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vec(B1_123),
                         vec(B2_123), c_and_gamma_123_1_1, dfs_123_1_1)
+theta_123expit_1_1_alt <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vec(B1_123),
+                            vec(B2_123)-vec(B1_123), c_and_gamma_123_1_1, dfs_123_1_1)
 
 # p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="ind_Student"
 dfs_132_1_1 <- c(30, 6)
@@ -490,6 +497,8 @@ B2_132 <- matrix(c(0.4, -0.1, -0.2, 0.5), nrow=2)
 B3_132 <- matrix(c(0.9, -0.5, 0.2, 0.4), nrow=2)
 theta_132thresit_1_1 <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
                           vec(B1_132), vec(B2_132), vec(B3_132), r1_132_1_1, r2_132_1_1, dfs_132_1_1)
+theta_132thresit_1_1_alt <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                              vec(B1_132), vec(B2_132)-vec(B1_132), vec(B3_132)-vec(B1_132), r1_132_1_1, r2_132_1_1, dfs_132_1_1)
 
 # p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), cond_dist="ind_Student",
 # mean_constraints=list(1:2), AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))
@@ -497,6 +506,9 @@ dfs_122_2_1 <- c(4, 13)
 theta_222expcmwit_2_1 <- c(phi10_222, vec(A11_222), vec(A12_222), vec(B1_222), vec(B2_222), xi_222expcmw_2_1, dfs_122_2_1)
 theta_222expcmwit_2_1_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
                                     vec(B1_222), vec(B2_222), c(0.01, 0.33), dfs_122_2_1)
+theta_222expcmwit_2_1_alt <- c(phi10_222, vec(A11_222), vec(A12_222), vec(B1_222), vec(B2_222)-vec(B1_222),
+                               xi_222expcmw_2_1, dfs_122_2_1)
+
 
 # p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="ind_Student",
 # mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2))
@@ -504,6 +516,8 @@ theta_132thresmwit_1_1 <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), ve
                             vec(B2_132), vec(B3_132), dfs_132_1_1)
 theta_132thresmwit_1_1_expanded <- c(phi10_132, phi20_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vec(B1_132),
                                      vec(B2_132), vec(B3_132), 0, 1.2, dfs_132_1_1)
+theta_132thresmwit_1_1_alt <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vec(B1_132),
+                                vec(B2_132)-vec(B1_132), vec(B3_132)-vec(B1_132), dfs_132_1_1)
 
 # p=1, M=2, p=3, weight_function="logistic", weightfun_pars=c(3, 1), cond_dist="ind_Student",
 # mean_constraints=list(1:2), AR_constraints=C_123
@@ -512,16 +526,22 @@ c_and_gamma_123_3_1 <- c(0.1, 0.4)
 theta_123logisticcmit_3_1 <- c(phi10_123, vec(A11_123), vec(B1_123), vec(B2_123), c_and_gamma_123_3_1, dfs_123_3_1)
 theta_123logisticcmit_3_1_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), vec(B1_123), vec(B2_123),
                                         c_and_gamma_123_3_1, dfs_123_3_1)
+theta_123logisticcmit_3_1_alt <- c(phi10_123, vec(A11_123), vec(B1_123), vec(B2_123)-vec(B1_123), c_and_gamma_123_3_1, dfs_123_3_1)
+
 
 # p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1), cond_dist="ind_Student", AR_constraints=C_222
 theta_222logcit_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(B1_222), vec(B2_222), gamma1_222_2_1, dfs_222_2_1)
 theta_222logcit_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
                               vec(B1_222), vec(B2_222), gamma1_222_2_1, dfs_222_2_1)
+theta_222logcit_2_1_alt <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(B1_222), vec(B2_222)-vec(B1_222),
+                             gamma1_222_2_1, dfs_222_2_1)
+
 
 # p=2, M=2, d=2, weight_function="exogenous", weightfun_pars=weightfun_pars222, cond_dist="ind_Student", AR_constraints=C_222
 theta_222exoit_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(B1_222), vec(B2_222), dfs_222_2_1)
 theta_222exoit_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
                              vec(B1_222), vec(B2_222), dfs_222_2_1)
+theta_222exoit_2_1_alt <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(B1_222), vec(B2_222)-vec(B1_222), dfs_222_2_1)
 
 #######
 
@@ -675,6 +695,8 @@ B1_222c <- matrix(c(0.5, -0.2, 0, 0.1), nrow=2)
 B2_222c <- matrix(c(-0.4, -0.1, 0, 0.2), nrow=2)
 theta_222logistitngb_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
                               Wvec(B1_222c), Wvec(B2_222c), c_and_gamma_222_2_1, dfs_222_2_1)
+theta_222logistitngb_2_1_alt <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                                  Wvec(B1_222c), Wvec(B2_222c)-Wvec(B1_222c), c_and_gamma_222_2_1, dfs_222_2_1)
 
 # p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1, lags=1), cond_dist="ind_Student", identification="non-Gaussianity",
 # B_constraints=matrix(c(1, NA, -1, 1) , nrow=2)
@@ -682,6 +704,8 @@ dfs_122_1_1 <- c(4, 13)
 B1_122c <- matrix(c(1.2, 0.3, -0.7, 0.1), nrow=2)
 B2_122c <- matrix(c(0.5, -0.9, -0.1, 3.1), nrow=2)
 theta_122logitngb_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), Wvec(B1_122c), Wvec(B2_122c), gamma1_122_1_1, dfs_122_1_1)
+theta_122logitngb_1_1_alt <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122),
+                               Wvec(B1_122c), Wvec(B2_122c)-Wvec(B1_122c), gamma1_122_1_1, dfs_122_1_1)
 
 # p=1, M=2, d=3, weight_function="exponential", weightfun_pars=c(1, 1), cond_dist="ind_Student", identification="non-Gaussianity",
 # B_constraints=matrix(c(1, NA, NA, 0, 1, NA, 0, NA, 1), nrow=3)
@@ -690,6 +714,8 @@ B1_123c <- matrix(c(1.0, 0.3, 0.1, 0, 1.1, -0.5, 0, -0.2, 0.4), nrow=3)
 B2_123c <- matrix(c(0.3, -0.2, -0.7, 0, 1.2, 0.5, 0, -0.2, 1.1), nrow=3)
 theta_123expitngb_1_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), Wvec(B1_123c),
                            Wvec(B2_123c), c_and_gamma_123_1_1, dfs_123_1_1)
+theta_123expitngb_1_1_alt <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), Wvec(B1_123c),
+                               Wvec(B2_123c)-Wvec(B1_123c), c_and_gamma_123_1_1, dfs_123_1_1)
 
 # p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="ind_Student", identification="non-Gaussianity",
 # B_constraints=matrix(c(1, 0, NA, 1), nrow=2)
@@ -699,6 +725,9 @@ B2_132c <- matrix(c(0.4, 0, 0.2, 0.5), nrow=2)
 B3_132c <- matrix(c(0.9, 0, -0.2, 0.4), nrow=2)
 theta_132thresitngb_1_1 <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
                              Wvec(B1_132c), Wvec(B2_132c), Wvec(B3_132c), r1_132_1_1, r2_132_1_1, dfs_132_1_1)
+theta_132thresitngb_1_1_alt <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                                 Wvec(B1_132c), Wvec(B2_132c)-Wvec(B1_132c), Wvec(B3_132c)-Wvec(B1_132c),
+                                 r1_132_1_1, r2_132_1_1, dfs_132_1_1)
 
 # p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), cond_dist="ind_Student",
 # mean_constraints=list(1:2), AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)),
@@ -707,6 +736,8 @@ dfs_222_2_1 <- c(4, 13)
 theta_222expcmwitngb_2_1 <- c(phi10_222, vec(A11_222), vec(A12_222), Wvec(B1_222c), Wvec(B2_222c), xi_222expcmw_2_1, dfs_222_2_1)
 theta_222expcmwitngb_2_1_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
                                        Wvec(B1_222c), Wvec(B2_222c), c(0.01, 0.33), dfs_222_2_1)
+theta_222expcmwitngb_2_1_alt <- c(phi10_222, vec(A11_222), vec(A12_222), Wvec(B1_222c), Wvec(B2_222c)-Wvec(B1_222c),
+                                  xi_222expcmw_2_1, dfs_222_2_1)
 
 # p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="ind_Student", mean_constraints=list(1, 2:3),
 # weight_constraints=list(R=0, r=c(0, 1.2)), identification="non-Gaussianity", B_constraints=matrix(c(1, 0, NA, 1), nrow=2)
@@ -714,6 +745,8 @@ theta_132thresmwitngb_1_1 <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132),
                                Wvec(B2_132c), Wvec(B3_132c), dfs_132_1_1)
 theta_132thresmwitngb_1_1_expanded <- c(phi10_132, phi20_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), Wvec(B1_132c),
                                         Wvec(B2_132c), Wvec(B3_132c), 0, 1.2, dfs_132_1_1)
+theta_132thresmwitngb_1_1_alt <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), Wvec(B1_132c),
+                                   Wvec(B2_132c)-Wvec(B1_132c), Wvec(B3_132c)-Wvec(B1_132c), dfs_132_1_1)
 
 # p=1, M=2, d=3, weight_function="logistic", weightfun_pars=c(3, 1), cond_dist="ind_Student", mean_constraints=list(1:2),
 # AR_constraints=C_123, identification="non-Gaussianity", B_constraints=matrix(c(1, NA, NA, 0, 1, NA, 0, NA, 1), nrow=3)
@@ -721,18 +754,24 @@ dfs_123_3_1 <- c(11, 3, 20)
 theta_123logisticcmitngb_3_1 <- c(phi10_123, vec(A11_123), Wvec(B1_123c), Wvec(B2_123c), c_and_gamma_123_3_1, dfs_123_3_1)
 theta_123logisticcmitngb_3_1_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), Wvec(B1_123c), Wvec(B2_123c),
                                            c_and_gamma_123_3_1, dfs_123_3_1)
+theta_123logisticcmitngb_3_1_alt <- c(phi10_123, vec(A11_123), Wvec(B1_123c), Wvec(B2_123c)-Wvec(B1_123c), c_and_gamma_123_3_1, dfs_123_3_1)
+
 
 # p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1), cond_dist="ind_Student", AR_constraints=C_222,
 # identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, 0, 1), nrow=2)
 theta_222logcitngb_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), Wvec(B1_222c), Wvec(B2_222c), gamma1_222_2_1, dfs_222_2_1)
 theta_222logcitngb_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
                                  Wvec(B1_222c), Wvec(B2_222c), gamma1_222_2_1, dfs_222_2_1)
+theta_222logcitngb_2_1_alt <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), Wvec(B1_222c), Wvec(B2_222c)-Wvec(B1_222c),
+                                gamma1_222_2_1, dfs_222_2_1)
 
 # p=2, M=2, d=2, weight_function="exogenous", weightfun_pars=weightfun_pars222, cond_dist="ind_Student",
 # AR_constraints=C_222, identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, 0, 1), nrow=2)
 theta_222exoitngb_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), Wvec(B1_222c), Wvec(B2_222c), dfs_222_2_1)
 theta_222exoitngb_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
                                 Wvec(B1_222c), Wvec(B2_222c), dfs_222_2_1)
+theta_222exoitngb_2_1_alt <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), Wvec(B1_222c), Wvec(B2_222c)-Wvec(B1_222c), dfs_222_2_1)
+
 
 ###############
 
@@ -1053,5 +1092,72 @@ test_that("loglikelihood works correctly", {
   expect_equal(c(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222exoitngb_2_1, weight_function="exogenous",
                              weightfun_pars=weightfun_pars222, cond_dist="ind_Student", AR_constraints=C_222,
                              identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, 0, 1), nrow=2), to_return="total_ccovs")[, , 242]),
+               c(0.07106374, -0.04640166, -0.04640166, 0.04615817), tolerance=1e-3)
+
+  # ind_Student / non-Gaussianity alt parametrization
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=1, params=theta_112it,  cond_dist="ind_Student", weight_function="threshold",
+                             weightfun_pars=c(1, 1), alt_par=TRUE), -851.9794, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222logistit_2_1_alt,
+                             cond_dist="ind_Student", weight_function="logistic",
+                             weightfun_pars=c(2, 1), alt_par=TRUE), -336.6867, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122logit_1_1_alt, weight_function="mlogit",
+                             weightfun_pars=list(vars=1, lags=1), cond_dist="ind_Student", alt_par=TRUE), -580.561, tolerance=1e-3)
+  expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123expit_1_1_alt, weight_function="exponential", weightfun_pars=c(1, 1),
+                             cond_dist="ind_Student", alt_par=TRUE), -3830.948, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222expcmwit_2_1_alt, weight_function="exponential", weightfun_pars=c(2, 1),
+                             cond_dist="ind_Student", mean_constraints=list(1:2), AR_constraints=C_222,
+                             weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), alt_par=TRUE), -393.5391, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=3, params=theta_132thresmwit_1_1_alt, weight_function="threshold", weightfun_pars=c(1, 1),
+                             cond_dist="ind_Student", mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2)), alt_par=TRUE),
+               -540.3383, tolerance=1e-3)
+  expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123logisticcmit_3_1_alt, weight_function="logistic", weightfun_pars=c(3, 1),
+                             cond_dist="ind_Student", mean_constraints=list(1:2), AR_constraints=C_123, alt_par=TRUE),
+               -6872.711, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222logcit_2_1_alt, weight_function="mlogit",
+                             weightfun_pars=list(vars=2, lags=1), cond_dist="ind_Student", AR_constraints=C_222, alt_par=TRUE),
+               -380.7479, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222exoit_2_1_alt, weight_function="exogenous",
+                             weightfun_pars=weightfun_pars222, cond_dist="ind_Student", AR_constraints=C_222, alt_par=TRUE),
+               -397.4386, tolerance=1e-3)
+
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=1, params=theta_112it, cond_dist="ind_Student", weight_function="threshold",
+                             weightfun_pars=c(1, 1), identification="non-Gaussianity", alt_par=TRUE), -851.9794, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222logistit_2_1_alt, cond_dist="ind_Student", weight_function="logistic",
+                             weightfun_pars=c(2, 1), identification="non-Gaussianity", alt_par=TRUE), -336.6867, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222logistitngb_2_1_alt, cond_dist="ind_Student", weight_function="logistic",
+                             weightfun_pars=c(2, 1), identification="non-Gaussianity", B_constraints=matrix(c(NA, -1, 0, 1), nrow=2),
+                             alt_par=TRUE), -5345.796, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122logitngb_1_1_alt, weight_function="mlogit",
+                             weightfun_pars=list(vars=1, lags=1), cond_dist="ind_Student", identification="non-Gaussianity",
+                             B_constraints=matrix(c(1, NA, -1, 1) , nrow=2), alt_par=TRUE), -580.1779, tolerance=1e-3)
+  expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123expitngb_1_1_alt, weight_function="exponential", weightfun_pars=c(1, 1),
+                             cond_dist="ind_Student", identification="non-Gaussianity",
+                             B_constraints=matrix(c(1, NA, NA, 0, 1, NA, 0, NA, 1), nrow=3), alt_par=TRUE), -2782.476, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=3, params=theta_132thresitngb_1_1_alt, weight_function="threshold", weightfun_pars=c(1, 1),
+                             cond_dist="ind_Student", identification="non-Gaussianity", B_constraints=matrix(c(1, 0, NA, 1), nrow=2),
+                             alt_par=TRUE), -3827.6, tolerance=1e-1)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222expcmwitngb_2_1_alt, weight_function="exponential", weightfun_pars=c(2, 1),
+                             cond_dist="ind_Student", mean_constraints=list(1:2), AR_constraints=C_222,
+                             weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), identification="non-Gaussianity",
+                             B_constraints=matrix(c(NA, -1, 0, 1), nrow=2), alt_par=TRUE), -1589.59, tolerance=1e-2)
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=3, params=theta_132thresmwitngb_1_1_alt, weight_function="threshold", weightfun_pars=c(1, 1),
+                             cond_dist="ind_Student", mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2)),
+                             identification="non-Gaussianity", B_constraints=matrix(c(1, 0, NA, 1), nrow=2), alt_par=TRUE),
+               -508.1507, tolerance=1e-3)
+  expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123logisticcmitngb_3_1_alt, weight_function="logistic", weightfun_pars=c(3, 1),
+                             cond_dist="ind_Student", mean_constraints=list(1:2), AR_constraints=C_123, identification="non-Gaussianity",
+                             B_constraints=matrix(c(1, NA, NA, 0, 1, NA, 0, NA, 1), nrow=3), alt_par=TRUE), -3988.082, tolerance=1e-2)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222logcitngb_2_1_alt, weight_function="mlogit",
+                             weightfun_pars=list(vars=2, lags=1), cond_dist="ind_Student", AR_constraints=C_222,
+                             identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, 0, 1), nrow=2), alt_par=TRUE),
+               -2820.663, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222exoitngb_2_1_alt, weight_function="exogenous",
+                             weightfun_pars=weightfun_pars222, cond_dist="ind_Student", AR_constraints=C_222,
+                             identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, 0, 1), nrow=2), alt_par=TRUE),
+               -2657.869, tolerance=1e-3)
+  expect_equal(c(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222exoitngb_2_1_alt, weight_function="exogenous",
+                               weightfun_pars=weightfun_pars222, cond_dist="ind_Student", AR_constraints=C_222,
+                               identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, 0, 1), nrow=2), alt_par=TRUE,
+                               to_return="total_ccovs")[, , 242]),
                c(0.07106374, -0.04640166, -0.04640166, 0.04615817), tolerance=1e-3)
 })

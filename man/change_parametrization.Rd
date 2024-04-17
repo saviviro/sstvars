@@ -178,7 +178,7 @@ Currently only available for models with \code{identification="heteroskedasticit
     is mean parametrized, and if set to \code{"mean"} it's assumed that \code{params} is intercept parametrized.}
   \item{If you want to switch between the paramterizations \eqn{B_{y,t}=\sum_{m=1}^M\alpha_{m,t}B_m} and
         \eqn{B_{y,t}=B_1 + \sum_{m=2}^M\alpha_{m,t}B_m^{*}}, \eqn{B_m^{*} = B_m - B_1}:}{either "orig"
-         (with \enq{B_m}) or "alt" (with \enq{B_m^{*}}). It is assumed that the parameter vector is in the
+         (with \eqn{B_m}) or "alt" (with \eqn{B_m^{*}}). It is assumed that the parameter vector is in the
          other parametrization than the one specified in \code{change_to}.}
 }}
 }

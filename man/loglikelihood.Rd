@@ -25,6 +25,7 @@ loglikelihood(
     "total_cmeans", "total_ccovs"),
   check_params = TRUE,
   indt_R = FALSE,
+  alt_par = FALSE,
   minval = NULL,
   stab_tol = 0.001,
   posdef_tol = 1e-08,
@@ -204,6 +205,9 @@ computation time if it does for sure.}
 
 \item{indt_R}{If \code{TRUE} calculates the independent Student's t density in R instead of C++ without any approximations
 employed for speed-up.}
+
+\item{alt_par}{If \code{TRUE} assumes that models identified by non-Gaussianiaty (or \code{cond_dist="Student}) are
+parametrized as \eqn{B_{y,t}=B_1 + \sum_{m=2}^M\alpha_{m,t}B_m^*}, where \eqn{B_m^* = B_m - B_1}.}
 
 \item{minval}{the value that will be returned if the parameter vector does not lie in the parameter space
 (excluding the identification condition).}
