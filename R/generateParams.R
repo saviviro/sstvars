@@ -171,54 +171,6 @@ random_impactmat <- function(d, B_scale, is_regime1=TRUE) {
   }
 }
 
-# get_one_Bm <- function(d, B_scale) {
-#   new_B <- matrix(nrow=d, ncol=d)
-#   for(i1 in 1:d) {
-#     new_B[i1,] <- rnorm(d, sd=sqrt(B_scale[i1]/d)) # Random elements to each row
-#   }
-#   new_B
-# }
-#
-# get_one_Bm(d=3, B_scale=c(1, 5, 30))
-#
-# get_Omega_m_from_B1_and_Bm_star <- function(d, B_scale) {
-#   B1tmp <- random_impactmat(d=d, B_scale=B_scale, is_regime1=TRUE)
-#   Bm_star <- get_one_Bm(d=d, B_scale=B_scale)
-#   tcrossprod(Bm_star - B1tmp)
-# }
-#
-# get_B1tcrossprod <- function(d, B_scale) {
-#   B1tmp <- random_impactmat(d=d, B_scale=B_scale, is_regime1=TRUE)
-#   tcrossprod(B1tmp)
-# }
-#
-# get_B1_and_Bm_tcrprod_from_B1_and_Bm_star <- function(d, B_scale) {
-#   B1tmp <- random_impactmat(d=d, B_scale=(B_scale - 1e-6), is_regime1=TRUE)
-#   Bm_star <- get_one_Bm(d=d, B_scale=rep(1e-6, times=d))
-#   tcrossprod(B1tmp, Bm_star + B1tmp)
-# }
-#
-# get_Bm_and_B1_tcrprod_from_B1_and_Bm_star <- function(d, B_scale) {
-#   B1tmp <- random_impactmat(d=d, B_scale=B_scale, is_regime1=TRUE)
-#   Bm_star <- get_one_Bm(d=d, B_scale=B_scale)
-#   tcrossprod(Bm_star + B1tmp, B1tmp)
-# }
-#
-#
-# get_Omega_m_from_B1_and_Bm_star <- function(d, B_scale) {
-#   B1tmp <- random_impactmat(d=d, B_scale=0.95*B_scale, is_regime1=TRUE)
-#   Bm_star <- get_one_Bm(d=d, B_scale=0.05*B_scale)
-#   tcrossprod(Bm_star - B1tmp)
-#   #tcrossprod(B1tmp)
-# }
-#
-# apply(replicate(n=10000, get_Omega_m_from_B1_and_Bm_star(d=3, B_scale=c(1, 0.2, 42))), 1:2, mean)
-#
-# apply(replicate(n=10000, get_B1_and_Bm_tcrprod_from_B1_and_Bm_star(d=3, B_scale=c(1, 0.1, 30))), 1:2, mean)
-# apply(replicate(n=10000, get_Bm_and_B1_tcrprod_from_B1_and_Bm_star(d=3, B_scale=c(1, 0.3, 42))), 1:2, mean)
-#
-
-
 
 #' @title Create a random VAR model \eqn{(dxd)} error impact matrix \eqn{B}
 #'   fairly close to the given \strong{invertible} impact matrix.
