@@ -264,7 +264,11 @@ the beginning of the function call. If calling \code{GAfit} from \code{fitSTVAR}
 instead of passing the argument \code{seed}.}
 }
 \value{
-Returns the estimated parameter vector which has the form described in \code{initpop}.
+Returns the estimated parameter vector which has the form described in \code{initpop},
+ \strong{with the exception} that for models with \code{cond_dist == "ind_Student"} or
+ \code{identification="non-Gaussianity"}, the parameter vector is parametrized with \eqn{B_1,B_2^*,...,B_M^*}
+ instead of  \eqn{B_1,B_2,...,B_M}, where \eqn{B_m^* = B_m - B_1}. Use the function \code{change_parametrization}
+ to change back to the original parametrization if desired.
 }
 \description{
 \code{GAfit} estimates the specified STVAR model using a genetic algorithm.

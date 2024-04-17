@@ -162,7 +162,11 @@
 #'
 #'  Structural models are not supported here, as they are best estimated based on reduced form parameter estimates
 #'  using the function \code{fitSSTVAR}.
-#' @return Returns the estimated parameter vector which has the form described in \code{initpop}.
+#' @return Returns the estimated parameter vector which has the form described in \code{initpop},
+#'  \strong{with the exception} that for models with \code{cond_dist == "ind_Student"} or
+#'  \code{identification="non-Gaussianity"}, the parameter vector is parametrized with \eqn{B_1,B_2^*,...,B_M^*}
+#'  instead of  \eqn{B_1,B_2,...,B_M}, where \eqn{B_m^* = B_m - B_1}. Use the function \code{change_parametrization}
+#'  to change back to the original parametrization if desired.
 #' @references
 #'  \itemize{
 #'    \item Ansley C.F., Kohn R. 1986. A note on reparameterizing a vector autoregressive
@@ -318,7 +322,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                                                AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                                                                weight_constraints=weight_constraints, B_constraints=NULL,
                                                                to_return="loglik", check_params=TRUE,
-                                                               minval=minval), numeric(1))
+                                                               minval=minval, alt_par=TRUE), numeric(1))
       G <- cbind(G, inds[, ind_loks > minval]) # Take good enough individuals
       if(ncol(G) >= popsize) {
         G <- G[, 1:popsize]
@@ -353,6 +357,10 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
         ind <- sort_impactmats(p=p, M=M, d=d, params=ind, weight_function=weight_function, weightfun_pars=weightfun_pars,
                               cond_dist=cond_dist, AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                               weight_constraints=weight_constraints)
+        ind <- change_parametrization(p=p, M=M, d=d, params=ind, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                      cond_dist=cond_dist, identification="reduced_form", AR_constraints=AR_constraints,
+                                      mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                                      B_constraints=NULL, change_to="alt") # Change B_1^*,..,B_M^*
       }
       if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(weight_constraints)) {
         initpop[[i1]] <- sort_regimes(p=p, M=M, d=d, params=ind, weight_function=weight_function, weightfun_pars=weightfun_pars,
@@ -398,7 +406,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                      parametrization="mean", identification="reduced_form",
                                      AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                                      weight_constraints=weight_constraints, B_constraints=NULL,
-                                     to_return="loglik_and_tw", check_params=TRUE, minval=minval)
+                                     to_return="loglik_and_tw", check_params=TRUE, minval=minval, alt_par=TRUE)
         fill_lok_and_red(i1, i2, loks_and_tw)
       }
     } else {
@@ -437,7 +445,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                                   parametrization="mean", identification="reduced_form",
                                                   AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                                                   weight_constraints=weight_constraints, B_constraints=NULL,
-                                                  to_return="loglik_and_tw", check_params=FALSE, minval=minval),
+                                                  to_return="loglik_and_tw", check_params=FALSE, minval=minval, alt_par=TRUE),
                                     error=function(e) minval)
           } else {
             loks_and_tw <- tryCatch(loglikelihood(data=data, p=p, M=M, params=G[,i2], weight_function=weight_function,
@@ -445,7 +453,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                                   parametrization="mean", identification="reduced_form",
                                                   AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                                                   weight_constraints=weight_constraints, B_constraints=NULL,
-                                                  to_return="loglik_and_tw", check_params=TRUE, minval=minval),
+                                                  to_return="loglik_and_tw", check_params=TRUE, minval=minval, alt_par=TRUE),
                                     error=function(e) minval)
           }
           fill_lok_and_red(i1, i2, loks_and_tw)
@@ -510,7 +518,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
     best_mw <- loglikelihood(data=data, p=p, M=M, params=best_ind, weight_function=weight_function, weightfun_pars=weightfun_pars,
                              cond_dist=cond_dist, parametrization="mean", identification="reduced_form", AR_constraints=AR_constraints,
                              mean_constraints=mean_constraints, weight_constraints=weight_constraints, B_constraints=NULL,
-                             to_return="tw", check_params=FALSE, minval=minval)
+                             to_return="tw", check_params=FALSE, minval=minval, alt_par=TRUE)
 
     # Which regimes are wasted:
     which_redundant <- which(vapply(1:M, function(i2) sum(best_mw[,i2] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))

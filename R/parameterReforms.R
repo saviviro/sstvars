@@ -104,7 +104,11 @@ change_parametrization <- function(p, M, d, params,
                                    numeric(d))
     }
   } else { # Change between nong_orig and nong_alt
-    if(M == 1) return(re_params) # B_1 = B_1*, so nothing to change
+    if(M == 1) { # B_1 = B_1*, so nothing to change
+      return(re_params)
+    } else if(cond_dist != "ind_Student") { # Other cond dists do not apply here
+      return(re_params)
+    }
     # All B_m or B_m^* matrices:
     all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=params, cond_dist=cond_dist,
                               identification=identification)
