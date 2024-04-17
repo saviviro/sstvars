@@ -8,8 +8,9 @@ random_impactmat(d, B_scale, is_regime1 = TRUE)
 }
 \arguments{
 \item{B_scale}{a size \eqn{(d \times 1)} strictly positive vector specifying the mean and variability of the
-random impact matrices in random mutations. In each regime, the mean of the error term covariance matrix
-implied by the random impact matrix will be \code{diag(B_scale)}, and the variability increases with \code{B_scale}.
+random impact matrices in random mutations. In Regime 1, the mean of the error term covariance matrix
+implied by the random impact matrix will be \code{0.95*diag(B_scale)} and in the rest of the regimes \code{diag(B_scale)},
+whereas the variability increases with \code{B_scale}.
 Default in \code{GAfit} is \code{var(stats::ar(data[,i], order.max=10)$resid, na.rm=TRUE), i=1,...,d}.
 This argument is ignored if \code{cond_dist != "ind_Student"}.}
 
@@ -21,6 +22,11 @@ Returns a \eqn{(d^2 \times 1)} vector containing the vectorized impact matrix \e
 }
 \description{
 \code{random_impactmat} generates random VAR model \eqn{(dxd)} impact matrix \eqn{B}
-  with its elements drawn from specific normal distributions (see the source code).
+  with its elements drawn from specific normal distributions (see the source code). If not the first
+  regime, will create the matrix \eqn{B_m*}.
+}
+\details{
+If the impact matrix is not for Regime 1, will create the matrix \eqn{B_m*}, which is related
+  to the impact matrix \eqn{B_m} of Regime m as \eqn{B_m* = B_m - B_1}.
 }
 \keyword{internal}

@@ -86,8 +86,9 @@
 #'   \code{var(stats::ar(data[,i], order.max=10)$resid, na.rm=TRUE), i=1,...,d}. This argument is ignored if
 #'   \code{cond_dist == "ind_Student"}.
 #' @param B_scale a size \eqn{(d \times 1)} strictly positive vector specifying the mean and variability of the
-#'   random impact matrices in random mutations. In each regime, the mean of the error term covariance matrix
-#'   implied by the random impact matrix will be \code{diag(B_scale)}, and the variability increases with \code{B_scale}.
+#'   random impact matrices in random mutations. In Regime 1, the mean of the error term covariance matrix
+#'   implied by the random impact matrix will be \code{0.95*diag(B_scale)} and in the rest of the regimes \code{diag(B_scale)},
+#'   whereas the variability increases with \code{B_scale}.
 #'   Default in \code{GAfit} is \code{var(stats::ar(data[,i], order.max=10)$resid, na.rm=TRUE), i=1,...,d}.
 #'   This argument is ignored if \code{cond_dist != "ind_Student"}.
 #' @param ar_scale a positive real number between zero and one adjusting how large AR parameter values are typically

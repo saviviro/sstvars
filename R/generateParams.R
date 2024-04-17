@@ -144,26 +144,80 @@ smart_covmat <- function(d, Omega, accuracy) {
 #' @title Create random VAR model impact matrix
 #'
 #' @description \code{random_impactmat} generates random VAR model \eqn{(dxd)} impact matrix \eqn{B}
-#'   with its elements drawn from specific normal distributions (see the source code).
+#'   with its elements drawn from specific normal distributions (see the source code). If not the first
+#'   regime, will create the matrix \eqn{B_m*}.
 #'
 #' @inheritParams loglikelihood
 #' @inheritParams GAfit
 #' @param is_regime1 is the impact matrix for Regime 1? Regime 1 impact matrix is constrained so the elements
 #'   in its first row are in a decreasing ordering and the diagonal elements are strictly positive.
+#' @details If the impact matrix is not for Regime 1, will create the matrix \eqn{B_m*}, which is related
+#'   to the impact matrix \eqn{B_m} of Regime m as \eqn{B_m* = B_m - B_1}.
 #' @return Returns a \eqn{(d^2 \times 1)} vector containing the vectorized impact matrix \eqn{B}.
 #' @keywords internal
 
 random_impactmat <- function(d, B_scale, is_regime1=TRUE) {
   new_B <- matrix(nrow=d, ncol=d)
-  for(i1 in 1:d) {
-    new_B[i1,] <- rnorm(d, sd=sqrt(B_scale[i1]/d)) # Random elements to each row
-  }
   if(is_regime1) {
+    for(i1 in 1:d) {
+      new_B[i1,] <- rnorm(d, sd=sqrt(0.95*B_scale[i1]/d)) # Random elements to each row
+    }
     return(order_B(new_B)) # First element in each column normalized to positive and columns ordered to a decreasing order
   } else {
+    for(i1 in 1:d) {
+      new_B[i1,] <- rnorm(d, sd=sqrt(0.05*B_scale[i1]/d)) # Random elements to each row
+    }
     return(new_B) # No constraints since not the first impact matrix
   }
 }
+
+# get_one_Bm <- function(d, B_scale) {
+#   new_B <- matrix(nrow=d, ncol=d)
+#   for(i1 in 1:d) {
+#     new_B[i1,] <- rnorm(d, sd=sqrt(B_scale[i1]/d)) # Random elements to each row
+#   }
+#   new_B
+# }
+#
+# get_one_Bm(d=3, B_scale=c(1, 5, 30))
+#
+# get_Omega_m_from_B1_and_Bm_star <- function(d, B_scale) {
+#   B1tmp <- random_impactmat(d=d, B_scale=B_scale, is_regime1=TRUE)
+#   Bm_star <- get_one_Bm(d=d, B_scale=B_scale)
+#   tcrossprod(Bm_star - B1tmp)
+# }
+#
+# get_B1tcrossprod <- function(d, B_scale) {
+#   B1tmp <- random_impactmat(d=d, B_scale=B_scale, is_regime1=TRUE)
+#   tcrossprod(B1tmp)
+# }
+#
+# get_B1_and_Bm_tcrprod_from_B1_and_Bm_star <- function(d, B_scale) {
+#   B1tmp <- random_impactmat(d=d, B_scale=(B_scale - 1e-6), is_regime1=TRUE)
+#   Bm_star <- get_one_Bm(d=d, B_scale=rep(1e-6, times=d))
+#   tcrossprod(B1tmp, Bm_star + B1tmp)
+# }
+#
+# get_Bm_and_B1_tcrprod_from_B1_and_Bm_star <- function(d, B_scale) {
+#   B1tmp <- random_impactmat(d=d, B_scale=B_scale, is_regime1=TRUE)
+#   Bm_star <- get_one_Bm(d=d, B_scale=B_scale)
+#   tcrossprod(Bm_star + B1tmp, B1tmp)
+# }
+#
+#
+# get_Omega_m_from_B1_and_Bm_star <- function(d, B_scale) {
+#   B1tmp <- random_impactmat(d=d, B_scale=0.95*B_scale, is_regime1=TRUE)
+#   Bm_star <- get_one_Bm(d=d, B_scale=0.05*B_scale)
+#   tcrossprod(Bm_star - B1tmp)
+#   #tcrossprod(B1tmp)
+# }
+#
+# apply(replicate(n=10000, get_Omega_m_from_B1_and_Bm_star(d=3, B_scale=c(1, 0.2, 42))), 1:2, mean)
+#
+# apply(replicate(n=10000, get_B1_and_Bm_tcrprod_from_B1_and_Bm_star(d=3, B_scale=c(1, 0.1, 30))), 1:2, mean)
+# apply(replicate(n=10000, get_Bm_and_B1_tcrprod_from_B1_and_Bm_star(d=3, B_scale=c(1, 0.3, 42))), 1:2, mean)
+#
+
 
 
 #' @title Create a random VAR model \eqn{(dxd)} error impact matrix \eqn{B}
