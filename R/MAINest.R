@@ -294,7 +294,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                                                        B_constraints=NULL,
                                                        to_return="loglik",
                                                        check_params=TRUE,
-                                                       minval=minval), numeric(1))
+                                                       minval=minval,
+                                                       alt_par=TRUE), numeric(1))
 
   if(print_res) {
     print_loks <- function() {
@@ -313,7 +314,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                            cond_dist=cond_dist, parametrization=parametrization,
                            identification="reduced_form", AR_constraints=AR_constraints,
                            mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                           B_constraints=NULL, to_return="loglik", check_params=TRUE, minval=minval),
+                           B_constraints=NULL, to_return="loglik", check_params=TRUE, minval=minval,
+                           alt_par=TRUE),
              error=function(e) minval)
   }
 
@@ -346,8 +348,20 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     print_loks()
   }
 
-  ### Obtain estimates and filter the inapproriate estimates
+  ### Obtain estimates, change back to original parametrization, and filter the inapproriate estimates
   all_estimates <- lapply(NEWTONresults, function(x) x$par)
+  if(cond_dist == "ind_Student") {
+    all_estimates <- lapply(all_estimates, function(pars) change_parametrization(p=p, M=M, d=d, params=pars,
+                                                                                 weight_function=weight_function,
+                                                                                 weightfun_pars=weightfun_pars,
+                                                                                 cond_dist=cond_dist,
+                                                                                 identification="reduced_form",
+                                                                                 AR_constraints=AR_constraints,
+                                                                                 mean_constraints=mean_constraints,
+                                                                                 weight_constraints=weight_constraints,
+                                                                                 B_constraints=NULL,
+                                                                                 change_to="orig"))
+  }
 
   if(filter_estimates) {
     if(!no_prints) cat("Filtering inappropriate estimates...\n")
@@ -418,7 +432,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   params <- all_estimates[[which_best_fit]] # The params to return
 
   ### Obtain standard errors, calculate IC ###
-  # Sort regimes if no constraints are employed
+  # Sort regimes if no constraints are employed (affects params only with specific weight_functions)
   if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(weight_constraints)) {
     params <- sort_regimes(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
                            cond_dist=cond_dist, identification="reduced_form")

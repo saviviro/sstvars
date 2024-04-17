@@ -158,7 +158,7 @@
 #'   computation time if it does for sure.
 #' @param indt_R If \code{TRUE} calculates the independent Student's t density in R instead of C++ without any approximations
 #'   employed for speed-up.
-#' @param alt_par If \code{TRUE} assumes that models identified by non-Gaussianiaty (or \code{cond_dist="Student}) are
+#' @param alt_par If \code{TRUE} assumes that models identified by non-Gaussianiaty (or \code{cond_dist="Student"}) are
 #'   parametrized as \eqn{B_{y,t}=B_1 + \sum_{m=2}^M\alpha_{m,t}B_m^*}, where \eqn{B_m^* = B_m - B_1}.
 #' @param minval the value that will be returned if the parameter vector does not lie in the parameter space
 #'   (excluding the identification condition).
