@@ -1881,7 +1881,7 @@ theta_123logisticcmit_3_1_2 <- c(phi10_123, vec(A11_123), vec(B1_123_2), vec(B2_
 
 test_that("sort_impactmats works correctly", {
   expect_equal(sort_impactmats(p=1, M=1, d=2, params=theta_112it, cond_dist="ind_Student", weight_function="threshold",
-                               weightfun_pars=c(1, 1)), c(phi10_112, vec(A11_112), vec(B1_112_sorted), dfs_112))
+                               weightfun_pars=c(1, 1)), c(phi10_112, vec(A11_112), vec(B1_112_sorted), dfs_112[2:1]))
   expect_equal(sort_impactmats(p=2, M=2, d=2, params=theta_222logistit_2_1, cond_dist="ind_Student", weight_function="logistic",
                                weightfun_pars=c(2, 1)), c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
                                                           vec(B1_222_sorted), vec(B2_222_sorted), c_and_gamma_222_2_1, dfs_222_2_1))
@@ -1892,7 +1892,7 @@ test_that("sort_impactmats works correctly", {
                                                            vec(B2_123_sorted), c_and_gamma_123_1_1, dfs_123_1_1))
   expect_equal(sort_impactmats(p=1, M=2, d=3, params=theta_123expit_1_1_2, weight_function="exponential", weightfun_pars=c(1, 1),
                                cond_dist="ind_Student"), c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vec(B1_123_2_sorted),
-                                                           vec(B2_123_2_sorted), c_and_gamma_123_1_1, dfs_123_1_1))
+                                                           vec(B2_123_2_sorted), c_and_gamma_123_1_1, dfs_123_1_1[c(3, 1, 2)]))
   expect_equal(sort_impactmats(p=1, M=3, d=2, params=theta_132thresit_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
                                cond_dist="ind_Student"), c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
                                                            vec(B1_132_sorted), vec(B2_132_sorted), vec(B3_132_sorted), r1_132_1_1,
@@ -1900,7 +1900,7 @@ test_that("sort_impactmats works correctly", {
   expect_equal(sort_impactmats(p=1, M=3, d=2, params=theta_132thresit_1_1_2, weight_function="threshold", weightfun_pars=c(1, 1),
                                cond_dist="ind_Student"), c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
                                                            vec(B1_132_2_sorted), vec(B2_132_2_sorted), vec(B3_132_2_sorted), r1_132_1_1,
-                                                           r2_132_1_1, dfs_132_1_1))
+                                                           r2_132_1_1, dfs_132_1_1[2:1]))
   expect_equal(sort_impactmats(p=2, M=2, d=2, params=theta_222expcmwit_2_1, weight_function="exponential", weightfun_pars=c(2, 1),
                                cond_dist="ind_Student", mean_constraints=list(1:2), AR_constraints=C_222,
                                weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))),
@@ -1912,13 +1912,13 @@ test_that("sort_impactmats works correctly", {
   expect_equal(sort_impactmats(p=1, M=3, d=2, params=theta_132thresmwit_1_1_2, weight_function="threshold", weightfun_pars=c(1, 1),
                                cond_dist="ind_Student", mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2))),
                c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vec(B1_132_2_sorted), vec(B2_132_2_sorted),
-                 vec(B3_132_2_sorted), dfs_132_1_1))
+                 vec(B3_132_2_sorted), dfs_132_1_1[2:1]))
   expect_equal(sort_impactmats(p=1, M=2, d=3, params=theta_123logisticcmit_3_1, weight_function="logistic", weightfun_pars=c(3, 1),
                                cond_dist="ind_Student", mean_constraints=list(1:2), AR_constraints=C_123),
                c(phi10_123, vec(A11_123), vec(B1_123_sorted), vec(B2_123_sorted), c_and_gamma_123_3_1, dfs_123_3_1))
   expect_equal(sort_impactmats(p=1, M=2, d=3, params=theta_123logisticcmit_3_1_2, weight_function="logistic", weightfun_pars=c(3, 1),
                                cond_dist="ind_Student", mean_constraints=list(1:2), AR_constraints=C_123),
-               c(phi10_123, vec(A11_123), vec(B1_123_2_sorted), vec(B2_123_2_sorted), c_and_gamma_123_3_1, dfs_123_3_1))
+               c(phi10_123, vec(A11_123), vec(B1_123_2_sorted), vec(B2_123_2_sorted), c_and_gamma_123_3_1, dfs_123_3_1[c(3, 1, 2)]))
   expect_equal(sort_impactmats(p=2, M=2, d=2, params=theta_222logcit_2_1, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1),
                                cond_dist="ind_Student", AR_constraints=C_222),
                c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(B1_222_sorted), vec(B2_222_sorted), gamma1_222_2_1, dfs_222_2_1))

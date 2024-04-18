@@ -442,7 +442,8 @@ reform_constrained_pars <- function(p, M, d, params,
 #'   with the regimes sorted so that...
 #'   \describe{
 #'     \item{If \code{cond_dist == "ind_Student"}:}{The parameter vector with the columns of the impact matrices sorted and sign changed so
-#'           that the first element in each column of \eqn{B_1} is positive and in a decreasing order.}
+#'           that the first element in each column of \eqn{B_1} is positive and in a decreasing order. Sorts also the degrees of feedom parameters
+#'           accordingly.}
 #'     \item{Otherwise:}{Nothing to sort, so returns the original parameter vector given in \code{param}.}
 #'   }
 #' @keywords internal
@@ -503,6 +504,10 @@ sort_impactmats <- function(p, M, d, params, weight_function=c("relative_dens", 
 
   # Fill in the new impact matrices to the parameter vector
   params[(length(params) - n_weight_pars - d - M*d^2 + 1):(length(params) - n_weight_pars - d)] <- as.vector(all_B_m)
+
+  # Sort the degrees of freedom parameters accordingly:
+  distpars <-  params[(length(params) - d + 1):length(params)]
+  params[(length(params) - d + 1):length(params)] <- distpars[new_ordering]
 
   # Return the new parameter vector
   params

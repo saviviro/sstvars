@@ -685,16 +685,17 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
   } else {
     ret <- alt_ind
   }
-  # GA always optimizes with mean parametrization, and cond_dist="ind_Student" models by parametrizing impact matrices
-  # instead of B_1,...,B_M, with B_1,B_2*,...,B_M*, where B_m* = B_m - B_1 for m=2,...,M.
-  # Switch parametriaztion back to the original one:
-  if(cond_dist == "ind_Student") {
-    ret <- change_parametrization(p=p, M=M, d=d, params=ret, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                  cond_dist=cond_dist, identification="reduced_form", AR_constraints=AR_constraints,
-                                  mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                                  B_constraints=NULL, change_to="alt")
-  }
+  # # GA always optimizes with mean parametrization, and cond_dist="ind_Student" models by parametrizing impact matrices
+  # # instead of B_1,...,B_M, with B_1,B_2*,...,B_M*, where B_m* = B_m - B_1 for m=2,...,M.
+  # # Switch parametriaztion back to the original one:
+  # if(cond_dist == "ind_Student") {
+  #   ret <- change_parametrization(p=p, M=M, d=d, params=ret, weight_function=weight_function, weightfun_pars=weightfun_pars,
+  #                                 cond_dist=cond_dist, identification="reduced_form", AR_constraints=AR_constraints,
+  #                                 mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+  #                                 B_constraints=NULL, change_to="alt")
+  # }
 
+  # # GA always optimizes with mean parametrization
   # Return intercept parametrized estimate if parametrization=="intercept".
   if(parametrization == "mean") { # This is always the case with mean_constraints
     return(ret)
