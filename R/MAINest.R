@@ -295,7 +295,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                                                        to_return="loglik",
                                                        check_params=TRUE,
                                                        minval=minval,
-                                                       alt_par=FALSE), numeric(1))
+                                                       alt_par=TRUE), numeric(1))
 
   if(print_res) {
     print_loks <- function() {
@@ -315,7 +315,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                            identification="reduced_form", AR_constraints=AR_constraints,
                            mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                            B_constraints=NULL, to_return="loglik", check_params=TRUE, minval=minval,
-                           alt_par=FALSE),
+                           alt_par=TRUE),
              error=function(e) minval)
   }
 
@@ -350,6 +350,19 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
 
   ### Obtain estimates, change back to original parametrization, and filter the inapproriate estimates
   all_estimates <- lapply(NEWTONresults, function(x) x$par)
+  if(cond_dist == "ind_Student") {
+    all_estimates <- lapply(all_estimates, function(pars) change_parametrization(p=p, M=M, d=d, params=pars,
+                                                                                 weight_function=weight_function,
+                                                                                 weightfun_pars=weightfun_pars,
+                                                                                 cond_dist=cond_dist,
+                                                                                 identification="reduced_form",
+                                                                                 AR_constraints=AR_constraints,
+                                                                                 mean_constraints=mean_constraints,
+                                                                                 weight_constraints=weight_constraints,
+                                                                                 B_constraints=NULL,
+                                                                                 change_to="orig"))
+  }
+
   if(filter_estimates) {
     if(!no_prints) cat("Filtering inappropriate estimates...\n")
     ord_by_loks <- order(loks, decreasing=TRUE) # Ordering from largest loglik to smaller
@@ -430,18 +443,18 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                                                                        identification="reduced_form"))
   }
   # Sort and sign change the columns of the impact matrices if cond_dist == "ind_Student"
-  # if(cond_dist == "ind_Student") {
-  #   params <- sort_impactmats(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
-  #                             cond_dist=cond_dist, AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-  #                             weight_constraints=weight_constraints)
-  #   all_estimates <- lapply(all_estimates, function(pars) sort_impactmats(p=p, M=M, d=d, params=pars,
-  #                                                                         weight_function=weight_function,
-  #                                                                         weightfun_pars=weightfun_pars,
-  #                                                                         cond_dist=cond_dist,
-  #                                                                         AR_constraints=AR_constraints,
-  #                                                                         mean_constraints=mean_constraints,
-  #                                                                         weight_constraints=weight_constraints))
-  # }
+  if(cond_dist == "ind_Student") {
+    params <- sort_impactmats(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                              cond_dist=cond_dist, AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                              weight_constraints=weight_constraints)
+    all_estimates <- lapply(all_estimates, function(pars) sort_impactmats(p=p, M=M, d=d, params=pars,
+                                                                          weight_function=weight_function,
+                                                                          weightfun_pars=weightfun_pars,
+                                                                          cond_dist=cond_dist,
+                                                                          AR_constraints=AR_constraints,
+                                                                          mean_constraints=mean_constraints,
+                                                                          weight_constraints=weight_constraints))
+  }
 
 
   if(NEWTONresults[[which_best_fit]]$convergence == 1) {
