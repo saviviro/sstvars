@@ -295,7 +295,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                                                        to_return="loglik",
                                                        check_params=TRUE,
                                                        minval=minval,
-                                                       alt_par=TRUE), numeric(1))
+                                                       alt_par=FALSE), numeric(1))
 
   if(print_res) {
     print_loks <- function() {
@@ -315,7 +315,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                            identification="reduced_form", AR_constraints=AR_constraints,
                            mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                            B_constraints=NULL, to_return="loglik", check_params=TRUE, minval=minval,
-                           alt_par=TRUE),
+                           alt_par=FALSE),
              error=function(e) minval)
   }
 
@@ -350,19 +350,6 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
 
   ### Obtain estimates, change back to original parametrization, and filter the inapproriate estimates
   all_estimates <- lapply(NEWTONresults, function(x) x$par)
-  if(cond_dist == "ind_Student") {
-    all_estimates <- lapply(all_estimates, function(pars) change_parametrization(p=p, M=M, d=d, params=pars,
-                                                                                 weight_function=weight_function,
-                                                                                 weightfun_pars=weightfun_pars,
-                                                                                 cond_dist=cond_dist,
-                                                                                 identification="reduced_form",
-                                                                                 AR_constraints=AR_constraints,
-                                                                                 mean_constraints=mean_constraints,
-                                                                                 weight_constraints=weight_constraints,
-                                                                                 B_constraints=NULL,
-                                                                                 change_to="orig"))
-  }
-
   if(filter_estimates) {
     if(!no_prints) cat("Filtering inappropriate estimates...\n")
     ord_by_loks <- order(loks, decreasing=TRUE) # Ordering from largest loglik to smaller

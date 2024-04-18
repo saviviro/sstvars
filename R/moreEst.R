@@ -341,21 +341,6 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
   }
   n_pars <- n_mean_pars + n_ar_pars + n_covmat_pars + n_weight_pars + n_dist_pars
 
-  if(cond_dist == "ind_Student" || identification == "non-Gaussianity") {
-    if(!is.null(B_constraints) && length(which(B_constraints != 0)) != 0) {
-      alt_par <- FALSE # Sign constraints employed, use normal parametrization
-    } else { # B_constraints not used or only used for zero constraints
-      alt_par <- TRUE # Switch to parametrization with B_1*,...,B_M*
-      params <- change_parametrization(p=p, M=M, d=d, params=params, cond_dist=cond_dist,
-                                       weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                       identification=identification, AR_constraints=AR_constraints,
-                                       mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                                       B_constraints=B_constraints, change_to="alt")
-    }
-  } else {
-    alt_par <- FALSE
-  }
-
   # Set up initial values using the obtained parameters
   if(identification == "heteroskedasticity") {
     if(M == 1) {
@@ -534,7 +519,7 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
                               parametrization=parametrization, identification=identification,
                               AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                               weight_constraints=weight_constraints, B_constraints=B_constraints,
-                              to_return="loglik", check_params=TRUE, minval=NULL, alt_par=alt_par)
+                              to_return="loglik", check_params=TRUE, minval=NULL, alt_par=FALSE)
 
   if(is.null(new_loglik)) {
     cat("Problem with the new parameter vector - try different B_constraints?\n See:\n")
@@ -553,14 +538,6 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
 
   ### Estimation
   if(is.null(data)) {
-    if(alt_par) {
-      new_params <- change_parametrization(p=p, M=M, d=d, params=new_params, cond_dist=cond_dist,
-                                           weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                           identification=identification, AR_constraints=AR_constraints,
-                                           mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                                           B_constraints=B_constraints, change_to="orig") # Change back to orig
-    }
-
     # No data, so returns the model with preliminary param values without estimation.
     message("There is no data for the model, so no estimation was done")
     return(STVAR(data=data, p=p, M=M, d=d, params=new_params, cond_dist=cond_dist,
@@ -580,7 +557,7 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
                            identification=identification, AR_constraints=AR_constraints,
                            mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                            B_constraints=B_constraints, to_return="loglik", check_params=TRUE,
-                           minval=minval, alt_par=alt_par),
+                           minval=minval, alt_par=FALSE),
              error=function(e) minval)
   }
 
@@ -607,14 +584,6 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
                                 control=list(fnscale=-1, maxit=maxit))
   new_params <- final_results$par
   if(print_res) cat(paste0("The log-likelihood after final estimation:   ", round(final_results$value, 3)), "\n")
-
-  if(alt_par) {
-    new_params <- change_parametrization(p=p, M=M, d=d, params=new_params, cond_dist=cond_dist,
-                                         weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                         identification=identification, AR_constraints=AR_constraints,
-                                         mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                                         B_constraints=B_constraints, change_to="orig") # Change back to orig
-  }
 
   # Return the estimated model
   STVAR(data=data, p=p, M=M, d=d, params=new_params, cond_dist=cond_dist,
@@ -661,22 +630,6 @@ fitbsSSTVAR <- function(data, p, M, params,
   identification <- match.arg(identification)
   robust_method <- match.arg(robust_method)
   minval <- get_minval(data)
-  d <- ncol(data)
-
-  if(cond_dist == "ind_Student" || identification == "non-Gaussianity") {
-    if(!is.null(B_constraints) && length(which(B_constraints != 0)) != 0) {
-      alt_par <- FALSE # Sign constraints employed, use normal parametrization
-    } else { # B_constraints not used or only used for zero constraints
-      alt_par <- TRUE # Switch to parametrization with B_1*,...,B_M*
-      params <- change_parametrization(p=p, M=M, d=d, params=params, cond_dist=cond_dist,
-                                       weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                       identification=identification, AR_constraints=AR_constraints,
-                                       mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                                       B_constraints=B_constraints, change_to="alt")
-    }
-  } else {
-    alt_par <- FALSE
-  }
 
   # Function to optimize
   loglik_fn <- function(params) {
@@ -686,7 +639,7 @@ fitbsSSTVAR <- function(data, p, M, params,
                            identification=identification, AR_constraints=AR_constraints,
                            mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                            B_constraints=B_constraints, other_constraints=other_constraints, to_return="loglik",
-                           check_params=TRUE, minval=minval, alt_par=alt_par),
+                           check_params=TRUE, minval=minval, alt_par=FALSE),
              error=function(e) minval)
   }
 
@@ -708,17 +661,7 @@ fitbsSSTVAR <- function(data, p, M, params,
   ## Estimation by the variable metric algorithm..
   final_results <- stats::optim(par=params, fn=loglik_fn, gr=loglik_grad, method="BFGS",
                                 control=list(fnscale=-1, maxit=maxit))
-  params <- final_results$par
-
-  # Change back to original parametrization
-  if(alt_par) {
-    new_params <- change_parametrization(p=p, M=M, d=d, params=params, cond_dist=cond_dist,
-                                         weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                         identification=identification, AR_constraints=AR_constraints,
-                                         mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                                         B_constraints=B_constraints, change_to="orig") # Change back to orig
-  }
 
   ## Return the estimate
-  params
+  final_results$par
 }
