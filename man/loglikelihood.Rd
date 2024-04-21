@@ -22,7 +22,7 @@ loglikelihood(
   B_constraints = NULL,
   other_constraints = NULL,
   to_return = c("loglik", "tw", "loglik_and_tw", "terms", "regime_cmeans",
-    "total_cmeans", "total_ccovs"),
+    "total_cmeans", "total_ccovs", "B_t"),
   check_params = TRUE,
   indt_R = FALSE,
   alt_par = FALSE,
@@ -239,6 +239,8 @@ to the border of the parameter space than this are considered to be "outside" th
     \item{If \code{to_return=="total_cmeans"}:}{a \code{[n_obs-p, d]} matrix containing the conditional means of the process.}
     \item{If \code{to_return=="total_ccovs"}:}{an \code{[d, d, n_obs-p]} array containing the conditional covariance matrices of
       the process.}
+    \item{If \code{to_return=="B_t"}:}{an \code{[d, d, n_obs-p]} array containing the impact matrices \eqn{B_t} of
+      the process. Available only for models with \code{cond_dist="ind_Student"}.}
   }
 }
 \description{
