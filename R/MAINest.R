@@ -442,19 +442,19 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                                                                        cond_dist=cond_dist,
                                                                        identification="reduced_form"))
   }
-  # # Sort and sign change the columns of the impact matrices if cond_dist == "ind_Student"
-  if(cond_dist == "ind_Student") {
-    params <- sort_impactmats(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                              cond_dist=cond_dist, AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                              weight_constraints=weight_constraints)
-    all_estimates <- lapply(all_estimates, function(pars) sort_impactmats(p=p, M=M, d=d, params=pars,
-                                                                          weight_function=weight_function,
-                                                                          weightfun_pars=weightfun_pars,
-                                                                          cond_dist=cond_dist,
-                                                                          AR_constraints=AR_constraints,
-                                                                          mean_constraints=mean_constraints,
-                                                                          weight_constraints=weight_constraints))
-  }
+  # # # Sort and sign change the columns of the impact matrices if cond_dist == "ind_Student"
+  # if(cond_dist == "ind_Student") {
+  #   params <- sort_impactmats(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
+  #                             cond_dist=cond_dist, AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+  #                             weight_constraints=weight_constraints)
+  #   all_estimates <- lapply(all_estimates, function(pars) sort_impactmats(p=p, M=M, d=d, params=pars,
+  #                                                                         weight_function=weight_function,
+  #                                                                         weightfun_pars=weightfun_pars,
+  #                                                                         cond_dist=cond_dist,
+  #                                                                         AR_constraints=AR_constraints,
+  #                                                                         mean_constraints=mean_constraints,
+  #                                                                         weight_constraints=weight_constraints))
+  # }
 
 
   if(NEWTONresults[[which_best_fit]]$convergence == 1) {
