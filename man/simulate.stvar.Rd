@@ -115,7 +115,7 @@ fit12 <- STVAR(data=gdpdef, p=1, M=2, params=params12, weight_function="logistic
 # then simulates a number of observations from the regime for a "burn-in" period,
 # and finally takes the last p observations generated from the regime as the initial
 # values for the simulation from the STVAR model:
-sim3 <- simulate(fit12, nsim=100, seed=1, init_regime=2, burn_in=1000)
+sim3 <- simulate(fit12, nsim=100, init_regime=1, burn_in=1000)
 plot.ts(sim3$sample) # Sample
 plot.ts(sim3$transition_weights) # Transition weights
 }

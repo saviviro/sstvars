@@ -19,8 +19,8 @@
 #'   generalized impulse responses be calculated.
 #' @param R1 the number of repetitions used to estimate GIRF for each initial
 #'   value.
-#' @param R2 the number of initial values to be drawn from a stationary
-#'   distribution of the process or of a specific regime? The confidence bounds
+#' @param R2 the number of initial values to use, i.e., to draw from \code{init_regime}
+#'   if \code{init_values} are not specified. The confidence bounds
 #'   will be sample quantiles of the GIRFs based on different initial values.
 #'   Ignored if the argument \code{init_value} is specified.
 #' @param which_cumulative a numeric vector with values in \eqn{1,...,d}
@@ -42,6 +42,11 @@
 #'   of peak response in absolute value. Ignored if \code{scale} is not specified.
 #' @param scale_horizon If \code{scale_type == "peak"} what the maximum horizon up
 #'   to which peak response is expected? Scaling won't based on values after this.
+#' @param init_values a size \code{[p, d, R2]} array specifying the initial values in each slice
+#'   for each Monte Carlo repetition, where d is the number of time series in the system and \code{R2}
+#'   is an argument of this function. In each slice, the \strong{last} row will be used as initial values
+#'   for the first lag, the second last row for second lag etc. If not specified, initial values will be
+#'   drawn from the regime specified in \code{init_regimes}.
 #' @param ci a numeric vector with elements in \eqn{(0, 1)} specifying the
 #'   confidence levels of the confidence intervals.
 #' @param ncores the number CPU cores to be used in parallel computing. Only
@@ -105,7 +110,7 @@
 #'  # GIRF for one-standard-error positive structural shocks, N=30 steps ahead,
 #'  # with the inital values drawn from the first regime.
 #'  girf1 <- GIRF(mod32logt, which_shocks=1:2, shock_size=1, N=30, R1=50, R2=50,
-#'   init_regime=1)
+#'   init_regime=2, use_parallel=FALSE)
 #'  print(girf1) # Print the results
 #'  plot(girf1) # Plot the GIRFs
 #'
@@ -127,7 +132,8 @@
 
 GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_regime=1, init_values=NULL,
                  which_cumulative=numeric(0), scale=NULL, scale_type=c("instant", "peak"), scale_horizon=N,
-                 ci=c(0.95, 0.80), ncores=2, burn_in=1000, exo_weights=NULL, seeds=NULL, use_parallel=TRUE) {
+                 ci=c(0.95, 0.80), ncores=2, burn_in=1000, exo_weights=NULL, seeds=NULL,
+                 use_parallel=TRUE) {
   check_stvar(stvar)
   scale_type <- match.arg(scale_type)
   if(stvar$model$identification == "reduced_form" && stvar$model$cond_dist != "ind_Student") {
@@ -143,6 +149,9 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
   identification <- stvar$model$identification
   stopifnot(N %% 1 == 0 && N > 0)
   stopifnot(scale_horizon %in% 0:N)
+  if(!is.null(init_values)) {
+    stopifnot(is.array(init_values) && dim(init_values) == c(p, d, R2))
+  }
 
   # Check the exogenous weights given for simulation
   if(stvar$model$weight_function == "exogenous") {
@@ -195,8 +204,8 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
   }
 
   # Function that estimates GIRF
-  get_one_girf <- function(shock_numb, shock_size, seed) {
-    simulate.stvar(stvar, nsim=N+1, seed=seed, init_values=init_values, init_regime=init_regime, ntimes=R1,
+  get_one_girf <- function(shock_numb, shock_size, seed, rep_numb) {
+    simulate.stvar(stvar, nsim=N+1, seed=seed, init_values=init_values[, , rep_numb], init_regime=init_regime, ntimes=R1,
                    burn_in=burn_in, exo_weights=exo_weights, girf_pars=list(shock_numb=shock_numb, shock_size=shock_size))
   }
 
@@ -224,13 +233,15 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
     for(i1 in 1:length(which_shocks)) {
       cat(paste0("Estimating GIRFs for structural shock ", which_shocks[i1], "..."), "\n")
       GIRF_shocks[[i1]] <- pbapply::pblapply(1:R2, function(i2) get_one_girf(shock_numb=which_shocks[i1],
-                                                                             shock_size=shock_size, seed=seeds[i2]), cl=cl)
+                                                                             shock_size=shock_size, seed=seeds[i2],
+                                                                             rep_numb=i2), cl=cl)
     }
     parallel::stopCluster(cl=cl)
   } else { # No parallel computing
     for(i1 in 1:length(which_shocks)) {
       GIRF_shocks[[i1]] <- lapply(1:R2, function(i2) get_one_girf(shock_numb=which_shocks[i1],
-                                                                  shock_size=shock_size, seed=seeds[i2]))
+                                                                  shock_size=shock_size, seed=seeds[i2],
+                                                                  rep_numb=i2))
     }
   }
 
@@ -424,6 +435,9 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
   p <- stvar$model$p
   M <- stvar$model$M
   d <- stvar$model$d
+  if(!is.null(init_values)) {
+    stopifnot(is.array(init_values) && dim(init_values) == c(p, d, R2))
+  }
 
   # Check the exogenous weights given for simulation
   if(stvar$model$weight_function == "exogenous") {
@@ -453,8 +467,8 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
     if(!is.matrix(init_values)) stop("init_values must be a numeric matrix")
     if(anyNA(init_values)) stop("init_values contains NA values")
     if(ncol(init_values) != d | nrow(init_values) < p) stop("init_values must contain d columns and at least p rows")
-    init_values <- init_values[(nrow(init_values) - p + 1):nrow(init_values), , drop=FALSE]
-    all_initvals <- array(init_values, dim=c(p, d, R2))
+    #init_values <- init_values[(nrow(init_values) - p + 1):nrow(init_values), , drop=FALSE]
+    #all_initvals <- array(init_values, dim=c(p, d, R2)) # Init vals are now always in this form
   }
   if(!is.null(seeds) && length(seeds) != R2) stop("The argument 'seeds' has wrong length!")
   stopifnot(length(shock_size) == 1)

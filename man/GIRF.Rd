@@ -52,8 +52,8 @@ generalized impulse responses be calculated.}
 \item{R1}{the number of repetitions used to estimate GIRF for each initial
 value.}
 
-\item{R2}{the number of initial values to be drawn from a stationary
-distribution of the process or of a specific regime? The confidence bounds
+\item{R2}{the number of initial values to use, i.e., to draw from \code{init_regime}
+if \code{init_values} are not specified. The confidence bounds
 will be sample quantiles of the GIRFs based on different initial values.
 Ignored if the argument \code{init_value} is specified.}
 
@@ -63,10 +63,11 @@ from the stationary distribution of the specific regime. Due to the lack of
 knowledge of the stationary distribution, models with other than Gaussian conditional distribution
 use a simulation procedure with a burn-in period. See the details section.}
 
-\item{init_values}{a size \eqn{(pxd)} matrix specifying the initial values, where d is the number
-of time series in the system. The \strong{last} row will be used as initial values for the first lag,
-the second last row for second lag etc. If not specified, initial values will be drawn from
-the regime specified in \code{init_regimes} (for Gaussian models only).}
+\item{init_values}{a size \code{[p, d, R2]} array specifying the initial values in each slice
+for each Monte Carlo repetition, where d is the number of time series in the system and \code{R2}
+is an argument of this function. In each slice, the \strong{last} row will be used as initial values
+for the first lag, the second last row for second lag etc. If not specified, initial values will be
+drawn from the regime specified in \code{init_regimes}.}
 
 \item{which_cumulative}{a numeric vector with values in \eqn{1,...,d}
 (\code{d=ncol(data)}) specifying which the variables for which the impulse
@@ -184,7 +185,7 @@ The confidence bounds reflect uncertainty about the initial state (but
  # GIRF for one-standard-error positive structural shocks, N=30 steps ahead,
  # with the inital values drawn from the first regime.
  girf1 <- GIRF(mod32logt, which_shocks=1:2, shock_size=1, N=30, R1=50, R2=50,
-  init_regime=1)
+  init_regime=2, use_parallel=FALSE)
  print(girf1) # Print the results
  plot(girf1) # Plot the GIRFs
 

@@ -83,7 +83,7 @@
 #' # then simulates a number of observations from the regime for a "burn-in" period,
 #' # and finally takes the last p observations generated from the regime as the initial
 #' # values for the simulation from the STVAR model:
-#' sim3 <- simulate(fit12, nsim=100, seed=1, init_regime=2, burn_in=1000)
+#' sim3 <- simulate(fit12, nsim=100, init_regime=1, burn_in=1000)
 #' plot.ts(sim3$sample) # Sample
 #' plot.ts(sim3$transition_weights) # Transition weights
 #' @export
@@ -530,10 +530,9 @@ simulate_from_regime <- function(stvar, regime=1, nsim=1, init_values=NULL, use_
                         mean_constraints=stvar$model$mean_constraints, weight_constraints=stvar$model$weight_constraints,
                         B_constraints=stvar$model$B_constraints, to_return="tw")
     tw <- tw[(nsim + 1):(nrow(tw)), regime] # Take the transition weights of the last 100 observations
-    twmax_ind <- which(abs(tw - max(tw)) < 1e-10)[1] # Ind with highest tw
-    samp <- ret[(nsim+1):nrow(ret), , drop=FALSE] # Includes the first p obs
-    twmax_ind_in_samp <- twmax_ind + p
-    ret <- samp[(twmax_ind - p):(twmax_ind_in_samp - 1), , drop=FALSE] # Return the previous p obs from the one with highest tw
+    twmax_ind <- which(abs(tw - max(tw)) < 0.001)[1] # Ind with highest tw, but not exactly to avoid overly skewed results
+    samp <- ret[(nsim-p+1):nrow(ret), , drop=FALSE] # -p so the twmax_ind is tw_ind - p + 1
+    ret <- samp[twmax_ind:(twmax_ind + p - 1), , drop=FALSE] # Return the previous p obs from the one with highest tw
   }
   ret
 }

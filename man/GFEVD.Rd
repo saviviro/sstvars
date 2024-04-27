@@ -62,10 +62,11 @@ from the stationary distribution of the specific regime. Due to the lack of
 knowledge of the stationary distribution, models with other than Gaussian conditional distribution
 use a simulation procedure with a burn-in period. See the details section.}
 
-\item{init_values}{a size \eqn{(pxd)} matrix specifying the initial values, where d is the number
-of time series in the system. The \strong{last} row will be used as initial values for the first lag,
-the second last row for second lag etc. If not specified, initial values will be drawn from
-the regime specified in \code{init_regimes} (for Gaussian models only).}
+\item{init_values}{a size \code{[p, d, R2]} array specifying the initial values in each slice
+for each Monte Carlo repetition, where d is the number of time series in the system and \code{R2}
+is an argument of this function. In each slice, the \strong{last} row will be used as initial values
+for the first lag, the second last row for second lag etc. If not specified, initial values will be
+drawn from the regime specified in \code{init_regimes}.}
 
 \item{which_cumulative}{a numeric vector with values in \eqn{1,...,d}
 (\code{d=ncol(data)}) specifying which the variables for which the impulse
