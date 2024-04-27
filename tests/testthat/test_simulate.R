@@ -117,13 +117,13 @@ test_that("simulate.stvar works correctly", {
   # Student
   expect_equal(s322t$sample[3,], c(0.4749844, 0.6297811), tol=1e-4)
   expect_equal(s322t$transition_weights[1,], c(0.002759205, 0.997240795), tol=1e-4)
-  expect_equal(s322t_2$sample[3,], c(-0.5229988, 0.3237579), tol=1e-4)
-  expect_equal(s322t_2$transition_weights[1,], c(0.01405111, 0.98594889), tol=1e-4)
+  expect_equal(s322t_2$sample[3,], c(1.3706210, 0.4015493), tol=1e-4)
+  expect_equal(s322t_2$transition_weights[1,], c(0.05456173, 0.94543827), tol=1e-4)
 
   # ind_Student
-  expect_equal(s122exocit$sample[3,], c(2.6418525, 0.4479334), tol=1e-4)
+  expect_equal(s122exocit$sample[3,], c(-0.10082676, -0.04832091), tol=1e-4)
   expect_equal(s122exocit$transition_weights, cbind(c(0.9, 0.5, 0.2), c(0.1, 0.5, 0.8)), tol=1e-4)
-  expect_equal(s322thresit$sample[4,], c(1.329187, -0.290043), tol=1e-4)
+  expect_equal(s322thresit$sample[4,], c(1.841653126, 0.007840574), tol=1e-4)
   expect_equal(s322thresit$transition_weights[4,], c(1, 0), tol=1e-4)
 
   # Structural
@@ -136,16 +136,16 @@ test_that("simulate.stvar works correctly", {
 
 
 test_that("simulate_from_regime works correctly", {
-  set.seed(1); sim_reg112_1 <- simulate_from_regime(mod112relg, regime=1, nsim=1)
-  set.seed(1); sim_reg112_2 <- simulate_from_regime(mod112relg, regime=1, nsim=1, init_values=gdpdef)
-  set.seed(2); sim_reg122_1 <- simulate_from_regime(mod122relg, regime=1, nsim=2)
-  set.seed(3); sim_reg122_2 <- simulate_from_regime(mod122relg, regime=2, nsim=3)
-  set.seed(4); sim_reg322_1 <- simulate_from_regime(mod322log, regime=1, nsim=4)
-  set.seed(5); sim_reg322t_1 <- simulate_from_regime(mod322logt, regime=2, nsim=5)
-  set.seed(5); sim_regs322tr_1 <- simulate_from_regime(mod322logtr_2_1, regime=2, nsim=1)
-  set.seed(6); sim_regs122relgsh_1 <- simulate_from_regime(mod122relgsh, regime=1, nsim=6)
-  set.seed(1); sim_reg122exocit_1 <- simulate_from_regime(mod122exocit, regime=2, nsim=2)
-  set.seed(2); sim_reg322thresit_1 <- simulate_from_regime(mod32thresit, regime=1, nsim=3)
+  set.seed(1); sim_reg112_1 <- simulate_from_regime(mod112relg, regime=1, nsim=1, use_transweights=FALSE)
+  set.seed(1); sim_reg112_2 <- simulate_from_regime(mod112relg, regime=1, nsim=1, init_values=gdpdef, use_transweights=FALSE)
+  set.seed(2); sim_reg122_1 <- simulate_from_regime(mod122relg, regime=1, nsim=2, use_transweights=FALSE)
+  set.seed(3); sim_reg122_2 <- simulate_from_regime(mod122relg, regime=2, nsim=3, use_transweights=FALSE)
+  set.seed(4); sim_reg322_1 <- simulate_from_regime(mod322log, regime=1, nsim=4, use_transweights=FALSE)
+  set.seed(5); sim_reg322t_1 <- simulate_from_regime(mod322logt, regime=2, nsim=5,  use_transweights=TRUE)
+  set.seed(5); sim_regs322tr_1 <- simulate_from_regime(mod322logtr_2_1, regime=2, nsim=1, use_transweights=FALSE)
+  set.seed(6); sim_regs122relgsh_1 <- simulate_from_regime(mod122relgsh, regime=1, nsim=6, use_transweights=TRUE)
+  set.seed(1); sim_reg122exocit_1 <- simulate_from_regime(mod122exocit, regime=2, nsim=2, use_transweights=FALSE)
+  set.seed(2); sim_reg322thresit_1 <- simulate_from_regime(mod32thresit, regime=1, nsim=5, use_transweights=TRUE)
 
   # Relative_dens Gaussian STVAR
   expect_equal(sim_reg112_1[1,], c(0.2634843, 0.8543901), tol=1e-4)
@@ -157,13 +157,13 @@ test_that("simulate_from_regime works correctly", {
   expect_equal(sim_reg322_1[4,], c(-0.3290652, 1.7006393), tol=1e-4)
 
   # Student
-  expect_equal(sim_reg322t_1[5,], c(1.7992914, 0.7365507), tol=1e-4)
+  expect_equal(sim_reg322t_1[3,], c(0.07970387, 0.54273994), tol=1e-4)
 
   # ind_Student
   expect_equal(sim_reg122exocit_1[2,], c(2.5533783, 0.5194208), tol=1e-4)
-  expect_equal(sim_reg322thresit_1[3,], c(1.0182935, 0.5337868), tol=1e-4)
+  expect_equal(sim_reg322thresit_1[3,], c(1.0536138, 0.5630061), tol=1e-4)
 
   # Structural
   expect_equal(sim_regs322tr_1[1,], c(0.05300774, 0.8396193), tol=1e-4)
-  expect_equal(sim_regs122relgsh_1[6,], c(2.0474385, 0.1348014), tol=1e-4)
+  expect_equal(sim_regs122relgsh_1[1,], c(1.143471, 0.678165), tol=1e-4)
 })

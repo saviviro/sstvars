@@ -43,8 +43,7 @@ covariance matrix of the structural error is an identity matrix.}
   \item{\code{"data"}:}{Estimate the GIRF for all the possible length \eqn{p} histories in the data.}
   \item{\code{"random"}:}{Estimate the GIRF for several random initial values generated from the a specific regime
      specified by the argument \code{init_regimes}. The number of initial values is set with the argument \code{R2}.}
-  \item{\code{"fixed"}:}{Estimate the GIRF for a fixed initial value only, which is specified with the argument
-     \code{init_values}.}
+  \item{\code{"fixed"}:}{Estimate the GIRF for the initial values specified with the argument \code{init_values}.}
 }}
 
 \item{use_data_shocks}{\code{TRUE} for a special feature in which for every possible length \eqn{p} history in the data,
@@ -54,13 +53,13 @@ See the details section.}
 \item{R1}{the number of repetitions used to estimate GIRF for each initial
 value.}
 
-\item{R2}{the number of initial values to be drawn if \code{initval_type="random"}.}
+\item{R2}{the number of initial values to be drawn/used if \code{initval_type="random"} or \code{"fixed"}.}
 
 \item{init_regime}{an integer in \eqn{1,...,M} specifying the regime from which
 the initial values should be generated from. The initial values will be generated
 from the stationary distribution of the specific regime. Due to the lack of
 knowledge of the stationary distribution, models with other than Gaussian conditional distribution
-use a simulation procedure with a burn-in period. See the details section.}
+uses a simulation procedure with a burn-in period. See the details section.}
 
 \item{init_values}{a size \code{[p, d, R2]} array specifying the initial values in each slice
 for each Monte Carlo repetition, where d is the number of time series in the system and \code{R2}

@@ -14,7 +14,7 @@
 #'   the initial values should be generated from. The initial values will be generated
 #'   from the stationary distribution of the specific regime. Due to the lack of
 #'   knowledge of the stationary distribution, models with other than Gaussian conditional distribution
-#'   use a simulation procedure with a burn-in period. See the details section.
+#'   uses a simulation procedure with a burn-in period. See the details section.
 #' @param ntimes how many sets of simulations should be performed?
 #' @param burn_in Burn-in period for simulating initial values from a regime when \code{cond_dist!="Gaussian"}.
 #'  See the details section.
@@ -32,6 +32,7 @@
 #'   we simulate a large number observations from that regime as specified in the argument \code{burn_in}. Then, we simulate
 #'   \eqn{p + 100} observations more after the burn in period, and for the \eqn{100} observations calculate the transition
 #'   weights for them and take the consecutive \eqn{p} observations that yield the highest transition weight for the given regime.
+#'   For models with exogenous transition weights, takes just the last \eqn{p} observations after the burn-in period.
 #'
 #'   The argument \code{ntimes} is intended for forecasting, which is used by the predict method (see \code{?predict.stvar}).
 #' @return If \code{drop==TRUE} and \code{ntimes==1} (default): \code{$sample}, \code{$component}, and \code{$transition_weights}
@@ -521,7 +522,7 @@ simulate_from_regime <- function(stvar, regime=1, nsim=1, init_values=NULL, use_
   # Simulate and return the sample
   tmp_sim <- simulate.stvar(new_stvar, nsim=ifelse(use_transweights, nsim+100+p, nsim), ntimes=1, init_values=init_values, drop=TRUE)
   ret <- tmp_sim$sample # Sample
-  if(use_transweights) {
+  if(use_transweights && stvar$model$weight_function != "exogenous") {
     # Calculate the transition weights, nrow = nrow(ret) - p, as the first p values were used is initial values
     tw <- loglikelihood(data=ret, p=stvar$model$p, M=stvar$model$M, params=stvar$params,
                         weight_function=stvar$model$weight_function, weightfun_pars=stvar$model$weightfun_pars,

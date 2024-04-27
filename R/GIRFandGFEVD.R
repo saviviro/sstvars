@@ -150,7 +150,7 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
   stopifnot(N %% 1 == 0 && N > 0)
   stopifnot(scale_horizon %in% 0:N)
   if(!is.null(init_values)) {
-    stopifnot(is.array(init_values) && dim(init_values) == c(p, d, R2))
+    stopifnot(is.array(init_values) && all(dim(init_values) == c(p, d, R2)))
   }
 
   # Check the exogenous weights given for simulation
@@ -175,7 +175,6 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
     stopifnot(all(which_shocks %in% 1:d))
     which_shocks <- unique(which_shocks)
   }
-  if(!is.null(init_values)) R2 <- 1
   if(!is.null(seeds) && length(seeds) != R2) stop("The argument 'seeds' needs be NULL or a vector of length 'R2'")
   stopifnot(init_regime %in% 1:M)
   stopifnot(length(ci) > 0 && all(ci > 0 & ci < 1))
@@ -205,8 +204,14 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 
   # Function that estimates GIRF
   get_one_girf <- function(shock_numb, shock_size, seed, rep_numb) {
-    simulate.stvar(stvar, nsim=N+1, seed=seed, init_values=init_values[, , rep_numb], init_regime=init_regime, ntimes=R1,
-                   burn_in=burn_in, exo_weights=exo_weights, girf_pars=list(shock_numb=shock_numb, shock_size=shock_size))
+    if(!is.null(init_values)) {
+      init_v <- matrix(init_values[, , rep_numb], nrow=p, ncol=d)
+    } else {
+      init_v <- NULL
+    }
+    simulate.stvar(stvar, nsim=N+1, seed=seed, init_values=init_v, init_regime=init_regime,
+                   ntimes=R1, burn_in=burn_in, exo_weights=exo_weights,
+                   girf_pars=list(shock_numb=shock_numb, shock_size=shock_size))
   }
 
   GIRF_shocks <- vector("list", length=length(which_shocks)) # Storage for the GIRFs [[shock]]
@@ -334,13 +339,12 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 #'     \item{\code{"data"}:}{Estimate the GIRF for all the possible length \eqn{p} histories in the data.}
 #'     \item{\code{"random"}:}{Estimate the GIRF for several random initial values generated from the a specific regime
 #'        specified by the argument \code{init_regimes}. The number of initial values is set with the argument \code{R2}.}
-#'     \item{\code{"fixed"}:}{Estimate the GIRF for a fixed initial value only, which is specified with the argument
-#'        \code{init_values}.}
+#'     \item{\code{"fixed"}:}{Estimate the GIRF for the initial values specified with the argument \code{init_values}.}
 #'   }
 #' @param use_data_shocks \code{TRUE} for a special feature in which for every possible length \eqn{p} history in the data,
 #'   the GFEVD is estimated for a shock that has the sign and size of the corresponding structural shock recovered from the data.
 #'   See the details section.
-#' @param R2 the number of initial values to be drawn if \code{initval_type="random"}.
+#' @param R2 the number of initial values to be drawn/used if \code{initval_type="random"} or \code{"fixed"}.
 #' @param seeds a numeric vector containing the random number generator seed for estimation
 #'   of each GIRF. Should have the length...
 #'   \itemize{
@@ -436,7 +440,7 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
   M <- stvar$model$M
   d <- stvar$model$d
   if(!is.null(init_values)) {
-    stopifnot(is.array(init_values) && dim(init_values) == c(p, d, R2))
+    stopifnot(is.array(init_values) && all(dim(init_values) == c(p, d, R2)))
   }
 
   # Check the exogenous weights given for simulation
@@ -461,14 +465,10 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
     stopifnot(init_regime%in% 1:M)
     all_initvals <- array(dim=c(1, 1, R2)) # This won't be used. NULL init_values will be used.
   } else if(initval_type == "fixed") {
-    R2 <- 1
     if(is.null(init_values)) stop(paste0("Initial values were not specified! Specify the initial values with the argument",
                                          "'init_values' or choose another 'initval_type'."))
-    if(!is.matrix(init_values)) stop("init_values must be a numeric matrix")
     if(anyNA(init_values)) stop("init_values contains NA values")
-    if(ncol(init_values) != d | nrow(init_values) < p) stop("init_values must contain d columns and at least p rows")
-    #init_values <- init_values[(nrow(init_values) - p + 1):nrow(init_values), , drop=FALSE]
-    #all_initvals <- array(init_values, dim=c(p, d, R2)) # Init vals are now always in this form
+    all_initvals <- init_values
   }
   if(!is.null(seeds) && length(seeds) != R2) stop("The argument 'seeds' has wrong length!")
   stopifnot(length(shock_size) == 1)

@@ -61,7 +61,7 @@ Ignored if the argument \code{init_value} is specified.}
 the initial values should be generated from. The initial values will be generated
 from the stationary distribution of the specific regime. Due to the lack of
 knowledge of the stationary distribution, models with other than Gaussian conditional distribution
-use a simulation procedure with a burn-in period. See the details section.}
+uses a simulation procedure with a burn-in period. See the details section.}
 
 \item{init_values}{a size \code{[p, d, R2]} array specifying the initial values in each slice
 for each Monte Carlo repetition, where d is the number of time series in the system and \code{R2}

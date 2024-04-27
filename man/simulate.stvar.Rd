@@ -36,7 +36,7 @@ the regime specified in \code{init_regimes} (for Gaussian models only).}
 the initial values should be generated from. The initial values will be generated
 from the stationary distribution of the specific regime. Due to the lack of
 knowledge of the stationary distribution, models with other than Gaussian conditional distribution
-use a simulation procedure with a burn-in period. See the details section.}
+uses a simulation procedure with a burn-in period. See the details section.}
 
 \item{ntimes}{how many sets of simulations should be performed?}
 
@@ -76,6 +76,7 @@ The stationary distribution of each regime is not known when \code{cond_dist!="G
   we simulate a large number observations from that regime as specified in the argument \code{burn_in}. Then, we simulate
   \eqn{p + 100} observations more after the burn in period, and for the \eqn{100} observations calculate the transition
   weights for them and take the consecutive \eqn{p} observations that yield the highest transition weight for the given regime.
+  For models with exogenous transition weights, takes just the last \eqn{p} observations after the burn-in period.
 
   The argument \code{ntimes} is intended for forecasting, which is used by the predict method (see \code{?predict.stvar}).
 }
