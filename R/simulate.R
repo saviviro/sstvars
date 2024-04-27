@@ -29,8 +29,9 @@
 #' @details The stationary distribution of each regime is not known when \code{cond_dist!="Gaussian"}. Therefore, when using
 #'   \code{init_regime} to simulate the initial values from a given regime, we employ the following simulation procedure to
 #'   obtain the initial values. First, we set the initial values to the unconditional mean of the specified regime. Then,
-#'   we simulate a large number observations from that regime as specified in the argument \code{burn_in}. The first \eqn{p}
-#'   observations obtained after the burn-in period are then set as the initial values obtained from the specified regime.
+#'   we simulate a large number observations from that regime as specified in the argument \code{burn_in}. Then, we simulate
+#'   \eqn{p + 100} observations more after the burn in period, and for the \eqn{100} observations calculate the transition
+#'   weights for them and take the consecutive \eqn{p} observations that yield the highest transition weight for the given regime.
 #'
 #'   The argument \code{ntimes} is intended for forecasting, which is used by the predict method (see \code{?predict.stvar}).
 #' @return If \code{drop==TRUE} and \code{ntimes==1} (default): \code{$sample}, \code{$component}, and \code{$transition_weights}
@@ -204,7 +205,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
       init_values <- matrix(mu + L%*%rnorm(d*p), nrow=p, ncol=d, byrow=TRUE) # i:th row for the i:th length d random vector
     } else {
       # Generate the initial values using the simulation procedure with a burn-in period.
-      init_values <- simulate_from_regime(stvar=stvar, regime=init_regime, nsim=burn_in)
+      init_values <- simulate_from_regime(stvar=stvar, regime=init_regime, nsim=burn_in, use_transweight=TRUE)
     }
   }
   # Take the last p rows of initial values as the initial values
@@ -437,17 +438,26 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
 #'   of time series in the system. The \strong{last} row will be used as initial values for the first lag,
 #'   the second last row for second lag etc. If not specified, initial values are set to the unconditional
 #'   mean of the regime.
+#' @param use_transweights if \code{TRUE} will calculate the transition weights of the provided model, simulate
+#'   \eqn{p + 100} observations more, calculate the transition weights for the last \eqn{100} observations, and
+#'   return the the consecutive \eqn{p} observations have the highest transition weight for the specified regime.
 #' @details Does not take random number generator seed as an argument to avoid unwanted behavior,
 #'    because \code{simulate_from_regime} is mostly called from \code{simulate.stvar}
 #'    that takes a seed as its argument, and \code{simulate_from_regime} calls \code{simulate.stvar} to simulate the observations.
 #'    Specifically, \code{simulate_from_regime} generates a STVAR model from the given regime, sets up the initial values to the
 #'    (if not specified), and then calls \code{simulate.stvar} accordingly.
-#' @return Returns a \eqn{(nsim \times d)} matrix such that the \eqn{t}th row contains the \eqn{t}th simulated observation.
+#' @return
+#'   \describe{
+#'     \item{If \code{use_transweights=FALSE}:}{Returns a \eqn{(nsim \times d)} matrix such that the \eqn{t}th row
+#'       contains the \eqn{t}th simulated observation.}
+#'     \item{If \code{use_transweights=TRUE}:}{Returns a \eqn{(p \times d)} such that the \eqn{t}th row constrains
+#'       the \eqn{t}th observations.}
+#'   }
 #' @seealso \code{\link{simulate.stvar}}
 #' @inherit simulate.stvar references
 #' @keywords internal
 
-simulate_from_regime <- function(stvar, regime=1, nsim=1, init_values=NULL) {
+simulate_from_regime <- function(stvar, regime=1, nsim=1, init_values=NULL, use_transweights=TRUE) {
   check_stvar(stvar)
 
   # Model specifications
@@ -509,6 +519,21 @@ simulate_from_regime <- function(stvar, regime=1, nsim=1, init_values=NULL) {
   } # else: simulate.stvar takes care of hand-specified initial values
 
   # Simulate and return the sample
-  tmp_sim <- simulate.stvar(new_stvar, nsim=nsim, ntimes=1, init_values=init_values, drop=TRUE)
-  tmp_sim$sample
+  tmp_sim <- simulate.stvar(new_stvar, nsim=ifelse(use_transweights, nsim+100+p, nsim), ntimes=1, init_values=init_values, drop=TRUE)
+  ret <- tmp_sim$sample # Sample
+  if(use_transweights) {
+    # Calculate the transition weights, nrow = nrow(ret) - p, as the first p values were used is initial values
+    tw <- loglikelihood(data=ret, p=stvar$model$p, M=stvar$model$M, params=stvar$params,
+                        weight_function=stvar$model$weight_function, weightfun_pars=stvar$model$weightfun_pars,
+                        cond_dist=stvar$model$cond_dist, parametrization=stvar$model$parametrization,
+                        identification=stvar$model$identification, AR_constraints=stvar$model$AR_constraints,
+                        mean_constraints=stvar$model$mean_constraints, weight_constraints=stvar$model$weight_constraints,
+                        B_constraints=stvar$model$B_constraints, to_return="tw")
+    tw <- tw[(nsim + 1):(nrow(tw)), regime] # Take the transition weights of the last 100 observations
+    twmax_ind <- which(abs(tw - max(tw)) < 1e-10)[1] # Ind with highest tw
+    samp <- ret[(nsim+1):nrow(ret), , drop=FALSE] # Includes the first p obs
+    twmax_ind_in_samp <- twmax_ind + p
+    ret <- samp[(twmax_ind - p):(twmax_ind_in_samp - 1), , drop=FALSE] # Return the previous p obs from the one with highest tw
+  }
+  ret
 }

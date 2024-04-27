@@ -4,7 +4,13 @@
 \alias{simulate_from_regime}
 \title{Simulate observations from a regime of a STVAR model}
 \usage{
-simulate_from_regime(stvar, regime = 1, nsim = 1, init_values = NULL)
+simulate_from_regime(
+  stvar,
+  regime = 1,
+  nsim = 1,
+  init_values = NULL,
+  use_transweights = TRUE
+)
 }
 \arguments{
 \item{stvar}{an object of class \code{'stvar'}.}
@@ -17,9 +23,18 @@ simulate_from_regime(stvar, regime = 1, nsim = 1, init_values = NULL)
 of time series in the system. The \strong{last} row will be used as initial values for the first lag,
 the second last row for second lag etc. If not specified, initial values are set to the unconditional
 mean of the regime.}
+
+\item{use_transweights}{if \code{TRUE} will calculate the transition weights of the provided model, simulate
+\eqn{p + 100} observations more, calculate the transition weights for the last \eqn{100} observations, and
+return the the consecutive \eqn{p} observations have the highest transition weight for the specified regime.}
 }
 \value{
-Returns a \eqn{(nsim \times d)} matrix such that the \eqn{t}th row contains the \eqn{t}th simulated observation.
+\describe{
+    \item{If \code{use_transweights=FALSE}:}{Returns a \eqn{(nsim \times d)} matrix such that the \eqn{t}th row
+      contains the \eqn{t}th simulated observation.}
+    \item{If \code{use_transweights=TRUE}:}{Returns a \eqn{(p \times d)} such that the \eqn{t}th row constrains
+      the \eqn{t}th observations.}
+  }
 }
 \description{
 \code{simulate_from_regime} allows to simulate observations from a single
