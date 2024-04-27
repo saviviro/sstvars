@@ -14,7 +14,7 @@ a univariate time series. Missing values are not supported.}
 }
 \value{
 Returns the data reformed into a \eqn{((n_{obs}-p+1)x(dp))} matrix. The i:th row
-  of the matrix contains the vector \eqn{(y_{i-1}',...,y_{i-p}')} \eqn{((dp)x1)}, where
+  of the matrix contains the vector \eqn{(y_{i-1},...,y_{i-p})} \eqn{((dp)x1)}, where
   \eqn{y_{i}=(y_{1i},...,y_{di})} \eqn{(dx1)}.
 }
 \description{
