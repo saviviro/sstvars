@@ -129,12 +129,15 @@ diagnostic_plot <- function(stvar, type=c("all", "series", "ac", "ch", "dist"), 
       } else { # cond_dist == "ind_Student"
         distpars <- stvar$params[(length(stvar$params) - d + 1):length(stvar$params)] # The last d params are always the df params here
       }
-      dens_fun <- function(y, df) dt(y, df=df)
+      dens_fun <- function(y, df) {
+        multiplier = sqrt((df - 2)/df)
+        (1/multiplier)*dt(y/multiplier, df=df)
+      }
       qqplot_fun <- function(y, df){
         y <- sort(y, decreasing=FALSE) # Sorted sample quantiles
         T_obs <- length(y)
         p <- (1:T_obs - 0.5)/T_obs  # Probs; 0.5 substracted to avoid 0 and 1 that would result in -Inf and Inf
-        t_quantiles <- qt(p, df=df)  # Theoretical quantiles; df taken from parent env
+        t_quantiles <- sqrt((df-2)/df)*qt(p, df=df)  # Theoretical quantiles; df taken from parent env
         plot(x=t_quantiles, y=y, main="", xlab="", ylab="") # Plot samples quantes agains theoretical quants
       }
       qqline_fun <- function(y, df) qqline(y, col="darkred", distribution=function(p) qt(p, df=df))
