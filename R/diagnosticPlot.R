@@ -140,7 +140,7 @@ diagnostic_plot <- function(stvar, type=c("all", "series", "ac", "ch", "dist"), 
         t_quantiles <- sqrt((df-2)/df)*qt(p, df=df)  # Theoretical quantiles; df taken from parent env
         plot(x=t_quantiles, y=y, main="", xlab="", ylab="") # Plot samples quantes agains theoretical quants
       }
-      qqline_fun <- function(y, df) qqline(y, col="darkred", distribution=function(p) qt(p, df=df))
+      qqline_fun <- function(y, df) qqline(y, col="darkred", distribution=function(p) sqrt((df - 2)/df)*qt(p, df=df))
     }
     # Plot histograms with theoretical density
     for(i1 in 1:d) {
