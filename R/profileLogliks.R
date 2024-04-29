@@ -136,6 +136,8 @@ profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precisi
     n_dist_pars <- d # df params
   }
 
+  B_row_ind <- NULL # Initialize
+
   # Go though the parameters in which_pars
   for(i1 in which_pars) {
     pars <- params
@@ -220,11 +222,29 @@ profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precisi
           cum_bc <- c(0, cumsum(d - n_zeros_in_each_column)) # Index in B_m parameters after which a new column in B_m starts
           posb <- i1 - (n_mean_pars + n_ar_pars + (m - 1)*(d^2 - n_zeros/M)) # Index in B_m parameters
           col_ind <- sum(posb > cum_bc) # Above n_zeros is the total number for all B_m, so divided by M
-          while(TRUE) {
-            if(B_row_ind[col_ind] %in% zero_positions[[col_ind]]) {
-              B_row_ind[col_ind] <- B_row_ind[col_ind] + 1
+          if(is.null(B_row_ind)) { # Which row of B_row_ind we are in, if started plotting mid B
+            B_row_ind <- rep(1, times=d) # row for each column
+            if(col_ind > 1) {
+              zeros_in_prev_cols <- sum(n_zeros_in_each_column[1:(col_ind-1)])
             } else {
-              break
+              zeros_in_prev_cols <- 0
+            }
+            row_ind_zeros_included <- posb - (col_ind*d - zeros_in_prev_cols)
+            zero_positions_in_this_row <- zero_positions[[col_ind]]
+            while(TRUE) {
+              if(B_row_ind[col_ind] %in% zero_positions_in_this_row) {
+                B_row_ind[col_ind] <- B_row_ind[col_ind] + 1
+              } else {
+                break
+              }
+            }
+          } else { # Does not start plotting mid B, B_row_ind already exists
+            while(TRUE) {
+              if(B_row_ind[col_ind] %in% zero_positions[[col_ind]]) {
+                B_row_ind[col_ind] <- B_row_ind[col_ind] + 1
+              } else {
+                break
+              }
             }
           }
           main <- substitute(B(foo), list(foo=paste0(B_row_ind[col_ind], ", ", col_ind)))
