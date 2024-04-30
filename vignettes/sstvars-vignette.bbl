@@ -16,29 +16,6 @@ Anderson H, Vahid F (1998).
 \newblock \emph{Journal of Econometrics}, \textbf{84}(1), 1--36.
 \newblock \doi{10.1016/S0304-4076(97)00076-6}.
 
-\bibitem[{Angelini \emph{et~al.}(2019)Angelini, Bacchiocchi, Caggiano, and
-  Fanelli}]{Angelini+Bacchiocchi+Caggiano+Fanelli:2019}
-Angelini G, Bacchiocchi E, Caggiano G, Fanelli L (2019).
-\newblock \enquote{Uncertainty across volatility regimes.}
-\newblock \emph{Journal of Applied Econometrics}, \textbf{34}(3), 437--455.
-\newblock \doi{10.1002/jae.2672}.
-
-\bibitem[{Bacchiocchi \emph{et~al.}(2016)Bacchiocchi, Castelnuovo, and
-  Fanelli}]{Bacchiocchi+Castelnuovo+Fanelli:2016}
-Bacchiocchi E, Castelnuovo E, Fanelli L (2016).
-\newblock \enquote{Gimme a Break! Identification and Estimation of the
-  Macroeconomic Effects of Monetary Policy Shocks in the U.S.}
-\newblock \emph{Melbourne Institute Working Paper No. 31/16}.
-\newblock \doi{10.2139/ssrn.2851316}.
-
-\bibitem[{Bacchiocchi and Fanelli(2015)}]{Bacchiocchi+Fanelli:2015}
-Bacchiocchi E, Fanelli L (2015).
-\newblock \enquote{Identification in Structural Vector Autoregressive models
-  with Structural Changes, with an Application to US Monetary policy.}
-\newblock \emph{Oxford Bulletin of Economics and Statistics}, \textbf{77}(6),
-  761--779.
-\newblock \doi{10.1111/obes.12092}.
-
 \bibitem[{Burgard \emph{et~al.}(2019)Burgard, Neuenkirch, and
   Nöckel}]{Burgard+Neuenkirch+Nockel:2019}
 Burgard J, Neuenkirch M, Nöckel M (2019).
@@ -114,6 +91,14 @@ Koop G, Pesaran M, Potter S (1996).
 \newblock \emph{Journal of Econometrics}, \textbf{74}(1), 119--147.
 \newblock \doi{10.1016/0304-4076(95)01753-4}.
 
+\bibitem[{Lanne \emph{et~al.}(2017)Lanne, Meitz, and
+  Saikkonen}]{Lanne+Meitz+Saikkonen:2017}
+Lanne M, Meitz M, Saikkonen P (2017).
+\newblock \enquote{Identification and estimation of non-Gaussian structural
+  vector autoregressions.}
+\newblock \emph{Journal of Econometrics}, \textbf{196}(2), 288--304.
+\newblock \doi{j.jeconom.2016.06.002}.
+
 \bibitem[{Lanne and Nyberg(2016)}]{Lanne+Nyberg:2016}
 Lanne M, Nyberg H (2016).
 \newblock \enquote{Generalized Forecast Error Variance Decomposition for Linear
@@ -121,6 +106,14 @@ Lanne M, Nyberg H (2016).
 \newblock \emph{Oxford Bulletin of Economics and Statistics}, \textbf{78}(4),
   595--603.
 \newblock \doi{10.1111/obes.12125}.
+
+\bibitem[{Lanne and Virolainen(2024)}]{Lanne+Virolainen:2024}
+Lanne M, Virolainen S (2024).
+\newblock \enquote{A {Gaussian} smooth transition vector autoregressive model:
+  An application to the macroeconomic effects of severe weather shocks.}
+\newblock \emph{Unpublished working paper, available as arXiv:2403.14216}.
+\newblock \doi{10.48550/arXiv.2403.14216}.
+\newblock \urlprefix\url{https://doi.org/10.48550/arXiv.2403.14216}.
 
 \bibitem[{L{\"u}tkepohl(2005)}]{Lutkepohl:2005}
 L{\"u}tkepohl H (2005).
@@ -169,6 +162,13 @@ Rigobon R (2003).
 \newblock \emph{The Review of Economics and Statistics}, \textbf{85}(4),
   777--792.
 \newblock \doi{10.1162/003465303772815727}.
+
+\bibitem[{Saikkonen(2008)}]{Saikkonen:2008}
+Saikkonen P (2008).
+\newblock \enquote{Stability of Regime Switching Error Correction Models under
+  Linear Cointegration.}
+\newblock \emph{Econometric Theory}, \textbf{24}(1), 294--318.
+\newblock \doi{10.1017/S0266466608080122}.
 
 \bibitem[{Solymos and Zawadzki(2020)}]{Solymos+Zawadzki:2020}
 Solymos P, Zawadzki Z (2020).

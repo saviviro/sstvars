@@ -52,8 +52,7 @@ data(gdpdef, package="sstvars")
 # Estimate a reduced form two-regime Student's t STVAR p=3 model with logistic transition weight function using the first
 # lag of the second variable (GDP deflator) as the switching variable. The below estimation is based on 20 estimation
 # rounds with seeds set for reproducibility.
-# (note: many empirical applications require more estimation rounds, e.g., hundreds
-# or thousands).
+# (IMPORTANT: typically empirical applications require more estimation rounds, e.g., hundreds or thousands).
 fit <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="Student",
                 nrounds=20, ncores=2, seeds=1:20)
                 
@@ -121,6 +120,17 @@ fitrec
 fithet <- fitSSTVAR(fit, identification="heteroskedasticity")
 fithet
 
+# Identification by non-Gaussianity available for models indepdent Student's t distribution
+# as the conditional distribution. The reduced form model is then readily identified by
+# non-Gaussianity. Estimate a reduced form model identified by non-Gaussianity: 
+fitindt <- fitSTVAR(gdpdef, p=2, M=2, weight_function="logistic", weightfun_pars=c(2, 1),
+                    cond_dist="ind_Student", nrounds=20, ncores=2, seeds=1:20)
+fitindt
+# Impose overidentying constraint with the argument B_constraints by estimating
+# with fitSSTVARs:
+fitindtb <- fitSSTVAR(fitindt, identification="non-Gaussianity",
+                      B_constraints=matrix(c(NA, NA, 0, NA), nrow=2))
+
 # Reorder the columns of the impact matrix of fithet to the reverse ordering:
 fithet <- reorder_B_columns(fithet, perm=c(2, 1))
 fithet
@@ -128,6 +138,7 @@ fithet
 # Change all signs of the first column of the impact matrix of fithet:
 fithet <- swap_B_signs(fithet, which_to_swap=1)
 fithet
+
 
 # Estimate the generalized impulse response function (GIRF) for the recursively
 # identified model to one-standard-error positive shocks with the starting values
@@ -202,3 +213,6 @@ plot(irf2)
 - Koop G., Pesaran M.H., Potter S.M. (1996). Impulse response analysis
   in nonlinear multivariate models. *Journal of Econometrics*, **74**:1,
   119-147.
+- Lanne M., Virolainen S. 2024. A Gaussian smooth transition vector
+  autoregressive model: An application to the macroeconomic effects of
+  severe weather shocks. Unpublished working paper, available as .
