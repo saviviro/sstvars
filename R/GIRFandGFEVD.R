@@ -400,8 +400,9 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 #'
 #'  # GFEVD for one-standard-error positive structural shocks, N=30 steps ahead,
 #'  # with fix initial values that are the last p observations of the data.
-#'  gfevd2 <- GFEVD(mod32logt, shock_size=1, N=30, initval_type="fixed", R1=100,
-#'    seeds=1, init_values=mod32logt$data)
+#'  gfevd2 <- GFEVD(mod32logt, shock_size=1, N=30, initval_type="fixed", R1=100, R2=1,
+#'   init_values=array(mod32logt$data[(nrow(mod32logt$data) - 2):nrow(mod32logt$data),],
+#'   dim=c(3, 2, 1)), seeds=1)
 #'  plot(gfevd2) # Plot the GFEVD
 #'
 #'  # GFEVD for two-standard-error negative structural shocks, N=50 steps ahead

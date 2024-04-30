@@ -216,3 +216,6 @@ plot(irf2)
 - Lanne M., Virolainen S. 2024. A Gaussian smooth transition vector
   autoregressive model: An application to the macroeconomic effects of
   severe weather shocks. Unpublished working paper, available as .
+- Virolainen S. 2024. Identification by non-Gaussianity in structural
+  threshold and smooth transition vector autoregressive. Unpublished
+  working paper, available in ArXiv.

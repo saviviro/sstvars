@@ -43,7 +43,8 @@ The upper and lower bounds are calculated using the Gripenberg's (1996) branch-a
  in Chang and Blondel (2013). This function can be generally used for approximating the JSR of a set of square matrices, but the
  main intention is STVAR applications (for models created with \code{sstvars}, the function \code{bound_JSR} should be preferred).
  Specifically, Kheifets and Saikkonen (2020) show that if the joint spectral radius of the companion form AR matrices of the regimes
- is smaller than one, the STVAR process is ergodic stationary. Therefore, if the upper bound is smaller than one, the process is
+ is smaller than one, the STVAR process is ergodic stationary. Virolainen (2024) shows the same result for his parametrization of
+ of threshold and smooth transition vector autoregressive models. Therefore, if the upper bound is smaller than one, the process is
  stationary ergodic. However, as the condition is not necessary but sufficient and also because the bound might be too conservative,
  upper bound larger than one does not imply that the process is not ergodic stationary. You can try higher accuracy, and if the bound
  is still larger than one, the result does not tell whether the process is ergodic stationary or not.
@@ -90,6 +91,9 @@ bound_jsr_G(S3, epsilon=0.01, adaptive_eps=FALSE)
      234, 43–60.
    \item I.L. Kheifets, P.J. Saikkonen. 2020. Stationarity and ergodicity of Vector STAR models.
      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
+   \item Virolainen S. 2024. Identification by non-Gaussianity in structural threshold and
+      smooth transition vector autoregressive models. Unpublished working
+      paper, available in ArXiv.
  }
 }
 \seealso{

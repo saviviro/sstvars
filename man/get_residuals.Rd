@@ -214,6 +214,9 @@ Returns a \eqn{(T \times d)} matrix containing...
      \emph{Cambridge University Press}, Cambridge.
    \item Tsay R. 1998. Testing and Modeling Multivariate Threshold Models.
      \emph{Journal of the American Statistical Association}, \strong{93}:443, 1188-1202.
+   \item Virolainen S. 2024. Identification by non-Gaussianity in structural threshold and
+      smooth transition vector autoregressive models. Unpublished working
+      paper, available in ArXiv.
  }
 }
 \keyword{internal}

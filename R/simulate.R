@@ -206,7 +206,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
       init_values <- matrix(mu + L%*%rnorm(d*p), nrow=p, ncol=d, byrow=TRUE) # i:th row for the i:th length d random vector
     } else {
       # Generate the initial values using the simulation procedure with a burn-in period.
-      init_values <- simulate_from_regime(stvar=stvar, regime=init_regime, nsim=burn_in, use_transweight=TRUE)
+      init_values <- simulate_from_regime(stvar=stvar, regime=init_regime, nsim=burn_in, use_transweights=TRUE)
     }
   }
   # Take the last p rows of initial values as the initial values

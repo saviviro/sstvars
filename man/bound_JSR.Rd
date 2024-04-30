@@ -85,12 +85,15 @@ bound_JSR(mod122, epsilon=0.001, adaptive_eps=TRUE)
 }
 \references{
 \itemize{
- \item Chang C-T, Blondel, V.D. 2013. An experimental study of approximation algorithms for the joint spectral radius.
+ \item C-T Chang and V.D. Blondel. 2013 . An experimental study of approximation algorithms for the joint spectral radius.
      \emph{Numerical algorithms}, \strong{64}, 181-202.
    \item Gripenberg, G. 1996. Computing the joint spectral radius. \emph{Linear Algebra and its Applications},
      234, 43–60.
-   \item Kheifets I.L., Saikkonen P.J. 2020. Stationarity and ergodicity of Vector STAR models.
+   \item I.L. Kheifets, P.J. Saikkonen. 2020. Stationarity and ergodicity of Vector STAR models.
      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
+   \item Virolainen S. 2024. Identification by non-Gaussianity in structural threshold and
+      smooth transition vector autoregressive models. Unpublished working
+      paper, available in ArXiv.
  }
 }
 \seealso{

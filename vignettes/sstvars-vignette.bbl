@@ -1,4 +1,4 @@
-\begin{thebibliography}{31}
+\begin{thebibliography}{32}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -191,6 +191,12 @@ Tsay R (1998).
   \textbf{93}(443), 1188--1202.
 \newblock \doi{10.1080/01621459.1998.10473779}.
 
+\bibitem[{Virolainen(2024{\natexlab{a}})}]{Virolainen2:2024}
+Virolainen (2024{\natexlab{a}}).
+\newblock \enquote{Identification by {non-Gaussianity} in structural threshold
+  and smooth transition vector autoregressive models.}
+\newblock \emph{Unpublished working paper, available in arXiv}.
+
 \bibitem[{Virolainen(2018{\natexlab{a}})}]{gmvarkit}
 Virolainen S (2018{\natexlab{a}}).
 \newblock \emph{gmvarkit: Estimate Gaussian and Student's $t$ Mixture Vector
@@ -222,8 +228,8 @@ Virolainen S (2022{\natexlab{b}}).
   559--580.
 \newblock \doi{10.1515/snde-2020-0060}.
 
-\bibitem[{Virolainen(2024)}]{Virolainen:2024}
-Virolainen S (2024).
+\bibitem[{Virolainen(2024{\natexlab{b}})}]{Virolainen:2024}
+Virolainen S (2024{\natexlab{b}}).
 \newblock \enquote{A statistically identified structural vector autoregression
   with endogeneously switching volatility regime.}
 \newblock \emph{Journal of Business \& Economic Statistics}.

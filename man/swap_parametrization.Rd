@@ -68,5 +68,8 @@ print_std_errors(mod112mu) # Standard errors are printed for the means
      \emph{Journal of Economic Dynamics & Control}, \strong{84}, 43-57.
    \item Tsay R. 1998. Testing and Modeling Multivariate Threshold Models.
      \emph{Journal of the American Statistical Association}, \strong{93}:443, 1188-1202.
+   \item Virolainen S. 2024. Identification by non-Gaussianity in structural threshold and
+      smooth transition vector autoregressive models. Unpublished working
+      paper, available in ArXiv.
  }
 }

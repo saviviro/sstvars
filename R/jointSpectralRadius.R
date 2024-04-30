@@ -20,7 +20,8 @@
 #'  in Chang and Blondel (2013). This function can be generally used for approximating the JSR of a set of square matrices, but the
 #'  main intention is STVAR applications (for models created with \code{sstvars}, the function \code{bound_JSR} should be preferred).
 #'  Specifically, Kheifets and Saikkonen (2020) show that if the joint spectral radius of the companion form AR matrices of the regimes
-#'  is smaller than one, the STVAR process is ergodic stationary. Therefore, if the upper bound is smaller than one, the process is
+#'  is smaller than one, the STVAR process is ergodic stationary. Virolainen (2024) shows the same result for his parametrization of
+#'  of threshold and smooth transition vector autoregressive models. Therefore, if the upper bound is smaller than one, the process is
 #'  stationary ergodic. However, as the condition is not necessary but sufficient and also because the bound might be too conservative,
 #'  upper bound larger than one does not imply that the process is not ergodic stationary. You can try higher accuracy, and if the bound
 #'  is still larger than one, the result does not tell whether the process is ergodic stationary or not.
@@ -41,6 +42,9 @@
 #'      234, 43–60.
 #'    \item I.L. Kheifets, P.J. Saikkonen. 2020. Stationarity and ergodicity of Vector STAR models.
 #'      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
+#'    \item Virolainen S. 2024. Identification by non-Gaussianity in structural threshold and
+#'       smooth transition vector autoregressive models. Unpublished working
+#'       paper, available in ArXiv.
 #'  }
 #' @examples
 #' # A set of two (5x5) square matrices:
@@ -311,15 +315,7 @@ bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=FALSE, ncores=2, print_pro
 #'  on variuous methods for bounding the JSR.
 #' @return Returns lower and upper bounds for the joint spectral radius of the "companion form AR matrices" of the regimes.
 #' @seealso \code{\link{bound_jsr_G}}
-#' @references
-#'  \itemize{
-#'  \item Chang C-T, Blondel, V.D. 2013. An experimental study of approximation algorithms for the joint spectral radius.
-#'      \emph{Numerical algorithms}, \strong{64}, 181-202.
-#'    \item Gripenberg, G. 1996. Computing the joint spectral radius. \emph{Linear Algebra and its Applications},
-#'      234, 43–60.
-#'    \item Kheifets I.L., Saikkonen P.J. 2020. Stationarity and ergodicity of Vector STAR models.
-#'      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
-#'  }
+#' @inherit bound_jsr_G references
 #' @examples
 #' # Gaussian STVAR p=1, M=2 model with weighted relative stationary densities
 #' # of the regimes as the transition weight function:

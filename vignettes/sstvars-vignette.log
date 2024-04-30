@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  30 APR 2024 16:36
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  30 APR 2024 20:13
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -687,7 +687,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [22]
-<figures/seriesplot.png, id=551, 1545.775pt x 1104.125pt>
+<figures/seriesplot.png, id=575, 1545.775pt x 1104.125pt>
 File: figures/seriesplot.png Graphic file (type png)
 <use figures/seriesplot.png>
 Package pdftex.def Info: figures/seriesplot.png  used on input line 613.
@@ -703,7 +703,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [24 <./figures/seriesplot.png>]
-<figures/profilelogliks.png, id=567, 1545.775pt x 1104.125pt>
+<figures/profilelogliks.png, id=590, 1545.775pt x 1104.125pt>
 File: figures/profilelogliks.png Graphic file (type png)
 <use figures/profilelogliks.png>
 Package pdftex.def Info: figures/profilelogliks.png  used on input line 676.
@@ -863,10 +863,10 @@ Package rerunfilecheck Info: File `sstvars-vignette.out' has not changed.
 (rerunfilecheck)             Checksum: DD337FA5F839F028362140B8A43974C5;12243.
  ) 
 Here is how much of TeX's memory you used:
- 12428 strings out of 478353
- 196292 string characters out of 5848086
- 496879 words of memory out of 5000000
- 30106 multiletter control sequences out of 15000+600000
+ 12433 strings out of 478353
+ 196404 string characters out of 5848086
+ 496915 words of memory out of 5000000
+ 30110 multiletter control sequences out of 15000+600000
  516856 words of font info for 106 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  75i,13n,77p,1628b,508s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -900,10 +900,10 @@ usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></usr/local/
 texlive/2021/texmf-dist/fonts/type1/public/lm/lmtti10.pfb></usr/local/texlive/2
 021/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr/local/texlive/2021/texmf
 -dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on sstvars-vignette.pdf (43 pages, 1045471 bytes).
+Output written on sstvars-vignette.pdf (43 pages, 1046547 bytes).
 PDF statistics:
- 954 PDF objects out of 1000 (max. 8388607)
- 834 compressed objects within 9 object streams
- 227 named destinations out of 1000 (max. 500000)
+ 977 PDF objects out of 1000 (max. 8388607)
+ 857 compressed objects within 9 object streams
+ 228 named destinations out of 1000 (max. 500000)
  355 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -93,6 +93,9 @@ diagnostic_plot(mod112, resid_type="raw") # All plots for raw residuals
      \emph{Cambridge University Press}, Cambridge.
    \item Tsay R. 1998. Testing and Modeling Multivariate Threshold Models.
      \emph{Journal of the American Statistical Association}, \strong{93}:443, 1188-1202.
+   \item Virolainen S. 2024. Identification by non-Gaussianity in structural threshold and
+      smooth transition vector autoregressive models. Unpublished working
+      paper, available in ArXiv.
  }
 }
 \seealso{
