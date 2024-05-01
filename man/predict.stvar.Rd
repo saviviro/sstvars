@@ -99,7 +99,7 @@ The forecasts are computed by simulating multiple sample paths of the future obs
      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
    \item Lanne M., Virolainen S. 2024. A Gaussian smooth transition vector autoregressive model:
       An application to the macroeconomic effects of severe weather shocks. Unpublished working
-      paper, available as \url{https://doi.org/10.48550/arXiv.2403.14216}.
+      paper, available as arXiv:2403.14216.
    \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis,
          \emph{Springer}.
    \item McElroy T. 2017. Computation of vector ARMA autocovariances.
@@ -110,7 +110,7 @@ The forecasts are computed by simulating multiple sample paths of the future obs
      \emph{Journal of the American Statistical Association}, \strong{93}:443, 1188-1202.
    \item Virolainen S. 2024. Identification by non-Gaussianity in structural threshold and
       smooth transition vector autoregressive models. Unpublished working
-      paper, available in ArXiv.
+      paper, available as arXiv:2404.19707.
  }
 }
 \seealso{

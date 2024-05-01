@@ -126,7 +126,10 @@ Returns the number of parameters in the parameter vector of the specified model.
    \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis, \emph{Springer}.
    \item Lanne M., Virolainen S. 2024. A Gaussian smooth transition vector autoregressive model:
       An application to the macroeconomic effects of severe weather shocks. Unpublished working
-      paper, available as \url{https://doi.org/10.48550/arXiv.2403.14216}.
+      paper, available as arXiv:2403.14216.
+   \item Virolainen S. 2024. Identification by non-Gaussianity in structural threshold and
+      smooth transition vector autoregressive models. Unpublished working
+      paper, available as arXiv:2404.19707.
  }
  @keywords internal
 }

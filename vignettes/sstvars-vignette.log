@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  30 APR 2024 20:13
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  1 MAY 2024 10:53
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -846,6 +846,12 @@ LaTeX Font Warning: Font shape `T1/lmr/b/it' in size <10.95> not available
 (Font)              Font shape `T1/lmr/b/sl' tried instead on input line 175.
 
 
+Underfull \hbox (badness 1436) in paragraph at lines 195--199
+\T1/lmr/m/n/10.95 tran-si-tion vec-tor au-tore-gres-sive mod-els.''  \T1/lmr/m/
+it/10.95 Un-pub-lished work-ing pa-per, avail-able as
+ []
+
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 42 []
  []
@@ -900,7 +906,7 @@ usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></usr/local/
 texlive/2021/texmf-dist/fonts/type1/public/lm/lmtti10.pfb></usr/local/texlive/2
 021/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr/local/texlive/2021/texmf
 -dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on sstvars-vignette.pdf (43 pages, 1046547 bytes).
+Output written on sstvars-vignette.pdf (43 pages, 1046967 bytes).
 PDF statistics:
  977 PDF objects out of 1000 (max. 8388607)
  857 compressed objects within 9 object streams
