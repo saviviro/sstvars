@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# Detect the operating system
+OS=$(uname -s)
+
+# Create src/Makevars.os with the appropriate settings
+if [ "$OS" = "Darwin" ]; then
+  echo "PKG_LIBS += -L/opt/homebrew/Cellar/gcc/14.1.0/lib/gcc/14 -lgfortran -lquadmath -lm" > src/Makevars.os
+elif [ "$OS" = "Linux" ]; then
+  echo "PKG_LIBS += \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)" > src/Makevars.os
+else
+  echo "" > src/Makevars.os
+fi
