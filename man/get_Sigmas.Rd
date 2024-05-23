@@ -19,13 +19,7 @@ get_Sigmas(p, M, d, all_A, all_boldA, all_Omegas)
 \item{all_boldA}{3D array containing the \eqn{((dp)x(dp))} "bold A" (companion form) matrices of each regime,
 obtained from \code{form_boldA}. Will be computed if not given.}
 
-\item{all_Omegas}{A 3D array containing the covariance matrix parameters obtain from \code{pick_Omegas}...
-\describe{
-  \item{If \code{cond_dist \%in\% c("Gaussian", "Student")}:}{all covariance matrices \eqn{\Omega_{m}} in \code{[, , m]}.}
-  \item{If \code{cond_dist=="ind_Student"}:}{all impact matrices \eqn{B_m} of the regimes in \code{[, , m]}.}
-}}
-
-\item{all_Omega}{a \code{[d, d, M]} array containing the covariance matrix Omegas}
+\item{all_Omegas}{a \code{[d, d, M]} array containing the covariance matrix Omegas}
 }
 \value{
 Returns a \code{[dp, dp, M]} array containing the dp-dimensional covariance matrices for each regime.

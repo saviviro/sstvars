@@ -45,7 +45,7 @@ zero lower bound does not bind.
 }
 \references{
 \itemize{
-   \item K. Gavriilidis, 2021. Measuring climate policy uncertainty. \url{https://ssrn.com/abstract=3847388}.
+   \item K. Gavriilidis, 2021. Measuring climate policy uncertainty. \url{https://www.ssrn.com/abstract=3847388}.
   \item Federal Reserve Bank of Chicago. 2023. Monthly GDP Growth Rate Data. \url{https://www.chicagofed.org/publications/bbki/index}.
    \item Wu J. and Xia F. 2016. Measuring the macroeconomic impact of monetary policy at the zero lower bound.
      \emph{Journal of Money, Credit and Banking}, 48(2-3): 253-291.

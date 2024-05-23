@@ -28,7 +28,7 @@ The switch is made by simultaneously diagonalizing the two error term covariance
   exists for more than two covariance matrices.
 }
 \seealso{
-\code{\link{fitSSTVAR}}, \code{\link{STVAR}}, code{\link{fitSTVAR}}
+\code{\link{fitSSTVAR}}, \code{\link{STVAR}}, \code{\link{fitSTVAR}}
  \itemize{
    \item Muirhead R.J. 1982. Aspects of Multivariate Statistical Theory, \emph{Wiley}.
  }

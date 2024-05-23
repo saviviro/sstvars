@@ -422,7 +422,7 @@ swap_parametrization <- function(stvar, calc_std_errors=FALSE) {
 #'   exists for more than two covariance matrices.
 #' @return Returns an object of class \code{'stvar'} defining a structural STVAR model identified by heteroskedasticity,
 #'   with the main diagonal of the impact matrix normalized to be positive.
-#' @seealso \code{\link{fitSSTVAR}}, \code{\link{STVAR}}, code{\link{fitSTVAR}}
+#' @seealso \code{\link{fitSSTVAR}}, \code{\link{STVAR}}, \code{\link{fitSTVAR}}
 #'  \itemize{
 #'    \item Muirhead R.J. 1982. Aspects of Multivariate Statistical Theory, \emph{Wiley}.
 #'  }

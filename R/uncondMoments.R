@@ -111,7 +111,7 @@ VAR_pcovmat <- function(p, d, all_Am, Omega_m) {
 #'
 #' @inheritParams in_paramspace
 #' @inheritParams form_boldA
-#' @param all_Omega a \code{[d, d, M]} array containing the covariance matrix Omegas
+#' @param all_Omegas a \code{[d, d, M]} array containing the covariance matrix Omegas
 #' @details
 #'  Calculates the dp-dimensional covariance matrix using the formula (2.1.39) in Lütkepohl (2005) when
 #'  \code{d*p < 12} and using the algorithm proposed by McElroy (2017) otherwise.

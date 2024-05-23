@@ -3,9 +3,6 @@
 
 # sstvars
 
-**THIS IS A DEVELOPMENT VERSION OF SOFTWARE THAT IS STILL A WORK IN
-PROGRESS!**
-
 <!-- badges: start -->
 <!-- badges: end -->
 
