@@ -1,4 +1,4 @@
-#' @title sstvars: toolkit for structural smooth transition vector autoregressive models
+#' @title sstvars: toolkit for reduced form and structural smooth transition vector autoregressive models
 #'
 #' @description \code{sstvars} is a package for reduced form and structural smooth transition vector
 #'   autoregressive models. The package implements various transition weight functions, conditional distributions,
