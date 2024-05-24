@@ -317,6 +317,9 @@ bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=FALSE, ncores=2, print_pro
 #' @seealso \code{\link{bound_jsr_G}}
 #' @inherit bound_jsr_G references
 #' @examples
+#' \donttest{
+#' ## Below examples take approximately 5 seconds to run.
+#'
 #' # Gaussian STVAR p=1, M=2 model with weighted relative stationary densities
 #' # of the regimes as the transition weight function:
 #' theta_122relg <- c(0.734054, 0.225598, 0.705744, 0.187897, 0.259626, -0.000863,
@@ -347,6 +350,7 @@ bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=FALSE, ncores=2, print_pro
 #' # Using adaptive_eps=TRUE usually speeds up the algorithm when the model
 #' # is large, but with the small model here, the speed-difference is small:
 #' bound_JSR(mod122, epsilon=0.001, adaptive_eps=TRUE)
+#' }
 #' @export
 
 bound_JSR <- function(stvar, epsilon=0.01, adaptive_eps=FALSE, ncores=2, print_progress=TRUE) {

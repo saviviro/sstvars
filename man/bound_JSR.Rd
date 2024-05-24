@@ -52,6 +52,9 @@ A sufficient condition for ergodic stationarity of the STVAR processes implement
  on variuous methods for bounding the JSR.
 }
 \examples{
+\donttest{
+## Below examples take approximately 5 seconds to run.
+
 # Gaussian STVAR p=1, M=2 model with weighted relative stationary densities
 # of the regimes as the transition weight function:
 theta_122relg <- c(0.734054, 0.225598, 0.705744, 0.187897, 0.259626, -0.000863,
@@ -82,6 +85,7 @@ bound_JSR(mod122, epsilon=0.001, adaptive_eps=FALSE)
 # Using adaptive_eps=TRUE usually speeds up the algorithm when the model
 # is large, but with the small model here, the speed-difference is small:
 bound_JSR(mod122, epsilon=0.001, adaptive_eps=TRUE)
+}
 }
 \references{
 \itemize{
