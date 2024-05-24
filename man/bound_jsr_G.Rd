@@ -35,7 +35,7 @@ bounds with the tightness given by the argument \code{epsilon}.}
 Returns an upper bound for the joint spectral radius of the "companion form AR matrices" of the regimes.
 }
 \description{
-\code{bound_jsr_G} calculates lowr and upper bounds for the joint spectral radious of a set of square matrices,
+\code{bound_jsr_G} calculates lower and upper bounds for the joint spectral radious of a set of square matrices,
  typically the "bold A" matrices, using the algorithm by Gripenberg (1996).
 }
 \details{
@@ -57,6 +57,9 @@ The upper and lower bounds are calculated using the Gripenberg's (1996) branch-a
  not found, until the epsilon given by the argument \code{epsilon} is reached.
 }
 \examples{
+\donttest{
+## Below examples take approximately 5 seconds to run.
+
 # A set of two (5x5) square matrices:
 set.seed(1); S1 <- array(rnorm(20*20*2), dim=c(5, 5, 2))
 
@@ -82,6 +85,7 @@ set.seed(3); S3 <- array(rnorm(2*2*8), dim=c(2, 2, 8))
 
 # Bound the joint spectral radius of the set of matrices S3:
 bound_jsr_G(S3, epsilon=0.01, adaptive_eps=FALSE)
+}
 }
 \references{
 \itemize{

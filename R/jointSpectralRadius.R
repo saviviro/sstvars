@@ -1,6 +1,6 @@
 #' @title Calculate upper bound for the joint spectral radius of a set of matrices
 #'
-#' @description \code{bound_jsr_G} calculates lowr and upper bounds for the joint spectral radious of a set of square matrices,
+#' @description \code{bound_jsr_G} calculates lower and upper bounds for the joint spectral radious of a set of square matrices,
 #'  typically the "bold A" matrices, using the algorithm by Gripenberg (1996).
 #'
 #' @param S the set of matrices the bounds should be calculated for in an array, in STVAR applications,
@@ -47,6 +47,9 @@
 #'       paper, available in ArXiv.
 #'  }
 #' @examples
+#' \donttest{
+#' ## Below examples take approximately 5 seconds to run.
+#'
 #' # A set of two (5x5) square matrices:
 #' set.seed(1); S1 <- array(rnorm(20*20*2), dim=c(5, 5, 2))
 #'
@@ -72,6 +75,7 @@
 #'
 #' # Bound the joint spectral radius of the set of matrices S3:
 #' bound_jsr_G(S3, epsilon=0.01, adaptive_eps=FALSE)
+#' }
 #' @export
 
 bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=FALSE, ncores=2, print_progress=TRUE) {
