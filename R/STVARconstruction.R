@@ -397,12 +397,12 @@ alt_stvar <- function(stvar, which_largest=1, which_round, calc_std_errors=FALSE
 #'   0.601786, -0.002945, 0.067224)
 #' mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112, parametrization="intercept",
 #'   calc_std_errors=TRUE)
-#' print_std_errors(mod112) # Standard errors are printed for the intercepts
+#' print(mod112, standard_error_print=TRUE) # Standard errors are printed for the intercepts
 #'
 #' # To obtain standard errors for the unconditional means instead of the intercepts,
 #' # swap to mean parametrization:
 #' mod112mu <- swap_parametrization(mod112, calc_std_errors=TRUE)
-#' print_std_errors(mod112mu) # Standard errors are printed for the means
+#' print(mod112mu, standard_error_print=TRUE) # Standard errors are printed for the means
 #' @export
 
 swap_parametrization <- function(stvar, calc_std_errors=FALSE) {
