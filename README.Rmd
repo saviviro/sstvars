@@ -53,7 +53,7 @@ fit <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logistic", weightfun_pars=c(2
 # Information on the estimated model:
 plot(fit) # Plot the estimated transition weight function with data
 summary(fit) # Summary printoout of the estimated model
-print_std_errors(fit) # Print standard errors of the estimated model (assuming the standard asymptotics on the ML estimator)
+print(fit, standard_error_print=TRUE) # Print standard errors of the estimates (assuming the standard asymptotics on the ML estimator)
 get_foc(fit) # The first order condition (gradient of the log-likelihood function)
 get_soc(fit) # The second order condition (eigenvalues of approximated Hessian)
 profile_logliks(fit) # Plot profile log-likelihood functions about the estimate
