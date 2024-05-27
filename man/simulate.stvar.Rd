@@ -27,7 +27,7 @@
 
 \item{...}{currently not in use.}
 
-\item{init_values}{a size \eqn{(pxd)} matrix specifying the initial values, where d is the number
+\item{init_values}{a size \eqn{(p\times d)} matrix specifying the initial values, where d is the number
 of time series in the system. The \strong{last} row will be used as initial values for the first lag,
 the second last row for second lag etc. If not specified, initial values will be drawn from
 the regime specified in \code{init_regimes} (for Gaussian models only).}
@@ -43,7 +43,7 @@ uses a simulation procedure with a burn-in period. See the details section.}
 \item{burn_in}{Burn-in period for simulating initial values from a regime when \code{cond_dist!="Gaussian"}.
 See the details section.}
 
-\item{exo_weights}{if \code{weight_function="exogenous"}, provide a size \eqn{(nsim x M)} matrix of exogenous
+\item{exo_weights}{if \code{weight_function="exogenous"}, provide a size \eqn{(nsim \times M)} matrix of exogenous
 transition weights for the regimes: \code{[t, m]} for a time \eqn{t} and regime \eqn{m} weight. Ignored
 if \code{weight_function!="exogenous"}.}
 
@@ -55,16 +55,18 @@ if \code{weight_function!="exogenous"}.}
 (see \code{?GIRF}). You should ignore it (specifying something else than null to it will change how the function behaves).}
 }
 \value{
-If \code{drop==TRUE} and \code{ntimes==1} (default): \code{$sample}, \code{$component}, and \code{$transition_weights}
-  are matrices. Otherwise, returns a list with...
-  \describe{
-    \item{\code{$sample}}{a size (\code{nsim}\eqn{ x d x }\code{ntimes}) array containing the samples: the dimension
+Returns a list containing the simulation results. If \code{drop==TRUE} and \code{ntimes==1} (default),
+  contains the following entries:
+  \item{sample}{a size (\code{nsim}\eqn{\times d}) matrix containing the simulated time series.}
+  \item{transition weights:}{a size (\code{nsim}\eqn{\times M}) matrix containing the transition weights corresponding
+        to the simulated sample.}
+  Otherwise, returns a list with the following entries:
+  \item{\code{$sample}}{a size (\code{nsim}\eqn{\times d\times}\code{ntimes}) array containing the samples: the dimension
      \code{[t, , ]} is the time index, the dimension \code{[, d, ]} indicates the marginal time series, and the dimension
      \code{[, , i]} indicates the i:th set of simulations.}
-    \item{\code{$transition_weights}}{a size (\code{nsim}\eqn{ x M x }\code{ntimes}) array containing the transition weights
+  \item{\code{$transition_weights}}{a size (\code{nsim}\eqn{\times M \times}\code{ntimes}) array containing the transition weights
      corresponding to the sample: the dimension \code{[t, , ]} is the time index, the dimension \code{[, m, ]} indicates the
      regime, and the dimension \code{[, , i]} indicates the i:th set of simulations.}
-  }
 }
 \description{
 \code{simulate.stvar} is a simulate method for class 'stvar' objects.

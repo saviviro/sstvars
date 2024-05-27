@@ -19,7 +19,7 @@ simulate_from_regime(
 
 \item{nsim}{number of observations to be simulated.}
 
-\item{init_values}{a size \eqn{(pxd)} matrix specifying the initial values, where d is the number
+\item{init_values}{a size \eqn{(p\times d)} matrix specifying the initial values, where d is the number
 of time series in the system. The \strong{last} row will be used as initial values for the first lag,
 the second last row for second lag etc. If not specified, initial values are set to the unconditional
 mean of the regime.}

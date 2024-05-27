@@ -6,7 +6,7 @@
 #' @param nsim number of observations to be simulated.
 #' @param seed set seed for the random number generator?
 #' @param ... currently not in use.
-#' @param init_values a size \eqn{(pxd)} matrix specifying the initial values, where d is the number
+#' @param init_values a size \eqn{(p\times d)} matrix specifying the initial values, where d is the number
 #'   of time series in the system. The \strong{last} row will be used as initial values for the first lag,
 #'   the second last row for second lag etc. If not specified, initial values will be drawn from
 #'   the regime specified in \code{init_regimes} (for Gaussian models only).
@@ -18,7 +18,7 @@
 #' @param ntimes how many sets of simulations should be performed?
 #' @param burn_in Burn-in period for simulating initial values from a regime when \code{cond_dist!="Gaussian"}.
 #'  See the details section.
-#' @param exo_weights if \code{weight_function="exogenous"}, provide a size \eqn{(nsim x M)} matrix of exogenous
+#' @param exo_weights if \code{weight_function="exogenous"}, provide a size \eqn{(nsim \times M)} matrix of exogenous
 #'  transition weights for the regimes: \code{[t, m]} for a time \eqn{t} and regime \eqn{m} weight. Ignored
 #'  if \code{weight_function!="exogenous"}.
 #' @param drop if \code{TRUE} (default) then the components of the returned list are coerced to lower dimension if
@@ -35,16 +35,18 @@
 #'   For models with exogenous transition weights, takes just the last \eqn{p} observations after the burn-in period.
 #'
 #'   The argument \code{ntimes} is intended for forecasting, which is used by the predict method (see \code{?predict.stvar}).
-#' @return If \code{drop==TRUE} and \code{ntimes==1} (default): \code{$sample}, \code{$component}, and \code{$transition_weights}
-#'   are matrices. Otherwise, returns a list with...
-#'   \describe{
-#'     \item{\code{$sample}}{a size (\code{nsim}\eqn{ x d x }\code{ntimes}) array containing the samples: the dimension
+#' @return Returns a list containing the simulation results. If \code{drop==TRUE} and \code{ntimes==1} (default),
+#'   contains the following entries:
+#'   \item{sample}{a size (\code{nsim}\eqn{\times d}) matrix containing the simulated time series.}
+#'   \item{transition weights:}{a size (\code{nsim}\eqn{\times M}) matrix containing the transition weights corresponding
+#'         to the simulated sample.}
+#'   Otherwise, returns a list with the following entries:
+#'   \item{\code{$sample}}{a size (\code{nsim}\eqn{\times d\times}\code{ntimes}) array containing the samples: the dimension
 #'      \code{[t, , ]} is the time index, the dimension \code{[, d, ]} indicates the marginal time series, and the dimension
 #'      \code{[, , i]} indicates the i:th set of simulations.}
-#'     \item{\code{$transition_weights}}{a size (\code{nsim}\eqn{ x M x }\code{ntimes}) array containing the transition weights
+#'   \item{\code{$transition_weights}}{a size (\code{nsim}\eqn{\times M \times}\code{ntimes}) array containing the transition weights
 #'      corresponding to the sample: the dimension \code{[t, , ]} is the time index, the dimension \code{[, m, ]} indicates the
 #'      regime, and the dimension \code{[, , i]} indicates the i:th set of simulations.}
-#'   }
 #' @seealso \code{\link{predict.stvar}},\code{\link{GIRF}}, \code{\link{GFEVD}},  \code{\link{fitSTVAR}},
 #'   \code{\link{fitSSTVAR}} \code{\link{STVAR}}
 #' @inherit loglikelihood references
@@ -435,7 +437,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
 #' @inheritParams simulate.stvar
 #' @param stvar an object of class \code{'stvar'}.
 #' @param regime an integer in \eqn{1,...,M} determining the regime from which to simulate observations from
-#' @param init_values a size \eqn{(pxd)} matrix specifying the initial values, where d is the number
+#' @param init_values a size \eqn{(p\times d)} matrix specifying the initial values, where d is the number
 #'   of time series in the system. The \strong{last} row will be used as initial values for the first lag,
 #'   the second last row for second lag etc. If not specified, initial values are set to the unconditional
 #'   mean of the regime.
