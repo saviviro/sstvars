@@ -38,7 +38,7 @@ STVAR(
 
 \method{plot}{stvar}(x, ..., plot_type = c("trans_weights", "cond_mean"))
 
-\method{print}{stvar}(x, ..., digits = 2, summary_print = FALSE)
+\method{print}{stvar}(x, ..., digits = 2, summary_print = FALSE, standard_error_print = FALSE)
 }
 \arguments{
 \item{data}{a matrix or class \code{'ts'} object with \code{d>1} columns. Each column is taken to represent
@@ -212,6 +212,10 @@ or conditional means?}
 
 \item{summary_print}{if set to \code{TRUE} then the print
 will include log-likelihood and information criteria values.}
+
+\item{standard_error_print}{if set to \code{TRUE}, instead of printing the estimates,
+prints the approximate standard errors using square roots of the diagonal of inverse
+of the observed information matrix.}
 }
 \value{
 Returns an S3 object of class \code{'stvar'} defining a smooth transition VAR model. The returned list

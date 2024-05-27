@@ -19,9 +19,12 @@ format_valuef <- function(digits) {
 #' @param digits number of digits to be printed.
 #' @param summary_print if set to \code{TRUE} then the print
 #'   will include log-likelihood and information criteria values.
+#' @param standard_error_print if set to \code{TRUE}, instead of printing the estimates,
+#'   prints the approximate standard errors using square roots of the diagonal of inverse
+#'   of the observed information matrix.
 #' @export
 
-print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
+print.stvar <- function(x, ..., digits=2, summary_print=FALSE, standard_error_print=FALSE) {
   stvar <- x
   stopifnot(digits >= 0 & digits%%1 == 0)
   format_value <- format_valuef(digits)
@@ -42,181 +45,352 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE) {
   IC <- stvar$IC
   var_names <- colnames(stvar$data)
   if(is.null(var_names)) var_names <- paste0("Var.", 1:d)
-  all_mu <- stvar$uncond_moments$regime_means
-  all_sd <- sqrt(stvar$uncond_moments$regime_vars)
-  npars <- length(params)
-  T_obs <- ifelse(is.null(stvar$data), NA, nrow(stvar$data) - p)
-  params <- reform_constrained_pars(p=p, M=M, d=d, params=params,
-                                    weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                    cond_dist=cond_dist, identification=identification, AR_constraints=AR_constraints,
+
+  # Regular / summary print
+  if(!standard_error_print) {
+    all_mu <- stvar$uncond_moments$regime_means
+    all_sd <- sqrt(stvar$uncond_moments$regime_vars)
+    npars <- length(params)
+    T_obs <- ifelse(is.null(stvar$data), NA, nrow(stvar$data) - p)
+    params <- reform_constrained_pars(p=p, M=M, d=d, params=params,
+                                      weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                      cond_dist=cond_dist, identification=identification, AR_constraints=AR_constraints,
+                                      mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                                      B_constraints=B_constraints)
+    if(stvar$model$parametrization == "mean") {
+      params <- change_parametrization(p=p, M=M, d=d, params=params, AR_constraints=NULL,
+                                       mean_constraints=NULL, change_to="intercept")
+    }
+    all_phi0 <- pick_phi0(M=M, d=d, params=params)
+    all_A <- pick_allA(p=p, M=M, d=d, params=params)
+    all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params, cond_dist=cond_dist, identification=identification)
+    weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                  cond_dist=cond_dist)
+    distpars <- pick_distpars(d=d, params=params, cond_dist=cond_dist)
+
+    if(weight_function == "mlogit") {
+      all_gamma_m <- cbind(matrix(weightpars, ncol=M-1), 0) # Column per gamma_m, m=1,...,M-1, gamma_M=0.
+    }
+    if(M == 1) weight_function <- "linear"
+    cat(weight_function, cond_dist, "STVAR model,",
+        ifelse(identification == "reduced_form", "reduced form model,",
+               ifelse(identification == "recursive", "recursive identification,", paste0("identified by ", identification, ","))),
+        ifelse(is.null(AR_constraints), "no AR_constraints,", "AR_constraints used,"),
+        ifelse(is.null(mean_constraints), paste0("no mean_constraints,", ifelse(is.null(B_constraints), "", ",")),
+               paste0("mean_constraints used,", ifelse(is.null(B_constraints), "", ","))),
+        ifelse(identification %in% c("reduced_form", "recursive"), "",
+               ifelse(is.null(B_constraints), "no B_constraints,", "B_constraints used,")))
+    cat("\n", paste0(" p = ", p, ", "))
+    cat(paste0("M = ", M, ", "))
+    cat(paste0("d = ", d, ", #parameters = " , npars, ","),
+        ifelse(is.na(T_obs), "\n", paste0("#observations = ", T_obs, " x ", d, "")))
+    if(weight_function == "mlogit") {
+      cat("\n ", paste0("Switching variables: ", paste0(var_names[weightfun_pars[[1]]], collapse=", "), " with ",
+                        weightfun_pars[[2]], ifelse(weightfun_pars[[2]] == 1, " lag.", " lags.")))
+    } else if(weight_function %in% c("logistic", "exponential", "threshold")) {
+      cat("\n ", paste0("Switching variable: ", paste0(var_names[weightfun_pars[1]], collapse=", "), " with lag ",
+                        weightfun_pars[2], "."))
+    }
+    if(is.na(T_obs) && weight_function %in% c("relative_dens", "exogenous", "linear")) {
+      cat("\n")
+    } else {
+      cat("\n\n")
+    }
+
+    if(summary_print) {
+      all_boldA_eigens <- get_boldA_eigens(stvar)
+      all_omega_eigens <- get_omega_eigens(stvar)
+      form_val2 <- function(txt, val) paste(txt, format_value(val))
+      cat(paste(form_val2("loglik/T:", stvar$loglik/T_obs),
+                form_val2("AIC:", IC$AIC),
+                form_val2("HQIC:", IC$HQIC),
+                form_val2("BIC:", IC$BIC),
+                sep=", "), "\n\n")
+    }
+
+    plus <- c("+", rep(" ", times=d-1))
+    round_lbrackets <- rep("(", times=d)
+    round_rbrackets <- rep(")", times=d)
+    Y <- paste0("y", 1:d)
+    tmp_names <- paste0("tmp", 1:(p*(d + 2) + d + 2))
+
+    for(m in seq_len(M)) {
+      count <- 1
+      cat(paste("Regime", m), "\n")
+      if(cond_dist == "Student" || cond_dist == "ind_Student") {
+        if(m == 1) {
+          cat(paste0("Degrees of freedom: ", paste0(format_value(distpars), collapse=", "), " (for all regimes)"), "\n")
+        }
+      }
+      if(summary_print) {
+        cat(paste("Moduli of 'bold A' eigenvalues: ", paste0(format_value(all_boldA_eigens[,m]), collapse=", ")),"\n")
+        cat(paste("Cov. matrix 'Omega' eigenvalues:", paste0(format_value(all_omega_eigens[,m]), collapse=", ")),"\n")
+      }
+      if(weight_function == "relative_dens") {
+        cat(paste("Weight param:", format_value(weightpars[m])), "\n")
+      } else if(weight_function == "mlogit") {
+        if(m < M) {
+          cat(paste("Weight params:", paste0(format_value(all_gamma_m[,m]), collapse=", ")), "\n")
+        }
+      } else if(weight_function %in% c("logistic", "exponential")) {
+        if(m == M) {
+          cat(paste("Weight params:", paste0(format_value(weightpars[1]), " (location), ",
+                                             format_value(weightpars[2]), " (scale)")), "\n")
+        }
+      } else if(weight_function == "threshold") {
+        if(m < M) {
+          cat(paste0("Upper threshold: ", format_value(weightpars[m])), "\n")
+        }
+      }
+      cat("Regime means:", paste0(format_value(all_mu[,m]), collapse=", "))
+      if(summary_print) {
+        cat("\nRegime sdevs:", paste0(format_value(all_sd[,m]), collapse=", "))
+      }
+      cat("\n\n")
+
+      left_brackets <- rep("[", times=d)
+      right_brackets <- rep("]", times=d)
+      df <- data.frame(Y=Y,
+                       eq=c("=", rep(" ", d - 1)),
+                       eq=left_brackets,
+                       phi0=format_value(all_phi0[, m, drop=FALSE]),
+                       eq=rep("]", times=d),
+                       plus)
+      for(i1 in seq_len(p)) {
+        Amp_colnames <- c(paste0("A", i1), tmp_names[count:(count + d - 1 - 1)]); count <- count + d - 1
+        df[, tmp_names[count]] <- left_brackets; count <- count + 1
+        df[, Amp_colnames] <- format_value(all_A[, ,i1 , m])
+        df[, tmp_names[count]] <- rep("]", times=d); count <- count + 1
+        df[, tmp_names[count]] <- paste0(Y, ".", i1); count <- count + 1
+        df <- cbind(df, plus)
+      }
+      df[, tmp_names[p*(d + 2) + 1]] <- left_brackets
+      if(cond_dist == "ind_Student") {
+        df[, c("B", tmp_names[(p*(d + 2) + 2):(p*(d + 2) + d)])] <- format_value(all_Omega[, , m])
+      } else { # cond_dist == "Gaussian" or "Student"
+        df[, c("Omega", tmp_names[(p*(d + 2) + 2):(p*(d + 2) + d)])] <- format_value(all_Omega[, , m])
+      }
+      df[, tmp_names[p*(d + 2) + d + 1]] <- rep("]", times=d)
+      if(cond_dist != "ind_Student") df[, "1/2"] <- rep(" ", d)
+      df[, tmp_names[p*(d + 2) + d + 2]] <- paste0("eps", 1:d)
+      names_to_omit <- unlist(lapply(c("plus", "eq", "round_lbrackets", "round_rbrackets", tmp_names),
+                                     function(nam) grep(nam, colnames(df))))
+      colnames(df)[names_to_omit] <- " "
+      print(df)
+      cat("\n")
+      if(summary_print) {
+        cat("Error term correlation matrix:\n")
+        if(cond_dist == "ind_Student") {
+          print(cov2cor(tcrossprod(all_Omega[, , m])), digits=digits) # Cov mat obtained from the impact matrix
+        } else {
+          print(cov2cor(all_Omega[, , m]), digits=digits)
+        }
+        cat("\n")
+      }
+    }
+    if(!identification %in% c("reduced_form", "recursive", "non-Gaussianity")) { # No separate structural pars for these models
+      cat("Structural parameters:\n")
+      if(identification == "heteroskedasticity") {
+        W <- format_value(pick_W(p=p, M=M, d=d, params=params, identification=identification))
+        tmp <- c(rep(" ", times=d - 1), ",")
+        df2 <- data.frame(left_brackets, W=W[,1])
+        for(i1 in 2:d) {
+          df2 <- cbind(df2, W[, i1])
+          colnames(df2)[1 + i1] <- "tmp"
+        }
+        df2 <- cbind(df2, right_brackets)
+        if(M > 1) {
+          lambdas <- format_value(pick_lambdas(p=p, M=M, d=d, params=params, identification=identification))
+          tmp <- c(rep(" ", times=d - 1), ",")
+          lambdas <- matrix(lambdas, nrow=d, ncol=M - 1, byrow=FALSE) # Column for each regime
+          for(i1 in 1:(sum(M) - 1)) {
+            lmb <- lambdas[,i1]
+            df2 <- cbind(df2, tmp, left_brackets, lmb, right_brackets)
+            colnames(df2)[grep("lmb", colnames(df2))] <- paste0("lamb", i1 + 1)
+          }
+        }
+        names_to_omit <- unlist(lapply(c("left_brackets", "right_brackets", "tmp"), function(nam) grep(nam, colnames(df2))))
+        colnames(df2)[names_to_omit] <- " "
+        print(df2)
+        cat("\n")
+        n_zero <- sum(B_constraints == 0, na.rm=TRUE)
+        n_free <- ifelse(is.null(B_constraints), d^2, sum(is.na(B_constraints)))
+        n_sign <- d^2 - n_zero - n_free
+        cat("The impact matrix is subject to", n_zero, "zero constraints and", n_sign, "sign constraints.\n")
+        cat("\n")
+      }
+    }
+
+    if(summary_print) {
+      cat("Print approximate standard errors by setting the argument 'standard_error_print=TRUE'.\n")
+    }
+  } else { # Print standard errors
+    npars <- length(stvar$params)
+    pars <- stvar$std_errors
+    pars <- reform_constrained_pars(p=p, M=M, d=d, params=pars, weight_function=weight_function,
+                                    weightfun_pars=weightfun_pars, cond_dist=cond_dist,
+                                    identification=identification, AR_constraints=AR_constraints,
                                     mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                                     B_constraints=B_constraints)
-  if(stvar$model$parametrization == "mean") {
-    params <- change_parametrization(p=p, M=M, d=d, params=params, AR_constraints=NULL,
-                                     mean_constraints=NULL, change_to="intercept")
-  }
-  all_phi0 <- pick_phi0(M=M, d=d, params=params)
-  all_A <- pick_allA(p=p, M=M, d=d, params=params)
-  all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params, cond_dist=cond_dist, identification=identification)
-  weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                cond_dist=cond_dist)
-  distpars <- pick_distpars(d=d, params=params, cond_dist=cond_dist)
-
-  if(weight_function == "mlogit") {
-    all_gamma_m <- cbind(matrix(weightpars, ncol=M-1), 0) # Column per gamma_m, m=1,...,M-1, gamma_M=0.
-  }
-  if(M == 1) weight_function <- "linear"
-  cat(weight_function, cond_dist, "STVAR model,",
-      ifelse(identification == "reduced_form", "reduced form model,",
-             ifelse(identification == "recursive", "recursive identification,", paste0("identified by ", identification, ","))),
-      ifelse(is.null(AR_constraints), "no AR_constraints,", "AR_constraints used,"),
-      ifelse(is.null(mean_constraints), paste0("no mean_constraints,", ifelse(is.null(B_constraints), "", ",")),
-             paste0("mean_constraints used,", ifelse(is.null(B_constraints), "", ","))),
-      ifelse(identification %in% c("reduced_form", "recursive"), "",
-             ifelse(is.null(B_constraints), "no B_constraints,", "B_constraints used,")))
-  cat("\n", paste0(" p = ", p, ", "))
-  cat(paste0("M = ", M, ", "))
-  cat(paste0("d = ", d, ", #parameters = " , npars, ","),
-      ifelse(is.na(T_obs), "\n", paste0("#observations = ", T_obs, " x ", d, "")))
-  if(weight_function == "mlogit") {
-    cat("\n ", paste0("Switching variables: ", paste0(var_names[weightfun_pars[[1]]], collapse=", "), " with ",
-                     weightfun_pars[[2]], ifelse(weightfun_pars[[2]] == 1, " lag.", " lags.")))
-  } else if(weight_function %in% c("logistic", "exponential", "threshold")) {
-    cat("\n ", paste0("Switching variable: ", paste0(var_names[weightfun_pars[1]], collapse=", "), " with lag ",
-                      weightfun_pars[2], "."))
-  }
-  if(is.na(T_obs) && weight_function %in% c("relative_dens", "exogenous", "linear")) {
-    cat("\n")
-  } else {
-    cat("\n\n")
-  }
-
-  if(summary_print) {
-    all_boldA_eigens <- get_boldA_eigens(stvar)
-    all_omega_eigens <- get_omega_eigens(stvar)
-    form_val2 <- function(txt, val) paste(txt, format_value(val))
-    cat(paste(form_val2("loglik/T:", stvar$loglik/T_obs),
-              form_val2("AIC:", IC$AIC),
-              form_val2("HQIC:", IC$HQIC),
-              form_val2("BIC:", IC$BIC),
-              sep=", "), "\n\n")
-  }
-
-  plus <- c("+", rep(" ", times=d-1))
-  round_lbrackets <- rep("(", times=d)
-  round_rbrackets <- rep(")", times=d)
-  Y <- paste0("y", 1:d)
-  tmp_names <- paste0("tmp", 1:(p*(d + 2) + d + 2))
-
-  for(m in seq_len(M)) {
-    count <- 1
-    cat(paste("Regime", m), "\n")
-    if(cond_dist == "Student" || cond_dist == "ind_Student") {
-      if(m == 1) {
-        cat(paste0("Degrees of freedom: ", paste0(format_value(distpars), collapse=", "), " (for all regimes)"), "\n")
-      }
+    all_phi0_or_mu <- pick_phi0(M=M, d=d, params=pars)
+    all_A <- pick_allA(p=p, M=M, d=d, params=pars)
+    distpars <- pick_distpars(d=d, params=pars, cond_dist=cond_dist)
+    if(identification == "heteroskedasticity") {
+      # No standard errors for cov. mats. as the model is parametrized with W and lambdas
+      all_Omega <- array(" ", dim=c(d, d, M))
+    } else {
+      all_Omega <- pick_Omegas(p=p, M=M, d=d, params=pars, cond_dist=cond_dist, identification=identification)
     }
-    if(summary_print) {
-      cat(paste("Moduli of 'bold A' eigenvalues: ", paste0(format_value(all_boldA_eigens[,m]), collapse=", ")),"\n")
-      cat(paste("Cov. matrix 'Omega' eigenvalues:", paste0(format_value(all_omega_eigens[,m]), collapse=", ")),"\n")
-    }
+    weightpars <- pick_weightpars(p=p, M=M, d=d, params=pars, weight_function=weight_function, weightfun_pars=weightfun_pars)
     if(weight_function == "relative_dens") {
-      cat(paste("Weight param:", format_value(weightpars[m])), "\n")
+      weightpars[M] <- NA # No standard error for the last alpha
+    } else if(weight_function %in% c("logistic", "exponential", "threshold", "exogenous")) {
+      # Weightpars are ok as is.
     } else if(weight_function == "mlogit") {
-      if(m < M) {
-        cat(paste("Weight params:", paste0(format_value(all_gamma_m[,m]), collapse=", ")), "\n")
-      }
-    } else if(weight_function %in% c("logistic", "exponential")) {
-      if(m == M) {
-        cat(paste("Weight params:", paste0(format_value(weightpars[1]), " (location), ",
-                                           format_value(weightpars[2]), " (scale)")), "\n")
-      }
-    } else if(weight_function == "threshold") {
-      if(m < M) {
-        cat(paste0("Upper threshold: ", format_value(weightpars[m])), "\n")
-      }
+      all_gamma_m <- matrix(weightpars, ncol=M-1) # Column per gamma_m, m=1,...,M-1, gamma_M=0.
     }
-    cat("Regime means:", paste0(format_value(all_mu[,m]), collapse=", "))
-    if(summary_print) {
-      cat("\nRegime sdevs:", paste0(format_value(all_sd[,m]), collapse=", "))
+
+    if(parametrization == "mean") {
+      all_mu <- all_phi0_or_mu
+      all_phi0 <- matrix(" ", nrow=d, ncol=M)
+    } else {
+      all_mu <- matrix(NA, nrow=d, ncol=M)
+      all_phi0 <- all_phi0_or_mu
+    }
+    if(!is.null(AR_constraints)) {
+      # The constrained AR parameter standard errors multiplied open in 'pars' are valid iff
+      # the constraint matrix contains zeros and ones only, and there is at most one one in
+      # each row (no multiplications or summations).
+      if(any(AR_constraints != 1 & AR_constraints != 0) | any(rowSums(AR_constraints) > 1)) {
+        sep_AR <- TRUE # The AR parameter std errors must be printed separately
+        all_A <- array(" ", dim=c(d, d, p, M))
+        AR_stds <- stvar$std_errors[(M*d + 1):(M*d + ncol(AR_constraints))] # Constrained AR param std errors
+      } else {
+        sep_AR <- FALSE
+      }
+    } else {
+      sep_AR <- FALSE # No constraints imposed
+    }
+
+    if(M == 1) weight_function <- "linear"
+    cat(weight_function, cond_dist, "STVAR model,",
+        ifelse(identification == "reduced_form", "reduced form model",
+               ifelse(identification == "recursive", "recursive identification,", paste0("identified by ", identification, ","))),
+        ifelse(is.null(AR_constraints), "no AR_constraints,", "AR_constraints used,"),
+        ifelse(is.null(mean_constraints), paste0("no mean_constraints,", ifelse(is.null(B_constraints), "", ",")),
+               paste0("mean_constraints used,", ifelse(is.null(B_constraints), "", ","))),
+        ifelse(identification %in% c("reduced_form", "recursive"), "",
+               ifelse(is.null(B_constraints), "no B_constraints,", "B_constraints used,")))
+    cat("\n", paste0(" p = ", p, ", "))
+    cat(paste0("M = ", M, ", "))
+    cat(paste0("d = ", d, ", #parameters = " , npars, ","))
+    if(weight_function == "mlogit") {
+      cat("\n ", paste0("Switching variables: ", paste0(var_names[weightfun_pars[[1]]], collapse=", "), " with ",
+                        weightfun_pars[[2]], ifelse(weightfun_pars[[2]] == 1, " lag.", " lags.")))
+    } else if(weight_function %in% c("logistic", "exponential", "threshold")) {
+      cat("\n ", paste0("Switching variable: ", paste0(var_names[weightfun_pars[1]], collapse=", "), " with lag ",
+                        weightfun_pars[2], "."))
     }
     cat("\n\n")
+    cat("APPROXIMATE STANDARD ERRORS ASSUMING STANDARD ASYMPTOTICS\n\n")
 
     left_brackets <- rep("[", times=d)
     right_brackets <- rep("]", times=d)
-    df <- data.frame(Y=Y,
-                     eq=c("=", rep(" ", d - 1)),
-                     eq=left_brackets,
-                     phi0=format_value(all_phi0[, m, drop=FALSE]),
-                     eq=rep("]", times=d),
-                     plus)
-    for(i1 in seq_len(p)) {
-      Amp_colnames <- c(paste0("A", i1), tmp_names[count:(count + d - 1 - 1)]); count <- count + d - 1
-      df[, tmp_names[count]] <- left_brackets; count <- count + 1
-      df[, Amp_colnames] <- format_value(all_A[, ,i1 , m])
-      df[, tmp_names[count]] <- rep("]", times=d); count <- count + 1
-      df[, tmp_names[count]] <- paste0(Y, ".", i1); count <- count + 1
-      df <- cbind(df, plus)
-    }
-    df[, tmp_names[p*(d + 2) + 1]] <- left_brackets
-    if(cond_dist == "ind_Student") {
-      df[, c("B", tmp_names[(p*(d + 2) + 2):(p*(d + 2) + d)])] <- format_value(all_Omega[, , m])
-    } else { # cond_dist == "Gaussian" or "Student"
-      df[, c("Omega", tmp_names[(p*(d + 2) + 2):(p*(d + 2) + d)])] <- format_value(all_Omega[, , m])
-    }
-    df[, tmp_names[p*(d + 2) + d + 1]] <- rep("]", times=d)
-    if(cond_dist != "ind_Student") df[, "1/2"] <- rep(" ", d)
-    df[, tmp_names[p*(d + 2) + d + 2]] <- paste0("eps", 1:d)
-    names_to_omit <- unlist(lapply(c("plus", "eq", "round_lbrackets", "round_rbrackets", tmp_names),
-                                   function(nam) grep(nam, colnames(df))))
-    colnames(df)[names_to_omit] <- " "
-    print(df)
-    cat("\n")
-    if(summary_print) {
-      cat("Error term correlation matrix:\n")
-      if(cond_dist == "ind_Student") {
-        print(cov2cor(tcrossprod(all_Omega[, , m])), digits=digits) # Cov mat obtained from the impact matrix
-      } else {
-        print(cov2cor(all_Omega[, , m]), digits=digits)
-      }
+    plus <- c("+", rep(" ", d - 1))
+    round_lbrackets <- rep("(", times=d)
+    round_rbrackets <- rep(")", times=d)
+    Y <- paste0("Y", 1:d)
+    tmp_names <- paste0("tmp", 1:(p*(d + 2) + d + 2))
+
+    for(m in seq_len(M)) {
+      count <- 1
+      cat(paste("Regime", m))
       cat("\n")
-    }
-  }
-  if(!identification %in% c("reduced_form", "recursive", "non-Gaussianity")) { # No separate structural pars for these models
-    cat("Structural parameters:\n")
-    if(identification == "heteroskedasticity") {
-      W <- format_value(pick_W(p=p, M=M, d=d, params=params, identification=identification))
-      tmp <- c(rep(" ", times=d - 1), ",")
-      df2 <- data.frame(left_brackets, W=W[,1])
-      for(i1 in 2:d) {
-        df2 <- cbind(df2, W[, i1])
-        colnames(df2)[1 + i1] <- "tmp"
-      }
-      df2 <- cbind(df2, right_brackets)
-      if(M > 1) {
-        lambdas <- format_value(pick_lambdas(p=p, M=M, d=d, params=params, identification=identification))
-        tmp <- c(rep(" ", times=d - 1), ",")
-        lambdas <- matrix(lambdas, nrow=d, ncol=M - 1, byrow=FALSE) # Column for each regime
-        for(i1 in 1:(sum(M) - 1)) {
-          lmb <- lambdas[,i1]
-          df2 <- cbind(df2, tmp, left_brackets, lmb, right_brackets)
-          colnames(df2)[grep("lmb", colnames(df2))] <- paste0("lamb", i1 + 1)
+      if(cond_dist == "Student" || cond_dist == "ind_Student") {
+        if(m == 1) {
+          cat(paste0("Degrees of freedom: ", paste0(format_value(distpars), collapse=", "), " (for all regimes)"), "\n")
         }
       }
-      names_to_omit <- unlist(lapply(c("left_brackets", "right_brackets", "tmp"), function(nam) grep(nam, colnames(df2))))
-      colnames(df2)[names_to_omit] <- " "
-      print(df2)
+      if(weight_function == "relative_dens") {
+        if(m < M) cat(paste("Weight param:", format_value(weightpars[m])), "\n")
+      } else if(weight_function == "mlogit") {
+        if(m < M) cat(paste("Weight params:", paste0(format_value(all_gamma_m[,m]), collapse=", ")), "\n")
+      } else if(weight_function %in% c("logistic", "exponential")) {
+        if(m == M) {
+          cat(paste("Weight params:", paste0(format_value(weightpars[1]), " (location), ",
+                                             format_value(weightpars[2]), " (scale)")), "\n")
+        }
+      } else if(weight_function == "threshold") {
+        if(m < M) {
+          cat(paste0("Upper threshold: ", format_value(weightpars[m])), "\n")
+        }
+      }
+      if(parametrization == "mean") cat("Regime means:", paste0(format_value(all_mu[,m]), collapse=", "), "\n")
       cat("\n")
-      n_zero <- sum(B_constraints == 0, na.rm=TRUE)
-      n_free <- ifelse(is.null(B_constraints), d^2, sum(is.na(B_constraints)))
-      n_sign <- d^2 - n_zero - n_free
-      cat("The impact matrix is subject to", n_zero, "zero constraints and", n_sign, "sign constraints.\n")
+      df <- data.frame(Y=Y,
+                       eq=c("=", rep(" ", d - 1)),
+                       eq=left_brackets,
+                       phi0=format_value(all_phi0[, m, drop=FALSE]),
+                       eq=right_brackets,
+                       plus)
+      for(i1 in seq_len(p)) {
+        Amp_colnames <- c(paste0("A", i1), tmp_names[count:(count + d - 1 - 1)]); count <- count + d - 1
+        df[, tmp_names[count]] <- left_brackets; count <- count + 1
+        df[, Amp_colnames] <- format_value(all_A[, ,i1 , m])
+        df[, tmp_names[count]] <- right_brackets; count <- count + 1
+        df[, tmp_names[count]] <- paste0(Y, ".", i1); count <- count + 1
+        df <- cbind(df, plus)
+      }
+      df[, tmp_names[p*(d + 2) + 1]] <- left_brackets
+      if(cond_dist == "ind_Student") {
+        df[, c("B", tmp_names[(p*(d + 2) + 2):(p*(d + 2) + d)])] <- format_value(all_Omega[, , m])
+      } else {
+        df[, c("Omega", tmp_names[(p*(d + 2) + 2):(p*(d + 2) + d)])] <- format_value(all_Omega[, , m])
+      }
+      df[, tmp_names[p*(d + 2) + d + 1]] <- right_brackets
+      if(cond_dist != "ind_Student") df[, "1/2"] <- rep(" ", d)
+      df[, tmp_names[p*(d + 2) + d + 2]] <- paste0("eps", 1:d)
+      names_to_omit <- unlist(lapply(c("plus", "eq", "round_lbrackets", "round_rbrackets", tmp_names),
+                                     function(nam) grep(nam, colnames(df))))
+      colnames(df)[names_to_omit] <- " "
+      print(df)
       cat("\n")
     }
-  }
+    if(sep_AR) cat(paste0("AR parameters: ", paste0(format_value(AR_stds), collapse=", ")), "\n\n")
 
-  if(summary_print) {
-    cat("Print approximate standard errors with the function 'print_std_errors'.\n")
+    if(!identification %in% c("reduced_form", "recursive", "non-Gaussianity")) { # No separate structural params for these models
+      cat("Structural parameters:\n")
+      if(identification == "heteroskedasticity") {
+        W <- format_value(pick_W(p=p, M=M, d=d, params=pars, identification=identification))
+
+        tmp <- c(rep(" ", times=d - 1), ",")
+        df2 <- data.frame(left_brackets, W=W[,1])
+        for(i1 in 2:d) {
+          df2 <- cbind(df2, W[, i1])
+          colnames(df2)[1 + i1] <- "tmp"
+        }
+        df2 <- cbind(df2, right_brackets)
+        if(M > 1) {
+          lambdas <- format_value(pick_lambdas(p=p, M=M, d=d, params=pars, identification=identification))
+          tmp <- c(rep(" ", times=d - 1), ",")
+          lambdas <- matrix(lambdas, nrow=d, ncol=M - 1, byrow=FALSE) # Column for each regime
+          for(i1 in 1:(sum(M) - 1)) {
+            lmb <- lambdas[,i1]
+            df2 <- cbind(df2, tmp, left_brackets, lmb, right_brackets)
+            colnames(df2)[grep("lmb", colnames(df2))] <- paste0("lamb", i1 + 1)
+          }
+        }
+        names_to_omit <- unlist(lapply(c("left_brackets", "right_brackets", "tmp"), function(nam) grep(nam, colnames(df2))))
+        colnames(df2)[names_to_omit] <- " "
+        print(df2)
+        cat("\n")
+        n_zero <- sum(B_constraints == 0, na.rm=TRUE)
+        n_free <- sum(is.na(B_constraints))
+        n_sign <- d^2 - n_zero - n_free
+        cat("The impact matrix is subject to", n_zero, "zero constraints and", n_sign, "sign constraints.\n")
+        cat("\n")
+      }
+    }
   }
   invisible(stvar)
 }
