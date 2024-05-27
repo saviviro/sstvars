@@ -9,7 +9,7 @@
 #' @details The purpose of \code{iterate_more} is to provide a simple and convenient tool to finalize
 #'   the estimation when the maximum number of iterations is reached when estimating a STVAR model
 #'   with the main estimation function \code{fitSTVAR} or \code{fitSSTVAR}.
-#' @return Returns an object of class \code{'stvar'} defining the estimated model
+#' @inherit STVAR return
 #' @seealso \code{\link{fitSTVAR}}, \code{\link{STVAR}}, \code{\link[stats]{optim}},
 #'  \code{\link{swap_B_signs}}, \code{\link{reorder_B_columns}}
 #' @inherit fitSTVAR references
@@ -146,7 +146,7 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
 #'
 #'   Employs the estimation function \code{optim} from the package \code{stats} that implements the optimization
 #'   algorithms. See \code{?optim} for the documentation on the
-#' @return Returns an object of class \code{'stvar'} defining the structural model
+#' @inherit STVAR return
 #' @seealso \code{\link{fitSTVAR}}, \code{\link{STVAR}}, \code{\link[stats]{optim}}
 #' @references
 #' \itemize{
@@ -641,7 +641,7 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
 #'
 #'   Employs the estimation function \code{optim} from the package \code{stats} that implements the optimization
 #'   algorithms.
-#' @return Returns an object of class \code{'stvar'} defining the structural model
+#' @inherit STVAR return
 #' @section warning: No argument checks!
 #' @seealso \code{\link{linear_IRF}}, \code{\link[stats]{optim}}
 #' @inherit fitSSTVAR references

@@ -12,8 +12,26 @@ swap_parametrization(stvar, calc_std_errors = FALSE)
 \item{calc_std_errors}{should approximate standard errors be calculated?}
 }
 \value{
-Returns an object of class \code{'stvar'} defining the specified reduced form or structural
- smooth transition VAR model. Can be used to work with other functions provided in \code{sstvars}.
+Returns an S3 object of class \code{'stvar'} defining a smooth transition VAR model. The returned list
+ contains the following components (some of which may be \code{NULL} depending on the use case):
+   \item{data}{The input time series data.}
+   \item{model}{A list describing the model structure.}
+   \item{params}{The parameters of the model.}
+   \item{std_errors}{Approximate standard errors of the parameters, if calculated.}
+   \item{transition_weights}{The transition weights of the model.}
+   \item{regime_cmeans}{Conditional means of the regimes, if data is provided.}
+   \item{total_cmeans}{Total conditional means of the model, if data is provided.}
+   \item{total_ccovs}{Total conditional covariances of the model, if data is provided.}
+   \item{uncond_moments}{A list of unconditional moments including regime autocovariances, variances, and means.}
+   \item{residuals_raw}{Raw residuals, if data is provided.}
+   \item{residuals_std}{Standardized residuals, if data is provided.}
+   \item{structural_shocks}{Recovered structural shocks, if applicable.}
+   \item{loglik}{Log-likelihood of the model, if data is provided.}
+   \item{IC}{The values of the information criteria (AIC, HQIC, BIC) for the model, if data is provided.}
+   \item{all_estimates}{The parameter estimates from all estimation rounds, if applicable.}
+   \item{all_logliks}{The log-likelihood of the estimates from all estimation rounds, if applicable.}
+   \item{which_converged}{Indicators of which estimation rounds converged, if applicable.}
+   \item{which_round}{Indicators of which round of optimization each estimate belongs to, if applicable.}
 }
 \description{
 \code{swap_parametrization} swaps the parametrization of a STVAR model

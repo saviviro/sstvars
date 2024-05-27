@@ -59,7 +59,7 @@
 #'  function \code{alt_stvar} (which can used with \code{filter_estimates=TRUE} as well since results from all estimation rounds
 #'  are saved).
 #'
-#' @return Returns an object of class \code{'stvar'} defining the estimated reduced form smooth transition VAR model.
+#' @inherit STVAR return
 #' @section S3 methods:
 #'   The following S3 methods are supported for class \code{'stvar'}: \code{logLik}, \code{residuals}, \code{print}, \code{summary},
 #'    \code{predict}, \code{simulate}, and \code{plot}.
