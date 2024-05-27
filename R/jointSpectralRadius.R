@@ -87,7 +87,7 @@ bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=FALSE, ncores=2, print_pro
   stopifnot(length(ncores) == 1 && ncores %% 1 == 0 && ncores > 0)
   if(ncores > parallel::detectCores()) {
     ncores <- parallel::detectCores()
-    cat("ncores was set larger than the number of cores available in the system. Using", ncores, "cores.\n")
+    message("ncores was set larger than the number of cores available in the system. Using", ncores, "cores.\n")
   }
   epsilon_goal <- epsilon # The epsilon value that we want to achieve
   if(adaptive_eps && epsilon < 0.2) {
@@ -194,7 +194,7 @@ bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=FALSE, ncores=2, print_pro
   all_matprod_inds_old <- matrix(1:m, ncol=m) # Initialize matrix for storing the indices of the matrices involved in the matrix prod
 
   if(print_progress) {
-    cat(paste0("Iteration: ", 1, ", current bounds: ", round(all_alpha[1], 4), ", ", round(all_beta[1], 4)), "\r")
+    message(paste0("Iteration: ", 1, ", current bounds: ", round(all_alpha[1], 4), ", ", round(all_beta[1], 4)), "\r")
   }
 
   for(k in 2:maxit) {
@@ -224,7 +224,13 @@ bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=FALSE, ncores=2, print_pro
     if(length(which_new_candidates) == 0) {
       if(isTRUE(all.equal(epsilon, epsilon_goal))) {
         # If there are no new candidates with epsilon_goal, return the best bounds so far
-        if(print_progress) cat("\nFinnished!                                         \n")
+        if(print_progress) {
+          if(k %% 10 != 0) {
+            message(paste0("Iteration: ", k, ", current bounds: ", round(max(all_alpha, na.rm=TRUE), 4), ", ",
+                           round(min(all_beta, na.rm=TRUE), 4)), "\r")
+          }
+          message("\nFinnished!                                         ")
+        }
         break
       } else {
         # If no new candidates with the larger epsilon, switch to smaller epsilon
@@ -256,7 +262,13 @@ bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=FALSE, ncores=2, print_pro
         }
         if(length(which_new_candidates) == 0) {
           # If there are no new candidates with epsilon_goal, return the best bounds so far
-          if(print_progress) cat("\nFinnished!                                         \n")
+          if(print_progress) {
+            if(k %% 10 != 0) {
+              message(paste0("Iteration: ", k, ", current bounds: ", round(max(all_alpha, na.rm=TRUE), 4), ", ",
+                             round(min(all_beta, na.rm=TRUE), 4)), "\r")
+            }
+            message("\nFinnished!                                         ")
+          }
           break
         }
       }
@@ -277,17 +289,29 @@ bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=FALSE, ncores=2, print_pro
     ## Update "old stuff" for the next round
     all_matprod_inds_old <- all_matprod_inds
 
-    if(print_progress) {
-      cat(paste0("Iteration: ", k, ", current bounds: ", round(all_alpha[k], 4), ", ", round(all_beta[k], 4)), "\r")
+    if(print_progress && k %% 10 == 0) {
+      message(paste0("Iteration: ", k, ", current bounds: ", round(all_alpha[k], 4), ", ", round(all_beta[k], 4)), "\r")
     }
 
     ## Stop iteration if the lower and upper bounds are close enough
     if(all_beta[k] - all_alpha[k] <= epsilon) {
-      if(print_progress) cat("\nFinnished!                                         \n")
+      if(print_progress) {
+        if(k %% 10 != 0) {
+          message(paste0("Iteration: ", k, ", current bounds: ", round(max(all_alpha, na.rm=TRUE), 4), ", ",
+                         round(min(all_beta, na.rm=TRUE), 4)), "\r")
+        }
+        message("\nFinnished!                                         ")
+      }
       break
     }
     if(k == maxit) {
-      cat("\nThe maximum number of iterations reached!                                         \n")
+      if(print_progress) {
+        if(k %% 10 != 0) {
+          message(paste0("Iteration: ", k, ", current bounds: ", round(max(all_alpha, na.rm=TRUE), 4), ", ",
+                         round(min(all_beta, na.rm=TRUE), 4)), "\r")
+        }
+      }
+      message("\nThe maximum number of iterations reached!                                         ")
     }
   }
 

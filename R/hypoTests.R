@@ -61,12 +61,12 @@ Wald_test <- function(stvar, A, c) {
 
   # Calculate Hessian matrix at the estimate
   Hess <- tryCatch(get_hessian(stvar), error=function(e) {
-    print(paste("Failed to calculate Hessian matrix:", e))
+    message(paste("Failed to calculate Hessian matrix:", e))
     return(NA)})
 
   # Invert the Hessian matrix
   inv_Hess <- tryCatch(solve(Hess), error=function(e) {
-    print(paste("Failed to invert Hessian matrix:", e))
+    message(paste("Failed to invert Hessian matrix:", e))
     return(NA)
   })
   if(anyNA(inv_Hess)) stop("Couldn't invert Hessian matrix of the log-likelihood function. Use the function 'get_soc'
@@ -258,7 +258,7 @@ Rao_test <- function(stvar) {
   # Calculate the gradient:
   Grad <- tryCatch(get_gradient(new_stvar),
                    error=function(e) {
-                     print(paste("Failed to calculate the gradient matrix:", e))
+                     message(paste("Failed to calculate the gradient matrix:", e))
                      return(NA)})
   if(anyNA(Grad)) {
     stop("Couldn't calculate gradient. Check that the estimates are not very close to the boundary of the parameter space.")
@@ -290,7 +290,7 @@ Rao_test <- function(stvar) {
 
   # Invert the OPG matrix
   inv_OPG <- tryCatch(solve(OPG), error=function(e) {
-    print(paste("Failed to invert the outer product of gradients matrix:", e))
+    message(paste("Failed to invert the outer product of gradients matrix:", e))
     return(NA)
   })
 

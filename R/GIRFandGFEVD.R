@@ -110,7 +110,7 @@
 #'  # GIRF for one-standard-error positive structural shocks, N=30 steps ahead,
 #'  # with the inital values drawn from the first regime.
 #'  girf1 <- GIRF(mod32logt, which_shocks=1:2, shock_size=1, N=30, R1=50, R2=50,
-#'   init_regime=2, use_parallel=FALSE)
+#'   init_regime=2)
 #'  print(girf1) # Print the results
 #'  plot(girf1) # Plot the GIRFs
 #'
@@ -222,11 +222,11 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
       message("ncores was set to be larger than the number of cores detected")
     }
     if(is.null(init_values)) {
-      cat(paste("Using", ncores, "cores to estimate", R2,"GIRFs for", length(which_shocks), "structural shocks,",
-                "each based on", R1, "Monte Carlo repetitions."), "\n")
+      message(paste("Using", ncores, "cores to estimate", R2,"GIRFs for", length(which_shocks), "structural shocks,",
+                "each based on", R1, "Monte Carlo repetitions."))
     } else {
-      cat(paste("Using", ncores, "cores to estimate one GIRF for", length(which_shocks), "structural shocks, each based on",
-                R1, "Monte Carlo repetitions."), "\n")
+      message(paste("Using", ncores, "cores to estimate one GIRF for", length(which_shocks), "structural shocks, each based on",
+              R1, "Monte Carlo repetitions."))
     }
 
     ### Calculate the GIRFs ###
@@ -236,7 +236,7 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
     parallel::clusterEvalQ(cl, c(library(pbapply), library(Rcpp), library(RcppArmadillo), library(sstvars)))
 
     for(i1 in 1:length(which_shocks)) {
-      cat(paste0("Estimating GIRFs for structural shock ", which_shocks[i1], "..."), "\n")
+      message(paste0("Estimating GIRFs for structural shock ", which_shocks[i1], "..."))
       GIRF_shocks[[i1]] <- pbapply::pblapply(1:R2, function(i2) get_one_girf(shock_numb=which_shocks[i1],
                                                                              shock_size=shock_size, seed=seeds[i2],
                                                                              rep_numb=i2), cl=cl)
@@ -303,7 +303,7 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
                                conf_ints=conf_ints)
   }
 
-  if(use_parallel) cat("Finished!\n")
+  if(use_parallel) message("Finished!")
   structure(list(girf_res=GIRF_results,
                  all_girfs=all_GIRFS,
                  shocks=which_shocks,
@@ -509,11 +509,11 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
       message("ncores was set to be larger than the number of cores detected")
     }
     if(initval_type != "fixed") {
-      cat(paste("Using", ncores, "cores to estimate", R2,"GIRFs for", d, "structural shocks,", "each based on",
-                R1, "Monte Carlo repetitions."), "\n")
+      message(paste("Using", ncores, "cores to estimate", R2,"GIRFs for", d, "structural shocks,", "each based on",
+                R1, "Monte Carlo repetitions."))
     } else {
-      cat(paste("Using", ncores, "cores to estimate one GIRF for", d, "structural shocks, each based on",
-                R1, "Monte Carlo repetitions."), "\n")
+      message(paste("Using", ncores, "cores to estimate one GIRF for", d, "structural shocks, each based on",
+                R1, "Monte Carlo repetitions."))
     }
 
     ### Calculate the GIRFs ###
@@ -523,7 +523,7 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
     parallel::clusterEvalQ(cl, c(library(pbapply), library(Rcpp), library(RcppArmadillo), library(sstvars)))
 
     for(i1 in 1:d) {
-      cat(paste0("Estimating GIRFs for structural shock ", i1, "..."), "\n")
+      message(paste0("Estimating GIRFs for structural shock ", i1, "..."))
       GIRF_shocks[[i1]] <- pbapply::pblapply(1:R2,
                                              function(i2) get_one_girf(shock_numb=i1,
                                                                        shock_size=ifelse(use_data_shocks, data_shocks[i2, i1], shock_size),
@@ -600,7 +600,7 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
     data_GFEVD_results <- NULL
   }
 
-  if(use_parallel) cat("Finished!\n")
+  if(use_parallel) message("Finished!")
   structure(list(gfevd_res=GFEVD_results,
                  shock_size=shock_size,
                  N=N,

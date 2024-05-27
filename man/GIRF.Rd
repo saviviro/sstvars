@@ -185,7 +185,7 @@ The confidence bounds reflect uncertainty about the initial state (but
  # GIRF for one-standard-error positive structural shocks, N=30 steps ahead,
  # with the inital values drawn from the first regime.
  girf1 <- GIRF(mod32logt, which_shocks=1:2, shock_size=1, N=30, R1=50, R2=50,
-  init_regime=2, use_parallel=FALSE)
+  init_regime=2)
  print(girf1) # Print the results
  plot(girf1) # Plot the GIRFs
 

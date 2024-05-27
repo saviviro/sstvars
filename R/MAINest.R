@@ -221,7 +221,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   weightfun_pars <- check_weightfun_pars(data=data, p=p, d=d, M=M, weight_function=weight_function,
                                          weightfun_pars=weightfun_pars, cond_dist=cond_dist)
   if(!is.null(mean_constraints) && parametrization == "intercept") {
-    if(!no_prints) cat("mean_constraints can be applied for mean-parametrized models only. Switching to parametrization = 'mean'.\n")
+    if(!no_prints) message("mean_constraints can be applied for mean-parametrized models only. Switching to parametrization = 'mean'.")
     parametrization <- "mean"
   }
   check_constraints(data=data, p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
@@ -240,13 +240,13 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   if(use_parallel) {
     if(ncores > parallel::detectCores()) {
       ncores <- parallel::detectCores()
-      message("ncores was set to be larger than the number of cores detected")
+      message("ncores was set to be larger than the number of cores detected.")
     }
     if(ncores > nrounds) {
       ncores <- nrounds
-      message("ncores was set to be larger than the number of estimation rounds")
+      message("ncores was set to be larger than the number of estimation rounds.")
     }
-    cat(paste("Using", ncores, "cores for", nrounds, "estimations rounds..."), "\n")
+    message(paste("Using", ncores, "cores for", nrounds, "estimations rounds..."))
 
     ### Optimization with the genetic algorithm ###
     cl <- parallel::makeCluster(ncores)
@@ -254,7 +254,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     parallel::clusterExport(cl, ls(environment(fitSTVAR)), envir=environment(fitSTVAR)) # assign all variables from package:sstvars
     parallel::clusterEvalQ(cl, c(library(pbapply), library(Rcpp), library(RcppArmadillo), library(sstvars)))
 
-    cat("Optimizing with a genetic algorithm...\n")
+    message("Optimizing with a genetic algorithm...")
     GAresults <- pbapply::pblapply(1:nrounds, function(i1) GAfit(data=data, p=p, M=M,
                                                                  weight_function=weight_function,
                                                                  weightfun_pars=weightfun_pars,
@@ -266,10 +266,10 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                                                                  seed=seeds[i1], ...), cl=cl)
 
   } else {
-    if(!no_prints) cat("Optimizing with a genetic algorithm...\n")
+    if(!no_prints) message("Optimizing with a genetic algorithm...")
 
     tmpfunGA <- function(i1, ...) {
-      if(!no_prints) cat(i1, "/", nrounds, "\r")
+      if(!no_prints) message(i1, "/", nrounds, "\r")
       GAfit(data=data, p=p, M=M,
             weight_function=weight_function,
             weightfun_pars=weightfun_pars,
@@ -302,11 +302,11 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
 
   if(print_res) {
     print_loks <- function() {
-      printfun <- function(txt, FUN) cat(paste(txt, round(FUN(loks), 3)), "\n")
+      printfun <- function(txt, FUN) message(paste(txt, round(FUN(loks), 3)))
       printfun("The lowest loglik: ", min)
       printfun("The largest loglik:", max)
     }
-    cat("Results from the genetic algorithm:\n")
+    message("Results from the genetic algorithm:")
     print_loks()
   }
 
@@ -329,14 +329,14 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     vapply(1:npars, function(i1) (loglik_fn(params + I[i1,]*h) - loglik_fn(params - I[i1,]*h))/(2*h), numeric(1))
   }
 
-  if(!no_prints) cat("Optimizing with a variable metric algorithm...\n")
+  if(!no_prints) message("Optimizing with a variable metric algorithm...")
   if(use_parallel) {
     NEWTONresults <- pbapply::pblapply(1:nrounds, function(i1) optim(par=GAresults[[i1]], fn=loglik_fn, gr=loglik_grad,
                                                                      method="BFGS", control=list(fnscale=-1, maxit=maxit)), cl=cl)
     parallel::stopCluster(cl=cl)
   } else {
     tmpfunNE <- function(i1) {
-      if(!no_prints) cat(i1, "/", nrounds, "\r")
+      if(!no_prints) message(i1, "/", nrounds, "\r")
       optim(par=GAresults[[i1]], fn=loglik_fn, gr=loglik_grad, method="BFGS",
             control=list(fnscale=-1, maxit=maxit))
     }
@@ -347,7 +347,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   converged <- vapply(1:nrounds, function(i1) NEWTONresults[[i1]]$convergence == 0, logical(1)) # Which coverged
 
   if(print_res) {
-    cat("Results from the variable metric algorithm:\n")
+    message("Results from the variable metric algorithm:")
     print_loks()
   }
 
@@ -367,7 +367,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   }
 
   if(filter_estimates) {
-    if(!no_prints) cat("Filtering inappropriate estimates...\n")
+    if(!no_prints) message("Filtering inappropriate estimates...")
     ord_by_loks <- order(loks, decreasing=TRUE) # Ordering from largest loglik to smaller
 
     # Go through estimates, take the estimate that yield the higher likelihood
@@ -476,7 +476,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   }
 
   ### Wrap up ###
-  if(!no_prints) cat("Calculating approximate standard errors...\n")
+  if(!no_prints) message("Calculating approximate standard errors...")
   ret <- STVAR(data=data, p=p, M=M, d=d, params=params,
                weight_function=weight_function,
                weightfun_pars=weightfun_pars,
@@ -493,7 +493,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   ret$which_converged <- converged
   ret$which_round <- which_best_fit # Which estimation round induced the largest log-likelihood?
   warn_eigens(ret)
-  if(!no_prints) cat("Finished!\n")
+  if(!no_prints) message("Finished!\n")
   ret
 }
 

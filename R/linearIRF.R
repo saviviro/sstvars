@@ -303,7 +303,7 @@ linear_IRF <- function(stvar, N=30, regime=1, which_cumulative=numeric(0), scale
     # For all models, bootstrapping conditions on the estimated transition weight parameters,
     # so they need to be removed:
     if(is.null(weight_constraints) && M > 1 && weight_function != "exogenous") { # No weight constraints
-      n_weightpars <- length(weightpars) - ifelse(weight_function=="relative_dens", 1, 0)
+      n_weightpars <- length(weightpars) - ifelse(weight_function == "relative_dens", 1, 0)
       new_params <- c(new_params[1:(length(new_params) - n_weightpars - length(distpars))],
                       distpars) # Removes weight params
     } else if(M > 1 && weight_function != "exogenous") { # Weight constraints employed
@@ -450,7 +450,7 @@ linear_IRF <- function(stvar, N=30, regime=1, which_cumulative=numeric(0), scale
       ncores <- parallel::detectCores()
       message("ncores was set to be larger than the number of cores detected")
     }
-    cat(paste("Using", ncores, "cores for", bootstrap_reps, "bootstrap replications..."), "\n")
+    message(paste("Using", ncores, "cores for", bootstrap_reps, "bootstrap replications..."))
     cl <- parallel::makeCluster(ncores)
     on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.
     parallel::clusterExport(cl, ls(environment(fitSTVAR)), envir=environment(fitSTVAR)) # assign all variables from package:sstvars

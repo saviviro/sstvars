@@ -453,11 +453,11 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
                       params[(n_mean_pars + n_ar_pars + length(oldWpars) + 1):length(params)])
     }
     if(n_sign_changes > 0) {
-      cat(paste0("There was ", n_sign_changes,
-                 " sign changes in the impact matrix when creating preliminary estimates for the new model. ",
-                  "The sign changes make the results more unrealiable. To obtain more reliable results, consider using ",
-                  "the function 'swap_B_signs' to create a model that has the sign constraints readily satisfied and ",
-                  "then applying this function.\n\n"))
+      message(paste0("There was ", n_sign_changes,
+              " sign changes in the impact matrix when creating preliminary estimates for the new model. ",
+              "The sign changes make the results more unrealiable. To obtain more reliable results, consider using ",
+              "the function 'swap_B_signs' to create a model that has the sign constraints readily satisfied and ",
+              "then applying this function.\n"))
     }
   } else { # identification == "non-Gaussianity"
     if(is.null(old_B_constraints) && is.null(B_constraints)) {
@@ -520,11 +520,11 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
                     params[(n_mean_pars + n_ar_pars + M*d^2 - M*n_zeros_in_B + 1):length(params)])
 
     if(n_sign_changes > 0) {
-      cat(paste0("There was in total of ", n_sign_changes,
-                 " sign changes in the impact matrices of the regimes when creating preliminary estimates for the new model. ",
-                 "The sign changes make the results more unrealiable. To obtain more reliable results, consider using ",
-                 "the function 'swap_B_signs' to create a model that has the sign constraints readily satisfied and ",
-                 "then applying this function.\n\n"))
+      message(paste0("There was in total of ", n_sign_changes,
+              " sign changes in the impact matrices of the regimes when creating preliminary estimates for the new model. ",
+              "The sign changes make the results more unrealiable. To obtain more reliable results, consider using ",
+              "the function 'swap_B_signs' to create a model that has the sign constraints readily satisfied and ",
+              "then applying this function.\n"))
     }
   }
 
@@ -537,7 +537,7 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
                               to_return="loglik", check_params=TRUE, minval=NULL, alt_par=alt_par)
 
   if(is.null(new_loglik)) {
-    cat("Problem with the new parameter vector - try different B_constraints?\n See:\n")
+    message("Problem with the new parameter vector - try different B_constraints?\n See:")
     check_params(data=data, p=p, M=M, d=d, params=new_params, cond_dist=cond_dist,
                  weight_function=weight_function, weightfun_pars=weightfun_pars,
                  parametrization=parametrization, identification=identification,
@@ -546,8 +546,8 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
   }
 
   if(print_res) {
-    cat("The log-likelihood of the supplied model:   ", round(c(stvar$loglik), 3),
-                    "\nConstrained log-likelihood prior estimation:", round(new_loglik, 3), "\n")
+    message("The log-likelihood of the supplied model:   ", round(c(stvar$loglik), 3),
+            "\nConstrained log-likelihood prior estimation:", round(new_loglik, 3))
   }
 
 
@@ -594,19 +594,17 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
 
   ## Estimation by robust method
   if(robust_method != "none") {
-    #cat(paste0("Estimation with the", robust_method, "algorithm..."), "\n")
     robust_results <- stats::optim(par=new_params, fn=loglik_fn, gr=loglik_grad, method=robust_method,
                                    control=list(fnscale=-1, maxit=maxit_robust))
     new_params <- robust_results$par
-    if(print_res) cat(paste0("The log-likelihood after robust estimation:  ", round(robust_results$value, 3)), "\n")
+    if(print_res) message(paste0("The log-likelihood after robust estimation:  ", round(robust_results$value, 3)))
   }
 
   ## Estimation by the variable metric algorithm...
-  #cat(paste0("Estimation with the variable metric algorithm..."), "\n")
   final_results <- stats::optim(par=new_params, fn=loglik_fn, gr=loglik_grad, method="BFGS",
                                 control=list(fnscale=-1, maxit=maxit))
   new_params <- final_results$par
-  if(print_res) cat(paste0("The log-likelihood after final estimation:   ", round(final_results$value, 3)), "\n")
+  if(print_res) message(paste0("The log-likelihood after final estimation:   ", round(final_results$value, 3)))
 
   if(alt_par) {
     new_params <- change_parametrization(p=p, M=M, d=d, params=new_params, cond_dist=cond_dist,
