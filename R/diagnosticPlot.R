@@ -21,6 +21,7 @@
 #'  \code{acf} from the package \code{stats} and the plot method for class \code{'acf'} objects is employed.
 #'  If \code{cond_dist == "Student"}, the estimate of the degrees of freedom parameter is used in theoretical
 #'  densities and quantiles.
+#' @return No return value, called for its side effect of plotting the diagnostic plot.
 #' @inherit get_residuals references
 #' @seealso \code{\link{Portmanteau_test}}, \code{\link{profile_logliks}}, \code{\link{fitSTVAR}}, \code{\link{STVAR}},
 #'  \code{\link{LR_test}}, \code{\link{Wald_test}}, \code{\link{Rao_test}}

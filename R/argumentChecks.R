@@ -184,20 +184,18 @@ in_paramspace <- function(p, M, d, params,
 #' @return Throws an informative error if there is something wrong with the parameter vector.
 #' @inherit in_paramspace references
 #' @examples
-#'  \dontrun{
 #'  # There examples will cause an informative error
 #'  params112_notpd <- c(6.5e-01, 7.0e-01, 2.9e-01, 2.0e-02, -1.4e-01,
 #'   9.0e-01, 6.0e-01, -1.0e-02, 1.0e-07)
-#'  check_params(p=1, M=1, d=2, params=params112_notpd)
+#'  try(check_params(p=1, M=1, d=2, params=params112_notpd))
 #'
 #'  params112_notstat <- c(6.5e-01, 7.0e-01, 10.9e-01, 2.0e-02, -1.4e-01,
 #'   9.0e-01, 6.0e-01, -1.0e-02, 1.0e-07)
-#'  check_params(p=1, M=1, d=2, params=params112_notstat)
+#'  try(check_params(p=1, M=1, d=2, params=params112_notstat))
 #'
 #'  params112_wronglength <- c(6.5e-01, 7.0e-01, 2.9e-01, 2.0e-02, -1.4e-01,
 #'   9.0e-01, 6.0e-01, -1.0e-02)
-#'  check_params(p=1, M=1, d=2, params=params112_wronglength)
-#'  }
+#'  try(check_params(p=1, M=1, d=2, params=params112_wronglength))
 #' @export
 
 check_params <- function(data, p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),

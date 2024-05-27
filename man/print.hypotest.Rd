@@ -14,6 +14,9 @@
 
 \item{digits}{how many significant digits to print?}
 }
+\value{
+Returns the input object \code{x} invisibly.
+}
 \description{
 \code{print.hypotest} is the print method for the class hypotest
  objects.

@@ -71,6 +71,7 @@ standard_errors <- function(data, p, M, params,
 #'   Note that if linear constraints are imposed and they involve summations or multiplications, then the AR
 #'   parameter standard errors are printed separately as they don't correspond one-to-one to the model parameter
 #'   standard errors.
+#' @return Returns the input object \code{stvar} invisibly.
 #' @seealso \code{\link{fitSTVAR}}, \code{\link{STVAR}}, \code{\link{print.stvar}},
 #'  \code{\link{swap_parametrization}}
 #' @inherit STVAR references

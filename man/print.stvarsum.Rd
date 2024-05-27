@@ -13,6 +13,9 @@
 
 \item{digits}{the number of digits to be printed.}
 }
+\value{
+Returns the input object \code{x} invisibly.
+}
 \description{
 \code{print.stvarsum} is a print method for object \code{'stvarsum'} generated
   by \code{summary.stvar}.

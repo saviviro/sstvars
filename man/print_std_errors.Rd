@@ -11,6 +11,9 @@ print_std_errors(stvar, digits = 3)
 
 \item{digits}{number of digits to be printed.}
 }
+\value{
+Returns the input object \code{stvar} invisibly.
+}
 \description{
 \code{print_std_errors} prints the approximate standard errors of a smooth transition VAR model in the
   same form as the parameters of objects of class \code{'stvar'} are printed.

@@ -27,6 +27,9 @@ diagnostic_plot(
 
 \item{maxlag}{the maximum lag considered in types \code{"ac"} and \code{"ch"}.}
 }
+\value{
+No return value, called for its side effect of plotting the diagnostic plot.
+}
 \description{
 \code{diagnostic_plot} plots a multivariate residual diagnostic plot
   for either autocorrelation, conditional heteroskedasticity, or distribution,
