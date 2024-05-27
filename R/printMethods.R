@@ -222,7 +222,7 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE, standard_error_pr
     }
 
     if(summary_print) {
-      cat("Print approximate standard errors by setting the argument 'standard_error_print=TRUE'.\n")
+      cat("Print approximate standard errors with the argument 'standard_error_print=TRUE'.\n")
     }
   } else { # Print standard errors
     npars <- length(stvar$params)

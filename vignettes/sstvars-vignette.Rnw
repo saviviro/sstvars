@@ -294,8 +294,6 @@ where $\Lambda_1=I_d$. The shocks are identified up to ordering and sign if none
 
 Shocks identified by heteroskedasticity impose constant relative impact responses for the variables, making them unsuitable for some applications concerned with time-varying impulse response functions. Similarly to the recursive identification, this method is straightforward to apply, but unlike the recursive identification, it does not necessarily require any zero constraints on the impact responses. Compared to the recursive identification, identification by heteroskedasticity is therefore particularly advantageous when the recursive identification would imply that the shock of interest is order last. In this case, the assumption of time-invariant relative impact responses is less restrictive than the zero restrictions of the recursive identification. In contrast, the recursive identification is particularly appealing when the shock of interest is ordered first (or almost first), as then the impact responses to the shock of interest can vary freely in time.
 
-%\cite{Bacchiocchi+Fanelli:2015}, \cite{Bacchiocchi+Castelnuovo+Fanelli:2016}, and \cite{Angelini+Bacchiocchi+Caggiano+Fanelli:2019} propose alternative way of identifying the shocks by combining heteroskedasticity with zero restrictions on the impact matrices. Their method allows some of the impact responses vary in time also relative to the other variables, but the required untestable zero constraints may challenging to justify economically. Nevertheless, since their identification method is not directly applicable to the STVAR models specified in Section~\ref{sec:models}, we do not discuss it further.
-
 \subsection{Identification by non-Gaussianity}
 When to shocks are mutually independent and at most one of them is Gaussian (i.e., under independent $t$-shocks, see Section~\ref{sec:indstudent}), they are generally statistically identified without imposing further restrictions on the models \citep{Virolainen2:2024}. Specifically, the required identifying assumptions are:
 \begin{assumption}\label{as:shocks}
@@ -313,7 +311,7 @@ Considering the functional form of $B_{y,t}$ in Equation~(\ref{eq:Bt}), in order
 A suitable strategy for fixing the ordering and signs of the columns of $B_1,...,B_M$ depends on the transition weights and distributions of the shocks, as for some specifications constraints that are not restrictive in some specifications can be overidentifying in others. Conversely, constraints that are identifying in some specifications may not be enough for identification in others. Therefore, it is useful to divide the discussion on the identification in two separate cases: when the transition weights are binary (i.e., $\alpha_{m,t}\in\lbrace 0, 1\rbrace$) and when the transition weights exhibit more variation.
 
 \subsubsection{Identification of the shocks in TVAR models}\label{sec:identtvar}
-Suppose the transition weights are binary, $\alpha_{m,t}\in\lbrace 0, 1\rbrace$, for all $t$ and $m=1,...,M$. Then, at every $t$, the process is completely in one of the regimes and the impact matrix is $B_{y,t}=B_m$ for the regime $m$ with $\alpha_{m,t}=1$. By Lemma~\ref{lemma:Bt_at_each_t}, the impact matrix $B_{y,t}$ is thereby identified up to ordering and signs of its columns in each of the regimes, implying that identification is obtained by fixing the ordering and signs of the columns of $B_1,...,B_M$. However, whether fixing the ordering or signs of the columns of $B_m$, $m=1,...,M$‚ separately in each regime is overidentifying depends on the distributions of the shocks $e_t=(e_{1t},...,e_{dt})$ \citep[see the discussion in]{Virolainen2:2024}
+Suppose the transition weights are binary, $\alpha_{m,t}\in\lbrace 0, 1\rbrace$, for all $t$ and $m=1,...,M$. Then, at every $t$, the process is completely in one of the regimes and the impact matrix is $B_{y,t}=B_m$ for the regime $m$ with $\alpha_{m,t}=1$. By Lemma~2 of \cite{Virolainen2:2024}, the impact matrix $B_{y,t}$ is thereby identified up to ordering and signs of its columns in each of the regimes, implying that identification is obtained by fixing the ordering and signs of the columns of $B_1,...,B_M$. However, whether fixing the ordering or signs of the columns of $B_m$, $m=1,...,M$‚ separately in each regime is overidentifying depends on the distributions of the shocks $e_t=(e_{1t},...,e_{dt})$ \citep[see the discussion in]{Virolainen2:2024}
 
 The required identification conditions depend on the distributions of the shocks, so it is useful to make some assumptions on them, which are stated in the following proposition providing the identification result for TVAR models \citep[][Proposition~1]{Virolainen2:2024}.
 \begin{proposition}\label{prop:tvar_ident}
@@ -402,7 +400,7 @@ The argument \code{seeds} supplies the seeds that initialize the random number g
 \begin{CodeInput}
 R> library(sstvars)
 R> data("gdpdef", package="sstvars")
-R> fit12t <- fitSTVAR(gdpdef, p=1, M=2, weight_function="logistic",
+R> fit12 <- fitSTVAR(gdpdef, p=1, M=2, weight_function="logistic",
 +    weightfun_pars=c(2, 1), cond_dist="Student", nrounds=24, ncores=8,
 +    seeds=1:24)
 \end{CodeInput}
@@ -437,7 +435,8 @@ The estimates can be examined with the \code{print} method.
 R> print(fit12)
 \end{CodeInput}
 \begin{CodeOutput}
-logistic Student STVAR model, reduced form model no AR_constraints, no mean_constraints,
+logistic Student STVAR model, reduced form model no AR_constraints,
+no mean_constraints,
   p = 1, M = 2, d = 2, #parameters = 21, #observations = 243 x 2
   Switching variable: GDPDEF with lag 1.
 
@@ -472,7 +471,8 @@ A more detailed printout is obtained with the \code{summary} method as follows:
 R> summary(fit12)
 \end{CodeInput}
 \begin{CodeOutput}
-logistic Student STVAR model, reduced form model no AR_constraints, no mean_constraints,
+logistic Student STVAR model, reduced form model, no AR_constraints,
+no mean_constraints,
   p = 1, M = 2, d = 2, #parameters = 21, #observations = 243 x 2
   Switching variable: GDPDEF with lag 1.
 
@@ -510,13 +510,13 @@ Error term correlation matrix:
 [1,]  1.00 -0.12
 [2,] -0.12  1.00
 
-Print approximate standard errors with the function 'print_std_errors'.
+Print approximate standard errors with the argument 'standard_error_print=TRUE'.
 \end{CodeOutput}
 \end{CodeChunk}
 %
 The above summary printout shows additional information compared to the print method, including moduli of the eigenvalues of the companion form AR matrices (to assess how close Condition~\ref{cond:necessary} is to break), eigenvalues of the error term covariance matrices (to assess how close they are to being non-positive definite), marginal standard deviations of the variables in each regime, error term correlation matrices, and the log-likelihood as well as the values of the information criteria divided by the number of observations $T-p$.
 
-Approximate standard errors can be printed with the function \code{print_std_errors}, which prints the standard errors in the same form as the print method prints the estimates. There is no standard error for the intercepts if mean parametrization is used (by setting \code{parametrization = "mean"} in \code{fitSTVAR}) and vice versa. In order to obtain standard errors for the regimewise unconditional means or intercepts, one can easily swap between the mean and intercept parametrizations with the function \code{swap_parametrization}. Note that approximate standard errors are based on the mere assumption of the standard Gaussian asymptotic distribution of the estimator. Hence, they should be interpreted with caution.
+Approximate standard errors can be printed by specifying the argument \code{standard_error_print = TRUE} in the print method, which prints the standard errors in the same form as the print method prints the estimates. There is no standard error for the intercepts if mean parametrization is used (by setting \code{parametrization = "mean"} in \code{fitSTVAR}) and vice versa. In order to obtain standard errors for the regimewise unconditional means or intercepts, one can easily swap between the mean and intercept parametrizations with the function \code{swap_parametrization}. Note that approximate standard errors are based on the mere assumption of the standard Gaussian asymptotic distribution of the estimator. Hence, they should be interpreted with caution.
 
 Finally, we show how STVAR models incorporating exogenous transition weights can be estimated. In the below example, we assume two regimes ($M=2$), autoregressive order one ($p=1$), and mutually independent Student's $t$ shocks. As an arbitrary example of exogenous transition weights, we draw the weights of Regime 1 by random from the uniform distribution, and construct the transition weights matrix as follows:
 \begin{CodeChunk}
@@ -559,43 +559,44 @@ We examine the estimates with the summary printout:
 R> summary(fitexo12)
 \end{CodeInput}
 \begin{CodeOutput}
-exogenous ind_Student STVAR model, reduced form model, no AR_constraints, no mean_constraints,
+exogenous ind_Student STVAR model, reduced form model, no AR_constraints,
+no mean_constraints,
   p = 1, M = 2, d = 2, #parameters = 22, #observations = 243 x 2
 
 loglik/T: -1.12, AIC: 2.42, HQIC: 2.54, BIC: 2.73
 
 Regime 1
-Degrees of freedom: 3.57, 3.75 (for all regimes)
-Moduli of 'bold A' eigenvalues:  0.89, 0.07
-Cov. matrix 'Omega' eigenvalues: 0.30, 0.07
-Regime means: 0.68, 0.51
-Regime sdevs: 0.55, 0.58
+Degrees of freedom: 3.73, 3.78 (for all regimes)
+Moduli of 'bold A' eigenvalues:  0.90, 0.08
+Cov. matrix 'Omega' eigenvalues: 0.51, 0.10
+Regime means: 0.68, 0.47
+Regime sdevs: 0.72, 0.70
 
    Y     phi0          A1                      B
-1 y1 = [ 0.66 ] + [  0.07 -0.04 ] y1.1 + [  0.55  0.04 ] eps1
-2 y2   [ 0.04 ]   [  0.02  0.89 ] y2.1   [ -0.02  0.26 ] eps2
+1 y1 = [ 0.63 ] + [  0.08 -0.01 ] y1.1 + [  0.71  0.11 ] eps1
+2 y2   [ 0.03 ]   [  0.02  0.90 ] y2.1   [  0.03 -0.31 ] eps2
 
 Error term correlation matrix:
-        [,1]    [,2]
-[1,]  1.0000 -0.0012
-[2,] -0.0012  1.0000
+       [,1]   [,2]
+[1,]  1.000 -0.065
+[2,] -0.065  1.000
 
 Regime 2
 Moduli of 'bold A' eigenvalues:  0.87, 0.48
-Cov. matrix 'Omega' eigenvalues: 0.55, 0.04
-Regime means: 0.91, 0.94
-Regime sdevs: 0.84, 0.44
+Cov. matrix 'Omega' eigenvalues: 0.82, 0.06
+Regime means: 0.90, 0.91
+Regime sdevs: 1.03, 0.54
 
    Y     phi0          A1                      B
-1 y1 = [ 0.64 ] + [  0.47 -0.17 ] y1.1 + [  0.57 -0.48 ] eps1
-2 y2   [ 0.09 ]   [  0.02  0.88 ] y2.1   [  0.17  0.11 ] eps2
+1 y1 = [ 0.65 ] + [  0.47 -0.19 ] y1.1 + [  0.78  0.47 ] eps1
+2 y2   [ 0.09 ]   [  0.02  0.88 ] y2.1   [  0.17 -0.20 ] eps2
 
 Error term correlation matrix:
      [,1] [,2]
-[1,] 1.00 0.28
-[2,] 0.28 1.00
+[1,] 1.00 0.16
+[2,] 0.16 1.00
 
-Print approximate standard errors with the function 'print_std_errors'.
+Print approximate standard errors with the argument 'standard_error_print=TRUE'.
 \end{CodeOutput}
 \end{CodeChunk}
 As the above printout shows, the impact matrices of the regimes, $B_1,...,B_M$ are directly estimated and their estimates presented in the place where the estimates of $\Omega_m$ are for models with \code{cond_dist="Gaussian"} or \code{cond_dist="ind_Student"}.
@@ -1064,7 +1065,8 @@ Estimation     & \code{fitSTVAR}           & Estimate STVAR models.\\
                & \code{fitSSTVAR}          & Estimate or construct structural STVAR models.\\
                & \code{alt_stvar}          & Construct a STVAR model based on any estimation round.\\
                & \code{iterate_more}       & Run more iterations of the variable metric algorithm for a preliminary estimated STVAR model.\\
-Estimates      & \code{summary} (method)   & Detailed printout of the model.\\
+Estimates      & \code{print} (method)     & Print the estimates or their approximate standard errors.\\
+               & \code{summary} (method)   & Detailed printout of the model.\\
                & \code{plot} (method)      & Plot the series with the fitted transition weights of the model.\\
                & \code{get_foc}            & Calculate numerically approximated gradient of the log-likelihood function evaluated at the estimate.\\
                & \code{get_soc}            & Calculate eigenvalues of numerically approximated Hessian of the log-likelihood function evaluated at the estimate.\\

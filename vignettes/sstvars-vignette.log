@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  1 MAY 2024 10:53
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  27 MAY 2024 14:27
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -605,11 +605,6 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [12]
-
-LaTeX Warning: Reference `lemma:Bt_at_each_t' on page 13 undefined on input lin
-e 313.
-
-
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 13
  []
@@ -620,7 +615,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [14]
-Overfull \hbox (16.80978pt too wide) in paragraph at lines 358--360
+Overfull \hbox (16.80978pt too wide) in paragraph at lines 356--358
 \T1/lmr/m/n/10.95 ram-e-ters ($\OT1/lmr/m/n/10.95 ([](
 [])\OML/lmm/m/it/10.95 ; :::; []\OT1/lmr/m/n/10.95 (
 []))$ \T1/lmr/m/n/10.95 for Gaus-sian and Stu-dent $\OML/lmm/m/it/10.95 t$ \T1/
@@ -655,7 +650,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [19]
-Overfull \hbox (14.5993pt too wide) in paragraph at lines 462--464
+Overfull \hbox (14.5993pt too wide) in paragraph at lines 461--463
 \T1/lmr/m/n/10.95 For mod-els in-cor-po-rat-ing mu-tu-ally in-de-pen-dent Stu-d
 ent's $\OML/lmm/m/it/10.95 t$ \T1/lmr/m/n/10.95 shocks (\T1/lmtt/m/n/10.95 cond
 _dist="ind_Student"\T1/lmr/m/n/10.95 ),
@@ -671,9 +666,9 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [20]
-Overfull \hbox (11.86206pt too wide) in paragraph at lines 516--517
-\T1/lmr/m/n/10.95 no stan-dard er-ror for the in-ter-cepts if mean parametriza-
-tion is used (by set-ting \T1/lmtt/m/n/10.95 parametrization
+Overfull \hbox (10.03676pt too wide) in paragraph at lines 516--517
+[]\T1/lmr/m/n/10.95 Approximate stan-dard er-rors can be printed by spec-i-fy-i
+ng the ar-gu-ment \T1/lmtt/m/n/10.95 standard_error_print
  []
 
 
@@ -687,10 +682,10 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [22]
-<figures/seriesplot.png, id=575, 1545.775pt x 1104.125pt>
+<figures/seriesplot.png, id=577, 1545.775pt x 1104.125pt>
 File: figures/seriesplot.png Graphic file (type png)
 <use figures/seriesplot.png>
-Package pdftex.def Info: figures/seriesplot.png  used on input line 613.
+Package pdftex.def Info: figures/seriesplot.png  used on input line 614.
 (pdftex.def)             Requested size: 354.12434pt x 252.9494pt.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -703,34 +698,34 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [24 <./figures/seriesplot.png>]
-<figures/profilelogliks.png, id=590, 1545.775pt x 1104.125pt>
+<figures/profilelogliks.png, id=592, 1545.775pt x 1104.125pt>
 File: figures/profilelogliks.png Graphic file (type png)
 <use figures/profilelogliks.png>
-Package pdftex.def Info: figures/profilelogliks.png  used on input line 676.
+Package pdftex.def Info: figures/profilelogliks.png  used on input line 677.
 (pdftex.def)             Requested size: 354.12434pt x 252.9494pt.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 25
  []
 
-[25 <./figures/profilelogliks.png>]
+[25]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 26 []
  []
 
-[26]
-Overfull \hbox (9.58008pt too wide) in paragraph at lines 737--738
-\T1/lmr/m/n/10.95 stric-tions can be im-posed on the im-pact ma-trix by set-tin
-g them in the ar-gu-ment \T1/lmtt/m/n/10.95 B_constraints\T1/lmr/m/n/10.95 .
- []
-
-
+[26 <./figures/profilelogliks.png>]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 27
  []
 
 [27]
-Overfull \hbox (1.85449pt too wide) in paragraph at lines 741--743
+Overfull \hbox (9.58008pt too wide) in paragraph at lines 738--739
+\T1/lmr/m/n/10.95 stric-tions can be im-posed on the im-pact ma-trix by set-tin
+g them in the ar-gu-ment \T1/lmtt/m/n/10.95 B_constraints\T1/lmr/m/n/10.95 .
+ []
+
+
+Overfull \hbox (1.85449pt too wide) in paragraph at lines 742--744
 \T1/lmr/m/n/10.95 struc-tural model \T1/lmtt/m/n/10.95 fit12het \T1/lmr/m/n/10.
 95 by set-ting the ar-gu-ment \T1/lmtt/m/n/10.95 identification="heteroskedasti
 city"
@@ -752,7 +747,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [30]
-Overfull \hbox (2.91833pt too wide) in paragraph at lines 888--889
+Overfull \hbox (2.91833pt too wide) in paragraph at lines 889--890
 \T1/lmr/m/n/10.95 groups of regimes that have the same mean pa-ram-e-ters us-in
 g the ar-gu-ment \T1/lmtt/m/n/10.95 mean_constraints\T1/lmr/m/n/10.95 .
  []
@@ -794,28 +789,31 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 
 [37]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 1057.
+(Font)              <10> on input line 1058.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 1057.
+(Font)              <7> on input line 1058.
 
-Underfull \hbox (badness 4454) in paragraph at lines 1068--1069
+Underfull \hbox (badness 4454) in paragraph at lines 1070--1071
 []\T1/lmr/m/n/10 Plot the graphs of the pro-file log-
  []
 
 
-Underfull \hbox (badness 2961) in paragraph at lines 1069--1070
+Underfull \hbox (badness 2961) in paragraph at lines 1071--1072
 []\T1/lmr/m/n/10 Calculate the (ad-justed) Port-man-teau
  []
 
 
-Underfull \hbox (badness 2277) in paragraph at lines 1077--1078
+Underfull \hbox (badness 2277) in paragraph at lines 1079--1080
 []\T1/lmr/m/n/10 Estimate gen-er-al-ized im-pulse re-sponse
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1081--1084
+Underfull \hbox (badness 10000) in paragraph at lines 1083--1086
 []\T1/lmr/m/n/10 Swap be-tween mean and in-ter-cept
  []
+
+
+LaTeX Warning: Float too large for page by 13.08037pt on input line 1092.
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -862,17 +860,14 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [43] (./sstvars-vignette.aux)
-
-LaTeX Warning: There were undefined references.
-
 Package rerunfilecheck Info: File `sstvars-vignette.out' has not changed.
 (rerunfilecheck)             Checksum: DD337FA5F839F028362140B8A43974C5;12243.
  ) 
 Here is how much of TeX's memory you used:
- 12433 strings out of 478353
- 196404 string characters out of 5848086
- 496915 words of memory out of 5000000
- 30110 multiletter control sequences out of 15000+600000
+ 12432 strings out of 478353
+ 196384 string characters out of 5848086
+ 497915 words of memory out of 5000000
+ 30109 multiletter control sequences out of 15000+600000
  516856 words of font info for 106 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  75i,13n,77p,1628b,508s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -906,10 +901,10 @@ usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></usr/local/
 texlive/2021/texmf-dist/fonts/type1/public/lm/lmtti10.pfb></usr/local/texlive/2
 021/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr/local/texlive/2021/texmf
 -dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on sstvars-vignette.pdf (43 pages, 1046967 bytes).
+Output written on sstvars-vignette.pdf (43 pages, 1047124 bytes).
 PDF statistics:
- 977 PDF objects out of 1000 (max. 8388607)
- 857 compressed objects within 9 object streams
+ 979 PDF objects out of 1000 (max. 8388607)
+ 859 compressed objects within 9 object streams
  228 named destinations out of 1000 (max. 500000)
  355 words of extra memory for PDF output out of 10000 (max. 10000000)
 
