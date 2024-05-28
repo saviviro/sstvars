@@ -3,11 +3,26 @@
 # Detect the operating system
 OS=$(uname -s)
 
-# Create src/Makevars.os with the appropriate settings
+# Set the default compiler and linker flags
+CXXFLAGS="${CXXFLAGS} -std=gnu++17"
+LDFLAGS=""
+
 if [ "$OS" = "Darwin" ]; then
-  echo "PKG_LIBS += -L/opt/homebrew/Cellar/gcc/14.1.0/lib/gcc/14 -lgfortran -lquadmath -lm" > src/Makevars.os
+  # macOS-specific settings
+  HOMEBREW_GCC_LIB_PATH=$(brew --prefix gcc)/lib/gcc/$(brew list --versions gcc | awk '{print $2}')
+  if [ -d "$HOMEBREW_GCC_LIB_PATH" ]; then
+    LDFLAGS="-L${HOMEBREW_GCC_LIB_PATH} -lgfortran -lquadmath -lm"
+  else
+    echo "Warning: GCC library path not found"
+  fi
 elif [ "$OS" = "Linux" ]; then
-  echo "PKG_LIBS += \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS)" > src/Makevars.os
+  # Linux-specific settings
+  LDFLAGS="$(R CMD config LAPACK_LIBS) $(R CMD config BLAS_LIBS) $(R CMD config FLIBS)"
 else
-  echo "" > src/Makevars.os
+  echo "Unsupported OS: $OS"
+  exit 1
 fi
+
+# Create src/Makevars.os with the appropriate settings
+echo "PKG_CXXFLAGS = ${CXXFLAGS}" > src/Makevars.os
+echo "PKG_LIBS = ${LDFLAGS}" >> src/Makevars.os

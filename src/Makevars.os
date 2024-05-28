@@ -1,1 +1,2 @@
-PKG_LIBS += -L/opt/homebrew/Cellar/gcc/14.1.0/lib/gcc/14 -lgfortran -lquadmath -lm
+PKG_CXXFLAGS = -g -O2 -arch arm64 -UNDEBUG -Wall -pedantic -g -O0 -fdiagnostics-color=always -std=gnu++17
+PKG_LIBS = 
