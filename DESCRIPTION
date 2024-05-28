@@ -9,7 +9,7 @@ Description: Maximum likelihood estimation of smooth transition vector
   autoregressive models with various types of transition weight functions,
   conditional distributions, and identification methods. Constrained
   estimation with various types of constraints is available. Residual based
-  model diagnostics, forcasting, simulations, and calculation of impulse
+  model diagnostics, forecasting, simulations, and calculation of impulse
   response functions, generalized impulse response functions, and generalized 
   forecast error variance decompositions. See
   Heather Anderson, Farshid Vahid (1998) <doi:10.1016/S0304-4076(97)00076-6>,
