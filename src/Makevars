@@ -1,6 +1,0 @@
-# Default settings for all platforms
-PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS)
-PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS)
-
-# Include OS-specific settings
-include Makevars.os
