@@ -2,55 +2,21 @@
 
 # Detect the operating system
 OS=$(uname -s)
-
 echo "Operating System detected: $OS"
 
-# Check environment variables for Linux
+# Only create Makevars for Linux
 if [ "$OS" = "Linux" ]; then
-  echo "Detected Linux"
-
-  # Capture the output of R CMD config commands
-  LAPACK_LIBS=$(R CMD config LAPACK_LIBS 2>&1)
-  BLAS_LIBS=$(R CMD config BLAS_LIBS 2>&1)
-  FLIBS=$(R CMD config FLIBS 2>&1)
-  SHLIB_OPENMP_CXXFLAGS=$(R CMD config SHLIB_OPENMP_CXXFLAGS 2>&1)
-
-  # Print the resolved variables for debugging
-  echo "LAPACK_LIBS: $LAPACK_LIBS"
-  echo "BLAS_LIBS: $BLAS_LIBS"
-  echo "FLIBS: $FLIBS"
-  echo "SHLIB_OPENMP_CXXFLAGS: $SHLIB_OPENMP_CXXFLAGS"
-
-  # Check if the variables contain any errors
-  if echo "$LAPACK_LIBS" | grep -q "should not be used without a path"; then
-    echo "Error: LAPACK_LIBS contains a warning or error."
-    LAPACK_LIBS=""
-  fi
-
-  if echo "$BLAS_LIBS" | grep -q "should not be used without a path"; then
-    echo "Error: BLAS_LIBS contains a warning or error."
-    BLAS_LIBS=""
-  fi
-
-  if echo "$FLIBS" | grep -q "should not be used without a path"; then
-    echo "Error: FLIBS contains a warning or error."
-    FLIBS=""
-  fi
-
-  # Generate Makevars for Linux
-  echo "Generating src/Makevars file..."
+  echo "Generating src/Makevars file for Linux..."
   {
-    echo "PKG_CXXFLAGS = $SHLIB_OPENMP_CXXFLAGS"
-    echo "PKG_LIBS = $LAPACK_LIBS $BLAS_LIBS $FLIBS $SHLIB_OPENMP_CXXFLAGS"
+    echo "PKG_CXXFLAGS = \$(SHLIB_OPENMP_CXXFLAGS)"
+    echo "PKG_LIBS = \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS) \$(SHLIB_OPENMP_CXXFLAGS)"
   } > src/Makevars
 
-  # Print the contents of src/Makevars for debugging
+  # Output the generated Makevars for verification
   echo "Contents of src/Makevars:"
   cat src/Makevars
 else
-  echo "Non-Linux OS detected. Skipping Makevars generation."
+  echo "No action needed for macOS."
 fi
 
-# Final confirmation message
 echo "configure script completed."
-
