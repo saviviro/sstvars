@@ -21,6 +21,13 @@ package.
 
 ## Installation
 
+You can install the released version of gmvarkit from
+[CRAN](https://CRAN.R-project.org/package=sstvars) with:
+
+``` r
+install.packages("sstvars")
+```
+
 You can install the development version of sstvars from
 [GitHub](https://github.com/) with:
 

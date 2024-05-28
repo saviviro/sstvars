@@ -22,6 +22,12 @@ The goal of `sstvars` is to provide a comprehensive toolkit for maximum likeliho
 
 ## Installation
 
+You can install the released version of gmvarkit from [CRAN](https://CRAN.R-project.org/package=sstvars) with:
+
+``` r
+install.packages("sstvars")
+```
+
 You can install the development version of sstvars from [GitHub](https://github.com/) with:
 
 ``` r
