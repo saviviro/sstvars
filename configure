@@ -8,21 +8,57 @@ CXXFLAGS="${CXXFLAGS} -std=gnu++17"
 LDFLAGS=""
 
 if [ "$OS" = "Darwin" ]; then
-  # macOS-specific settings
-  HOMEBREW_GCC_LIB_PATH=$(brew --prefix gcc)/lib/gcc/$(brew list --versions gcc | awk '{print $2}')
-  if [ -d "$HOMEBREW_GCC_LIB_PATH" ]; then
-    LDFLAGS="-L${HOMEBREW_GCC_LIB_PATH} -lgfortran -lquadmath -lm"
+  echo "Detected macOS"
+  HOMEBREW_GCC_PREFIX=$(brew --prefix gcc)
+  GCC_LIB_DIR="${HOMEBREW_GCC_PREFIX}/lib/gcc"
+  CRAN_GCC_LIB_DIR="/opt/homebrew/Cellar/gcc/14.1.0/lib/gcc/14"
+
+  if [ -d "$GCC_LIB_DIR" ]; then
+    # Find the exact version directory
+    GCC_VERSION_DIR=$(find ${GCC_LIB_DIR} -type d -name "[0-9]*" | head -n 1)
+    echo "GCC_VERSION_DIR=${GCC_VERSION_DIR}"
+
+    if [ -d "$GCC_VERSION_DIR" ] && [ -f "$GCC_VERSION_DIR/libgfortran.dylib" ]; then
+      echo "Using GCC_VERSION_DIR for libgfortran"
+      LDFLAGS="-L${GCC_VERSION_DIR} -lgfortran -lquadmath -lm"
+    elif [ -d "$CRAN_GCC_LIB_DIR" ] && [ -f "$CRAN_GCC_LIB_DIR/libgfortran.dylib" ]; then
+      echo "Using CRAN_GCC_LIB_DIR for libgfortran"
+      LDFLAGS="-L${CRAN_GCC_LIB_DIR} -lgfortran -lquadmath -lm"
+    else
+      echo "Error: libgfortran not found in expected directories"
+      exit 1
+    fi
   else
-    echo "Warning: GCC library path not found"
+    echo "Error: GCC library path not found at ${GCC_LIB_DIR}"
+    exit 1
   fi
+
 elif [ "$OS" = "Linux" ]; then
   # Linux-specific settings
-  LDFLAGS="$(R CMD config LAPACK_LIBS) $(R CMD config BLAS_LIBS) $(R CMD config FLIBS)"
+  LAPACK_LIBS=$(R CMD config LAPACK_LIBS)
+  BLAS_LIBS=$(R CMD config BLAS_LIBS)
+  FLIBS=$(R CMD config FLIBS)
+
+  echo "Detected Linux"
+  echo "LAPACK_LIBS=${LAPACK_LIBS}"
+  echo "BLAS_LIBS=${BLAS_LIBS}"
+  echo "FLIBS=${FLIBS}"
+
+  if [ -n "$LAPACK_LIBS" ] && [ -n "$BLAS_LIBS" ] && [ -n "$FLIBS" ]; then
+    LDFLAGS="${LAPACK_LIBS} ${BLAS_LIBS} ${FLIBS}"
+  else
+    echo "Error: Unable to find LAPACK, BLAS, or Fortran libraries"
+    exit 1
+  fi
 else
   echo "Unsupported OS: $OS"
-  exit 1
+  echo "" > src/Makevars.os
 fi
 
 # Create src/Makevars.os with the appropriate settings
 echo "PKG_CXXFLAGS = ${CXXFLAGS}" > src/Makevars.os
 echo "PKG_LIBS = ${LDFLAGS}" >> src/Makevars.os
+
+# Print final Makevars.os content for debugging
+echo "Generated src/Makevars.os content:"
+cat src/Makevars.os
