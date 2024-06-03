@@ -5,3 +5,7 @@
 # sstvars 1.0.1
 
 * Updated configure script to fix an issue with the installation on Mac OS X.
+
+# sstvars 1.0.2
+
+* Updated readme.

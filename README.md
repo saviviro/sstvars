@@ -13,10 +13,7 @@ Threshold VAR models). Various transition weight functions, conditional
 distributions, and identification methods are and will be accommodated.
 Also constrained ML estimation is supported with constraints on the
 autoregressive parameters, regimewise means, weight parameters, and the
-impact matrix. The package is, however, limited to endogenous switching
-variables to ensure that ergodicity and stationarity of the models is
-verifiable and that the true generalized impulse response functions can
-be estimated. See the vignette for a more detailed description of the
+impact matrix. See the vignette for a more detailed description of the
 package.
 
 ## Installation
