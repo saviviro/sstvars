@@ -9,9 +9,9 @@
 The goal of `sstvars` is to provide a comprehensive toolkit for maximum
 likelihood (ML) estimation and analysis of reduced form and structural
 smooth transition vector autoregressive (STVAR) models (including
-Threshold VAR models). Various transition weight functions, conditional
-distributions, and identification methods are and will be accommodated.
-Also constrained ML estimation is supported with constraints on the
+threshold VAR models). Various transition weight functions, conditional
+distributions, and identification methods are accommodated. Also
+constrained ML estimation is supported with constraints on the
 autoregressive parameters, regimewise means, weight parameters, and the
 impact matrix. See the vignette for a more detailed description of the
 package.

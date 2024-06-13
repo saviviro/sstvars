@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  27 MAY 2024 14:27
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  13 JUN 2024 16:07
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -506,11 +506,14 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 69.
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-) [1
+)
+Underfull \vbox (badness 1117) has occurred while \output is active []
+
+ [1
 
 {/usr/local/texlive/2021/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 8
-0.
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 7
+8.
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
@@ -523,7 +526,7 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [2]
-Overfull \hbox (3.74004pt too wide) in paragraph at lines 97--98
+Overfull \hbox (3.74004pt too wide) in paragraph at lines 95--96
 []\T1/lmr/m/n/10.95 Conditional on $\OMS/lmsy/m/n/10.95 F[]$\T1/lmr/m/n/10.95 ,
  the con-di-tional mean of the above de-scribed pro-cess is $\OML/lmm/m/it/10.9
 5 ^^V[] \OMS/lmsy/m/n/10.95 ^^Q \OML/lmm/m/it/10.95 E\OT1/lmr/m/n/10.95 [\OML/l
@@ -543,14 +546,14 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 [4]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 151.
+(hyperref)                removing `math shift' on input line 149.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 151.
+(hyperref)                removing `math shift' on input line 149.
 
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <12> on input line 151.
+(Font)              <12> on input line 149.
 
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 5
@@ -559,16 +562,16 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 [5]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 164.
+(hyperref)                removing `math shift' on input line 162.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 164.
+(hyperref)                removing `math shift' on input line 162.
 
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <9> on input line 178.
+(Font)              <9> on input line 176.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 178.
+(Font)              <5> on input line 176.
 
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 6 []
@@ -615,7 +618,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [14]
-Overfull \hbox (16.80978pt too wide) in paragraph at lines 356--358
+Overfull \hbox (16.80978pt too wide) in paragraph at lines 354--356
 \T1/lmr/m/n/10.95 ram-e-ters ($\OT1/lmr/m/n/10.95 ([](
 [])\OML/lmm/m/it/10.95 ; :::; []\OT1/lmr/m/n/10.95 (
 []))$ \T1/lmr/m/n/10.95 for Gaus-sian and Stu-dent $\OML/lmm/m/it/10.95 t$ \T1/
@@ -650,14 +653,14 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [19]
-Overfull \hbox (14.5993pt too wide) in paragraph at lines 461--463
+Overfull \hbox (14.5993pt too wide) in paragraph at lines 459--461
 \T1/lmr/m/n/10.95 For mod-els in-cor-po-rat-ing mu-tu-ally in-de-pen-dent Stu-d
 ent's $\OML/lmm/m/it/10.95 t$ \T1/lmr/m/n/10.95 shocks (\T1/lmtt/m/n/10.95 cond
 _dist="ind_Student"\T1/lmr/m/n/10.95 ),
  []
 
 LaTeX Font Info:    Trying to load font information for TS1+lmtt on input line 
-480.
+478.
 (/usr/local/texlive/2021/texmf-dist/tex/latex/lm/ts1lmtt.fd
 File: ts1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
@@ -666,7 +669,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [20]
-Overfull \hbox (10.03676pt too wide) in paragraph at lines 516--517
+Overfull \hbox (10.03676pt too wide) in paragraph at lines 514--515
 []\T1/lmr/m/n/10.95 Approximate stan-dard er-rors can be printed by spec-i-fy-i
 ng the ar-gu-ment \T1/lmtt/m/n/10.95 standard_error_print
  []
@@ -685,7 +688,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 <figures/seriesplot.png, id=577, 1545.775pt x 1104.125pt>
 File: figures/seriesplot.png Graphic file (type png)
 <use figures/seriesplot.png>
-Package pdftex.def Info: figures/seriesplot.png  used on input line 614.
+Package pdftex.def Info: figures/seriesplot.png  used on input line 612.
 (pdftex.def)             Requested size: 354.12434pt x 252.9494pt.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -701,7 +704,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 <figures/profilelogliks.png, id=592, 1545.775pt x 1104.125pt>
 File: figures/profilelogliks.png Graphic file (type png)
 <use figures/profilelogliks.png>
-Package pdftex.def Info: figures/profilelogliks.png  used on input line 677.
+Package pdftex.def Info: figures/profilelogliks.png  used on input line 675.
 (pdftex.def)             Requested size: 354.12434pt x 252.9494pt.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -719,13 +722,13 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [27]
-Overfull \hbox (9.58008pt too wide) in paragraph at lines 738--739
+Overfull \hbox (9.58008pt too wide) in paragraph at lines 736--737
 \T1/lmr/m/n/10.95 stric-tions can be im-posed on the im-pact ma-trix by set-tin
 g them in the ar-gu-ment \T1/lmtt/m/n/10.95 B_constraints\T1/lmr/m/n/10.95 .
  []
 
 
-Overfull \hbox (1.85449pt too wide) in paragraph at lines 742--744
+Overfull \hbox (1.85449pt too wide) in paragraph at lines 740--742
 \T1/lmr/m/n/10.95 struc-tural model \T1/lmtt/m/n/10.95 fit12het \T1/lmr/m/n/10.
 95 by set-ting the ar-gu-ment \T1/lmtt/m/n/10.95 identification="heteroskedasti
 city"
@@ -747,7 +750,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [30]
-Overfull \hbox (2.91833pt too wide) in paragraph at lines 889--890
+Overfull \hbox (2.91833pt too wide) in paragraph at lines 887--888
 \T1/lmr/m/n/10.95 groups of regimes that have the same mean pa-ram-e-ters us-in
 g the ar-gu-ment \T1/lmtt/m/n/10.95 mean_constraints\T1/lmr/m/n/10.95 .
  []
@@ -789,31 +792,31 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 
 [37]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 1058.
+(Font)              <10> on input line 1056.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 1058.
+(Font)              <7> on input line 1056.
 
-Underfull \hbox (badness 4454) in paragraph at lines 1070--1071
+Underfull \hbox (badness 4454) in paragraph at lines 1068--1069
 []\T1/lmr/m/n/10 Plot the graphs of the pro-file log-
  []
 
 
-Underfull \hbox (badness 2961) in paragraph at lines 1071--1072
+Underfull \hbox (badness 2961) in paragraph at lines 1069--1070
 []\T1/lmr/m/n/10 Calculate the (ad-justed) Port-man-teau
  []
 
 
-Underfull \hbox (badness 2277) in paragraph at lines 1079--1080
+Underfull \hbox (badness 2277) in paragraph at lines 1077--1078
 []\T1/lmr/m/n/10 Estimate gen-er-al-ized im-pulse re-sponse
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1083--1086
+Underfull \hbox (badness 10000) in paragraph at lines 1081--1084
 []\T1/lmr/m/n/10 Swap be-tween mean and in-ter-cept
  []
 
 
-LaTeX Warning: Float too large for page by 13.08037pt on input line 1092.
+LaTeX Warning: Float too large for page by 13.08037pt on input line 1090.
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -866,7 +869,7 @@ Package rerunfilecheck Info: File `sstvars-vignette.out' has not changed.
 Here is how much of TeX's memory you used:
  12432 strings out of 478353
  196384 string characters out of 5848086
- 497915 words of memory out of 5000000
+ 497993 words of memory out of 5000000
  30109 multiletter control sequences out of 15000+600000
  516856 words of font info for 106 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -901,7 +904,7 @@ usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></usr/local/
 texlive/2021/texmf-dist/fonts/type1/public/lm/lmtti10.pfb></usr/local/texlive/2
 021/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr/local/texlive/2021/texmf
 -dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on sstvars-vignette.pdf (43 pages, 1047124 bytes).
+Output written on sstvars-vignette.pdf (43 pages, 1047312 bytes).
 PDF statistics:
  979 PDF objects out of 1000 (max. 8388607)
  859 compressed objects within 9 object streams

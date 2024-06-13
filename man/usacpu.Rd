@@ -12,7 +12,7 @@ Fifth, the log-difference of the producer price index (PPI).
 Sixth, an interest rate variable, which is the effective federal funds rate that is replaced by the
 the Wu and Xia (2016) shadow rate during zero-lower-bound periods. The Wu and Xia (2016) shadow rate is not bounded by the zero
 lower bound and also quantifies unconventional monetary policy measures, while it closely follows the federal funds rate when the
-zero lower bound does not bind.}
+zero lower bound does not bind. This is the dataset used in Virolainen (2024)}
 \format{
 A numeric matrix of class \code{'ts'} with 443 rows and 4 columns with one time series in each column:
 \describe{
@@ -41,12 +41,14 @@ Fifth, the log-difference of the producer price index (PPI).
 Sixth, an interest rate variable, which is the effective federal funds rate that is replaced by the
 the Wu and Xia (2016) shadow rate during zero-lower-bound periods. The Wu and Xia (2016) shadow rate is not bounded by the zero
 lower bound and also quantifies unconventional monetary policy measures, while it closely follows the federal funds rate when the
-zero lower bound does not bind.
+zero lower bound does not bind. This is the dataset used in Virolainen (2024)
 }
 \references{
 \itemize{
    \item K. Gavriilidis, 2021. Measuring climate policy uncertainty. \url{https://www.ssrn.com/abstract=3847388}.
-  \item Federal Reserve Bank of Chicago. 2023. Monthly GDP Growth Rate Data. \url{https://www.chicagofed.org/publications/bbki/index}.
+   \item Federal Reserve Bank of Chicago. 2023. Monthly GDP Growth Rate Data. \url{https://www.chicagofed.org/publications/bbki/index}.
+   \item Virolainen S. 2024. Identification by non-Gaussianity in structural threshold and smooth transition vector
+     autoregressive models. Unpublished working paper, available as \url{https://doi.org/10.48550/arXiv.2404.19707}.
    \item Wu J. and Xia F. 2016. Measuring the macroeconomic impact of monetary policy at the zero lower bound.
      \emph{Journal of Money, Credit and Banking}, 48(2-3): 253-291.
  }

@@ -9,3 +9,4 @@
 # sstvars 1.0.2
 
 * Updated readme.
+* Updated documentation.
