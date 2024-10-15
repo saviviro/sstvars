@@ -10,7 +10,7 @@ pick_lambdas(
   d,
   params,
   identification = c("reduced_form", "recursive", "heteroskedasticity",
-    "non-Gaussiniaty")
+    "non-Gaussianity")
 )
 }
 \arguments{
@@ -27,7 +27,7 @@ where (see exceptions below):
   \item{\describe{
     \item{if \code{cond_dist="Gaussian"} or \code{"Student"}:}{\eqn{\sigma = (vech(\Omega_1),...,vech(\Omega_M))}
       \eqn{(Md(d + 1)/2 \times 1)}.}
-    \item{if \code{cond_dist="ind_Student"}:}{\eqn{\sigma = (vec(B_1),...,vec(B_M)} \eqn{(Md^2 \times 1)}.}
+    \item{if \code{cond_dist="ind_Student"} or \code{"ind_skewed_t"}:}{\eqn{\sigma = (vec(B_1),...,vec(B_M)} \eqn{(Md^2 \times 1)}.}
     }
   }
   \item{\eqn{\alpha = } the \eqn{(a\times 1)} vector containing the transition weight parameters (see below).}
@@ -68,9 +68,10 @@ For models with...
         \eqn{W} \eqn{(d\times d)} and \eqn{\lambda_m} \eqn{(d\times 1)}, \eqn{m=2,...,M}, satisfy
         \eqn{\Omega_1=WW'} and \eqn{\Omega_m=W\Lambda_mW'}, \eqn{\Lambda_m=diag(\lambda_{m1},...,\lambda_{md})},
         \eqn{\lambda_{mi}>0}, \eqn{m=2,...,M}, \eqn{i=1,...,d}.}
-  \item{B_constraints (only for structural models identified by heteroskedasticity):}{Replace \eqn{vec(W)} with \eqn{\tilde{vec}(W)}
-        that stacks the columns of the matrix \eqn{W} in to vector
-        so that the elements that are constrained to zero are not included.}
+  \item{B_constraints:}{For models identified by heteroskedasticity, replace \eqn{vec(W)} with \eqn{\tilde{vec}(W)}
+        that stacks the columns of the matrix \eqn{W} in to vector so that the elements that are constrained to zero
+        are not included. For models identified by non-Gaussianity, replace \eqn{vec(B_1),...,vec(B_M)} with
+        similarly with vectorized versions \enq{B_m} so that the elements that are constrained to zero are not included.}
 }
 Above, \eqn{\phi_{m,0}} is the intercept parameter, \eqn{A_{m,i}} denotes the \eqn{i}th coefficient matrix of the \eqn{m}th
 regime, \eqn{\Omega_{m}} denotes the positive definite error term covariance matrix of the \eqn{m}th regime, and \eqn{B_m}

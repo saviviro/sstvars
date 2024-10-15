@@ -6,14 +6,27 @@
 #' @param d the number of time series in the system, i.e., the dimension
 #' @param params a real valued vector specifying the parameter values.
 #'   Should have the form \eqn{\theta = (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\sigma,\alpha,\nu)},
-#'   where
+#'   where (see exceptions below):
 #'   \itemize{
 #'     \item{\eqn{\phi_{m,0} = } the \eqn{(d \times 1)} intercept (or mean) vector of the \eqn{m}th regime.}
 #'     \item{\eqn{\varphi_m = (vec(A_{m,1}),...,vec(A_{m,p}))} \eqn{(pd^2 \times 1)}.}
-#'     \item{\eqn{\sigma = (vech(\Omega_1),...,vech(\Omega_M)} \eqn{(Md(d + 1)/2 \times 1)}.}
-#'     \item{\eqn{\alpha} contains the transition weights parameters.}
-#'     \item{\eqn{\nu > 2} is the degrees of freedom parameter that is included only if \code{cond_dist="Student"}.}
+#'     \item{\describe{
+#'       \item{if \code{cond_dist="Gaussian"} or \code{"Student"}:}{\eqn{\sigma = (vech(\Omega_1),...,vech(\Omega_M))}
+#'         \eqn{(Md(d + 1)/2 \times 1)}.}
+#'       \item{if \code{cond_dist="ind_Student"} or \code{"ind_skewed_t"}:}{\eqn{\sigma = (vec(B_1),...,vec(B_M)} \eqn{(Md^2 \times 1)}.}
+#'       }
+#'     }
+#'     \item{\eqn{\alpha = } the \eqn{(a\times 1)} vector containing the transition weight parameters (see below).}
+#'     \item{\describe{
+#'       \item{if \code{cond_dist = "Gaussian")}:}{Omit \eqn{\nu} from the parameter vector.}
+#'       \item{if \code{cond_dist="Student"}:}{\eqn{\nu > 2} is the single degrees of freedom parameter.}
+#'       \item{if \code{cond_dist="ind_Student"}:}{\eqn{\nu = (\nu_1,...,\nu_d)} \eqn{(d \times 1)}, \eqn{\nu_i > 2}.}
+#'       \item{if \code{cond_dist="ind_skewed_t"}:}{\eqn{\nu = (\nu_1,...,\nu_d,\lambda_1,...,\lambda_d)} \eqn{(2d \times 1)},
+#'        \eqn{\nu_i > 2} and \eqn{\lambda_i \in (0, 1)}.}
+#'       }
+#'     }
 #'   }
+#'   For models with...
 #'   \describe{
 #'     \item{\code{weight_function="relative_dens"}:}{\eqn{\alpha = (\alpha_1,...,\alpha_{M-1})}
 #'           \eqn{(M - 1 \times 1)}, where \eqn{\alpha_m} \eqn{(1\times 1), m=1,...,M-1} are the transition weight parameters.}
@@ -21,8 +34,8 @@
 #'           \eqn{(2 \times 1)}, where \eqn{c\in\mathbb{R}} is the location parameter and \eqn{\gamma >0} is the scale parameter.}
 #'     \item{\code{weight_function="mlogit"}:}{\eqn{\alpha = (\gamma_1,...,\gamma_M)} \eqn{((M-1)k\times 1)},
 #'           where \eqn{\gamma_m} \eqn{(k\times 1)}, \eqn{m=1,...,M-1} contains the multinomial logit-regression coefficients
-#'           of the \eqn{m}th regime. Specifically, for switching variables with indices in \eqn{I\subset\lbrace 1,...,d\rbrace},
-#'           and with \eqn{\tilde{p}\in\lbrace 1,...,p\rbrace} lags included, \eqn{\gamma_m} contains the coefficients for the vector
+#'           of the \eqn{m}th regime. Specifically, for switching variables with indices in \eqn{I\subset\lbrace 1,...,d\rbrace}, and with
+#'          \eqn{\tilde{p}\in\lbrace 1,...,p\rbrace} lags included, \eqn{\gamma_m} contains the coefficients for the vector
 #'          \eqn{z_{t-1} = (1,\tilde{z}_{\min\lbrace I\rbrace},...,\tilde{z}_{\max\lbrace I\rbrace})}, where
 #'          \eqn{\tilde{z}_{i} =(y_{it-1},...,y_{it-\tilde{p}})}, \eqn{i\in I}. So \eqn{k=1+|I|\tilde{p}}
 #'          where \eqn{|I|} denotes the number of elements in \eqn{I}.}
@@ -30,13 +43,18 @@
 #'           \eqn{(2 \times 1)}, where \eqn{c\in\mathbb{R}} is the location parameter and \eqn{\gamma >0} is the scale parameter.}
 #'     \item{\code{weight_function="threshold"}:}{\eqn{\alpha = (r_1,...,r_{M-1})}
 #'           \eqn{(M-1 \times 1)}, where \eqn{r_1,...,r_{M-1}} are the threshold values.}
+#'     \item{\code{weight_function="exogenous"}:}{Omit \eqn{\alpha} from the parameter vector.}
+#'     \item{\code{identification="heteroskedasticity"}:}{\eqn{\sigma = (vec(W),\lambda_2,...,\lambda_M)}, where
+#'           \eqn{W} \eqn{(d\times d)} and \eqn{\lambda_m} \eqn{(d\times 1)}, \eqn{m=2,...,M}, satisfy
+#'           \eqn{\Omega_1=WW'} and \eqn{\Omega_m=W\Lambda_mW'}, \eqn{\Lambda_m=diag(\lambda_{m1},...,\lambda_{md})},
+#'           \eqn{\lambda_{mi}>0}, \eqn{m=2,...,M}, \eqn{i=1,...,d}.}
 #'   }
 #'   Above, \eqn{\phi_{m,0}} is the intercept parameter, \eqn{A_{m,i}} denotes the \eqn{i}th coefficient matrix of the \eqn{m}th
-#'   mixture component, and \eqn{\Omega_{m}} denotes the error term covariance matrix of the \eqn{m}:th mixture component.
-#'   If \code{parametrization=="mean"}, just replace each \eqn{\phi_{m,0}} with regimewise mean \eqn{\mu_{m}}.
-#'   \eqn{vec()} is vectorization operator that stacks columns of a given matrix into a vector. \eqn{vech()} stacks columns
-#'   of a given matrix from the principal diagonal downwards (including elements on the diagonal) into a vector.
-#' @return Returns a \eqn{(dxM)} matrix containing \eqn{\phi_{m,0}} in the m:th column or
+#'   regime, \eqn{\Omega_{m}} denotes the positive definite error term covariance matrix of the \eqn{m}th regime, and \eqn{B_m}
+#'   is the invertible \eqn{(d\times d)} impact matrix of the \eqn{m}th regime. \eqn{\nu_m} is the degrees of freedom parameter
+#'   of the \eqn{m}th regime. If \code{parametrization=="mean"}, just replace each \eqn{\phi_{m,0}} with regimewise mean
+#'   \eqn{\mu_{m}}.
+#' @return Returns a \eqn{(d\times M)} matrix containing \eqn{\phi_{m,0}} in the m:th column or
 #'   \eqn{\mu_{m}} if the parameter vector is mean-parametrized, \eqn{, m=1,..,M}.
 #' @details Does not support constrained parameter vectors.
 #' @section Warning:
@@ -119,20 +137,20 @@ pick_allA <- function(p, M, d, params) {
 #' @inherit pick_Am
 #' @return Returns a 3D array containing...
 #'   \describe{
-#'     \item{If \code{identification == "non-Gaussianity"} or \code{cond_dist == "ind_Student"}:}{the impact matrices of the regimes,
-#'       \eqn{B_m} in \code{[, , m]}.}
+#'     \item{If \code{identification == "non-Gaussianity"} or \code{cond_dist \%in\% c("ind_Student", "ind_skewed_t")}:}{the impact
+#'           matrices of the regimes, \eqn{B_m} in \code{[, , m]}.}
 #'     \item{If otherwise:}{the covariance matrices of the given model, \eqn{\Omega_m} in \code{[, , m]}.}
 #'   }
 #' @details Constrained parameter vectors are not supported.
 #' @inheritSection pick_Ami Warning
 #' @keywords internal
 
-pick_Omegas <- function(p, M, d, params, cond_dist=c("Gaussian", "Student", "ind_Student"),
+pick_Omegas <- function(p, M, d, params, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                         identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity")) {
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
   Omegas <- array(dim=c(d, d, M))
-  if(identification == "non-Gaussianity" || cond_dist == "ind_Student") {
+  if(identification == "non-Gaussianity" || cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") {
     for(m in 1:M) {
       Omegas[, , m] <- unvec(d=d, a=params[(M*d + d^2*p*M + (m - 1)*d^2 + 1):(M*d + d^2*p*M + m*d^2)])
     }
@@ -182,16 +200,19 @@ pick_Omegas <- function(p, M, d, params, cond_dist=c("Gaussian", "Student", "ind
 #' @inheritSection pick_Ami Warning
 #' @keywords internal
 
-pick_weightpars <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
-                            weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student")) {
+pick_weightpars <- function(p, M, d, params,
+                            weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                            weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t")) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   if(cond_dist == "Gaussian") {
     n_distpars <- 0
   } else if(cond_dist == "Student") {
     n_distpars <- 1
-  } else { # cond_dist == "ind_Student"
+  } else if (cond_dist == "ind_Student") {
     n_distpars <- d
+  } else { # Cond_dist == "ind_skewed_t"
+    n_distpars <- 2*d
   }
   if(M == 1) {
     if(weight_function == "relative_dens") {
@@ -228,17 +249,21 @@ pick_weightpars <- function(p, M, d, params, weight_function=c("relative_dens", 
 #'     \item{If \code{cond_dist == "Gaussian"}:}{a numeric vector of length zero.}
 #'     \item{If \code{cond_dist == "Student"}:}{the degrees of freedom parameter.}
 #'     \item{If \code{cond_dist == "ind_Student"}:}{a numeric vector of length \eqn{d} containing the degrees of freedom parameters.}
+#'     \item{If \code{cond_dist == "ind_skewed_t"}:}{a numeric vector \eqn{(\nu_1,...,\nu_d,\lambda_1,...,\lambda_d)} of length \eqn{2d}
+#'           containing the degrees of freedom and skewness parameters.}
 #'   }
 #' @keywords internal
 
-pick_distpars <- function(d, params, cond_dist=c("Gaussian", "Student", "ind_Student")) {
+pick_distpars <- function(d, params, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t")) {
   cond_dist <- match.arg(cond_dist)
   if(cond_dist == "Gaussian") {
     return(numeric(0))
   } else if(cond_dist == "Student") {
     return(params[length(params)])
-  } else { # cond_dist == "ind_Student"
+  } else if(cond_dist == "ind_Student") {
     return(params[(length(params) - d + 1):length(params)])
+  } else { # Cond_dist == "ind_skewed_t"
+    return(params[(length(params) - 2*d + 1):length(params)])
   }
 }
 
@@ -246,22 +271,23 @@ pick_distpars <- function(d, params, cond_dist=c("Gaussian", "Student", "ind_Stu
 #' @title Pick regime parameters
 #'
 #' @description \code{pick_regime} picks the regime parameters
-#'   \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vech(\Omega_m))}
+#'   \eqn{(\phi_{m,0},vec(A_{m,1}),...,vec(A_{m,p}),vech(\Omega_m))}
 #' @inheritParams pick_Am
 #' @details Constrained models nor structural models are supported.
 #' @return Returns the vector...
 #'   \describe{
-#'     \item{If \code{identification == "non-Gaussianity"} or \code{cond_dist == "ind_Student"}:}{\eqn{(\phi_{m,0},vec(A_{m,1}),...,vec(A_{m,p}),vec(B_m))}.}
+#'     \item{If \code{identification == "non-Gaussianity"} or \code{cond_dist \%in\% c("ind_Student", "ind_skewed_t")}:}{
+#'           \eqn{(\phi_{m,0},vec(A_{m,1}),...,vec(A_{m,p}),vec(B_m))}.}
 #'     \item{If otherwise:}{\eqn{(\phi_{m,0},vec(A_{m,1}),...,vec(A_{m,p}),vech(\Omega_m))}.}
 #'   }
 #'   Note that neither weight parameters or distribution parameters are picked.
 #' @keywords internal
 
-pick_regime <- function(p, M, d, params, m, cond_dist=c("Gaussian", "Student", "ind_Student"),
+pick_regime <- function(p, M, d, params, m, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                         identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity")) {
   identification <- match.arg(identification)
   cond_dist <- match.arg(cond_dist)
-  if(identification == "non-Gaussianity" || cond_dist == "ind_Student") {
+  if(identification == "non-Gaussianity" || cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") {
     return(c(params[((m - 1)*d + 1):(m*d)],
              params[(M*d + (m - 1)*p*d^2 + 1):(M*d + m*p*d^2)],
              params[(M*d + M*p*d^2 + (m - 1)*d^2 + 1):(M*d + M*p*d^2 + m*d^2)]))
@@ -306,7 +332,7 @@ pick_W <- function(p, M, d, params, identification=c("reduced_form", "recursive"
 #' @inherit pick_W details references
 #' @keywords internal
 
-pick_lambdas <- function(p, M, d, params, identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussiniaty")) {
+pick_lambdas <- function(p, M, d, params, identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity")) {
   identification <- match.arg(identification)
   if(identification != "heteroskedasticity") {
     return(NULL)
