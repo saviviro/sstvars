@@ -68,8 +68,8 @@ See the vignette for more details about the weight functions.}
 }}
 
 \item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"}, \code{"Student"}, \code{"ind_Student"},
-or \code{"ind_skewed_t}, where \code{"ind_Student"} the Student's \eqn{t} distribution with independent components, and
-\code{"ind_skewed_t} is the skewed \eqn{t} distribution with independent components (see Hansen, 1994).}
+or \code{"ind_skewed_t"}, where \code{"ind_Student"} the Student's \eqn{t} distribution with independent components, and
+\code{"ind_skewed_t"} is the skewed \eqn{t} distribution with independent components (see Hansen, 1994).}
 
 \item{identification}{is it reduced form model or an identified structural model; if the latter, how is it identified
 (see the vignette or the references for details)?
