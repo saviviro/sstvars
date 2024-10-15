@@ -134,8 +134,9 @@ See the vignette for more details about the weight functions.}
     values are allowed.}
 }}
 
-\item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"}, \code{"Student"}, or \code{"ind_Student"},
-where the latest is the Student's \eqn{t} distribution with independent components.}
+\item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"}, \code{"Student"}, \code{"ind_Student"},
+or \code{"ind_skewed_t}, where \code{"ind_Student"} the Student's \eqn{t} distribution with independent components, and
+\code{"ind_skewed_t} is the skewed \eqn{t} distribution with independent components (see Hansen, 1994).}
 
 \item{parametrization}{\code{"intercept"} or \code{"mean"} determining whether the model is parametrized with intercept
 parameters \eqn{\phi_{m,0}} or regime means \eqn{\mu_{m}}, m=1,...,M.}
@@ -201,8 +202,10 @@ Returns a \eqn{(T \times d)} matrix containing...
 \itemize{
    \item Anderson H., Vahid F. 1998. Testing multiple equation systems for common nonlinear components.
      \emph{Journal of Econometrics}, \strong{84}:1, 1-36.
+   \item Hansen B.E. 1994. Autoregressive Conditional Density estimation.
+     \emph{Journal of Econometrics}, \strong{35}:3, 705-730.
    \item Kheifets I.L., Saikkonen P.J. 2020. Stationarity and ergodicity of Vector STAR models.
-     \emph{Econometric Reviews}, \strong{39}:4, 407-414.
+     \emph{International Economic Review}, \strong{35}:3, 407-414.
    \item Lanne M., Virolainen S. 2024. A Gaussian smooth transition vector autoregressive model:
       An application to the macroeconomic effects of severe weather shocks. Unpublished working
       paper, available as arXiv:2403.14216.

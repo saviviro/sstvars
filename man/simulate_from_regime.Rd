@@ -51,8 +51,10 @@ Does not take random number generator seed as an argument to avoid unwanted beha
 \itemize{
    \item Anderson H., Vahid F. 1998. Testing multiple equation systems for common nonlinear components.
      \emph{Journal of Econometrics}, \strong{84}:1, 1-36.
+   \item Hansen B.E. 1994. Autoregressive Conditional Density estimation.
+     \emph{Journal of Econometrics}, \strong{35}:3, 705-730.
    \item Kheifets I.L., Saikkonen P.J. 2020. Stationarity and ergodicity of Vector STAR models.
-     \emph{Econometric Reviews}, \strong{39}:4, 407-414.
+     \emph{International Economic Review}, \strong{35}:3, 407-414.
    \item Lanne M., Virolainen S. 2024. A Gaussian smooth transition vector autoregressive model:
       An application to the macroeconomic effects of severe weather shocks. Unpublished working
       paper, available as arXiv:2403.14216.

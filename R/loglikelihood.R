@@ -106,8 +106,9 @@
 #'     transition weights as \code{[t, m]} for time \eqn{t} and regime \eqn{m}. Each row needs to sum to one and only weakly positive
 #'     values are allowed.}
 #' }
-#' @param cond_dist specifies the conditional distribution of the model as \code{"Gaussian"}, \code{"Student"}, or \code{"ind_Student"},
-#'   where the latest is the Student's \eqn{t} distribution with independent components.
+#' @param cond_dist specifies the conditional distribution of the model as \code{"Gaussian"}, \code{"Student"}, \code{"ind_Student"},
+#'   or \code{"ind_skewed_t}, where \code{"ind_Student"} the Student's \eqn{t} distribution with independent components, and
+#'   \code{"ind_skewed_t} is the skewed \eqn{t} distribution with independent components (see Hansen, 1994).
 #' @param parametrization \code{"intercept"} or \code{"mean"} determining whether the model is parametrized with intercept
 #'   parameters \eqn{\phi_{m,0}} or regime means \eqn{\mu_{m}}, m=1,...,M.
 #' @param identification is it reduced form model or an identified structural model; if the latter, how is it identified
@@ -193,8 +194,10 @@
 #'  \itemize{
 #'    \item Anderson H., Vahid F. 1998. Testing multiple equation systems for common nonlinear components.
 #'      \emph{Journal of Econometrics}, \strong{84}:1, 1-36.
+#'    \item Hansen B.E. 1994. Autoregressive Conditional Density estimation.
+#'      \emph{Journal of Econometrics}, \strong{35}:3, 705-730.
 #'    \item Kheifets I.L., Saikkonen P.J. 2020. Stationarity and ergodicity of Vector STAR models.
-#'      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
+#'      \emph{International Economic Review}, \strong{35}:3, 407-414.
 #'    \item Lanne M., Virolainen S. 2024. A Gaussian smooth transition vector autoregressive model:
 #'       An application to the macroeconomic effects of severe weather shocks. Unpublished working
 #'       paper, available as arXiv:2403.14216.
@@ -212,10 +215,13 @@
 #'  }
 #' @keywords internal
 
-loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
-                          weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), parametrization=c("intercept", "mean"),
+loglikelihood <- function(data, p, M, params,
+                          weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                          weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
+                          parametrization=c("intercept", "mean"),
                           identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
-                          AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL, other_constraints=NULL,
+                          AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
+                          other_constraints=NULL,
                           to_return=c("loglik", "tw", "loglik_and_tw", "terms", "regime_cmeans", "total_cmeans", "total_ccovs", "B_t"),
                           check_params=TRUE, indt_R=FALSE, alt_par=FALSE, minval=NULL,
                           stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
@@ -285,7 +291,8 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
   # Calculate unconditional regime-specific expected values (column per component) or phi0-parameters if using mean-parametrization
   Id <- diag(nrow=d)
   if(parametrization == "intercept") {
-    all_mu <- vapply(1:M, function(m) solve(Id - rowSums(all_A[, , , m, drop=FALSE], dims=2), all_phi0[,m]), numeric(d)) # sum over dims+1=3
+    all_mu <- vapply(1:M, function(m) solve(Id - rowSums(all_A[, , , m, drop=FALSE], dims=2),
+                                            all_phi0[,m]), numeric(d)) # sum over dims+1=3
   } else {
     all_phi0 <- vapply(1:M, function(m) (Id - rowSums(all_A[, , , m, drop=FALSE], dims=2))%*%all_mu[,m], numeric(d))
   }
@@ -338,7 +345,8 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
 
   # Calculate the conditional log-likelihood; the initial values are not used here
   if(cond_dist == "Gaussian") { # Gaussian conditional distribution
-    all_lt <- -0.5*d*log(2*pi) + Gaussian_densities_Cpp(obs=data[(p+1):nrow(data),], means=mu_yt, covmats=all_Omegas, alpha_mt=alpha_mt)
+    all_lt <- -0.5*d*log(2*pi) + Gaussian_densities_Cpp(obs=data[(p+1):nrow(data),], means=mu_yt, covmats=all_Omegas,
+                                                        alpha_mt=alpha_mt)
 
     # BELOW IS AN R IMPLEMENTATION
     #all_covmats <- array(rowSums(vapply(1:M, function(m) rep(alpha_mt[, m], each=d*d)*as.vector(all_Omegas[, , m]),
@@ -376,7 +384,7 @@ loglikelihood <- function(data, p, M, params, weight_function=c("relative_dens",
     logC1 <- sum(lgamma(0.5*(1 + distpars)) - 0.5*log(base::pi) - 0.5*log(distpars - 2) - lgamma(0.5*distpars))
     obs <- data[(p+1):nrow(data),]
     if(!indt_R) {
-      if(is.null(minval) || !is.numeric(minval)) minval <- -999999999 # Cpp function expects minval to be numerical, will cause an error if not
+      if(is.null(minval) || !is.numeric(minval)) minval <- -999999999 # Cpp fun expects minval to be numerical, will cause an error if not
       t_dens <- ind_Student_densities_Cpp(obs=obs, means=mu_yt, impact_matrices=all_Omegas, alpha_mt=alpha_mt, distpars=distpars,
                                           minval=minval, posdef_tol=posdef_tol)
 
