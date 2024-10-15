@@ -289,7 +289,7 @@ change_regime <- function(p, M, d, params, m, regime_pars, cond_dist=c("Gaussian
 
 reform_constrained_pars <- function(p, M, d, params,
                                     weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
-                                    weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"),
+                                    weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                                     identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                                     AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                                     other_constraints=NULL, change_na=FALSE) {
@@ -343,7 +343,7 @@ reform_constrained_pars <- function(p, M, d, params,
   }
 
   ## Obtain the covariance matrix parameters ##
-  if(identification == "non-Gaussianity" || cond_dist == "ind_Student") {
+  if(identification == "non-Gaussianity" || cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") {
     if(is.null(B_constraints)) {
       covmatpars <- params[(d*M - less_pars + q + 1):(d*M - less_pars + q + M*d^2)]
       less_covmatpars <- 0
@@ -420,8 +420,10 @@ reform_constrained_pars <- function(p, M, d, params,
     distpars <- numeric(0)
   } else if(cond_dist == "Student") {
     distpars <- params[length(params)]
-  } else { # cond_dist == "ind_Student"
+  } else if(cond_dist == "ind_Student") {
     distpars <- params[(length(params) - d + 1):length(params)]
+  } else if(cond_dist == "ind_skewed_t") {
+    distpars <- params[(length(params) - 2*d + 1):length(params)]
   }
 
   c(all_phi0, psi_expanded, covmatpars, weightpars, distpars)
