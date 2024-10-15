@@ -735,9 +735,77 @@ theta_222exoit <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(B1_222
 theta_222exoit_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
                              vec(B1_222), vec(B2_222), dfs_222_2_1)
 
-##########
+
+################
+### ind_skewed_t
+
+# p=1, M=1, d=2, cond_dist="ind_skewed_t", weight_function="threshold", weightfun_pars=c(1, 1)
+dfls_112 <- c(3, 7, 0.1, -0.2)
+B1_112 <- matrix(c(0.5, 0.2, -0.7, 0.3), nrow=2)
+theta_112ikt <- c(phi10_112, vec(A11_112), vec(B1_112), dfls_112)
+
+# p=2, M=2, d=2, cond_dist="ind_skewed_t", weight_function="logistic", weightfun_pars=c(2, 1)
+dfls_222_2_1 <- c(3, 7, 0.4, 0)
+B1_222 <- matrix(c(0.5, 0.2, -0.1, 0.3), nrow=2)
+B2_222 <- matrix(c(0.4, -0.1, -0.2, 0.3), nrow=2)
+theta_222logistikt_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                           vec(B1_222), vec(B2_222), c_and_gamma_222_2_1, dfls_222_2_1)
+
+# p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1, lags=1), cond_dist="ind_skewed_t"
+dfls_122_1_1 <- c(4, 13, -0.1, -0.2)
+B1_122 <- matrix(c(1.2, -0.3, 0.7, 0.1), nrow=2)
+B2_122 <- matrix(c(0.5, 0.2, -0.1, 3.1), nrow=2)
+theta_122logikt_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vec(B1_122), vec(B2_122), gamma1_122_1_1, dfls_122_1_1)
+
+# p=1, M=2, d=3, weight_function="exponential", weightfun_pars=c(1, 1), cond_dist="ind_skewed_t"
+dfls_123_1_1 <- c(10, 12, 3, 0.1, 0.2, 0.3)
+B1_123 <- matrix(c(1.0, 0.3, 0.1, -0.8, 1.1, -0.5, -0.1, -0.2, 0.4), nrow=3)
+B2_123 <- matrix(c(0.3, -0.2, -0.7, -0.8, 1.2, 0.5, 0.1, -0.2, 1.1), nrow=3)
+theta_123expikt_1_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vec(B1_123),
+                        vec(B2_123), c_and_gamma_123_1_1, dfls_123_1_1)
+
+# p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="ind_skewed_t"
+dfls_132_1_1 <- c(30, 6, -0.1, 0)
+B1_132 <- matrix(c(0.6, 0.2, -0.1, 0.7), nrow=2)
+B2_132 <- matrix(c(0.4, -0.1, -0.2, 0.5), nrow=2)
+B3_132 <- matrix(c(0.9, -0.5, 0.2, 0.4), nrow=2)
+theta_132thresikt_1_1 <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                          vec(B1_132), vec(B2_132), vec(B3_132), r1_132_1_1, r2_132_1_1, dfls_132_1_1)
+
+# p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), cond_dist="ind_skewed_t",
+# mean_constraints=list(1:2), AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))
+dfls_122_2_1 <- c(4, 13, 0, 0)
+theta_222expcmwikt_2_1 <- c(phi10_222, vec(A11_222), vec(A12_222), vec(B1_222), vec(B2_222), xi_222expcmw_2_1, dfls_122_2_1)
+theta_222expcmwikt_2_1_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                    vec(B1_222), vec(B2_222), c(0.01, 0.33), dfls_122_2_1)
+
+# p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="ind_skewed_t",
+# mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2))
+theta_132thresmwikt_1_1 <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vec(B1_132),
+                            vec(B2_132), vec(B3_132), dfls_132_1_1)
+theta_132thresmwikt_1_1_expanded <- c(phi10_132, phi20_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vec(B1_132),
+                                     vec(B2_132), vec(B3_132), 0, 1.2, dfls_132_1_1)
+
+# p=1, M=2, p=3, weight_function="logistic", weightfun_pars=c(3, 1), cond_dist="ind_skewed_t",
+# mean_constraints=list(1:2), AR_constraints=C_123
+dfls_123_3_1 <- c(11, 3, 20, 0.1, -0.1, 0.2)
+theta_123logisticcmikt_3_1 <- c(phi10_123, vec(A11_123), vec(B1_123), vec(B2_123), c_and_gamma_123_3_1, dfls_123_3_1)
+theta_123logisticcmikt_3_1_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), vec(B1_123), vec(B2_123),
+                                        c_and_gamma_123_3_1, dfls_123_3_1)
+
+# p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1), cond_dist="ind_skewed_t", AR_constraints=C_222
+theta_222logcikt_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(B1_222), vec(B2_222), gamma1_222_2_1, dfls_222_2_1)
+theta_222logcikt_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                              vec(B1_222), vec(B2_222), gamma1_222_2_1, dfls_222_2_1)
+
+# p=2, M=2, d=2, weight_function="exogenous", weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_skewed_t", AR_constraints=C_222
+theta_222exoikt <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(B1_222), vec(B2_222), dfls_222_2_1)
+theta_222exoikt_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                             vec(B1_222), vec(B2_222), dfls_222_2_1)
 
 
+
+#####################
 ### Structural models
 # (recursively identified models use the same parametrization as reduced form models)
 
@@ -939,7 +1007,82 @@ theta_222exoitngb_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), Wve
 theta_222exoitngb_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
                                 vec(B1_222c), vec(B2_222c), dfs_222_2_1)
 
-###############
+
+################
+### ind_skewed_t
+
+# p=2, M=2, d=2, cond_dist="ind_skewed_t", weight_function="logistic", weightfun_pars=c(2, 1), identification="non-Gaussianity",
+# B_constraints=matrix(c(NA, -1, 0, 1), nrow=2)
+B1_222c <- matrix(c(0.5, -0.2, 0, 0.1), nrow=2)
+B2_222c <- matrix(c(-0.4, -0.1, 0, 0.2), nrow=2)
+theta_222logistiktngb_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                              Wvec(B1_222c), Wvec(B2_222c), c_and_gamma_222_2_1, dfls_222_2_1)
+theta_222logistiktngb_2_1_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                                       vec(B1_222c), vec(B2_222c), c_and_gamma_222_2_1, dfls_222_2_1)
+
+# p=1, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1, lags=1), cond_dist="ind_skewed_t", identification="non-Gaussianity",
+# B_constraints=matrix(c(1, NA, -1, 1) , nrow=2)
+dfls_122_1_1 <- c(4, 13, 0.1, 0.2)
+B1_122c <- matrix(c(1.2, 0.3, -0.7, 0.1), nrow=2)
+B2_122c <- matrix(c(0.5, -0.9, -0.1, 3.1), nrow=2)
+theta_122logiktngb_1_1 <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), Wvec(B1_122c), Wvec(B2_122c), gamma1_122_1_1, dfls_122_1_1)
+theta_122logiktngb_1_1_expanded <- c(phi10_122, phi20_122, vec(A11_122), vec(A21_122), vec(B1_122c), vec(B2_122c), gamma1_122_1_1, dfls_122_1_1)
+
+
+# p=1, M=2, d=3, weight_function="exponential", weightfun_pars=c(1, 1), cond_dist="ind_skewed_t", identification="non-Gaussianity",
+# B_constraints=matrix(c(1, NA, NA, 0, 1, NA, 0, NA, 1), nrow=3)
+dfls_123_1_1 <- c(10, 12, 3, 0, -0.1, 0.3)
+B1_123c <- matrix(c(1.0, 0.3, 0.1, 0, 1.1, -0.5, 0, -0.2, 0.4), nrow=3)
+B2_123c <- matrix(c(0.3, -0.2, -0.7, 0, 1.2, 0.5, 0, -0.2, 1.1), nrow=3)
+theta_123expiktngb_1_1 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), Wvec(B1_123c),
+                           Wvec(B2_123c), c_and_gamma_123_1_1, dfls_123_1_1)
+theta_123expiktngb_1_1_expanded <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vec(B1_123c),
+                                    vec(B2_123c), c_and_gamma_123_1_1, dfls_123_1_1)
+
+# p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="ind_skewed_t", identification="non-Gaussianity",
+# B_constraints=matrix(c(1, 0, NA, 1), nrow=2)
+dfls_132_1_1 <- c(30, 6, 0.1, 0.6)
+B1_132c <- matrix(c(0.6, 0, -0.1, 0.7), nrow=2)
+B2_132c <- matrix(c(0.4, 0, 0.2, 0.5), nrow=2)
+B3_132c <- matrix(c(0.9, 0, -0.2, 0.4), nrow=2)
+theta_132thresiktngb_1_1 <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                             Wvec(B1_132c), Wvec(B2_132c), Wvec(B3_132c), r1_132_1_1, r2_132_1_1, dfls_132_1_1)
+theta_132thresiktngb_1_1_expanded <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                                      vec(B1_132c), vec(B2_132c), vec(B3_132c), r1_132_1_1, r2_132_1_1, dfls_132_1_1)
+
+# p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), cond_dist="ind_skewed_t",
+# mean_constraints=list(1:2), AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)),
+# identification="non-Gaussianity", B_constraints=matrix(c(NA, -1, 0, 1), nrow=2)
+theta_222expcmwiktngb_2_1 <- c(phi10_222, vec(A11_222), vec(A12_222), Wvec(B1_222c), Wvec(B2_222c), xi_222expcmw_2_1, dfls_222_2_1)
+theta_222expcmwiktngb_2_1_expanded <- c(phi10_222, phi10_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                       vec(B1_222c), vec(B2_222c), c(0.01, 0.33), dfls_222_2_1)
+
+# p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="ind_skewed_t", mean_constraints=list(1, 2:3),
+# weight_constraints=list(R=0, r=c(0, 1.2)), identification="non-Gaussianity", B_constraints=matrix(c(1, 0, NA, 1), nrow=2)
+theta_132thresmwiktngb_1_1 <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), Wvec(B1_132c),
+                               Wvec(B2_132c), Wvec(B3_132c), dfls_132_1_1)
+theta_132thresmwiktngb_1_1_expanded <- c(phi10_132, phi20_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vec(B1_132c),
+                                        vec(B2_132c), vec(B3_132c), 0, 1.2, dfls_132_1_1)
+
+# p=1, M=2, d=3, weight_function="logistic", weightfun_pars=c(3, 1), cond_dist="ind_skewed_t", mean_constraints=list(1:2),
+# AR_constraints=C_123, identification="non-Gaussianity", B_constraints=matrix(c(1, NA, NA, 0, 1, NA, 0, NA, 1), nrow=3)
+dfls_123_3_1 <- c(11, 3, 20, 0.7, -0.1, 0)
+theta_123logisticcmiktngb_3_1 <- c(phi10_123, vec(A11_123), Wvec(B1_123c), Wvec(B2_123c), c_and_gamma_123_3_1, dfls_123_3_1)
+theta_123logisticcmiktngb_3_1_expanded <- c(phi10_123, phi10_123, vec(A11_123), vec(A11_123), vec(B1_123c), vec(B2_123c),
+                                           c_and_gamma_123_3_1, dfls_123_3_1)
+
+# p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1), cond_dist="ind_skewed_t", AR_constraints=C_222,
+# identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, 0, 1), nrow=2)
+theta_222logciktngb_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), Wvec(B1_222c), Wvec(B2_222c), gamma1_222_2_1, dfls_222_2_1)
+theta_222logciktngb_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                 vec(B1_222c), vec(B2_222c), gamma1_222_2_1, dfls_222_2_1)
+
+# p=2, M=2, d=2, weight_function="exogenous", weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_skewed_t",
+# AR_constraints=C_222, identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, 0, 1), nrow=2)
+theta_222exoiktngb_2_1 <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), Wvec(B1_222c), Wvec(B2_222c), dfls_222_2_1)
+theta_222exoiktngb_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A11_222), vec(A12_222),
+                                vec(B1_222c), vec(B2_222c), dfls_222_2_1)
+
 
 
 test_that("reform_constrained_pars works correctly", {
@@ -1128,6 +1271,23 @@ test_that("reform_constrained_pars works correctly", {
                                        weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_Student", AR_constraints=C_222),
                theta_222exoit_expanded)
 
+  # ind_skewed_t
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222expcmwikt_2_1, weight_function="exponential", weightfun_pars=c(2, 1),
+                                       cond_dist="ind_skewed_t", mean_constraints=list(1:2), AR_constraints=C_222,
+                                       weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))), theta_222expcmwikt_2_1_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=3, d=2, params=theta_132thresmwikt_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
+                                       cond_dist="ind_skewed_t", mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2))),
+               theta_132thresmwikt_1_1_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=2, d=3, params=theta_123logisticcmikt_3_1, weight_function="logistic", weightfun_pars=c(3, 1),
+                                       cond_dist="ind_skewed_t", mean_constraints=list(1:2), AR_constraints=C_123),
+               theta_123logisticcmikt_3_1_expanded)
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222logcikt_2_1, weight_function="mlogit",
+                                       weightfun_pars=list(vars=2, lags=1), cond_dist="ind_skewed_t", AR_constraints=C_222),
+               theta_222logcikt_expanded)
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222exoikt, weight_function="exogenous",
+                                       weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_skewed_t", AR_constraints=C_222),
+               theta_222exoikt_expanded)
+
   ## Structural models
   expect_equal(reform_constrained_pars(p=1, M=2, d=2, params=theta_122relgshc, weight_function="relative_dens",
                                        identification="heteroskedasticity", AR_constraints=C_122),
@@ -1216,6 +1376,43 @@ test_that("reform_constrained_pars works correctly", {
                                        weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_Student",
                                        AR_constraints=C_222, identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, 0, 1), nrow=2)),
                theta_222exoitngb_expanded)
+
+  # ind_skewed_t with B_constraints
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222logistiktngb_2_1, cond_dist="ind_skewed_t", weight_function="logistic",
+                                       weightfun_pars=c(2, 1), identification="non-Gaussianity", B_constraints=matrix(c(NA, -1, 0, 1), nrow=2)),
+               theta_222logistiktngb_2_1_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=2, d=2, params=theta_122logiktngb_1_1, weight_function="mlogit",
+                                       weightfun_pars=list(vars=1, lags=1), cond_dist="ind_skewed_t", identification="non-Gaussianity",
+                                       B_constraints=matrix(c(1, NA, -1, 1) , nrow=2)),
+               theta_122logiktngb_1_1_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=2, d=3, params=theta_123expiktngb_1_1, weight_function="exponential", weightfun_pars=c(1, 1),
+                                       cond_dist="ind_skewed_t", identification="non-Gaussianity",
+                                       B_constraints=matrix(c(1, NA, NA, 0, 1, NA, 0, NA, 1), nrow=3)),
+               theta_123expiktngb_1_1_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=3, d=2, params=theta_132thresiktngb_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
+                                       cond_dist="ind_skewed_t", identification="non-Gaussianity", B_constraints=matrix(c(1, 0, NA, 1), nrow=2)),
+               theta_132thresiktngb_1_1_expanded)
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222expcmwiktngb_2_1, weight_function="exponential", weightfun_pars=c(2, 1),
+                                       cond_dist="ind_skewed_t", mean_constraints=list(1:2), AR_constraints=C_222,
+                                       weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)),
+                                       identification="non-Gaussianity", B_constraints=matrix(c(NA, -1, 0, 1), nrow=2)),
+               theta_222expcmwiktngb_2_1_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=3, d=2, params=theta_132thresmwiktngb_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
+                                       cond_dist="ind_skewed_t", mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2)),
+                                       identification="non-Gaussianity", B_constraints=matrix(c(1, 0, NA, 1), nrow=2)),
+               theta_132thresmwiktngb_1_1_expanded)
+  expect_equal(reform_constrained_pars(p=1, M=2, d=3, params=theta_123logisticcmiktngb_3_1, weight_function="logistic", weightfun_pars=c(3, 1),
+                                       cond_dist="ind_skewed_t", mean_constraints=list(1:2), AR_constraints=C_123,
+                                       identification="non-Gaussianity", B_constraints=matrix(c(1, NA, NA, 0, 1, NA, 0, NA, 1), nrow=3)),
+               theta_123logisticcmiktngb_3_1_expanded)
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222logciktngb_2_1, weight_function="mlogit",
+                                       weightfun_pars=list(vars=2, lags=1), cond_dist="ind_skewed_t", AR_constraints=C_222,
+                                       identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, 0, 1), nrow=2)),
+               theta_222logciktngb_expanded)
+  expect_equal(reform_constrained_pars(p=2, M=2, d=2, params=theta_222exoiktngb_2_1, weight_function="exogenous",
+                                       weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_skewed_t",
+                                       AR_constraints=C_222, identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, 0, 1), nrow=2)),
+               theta_222exoiktngb_expanded)
 })
 
 
