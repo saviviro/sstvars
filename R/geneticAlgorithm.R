@@ -687,7 +687,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
   }
   # # GA always optimizes with mean parametrization, and cond_dist="ind_Student" models by parametrizing impact matrices
   # # instead of B_1,...,B_M, with B_1,B_2*,...,B_M*, where B_m* = B_m - B_1 for m=2,...,M.
-  # # Switch parametriaztion back to the original one:
+  # # Switch parametrization back to the original one:
   # if(cond_dist == "ind_Student") {
   #   ret <- change_parametrization(p=p, M=M, d=d, params=ret, weight_function=weight_function, weightfun_pars=weightfun_pars,
   #                                 cond_dist=cond_dist, identification="reduced_form", AR_constraints=AR_constraints,

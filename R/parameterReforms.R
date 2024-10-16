@@ -75,7 +75,7 @@ form_boldA <- function(p, M, d, all_A) {
 
 change_parametrization <- function(p, M, d, params,
                                    weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
-                                   weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"),
+                                   weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                                    identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                                    AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                                    change_to=c("intercept", "mean", "orig", "alt")) {
@@ -106,7 +106,7 @@ change_parametrization <- function(p, M, d, params,
   } else { # Change between nong_orig and nong_alt
     if(M == 1) { # B_1 = B_1*, so nothing to change
       return(re_params)
-    } else if(cond_dist != "ind_Student") { # Other cond dists do not apply here
+    } else if(!cond_dist %in% c("ind_Student", "ind_skewed_t")) { # Other cond dists do not apply to B matrices below
       return(re_params)
     }
     # All B_m or B_m^* matrices:
@@ -182,7 +182,7 @@ change_parametrization <- function(p, M, d, params,
 #' @keywords internal
 
 sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
-                         weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"),
+                         weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                          identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"), B_constraints=NULL) {
   weight_function <- match.arg(weight_function)
   if(M == 1 || weight_function %in% c("logistic", "mlogit", "exponential", "threshold", "exogenous")) {
@@ -201,9 +201,10 @@ sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "lo
   } else {
     return(params) # Other weight functions do not have sorting implemented
   }
-  if(cond_dist %in% c("Student", "ind_Student") || identification == "non-Gaussianity") {
+  if(cond_dist %in% c("Student", "ind_Student", "ind_skewed_t") || identification == "non-Gaussianity") {
     # Should never end up here, but exists to detect errors in a flawed update
-    stop("cond_dist or identification in sort regime implies a weight function that does not support sorting!")
+    stop(paste("cond_dist or identification in sort regime implies a weight function that",
+               "does not support sorting ('alt parametrization' assumed)!"))
   }
 
   all_phi0 <- pick_phi0(M=M, d=d, params=params)
@@ -251,7 +252,7 @@ sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "lo
 #'   \describe{
 #'     \item{If \code{cond_dist="Gaussian"} or \code{cond_dist="Student"}:}{rhe \eqn{(dp + pd^2 + d(d+1)/2)} vector
 #'      \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vech(\Omega_m))}.}
-#'     \item{If \code{cond_dist="ind_Student"}:}{the \eqn{(dp + pd^2 + d^2 + 1)} vector
+#'     \item{If \code{cond_dist="ind_Student"} or \code{"ind_skewed_t"}:}{the \eqn{(dp + pd^2 + d^2 + 1)} vector
 #'      \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vec(B_m))}.}
 #'   }
 #' @return Returns parameter vector with \code{m}:th regime changed to \code{regime_pars}.
@@ -260,12 +261,12 @@ sort_regimes <- function(p, M, d, params, weight_function=c("relative_dens", "lo
 #' @inherit in_paramspace references
 #' @keywords internal
 
-change_regime <- function(p, M, d, params, m, regime_pars, cond_dist=c("Gaussian", "Student", "ind_Student")) {
+change_regime <- function(p, M, d, params, m, regime_pars, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t")) {
   cond_dist <- match.arg(cond_dist)
   new_pars <- params
   new_pars[((m - 1)*d + 1):(m*d)] <- regime_pars[1:d]
   new_pars[(M*d + (m - 1)*p*d^2 + 1):(M*d + m*p*d^2)] <- regime_pars[(d + 1):(d + p*d^2)]
-  if(cond_dist == "ind_Student") {
+  if(cond_dist %in% c("ind_Student", "ind_skewed_t")) {
     new_pars[(M*d + M*p*d^2 + (m - 1)*d^2 + 1):(M*d + M*p*d^2 + m*d^2)] <- regime_pars[(d + p*d^2 + 1):(d + p*d^2 + d^2)]
   } else {
     new_pars[(M*d + M*p*d^2 + (m - 1)*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + m*d*(d + 1)/2)] <- regime_pars[(d + p*d^2 + 1):length(regime_pars)]
@@ -443,19 +444,20 @@ reform_constrained_pars <- function(p, M, d, params,
 #' @return Returns sorted parameter vector of the form described for the argument \code{params},
 #'   with the regimes sorted so that...
 #'   \describe{
-#'     \item{If \code{cond_dist == "ind_Student"}:}{The parameter vector with the columns of the impact matrices sorted and sign changed so
-#'           that the first element in each column of \eqn{B_1} is positive and in a decreasing order. Sorts also the degrees of feedom parameters
-#'           accordingly.}
+#'     \item{If \code{cond_dist == "ind_Student"} or \code{"ind_skewed_t}:}{The parameter vector with the columns of the impact matrices sorted
+#'           and sign changed so that the first element in each column of \eqn{B_1} is positive and in a decreasing order. Sorts also the degrees
+#'           of feedom and skewness parameters (if any) accordingly.}
 #'     \item{Otherwise:}{Nothing to sort, so returns the original parameter vector given in \code{param}.}
 #'   }
 #' @keywords internal
 
-sort_impactmats <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
-                            weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"),
+sort_impactmats <- function(p, M, d, params,
+                            weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                            weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                             AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
-  if(cond_dist != "ind_Student") {
+  if(!cond_dist %in% c("ind_Student", "ind_skewed_t")) {
     return(params) # No impact matrices whose columns to sort
   }
 
@@ -479,10 +481,13 @@ sort_impactmats <- function(p, M, d, params, weight_function=c("relative_dens", 
       }
     }
   }
-  # The number of degrees of freedom parameters is d for cond_dist == "ind_Student"
+  # The number of degrees of freedom parameters is d for cond_dist == "ind_Student",
+  # whereas the number of df and skewness parameters is 2d for cond_dist == "ind_skewed_t".
+  n_distpars <- ifelse(cond_dist == "ind_Student", d, 2*d) # Models with other cond dists do not arrive here
 
   # Obtain the impact matrices
-  all_B_m <- array(params[(length(params) - n_weight_pars - d - M*d^2 + 1):(length(params) - n_weight_pars - d)], dim=c(d, d, M))
+  all_B_m <- array(params[(length(params) - n_weight_pars - n_distpars - M*d^2 + 1):(length(params) - n_weight_pars - n_distpars)],
+                   dim=c(d, d, M))
 
   # Determine which columns should go through sign change, and change the signs of those columns
   for(i1 in 1:d) {
@@ -505,11 +510,17 @@ sort_impactmats <- function(p, M, d, params, weight_function=c("relative_dens", 
   }
 
   # Fill in the new impact matrices to the parameter vector
-  params[(length(params) - n_weight_pars - d - M*d^2 + 1):(length(params) - n_weight_pars - d)] <- as.vector(all_B_m)
+  params[(length(params) - n_weight_pars - n_distpars - M*d^2 + 1):(length(params) - n_weight_pars - n_distpars)] <- as.vector(all_B_m)
 
   # Sort the degrees of freedom parameters accordingly:
-  distpars <-  params[(length(params) - d + 1):length(params)]
-  params[(length(params) - d + 1):length(params)] <- distpars[new_ordering]
+  if(cond_dist == "ind_Student") { # Only degrees of freedom parameters to sort
+    distpars <- params[(length(params) - n_distpars + 1):length(params)]
+    params[(length(params) - n_distpars + 1):length(params)] <- distpars[new_ordering]
+  } else { # ind_skewed_t, sort both degrees of freedom and skewness parameters
+    distpars <- matrix(params[(length(params) - n_distpars + 1):length(params)], ncol=2) # [d,]
+    distpars <- distpars[new_ordering,]
+    params[(length(params) - n_distpars + 1):length(params)] <- as.vector(distpars)
+  }
 
   # Return the new parameter vector
   params

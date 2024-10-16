@@ -11,7 +11,7 @@ change_regime(
   params,
   m,
   regime_pars,
-  cond_dist = c("Gaussian", "Student", "ind_Student")
+  cond_dist = c("Gaussian", "Student", "ind_Student", "ind_skewed_t")
 )
 }
 \arguments{
@@ -77,7 +77,7 @@ of the \eqn{m}th regime. If \code{parametrization=="mean"}, just replace each \e
 \item{regime_pars}{\describe{
   \item{If \code{cond_dist="Gaussian"} or \code{cond_dist="Student"}:}{rhe \eqn{(dp + pd^2 + d(d+1)/2)} vector
    \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vech(\Omega_m))}.}
-  \item{If \code{cond_dist="ind_Student"}:}{the \eqn{(dp + pd^2 + d^2 + 1)} vector
+  \item{If \code{cond_dist="ind_Student"} or \code{"ind_skewed_t"}:}{the \eqn{(dp + pd^2 + d^2 + 1)} vector
    \eqn{(\phi_{m,0},vec(A_{m,1}),...,\vec(A_{m,p}),vec(B_m))}.}
 }}
 }

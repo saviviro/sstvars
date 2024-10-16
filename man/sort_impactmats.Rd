@@ -13,7 +13,7 @@ sort_impactmats(
   weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold",
     "exogenous"),
   weightfun_pars = NULL,
-  cond_dist = c("Gaussian", "Student", "ind_Student"),
+  cond_dist = c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
   AR_constraints = NULL,
   mean_constraints = NULL,
   weight_constraints = NULL
@@ -158,9 +158,9 @@ the weight parameter to the constant \eqn{r} (in this case, \eqn{\alpha} is drop
 Returns sorted parameter vector of the form described for the argument \code{params},
   with the regimes sorted so that...
   \describe{
-    \item{If \code{cond_dist == "ind_Student"}:}{The parameter vector with the columns of the impact matrices sorted and sign changed so
-          that the first element in each column of \eqn{B_1} is positive and in a decreasing order. Sorts also the degrees of feedom parameters
-          accordingly.}
+    \item{If \code{cond_dist == "ind_Student"} or \code{"ind_skewed_t}:}{The parameter vector with the columns of the impact matrices sorted
+          and sign changed so that the first element in each column of \eqn{B_1} is positive and in a decreasing order. Sorts also the degrees
+          of feedom and skewness parameters (if any) accordingly.}
     \item{Otherwise:}{Nothing to sort, so returns the original parameter vector given in \code{param}.}
   }
 }
