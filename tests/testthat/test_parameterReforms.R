@@ -2337,7 +2337,6 @@ test_that("sort_impactmats works correctly", {
                theta_123relg_2)
   expect_equal(sort_impactmats(p=2, M=2, d=2, params=theta_222logistict_2_1, cond_dist="Student", weight_function="logistic",
                                weightfun_pars=c(2, 1)), theta_222logistict_2_1)
-
 })
 
 

@@ -94,7 +94,7 @@ in_paramspace <- function(p, M, d, params,
   } else if(cond_dist == "ind_skewed_t") {
     if(any(distpars[1:d] <= 2 + distpar_tol)) {
       return(FALSE)
-    } else if(any(abs(distpars[(d + 1):(2*d)])) > 1 - distpar_tol) {
+    } else if(any(abs(distpars[(d + 1):(2*d)]) > 1 - distpar_tol)) {
       return(FALSE)
     }
   }
@@ -207,7 +207,8 @@ in_paramspace <- function(p, M, d, params,
 
 check_params <- function(data, p, M, d, params,
                          weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
-                         weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), parametrization=c("intercept", "mean"),
+                         weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
+                         parametrization=c("intercept", "mean"),
                          identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                          AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL, transition_weights,
                          stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
@@ -249,7 +250,7 @@ check_params <- function(data, p, M, d, params,
     if(any(lambdas <= 0)) {
       stop("The eigenvalues 'lambdas' should be strictly positive")
     }
-  } else if(identification == "non-Gaussianity" || cond_dist == "ind_Student") { # Check B matrices
+  } else if(identification == "non-Gaussianity" || cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") { # Check B matrices
     for(i1 in 1:M) {
       if(any(all_Omegas[, , i1][B_constraints == 0] != 0, na.rm=TRUE)) {
         stop(paste0("The impact matrix of Regime ", i1, " doesn't satisfy the zero constraints in B_constraints"))
@@ -276,6 +277,12 @@ check_params <- function(data, p, M, d, params,
     if(any(distpars <= 2 + distpar_tol)) {
       stop("The degrees of freedom parameters need to be strictly larger than two (with large enough numerical tolerance)!")
     }
+  } else if(cond_dist == "ind_skewed_t") {
+    if(any(distpars[1:d] <= 2 + distpar_tol)) {
+      stop("The degrees of freedom parameters need to be strictly larger than two (with large enough numerical tolerance)!")
+    } else if(any(abs(distpars[(d + 1):(2*d)]) > 1 - distpar_tol)) {
+      stop("The skewness parameters need to be in the interval (-1, 1) (with large enough numerical tolerance)!")
+    }
   }
   if(weight_function == "relative_dens") {
     if(M >= 2 & sum(weightpars[-M]) >= 1) {
@@ -300,8 +307,7 @@ check_params <- function(data, p, M, d, params,
   if(!stab_conds_satisfied(p=p, M=M, d=d, all_boldA=all_boldA, tolerance=stab_tol)) {
     stop("At least one of the regimes does not satisfy the stability condition (with large enough numerical tolerance)!")
   }
-
-  if(cond_dist != "ind_Student" && identification != "non-Gaussianity") {
+  if(cond_dist != "ind_Student" && cond_dist != "ind_skewed_t" && identification != "non-Gaussianity") {
     for(m in 1:M) {
       if(any(eigen(all_Omegas[, , m], symmetric=TRUE, only.values=TRUE)$values < posdef_tol)) {
         stop(paste0("The conditional covariance matrix of Regime ", m,
@@ -398,7 +404,7 @@ check_data <- function(data, p) {
 #' @keywords internal
 
 n_params <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
-                     weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"),
+                     weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                      identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                      AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
   weight_function <- match.arg(weight_function)
@@ -418,7 +424,7 @@ n_params <- function(p, M, d, weight_function=c("relative_dens", "logistic", "ml
   }
 
   # Covmat pars
-  if(identification == "non-Gaussianity" || cond_dist == "ind_Student") { # impact matrices parametrized directly
+  if(identification == "non-Gaussianity" || cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") { # impact matrices parametrized
     if(is.null(B_constraints)) {
       n_zeros <- 0
     } else {
@@ -462,8 +468,10 @@ n_params <- function(p, M, d, weight_function=c("relative_dens", "logistic", "ml
     n_dist_pars <- 0
   } else if(cond_dist == "Student") {
     n_dist_pars <- 1 # degrees of freedom param
-  } else { # cond_dist == "ind_Student"
+  } else if(cond_dist == "ind_Student") {
     n_dist_pars <- d # Degrees of freedom for each component
+  } else if(cond_dist == "ind_skewed_t") {
+    n_dist_pars <- 2*d # Degrees of freedom and skewness parameters
   }
 
   n_mean_pars + n_ar_pars + n_covmat_pars + n_weight_pars + n_dist_pars
@@ -615,7 +623,7 @@ check_constraints <- function(data, p, M, d,
 
 check_weightfun_pars <- function(data, p, M, d,
                                  weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
-                                 weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student")) {
+                                 weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t")) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
 
