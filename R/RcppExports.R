@@ -130,9 +130,9 @@ get_mu_yt_Cpp <- function(obs, all_phi0, all_A, alpha_mt) {
 #'
 #' @inheritParams Student_densities_Cpp
 #' @inheritParams loglikelihood
-#' @param impact_matrices A a size \eqn{d\times d \times M} \code{arma::cube} (3D array in R), where each slice contains an
+#' @param impact_matrices a size \eqn{d\times d \times M} \code{arma::cube} (3D array in R), where each slice contains an
 #'  invertible (d x d) impact matrix of each regime.
-#' @param distpars A numeric vector of length \eqn{d}, containing the degrees of freedom parameters for each component.
+#' @param distpars a numeric vector of length \eqn{d}, containing the degrees of freedom parameters for each component.
 #' @details Returns \code{minval} if the impact matrix \eqn{B_t} is not invertible for some t up to the numerical tolerance
 #'  \code{posdef_tol}.
 #' @return A numeric vector of length \eqn{T}, where each element represents the computed density component for
@@ -140,5 +140,23 @@ get_mu_yt_Cpp <- function(obs, all_phi0, all_A, alpha_mt) {
 #' @keywords internal
 ind_Student_densities_Cpp <- function(obs, means, impact_matrices, alpha_mt, distpars, minval, posdef_tol) {
     .Call('_sstvars_ind_Student_densities_Cpp', PACKAGE = 'sstvars', obs, means, impact_matrices, alpha_mt, distpars, minval, posdef_tol)
+}
+
+#' @name ind_skewed_t_densities_Cpp
+#' @title Calculate log independent multivariate skewed t densities
+#' @description Calculates logs of independent multivariate skewed t densities with varying mean
+#'   and impact matrix (including the constant terms of the density). The varying impact matrix
+#'   is calculated within the function from the impact matrices of the regimes and transition weights.
+#'
+#' @inheritParams ind_Student_densities_Cpp
+#' @param all_nu a numeric vector of length \eqn{d}, containing the degrees of freedom parameters for each component.
+#' @param all_lambda a numeric vector of length \eqn{d}, containing the skewness parameters for each component.
+#' @details Returns \code{minval} if the impact matrix \eqn{B_t} is not invertible for some t up to the numerical tolerance
+#'  \code{posdef_tol}.
+#' @return A numeric vector of length \eqn{T}, where each element represents the computed density component for
+#'  the corresponding observation.
+#' @keywords internal
+ind_skewed_t_densities_Cpp <- function(obs, means, impact_matrices, alpha_mt, all_nu, all_lambda, minval, posdef_tol) {
+    .Call('_sstvars_ind_skewed_t_densities_Cpp', PACKAGE = 'sstvars', obs, means, impact_matrices, alpha_mt, all_nu, all_lambda, minval, posdef_tol)
 }
 

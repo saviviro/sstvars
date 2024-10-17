@@ -253,7 +253,7 @@ loglikelihood <- function(data, p, M, params,
                                     weight_constraints=weight_constraints, B_constraints=B_constraints,
                                     other_constraints=other_constraints, weightfun_pars=weightfun_pars)
 
-  if(cond_dist == "ind_Student" || identification == "non-Gaussianity") {
+  if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t" || identification == "non-Gaussianity") {
     if(alt_par) { # Change to the parametrization with impact matrices of the regimes parametrized directly.
       params <- change_parametrization(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                        cond_dist=cond_dist, identification=identification, AR_constraints=NULL, mean_constraints=NULL,
@@ -325,7 +325,7 @@ loglikelihood <- function(data, p, M, params,
     #return(matrix(rowSums(vapply(1:M, function(m) alpha_mt[,m]*mu_mt[, , m], numeric(d*T_obs))), nrow=T_obs, ncol=d, byrow=FALSE))
     return(mu_yt)
   } else if(to_return == "total_ccovs") {
-    if(cond_dist == "ind_Student" || identification == "non-Gaussianity") { # Parametrization via impact matrices
+    if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t" || identification == "non-Gaussianity") { # Parametrization via B_m
       # Cond covariance matrices of the process: B_tB_t' for each t
       all_Bt <- get_Bt_Cpp(all_Omegas=all_Omegas, alpha_mt=alpha_mt)
       all_covmats <- array(dim=c(d, d, T_obs))
@@ -339,8 +339,8 @@ loglikelihood <- function(data, p, M, params,
     }
     return(all_covmats)
   } else if(to_return == "B_t") {
-    if(cond_dist != "ind_Student") {
-      stop("The requested output B_t is available only for models with cond_dist='ind_Student'.")
+    if(cond_dist != "ind_Student" && cond_dist != "ind_skewed_t") {
+      stop("The requested output B_t is available only for models with cond_dist='ind_Student' or 'ind_skewed_t'.")
     }
     return(get_Bt_Cpp(all_Omegas=all_Omegas, alpha_mt=alpha_mt))
   }
@@ -401,16 +401,51 @@ loglikelihood <- function(data, p, M, params,
       obs_minus_cmean <- obs - mu_yt
       all_lt <- numeric(T_obs)
       for(i1 in 1:T_obs) {
-        tdens_i1 <- numeric(d)
+        #tdens_i1 <- numeric(d)
         Bt <- apply(X=all_Omegas, MARGIN=c(1, 2), FUN=function(mat) sum(mat*alpha_mt[i1,]))
-        invBt_obs_minus_cmean <- solve(Bt, obs_minus_cmean[i1,])
-        for(i2 in 1:d) {
-          tdens_i1[i2] <- 0.5*(1 + distpars[i2])*log(1 + invBt_obs_minus_cmean[i2]^2/(distpars[i2] - 2))
-        }
+        e_t <- solve(Bt, obs_minus_cmean[i1,]) # invBt_obs_minus_cmean
+        #for(i2 in 1:d) {
+        #  tdens_i1[i2] <- 0.5*(1 + distpars[i2])*log(1 + e_t[i2]^2/(distpars[i2] - 2))
+        #}
+        tdens_i1 <- 0.5*(1 + distpars)*log(1 + e_t^2/(distpars - 2)) # Not tested
         all_lt[i1] <- -log(abs(det(Bt))) + logC1 - sum(tdens_i1)
       }
     }
+  } else if(cond_dist == "ind_skewed_t") {
+    # Invertibilty of Bt for all t is checked in ind_skewed_t_densities_Cpp, and it returns minval if not invertible for some t.
+    obs <- data[(p+1):nrow(data),]
+    all_nu <- distpars[1:d]
+    all_lambda <- distpars[(d+1):length(distpars)]
+
+    if(!indt_R) {
+      if(is.null(minval) || !is.numeric(minval)) minval <- -999999999 # Cpp fun expects minval to be numerical, will cause an error if not
+      all_lt <- ind_skewed_t_densities_Cpp(obs=obs, means=mu_yt, impact_matrices=all_Omegas, alpha_mt=alpha_mt, all_nu=all_nu,
+                                           all_lambda=all_lambda, minval=minval, posdef_tol=posdef_tol)
+
+    } else {
+      # R IMPLEMENTATION BELOW
+      logc_i <- lgamma(0.5*(1 + all_nu)) - 0.5*log(base::pi) - 0.5*log(all_nu - 2) - lgamma(0.5*all_nu) # (d x 1 )
+      a_i <- 4*all_lambda*exp(logc_i)*(all_nu - 2)/(all_nu - 1) # (d x 1)
+      logb_i <- 0.5*log(1 + 3*all_lambda^2 - a_i^2) # (d x 1)
+      b_i <- exp(logb_i) # (d x 1)
+
+      obs_minus_cmean <- obs - mu_yt
+      all_lt <- numeric(T_obs)
+      for(i1 in 1:T_obs) {
+        Bt <- apply(X=all_Omegas, MARGIN=c(1, 2), FUN=function(mat) sum(mat*alpha_mt[i1,]))
+        e_t <- solve(Bt, obs_minus_cmean[i1,]) # invBt_obs_minus_cmean
+        # dens_i1 <- numeric(d)
+        # for(i2 in 1:d) {
+        #   dens_i1[i2] <- 0.5*(1 + all_nu[i2])*log(1 + ((b_i[i2]*e_t[i2] + a_i[i2])^2)/((all_nu[i2] - 2)*(1 + ifelse(e_t[i2] < -a_i[i2]/b_i[i2],
+        #                                                                                                             -all_lambda[i2],
+        #                                                                                                             all_lambda[i2]))^2))
+        # }
+        dens_i1 <- 0.5*(1 + all_nu)*log(1 + ((b_i*e_t + a_i)^2)/((all_nu - 2)*(1 + ifelse(e_t < -a_i/b_i, -all_lambda, all_lambda))^2))
+        all_lt[i1] <- -log(abs(det(Bt))) + sum(logb_i + logc_i) - sum(dens_i1)
+      }
+    }
   }
+
   if(to_return == "terms") {
     return(all_lt)
   } else if(to_return == "loglik_and_tw") {
@@ -597,7 +632,7 @@ get_alpha_mt <- function(data, Y2, p, M, d, weight_function=c("relative_dens", "
     denominator <- as.vector(mvnvalues%*%weightpars)
     alpha_mt <- (mvnvalues/denominator)%*%diag(weightpars)
   } else {
-    stop("Only relative_dens and mlogit weight functions are currently implemented to get_alpha_mt")
+    stop("get_alpha_mt ended up somewhere it should never end up in")
   }
   alpha_mt
 }
