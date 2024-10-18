@@ -12,7 +12,7 @@ smart_ind(
   weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold",
     "exogenous"),
   weightfun_pars = NULL,
-  cond_dist = c("Gaussian", "Student", "ind_Student"),
+  cond_dist = c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
   AR_constraints = NULL,
   mean_constraints = NULL,
   weight_constraints = NULL,

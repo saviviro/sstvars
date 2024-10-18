@@ -20,6 +20,8 @@ Returns a numeric vector ...
      (strictly larger than two).}
     \item{If \code{cond_dist == "ind_Student"}:}{of length d containing a degrees of freedom parameter values
      (strictly larger than two).}
+    \item{If \code{cond_dist == "ind_skewed_t"}:}{of length 2d containing df params strictly larger than two in the first d
+          elements and skewness params strictly between -1 and 1 in the rest d elements.}
   }
 }
 \description{

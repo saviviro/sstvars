@@ -16,7 +16,9 @@ Returns a numeric vector ...
   \describe{
     \item{If \code{cond_dist == "Gaussian"}:}{of length zero.}
     \item{If \code{cond_dist == "Student"}:}{of length one containing a df param strictly larger than two.}
-    \item{If \code{cond_dist == "ind_Student"}:}{of length d containing a df params strictly larger than two.}
+    \item{If \code{cond_dist == "ind_Student"}:}{of length d containing df params strictly larger than two.}
+    \item{If \code{cond_dist == "ind_skewed_t"}:}{of length 2d containing df params strictly larger than two in the first d
+          elements and skewness params strictly between -1 and 1 in the rest d elements.}
   }
 }
 \description{

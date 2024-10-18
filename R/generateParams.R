@@ -206,7 +206,9 @@ smart_impactmat <- function(d, B, accuracy, is_regime1=TRUE) {
 #'   \describe{
 #'     \item{If \code{cond_dist == "Gaussian"}:}{of length zero.}
 #'     \item{If \code{cond_dist == "Student"}:}{of length one containing a df param strictly larger than two.}
-#'     \item{If \code{cond_dist == "ind_Student"}:}{of length d containing a df params strictly larger than two.}
+#'     \item{If \code{cond_dist == "ind_Student"}:}{of length d containing df params strictly larger than two.}
+#'     \item{If \code{cond_dist == "ind_skewed_t"}:}{of length 2d containing df params strictly larger than two in the first d
+#'           elements and skewness params strictly between -1 and 1 in the rest d elements.}
 #'   }
 #' @keywords internal
 
@@ -217,6 +219,9 @@ random_distpars <- function(d, cond_dist) {
     return(2.000001 + rgamma(1, shape=0.3, rate=0.007))
   } else if(cond_dist == "ind_Student") {
     return(2.000001 + rgamma(d, shape=0.3, rate=0.007))
+  } else if(cond_dist == "ind_skewed_t") {
+    return(c(2.000001 + rgamma(d, shape=0.3, rate=0.007),
+             runif(d, min=-0.999, max=0.999)))
   }
 }
 
@@ -236,6 +241,8 @@ random_distpars <- function(d, cond_dist) {
 #'      (strictly larger than two).}
 #'     \item{If \code{cond_dist == "ind_Student"}:}{of length d containing a degrees of freedom parameter values
 #'      (strictly larger than two).}
+#'     \item{If \code{cond_dist == "ind_skewed_t"}:}{of length 2d containing df params strictly larger than two in the first d
+#'           elements and skewness params strictly between -1 and 1 in the rest d elements.}
 #'   }
 #' @keywords internal
 
@@ -243,9 +250,12 @@ smart_distpars <- function(distpars, accuracy, cond_dist) {
   if(cond_dist == "Gaussian") {
     return(numeric(0))
   } else if(cond_dist == "Student" || cond_dist == "ind_Student") {
-    new_distpars <- rnorm(length(distpars), mean=distpars, sd=pmax(0.2, abs(distpars))/accuracy) # smart df
-    return(pmax(2.01, new_distpars)) # Make sure all df are above the strict lower bound 2
-  }
+    return(pmax(2.01, rnorm(length(distpars), mean=distpars, sd=pmax(0.2, abs(distpars))/accuracy))) # Make sure all df are above 2
+  } else if(cond_dist == "ind_skewed_t")
+    d <- length(distpars)/2
+    return(c(pmax(2.01, rnorm(d, mean=distpars[1:d], sd=pmax(0.2, abs(distpars[1:d]))/accuracy)), # df > 2
+             pmax(pmin(rnorm(d, mean=distpars[(d + 1):length(distpars)], sd=pmax(0.1, abs(distpars[(d + 1):length(distpars)]))/accuracy),
+                       0.99), -0.99))) # skew in (-1, 1)
 }
 
 
@@ -411,8 +421,8 @@ smart_weightpars <- function(M, weight_pars,
 #' @keywords internal
 
 random_ind <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
-                       weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), AR_constraints=NULL, mean_constraints=NULL,
-                       weight_constraints=NULL, force_stability=is.null(AR_constraints),
+                       weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
+                       AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, force_stability=is.null(AR_constraints),
                        mu_scale, mu_scale2, omega_scale, B_scale, weight_scale, ar_scale=1, ar_scale2=1) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -440,12 +450,12 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logistic", "
   }
 
   # Generate covmat params
-  if(cond_dist == "ind_Student") { # Covmat pars impact matrix params
+  if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") { # Covmat pars impact matrix params
     if(M == 1) {
       covmat_pars <- as.vector(random_impactmat(d=d, B_scale=B_scale, is_regime1=TRUE))
     } else {
       covmat_pars <- c(random_impactmat(d=d, B_scale=B_scale, is_regime1=TRUE), # Regime 1 impact matrix is constrained
-                               replicate(n=M-1, expr=random_impactmat(d=d, B_scale=B_scale, is_regime1=FALSE))) # Regime 2,...,M impact matrices
+                       replicate(n=M-1, expr=random_impactmat(d=d, B_scale=B_scale, is_regime1=FALSE))) # Regime 2,...,M impact matrices
     }
   } else { # cond_dist == "Gaussian" or "Student"
     covmat_pars <- as.vector(replicate(n=M, expr=random_covmat(d=d, omega_scale=omega_scale)))
@@ -485,10 +495,11 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logistic", "
 #' @inherit random_ind return references
 #' @keywords internal
 
-smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
-                      weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), AR_constraints=NULL, mean_constraints=NULL,
-                      weight_constraints=NULL,  accuracy=1, which_random=numeric(0),
-                      mu_scale, mu_scale2, omega_scale, B_scale, ar_scale=1, ar_scale2=1) {
+smart_ind <- function(p, M, d, params,
+                      weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                      weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
+                      AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,  accuracy=1,
+                      which_random=numeric(0), mu_scale, mu_scale2, omega_scale, B_scale, ar_scale=1, ar_scale2=1) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   scale_A <- ar_scale2*(1 + log(2*mean(c((p - 0.2)^(1.25), d))))
@@ -512,13 +523,13 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logis
         } else {
           new_pars[(M*d + (m - 1)*p*d^2 + 1):(M*d + m*p*d^2)] <- random_coefmats2(p=p, d=d, ar_scale=ar_scale) # Use the algorithm
         }
-        if(cond_dist == "ind_Student") { # Impact matrix parameters
+        if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") { # Impact matrix parameters
           new_pars[(M*d + M*p*d^2 + (m - 1)*d^2 + 1):(M*d + M*p*d^2 + m*d^2)] <- random_impactmat(d=d, B_scale=B_scale, is_regime1=(m == 1))
         } else { # cond_dist == "Gaussian" or "Student", cov mat parameters
           new_pars[(M*d + M*p*d^2 + (m - 1)*d*(d + 1)/2 + 1):(M*d + M*p*d^2 + m*d*(d + 1)/2)] <- random_covmat(d=d, omega_scale=omega_scale)
         }
       } else { # Smart_regime, smart mean and AR parameters already generated
-        if(cond_dist == "ind_Student") {  # Impact matrix parameters
+        if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") {  # Impact matrix parameters
           new_pars[(M*d + M*p*d^2 + (m - 1)*d^2 + 1):(M*d + M*p*d^2 + m*d^2)] <- smart_impactmat(d=d, B=all_Omega[, , m],
                                                                                                  accuracy=accuracy,
                                                                                                  is_regime1=(m == 1))
@@ -581,7 +592,7 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logis
     }
 
     # Covariance matrix / impact matrix parameters
-    if(cond_dist == "ind_Student") { # impact mat params
+    if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") { # impact mat params
       covmat_pars <- as.vector(vapply(1:M, function(m) {
         if(any(which_random == m)) {
           random_impactmat(d=d, B_scale=B_scale, is_regime1=(m == 1))
@@ -631,6 +642,9 @@ smart_ind <- function(p, M, d, params, weight_function=c("relative_dens", "logis
   } else if(cond_dist == "ind_Student") {
     # Add degrees of freedom parameters
     new_pars[(length(new_pars) - d + 1):length(new_pars)] <- smart_distpars(distpars=dist_pars, accuracy=accuracy, cond_dist=cond_dist)
+  } else if(cond_dist == "ind_skewed_t") {
+    # Add degrees of freedom and skewness parameters
+    new_pars[(length(new_pars) - 2*d + 1):length(new_pars)] <- smart_distpars(distpars=dist_pars, accuracy=accuracy, cond_dist=cond_dist)
   }
   new_pars
 }
