@@ -58,7 +58,8 @@ get_omega_eigens <- function(stvar) {
 
 get_boldA_eigens_par <- function(p, M, d, params,
                                  weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
-                                 weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), parametrization=c("intercept", "mean"),
+                                 weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
+                                 parametrization=c("intercept", "mean"),
                                  identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                                  AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
   parametrization <- match.arg(parametrization)
@@ -98,7 +99,8 @@ get_boldA_eigens_par <- function(p, M, d, params,
 
 get_omega_eigens_par <- function(p, M, d, params,
                                  weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
-                                 weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), parametrization=c("intercept", "mean"),
+                                 weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
+                                 parametrization=c("intercept", "mean"),
                                  identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                                  AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL) {
   parametrization <- match.arg(parametrization)
@@ -117,7 +119,7 @@ get_omega_eigens_par <- function(p, M, d, params,
                                     AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                                     weight_constraints=weight_constraints, B_constraints=B_constraints)
   all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params, cond_dist=cond_dist, identification=identification)
-  if(cond_dist == "ind_Student") {
+  if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") {
     all_Omega <- array(vapply(1:M, function(m) tcrossprod(all_Omega[,,m]), numeric(d^2)), dim=c(d, d, M))
   }
   matrix(vapply(1:M, function(m) eigen(all_Omega[, , m], symmetric=TRUE, only.values=TRUE)$'values', numeric(d)),
