@@ -256,6 +256,22 @@ mod222logistit <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logistit, we
                         cond_dist="ind_Student", mean_constraints=list(1:2), AR_constraints=C_222,
                         weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean")
 
+## ind_skewed_t
+
+# p=1, M=2, d=3, weight_function="exogenous", weighfun_pars=weightfun_pars123, cond_dist="ind_skewed_t"
+theta_123exoikt <- c(0.10741, 0.13813, -0.12092, 3.48957, 0.60615, 0.45646, 0.87227, -0.01595, 0.14124,
+                    -0.08611, 0.61865, 0.34311, -0.02047, 0.025, 0.97548, 0.74976, 0.02187, 0.29213,
+                    -1.55165, 0.58245, -0.00696, -0.07261, 0.02021, 0.96883, Bmatpars123, 7, 3, 13, 0.1, 0.2, 0.3)
+mod123exoikt <- STVAR(data=usamone, p=1, M=2, d=3, params=theta_123exoikt, weight_function="exogenous",
+                      weightfun_pars=weightfun_pars123, cond_dist="ind_skewed_t")
+
+# p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="ind_skewed_t", mean_constraints=list(1:2),
+# AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean"
+theta_222logistikt <- c(0.7209658, 0.810858, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01, 0.08, 0.3, Bmatpars222, 0.4, 7, 3, -0.1, 0)
+mod222logistikt <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logistikt, weight_function="logistic", weightfun_pars=c(2, 1),
+                        cond_dist="ind_skewed_t", mean_constraints=list(1:2), AR_constraints=C_222,
+                        weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean")
+
 
 ### Structural models
 # (recursively identified models use the same parametrization as reduced form models)
@@ -397,6 +413,17 @@ mod222logistitb <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logistitb, 
                          weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), identification="non-Gaussianity",
                          parametrization="mean", B_constraints=matrix(c(1, NA, 0, 1), nrow=2, ncol=2))
 
+# p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="ind_skewed_t", mean_constraints=list(1:2),
+# AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean",
+# B_constraints=matrix(c(1, NA, 0, 1), nrow=2, ncol=2)
+theta_222logistiktb <- c(0.7209658, 0.810858, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01, 0.08, 0.3, # mu + A
+                        0.1, 0.2, 0.3, 0.11, -0.22, 0.33, # B mats
+                        0.4, 7, 3, 0.1, -0.2)
+mod222logistiktb <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logistiktb, weight_function="logistic", weightfun_pars=c(2, 1),
+                         cond_dist="ind_skewed_t", mean_constraints=list(1:2), AR_constraints=C_222,
+                         weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), identification="non-Gaussianity",
+                         parametrization="mean", B_constraints=matrix(c(1, NA, 0, 1), nrow=2, ncol=2))
+
 
 
 test_that("get_regime_means works correctly", {
@@ -505,6 +532,20 @@ test_that("get_regime_means works correctly", {
   expect_equal(c(get_regime_means(p=2, M=3, d=2, params=theta_232threstshb_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
                                   cond_dist="Student", identification="heteroskedasticity", B_constraints=matrix(c(0.1, 0.2, -0.3, 0), nrow=2))),
                c(0.55, 0.11, 0.17, 0.25, 12.00, 13.00), tolerance=1e-3)
+
+  # ind_Student
+  expect_equal(c(get_regime_means(p=2, M=2, d=2, params=theta_222logistitb, weight_function="logistic", weightfun_pars=c(2, 1),
+                                  cond_dist="ind_Student", mean_constraints=list(1:2), AR_constraints=C_222, identification="non-Gaussianity",
+                                  weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean",
+                                  B_constraints=matrix(c(1, NA, 0, 1), nrow=2, ncol=2))),
+               c(0.7209658, 0.8108580, 0.7209658, 0.8108580), tolerance=1e-3)
+
+  # ind_skewed_t
+  expect_equal(c(get_regime_means(p=2, M=2, d=2, params=theta_222logistiktb, weight_function="logistic", weightfun_pars=c(2, 1),
+                                  cond_dist="ind_skewed_t", mean_constraints=list(1:2), AR_constraints=C_222, identification="non-Gaussianity",
+                                  weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean",
+                                  B_constraints=matrix(c(1, NA, 0, 1), nrow=2, ncol=2))),
+               c(0.7209658, 0.8108580, 0.7209658, 0.8108580), tolerance=1e-3)
 })
 
 
@@ -610,6 +651,35 @@ test_that("uncond_moments works correctly", {
                c(0.016, 0.01258, 0.01258, 0.20739, 2e-04, 0.00018, -0.01894, 0.11662, 0.00758, 0.0037, 9e-05, 0.10644, 0.02748, -0.05388,
                  -0.05388, 0.2432, 0.01686, -0.03521, -0.05226, 0.13138, 0.01595, -0.02916, -0.03384, 0.1216), tolerance=1e-3)
   expect_equal(c(uncond_moments(mod222logistitb)$regime_autocors),
+               c(1, 0.21834, 0.21834, 1, 0.01257, 0.00317, -0.32873, 0.56233, 0.47394, 0.06417, 0.00154, 0.51322, 1, -0.65911, -0.65911,
+                 1, 0.61352, -0.43073, -0.63928, 0.54022, 0.58032, -0.35671, -0.41395, 0.50001), tolerance=1e-3)
+
+  # ind_skewed_t (autocovs not tested separately elsewhere)
+  expect_equal(c(uncond_moments(mod123exoikt)$regime_means), c(0.01872735, 0.54692881, 2.82960017, -0.50345541, 1.88535674, 9.50476379),
+               tolerance=1e-3)
+  expect_equal(c(uncond_moments(mod123exoikt)$regime_vars), c(13.773506, 5.732314, 135.388352, 31.599910, 2.625764, 54.933752), tolerance=1e-3)
+  expect_equal(c(uncond_moments(mod123exoikt)$regime_autocovs),
+               c(13.77351, -0.5673, -28.57629, -0.5673, 5.73231, 12.95279, -28.57629, 12.95279, 135.38835, 12.64802, -1.28506, -26.12487,
+                 -1.25359, 3.87916, 14.52188, -28.813, 11.85374, 132.47675, 31.59991, -1.508, 1.22923, -1.508, 2.62576, 2.29457, 1.22923,
+                 2.29457, 54.93375, 25.94298, -0.1624, 10.43269, -5.37151, 1.54277, 1.76424, -6.62748, 2.47356, 53.56459), tolerance=1e-3)
+  expect_equal(c(uncond_moments(mod123exoikt)$regime_autocors),
+               c(1, -0.06384, -0.66175, -0.06384, 1, 0.46495, -0.66175, 0.46495, 1, 0.91829, -0.14462, -0.60498, -0.14108, 0.67672, 0.52128,
+                 -0.66723, 0.4255, 0.97849, 1, -0.16555, 0.0295, -0.16555, 1, 0.19105, 0.0295, 0.19105, 1, 0.82098, -0.01783, 0.2504, -0.58969,
+                 0.58755, 0.1469, -0.15907, 0.20596, 0.97508), tolerance=1e-3)
+  expect_equal(c(uncond_moments(mod222logistikt)$regime_means), c(0.7209658, 0.8108580, 0.7209658, 0.8108580), tolerance=1e-3)
+  expect_equal(c(uncond_moments(mod222logistikt)$regime_vars), c(3.435886, 2.846262, 4.494696, 1.131096), tolerance=1e-3)
+  expect_equal(c(uncond_moments(mod222logistikt)$regime_autocovs),
+               c(3.43589, -1.89902, -1.89902, 2.84626, 1.61623, -0.87752, -1.08966, 1.43554, 1.74399, -0.84932, -1.00595, 1.36735, 4.4947,
+                 -0.95952, -0.95952, 1.1311, 1.86008, -0.25556, -0.44141, 0.55159, 2.21362, -0.32087, -0.48277, 0.53756), tolerance=1e-3)
+  expect_equal(c(uncond_moments(mod222logistikt)$regime_autocors),
+               c(1, -0.60726, -0.60726, 1, 0.4704, -0.28061, -0.34845, 0.50436, 0.50758, -0.27159, -0.32168, 0.4804, 1, -0.42556, -0.42556,
+                 1, 0.41384, -0.11334, -0.19577, 0.48766, 0.49249, -0.14231, -0.21411, 0.47525), tolerance=1e-3)
+  expect_equal(c(uncond_moments(mod222logistiktb)$regime_means), c(0.7209658, 0.8108580, 0.7209658, 0.8108580), tolerance=1e-3)
+  expect_equal(c(uncond_moments(mod222logistiktb)$regime_vars), c(0.01600109, 0.20738602, 0.02747879, 0.24319752), tolerance=1e-3)
+  expect_equal(c(uncond_moments(mod222logistiktb)$regime_autocovs),
+               c(0.016, 0.01258, 0.01258, 0.20739, 2e-04, 0.00018, -0.01894, 0.11662, 0.00758, 0.0037, 9e-05, 0.10644, 0.02748, -0.05388,
+                 -0.05388, 0.2432, 0.01686, -0.03521, -0.05226, 0.13138, 0.01595, -0.02916, -0.03384, 0.1216), tolerance=1e-3)
+  expect_equal(c(uncond_moments(mod222logistiktb)$regime_autocors),
                c(1, 0.21834, 0.21834, 1, 0.01257, 0.00317, -0.32873, 0.56233, 0.47394, 0.06417, 0.00154, 0.51322, 1, -0.65911, -0.65911,
                  1, 0.61352, -0.43073, -0.63928, 0.54022, 0.58032, -0.35671, -0.41395, 0.50001), tolerance=1e-3)
 })
