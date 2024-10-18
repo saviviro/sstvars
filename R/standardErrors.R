@@ -12,7 +12,8 @@
 
 standard_errors <- function(data, p, M, params,
                             weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
-                            weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), parametrization=c("intercept", "mean"),
+                            weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
+                            parametrization=c("intercept", "mean"),
                             identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                             AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL, minval) {
   weight_function <- match.arg(weight_function)
