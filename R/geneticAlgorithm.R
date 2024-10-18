@@ -1,10 +1,10 @@
 #' @import stats
 #'
-#' @title Genetic algorithm for preliminary estimation of a STVAR models
+#' @title Genetic algorithm for preliminary estimation of reduced form STVAR models
 #'
-#' @description \code{GAfit} estimates the specified STVAR model using a genetic algorithm.
-#'   It is designed to find starting values for gradient based methods and NOT to obtain
-#'   final estimates constituting a local maximum.
+#' @description \code{GAfit} estimates the specified reduced form STVAR model using a genetic algorithm.
+#'   It is designed to find starting values for gradient based methods and NOT to obtain final estimates
+#'   constituting a local maximum.
 #'
 #' @inheritParams loglikelihood
 #' @inheritParams random_covmat
@@ -17,26 +17,28 @@
 #'   close (or partially close) to the best fitting individual (which has the least regimes with time varying
 #'   mixing weights practically at zero) so far.
 #' @param initpop a list of parameter vectors from which the initial population of the genetic algorithm
-#'   will be generated from. The parameter vectors should have the form
-#'   \eqn{\theta = (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\sigma,\alpha,\nu)},
-#'   where
+#'   will be generated from. The parameter vectors hould have the form
+#'   \eqn{\theta = (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\sigma,\alpha,\nu)}, where (see exceptions below):
 #'   \itemize{
 #'     \item{\eqn{\phi_{m,0} = } the \eqn{(d \times 1)} intercept (or mean) vector of the \eqn{m}th regime.}
 #'     \item{\eqn{\varphi_m = (vec(A_{m,1}),...,vec(A_{m,p}))} \eqn{(pd^2 \times 1)}.}
 #'     \item{\describe{
 #'       \item{if \code{cond_dist="Gaussian"} or \code{"Student"}:}{\eqn{\sigma = (vech(\Omega_1),...,vech(\Omega_M))}
 #'         \eqn{(Md(d + 1)/2 \times 1)}.}
-#'       \item{if \code{cond_dist="ind_Student"}:}{\eqn{\sigma = (vec(B_1),...,vec(B_M)} \eqn{(Md^2 \times 1)}.}
+#'       \item{if \code{cond_dist="ind_Student"} or \code{"ind_skewed_t"}:}{\eqn{\sigma = (vec(B_1),...,vec(B_M)} \eqn{(Md^2 \times 1)}.}
 #'       }
 #'     }
-#'     \item{\eqn{\alpha} contains the transition weights parameters (see below)}
+#'     \item{\eqn{\alpha = } the \eqn{(a\times 1)} vector containing the transition weight parameters (see below).}
 #'     \item{\describe{
 #'       \item{if \code{cond_dist = "Gaussian")}:}{Omit \eqn{\nu} from the parameter vector.}
 #'       \item{if \code{cond_dist="Student"}:}{\eqn{\nu > 2} is the single degrees of freedom parameter.}
-#'       \item{if \code{cond_dist="ind_Student"}:}{\eqn{\nu = (\nu_1,...,\nu_M)} \eqn{(M \times 1)}, \eqn{nu_m > 2}.}
+#'       \item{if \code{cond_dist="ind_Student"}:}{\eqn{\nu = (\nu_1,...,\nu_d)} \eqn{(d \times 1)}, \eqn{\nu_i > 2}.}
+#'       \item{if \code{cond_dist="ind_skewed_t"}:}{\eqn{\nu = (\nu_1,...,\nu_d,\lambda_1,...,\lambda_d)} \eqn{(2d \times 1)},
+#'        \eqn{\nu_i > 2} and \eqn{\lambda_i \in (0, 1)}.}
 #'       }
 #'     }
 #'   }
+#'   For models with...
 #'   \describe{
 #'     \item{\code{weight_function="relative_dens"}:}{\eqn{\alpha = (\alpha_1,...,\alpha_{M-1})}
 #'           \eqn{(M - 1 \times 1)}, where \eqn{\alpha_m} \eqn{(1\times 1), m=1,...,M-1} are the transition weight parameters.}
@@ -67,9 +69,7 @@
 #'   of the \eqn{m}th regime.
 #'   If \code{parametrization=="mean"}, just replace each \eqn{\phi_{m,0}} with regimewise mean \eqn{\mu_{m}}.
 #'   \eqn{vec()} is vectorization operator that stacks columns of a given matrix into a vector. \eqn{vech()} stacks columns
-#'   of a given matrix from the principal diagonal downwards (including elements on the diagonal) into a vector. \eqn{Bvec()}
-#'   is a vectorization operator that stacks the columns of a given impact matrix \eqn{B_m} into a vector so that the elements
-#'   that are constrained to zero by the argument \code{B_constraints} are excluded.
+#'   of a given matrix from the principal diagonal downwards (including elements on the diagonal) into a vector.
 #' @param mu_scale a size \eqn{(dx1)} vector defining \strong{means} of the normal distributions from which each
 #'   mean parameter \eqn{\mu_{m}} is drawn from in random mutations. Default is \code{colMeans(data)}. Note that
 #'   mean-parametrization is always used for optimization in \code{GAfit} - even when \code{parametrization=="intercept"}.
@@ -164,7 +164,7 @@
 #'  using the function \code{fitSSTVAR}.
 #' @return Returns the estimated parameter vector which has the form described in \code{initpop},
 #'  \strong{with the exception} that for models with \code{cond_dist == "ind_Student"} or
-#'  \code{identification="non-Gaussianity"}, the parameter vector is parametrized with \eqn{B_1,B_2^*,...,B_M^*}
+#'  \code{"ind_skewed_t"}, the parameter vector is parametrized with \eqn{B_1,B_2^*,...,B_M^*}
 #'  instead of  \eqn{B_1,B_2,...,B_M}, where \eqn{B_m^* = B_m - B_1}. Use the function \code{change_parametrization}
 #'  to change back to the original parametrization if desired.
 #' @references
@@ -182,12 +182,11 @@
 #'  }
 
 GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
-                  weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), parametrization=c("intercept", "mean"),
-                  AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
-                  ngen=200, popsize, smart_mu=min(100, ceiling(0.5*ngen)), initpop=NULL,
-                  mu_scale, mu_scale2, omega_scale, B_scale, weight_scale,
-                  ar_scale=0.2, upper_ar_scale=1, ar_scale2=1, regime_force_scale=1, red_criteria=c(0.05, 0.01),
-                  pre_smart_mu_prob=0, to_return=c("alt_ind", "best_ind"), minval, seed=NULL) {
+                  weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
+                  parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
+                  ngen=200, popsize, smart_mu=min(100, ceiling(0.5*ngen)), initpop=NULL,  mu_scale, mu_scale2, omega_scale,
+                  B_scale, weight_scale, ar_scale=0.2, upper_ar_scale=1, ar_scale2=1, regime_force_scale=1,
+                  red_criteria=c(0.05, 0.01), pre_smart_mu_prob=0, to_return=c("alt_ind", "best_ind"), minval, seed=NULL) {
 
   # Required values and preliminary checks
   set.seed(seed)
@@ -355,8 +354,8 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
       }
       if(cond_dist == "ind_Student") { # Sort and sign change columns so that the first row of B_1 is positive and in a decreasing order.
         ind <- sort_impactmats(p=p, M=M, d=d, params=ind, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                              cond_dist=cond_dist, AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                              weight_constraints=weight_constraints)
+                               cond_dist=cond_dist, AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                               weight_constraints=weight_constraints)
         ind <- change_parametrization(p=p, M=M, d=d, params=ind, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                       cond_dist=cond_dist, identification="reduced_form", AR_constraints=AR_constraints,
                                       mean_constraints=mean_constraints, weight_constraints=weight_constraints,
@@ -608,7 +607,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
         which_to_change <- which_redundant[1]
 
         # Pick the nonredundant regimes of best_ind and alt_ind
-        n_regpars <- p*d^2 + d + ifelse(cond_dist == "ind_Student", d^2, d*(d+1)/2)
+        n_regpars <- p*d^2 + d + ifelse(cond_dist %in% c("ind_Student", "ind_skewed_t"), d^2, d*(d+1)/2)
         non_red_regs_best <- vapply((1:M)[-which_redundant], function(i2) pick_regime(p=p, M=M, d=d, params=best_ind, cond_dist=cond_dist,
                                                                                       m=i2), numeric(n_regpars))
 
@@ -669,7 +668,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
     }
 
     # Sort and sign change the columns of the impact matrices so that the first row of B_1 is positive and in a decreasing order.
-    if(cond_dist == "ind_Student") {
+    if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") {
       H2 <- vapply(1:popsize, function(i2) sort_impactmats(p=p, M=M, d=d, params=H2[,i2], weight_function=weight_function,
                                                            weightfun_pars=weightfun_pars, cond_dist=cond_dist,
                                                            AR_constraints=AR_constraints, mean_constraints=mean_constraints,
