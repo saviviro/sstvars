@@ -18,8 +18,10 @@
 #' @inherit loglikelihood references
 #' @keywords internal
 
-get_residuals <- function(data, p, M, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
-                          weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), parametrization=c("intercept", "mean"),
+get_residuals <- function(data, p, M, params,
+                          weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                          weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
+                          parametrization=c("intercept", "mean"),
                           identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                           AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                           standardize=TRUE, structural_shocks=FALSE) {
@@ -27,7 +29,7 @@ get_residuals <- function(data, p, M, params, weight_function=c("relative_dens",
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
   identification <- match.arg(identification)
-  if(structural_shocks && identification == "reduced_form" && cond_dist != "ind_Student") {
+  if(structural_shocks && identification == "reduced_form" && !(cond_dist %in% c("ind_Student", "ind_skewed_t"))) {
     stop("Structural shocks are not available if identification == \"reduced_form\" and cond_dist != \"ind_Student\".")
   }
   T_obs <- nrow(data) - p
@@ -74,7 +76,7 @@ get_residuals <- function(data, p, M, params, weight_function=c("relative_dens",
      lambdas <- pick_lambdas(p=p, M=M, d=d, params=params_std, identification=identification)
      if(M > 1) lambdas <- cbind(1, matrix(lambdas, nrow=d, ncol=M-1)) # First column is column of ones for the first regime
   }
-  if(cond_dist == "ind_Student") {
+  if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") {
     all_Omegas <- pick_Omegas(p=p, M=M, d=d, params=reform_constrained_pars(p=p, M=M, d=d, params=params,
                                                                             weight_function=weight_function,
                                                                             weightfun_pars=weightfun_pars,
@@ -95,7 +97,7 @@ get_residuals <- function(data, p, M, params, weight_function=c("relative_dens",
 
   # Go through each point of time and calculate the residuals/shocks
   for(i1 in 1:T_obs) {
-    if(cond_dist == "ind_Student") {
+    if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") {
       # Structural shocks and standardized errors are the same thing here due to statistical identification
       all_residuals[i1,] <- solve(all_Bt[, , i1], y_minus_mu[i1, ])
     } else {

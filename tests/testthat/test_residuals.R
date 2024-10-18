@@ -108,6 +108,17 @@ theta_222exoit <- c(all_phi_222, all_A_222, vec(B1_222), vec(B2_222), dfs_222)
 # p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="ind_Student"
 theta_222logistit <- c(all_phi_222, all_A_222, vec(B1_222), vec(B2_222), c_and_gamma_222_2_1, dfs_222)
 
+## ind_skewed_t
+
+# p=2, M=2, d=2, weight_function="exogenous", weightfun_pars=weightfun_pars222, cond_dist="ind_skewed_t"
+B1_222 <- matrix(c(0.2, -0.3, 0.1, 0.4), nrow=2)
+B2_222 <- matrix(c(-0.1, 0.2, 0.3, 0.4), nrow=2)
+dfls_222 <- c(3, 7, 0.1, -0.2)
+theta_222exoikt <- c(all_phi_222, all_A_222, vec(B1_222), vec(B2_222), dfls_222)
+
+# p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="ind_skewed_t"
+theta_222logistikt <- c(all_phi_222, all_A_222, vec(B1_222), vec(B2_222), c_and_gamma_222_2_1, dfls_222)
+
 
 test_that("get_residuals works correctly", {
   # ind_Student
@@ -295,10 +306,22 @@ test_that("get_residuals works correctly", {
                                cond_dist="Student", identification="heteroskedasticity", structural_shocks=TRUE)[c(12, 142),]),
                c(-1.35036836, -0.42294593, 0.95211166, 0.06125506), tolerance=1e-3)
 
+  # ind_Student
   expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222exoit, weight_function="exogenous",
                                weightfun_pars=weightfun_pars222, cond_dist="ind_Student", structural_shocks=TRUE)[c(1, 4, 211, 242),]),
                c(-9.1271938, -35.5238379, 2.2777582, -3.4403451, -4.0396570, -2.8173797, -0.2085455, -1.8803190), tolerance=1e-3)
   expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222logistit, weight_function="logistic", weightfun_pars=c(2, 1),
                                cond_dist="ind_Student", structural_shocks=TRUE)[c(1, 5, 212, 242),]),
+               c(-21.009310, -9.210099, -8.864146, -7.759104, -2.739508, -1.408796, -1.374498, -1.270225), tolerance=1e-3)
+
+  # ind_skewed_t
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222exoikt, weight_function="exogenous",
+                               weightfun_pars=weightfun_pars222, cond_dist="ind_skewed_t", structural_shocks=TRUE)[c(1, 4, 211, 242),]),
+               c(-9.1271938, -35.5238379, 2.2777582, -3.4403451, -4.0396570, -2.8173797, -0.2085455, -1.8803190), tolerance=1e-3)
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222logistikt, weight_function="logistic", weightfun_pars=c(2, 1),
+                               cond_dist="ind_skewed_t", structural_shocks=TRUE)[c(1, 5, 212, 242),]),
+               c(-21.009310, -9.210099, -8.864146, -7.759104, -2.739508, -1.408796, -1.374498, -1.270225), tolerance=1e-3)
+  expect_equal(c(get_residuals(data=gdpdef, p=2, M=2, params=theta_222logistikt, weight_function="logistic", weightfun_pars=c(2, 1),
+                               cond_dist="ind_skewed_t", structural_shocks=FALSE)[c(1, 5, 212, 242),]),
                c(-21.009310, -9.210099, -8.864146, -7.759104, -2.739508, -1.408796, -1.374498, -1.270225), tolerance=1e-3)
 })

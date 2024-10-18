@@ -12,7 +12,7 @@ get_residuals(
   weight_function = c("relative_dens", "logistic", "mlogit", "exponential", "threshold",
     "exogenous"),
   weightfun_pars = NULL,
-  cond_dist = c("Gaussian", "Student", "ind_Student"),
+  cond_dist = c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
   parametrization = c("intercept", "mean"),
   identification = c("reduced_form", "recursive", "heteroskedasticity",
     "non-Gaussianity"),
