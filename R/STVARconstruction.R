@@ -113,18 +113,21 @@
 #' summary(mod112) # Summary printout
 #' @export
 
-STVAR <- function(data, p, M, d, params, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
-                  weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), parametrization=c("intercept", "mean"),
-                  identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"), AR_constraints=NULL,
-                  mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL, calc_std_errors=FALSE) {
+STVAR <- function(data, p, M, d, params,
+                  weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                  weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
+                  parametrization=c("intercept", "mean"),
+                  identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
+                  AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
+                  calc_std_errors=FALSE) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
   identification <- match.arg(identification)
-  if(cond_dist == "ind_Student" && !(identification %in% c("reduced_form", "non-Gaussianity"))) {
-    stop(paste("If cond_dist='ind_Student', identification must be 'reduced_form' or 'non-Gaussianity'",
+  if(cond_dist %in% c("ind_Student", "ind_skewed_t") && !(identification %in% c("reduced_form", "non-Gaussianity"))) {
+    stop(paste("If cond_dist='ind_Student' or 'ind_skewed_t', identification must be 'reduced_form' or 'non-Gaussianity'",
                "(note that short-run restriction can be imposed by specifying the argument 'B_constraints')"))
-  } else if(cond_dist != "ind_Student" && identification == "non-Gaussianity") {
+  } else if(!(cond_dist %in% c("ind_Student", "ind_skewed_t")) && identification == "non-Gaussianity") {
     stop("Identification by 'non-Gaussianity' is not available for models with cond_dist='Gaussian' or 'Student'.")
   }
   if(missing(data) & missing(d)) stop("data or d must be provided")

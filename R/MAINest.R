@@ -197,9 +197,9 @@
 #' @export
 
 fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
-                     weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), parametrization=c("intercept", "mean"),
-                     AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, nrounds=(M + 1)^5, ncores=2, maxit=1000,
-                     seeds=NULL, print_res=TRUE, use_parallel=TRUE, filter_estimates=TRUE, ...) {
+                     weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
+                     parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
+                     nrounds=(M + 1)^5, ncores=2, maxit=1000, seeds=NULL, print_res=TRUE, use_parallel=TRUE, filter_estimates=TRUE, ...) {
   # Initial checks etc
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -231,8 +231,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   npars <- n_params(p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars, cond_dist=cond_dist,
                     AR_constraints=AR_constraints, mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                     B_constraints=NULL, identification="reduced_form")
-  if(npars >= d*nrow(data)) stop("There are at least as many parameters in the model as there are observations in the data,
-                                 so you should use smaller p or M.")
+  if(npars >= d*nrow(data)) stop(paste("There are at least as many parameters in the model as there are observations in the data,",
+                                       "so you should use smaller p or M."))
   dot_params <- list(...)
   minval <- ifelse(is.null(dot_params$minval), get_minval(data), dot_params$minval)
   red_criteria <- ifelse(rep(is.null(dot_params$red_criteria), 2), c(0.05, 0.01), dot_params$red_criteria)
@@ -353,7 +353,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
 
   ### Obtain estimates, change back to original parametrization, and filter the inapproriate estimates
   all_estimates <- lapply(NEWTONresults, function(x) x$par)
-  if(cond_dist == "ind_Student") {
+  if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") {
     all_estimates <- lapply(all_estimates, function(pars) change_parametrization(p=p, M=M, d=d, params=pars,
                                                                                  weight_function=weight_function,
                                                                                  weightfun_pars=weightfun_pars,
@@ -446,7 +446,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                                                                        identification="reduced_form"))
   }
   # Sort and sign change the columns of the impact matrices if cond_dist == "ind_Student"
-  if(cond_dist == "ind_Student") {
+  if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") {
     params <- sort_impactmats(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
                               cond_dist=cond_dist, AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                               weight_constraints=weight_constraints)
