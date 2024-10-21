@@ -90,7 +90,7 @@ profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precisi
   } else { # AR matrices constrained
     n_ar_pars <- ncol(AR_constraints)
   }
-  if(cond_dist == "ind_Student" || identification == "non-Gaussianity") {
+  if(cond_dist %in% c("ind_Student", "ind_skewed_t") || identification == "non-Gaussianity") {
     if(is.null(B_constraints)) {
       n_zeros <- 0
     } else {
@@ -132,8 +132,10 @@ profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precisi
     n_dist_pars <- 0
   } else if(cond_dist == "Student") {
     n_dist_pars <- 1 # degrees of freedom param
-  } else { # cond_dist == "ind_Student"
+  } else if(cond_dist == "ind_Student") {
     n_dist_pars <- d # df params
+  } else { # cond_dist = "ind_skewed_t"
+    n_dist_pars <- 2*d # df and skewness params
   }
 
   B_row_ind <- NULL # Initialize
@@ -180,7 +182,7 @@ profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precisi
         main <- substitute(psi(foo), list(foo=i1 - n_mean_pars))
       }
     } else if(i1 <= n_mean_pars + n_ar_pars + n_covmat_pars) { # Covariance matrix parameter
-      if(identification %in% c("reduced_form", "recursive") && cond_dist != "ind_Student") {
+      if(identification %in% c("reduced_form", "recursive") && cond_dist != "ind_Student" && cond_dist != "ind_skewed_t") {
         cum_o <- n_mean_pars + n_ar_pars + (0:(M - 1))*d*(d + 1)/2 # The indeces after which regime changes
         m <- sum(i1 > cum_o) # Which regime
         cum_col <- cum_o[m] + c(0, cumsum(d - 0:(d - 1))) # The indeces after which column changes in vech(Omega_m)
@@ -211,7 +213,7 @@ profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precisi
             pos <- i1 - cum_lamb[m - 1] # which i=1,...,d in lambda_{mi}
             main <- substitute(lambda[foo](foo2), list(foo=m, foo2=pos))
           }
-        } else { # identification by non-Gaussianity (also cond_dist="ind_Student"): B_m params for m=1,...,M
+        } else { # identification by non-Gaussianity (also cond_dist="ind_Student" or "ind_skewed_t"): B_m params for m=1,...,M
           cum_b <- n_mean_pars + n_ar_pars + (0:(M - 1))*(d^2 - n_zeros/M) # Index after which the regime changes
           if(any(i1 == cum_b + 1)) { # Above n_zeros is the total number for all B_m, so divided by M
             B_row_ind <- rep(1, times=d) # row for each column, resets whenever a new regime starts
@@ -279,9 +281,16 @@ profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precisi
     } else { # Must be a distribution parameter
       if(cond_dist == "Student") {
         main <- substitute(nu) # Must be the only df parameter
-      } else { # cond_dist == "ind_Student"
+      } else if(cond_dist == "ind_Student") {
         which_df <- i1 - n_mean_pars - n_ar_pars - n_covmat_pars - n_weight_pars # Which df parameter (related to which time series)
         main <- substitute(nu[foo], list(foo=which_df))
+      } else if(cond_dist == "ind_skewed_t") {
+        which_distpar <- i1 - n_mean_pars - n_ar_pars - n_covmat_pars - n_weight_pars # which dist par
+        if(which_distpar <= d) {
+          main <- substitute(nu[foo], list(foo=which_distpar)) # df param
+        } else {
+          main <- substitute(lambda[foo], list(foo=which_distpar - d)) # skewness params
+        }
       }
     }
     plot(x=vals, y=logliks, type="l", main=main, xlab="", ylab="")
