@@ -135,7 +135,7 @@ linear_IRF <- function(stvar, N=30, regime=1, which_cumulative=numeric(0), scale
   stopifnot(regime <= stvar$model$M)
   stopifnot(!is.null(stvar$data))
   if(!is.null(seed)) stopifnot(is.numeric(seed) && length(seed) == 1)
-  if(stvar$model$identification == "reduced_form" && stvar$model$cond_dist == "ind_Student") {
+  if(stvar$model$cond_dist == "ind_Student" || stvar$model$cond_dist == "ind_skewed_t") {
     stvar$model$identification <- "non-Gaussianity" # Readily identified by non-Gaussianity
   }
   data <- stvar$data
@@ -187,7 +187,7 @@ linear_IRF <- function(stvar, N=30, regime=1, which_cumulative=numeric(0), scale
   ci_possible <- (means_identical && AR_mats_identical) || M == 1
 
   # Check the argument scale and which_cumulative
-  if(identification == "heteroskedasticity" || identification == "non-Gaussianity") { # ind_Students mods ident set to non-Gaus
+  if(identification == "heteroskedasticity" || identification == "non-Gaussianity") {
     if(is.null(B_constraints)) {
       B_constrs <- matrix(NA, nrow=d, ncol=d)
     } else {
@@ -235,7 +235,7 @@ linear_IRF <- function(stvar, N=30, regime=1, which_cumulative=numeric(0), scale
     } else { # regime == 1
       B_matrix <- W
     }
-  } else if(identification == "non-Gaussianity") { # ind_Student mods ident set to non-Gaus
+  } else if(identification == "non-Gaussianity") {
     if(is.null(ci) || !ci_possible) {
       B_matrix <- all_Omega[, , regime] # impact matrix readily parametrized
     } else {

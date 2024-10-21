@@ -94,7 +94,7 @@ For models with...
   \item{B_constraints:}{For models identified by heteroskedasticity, replace \eqn{vec(W)} with \eqn{\tilde{vec}(W)}
         that stacks the columns of the matrix \eqn{W} in to vector so that the elements that are constrained to zero
         are not included. For models identified by non-Gaussianity, replace \eqn{vec(B_1),...,vec(B_M)} with
-        similarly with vectorized versions \enq{B_m} so that the elements that are constrained to zero are not included.}
+        similarly with vectorized versions \eqn{B_m} so that the elements that are constrained to zero are not included.}
 }
 Above, \eqn{\phi_{m,0}} is the intercept parameter, \eqn{A_{m,i}} denotes the \eqn{i}th coefficient matrix of the \eqn{m}th
 regime, \eqn{\Omega_{m}} denotes the positive definite error term covariance matrix of the \eqn{m}th regime, and \eqn{B_m}
