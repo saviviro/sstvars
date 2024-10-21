@@ -34,7 +34,7 @@ STVAR(
 
 \method{residuals}{stvar}(object, ...)
 
-\method{summary}{stvar}(object, ..., digits = 2)
+\method{summary}{stvar}(object, ..., digits = 2, standard_error_print = FALSE)
 
 \method{plot}{stvar}(x, ..., plot_type = c("trans_weights", "cond_mean"))
 
@@ -209,6 +209,10 @@ Currently only available for models with \code{identification="heteroskedasticit
 
 \item{digits}{number of digits to be printed.}
 
+\item{standard_error_print}{if set to \code{TRUE}, instead of printing the estimates,
+prints the approximate standard errors using square roots of the diagonal of inverse
+of the observed information matrix.}
+
 \item{x}{an object of class \code{'stvar'}.}
 
 \item{plot_type}{should the series be plotted with the estimated transition weights
@@ -216,10 +220,6 @@ or conditional means?}
 
 \item{summary_print}{if set to \code{TRUE} then the print
 will include log-likelihood and information criteria values.}
-
-\item{standard_error_print}{if set to \code{TRUE}, instead of printing the estimates,
-prints the approximate standard errors using square roots of the diagonal of inverse
-of the observed information matrix.}
 }
 \value{
 Returns an S3 object of class \code{'stvar'} defining a smooth transition VAR model. The returned list

@@ -19,11 +19,12 @@ residuals.stvar <- function(object, ...) {
 #' @inheritParams logLik.stvar
 #' @inheritParams print.stvar
 #' @export
-summary.stvar <- function(object, ..., digits=2) {
+summary.stvar <- function(object, ..., digits=2, standard_error_print=FALSE) {
   stvar <- object
   structure(list(stvar=stvar,
                  abs_boldA_eigens=get_boldA_eigens(stvar),
                  omega_eigens=get_omega_eigens(stvar),
-                 digits=digits),
+                 digits=digits,
+                 standard_error_print=standard_error_print),
             class="stvarsum")
 }
