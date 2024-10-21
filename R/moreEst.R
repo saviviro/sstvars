@@ -244,14 +244,15 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
   old_npars <- length(stvar$params) # old npars, B_constraints not adjusted!
 
   # Check identification
-  if(identification == "recursive" && cond_dist == "ind_Student") {
-    warning(paste("Only identification by non-Gaussianity is supported with independent Student's t-distributed errors.",
-                  "Using identification by non-Gaussianity. Note that recursive structure and other overidentifying",
-                  "constraints can by imposed by the argument B_constraints."))
+  if(identification != "non-Gaussianity" && cond_dist %in% c("ind_Student", "ind_skewed_t")) {
+     message(paste("Only identification by non-Gaussianity is supported with independent",
+                   ifelse(cond_dist == "ind_Student", "Student's", "skewed"), "t-distributed errors.",
+                   "Using identification by non-Gaussianity. Note that recursive structure and other overidentifying",
+                   "constraints can by imposed by the argument B_constraints."))
     identification <- "non-Gaussianity"
   }
 
-  if(old_identification != "reduced_form" && cond_dist != "ind_Student") {
+  if(old_identification != "reduced_form" && cond_dist != "ind_Student" && cond_dist != "ind_skewed_t") {
     if(old_identification == "recursive") {
       warning(paste("Recursively identified model supplied (not possible to impose overidentifying restrictions,",
                     "so the original model is returned"))
@@ -267,7 +268,7 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
 
   if(identification == "recursive") {
     # Old identification reduced form, recursively identified model should be returned.
-    if(!is.null(B_constraints)) warning("Cannot impose B_constraints on recursively identified models")
+    if(!is.null(B_constraints)) warning("B_constraints cannot be imposed on recursively identified models")
 
     return(STVAR(data=data, p=p, M=M, d=d, params=params, cond_dist=cond_dist,
                  weight_function=weight_function, weightfun_pars=weightfun_pars,
@@ -294,14 +295,14 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
     n_ar_pars <- ncol(AR_constraints)
   }
   # Covmatpars
-  if(cond_dist == "ind_Student" || identification == "non-Gaussiniaty") {
+  if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t" || identification == "non-Gaussiniaty") {
     if(is.null(old_B_constraints)) {
       n_zeros_in_B <- 0
     } else {
       n_zeros_in_B <- sum(old_B_constraints == 0, na.rm=TRUE)
     }
     n_covmat_pars <- M*d^2 - n_zeros_in_B
-  } else  if(old_identification %in% c("reduced_form", "recursive")) {
+  } else if(old_identification %in% c("reduced_form", "recursive")) {
     n_covmat_pars <- M*d*(d + 1)/2 # No B_constraints available here
     n_zeros_in_W <- 0
   } else { # identification == "heteroskedasticity
@@ -336,12 +337,15 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
     n_dist_pars <- 0
   } else if(cond_dist == "Student") {
     n_dist_pars <- 1
-  } else { # cond_dist == "ind_Student"
+  } else if(cond_dist == "ind_Student") {
     n_dist_pars <- d
+  } else { # cond_dist == "ind_skewed_t"
+    n_dist_pars <- 2*d
   }
+
   n_pars <- n_mean_pars + n_ar_pars + n_covmat_pars + n_weight_pars + n_dist_pars
 
-  if(cond_dist == "ind_Student" || identification == "non-Gaussianity") {
+  if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t" || identification == "non-Gaussianity") {
     if(!is.null(B_constraints) && length(which(B_constraints != 0)) != 0) {
       alt_par <- FALSE # Sign constraints employed, use normal parametrization
     } else { # B_constraints not used or only used for zero constraints
@@ -546,8 +550,8 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
   }
 
   if(print_res) {
-    message("The log-likelihood of the supplied model:   ", round(c(stvar$loglik), 3),
-            "\nConstrained log-likelihood prior estimation:", round(new_loglik, 3))
+    message("The log-likelihood of the supplied model:    ", round(c(stvar$loglik), 3),
+            "\nConstrained log-likelihood prior estimation: ", round(new_loglik, 3))
   }
 
 
@@ -647,7 +651,8 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
 
 fitbsSSTVAR <- function(data, p, M, params,
                         weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
-                        weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student"), parametrization=c("intercept", "mean"),
+                        weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
+                        parametrization=c("intercept", "mean"),
                         identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                         AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                         other_constraints=NULL, robust_method=c("Nelder-Mead", "SANN", "none"),
@@ -661,7 +666,7 @@ fitbsSSTVAR <- function(data, p, M, params,
   minval <- get_minval(data)
   d <- ncol(data)
 
-  if(cond_dist == "ind_Student" || identification == "non-Gaussianity") {
+  if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t" || identification == "non-Gaussianity") {
     if(!is.null(B_constraints) && length(which(B_constraints != 0)) != 0) {
       alt_par <- FALSE # Sign constraints employed, use normal parametrization
     } else { # B_constraints not used or only used for zero constraints

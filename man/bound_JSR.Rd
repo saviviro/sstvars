@@ -6,7 +6,7 @@
 \usage{
 bound_JSR(
   stvar,
-  epsilon = 0.01,
+  epsilon = 0.02,
   adaptive_eps = FALSE,
   ncores = 2,
   print_progress = TRUE

@@ -381,7 +381,7 @@ bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=FALSE, ncores=2, print_pro
 #' }
 #' @export
 
-bound_JSR <- function(stvar, epsilon=0.01, adaptive_eps=FALSE, ncores=2, print_progress=TRUE) {
+bound_JSR <- function(stvar, epsilon=0.02, adaptive_eps=FALSE, ncores=2, print_progress=TRUE) {
   check_stvar(stvar)
   stopifnot(is.numeric(epsilon) && epsilon > 0)
   all_A <- pick_allA(p=stvar$model$p, M=stvar$model$M, d=stvar$model$d, params=stvar$params)
