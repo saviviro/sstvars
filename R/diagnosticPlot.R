@@ -19,8 +19,10 @@
 #' @param maxlag the maximum lag considered in types \code{"ac"} and \code{"ch"}.
 #' @details Auto- and cross-correlations (types \code{"ac"} and \code{"ch"}) are calculated with the function
 #'  \code{acf} from the package \code{stats} and the plot method for class \code{'acf'} objects is employed.
-#'  If \code{cond_dist == "Student"}, the estimate of the degrees of freedom parameter is used in theoretical
-#'  densities and quantiles.
+#'
+#'  If \code{cond_dist == "Student"} or \code{"ind_Student"}, the estimates of the degrees of freedom parameters is used in
+#'  theoretical densities and quantiles. If \code{cond_dist == "ind_skewed_t"}, the estimates of the degrees of freedom and
+#'  skewness parameters are used in theoretical densities and quantiles, and the quantile function is computed numerically.
 #' @return No return value, called for its side effect of plotting the diagnostic plot.
 #' @inherit get_residuals references
 #' @seealso \code{\link{Portmanteau_test}}, \code{\link{profile_logliks}}, \code{\link{fitSTVAR}}, \code{\link{STVAR}},
@@ -68,6 +70,7 @@ diagnostic_plot <- function(stvar, type=c("all", "series", "ac", "ch", "dist"), 
                             maxlag=12) {
 
   check_stvar(stvar)
+  cond_dist <- stvar$model$cond_dist
   if(is.null(stvar$data)) stop("The model needs to contain data!")
   type <- match.arg(type)
   resid_type <- match.arg(resid_type)
@@ -118,16 +121,16 @@ diagnostic_plot <- function(stvar, type=c("all", "series", "ac", "ch", "dist"), 
   }
   if(type == "dist" || type == "all") {
     par(mfrow=c(2, d), mar=c(2.5, 2.8, 2.1, 1.0))
-    if(stvar$model$cond_dist == "Gaussian") {
+    if(cond_dist == "Gaussian") {
       distpars <- rep(NA, times=d) # No dist pars here, df intentionally redundant argument below
       dens_fun <- function(y, df) dnorm(y)
       qqplot_fun <- function(y, df) qqnorm(y, main="", ylab="", xlab="")
       qqline_fun <- function(y, df) qqline(y, col="darkred")
-    } else { # cond_dist == "Student" or "ind_Student"
-      if(stvar$model$cond_dist == "Student") {
+    } else if(cond_dist %in% c("Student", "ind_Student")) {
+      if(cond_dist == "Student") {
         distpars <- stvar$params[length(stvar$params)] # The last param is always the df param here
         distpars <- rep(distpars, times=d) # The same df for all components
-      } else { # cond_dist == "ind_Student"
+      } else if(cond_dist == "ind_Student") {
         distpars <- stvar$params[(length(stvar$params) - d + 1):length(stvar$params)] # The last d params are always the df params here
       }
       dens_fun <- function(y, df) {
@@ -138,22 +141,72 @@ diagnostic_plot <- function(stvar, type=c("all", "series", "ac", "ch", "dist"), 
         y <- sort(y, decreasing=FALSE) # Sorted sample quantiles
         T_obs <- length(y)
         p <- (1:T_obs - 0.5)/T_obs  # Probs; 0.5 substracted to avoid 0 and 1 that would result in -Inf and Inf
-        t_quantiles <- sqrt((df-2)/df)*qt(p, df=df)  # Theoretical quantiles; df taken from parent env
-        plot(x=t_quantiles, y=y, main="", xlab="", ylab="") # Plot samples quantes agains theoretical quants
+        t_quantiles <- sqrt((df-2)/df)*qt(p, df=df)  # Theoretical quantiles
+        plot(x=t_quantiles, y=y, main="", xlab="", ylab="") # Plot sample quantiles against theoretical quantiles
       }
       qqline_fun <- function(y, df) qqline(y, col="darkred", distribution=function(p) sqrt((df - 2)/df)*qt(p, df=df))
+    } else if(cond_dist == "ind_skewed_t") {
+      distpars <- stvar$params[(length(stvar$params) - 2*d + 1):length(stvar$params)]
+      all_nu <- distpars[1:d] # df params
+      all_lambda <- distpars[(d+1):length(distpars)] # skewness params
+
+      # The density function
+      dens_fun <- function(y, nu, lambda) {
+        logc_i <- lgamma(0.5*(1 + nu)) - 0.5*log(base::pi) - 0.5*log(nu - 2) - lgamma(0.5*nu) # (d x 1 )
+        a_i <- 4*lambda*exp(logc_i)*(nu - 2)/(nu - 1) # (d x 1)
+        logb_i <- 0.5*log(1 + 3*lambda^2 - a_i^2) # (d x 1)
+        b_i <- exp(logb_i) # (d x 1)
+        b_i*exp(logc_i)*(1 + 1/(nu - 2)*((b_i*y + a_i)/(1 + ifelse(y < -a_i/b_i, -lambda, lambda)))^2)^(-0.5*(1 + nu))
+      }
+
+      # The cumulative distribution function
+      cum_fun <- function(y, nu, lambda) {
+        integrate(function(x) dens_fun(x, nu=nu, lambda=lambda), lower=-Inf, upper=y, subdivisions=100, rel.tol=0.01)$value
+      }
+
+      # The quantile function
+      quant_fun <- function(p, nu, lambda, which_series) {
+        tmp <- max(abs(min(res[,which_series])), max(res[,which_series])) + 10
+        vapply(p, function(p_i) {
+          uniroot(function(y) cum_fun(y, nu=nu, lambda=lambda) - p_i, lower=-tmp, upper=tmp, tol=0.01)$root
+        }, numeric(1))
+      }
+
+      # The qqplot function
+      qqplot_fun <- function(y, nu, lambda, which_series){
+        y <- sort(y, decreasing=FALSE) # Sorted sample quantiles
+        T_obs <- length(y)
+        p <- (1:T_obs - 0.5)/T_obs  # Probs; 0.5 substracted to avoid 0 and 1 that would result in -Inf and Inf
+        t_quantiles <- vapply(p, function(i1) quant_fun(i1, nu=nu, lambda=lambda, which_series=which_series),
+                              numeric(1))  # Theoretical quantiles
+        plot(x=t_quantiles, y=y, main="", xlab="", ylab="") # Plot sample quantiles against theoretical quantiles
+      }
+
+      # The qqline function
+      qqline_fun <- function(y, nu, lambda, which_series) {
+        qqline(y, col="darkred", distribution=function(p) quant_fun(p, nu=nu, lambda=lambda, which_series=which_series))
+      }
     }
     # Plot histograms with theoretical density
     for(i1 in 1:d) {
       hs <- hist(res[,i1], breaks="Scott", probability=TRUE, col="skyblue", plot=TRUE,
                  main=colnames(res)[i1], ylim=c(0, 0.5), ylab="", xlab="")
       x <- seq(from=min(hs$breaks), to=max(hs$breaks), length.out=1000)
-      lines(x=x, y=dens_fun(y=x, df=distpars[i1]), lty=2, col="darkred", lwd=2)
+      if(cond_dist == "ind_skewed_t") { # Also skewness pars
+        lines(x=x, y=dens_fun(y=x, nu=all_nu[i1], lambda=all_lambda[i1]), lty=2, col="darkred", lwd=2)
+      } else {
+        lines(x=x, y=dens_fun(y=x, df=distpars[i1]), lty=2, col="darkred", lwd=2)
+      }
     }
     # Plot QQ plots with theoretical quantiles
     for(i1 in 1:d) {
-      qqplot_fun(y=res[,i1], df=distpars[i1])
-      qqline_fun(y=res[,i1], df=distpars[i1])
+      if(cond_dist == "ind_skewed_t") { # Also skewness pars
+        qqplot_fun(y=res[,i1], nu=all_nu[i1], lambda=all_lambda[i1], which_series=i1)
+        qqline_fun(y=res[,i1], nu=all_nu[i1], lambda=all_lambda[i1], which_series=i1)
+      } else {
+        qqplot_fun(y=res[,i1], df=distpars[i1])
+        qqline_fun(y=res[,i1], df=distpars[i1])
+      }
     }
   }
 }

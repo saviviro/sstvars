@@ -38,8 +38,10 @@ No return value, called for its side effect of plotting the diagnostic plot.
 \details{
 Auto- and cross-correlations (types \code{"ac"} and \code{"ch"}) are calculated with the function
  \code{acf} from the package \code{stats} and the plot method for class \code{'acf'} objects is employed.
- If \code{cond_dist == "Student"}, the estimate of the degrees of freedom parameter is used in theoretical
- densities and quantiles.
+
+ If \code{cond_dist == "Student"} or \code{"ind_Student"}, the estimates of the degrees of freedom parameters is used in
+ theoretical densities and quantiles. If \code{cond_dist == "ind_skewed_t"}, the estimates of the degrees of freedom and
+ skewness parameters are used in theoretical densities and quantiles, and the quantile function is computed numerically.
 }
 \examples{
 ## Gaussian STVAR p=1, M=2 model, with weighted relative stationary densities

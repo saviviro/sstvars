@@ -444,7 +444,7 @@ reform_constrained_pars <- function(p, M, d, params,
 #' @return Returns sorted parameter vector of the form described for the argument \code{params},
 #'   with the regimes sorted so that...
 #'   \describe{
-#'     \item{If \code{cond_dist == "ind_Student"} or \code{"ind_skewed_t}:}{The parameter vector with the columns of the impact matrices sorted
+#'     \item{If \code{cond_dist == "ind_Student"} or \code{"ind_skewed_t"}:}{The parameter vector with the columns of the impact matrices sorted
 #'           and sign changed so that the first element in each column of \eqn{B_1} is positive and in a decreasing order. Sorts also the degrees
 #'           of feedom and skewness parameters (if any) accordingly.}
 #'     \item{Otherwise:}{Nothing to sort, so returns the original parameter vector given in \code{param}.}

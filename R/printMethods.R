@@ -124,7 +124,8 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE, standard_error_pr
       } else if(cond_dist == "ind_skewed_t") {
         if(m == 1) {
           cat(paste0("Degrees of freedom: ", paste0(format_value(distpars[1:d]), collapse=", "), " (for all regimes)"), "\n")
-          cat(paste0("Skewness params:    ", paste0(format_value(distpars[(d + 1):d]), collapse=", "), " (for all regimes)"), "\n")
+          cat(paste0("Skewness params:    ", paste0(format_value(distpars[(d + 1):length(distpars)]), collapse=", "),
+                     " (for all regimes)"), "\n")
         }
       }
       if(summary_print) {
@@ -318,7 +319,8 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE, standard_error_pr
       } else if(cond_dist == "ind_skewed_t") {
         if(m == 1) {
           cat(paste0("Degrees of freedom: ", paste0(format_value(distpars[1:d]), collapse=", "), " (for all regimes)"), "\n")
-          cat(paste0("Skewness params:    ", paste0(format_value(distpars[(d + 1):d]), collapse=", "), " (for all regimes)"), "\n")
+          cat(paste0("Skewness params:    ", paste0(format_value(distpars[(d + 1):length(distpars)]), collapse=", "),
+                     " (for all regimes)"), "\n")
         }
       }
       if(weight_function == "relative_dens") {
