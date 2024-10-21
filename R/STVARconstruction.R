@@ -465,6 +465,8 @@ get_hetsked_sstvar <- function(stvar, calc_std_errors=FALSE) {
     stop("Only two-regime models are supported")
   } else if(cond_dist == "ind_Student") {
     stop("Models with independent Student's t errors are not supported (they are readily statistically identified)")
+  } else if(cond_dist == "ind_skewed_t") {
+    stop("Models with independent skewed t errors are not supported (they are readily statistically identified)")
   }
   AR_constraints <- stvar$model$AR_constraints
   mean_constraints <- stvar$model$mean_constraints
@@ -603,7 +605,7 @@ reorder_B_columns <- function(stvar, perm, calc_std_errors=FALSE) {
   check_stvar(stvar)
   cond_dist <- stvar$model$cond_dist
   identification <- stvar$model$identification
-  if(cond_dist == "ind_Student") identification <- "non-Gaussianity" # ind_Student models are readily identified
+  if(cond_dist %in% c("ind_Student", "ind_skewed_t")) identification <- "non-Gaussianity" # ind_Stud and skewed_t mods are readily identified
   if(identification != "heteroskedasticity" && identification != "non-Gaussianity") {
     stop("Only model identified by heteroskedasticity or non-Gaussianity are supported!")
   }
@@ -683,8 +685,13 @@ reorder_B_columns <- function(stvar, perm, calc_std_errors=FALSE) {
     new_params[(length(new_params) - (n_weight_pars + length(new_all_B) + n_distpars)
                 + 1):(length(new_params) - (n_weight_pars + n_distpars))] <- new_all_B # New impact matrix params
 
-    new_distpars <- distpars[perm] # Reorder the distribution parameters (degrees of freedom params here)
-    new_params[(length(new_params) - n_distpars + 1):length(new_params)] <- new_distpars # New distribution parameters
+    if(cond_dist == "ind_Student") {
+      new_distpars <- distpars[perm] # Reorder the degrees of freedom parameters
+    } else if(cond_dist == "ind_skewed_t") { # cond_dist == "ind_skewed_t"
+      new_distpars <- c(distpars[1:d][perm], distpars[(d + 1):length(distpars)][perm]) # reorder df and skewness params
+    } # Other options do not end up here as, we are inside identificatiom by non-Gaussianity
+
+    new_params[(length(new_params) - n_distpars + 1):length(new_params)] <- new_distpars # Insert new distribution parameters
   }
 
   ## Reorder the columns of the B_constraints accordingly
@@ -754,7 +761,7 @@ swap_B_signs <- function(stvar, which_to_swap, calc_std_errors=FALSE) {
   check_stvar(stvar)
   cond_dist <- stvar$model$cond_dist
   identification <- stvar$model$identification
-  if(cond_dist == "ind_Student") identification <- "non-Gaussianity" # ind_Student models are readily identified
+  if(cond_dist %in% c("ind_Student", "ind_skewed_t")) identification <- "non-Gaussianity" # ind_Stud and skewed_t mods are readily identified
   if(identification != "heteroskedasticity" && identification != "non-Gaussianity") {
     stop("Only model identified by heteroskedasticity or non-Gaussianity are supported!")
   }

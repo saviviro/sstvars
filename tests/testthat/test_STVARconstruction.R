@@ -325,8 +325,16 @@ test_that("swap_parametrization works correctly", {
                  0.59600000, 1.63600000, 0.68900000, -1.28100000, -0.21300000, 1.89700000, 1.77700000, 0.56700000, 0.01600000,
                  0.38300000, -0.04500000, 0.03400000, 0.16900000, 1.16500000, -0.04400000, 7.00000000, 3.00000000, 13.00000000),
                tolerance=1e-3)
-})
 
+  # ind_skewed_t exo
+  expect_equal(swap_parametrization(mod123exoikt, calc_std_errors=FALSE)$params,
+               c(0.01872735, 0.54692881, 2.82960017, -0.50345541, 1.88535674, 9.50476379, 0.87227000, -0.01595000, 0.14124000,
+                 -0.08611000, 0.61865000, 0.34311000, -0.02047000, 0.02500000, 0.97548000, 0.74976000, 0.02187000, 0.29213000,
+                 -1.55165000, 0.58245000, -0.00696000, -0.07261000, 0.02021000, 0.96883000, 0.21700000, -0.54200000, 0.89100000,
+                 0.59600000, 1.63600000, 0.68900000, -1.28100000, -0.21300000, 1.89700000, 1.77700000, 0.56700000, 0.01600000,
+                 0.38300000, -0.04500000, 0.03400000, 0.16900000, 1.16500000, -0.04400000, 7.00000000, 3.00000000, 13.00000000,
+                 -0.1, 0.2, 0.3), tolerance=1e-3)
+})
 
 
 
@@ -384,6 +392,23 @@ test_that("reorder_B_columns works correctly", {
 
   expect_equal(reorder_B_columns(mod222logistitb, perm=c(2, 1), calc_std_errors=FALSE)$model$B_constraints,
                matrix(c(0, 1, 1, NA), nrow=2), tolerance=1e-4)
+
+  # ind_skewed_t
+  expect_equal(reorder_B_columns(mod123exoikt, perm=c(3, 1, 2), calc_std_errors=FALSE)$params,
+               c(0.10741, 0.13813, -0.12092, 3.48957, 0.60615, 0.45646, 0.87227, -0.01595, 0.14124, -0.08611, 0.61865, 0.34311,
+                 -0.02047, 0.025, 0.97548, 0.74976, 0.02187, 0.29213, -1.55165, 0.58245, -0.00696, -0.07261, 0.02021, 0.96883,
+                 -1.281, -0.213, 1.897, 0.217, -0.542, 0.891, 0.596, 1.636, 0.689, 0.169, 1.165, -0.044, 1.777, 0.567, 0.016,
+                 0.383, -0.045, 0.034, 13, 7, 3, 0.3, -0.1, 0.2), tolerance=1e-4)
+
+  expect_equal(reorder_B_columns(mod222logistiktb, perm=c(2, 1), calc_std_errors=FALSE)$params,
+               c(0.7209658, 0.810858, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01, 0.08, 0.3, 0.7, 0.1, 0.2, 0.73, 0.11, -0.22,
+                 0.4, 3, 7, 0.7, 0.4), tolerance=1e-4)
+
+  expect_equal(reorder_B_columns(mod222logistiktb, perm=c(1, 2), calc_std_errors=FALSE)$params,
+               mod222logistiktb$params, tolerance=1e-4)
+
+  expect_equal(reorder_B_columns(mod222logistiktb, perm=c(2, 1), calc_std_errors=FALSE)$model$B_constraints,
+               matrix(c(0, 1, 1, NA), nrow=2), tolerance=1e-4)
 })
 
 
@@ -415,5 +440,23 @@ test_that("swap_B_signs works correctly", {
   expect_equal(swap_B_signs(mod222logistitb, which_to_swap=1:2, calc_std_errors=FALSE)$model$B_constraints,
                matrix(c(-1, NA, 0, -1), nrow=2), tolerance=1e-4)
   expect_equal(swap_B_signs(mod222logistitb, which_to_swap=1, calc_std_errors=FALSE)$model$B_constraints,
+               matrix(c(-1, NA, 0, 1), nrow=2), tolerance=1e-4)
+
+  # ind_skewed_t
+  expect_equal(swap_B_signs(mod123exoikt, which_to_swap=1, calc_std_errors=FALSE)$params,
+               c(0.10741, 0.13813, -0.12092, 3.48957, 0.60615, 0.45646, 0.87227, -0.01595, 0.14124, -0.08611, 0.61865, 0.34311,
+                 -0.02047, 0.025, 0.97548, 0.74976, 0.02187, 0.29213, -1.55165, 0.58245, -0.00696, -0.07261, 0.02021, 0.96883,
+                 -0.217, 0.542, -0.891, 0.596, 1.636, 0.689, -1.281, -0.213, 1.897, -1.777, -0.567, -0.016, 0.383, -0.045, 0.034,
+                 0.169, 1.165, -0.044, 7, 3, 13, -0.10000, 0.2, 0.3), tolerance=1e-4)
+
+  expect_equal(swap_B_signs(mod222logistiktb, which_to_swap=2, calc_std_errors=FALSE)$params,
+               c(0.720966, 0.810858, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01, 0.08, 0.3, 0.1, 0.2, -0.7, 0.11, -0.22, -0.73, 0.4, 7, 3,
+                 0.4, 0.7), tolerance=1e-4)
+
+  expect_equal(swap_B_signs(mod222logistiktb, which_to_swap=2, calc_std_errors=FALSE)$model$B_constraints,
+               matrix(c(1, NA, 0, -1), nrow=2), tolerance=1e-4)
+  expect_equal(swap_B_signs(mod222logistiktb, which_to_swap=1:2, calc_std_errors=FALSE)$model$B_constraints,
+               matrix(c(-1, NA, 0, -1), nrow=2), tolerance=1e-4)
+  expect_equal(swap_B_signs(mod222logistiktb, which_to_swap=1, calc_std_errors=FALSE)$model$B_constraints,
                matrix(c(-1, NA, 0, 1), nrow=2), tolerance=1e-4)
 })
