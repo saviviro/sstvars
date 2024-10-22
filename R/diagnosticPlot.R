@@ -133,10 +133,7 @@ diagnostic_plot <- function(stvar, type=c("all", "series", "ac", "ch", "dist"), 
       } else if(cond_dist == "ind_Student") {
         distpars <- stvar$params[(length(stvar$params) - d + 1):length(stvar$params)] # The last d params are always the df params here
       }
-      dens_fun <- function(y, df) {
-        multiplier = sqrt((df - 2)/df)
-        (1/multiplier)*dt(y/multiplier, df=df)
-      }
+      dens_fun <- function(y, df) stand_t_dens(y=y, nu=df)
       qqplot_fun <- function(y, df){
         y <- sort(y, decreasing=FALSE) # Sorted sample quantiles
         T_obs <- length(y)
@@ -150,18 +147,9 @@ diagnostic_plot <- function(stvar, type=c("all", "series", "ac", "ch", "dist"), 
       all_nu <- distpars[1:d] # df params
       all_lambda <- distpars[(d+1):length(distpars)] # skewness params
 
-      # The density function
-      dens_fun <- function(y, nu, lambda) {
-        logc_i <- lgamma(0.5*(1 + nu)) - 0.5*log(base::pi) - 0.5*log(nu - 2) - lgamma(0.5*nu) # (d x 1 )
-        a_i <- 4*lambda*exp(logc_i)*(nu - 2)/(nu - 1) # (d x 1)
-        logb_i <- 0.5*log(1 + 3*lambda^2 - a_i^2) # (d x 1)
-        b_i <- exp(logb_i) # (d x 1)
-        b_i*exp(logc_i)*(1 + 1/(nu - 2)*((b_i*y + a_i)/(1 + ifelse(y < -a_i/b_i, -lambda, lambda)))^2)^(-0.5*(1 + nu))
-      }
-
       # The cumulative distribution function
       cum_fun <- function(y, nu, lambda) {
-        integrate(function(x) dens_fun(x, nu=nu, lambda=lambda), lower=-Inf, upper=y, subdivisions=100, rel.tol=0.01)$value
+        integrate(function(x) skewed_t_dens(x, nu=nu, lambda=lambda), lower=-Inf, upper=y, subdivisions=100, rel.tol=0.01)$value
       }
 
       # The quantile function
@@ -193,7 +181,7 @@ diagnostic_plot <- function(stvar, type=c("all", "series", "ac", "ch", "dist"), 
                  main=colnames(res)[i1], ylim=c(0, 0.5), ylab="", xlab="")
       x <- seq(from=min(hs$breaks), to=max(hs$breaks), length.out=1000)
       if(cond_dist == "ind_skewed_t") { # Also skewness pars
-        lines(x=x, y=dens_fun(y=x, nu=all_nu[i1], lambda=all_lambda[i1]), lty=2, col="darkred", lwd=2)
+        lines(x=x, y=skewed_t_dens(y=x, nu=all_nu[i1], lambda=all_lambda[i1]), lty=2, col="darkred", lwd=2)
       } else {
         lines(x=x, y=dens_fun(y=x, df=distpars[i1]), lty=2, col="darkred", lwd=2)
       }
