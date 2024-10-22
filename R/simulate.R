@@ -284,15 +284,15 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
       mu_yt <- get_mu_yt_Cpp(obs=matrix(Y[i1,], nrow=1), all_phi0=all_phi0, all_A=all_A2, alpha_mt=alpha_mt)
 
       # Calculate conditional covariance matrix
-      if(cond_dist == "ind_Student" || identification == "non-Gaussianity") { # Parametrization with impact matrices
-        # Omega_yt is not used anywhere so no need to calculate it
+      if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t" || identification == "non-Gaussianity") {
+        # Paramtrization with impact matrices. Omega_yt is not used anywhere so no need to calculate it.
       } else { # Parametrization with covariance matrices
         Omega_yt <- matrix(rowSums(vapply(1:M, function(m) alpha_mt[, m]*as.vector(all_Omegas[, , m]), numeric(d*d))),
                            nrow=d, ncol=d)
       }
 
       # Calculate B_t
-      if(cond_dist == "ind_Student" || identification == "non-Gaussianity") { # Also reduced form ind_Student models here
+      if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t" || identification == "non-Gaussianity") {
         B_t <- matrix(rowSums(vapply(1:M, function(m) alpha_mt[, m]*as.vector(all_Omegas[, , m]), numeric(d*d))),
                       nrow=d, ncol=d) # weighted sum of the impact matrices.
       } else if(identification == "reduced_form") {
@@ -319,7 +319,9 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
         Z <- sqrt((distpars - 2)/distpars)*e_t # Sample from N(0, (df-2)/df*I_d) # df == distpars
         e_t <- Z*sqrt(distpars/rchisq(n=1, df=distpars)) # Sample from t_d(0, I_d, df)
       } else if(cond_dist == "ind_Student") {
-        e_t <- rt(n=d, df=distpars) # Sample from independent Student's t distributions
+        e_t <- sqrt((distpars - 2)/distpars)*rt(n=d, df=distpars) # Sample from independent Student's t distributions
+      } else if(cond_dist == "ind_skewed_t") {
+        e_t <- 0 # Not implemented yet
       }
 
       # Calculate the current observation
@@ -497,7 +499,7 @@ simulate_from_regime <- function(stvar, regime=1, nsim=1, init_values=NULL, use_
 
   # Create VAR params corresponding the given regime
   # Note that structural models not implemented here: no need here because just simulates initial values to the simulator function
-  if(cond_dist == "ind_Student" || identification == "non-Gaussianity") {
+  if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t" || identification == "non-Gaussianity") {
     new_params <- c(all_phi0[, regime], all_A[, , , regime],
                     vec(all_Omegas[, , regime]), distpars)
   } else {
