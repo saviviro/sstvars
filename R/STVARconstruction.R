@@ -190,7 +190,8 @@ STVAR <- function(data, p, M, d, params,
                                    mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                                    B_constraints=B_constraints, standardize=TRUE)
     IC <- get_IC(loglik=lok_and_tw$loglik, npars=npars, T_obs=nrow(data) - p)
-    if(identification == "reduced_form" && cond_dist != "ind_Student") { # Struct shocks available for ind_Student mods
+    if(identification == "reduced_form" && cond_dist != "ind_Student" && cond_dist != "ind_skewed_t") {
+      # Struct shocks are available for ind_Student and skewed_t mods
       structural_shocks <- NA
     } else {
       structural_shocks <- get_residuals(data=data, p=p, M=M, params=params,

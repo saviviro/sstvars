@@ -104,6 +104,16 @@ params322thresit <- c(0.53077, 0.003653, 1.299719, -0.004862, 0.276631, 0.045029
 mod322thresit <- STVAR(gdpdef, p=3, M=2, params=params322thresit, weight_function="threshold", weightfun_pars=c(2, 1),
                       cond_dist="ind_Student", identification="non-Gaussianity")
 
+# p=1, M=2, d=2, weight_function="exogenous", cond_dist="ind_skewed_t", weightfun_pars=twmat, AR_constraints=C_122
+params122exocikt <- c(params122exocit, 0.1, -0.11)
+mod122exocikt <- STVAR(data=gdpdef, p=1, M=2, d=2, params=params122exocikt, weight_function="exogenous", cond_dist="ind_skewed_t",
+                       weightfun_pars=twmat, AR_constraints=C_122)
+
+# p=3, M=2, weight_function="threshold", cond_dist="ind_skewed_t", weightfun_pars=c(2, 1), identification="non-Gaussianity"
+params322thresikt <- c(params322thresit, -0.11, 0.1)
+mod322thresikt <- STVAR(gdpdef, p=3, M=2, params=params322thresikt, weight_function="threshold", weightfun_pars=c(2, 1),
+                        cond_dist="ind_skewed_t", identification="non-Gaussianity")
+
 
 set.seed(1); p112 <- predict(mod112relg, nsteps=1, nsim=1, pred_type="mean")
 set.seed(2); p122 <- predict(mod122relg, nsteps=3, nsim=3, pred_type="median")
@@ -125,6 +135,10 @@ set.seed(6); p122relgsh <- predict(mod122relgsh, nsteps=4, nsim=3, pred_type="me
 set.seed(7); p122exocit <- predict(mod122exocit, nsteps=3, nsim=5, pred_type="mean", pi=0.9,
                                    exo_weights=cbind(c(0.1, 0.6, 0.9), c(0.9, 0.4, 0.1)))
 set.seed(8); p322thresit <- predict(mod322thresit, nsteps=2, nsim=3, pred_type="median", pi=0.49)
+
+set.seed(7); p122exocikt <- predict(mod122exocikt, nsteps=3, nsim=5, pred_type="mean", pi=0.9,
+                                    exo_weights=cbind(c(0.1, 0.6, 0.9), c(0.9, 0.4, 0.1)))
+set.seed(8); p322thresikt <- predict(mod322thresikt, nsteps=2, nsim=3, pred_type="median", pi=0.49)
 
 test_that("simulate.stvar works correctly", {
   # Relative_dens Gaussian STVAR
@@ -173,5 +187,11 @@ test_that("simulate.stvar works correctly", {
   expect_equal(c(unname(p122exocit$pred_ints[3, ,])), c(-0.2899756, 1.1800892, 0.4027048, 0.6666149), tol=1e-4)
   expect_equal(c(unname(p322thresit$pred[2,])), c(0.1871531, 0.4202337), tol=1e-4)
   expect_equal(c(unname(p122exocit$pred_ints[2, ,])), c(-0.4616687, 1.5479501, 0.3639803, 0.6829701), tol=1e-4)
+
+  # ind_skewed_t
+  expect_equal(unname(p122exocikt$pred[3,]), c(-0.1880324, 0.5544878), tol=1e-4)
+  expect_equal(c(unname(p122exocikt$pred_ints[3, ,])), c(-1.64357708, 0.97150011, 0.05450224, 0.89698673), tol=1e-4)
+  expect_equal(c(unname(p322thresikt$pred[2,])), c(0.6630216, 0.54868387), tol=1e-4)
+  expect_equal(c(unname(p122exocikt$pred_ints[2, ,])), c(-0.3572890, 0.8447560, 0.2011615, 0.7691904), tol=1e-4)
 })
 

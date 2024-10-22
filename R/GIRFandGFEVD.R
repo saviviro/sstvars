@@ -136,10 +136,11 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
                  use_parallel=TRUE) {
   check_stvar(stvar)
   scale_type <- match.arg(scale_type)
-  if(stvar$model$identification == "reduced_form" && stvar$model$cond_dist != "ind_Student") {
+  cond_dist <- stvar$model$cond_dist
+  if(stvar$model$identification == "reduced_form" && cond_dist != "ind_Student" && cond_dist != "ind_skewed_t") {
     warning(paste("Reduced form model supplied, so using recursive identification"))
     stvar$model$identification <- "recursive"
-  } else if(stvar$model$identification == "reduced_form" && stvar$model$cond_dist == "ind_Student") {
+  } else if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") {
     stvar$model$identification <- "non-Gaussianity" # Readily identified by non-Gaussianity
   }
 
@@ -431,10 +432,11 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
                   burn_in=1000, exo_weights=NULL, seeds=NULL, use_parallel=TRUE) {
   check_stvar(stvar)
   initval_type <- match.arg(initval_type)
-  if(stvar$model$identification == "reduced_form" && stvar$model$cond_dist != "ind_Student") {
+  cond_dist <- stvar$model$cond_dist
+  if(stvar$model$identification == "reduced_form" && cond_dist != "ind_Student" && cond_dist != "ind_skewed_t") {
     warning(paste("Reduced form model supplied, so using recursive identification"))
     stvar$model$identification <- "recursive"
-  } else if(stvar$model$identification == "reduced_form" && stvar$model$cond_dist == "ind_Student") {
+  } else if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") {
     stvar$model$identification <- "non-Gaussianity" # Readily identified by non-Gaussianity
   }
   p <- stvar$model$p
@@ -481,7 +483,7 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
   # Calculate the shock sizes for each history in the data
   if(use_data_shocks) {
     # Recover the structural shocks for each initial value in all_initvals:
-    if(stvar$model$identification == "reduced_form" && stvar$model$cond_dist != "ind_Student") {
+    if(stvar$model$identification == "reduced_form" && cond_dist != "ind_Student" && cond_dist != "ind_skewed_t") {
       # Recover the structural shocks from the reduced form shocks using recursive identification:
       data_shocks <- get_residuals(data=stvar$data, p=p, M=M, params=stvar$params, weight_function=stvar$model$weight_function,
                                    weightfun_pars=stvar$model$weightfun_pars, cond_dist=stvar$model$cond_dist,
