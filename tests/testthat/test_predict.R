@@ -169,9 +169,9 @@ test_that("simulate.stvar works correctly", {
   expect_equal(unname(p122relgsh$pred_ints[4, 1,]), c(0.3007967, 0.3969968), tol=1e-4)
 
   # ind_Student
-  expect_equal(unname(p122exocit$pred[3,]), c(0.3939130, 0.4663528), tol=1e-4)
-  expect_equal(c(unname(p122exocit$pred_ints[3, ,])), c(-0.3053796, 1.5096820, 0.3453159, 0.6648726), tol=1e-4)
-  expect_equal(c(unname(p322thresit$pred[2,])), c(0.0383185, 0.4116402), tol=1e-4)
-  expect_equal(c(unname(p122exocit$pred_ints[2, ,])), c(-0.6105301, 1.8325592, 0.3266453, 0.7264805), tol=1e-4)
+  expect_equal(unname(p122exocit$pred[3,]), c(0.2664362, 0.4953650), tol=1e-4)
+  expect_equal(c(unname(p122exocit$pred_ints[3, ,])), c(-0.2899756, 1.1800892, 0.4027048, 0.6666149), tol=1e-4)
+  expect_equal(c(unname(p322thresit$pred[2,])), c(0.1871531, 0.4202337), tol=1e-4)
+  expect_equal(c(unname(p122exocit$pred_ints[2, ,])), c(-0.4616687, 1.5479501, 0.3639803, 0.6829701), tol=1e-4)
 })
 

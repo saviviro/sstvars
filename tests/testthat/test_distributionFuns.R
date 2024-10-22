@@ -85,3 +85,18 @@ test_that("bounding_const_M works correctly", {
   expect_equal(bounding_const_M(nu=9.2, lambda=0.8), 4.06109, tolerance=1e-3)
 })
 
+
+test_that("generate_skewed_t returns a numeric vector of length n", {
+  set.seed(1); samples <- generate_skewed_t(n=113, nu=5, lambda=0.5)
+  expect_true(is.numeric(samples))
+  expect_length(samples,113)
+})
+
+test_that("generate_skewed_t works correctly", {
+  set.seed(2); res1 <- generate_skewed_t(n=1, nu=2.1, lambda=0.1)
+  set.seed(3); res2 <- generate_skewed_t(n=1, nu=10, lambda=0.9)
+  set.seed(4); res3 <- generate_skewed_t(n=1, nu=5, lambda=-0.3, bc_M=10)
+  expect_equal(res1, 0.28912, tolerance=1e-3)
+  expect_equal(res2, -0.5275574, tolerance=1e-3)
+  expect_equal(res3, 0.07797383, tolerance=1e-3)
+})

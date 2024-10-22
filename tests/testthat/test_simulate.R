@@ -75,6 +75,15 @@ params32thresit <- c(0.53077, 0.003653, 1.299719, -0.004862, 0.276631, 0.045029,
 mod32thresit <- STVAR(gdpdef, p=3, M=2, params=params32thresit, weight_function="threshold", weightfun_pars=c(2, 1),
                       cond_dist="ind_Student", identification="non-Gaussianity")
 
+# p=1, M=2, d=2, weight_function="exogenous", cond_dist="ind_skewed_t", weightfun_pars=twmat, AR_constraints=C_122
+params122exocikt <- c(params122exocit, 0.1, -0.11)
+mod122exocikt <- STVAR(data=gdpdef, p=1, M=2, d=2, params=params122exocikt, weight_function="exogenous", cond_dist="ind_skewed_t",
+                      weightfun_pars=twmat, AR_constraints=C_122)
+
+# p=3, M=2, weight_function="threshold", cond_dist="ind_skewed_t", weightfun_pars=c(2, 1), identification="non-Gaussianity"
+params32thresikt <- c(params32thresit, -0.11, 0.1)
+mod32thresikt <- STVAR(gdpdef, p=3, M=2, params=params32thresikt, weight_function="threshold", weightfun_pars=c(2, 1),
+                      cond_dist="ind_skewed_t", identification="non-Gaussianity")
 
 test_that("simulate.stvar works correctly", {
   s112 <- simulate(mod112relg, nsim=1, seed=1, init_regime=1)
@@ -91,6 +100,8 @@ test_that("simulate.stvar works correctly", {
   s122relgsh <- simulate(mod122relgsh, nsim=3, seed=4, init_regime=2)
   s122exocit <- simulate(mod122exocit, nsim=3, seed=5, init_regime=2, exo_weights=cbind(c(0.9, 0.5, 0.2), c(0.1, 0.5, 0.8)))
   s322thresit <- simulate(mod32thresit, nsim=4, seed=6, init_regime=1)
+  s122exocikt <- simulate(mod122exocikt, nsim=3, seed=5, init_regime=2, exo_weights=cbind(c(0.9, 0.5, 0.2), c(0.1, 0.5, 0.8)))
+  s322thresikt <- simulate(mod32thresikt, nsim=4, seed=6, init_regime=1)
 
   # Relative_dens Gaussian STVAR
   expect_equal(s112$sample[1,], c(-0.07206511, 1.343205), tol=1e-4)
@@ -121,10 +132,16 @@ test_that("simulate.stvar works correctly", {
   expect_equal(s322t_2$transition_weights[1,], c(0.05456173, 0.94543827), tol=1e-4)
 
   # ind_Student
-  expect_equal(s122exocit$sample[3,], c(-0.10082676, -0.04832091), tol=1e-4)
+  expect_equal(s122exocit$sample[3,], c(-0.02252565, 0.15108849), tol=1e-4)
   expect_equal(s122exocit$transition_weights, cbind(c(0.9, 0.5, 0.2), c(0.1, 0.5, 0.8)), tol=1e-4)
-  expect_equal(s322thresit$sample[4,], c(1.841653126, 0.007840574), tol=1e-4)
+  expect_equal(s322thresit$sample[4,], c(1.6113043, 0.1001029), tol=1e-4)
   expect_equal(s322thresit$transition_weights[4,], c(1, 0), tol=1e-4)
+
+  # ind_skewed_t
+  expect_equal(s122exocikt$sample[3,], c(0.8788235, 0.7216581), tol=1e-4)
+  expect_equal(s122exocikt$transition_weights, cbind(c(0.9, 0.5, 0.2), c(0.1, 0.5, 0.8)), tol=1e-4)
+  expect_equal(s322thresikt$sample[4,], c(0.96011435, -0.08796093), tol=1e-4)
+  expect_equal(s322thresikt$transition_weights[4,], c(1, 0), tol=1e-4)
 
   # Structural
   expect_equal(s322tr$sample[4,], c(-0.05019288, -0.07683787), tol=1e-4)
@@ -160,8 +177,8 @@ test_that("simulate_from_regime works correctly", {
   expect_equal(sim_reg322t_1[3,], c(0.07970387, 0.54273994), tol=1e-4)
 
   # ind_Student
-  expect_equal(sim_reg122exocit_1[2,], c(2.5533783, 0.5194208), tol=1e-4)
-  expect_equal(sim_reg322thresit_1[3,], c(1.0536138, 0.5630061), tol=1e-4)
+  expect_equal(sim_reg122exocit_1[2,], c(2.2260794, 0.5797427), tol=1e-4)
+  expect_equal(sim_reg322thresit_1[3,], c(2.0512624, 0.4178233), tol=1e-4)
 
   # Structural
   expect_equal(sim_regs322tr_1[1,], c(0.05300774, 0.8396193), tol=1e-4)

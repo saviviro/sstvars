@@ -256,8 +256,22 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
     # Nothing to do here, uses exo_weights directly
   }
 
+  # Get bounding constants for acceptance-rejection sampling for skewed t-distribution
+  if(cond_dist == "ind_skewed_t") {
+    all_nu <- distpars[1:d] # df pars
+    all_lambda <- distpars[(d + 1):(2*d)] # skewness pars, note that het.sked ident not possible here
+    all_bc_M <- vapply(1:d, function(i1) bounding_const_M(nu=all_nu[i1], lambda=all_lambda[i1]), numeric(1)) # bounding constants
+  }
+
   # Run through the time periods and repetitions
   for(j1 in seq_len(ntimes)) {
+    if(cond_dist == "ind_skewed_t") { # Genererate sequences of structural shocks here for computational efficiency
+      all_e_t <- matrix(nrow=nsim, ncol=d) # [nsim, d]
+      for(i1 in 1:d) {
+        all_e_t[,i1] <- generate_skewed_t(n=nsim, nu=all_nu[i1], lambda=all_lambda[i1],
+                                          bc_M=all_bc_M[i1]) # nsim draws from the i1:th shock
+      }
+    }
     for(i1 in seq_len(nsim)) {
       # Calculate transition weights
       if(M == 1) {
@@ -321,7 +335,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
       } else if(cond_dist == "ind_Student") {
         e_t <- sqrt((distpars - 2)/distpars)*rt(n=d, df=distpars) # Sample from independent Student's t distributions
       } else if(cond_dist == "ind_skewed_t") {
-        e_t <- 0 # Not implemented yet
+        e_t <- all_e_t[i1,] # Sample from independent skewed t distributions (drawn earlier)
       }
 
       # Calculate the current observation
@@ -360,15 +374,15 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
         # Calculate conditional mean and conditional covariance matrix
         mu_yt2 <- get_mu_yt_Cpp(obs=matrix(Y2[i1,], nrow=1), all_phi0=all_phi0, all_A=all_A2, alpha_mt=alpha_mt2)
 
-        if(cond_dist == "ind_Student" || identification == "non-Gaussianity") { # Parametrization with impact matrices
+        if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t" || identification == "non-Gaussianity") {
           # Omega_yt2 is not used anywhere so no need to calculate it
         } else { # Parametrization with covariance matrices
-        Omega_yt2 <- matrix(rowSums(vapply(1:M, function(m) alpha_mt2[, m]*as.vector(all_Omegas[, , m]),
-                                           numeric(d*d))), nrow=d, ncol=d)
+          Omega_yt2 <- matrix(rowSums(vapply(1:M, function(m) alpha_mt2[, m]*as.vector(all_Omegas[, , m]),
+                                             numeric(d*d))), nrow=d, ncol=d)
         }
 
         # Calculate B_t
-        if(cond_dist == "ind_Student" || identification == "non-Gaussianity") { # Also reduced form ind_Student models here
+        if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t" || identification == "non-Gaussianity") {
           B_t2 <- matrix(rowSums(vapply(1:M, function(m) alpha_mt2[, m]*as.vector(all_Omegas[, , m]),
                                         numeric(d*d))), nrow=d, ncol=d) # weighted sum of the impact matrices.
         } else if(identification == "reduced_form") {

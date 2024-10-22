@@ -72,3 +72,48 @@ bounding_const_M <- function(nu, lambda) {
   ratios <- vapply(y_vals, FUN=ratio_fun, FUN.VALUE=numeric(1))
   max(ratios, na.rm=TRUE)*1.1 # Estimate of the bounding constant M with 10% safety margin
 }
+
+
+#' @title Generate random samples from the skewed t-distribution
+#'
+#' @description \code{generate_skewed_t} generates \code{n} random observations from the univariate skewed \emph{t}-distribution
+#'  described in Hansen (1994) using the acceptance-rejection sampling method.
+#'
+#' @param n An integer specifying the number of random observations to generate. Must be a positive integer.
+#' @param nu A numeric scalar specifying the degrees of freedom parameter for the skewed \emph{t}-distribution. Must be greater than 2.
+#' @param lambda A numeric scalar specifying the skewness parameter for the skewed \emph{t}-distribution. Must be between \eqn{-1} and \eqn{1}.
+#' @param bc_M An optional numeric scalar specifying the bounding constant \eqn{M} used in the acceptance-rejection algorithm.
+#'   If not provided, it is computed using \code{\link{bounding_const_M}} with the given \code{nu} and \code{lambda}.
+#' @details The function implements the acceptance-rejection algorithm to generate random samples from the skewed \emph{t}-distribution.
+#'   The proposal distribution used is a standard \emph{t}-distribution with degrees of freedom \code{proposal_nu}, which is set to \eqn{3}
+#'   when \code{nu > 3} to ensure heavier tails and accommodate the skewness of the target distribution.
+#'
+#'   If \code{bounding_const_M} is not provided, it is calculated using the \code{\link{bounding_const_M}} function. It is important that
+#'   the same proposal distribution is used in both the computation of \code{bounding_const_M} and the acceptance-rejection sampling
+#'   algorithm to ensure correctness.
+#' @return A numeric vector of length \code{n} containing random observations from the skewed \emph{t}-distribution with
+#'   parameters \code{nu} and \code{lambda}.
+#' @inherit skewed_t_dens references
+#' @keywords internal
+
+generate_skewed_t <- function(n, nu, lambda, bc_M) {
+  if(missing(bc_M)) {
+    bc_M <- bounding_const_M(nu=nu, lambda=lambda)
+  } # Note that the same proposal dist needs to be used in computing M as well as in the sampling algorithm
+  proposal_nu <- ifelse(nu > 3, 3, nu) # Proposal dist needs to have heavy tails to accommodate skewness in the target dist
+  y_vals <- numeric(n)
+
+  # Iterate throught the algorithm
+  for(i1 in 1:n) {
+    accept <- FALSE
+    while(!accept) {
+      y_cand <- sqrt((proposal_nu - 2)/proposal_nu)*rt(1, df=proposal_nu)
+      u <- runif(1)
+      if(u < skewed_t_dens(y_cand, nu=nu, lambda=lambda)/(bc_M*stand_t_dens(y_cand, nu=proposal_nu))) {
+        y_vals[i1] <- y_cand
+        accept <- TRUE
+      }
+    }
+  }
+  y_vals # Sample of n values from the skewed t distribution
+}
