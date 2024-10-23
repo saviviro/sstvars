@@ -1,4 +1,4 @@
-\begin{thebibliography}{32}
+\begin{thebibliography}{33}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -44,6 +44,11 @@ Gripenberg G (1996).
 \newblock \enquote{Computing the joint spectral radius.}
 \newblock \emph{Linear algebra and its applications}, \textbf{234}, 43--60.
 \newblock \doi{10.1016/0024-3795(94)00082-4}.
+
+\bibitem[{Hansen(1994)}]{Hansen:1994}
+Hansen BE (1994).
+\newblock \enquote{Autoregressive Conditional Density Estimation.}
+\newblock \emph{International Economic Review}, \textbf{35}(3), 705--730.
 
 \bibitem[{Herwartz and L{\"u}tkepohl(2014)}]{Herwartz+Lutkepohl:2014}
 Herwartz H, L{\"u}tkepohl H (2014).
@@ -172,7 +177,7 @@ Saikkonen P (2008).
 
 \bibitem[{Solymos and Zawadzki(2020)}]{Solymos+Zawadzki:2020}
 Solymos P, Zawadzki Z (2020).
-\newblock \emph{\pkg{pbapply}: Adding Progress Bar to '*apply' Functions}.
+\newblock \emph{pbapply: Adding Progress Bar to '*apply' Functions}.
 \newblock R package version 1.4-3,
   \urlprefix\url{https://CRAN.R-project.org/package=pbapply}.
 
