@@ -725,3 +725,62 @@ fitbsSSTVAR <- function(data, p, M, params,
   ## Return the estimate
   params
 }
+
+
+#' @title Internal estimation function for estimating autoregressive and threshold parameters of
+#'   a TVAR model by the method of least squares.
+#'
+#' @description \code{estim_LS} estimates the autoregressive and threshold parameters of a TVAR model
+#'   by the method of least squares.
+#'
+#' @inheritParams loglikelihood
+#' @details Used internally in the multiple phase estimation procedure proposed by Koivisto,
+#'  Luoto, and Virolainen (2025). Mean constraints are not supported. Only weight constraints that
+#'  specify the threshold parameters as fixed values are supported.
+#' @return Returns the estimated parameters in a vector of the form
+#'  \eqn{(\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\alpha}, where
+#'  \itemize{
+#'     \item{\eqn{\phi_{m,0} = } the \eqn{(d \times 1)} intercept vector of the \eqn{m}th regime.}
+#'     \item{\eqn{\varphi_m = (vec(A_{m,1}),...,vec(A_{m,p}))} \eqn{(pd^2 \times 1)}.}
+#'     \item{\eqn{\alpha = (r_1,...,r_{M-1})} the \eqn{(M-1\times 1)} vector of the threshold parameters.}
+#'  }
+#'  For models with...
+#'   \describe{
+#'     \item{AR_constraints:}{Replace \eqn{\varphi_1,...,\varphi_M} with \eqn{\psi} as described in the argument \code{AR_constraints}.}
+#'     \item{weight_constraints:}{If linear constraints are imposed, replace \eqn{\alpha} with \eqn{\xi} as described in the
+#'      argument \code{weigh_constraints}. If weight functions parameters are imposed to be fixed values, simply drop \eqn{\alpha}
+#'      from the parameter vector.}
+#'   }
+#' @references
+#'  \itemize{
+#'    \item Hubrich K., Teräsvirta. T. 2013. Thresholds and Smooth Transitions in Vector Autoregressive Models.
+#'      \emph{CREATES Research Paper 2013-18, Aarhus University.}
+#'    \item Koivisto T., Luoto J., Virolainen S. 2025. Unpublished working paper.
+#'    \item Tsay R. 1998. Testing and Modeling Multivariate Threshold Models.
+#'      \emph{Journal of the American Statistical Association}, \strong{93}:443, 1188-1202.
+#'    \item Virolainen S. 2024. Identification by non-Gaussianity in structural threshold and
+#'       smooth transition vector autoregressive models. Unpublished working
+#'       paper, available as arXiv:2404.19707.
+#'  }
+#' @keywords internal
+
+estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+                     weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
+                     parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL) {
+  weight_function <- match.arg(weight_function)
+  cond_dist <- match.arg(cond_dist)
+  parametrization <- match.arg(parametrization)
+  stopifnot(weight_function == "threshold") # Only threshold weight function is supported
+  stopifnot(is.null(mean_constraints)) # AR and mean constraints are not supported
+  data <- check_data(data)
+  # Check the weight constraints
+  if(!is.null(weight_constraints)) {
+    if(weight_constraints[[1]] != 0) {
+      stop(paste("Only such weight_constraints that specify the threshold parameters some known fixed values",
+                 "are supported in the least squares estimation."))
+    }
+  }
+
+  # Maybe AR constraints should be supported? Could be needed in the paper, and interesting to have them anyway.
+  # SO CREATE THE FORMULAS FOR THE LEAST SQUARES ESTIMATION WITH AR CONSTRAINTS.
+}
