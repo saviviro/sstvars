@@ -121,9 +121,10 @@ fitrec
 fithet <- fitSSTVAR(fit, identification="heteroskedasticity")
 fithet
 
-# Identification by non-Gaussianity available for models indepdent Student's t distribution
-# as the conditional distribution. The reduced form model is then readily identified by
-# non-Gaussianity. Estimate a reduced form model identified by non-Gaussianity: 
+# Identification by non-Gaussianity available for models with independent Student's t distribution
+# or independent skewed t distribution as the conditional distribution. The reduced form model is
+# then readily identified by non-Gaussianity. Estimate a reduced form model identified by
+# non-Gaussianity with independent Student's t shocks: 
 fitindt <- fitSTVAR(gdpdef, p=2, M=2, weight_function="logistic", weightfun_pars=c(2, 1),
                     cond_dist="ind_Student", nrounds=20, ncores=2, seeds=1:20)
 fitindt
