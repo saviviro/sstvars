@@ -470,8 +470,8 @@ loglikelihood <- function(data, p, M, params,
 #' @param log_mvdvalues a \eqn{T x M} matrix containing log multivariate normal densities (can be used with
 #'   relative dens weight function only)
 #' @details Note that we index the time series as \eqn{-p+1,...,0,1,...,T}.
-#' @return Returns the mixing weights a \eqn{(T x M)} matrix, so that the t:th row is for the time point t
-#'   and m:th column is for the regime m.
+#' @return Returns the mixing weights a \eqn{(T x M)} matrix, so that the \eqn{t}th row is for the time period \eqn{t}
+#'   and \eqn{m}:th column is for the regime \eqn{m}.
 #' @inherit in_paramspace references
 #' @keywords internal
 

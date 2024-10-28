@@ -767,12 +767,15 @@ fitbsSSTVAR <- function(data, p, M, params,
 estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                      weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                      parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL) {
+  # Checks
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
-  stopifnot(weight_function == "threshold") # Only threshold weight function is supported
-  stopifnot(is.null(mean_constraints)) # AR and mean constraints are not supported
-  data <- check_data(data)
+  if(!is.null(mean_constraints)) {
+    stop("Mean constraints are not supported by the LS estimation")
+  } else if(weight_function != "threshold") {
+    stop("Only threshold weight function is supported by the LS estimation")
+  }
   # Check the weight constraints
   if(!is.null(weight_constraints)) {
     if(weight_constraints[[1]] != 0) {
@@ -781,6 +784,36 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     }
   }
 
-  # Maybe AR constraints should be supported? Could be needed in the paper, and interesting to have them anyway.
-  # SO CREATE THE FORMULAS FOR THE LEAST SQUARES ESTIMATION WITH AR CONSTRAINTS.
+  # Obtain relevant statistics
+  data <- check_data(data)
+  d <- ncol(data)
+  n_obs <- nrow(data)
+  T_obs <- n_obs - p
+
+
+  ## Least squares estimation function given thresholds for models without AR constraints
+  LS_without_AR_constraints <- function(thresholds) {
+    # threshold = length M-1 vector of the thresholds r_1,...,r_{M-1}
+    # Other arguments are taken from the parent environment.
+
+    # Storages for the estimates
+    intercepts <- matrix(NA, nrow=d, ncol=M) # [d, m]
+    AR_matrices <- array(NA, dim=c(d, d, p, M)) # [d, d, p, m]
+
+    # In Y, i:th row denotes the vector \bold{y_{i-1}} = (y_{i-1},...,y_{i-p}) (dpx1),
+    # assuming the observed data is y_{-p+1},...,y_0,y_1,...,y_{T}. The last row is for
+    # the vector (y_{T},...,y_{T-p}).
+    Y <- reform_data(data, p) # (T_obs + 1 x dp)
+    Y2 <- Y[1:T_obs, , drop=FALSE] # Last row removed; not needed when only lagged observations used
+
+    # The transition weights: (T x M) matrix, the t:th row is for the time point t and the m:th column is for the regime m.
+    alpha_mt <- get_alpha_mt(data, Y2=Y2, p=p, M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                             weightpars=thresholds) # Transition weights (T x M), t:th row
+
+    # Go through the regimes
+    for(m in 1:M) {
+      # Obtain the time periods during which regime m prevails
+
+    }
+  }
 }

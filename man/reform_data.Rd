@@ -13,13 +13,16 @@ a univariate time series. Missing values are not supported.}
 \item{p}{a positive integer specifying the autoregressive order}
 }
 \value{
-Returns the data reformed into a \eqn{((n_{obs}-p+1)x(dp))} matrix. The i:th row
-  of the matrix contains the vector \eqn{(y_{i-1},...,y_{i-p})} \eqn{((dp)x1)}, where
-  \eqn{y_{i}=(y_{1i},...,y_{di})} \eqn{(dx1)}.
+Returns the data reformed into a \eqn{((n_{obs}-p+1)\times dp)} matrix. The i:th row
+  of the matrix contains the vector \eqn{(y_{i-1},...,y_{i-p})} \eqn{(dp\times 1)}, where
+  \eqn{y_{i}=(y_{1i},...,y_{di})} \eqn{(d \times 1)}.
 }
 \description{
 \code{reform_data} reforms the data into a form that is
   easier to use when calculating log-likelihood values etc.
+}
+\details{
+Assumes the observed data is \eqn{y_{-p+1},...,y_0,y_1,...,y_{T}}.
 }
 \section{Warning}{
 

@@ -4,9 +4,10 @@
 #'   easier to use when calculating log-likelihood values etc.
 #'
 #' @inheritParams loglikelihood
-#' @return Returns the data reformed into a \eqn{((n_{obs}-p+1)x(dp))} matrix. The i:th row
-#'   of the matrix contains the vector \eqn{(y_{i-1},...,y_{i-p})} \eqn{((dp)x1)}, where
-#'   \eqn{y_{i}=(y_{1i},...,y_{di})} \eqn{(dx1)}.
+#' @details Assumes the observed data is \eqn{y_{-p+1},...,y_0,y_1,...,y_{T}}.
+#' @return Returns the data reformed into a \eqn{((n_{obs}-p+1)\times dp)} matrix. The i:th row
+#'   of the matrix contains the vector \eqn{(y_{i-1},...,y_{i-p})} \eqn{(dp\times 1)}, where
+#'   \eqn{y_{i}=(y_{1i},...,y_{di})} \eqn{(d \times 1)}.
 #' @section Warning:
 #'  No argument checks!
 #' @keywords internal
@@ -20,7 +21,7 @@ reform_data <- function(data, p) {
 }
 
 
-#' @title Form the \eqn{((dp)x(dp))} "bold A" matrices related to the VAR processes
+#' @title Form the \eqn{(dp\times dp)} "bold A" matrices related to the VAR processes
 #'
 #' @description \code{form_boldA} creates the "bold A" (companien form) coefficient matrices related to
 #'   VAR processes.
@@ -28,7 +29,7 @@ reform_data <- function(data, p) {
 #' @inheritParams pick_allA
 #' @param all_A 4D array containing all coefficient matrices \eqn{A_{m,i}}, obtained from \code{pick_allA}.
 #' @details The "bold A" (companion form) matrix is given, for instance, in Lütkepohl (2005, p. 15).
-#' @return Returns 3D array containing the \eqn{((dp)x(dp))} "bold A" matrices related to each component VAR-process.
+#' @return Returns 3D array containing the \eqn{(dp \times dp)} "bold A" matrices related to each component VAR-process.
 #'  The matrix \strong{\eqn{A_{m}}} can be obtained by choosing \code{[, , m]}.
 #' @section Warning:
 #'  No argument checks!

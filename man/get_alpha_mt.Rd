@@ -96,8 +96,8 @@ obtained from \code{form_boldA}. Will be computed if not given.}
 relative dens weight function only)}
 }
 \value{
-Returns the mixing weights a \eqn{(T x M)} matrix, so that the t:th row is for the time point t
-  and m:th column is for the regime m.
+Returns the mixing weights a \eqn{(T x M)} matrix, so that the \eqn{t}th row is for the time period \eqn{t}
+  and \eqn{m}:th column is for the regime \eqn{m}.
 }
 \description{
 \code{get_alpha_mt} computes the transition weights.
