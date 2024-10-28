@@ -785,20 +785,18 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   }
 
   # Obtain relevant statistics
-  data <- check_data(data)
+  data <- check_data(data, p=p)
   d <- ncol(data)
   n_obs <- nrow(data)
   T_obs <- n_obs - p
 
-
   ## Least squares estimation function given thresholds for models without AR constraints
   LS_without_AR_constraints <- function(thresholds) {
-    # threshold = length M-1 vector of the thresholds r_1,...,r_{M-1}
+    # threshold = length M-1 vector of the thresholds r_1,...,r_{M-1}; if M=1 anything is ok
     # Other arguments are taken from the parent environment.
 
-    # Storages for the estimates
-    intercepts <- matrix(NA, nrow=d, ncol=M) # [d, m]
-    AR_matrices <- array(NA, dim=c(d, d, p, M)) # [d, d, p, m]
+    # Storage for the estimates
+    estims <- array(NA, dim=c(d, d*p + 1, M)) # [, , m] for [\phi_{m,0} : A_{m,1} : ... : A_{m,p}]
 
     # In Y, i:th row denotes the vector \bold{y_{i-1}} = (y_{i-1},...,y_{i-p}) (dpx1),
     # assuming the observed data is y_{-p+1},...,y_0,y_1,...,y_{T}. The last row is for
@@ -813,7 +811,59 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     # Go through the regimes
     for(m in 1:M) {
       # Obtain the time periods during which regime m prevails
+      m_periods <- which(abs(alpha_mt[, m] - 1) < 1e-6) # The time periods t when regime m prevails
 
+      # Create the matrix Y for regime m; the first p values in data are the initial valus
+      Y_m <- data[m_periods + p, , drop=FALSE] # (T_m x d)]
+
+      # Create the matrix X for regime m
+      X_m <- cbind(1, Y2[m_periods, , drop=FALSE]) # (T_m x d(p+1))
+
+      # Calculate the lest squares estimates
+      C_m <- t(qr.solve(crossprod(X_m, X_m), crossprod(X_m, Y_m))) # (d x d(p+1)), [\phi_{m,0} : A_{m,1} : ... : A_{m,p}]
+
+      # Store the estimates
+      estims[, , m] <- C_m
     }
+
+    estims
   }
+
+  ## Least squares estimation function given thresholds for models with AR constraints
+  LS_with_AR_constraints <- function(thresholds) {
+    # threshold = length M-1 vector of the thresholds r_1,...,r_{M-1}; if M=1 anything is ok
+    # Other arguments are taken from the parent environment.
+
+    # Create the constraint matrix \tilde{C} with dummy constraints for the intercepts as well
+    q <- ncol(AR_constraints) # The number of intercept and AR parameters under constraints
+    C_tilde <- rbind(cbind(diag(rep(1, times=M*d)), matrix(0, nrow=M*d, ncol=q)),
+                     cbind(matrix(0, nrow=M*p*d^2, ncol=M*d), AR_constraints))
+
+    # Storage for the estimates
+    estims <- array(NA, dim=c(d, d*p + 1, M)) # [, , m] for [\phi_{m,0} : A_{m,1} : ... : A_{m,p}]
+
+    # In Y, i:th row denotes the vector \bold{y_{i-1}} = (y_{i-1},...,y_{i-p}) (dpx1),
+    # assuming the observed data is y_{-p+1},...,y_0,y_1,...,y_{T}. The last row is for
+    # the vector (y_{T},...,y_{T-p}).
+    Y <- reform_data(data, p) # (T_obs + 1 x dp)
+    Y2 <- Y[1:T_obs, , drop=FALSE] # Last row removed; not needed when only lagged observations used
+
+    # The transition weights: (T x M) matrix, the t:th row is for the time point t and the m:th column is for the regime m.
+    alpha_mt <- get_alpha_mt(data, Y2=Y2, p=p, M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                             weightpars=thresholds) # Transition weights (T x M), t:th row
+
+    # Now the observations are stored to a (Td x 1) vector defining the matrix Y.
+    Y <- vec(t(data)) # (Td x 1)
+
+    # We construct the (Td x Md + Mpd^2) matrix X consisting of (d x Md + Mpd^2) blocks X_t for each time period t.
+    # Each block X_t can be partioned to the intercept part X_t_phi (d x Md) and the AR part X_t_A (d x Mpd^2).
+    I_d <- diag(rep(1, times=d)) # The (d x d) identity matrix
+    for(t in 1:T_obs) { # We need to loop through all time periods
+      m <- which(abs(alpha_mt[t, ] - 1) < 1e-6) # The regime m that prevails at time t
+      X_t_phi <- cbind(matrix(0, nrow=d, ncol=(m - 1)*d), I_d, matrix(0, nrow=d, ncol=(M - m)*d)) # (d x Md)
+    }
+
+  }
+
+  LS_without_AR_constraints(threshold=numeric(0))
 }

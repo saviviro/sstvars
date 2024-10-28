@@ -482,7 +482,7 @@ get_alpha_mt <- function(data, Y2, p, M, d, weight_function=c("relative_dens", "
     return(weightfun_pars)
   }
   if(is.null(log_mvdvalues)) {
-    T_obs <- ifelse(missing(data), 1, nrow(data) - p) # simulate.stvar uses without data, needs to return 1 if M=1.
+    T_obs <- ifelse(missing(data), 1, nrow(data) - p) # simulate.stvar and estim_LS use without data, needs to return 1 if M=1.
     if(M == 1) {
       return(as.matrix(rep(1, times=T_obs)))
     }
