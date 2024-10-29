@@ -789,6 +789,8 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   d <- ncol(data)
   n_obs <- nrow(data)
   T_obs <- n_obs - p
+  T_min <- 2/d*ifelse(is.null(AR_constraints), (p + 1)*d^2 + d,
+                      ncol(AR_constraints)/M + d + d^2) # Minimum number of obs in each regime
 
   ## Least squares estimation function given thresholds for models without AR constraints
   LS_without_AR_constraints <- function(thresholds) {
@@ -796,7 +798,12 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     # Other arguments are taken from the parent environment.
 
     # Storage for the estimates
-    estims <- array(NA, dim=c(d, d*p + 1, M)) # [, , m] for [\phi_{m,0} : A_{m,1} : ... : A_{m,p}]
+    #estims <- array(NA, dim=c(d, d*p + 1, M)) # [, , m] for [\phi_{m,0} : A_{m,1} : ... : A_{m,p}]
+    all_intercepts <- matrix(NA, nrow=d, ncol=M) # (d x M), [, m] for regime m
+    all_AR_mats <- array(NA, dim=c(d, d*p, M)) # [, , m] for A_{m,1} : ... : A_{m,p}
+
+    # Storage for the sums of squares of residuals
+    all_ssr <- numeric(M) # The sum of squares of residuals for each regime
 
     # In Y, i:th row denotes the vector \bold{y_{i-1}} = (y_{i-1},...,y_{i-p}) (dpx1),
     # assuming the observed data is y_{-p+1},...,y_0,y_1,...,y_{T}. The last row is for
@@ -823,10 +830,20 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       C_m <- t(qr.solve(crossprod(X_m, X_m), crossprod(X_m, Y_m))) # (d x d(p+1)), [\phi_{m,0} : A_{m,1} : ... : A_{m,p}]
 
       # Store the estimates
-      estims[, , m] <- C_m
+      #estims[, , m] <- C_m
+      all_intercepts[, m] <- C_m[, 1]
+      all_AR_mats[, , m] <- C_m[, -1]
+
+      # Calculate the sum of squares of residuals
+      U_m <- Y_m - X_m%*%C_m # (T_m x d), residuals
+      all_ssr[m] <- trace(crossprod(U_m, U_m)) # The sum of squares of residuals
     }
 
-    estims
+    # Obtain the estimates in the vector (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M)
+    estims <- c(all_intercepts, all_AR_mats)
+
+    # Return the estimates and the sum of squares of residuals, the last element is the for ssr
+    c(estims, sum(all_ssr))
   }
 
   ## Least squares estimation function given thresholds for models with AR constraints
@@ -855,15 +872,38 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     # Now the observations are stored to a (Td x 1) vector defining the matrix Y.
     Y <- vec(t(data)) # (Td x 1)
 
+    # Initialize the matrix of regressors X.
+    X <- matrix(0, nrow=d*T_obs, ncol=M*d + M*p*d^2) # (Td x Md + Mpd^2)
+
     # We construct the (Td x Md + Mpd^2) matrix X consisting of (d x Md + Mpd^2) blocks X_t for each time period t.
     # Each block X_t can be partioned to the intercept part X_t_phi (d x Md) and the AR part X_t_A (d x Mpd^2).
     I_d <- diag(rep(1, times=d)) # The (d x d) identity matrix
     for(t in 1:T_obs) { # We need to loop through all time periods
       m <- which(abs(alpha_mt[t, ] - 1) < 1e-6) # The regime m that prevails at time t
       X_t_phi <- cbind(matrix(0, nrow=d, ncol=(m - 1)*d), I_d, matrix(0, nrow=d, ncol=(M - m)*d)) # (d x Md)
+      X_t_A <- matrix(0, nrow=d, ncol=M*p*d^2) # (d x Mpd^2), initialize the AR part
+      for(j in 1:p) { # Go through the lags and fill in the blocks
+        # The Block_{A_{m,j}} is the columns: (dp*(m - 1)+ d*(j - 1) + 1):(dp*(m - 1) + d*j)
+        X_t_A[, (dp*(m - 1) + (j - 1)*d^2 + 1):(dp*(m - 1) + j*d^2)] <- kronecker(t(data[t + p - j,]), I_d) # (d x d^2) block
+      }
+      # Will in the X_t block to the X matrix
+      X[((t - 1)*d + 1):((t - 1)*d + d), ] <- cbind(X_t_phi, X_t_A) # (d x Md + Mpd^2)
     }
 
+    # Integrate the constraints into the design matrix
+    X_tilde <- X%*%C_tilde # (Td x q)
+
+    # Calculate the least squares estimates, (phi_{1,0}, ..., phi_{M,0}, psi))
+    estims <- qr.solve(crossprod(X_tilde, X_tilde), crossprod(X_tilde, Y)) # (M*de + q x 1)
+
+    # Calculate the sum of squares of residuals
+    U <- Y - X_tilde%*%estims # (Td x 1), residuals
+    ssr <- crossprod(U, U) # The sum of squares of residuals
+
+    # Return the estimates and the sum of squares of residuals, the last element is the for ssr
+    c(estims, ssr)
   }
 
-  LS_without_AR_constraints(threshold=numeric(0))
+  ## Create the set of threshold vectors for the optimization; M=1 will use numeric(0) and run the LS only once
+
 }
