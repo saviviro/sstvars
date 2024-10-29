@@ -121,6 +121,22 @@ get_mu_yt_Cpp <- function(obs, all_phi0, all_A, alpha_mt) {
     .Call('_sstvars_get_mu_yt_Cpp', PACKAGE = 'sstvars', obs, all_phi0, all_A, alpha_mt)
 }
 
+#' @name get_multisets_Cpp
+#' @title Generate all k-element multisets
+#' @description Generates all d-element multisets in \eqn{\lbrace 1,...,n \rbrace}
+#'   ordered in a lexicographic order.
+#'
+#' @param n positive integer specifying the value n in \eqn{\lbrace 1,...,n \rbrace}.
+#' @param k positive integer specifying the size of the multisets.
+#' @param N the binomial coefficient \code{choose(n + k - 1, k)} (calculated in R wrapper)
+#' @details This function is used in the least squares estimation
+#' @return a numeric matrix with N rows and d columns, containing each multiset in each row, ordered
+#'   lexicographically from top to bottom.
+#' @keywords internal
+get_multisets_Cpp <- function(n, k, N) {
+    .Call('_sstvars_get_multisets_Cpp', PACKAGE = 'sstvars', n, k, N)
+}
+
 #' @name ind_Student_densities_Cpp
 #' @title Calculate log independent multivariate Student's t densities
 #' @description Calculates logs of independent multivariate Student t densities with varying mean
