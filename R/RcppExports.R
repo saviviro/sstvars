@@ -123,7 +123,7 @@ get_mu_yt_Cpp <- function(obs, all_phi0, all_A, alpha_mt) {
 
 #' @name get_multisets_Cpp
 #' @title Generate all k-element multisets
-#' @description Generates all d-element multisets in \eqn{\lbrace 1,...,n \rbrace}
+#' @description Generates all k-element multisets in \eqn{\lbrace 1,...,n \rbrace}
 #'   ordered in a lexicographic order.
 #'
 #' @param n positive integer specifying the value n in \eqn{\lbrace 1,...,n \rbrace}.

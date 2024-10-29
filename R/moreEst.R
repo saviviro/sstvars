@@ -791,6 +791,9 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   T_obs <- n_obs - p
   T_min <- 2/d*ifelse(is.null(AR_constraints), (p + 1)*d^2 + d,
                       ncol(AR_constraints)/M + d + d^2) # Minimum number of obs in each regime
+  if(T_obs/M < T_min) {
+    stop("The number of observations is too small for reasonable estimation. Decrease the order p or the number of regimes M.")
+  }
 
   ## Least squares estimation function given thresholds for models without AR constraints
   LS_without_AR_constraints <- function(thresholds) {
@@ -905,5 +908,46 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   }
 
   ## Create the set of threshold vectors for the optimization; M=1 will use numeric(0) and run the LS only once
+  switch_var_series <- data[weightfun_pars[1],] # The switching variable time series
+  sv_sorted_full <- sort(switch_var_series, decreasing=FALSE) # The sorted switch variable series
 
+  # Remove the values from the sorted switch variable series that would leave less than T_min observations
+  # smaller or larger than the threshold.
+  switch_var_sorted <- sv_sorted_full[T_min:(length(switch_var_series) - T_min)]
+  min_switchvar <- min(switch_var_sorted)
+  max_switchvar <- max(switch_var_sorted)
+
+  # The maximum number of grid points is calculated so that the number M-1 dimensional of multisets
+  # is at most 10000 for M <= 4.
+  if(M == 1) {
+    thresholds <- numeric(0)
+  } else {
+    if(M == 2) {
+      max_thresholds <- 200 # The maximum number of threshold values to considered
+      if(length(switch_var_sorted) < max_thresholds) {
+        grid_points <- switch_var_sorted
+      } else {
+        grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=max_thresholds)
+      }
+    } else if(M == 3) {
+      grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=141)
+    } else if(M == 4) {
+      grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=40)
+    } else {
+      grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=25)
+    }
+    thresholds <- t(combn(x=grid_points, m=M - 1, simplify=TRUE)) # M-1 dim multisets of lexically ordered grid points
+  }
+  if(M == 2) {
+    thresvecs <- thresholds # Each row for each threshold vector (scalar in this case)
+  } else {
+    obs_between_thresholds <-  matrix(NA, nrow=nrow(thresholds), ncol=M - 2) # The number of observations between the thresholds
+    for(m in 1:(M - 2)) {
+      n_at_most_upper <- findInterval(x=thresholds[, 2], vec=sv_sorted_full, left.open=TRUE, rightmost.closed=TRUE)
+      n_at_most_lower <- findInterval(x=thresholds[, 1], vec=sv_sorted_full, left.open=TRUE, rightmost.closed=TRUE)
+      obs_between_thresholds[,m] <- n_at_most_upper - n_at_most_lower # Number of observations between lower and upper threshold
+    }
+    # The threshold vectors with enough observations in all regimes
+    thresvecs <- thresholds[which(rowSums(obs_between_thresholds >= T_min) == ncol(obs_between_thresholds)),]
+  }
 }

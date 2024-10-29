@@ -18,7 +18,7 @@ a numeric matrix with N rows and d columns, containing each multiset in each row
   lexicographically from top to bottom.
 }
 \description{
-Generates all d-element multisets in \eqn{\lbrace 1,...,n \rbrace}
+Generates all k-element multisets in \eqn{\lbrace 1,...,n \rbrace}
   ordered in a lexicographic order.
 }
 \details{
