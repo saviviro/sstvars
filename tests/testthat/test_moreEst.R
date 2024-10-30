@@ -32,3 +32,7 @@ test_that("fitSSTVAR works correctly", {
                                         -0.001023027, 0.386047861, 0.313316913, 0.069656755, 0.426723021), tolerance=1e-4)
 
 })
+
+test_that("estim_LS works correctly", {
+  expect_equal(, c(0), tolerance=1e-4)
+})

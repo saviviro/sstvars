@@ -16,7 +16,9 @@ estim_LS(
   parametrization = c("intercept", "mean"),
   AR_constraints = NULL,
   mean_constraints = NULL,
-  weight_constraints = NULL
+  weight_constraints = NULL,
+  use_parallel = TRUE,
+  ncores = 2
 )
 }
 \arguments{
@@ -94,6 +96,10 @@ The constraints are of the form \eqn{\alpha = R\xi + r}, where \eqn{R} is a know
 constraint matrix of full column rank (\eqn{a} is the dimension of \eqn{\alpha}), \eqn{r} is a known \eqn{(a\times 1)} constant,
 and \eqn{\xi} is an unknown \eqn{(l\times 1)} parameter. \strong{Alternatively}, set \eqn{R=0} in order to constrain the
 the weight parameter to the constant \eqn{r} (in this case, \eqn{\alpha} is dropped from the constrained parameter vector).}
+
+\item{use_parallel}{employ parallel computing? If \code{FALSE}, does not print anything.}
+
+\item{ncores}{the number CPU cores to be used in parallel computing.}
 }
 \value{
 Returns the estimated parameters in a vector of the form

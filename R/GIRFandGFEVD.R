@@ -233,7 +233,7 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
     ### Calculate the GIRFs ###
     cl <- parallel::makeCluster(ncores)
     on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.
-    parallel::clusterExport(cl, ls(environment(GIRF)), envir = environment(GIRF)) # assign all variables from package:sstvars
+    parallel::clusterExport(cl, ls(environment(GIRF)), envir=environment(GIRF)) # assign all variables from package:sstvars
     parallel::clusterEvalQ(cl, c(library(pbapply), library(Rcpp), library(RcppArmadillo), library(sstvars)))
 
     for(i1 in 1:length(which_shocks)) {

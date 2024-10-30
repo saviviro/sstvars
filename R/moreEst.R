@@ -734,6 +734,8 @@ fitbsSSTVAR <- function(data, p, M, params,
 #'   by the method of least squares.
 #'
 #' @inheritParams loglikelihood
+#' @param ncores the number CPU cores to be used in parallel computing.
+#' @param use_parallel employ parallel computing? If \code{FALSE}, does not print anything.
 #' @details Used internally in the multiple phase estimation procedure proposed by Koivisto,
 #'  Luoto, and Virolainen (2025). Mean constraints are not supported. Only weight constraints that
 #'  specify the threshold parameters as fixed values are supported.
@@ -766,7 +768,8 @@ fitbsSSTVAR <- function(data, p, M, params,
 
 estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                      weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
-                     parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL) {
+                     parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
+                     use_parallel=TRUE, ncores=2) {
   # Checks
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -959,24 +962,32 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   } else { # thresholds fixed to known numbers
     thresvecs <- matrix(weight_constraints[[2]], nrow=1, ncol=M - 1)
   }
-  message(paste("Estimating by least squares for ", nrow(thresvecs), " vectors of thresholds"))
 
   # Each row in thresvecs of a threshold vector
 
   ## Estimate the model for all thresholds vectors in thresvecs
-  if(is.null(AR_constraints)) { # No AR constraints
-    if(M == 1) {
-      estims <- LS_without_AR_constraints(numeric(0))
-    } else {
-      estims <- vapply(1:nrow(thresvecs), FUN=function(i1) LS_without_AR_constraints(thresvecs[i1,], index=i1),
-                       FUN.VALUE=numeric(M*d + M*p*d^2 + 1))
-    }
-  } else { # AR constraints
-    if(M == 1) {
-      estims <- LS_with_AR_constraints(numeric(0))
-    } else {
-      estims <- vapply(1:nrow(thresvecs), FUN=function(i1) LS_with_AR_constraints(thresvecs[i1,]),
-                       FUN.VALUE=numeric(M*d + ncol(AR_constraints) + 1))
+  estim_fun <- if(is.null(AR_constraints)) LS_without_AR_constraints else LS_with_AR_constraints
+  estim_length <- if(is.null(AR_constraints)) d + M*p*d^2 + 1 else M*d + ncol(AR_constraints) + 1
+
+  if(M == 1) {
+    estims <- estim_fun(numeric(0))
+  } else {
+    if(use_parallel) {
+      if(ncores > parallel::detectCores()) {
+        ncores <- parallel::detectCores()
+        message("ncores was set to be larger than the number of cores detected")
+      }
+      n_thresvecs <- ifelse(M == 1 || !is.null(weight_constraints), 1, nrow(thresvecs))
+      message(paste("Estimating by least squares for ", n_thresvecs, " vectors of thresholds..."))
+      cl <- parallel::makeCluster(ncores)
+      on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.
+      parallel::clusterExport(cl, ls(environment(estim_LS)), envir=environment(estim_LS)) # assign all variables from package:sstvars
+      parallel::clusterEvalQ(cl, c(library(pbapply), library(sstvars)))
+      estims <- simplify2array(pbapply::pblapply(1:nrow(thresvecs), FUN=function(i1) estim_fun(thresvecs[i1,]), cl=cl))
+      parallel::stopCluster(cl=cl)
+    } else { # No parallel computing
+      estims <- vapply(1:nrow(thresvecs), FUN=function(i1) estim_fun(thresvecs[i1,]),
+                       FUN.VALUE=numeric(estim_length))
     }
   }
   estims <- as.matrix(estims)
