@@ -786,10 +786,16 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                  "are supported in the least squares estimation."))
     }
   }
-
-  # Obtain relevant statistics
   data <- check_data(data, p=p)
   d <- ncol(data)
+  weightfun_pars <- check_weightfun_pars(data=data, p=p, d=d, M=M, weight_function=weight_function,
+                                         weightfun_pars=weightfun_pars, cond_dist=cond_dist)
+  check_constraints(data=data, p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                    parametrization=parametrization, identification="reduced_form",
+                    AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                    weight_constraints=weight_constraints, B_constraints=NULL)
+
+  # Obtain relevant statistics
   n_obs <- nrow(data)
   T_obs <- n_obs - p
   T_min <- 2/d*ifelse(is.null(AR_constraints), (p + 1)*d^2 + d,
@@ -882,7 +888,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                              weightpars=thresholds) # Transition weights (T x M), t:th row
 
     # Now the observations are stored to a (Td x 1) vector defining the matrix Y.
-    Y <- vec(t(data)) # (Td x 1)
+    Y <- as.matrix(vec(t(data[(p+1):nrow(data),]))) # (Td x 1), we don't take the first p observations (init values)
 
     # Initialize the matrix of regressors X.
     X <- matrix(0, nrow=d*T_obs, ncol=M*d + M*p*d^2) # (Td x Md + Mpd^2)
@@ -896,20 +902,25 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       X_t_A <- matrix(0, nrow=d, ncol=M*p*d^2) # (d x Mpd^2), initialize the AR part
       for(j in 1:p) { # Go through the lags and fill in the blocks
         # The Block_{A_{m,j}} is the columns: (dp*(m - 1)+ d*(j - 1) + 1):(dp*(m - 1) + d*j)
-        X_t_A[, (dp*(m - 1) + (j - 1)*d^2 + 1):(dp*(m - 1) + j*d^2)] <- kronecker(t(data[t + p - j,]), I_d) # (d x d^2) block
+        X_t_A[, ((m - 1)*p*d^2 + (j - 1)*d^2 + 1):((m - 1)*p*d^2 + j*d^2)] <- kronecker(t(data[t + p - j,]), I_d) # (d x d^2) block
       }
       # Will in the X_t block to the X matrix
       X[((t - 1)*d + 1):((t - 1)*d + d), ] <- cbind(X_t_phi, X_t_A) # (d x Md + Mpd^2)
     }
 
     # Integrate the constraints into the design matrix
-    X_tilde <- X%*%C_tilde # (Td x q)
+    X_bold <- X%*%C_tilde # (Td x q)
 
     # Calculate the least squares estimates, (phi_{1,0}, ..., phi_{M,0}, psi))
-    estims <- qr.solve(crossprod(X_tilde, X_tilde), crossprod(X_tilde, Y)) # (M*de + q x 1)
+    #print(paste("dim X_bold:", paste(dim(X_bold), collapse=" ")))
+    #print(paste("dim Y:", paste(dim(Y), collapse=" ")))
+    #print(paste("dim X_bold'X_bold:", paste(dim(crossprod(X_bold, X_bold)), collapse=" ")))
+    #print(paste("dim X_bold'Y:", paste(dim(crossprod(X_bold, Y)), collapse=" ")))
+    #print(crossprod(X_bold, X_bold))
+    estims <- qr.solve(crossprod(X_bold, X_bold), crossprod(X_bold, Y)) # (M*de + q x 1)
 
     # Calculate the sum of squares of residuals
-    U <- Y - X_tilde%*%estims # (Td x 1), residuals
+    U <- Y - X_bold%*%estims # (Td x 1), residuals
     ssr <- crossprod(U, U) # The sum of squares of residuals
 
     # Return the estimates and the sum of squares of residuals, the last element is the for ssr
@@ -956,7 +967,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
         obs_between_thresholds[,m] <- n_at_most_upper - n_at_most_lower # Number of observations between lower and upper threshold
       }
       # The threshold vectors with enough observations in all regimes
-      tmp_rowsums <- rowSums(obs_between_thresholds >= T_min)
+      #print(which(rowSums(obs_between_thresholds >= T_min) == ncol(obs_between_thresholds)))
       thresvecs <- thresholds[which(rowSums(obs_between_thresholds >= T_min) == ncol(obs_between_thresholds)), , drop=FALSE]
     }
   } else { # thresholds fixed to known numbers
