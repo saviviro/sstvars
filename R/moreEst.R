@@ -911,13 +911,8 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     # Integrate the constraints into the design matrix
     X_bold <- X%*%C_tilde # (Td x q)
 
-    # Calculate the least squares estimates, (phi_{1,0}, ..., phi_{M,0}, psi))
-    #print(paste("dim X_bold:", paste(dim(X_bold), collapse=" ")))
-    #print(paste("dim Y:", paste(dim(Y), collapse=" ")))
-    #print(paste("dim X_bold'X_bold:", paste(dim(crossprod(X_bold, X_bold)), collapse=" ")))
-    #print(paste("dim X_bold'Y:", paste(dim(crossprod(X_bold, Y)), collapse=" ")))
-    #print(crossprod(X_bold, X_bold))
-    estims <- qr.solve(crossprod(X_bold, X_bold), crossprod(X_bold, Y)) # (M*de + q x 1)
+    estims <- tryCatch(qr.solve(crossprod(X_bold, X_bold), crossprod(X_bold, Y)), # (M*d + q x 1)
+                       error=function(e) matrix(0, nrow=M*d + q, ncol=1)) # zero estimates are legal but bad, dummy estimates
 
     # Calculate the sum of squares of residuals
     U <- Y - X_bold%*%estims # (Td x 1), residuals
