@@ -791,12 +791,16 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   T_obs <- n_obs - p
   T_min <- 2/d*ifelse(is.null(AR_constraints), (p + 1)*d^2 + d,
                       ncol(AR_constraints)/M + d + d^2) # Minimum number of obs in each regime
-  if(T_obs/M < T_min) {
-    stop("The number of observations is too small for reasonable estimation. Decrease the order p or the number of regimes M.")
+  if(T_obs/M < T_min) { # Try smaller T_min
+    T_min <- 1.5/d*ifelse(is.null(AR_constraints), (p + 1)*d^2 + d,
+                        ncol(AR_constraints)/M + d + d^2)
+    if(T_obs/M < T_min) {
+      stop("The number of observations is too small for reasonable estimation. Decrease the order p or the number of regimes M.")
+    }
   }
 
   ## Least squares estimation function given thresholds for models without AR constraints
-  LS_without_AR_constraints <- function(thresholds) {
+  LS_without_AR_constraints <- function(thresholds, index) {
     # threshold = length M-1 vector of the thresholds r_1,...,r_{M-1}; if M=1 anything is ok
     # Other arguments are taken from the parent environment.
 
@@ -815,7 +819,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     Y2 <- Y[1:T_obs, , drop=FALSE] # Last row removed; not needed when only lagged observations used
 
     # The transition weights: (T x M) matrix, the t:th row is for the time point t and the m:th column is for the regime m.
-    alpha_mt <- get_alpha_mt(data, Y2=Y2, p=p, M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
+    alpha_mt <- get_alpha_mt(data, Y2=Y2, p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
                              weightpars=thresholds) # Transition weights (T x M), t:th row
 
     # Go through the regimes
@@ -830,16 +834,18 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       X_m <- cbind(1, Y2[m_periods, , drop=FALSE]) # (T_m x d(p+1))
 
       # Calculate the lest squares estimates
-      C_m <- t(qr.solve(crossprod(X_m, X_m), crossprod(X_m, Y_m))) # (d x d(p+1)), [\phi_{m,0} : A_{m,1} : ... : A_{m,p}]
+      C_m <- tryCatch(qr.solve(crossprod(X_m, X_m), crossprod(X_m, Y_m)), # (d x d(p+1)), [\phi_{m,0} : A_{m,1} : ... : A_{m,p}]
+                      error=function(e) matrix(0, nrow=d, ncol=d*p + 1)) # zero estimates are legal but bad, dummy estimates
+      tC_m <- t(C_m)
 
       # Store the estimates
       #estims[, , m] <- C_m
-      all_intercepts[, m] <- C_m[, 1]
-      all_AR_mats[, , m] <- C_m[, -1]
+      all_intercepts[, m] <- tC_m[, 1]
+      all_AR_mats[, , m] <- tC_m[, -1]
 
       # Calculate the sum of squares of residuals
       U_m <- Y_m - X_m%*%C_m # (T_m x d), residuals
-      all_ssr[m] <- trace(crossprod(U_m, U_m)) # The sum of squares of residuals
+      all_ssr[m] <- sum(diag((crossprod(U_m, U_m)))) # The sum of squares of residuals
     }
 
     # Obtain the estimates in the vector (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M)
@@ -869,7 +875,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     Y2 <- Y[1:T_obs, , drop=FALSE] # Last row removed; not needed when only lagged observations used
 
     # The transition weights: (T x M) matrix, the t:th row is for the time point t and the m:th column is for the regime m.
-    alpha_mt <- get_alpha_mt(data, Y2=Y2, p=p, M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
+    alpha_mt <- get_alpha_mt(data, Y2=Y2, p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
                              weightpars=thresholds) # Transition weights (T x M), t:th row
 
     # Now the observations are stored to a (Td x 1) vector defining the matrix Y.
@@ -908,46 +914,83 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   }
 
   ## Create the set of threshold vectors for the optimization; M=1 will use numeric(0) and run the LS only once
-  switch_var_series <- data[weightfun_pars[1],] # The switching variable time series
-  sv_sorted_full <- sort(switch_var_series, decreasing=FALSE) # The sorted switch variable series
+  if(is.null(weight_constraints)) {
+    switch_var_series <- data[,weightfun_pars[1]] # The switching variable time series
+    sv_sorted_full <- sort(switch_var_series, decreasing=FALSE) # The sorted switch variable series
 
-  # Remove the values from the sorted switch variable series that would leave less than T_min observations
-  # smaller or larger than the threshold.
-  switch_var_sorted <- sv_sorted_full[T_min:(length(switch_var_series) - T_min)]
-  min_switchvar <- min(switch_var_sorted)
-  max_switchvar <- max(switch_var_sorted)
+    # Remove the values from the sorted switch variable series that would leave less than T_min observations
+    # smaller or larger than the threshold.
+    switch_var_sorted <- sv_sorted_full[T_min:(length(switch_var_series) - T_min)]
+    min_switchvar <- min(switch_var_sorted)
+    max_switchvar <- max(switch_var_sorted)
 
-  # The maximum number of grid points is calculated so that the number M-1 dimensional of multisets
-  # is at most 10000 for M <= 4.
-  if(M == 1) {
-    thresholds <- numeric(0)
-  } else {
-    if(M == 2) {
-      max_thresholds <- 200 # The maximum number of threshold values to considered
-      if(length(switch_var_sorted) < max_thresholds) {
-        grid_points <- switch_var_sorted
+    # The maximum number of grid points is calculated so that the number M-1 dimensional of multisets
+    # is at most 10000 for M <= 4.
+    if(M >= 2) { # M=1 case is separately handled
+      max_thresholds <- 400 # The maximum number of threshold values to considered
+      if(M == 2) {
+        if(length(switch_var_sorted) < max_thresholds) {
+          grid_points <- switch_var_sorted
+        } else {
+          grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=max_thresholds)
+        }
+      } else if(M == 3) {
+        grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=min(140, max_thresholds))
+      } else if(M == 4) {
+        grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=40)
       } else {
-        grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=max_thresholds)
+        grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=25)
       }
-    } else if(M == 3) {
-      grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=141)
-    } else if(M == 4) {
-      grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=40)
+      thresholds <- t(combn(x=grid_points, m=M - 1, simplify=TRUE)) # M-1 dim multisets of lexically ordered grid points
+    }
+    if(M == 2) {
+      thresvecs <- thresholds # Each row for each threshold vector (scalar in this case)
+    } else if(M > 2) {
+      obs_between_thresholds <-  matrix(NA, nrow=nrow(thresholds), ncol=M - 2) # The number of observations between the thresholds
+      for(m in 1:(M - 2)) {
+        n_at_most_upper <- findInterval(x=thresholds[, m + 1], vec=sv_sorted_full, left.open=TRUE, rightmost.closed=TRUE)
+        n_at_most_lower <- findInterval(x=thresholds[, m], vec=sv_sorted_full, left.open=TRUE, rightmost.closed=TRUE)
+        obs_between_thresholds[,m] <- n_at_most_upper - n_at_most_lower # Number of observations between lower and upper threshold
+      }
+      # The threshold vectors with enough observations in all regimes
+      tmp_rowsums <- rowSums(obs_between_thresholds >= T_min)
+      thresvecs <- thresholds[which(rowSums(obs_between_thresholds >= T_min) == ncol(obs_between_thresholds)), , drop=FALSE]
+    }
+  } else { # thresholds fixed to known numbers
+    thresvecs <- matrix(weight_constraints[[2]], nrow=1, ncol=M - 1)
+  }
+  message(paste("Estimating by least squares for ", nrow(thresvecs), " vectors of thresholds"))
+
+  # Each row in thresvecs of a threshold vector
+
+  ## Estimate the model for all thresholds vectors in thresvecs
+  if(is.null(AR_constraints)) { # No AR constraints
+    if(M == 1) {
+      estims <- LS_without_AR_constraints(numeric(0))
     } else {
-      grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=25)
+      estims <- vapply(1:nrow(thresvecs), FUN=function(i1) LS_without_AR_constraints(thresvecs[i1,], index=i1),
+                       FUN.VALUE=numeric(M*d + M*p*d^2 + 1))
     }
-    thresholds <- t(combn(x=grid_points, m=M - 1, simplify=TRUE)) # M-1 dim multisets of lexically ordered grid points
+  } else { # AR constraints
+    if(M == 1) {
+      estims <- LS_with_AR_constraints(numeric(0))
+    } else {
+      estims <- vapply(1:nrow(thresvecs), FUN=function(i1) LS_with_AR_constraints(thresvecs[i1,]),
+                       FUN.VALUE=numeric(M*d + ncol(AR_constraints) + 1))
+    }
   }
-  if(M == 2) {
-    thresvecs <- thresholds # Each row for each threshold vector (scalar in this case)
+  estims <- as.matrix(estims)
+  # Each column in estims corresponds to each vector of thresholds
+
+  ## Find the index for which the sum of squares of residuals is the smallest
+  min_ssr_index <- which.min(estims[nrow(estims),])[1]
+
+  ## Obtain and return the estimates corresponding the smallest sum of squares of residuals
+  int_and_ar_estims <- estims[1:(nrow(estims) - 1), min_ssr_index]
+  if(M == 1 || !is.null(weight_constraints)) {
+    threshold_estims <- numeric(0) # No threshold estimates
   } else {
-    obs_between_thresholds <-  matrix(NA, nrow=nrow(thresholds), ncol=M - 2) # The number of observations between the thresholds
-    for(m in 1:(M - 2)) {
-      n_at_most_upper <- findInterval(x=thresholds[, 2], vec=sv_sorted_full, left.open=TRUE, rightmost.closed=TRUE)
-      n_at_most_lower <- findInterval(x=thresholds[, 1], vec=sv_sorted_full, left.open=TRUE, rightmost.closed=TRUE)
-      obs_between_thresholds[,m] <- n_at_most_upper - n_at_most_lower # Number of observations between lower and upper threshold
-    }
-    # The threshold vectors with enough observations in all regimes
-    thresvecs <- thresholds[which(rowSums(obs_between_thresholds >= T_min) == ncol(obs_between_thresholds)),]
+    threshold_estims <- thresvecs[min_ssr_index,]
   }
+  c(int_and_ar_estims, threshold_estims) # Return the estimates
 }
