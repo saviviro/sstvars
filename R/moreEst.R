@@ -848,7 +848,6 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       tC_m <- t(C_m)
 
       # Store the estimates
-      #estims[, , m] <- C_m
       all_intercepts[, m] <- tC_m[, 1]
       all_AR_mats[, , m] <- tC_m[, -1]
 
