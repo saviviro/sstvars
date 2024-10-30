@@ -92,19 +92,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// get_multisets_Cpp
-arma::mat get_multisets_Cpp(int n, int k, arma::uword N);
-RcppExport SEXP _sstvars_get_multisets_Cpp(SEXP nSEXP, SEXP kSEXP, SEXP NSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< int >::type k(kSEXP);
-    Rcpp::traits::input_parameter< arma::uword >::type N(NSEXP);
-    rcpp_result_gen = Rcpp::wrap(get_multisets_Cpp(n, k, N));
-    return rcpp_result_gen;
-END_RCPP
-}
 // ind_Student_densities_Cpp
 arma::vec ind_Student_densities_Cpp(const arma::mat& obs, const arma::mat& means, const arma::cube& impact_matrices, arma::mat& alpha_mt, const arma::vec& distpars, const arma::vec& minval, const double posdef_tol);
 RcppExport SEXP _sstvars_ind_Student_densities_Cpp(SEXP obsSEXP, SEXP meansSEXP, SEXP impact_matricesSEXP, SEXP alpha_mtSEXP, SEXP distparsSEXP, SEXP minvalSEXP, SEXP posdef_tolSEXP) {
@@ -148,7 +135,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_sstvars_check_Bt_Cpp", (DL_FUNC) &_sstvars_check_Bt_Cpp, 3},
     {"_sstvars_get_Bt_Cpp", (DL_FUNC) &_sstvars_get_Bt_Cpp, 2},
     {"_sstvars_get_mu_yt_Cpp", (DL_FUNC) &_sstvars_get_mu_yt_Cpp, 4},
-    {"_sstvars_get_multisets_Cpp", (DL_FUNC) &_sstvars_get_multisets_Cpp, 3},
     {"_sstvars_ind_Student_densities_Cpp", (DL_FUNC) &_sstvars_ind_Student_densities_Cpp, 7},
     {"_sstvars_ind_skewed_t_densities_Cpp", (DL_FUNC) &_sstvars_ind_skewed_t_densities_Cpp, 8},
     {NULL, NULL, 0}
