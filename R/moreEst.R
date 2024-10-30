@@ -967,7 +967,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
 
   ## Estimate the model for all thresholds vectors in thresvecs
   estim_fun <- if(is.null(AR_constraints)) LS_without_AR_constraints else LS_with_AR_constraints
-  estim_length <- if(is.null(AR_constraints)) d + M*p*d^2 + 1 else M*d + ncol(AR_constraints) + 1
+  estim_length <- if(is.null(AR_constraints)) M*d + M*p*d^2 + 1 else M*d + ncol(AR_constraints) + 1
 
   if(M == 1) {
     estims <- estim_fun(numeric(0))
