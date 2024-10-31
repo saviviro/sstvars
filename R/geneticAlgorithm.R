@@ -363,7 +363,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                             force_stability=is.null(AR_constraints),
                                             mu_scale=mu_scale, mu_scale2=mu_scale2,
                                             omega_scale=omega_scale, B_scale=B_scale, ar_scale=ar_scale,
-                                            weight_scale=weight_scale, ar_scale2=ar_scale2))
+                                            weight_scale=weight_scale, ar_scale2=ar_scale2, fixed_params=fixed_params))
 
       ind_loks <- vapply(1:popsize, function(i2) loglikelihood(data=data, p=p, M=M, params=inds[,i2],
                                                                weight_function=weight_function, weightfun_pars=weightfun_pars,
@@ -379,10 +379,15 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
         break
       } else if(i1 == n_attempts) {
         if(length(G) == 0) {
-          stop("Failed to create initial population with good enough individuals. Scaling the individual series
-               so that the AR coefficients (of a VAR model) will not be very large (preferably less than one)
-               may solve the problem. If needed, another package may be used to fit linear VARs so see which
-               scalings produce relatively small AR coefficient estimates.")
+          if(!is.null(fixed_params)) {
+            stop("Failed to create initial population with good enough individuals. Check that fixed_params are reasonable
+                  estimates and satisfy the stability condition and other requirements.")
+          } else {
+            stop(paste("Failed to create initial population with good enough individuals. Scaling the individual series",
+                       "so that the AR coefficients (of a VAR model) will not be very large (preferably less than one)",
+                       "may solve the problem. If needed, another package may be used to fit linear VARs so see which",
+                       "scalings produce relatively small AR coefficient estimates."))
+          }
         } else {
           G <- G[, sample.int(ncol(G), size=popsize, replace=TRUE)]
         }
@@ -613,7 +618,8 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                                                                  B_scale=B_scale,
                                                                                  ar_scale=ar_scale,
                                                                                  weight_scale=weight_scale,
-                                                                                 ar_scale2=ar_scale2), numeric(npars))
+                                                                                 ar_scale2=ar_scale2,
+                                                                                 fixed_params=fixed_params), numeric(npars))
 
     } else if(length(which_mutate) >= 1) { # Smart mutations
       stat_mu <- FALSE
@@ -634,8 +640,8 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
 
       ## 'Smart mutation': mutate close to a well fitting individual. We obviously don't mutate close to
       # redundant regimes but draw them at random ('rand_to_use' in what follows).
-      if(!is.null(AR_constraints) | !is.null(mean_constraints) | !is.null(weight_constraints) |
-         length(which_redundant) <= length(which_redundant_alt) | runif(1) > 0.5) {
+      if(!is.null(AR_constraints) || !is.null(mean_constraints) || !is.null(weight_constraints) ||
+         length(which_redundant) <= length(which_redundant_alt) || !is.null(fixed_params) || runif(1) > 0.5) {
         # The first option for smart mutations: smart mutate to 'alt_ind' which is the best fitting individual
         # with the least redundant regimes.
         # Note that best_ind == alt_ind when length(which_redundant) <= length(which_redundant_alt).
@@ -708,7 +714,8 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                                                                  omega_scale=omega_scale,
                                                                                  B_scale=B_scale,
                                                                                  ar_scale=ar_scale,
-                                                                                 ar_scale2=ar_scale2), numeric(npars))
+                                                                                 ar_scale2=ar_scale2,
+                                                                                 fixed_params=fixed_params), numeric(npars))
     }
 
     # Sort components according to the transition weight parameters (for some weight functions). No sorting if constraints are employed.

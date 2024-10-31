@@ -495,6 +495,9 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     ### Phase 2: Estimate the remaining parameters conditional on the LS estimates of the AR and weight parameters
 
     ## Part 1: Estimation by genetic algorithm
+    # LS_results are always in the intercept parametrization
+
+    # In the end, change parametrization to mean-parametrization if parametrization="mean"
   }
 
   ### Obtain standard errors, calculate IC ###
