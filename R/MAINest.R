@@ -496,6 +496,15 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
 
     ## Part 1: Estimation by genetic algorithm
     # LS_results are always in the intercept parametrization
+    cl <- parallel::makeCluster(ncores)
+    on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.
+    parallel::clusterExport(cl, ls(environment(fitSTVAR)), envir=environment(fitSTVAR)) # assign all variables from package:sstvars
+    parallel::clusterEvalQ(cl, c(library(pbapply), library(Rcpp), library(RcppArmadillo), library(sstvars)))
+
+    ## Part 2: Estimation by variable metric algorithm
+
+    parallel::stopCluster(cl=cl)
+
 
     # In the end, change parametrization to mean-parametrization if parametrization="mean"
   }
