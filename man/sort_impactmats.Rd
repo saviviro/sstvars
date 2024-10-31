@@ -151,8 +151,8 @@ that is, when \code{parametrization="mean"}.}
 specifying linear constraints on the transition weight parameters \eqn{\alpha}.
 The constraints are of the form \eqn{\alpha = R\xi + r}, where \eqn{R} is a known \eqn{(a\times l)}
 constraint matrix of full column rank (\eqn{a} is the dimension of \eqn{\alpha}), \eqn{r} is a known \eqn{(a\times 1)} constant,
-and \eqn{\xi} is an unknown \eqn{(l\times 1)} parameter. \strong{Alternatively}, set \eqn{R=0} in order to constrain the
-the weight parameter to the constant \eqn{r} (in this case, \eqn{\alpha} is dropped from the constrained parameter vector).}
+and \eqn{\xi} is an unknown \eqn{(l\times 1)} parameter. \strong{Alternatively}, set \eqn{R=0} to constrain the
+weight parameters to the constant \eqn{r} (in this case, \eqn{\alpha} is dropped from the constrained parameter vector).}
 }
 \value{
 Returns sorted parameter vector of the form described for the argument \code{params},

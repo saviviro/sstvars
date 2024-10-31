@@ -107,7 +107,6 @@ random_covmat <- function(d, omega_scale) {
 }
 
 
-
 #' @title Create random VAR model \eqn{(dxd)} error term covariance matrix \eqn{\Omega}
 #'   fairly close to the given \strong{positive definite} covariance matrix using (scaled)
 #'   Wishart distribution
@@ -138,7 +137,6 @@ smart_covmat <- function(d, Omega, accuracy) {
   }
   vech(covmat)
 }
-
 
 
 #' @title Create random VAR model impact matrix
@@ -406,7 +404,7 @@ smart_weightpars <- function(M, weight_pars,
 #'
 #' @inheritParams GAfit
 #' @inheritParams loglikelihood
-#' @param force_stability Should the algorithm proposed by Ansley and Kohn be used to generate
+#' @param force_stability Should the algorithm proposed by Ansley and Kohn (1986) be used to generate
 #'   AR matrices that always satisfy the stability condition? Not supported if AR constraints are
 #'   employed.
 #' @details Structural models are not supported!
@@ -423,29 +421,46 @@ smart_weightpars <- function(M, weight_pars,
 random_ind <- function(p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                        weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                        AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, force_stability=is.null(AR_constraints),
-                       mu_scale, mu_scale2, omega_scale, B_scale, weight_scale, ar_scale=1, ar_scale2=1) {
+                       mu_scale, mu_scale2, omega_scale, B_scale, weight_scale, ar_scale=1, ar_scale2=1, fixed_params=NULL) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   g <- ifelse(is.null(mean_constraints), M, length(mean_constraints)) # Number of groups of regimes with the same mean parameters
 
   # Generate mean params
-  if(is.null(mean_constraints)) {
-    mean_pars <- as.vector(replicate(n=M, expr=rnorm(d, mean=mu_scale, sd=mu_scale2)))
-  } else { # mean_constraints used
-    mean_pars <- rnorm(d*g, mean=mu_scale, sd=mu_scale2)
+  if(is.null(fixed_params)) {
+    if(is.null(mean_constraints)) {
+      mean_pars <- as.vector(replicate(n=M, expr=rnorm(d, mean=mu_scale, sd=mu_scale2)))
+    } else { # mean_constraints used
+      mean_pars <- rnorm(d*g, mean=mu_scale, sd=mu_scale2)
+    }
+  } else {
+    # Obtain the fixed mean parameters
+    mean_pars <- fixed_params[1:(d*M)]
   }
 
+
   # Generate AR params
-  if(is.null(AR_constraints) && force_stability) {
-    coefmat_pars <- as.vector(replicate(n=M, random_coefmats2(p=p, d=d, ar_scale=ar_scale)))
+  if(is.null(fixed_params)) {
+    if(is.null(AR_constraints) && force_stability) {
+      coefmat_pars <- as.vector(replicate(n=M, random_coefmats2(p=p, d=d, ar_scale=ar_scale)))
+    } else {
+      scale_A <- ar_scale2*ifelse(is.null(AR_constraints),
+                                  1 + log(2*mean(c((p - 0.2)^(1.25), d))),
+                                  1 + (sum(AR_constraints)/(M*d^2))^0.85)
+      if(is.null(AR_constraints)) {
+        coefmat_pars <- as.vector(replicate(n=M, expr=random_coefmats(d=d, how_many=p, scale=scale_A)))
+      } else { # AR_constraints employed
+        coefmat_pars <- rnorm(ncol(AR_constraints), mean=0, sd=0.5/scale_A) # random psi
+      }
+    }
   } else {
-    scale_A <- ar_scale2*ifelse(is.null(AR_constraints),
-                                1 + log(2*mean(c((p - 0.2)^(1.25), d))),
-                                1 + (sum(AR_constraints)/(M*d^2))^0.85)
+    # Obtain the fixed parameters
     if(is.null(AR_constraints)) {
-      coefmat_pars <- as.vector(replicate(n=M, expr=random_coefmats(d=d, how_many=p, scale=scale_A)))
-    } else { # AR_constraints employed
-      coefmat_pars <- rnorm(ncol(AR_constraints), mean=0, sd=0.5/scale_A) # random psi
+      coefmat_pars <- fixed_params[(d*M + 1):(d*M + M*p*d^2)]
+      q <- M*p*d^2 # q is used later in the code
+    } else {
+      q <- ncol(AR_constraints)
+      coefmat_pars <- fixed_params[(d*M + 1):(d*M + q)]
     }
   }
 
@@ -463,9 +478,18 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logistic", "
 
   # Generate weight params
   if(M > 1) {
-    weight_pars <- random_weightpars(M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                     AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                                     weight_constraints=weight_constraints, weight_scale=weight_scale)
+    if(is.null(fixed_params)) {
+      weight_pars <- random_weightpars(M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                       AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                       weight_constraints=weight_constraints, weight_scale=weight_scale)
+    } else {
+      # Obtain the fixed parameters
+      if(is.null(weight_constraints)) {
+        weight_pars <- fixed_params[(d*M + q + 1):length(fixed_params)]
+      } else {
+        weight_pars <- numeric(0) # Only allowed weight constraint here fixes the weight parameters (checked in GAfit)
+      }
+    }
   } else {
     weight_pars <- numeric(0) # Replicate returns a list if the value is numeric(0)
   }
@@ -498,8 +522,9 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logistic", "
 smart_ind <- function(p, M, d, params,
                       weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                       weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
-                      AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,  accuracy=1,
-                      which_random=numeric(0), mu_scale, mu_scale2, omega_scale, B_scale, ar_scale=1, ar_scale2=1) {
+                      AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, accuracy=1,
+                      which_random=numeric(0), mu_scale, mu_scale2, omega_scale, B_scale, ar_scale=1, ar_scale2=1,
+                      fixed_params=NULL) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   scale_A <- ar_scale2*(1 + log(2*mean(c((p - 0.2)^(1.25), d))))
@@ -512,9 +537,13 @@ smart_ind <- function(p, M, d, params,
                            identification="reduced_form") # Impact matrices for cond_dist == "ind_Student"
   new_pars <- numeric(length(params))
   if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(weight_constraints)) {
-    all_means_and_A <- params[1:(d*M + M*p*d^2)] # all mu + A if called from GAfit
-    new_pars[1:(d*M + M*p*d^2)] <- rnorm(n=length(all_means_and_A), # Fills in smart means and A, later replaced with random if random regime
-                                         mean=all_means_and_A, sd=pmax(0.2, abs(all_means_and_A))/accuracy)
+    if(is.null(fixed_params)) {
+      all_means_and_A <- params[1:(d*M + M*p*d^2)] # all mu + A if called from GAfit
+      new_pars[1:(d*M + M*p*d^2)] <- rnorm(n=length(all_means_and_A), # Fills in smart means and A, later replaced with random if random regime
+                                           mean=all_means_and_A, sd=pmax(0.2, abs(all_means_and_A))/accuracy)
+    } else { # Fixed mean and AR parameters
+      new_pars[1:(d*M + M*p*d^2)] <- fixed_params[1:(d*M + M*p*d^2)] # Obtain the fixed parameters
+    }
     for(m in 1:M) {
       if(any(which_random) == m) { # Not a smart regime
         new_pars[((m - 1)*d + 1):(m*d)] <- rnorm(d, mean=mu_scale, sd=mu_scale2) # Random mean
@@ -540,17 +569,29 @@ smart_ind <- function(p, M, d, params,
       }
     }
     if(M > 1 && weight_function != "exogenous") {
-      weight_pars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                     cond_dist=cond_dist)
-      if(weight_function == "relative_dens") {
-        weight_pars <- weight_pars[-length(weight_pars)] # Remove alpha_M
+      if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") {
+        n_covmat_pars <- M*d^2
+      } else {
+        n_covmat_pars <- M*d*(d + 1)/2
       }
-      new_pars[(M*d + M*p*d^2 + M*d*(d + 1)/2 + 1):
-                 (M*d + M*p*d^2 + M*d*(d + 1)/2 + length(weight_pars))] <- smart_weightpars(M=M,
-                                                                                            weight_pars=weight_pars,
-                                                                                            weight_function=weight_function,
-                                                                                            weight_constraints=weight_constraints,
-                                                                                            accuracy=accuracy)
+      if(is.null(fixed_params)) {
+        weight_pars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                       cond_dist=cond_dist)
+        if(weight_function == "relative_dens") {
+          weight_pars <- weight_pars[-length(weight_pars)] # Remove alpha_M
+        }
+        new_pars[(M*d + M*p*d^2 + n_covmat_pars + 1):
+                   (M*d + M*p*d^2 + n_covmat_pars + length(weight_pars))] <- smart_weightpars(M=M,
+                                                                                              weight_pars=weight_pars,
+                                                                                              weight_function=weight_function,
+                                                                                              weight_constraints=weight_constraints,
+                                                                                              accuracy=accuracy)
+      } else { # Fixed weight parameters
+        n_weight_params <- length(fixed_params) - M*d - M*p*d^2
+        new_pars[(M*d + M*p*d^2 + n_covmat_pars + 1):
+                   (M*d + M*p*d^2 + n_covmat_pars + n_weight_params)] <- fixed_params[(M*d + M*p*d^2 + 1):length(fixed_params)]
+      }
+
     }
   } else { # AR, mean, or weight constraints employed
     # mean parameters
@@ -560,35 +601,48 @@ smart_ind <- function(p, M, d, params,
     } else {
       smart_regs <- (1:M)[-which_random]
     }
-    all_means <- matrix(params[1:(d*g)], nrow=d, ncol=g, byrow=FALSE)
-    mean_pars <- as.vector(vapply(1:g, function(m) {
-      which_reg <- ifelse(is.null(mean_constraints), m, mean_constraints[[m]]) # Can be many if mean_constraints used
-      if(any(which_reg %in% smart_regs)) { # Smart parameters
-        rnorm(d, mean=all_means[,m], sd=abs(all_means[,m]/accuracy))
-      } else { # Random parameters
-        rnorm(d, mean=mu_scale, sd=mu_scale2)
-      }
-    }, numeric(d)))
+    if(is.null(fixed_params)) {
+      all_means <- matrix(params[1:(d*g)], nrow=d, ncol=g, byrow=FALSE)
+      mean_pars <- as.vector(vapply(1:g, function(m) {
+        which_reg <- ifelse(is.null(mean_constraints), m, mean_constraints[[m]]) # Can be many if mean_constraints used
+        if(any(which_reg %in% smart_regs)) { # Smart parameters
+          rnorm(d, mean=all_means[,m], sd=abs(all_means[,m]/accuracy))
+        } else { # Random parameters
+          rnorm(d, mean=mu_scale, sd=mu_scale2)
+        }
+      }, numeric(d)))
+    } else { # mean parameters are fixed, no mean constraints (checked in GAfit)
+      mean_pars <- fixed_params[1:(d*M)]
+    }
+
     # AR parameters
     if(is.null(AR_constraints)) {
       q <- M*p*d^2
-      all_A <- pick_allA(p=p, M=M, d=d, params=params_std)
-      AR_pars <- vapply(1:M, function(m) {
-        if(any(which_random) == m) { # Random AR matrix
-          if(runif(1) > 0.5) { # Use algorithm to force stability of coefficient matrices
-            random_coefmats2(p=p, d=d, ar_scale=ar_scale)
-          } else {
-            random_coefmats(d=d, how_many=p, scale=scale_A)
+      if(is.null(fixed_arams)) {
+        all_A <- pick_allA(p=p, M=M, d=d, params=params_std)
+        AR_pars <- vapply(1:M, function(m) {
+          if(any(which_random) == m) { # Random AR matrix
+            if(runif(1) > 0.5) { # Use algorithm to force stability of coefficient matrices
+              random_coefmats2(p=p, d=d, ar_scale=ar_scale)
+            } else {
+              random_coefmats(d=d, how_many=p, scale=scale_A)
+            }
+          } else { # Smart AR matrix
+            all_Am <- as.vector(all_A[, , , m])
+            rnorm(n=length(all_Am), mean=all_Am, sd=pmax(0.2, abs(all_Am))/accuracy)
           }
-        } else { # Smart AR matrix
-          all_Am <- as.vector(all_A[, , , m])
-          rnorm(n=length(all_Am), mean=all_Am, sd=pmax(0.2, abs(all_Am))/accuracy)
-        }
-      }, numeric(p*d^2))
+        }, numeric(p*d^2))
+      } else { # AR parameters are fixed
+        AR_pars <- fixed_params[(d*M + 1):(d*M + q)]
+      }
     } else {
       q <- ncol(AR_constraints)
-      psi <- params[(g*d + 1):(g*d + q)]
-      AR_pars <- rnorm(q, mean=psi, sd=pmax(0.2, abs(psi))/accuracy)
+      if(is.null(fixed_params)) {
+        psi <- params[(g*d + 1):(g*d + q)]
+        AR_pars <- rnorm(q, mean=psi, sd=pmax(0.2, abs(psi))/accuracy)
+      } else { # AR parameters are fixed
+        AR_pars <- fixed_params[(d*M + 1):(d*M + q)]
+      }
     }
 
     # Covariance matrix / impact matrix parameters
@@ -612,25 +666,35 @@ smart_ind <- function(p, M, d, params,
 
     # Weight function parameters
     if(M > 1 && weight_function != "exogenous") {
-      if(is.null(weight_constraints)) {
-        weight_pars <- pick_weightpars(p=p, M=M, d=d, params=params_std, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                       cond_dist=cond_dist)
-        if(weight_function == "relative_dens") {
-          weight_pars <- weight_pars[-length(weight_pars)]
-        }
-        weight_pars <- smart_weightpars(M=M, weight_pars=weight_pars, weight_function=weight_function,
-                                        weight_constraints=weight_constraints, accuracy=accuracy)
-      } else { # Weight constraints used
-        if(all(weight_constraints[[1]] == 0)) {
-          weight_pars <- numeric(0) # alpha = r known constant so it is not parametrized here
-        } else {
-          weight_pars <- smart_weightpars(M=M,
-                                          weight_pars=params[(M*g + q + M*d*(d + 1)/2 + 1):(M*g + q + M*d*(d + 1)/2 +
-                                                                                              ncol(weight_constraints[[1]]))],
-                                          weight_function=weight_function,
+      if(is.null(fixed_params)) {
+        if(is.null(weight_constraints)) {
+          weight_pars <- pick_weightpars(p=p, M=M, d=d, params=params_std, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                         cond_dist=cond_dist)
+          if(weight_function == "relative_dens") {
+            weight_pars <- weight_pars[-length(weight_pars)]
+          }
+          weight_pars <- smart_weightpars(M=M, weight_pars=weight_pars, weight_function=weight_function,
                                           weight_constraints=weight_constraints, accuracy=accuracy)
+        } else { # Weight constraints used
+          if(all(weight_constraints[[1]] == 0)) {
+            weight_pars <- numeric(0) # alpha = r known constant so it is not parametrized here
+          } else {
+            weight_pars <- smart_weightpars(M=M,
+                                            weight_pars=params[(M*g + q + M*d*(d + 1)/2 + 1):(M*g + q + M*d*(d + 1)/2 +
+                                                                                                ncol(weight_constraints[[1]]))],
+                                            weight_function=weight_function,
+                                            weight_constraints=weight_constraints, accuracy=accuracy)
+          }
+        }
+      } else { # weight parameters are fixed
+        if(is.null(weight_constraints)) {
+          n_weight_params <- length(fixed_params) - M*d - q
+          weight_pars <- fixed_params[(M*d + q + 1):(M*d + q + n_weight_params)]
+        } else {
+          weight_pars <- numeric(0) # The only allowed weight constraint here fixes the weight parameters (checked in GAfit)
         }
       }
+
     } else {
       weight_pars <- numeric(0)
     }

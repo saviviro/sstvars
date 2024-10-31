@@ -33,6 +33,7 @@ GAfit(
   pre_smart_mu_prob = 0,
   to_return = c("alt_ind", "best_ind"),
   minval,
+  fixed_params = NULL,
   seed = NULL
 )
 }
@@ -109,8 +110,8 @@ that is, when \code{parametrization="mean"}.}
 specifying linear constraints on the transition weight parameters \eqn{\alpha}.
 The constraints are of the form \eqn{\alpha = R\xi + r}, where \eqn{R} is a known \eqn{(a\times l)}
 constraint matrix of full column rank (\eqn{a} is the dimension of \eqn{\alpha}), \eqn{r} is a known \eqn{(a\times 1)} constant,
-and \eqn{\xi} is an unknown \eqn{(l\times 1)} parameter. \strong{Alternatively}, set \eqn{R=0} in order to constrain the
-the weight parameter to the constant \eqn{r} (in this case, \eqn{\alpha} is dropped from the constrained parameter vector).}
+and \eqn{\xi} is an unknown \eqn{(l\times 1)} parameter. \strong{Alternatively}, set \eqn{R=0} to constrain the
+weight parameters to the constant \eqn{r} (in this case, \eqn{\alpha} is dropped from the constrained parameter vector).}
 
 \item{ngen}{a positive integer specifying the number of generations to be ran through in
 the genetic algorithm.}
@@ -259,6 +260,22 @@ in general (\code{"best_ind"}) but might have more wasted regimes?}
 \item{minval}{a real number defining the minimum value of the log-likelihood function that will be considered.
 Values smaller than this will be treated as they were \code{minval} and the corresponding individuals will
 never survive. The default is \code{-(10^(ceiling(log10(n_obs)) + d) - 1)}.}
+
+\item{fixed_params}{a vector containing fixed parameter values for mean, autoregressive, and weight parameters
+that should be fixed in the parameter vector. Should have the form:
+\eqn{(\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\alpha}, where
+\itemize{
+  \item{\eqn{\phi_{m,0} = } the \eqn{(d \times 1)} intercept vector of the \eqn{m}th regime.}
+  \item{\eqn{\varphi_m = (vec(A_{m,1}),...,vec(A_{m,p}))} \eqn{(pd^2 \times 1)}.}
+  \item{\eqn{\alpha = (r_1,...,r_{M-1})} the \eqn{(M-1\times 1)} vector of the threshold parameters.}
+}
+For models with...
+\describe{
+  \item{AR_constraints:}{Replace \eqn{\varphi_1,...,\varphi_M} with \eqn{\psi} as described in the argument \code{AR_constraints}.}
+  \item{weight_constraints:}{If linear constraints are imposed, replace \eqn{\alpha} with \eqn{\xi} as described in the
+   argument \code{weigh_constraints}. If weight functions parameters are imposed to be fixed values, simply drop \eqn{\alpha}
+   from the parameter vector.}
+}}
 
 \item{seed}{a single value, interpreted as an integer, or NULL, that sets seed for the random number generator in
 the beginning of the function call. If calling \code{GAfit} from \code{fitSTVAR}, use the argument \code{seeds}

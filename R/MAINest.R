@@ -486,13 +486,15 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   } else {
     ######### MULTIPLE-PHASE ESTIMATION #########
 
-    ## Phase 1: Estimate AR and weight parameters by least squares (always estimates with intercept parametrization)
+    ### Phase 1: Estimate AR and weight parameters by least squares (always estimates with intercept parametrization)
     LS_results <- estim_LS(data=data, p=p, M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
                            cond_dist=cond_dist, parametrization=parametrization, AR_constraints=AR_constraints,
                            mean_constraints=mean_constraints, weight_constraints=weight_constraints, ncores=ncores,
                            use_parallel=use_parallel)
 
-    ## Phase 2, Part 1: Estimate the remaining parameters with the genetic algorithm
+    ### Phase 2: Estimate the remaining parameters conditional on the LS estimates of the AR and weight parameters
+
+    ## Part 1: Estimation by genetic algorithm
   }
 
   ### Obtain standard errors, calculate IC ###

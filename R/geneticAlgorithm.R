@@ -139,6 +139,21 @@
 #' @param minval a real number defining the minimum value of the log-likelihood function that will be considered.
 #'   Values smaller than this will be treated as they were \code{minval} and the corresponding individuals will
 #'   never survive. The default is \code{-(10^(ceiling(log10(n_obs)) + d) - 1)}.
+#' @param fixed_params a vector containing fixed parameter values for mean, autoregressive, and weight parameters
+#'   that should be fixed in the parameter vector. Should have the form:
+#'   \eqn{(\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\alpha}, where
+#'   \itemize{
+#'     \item{\eqn{\phi_{m,0} = } the \eqn{(d \times 1)} intercept vector of the \eqn{m}th regime.}
+#'     \item{\eqn{\varphi_m = (vec(A_{m,1}),...,vec(A_{m,p}))} \eqn{(pd^2 \times 1)}.}
+#'     \item{\eqn{\alpha = (r_1,...,r_{M-1})} the \eqn{(M-1\times 1)} vector of the threshold parameters.}
+#'   }
+#'   For models with...
+#'   \describe{
+#'     \item{AR_constraints:}{Replace \eqn{\varphi_1,...,\varphi_M} with \eqn{\psi} as described in the argument \code{AR_constraints}.}
+#'     \item{weight_constraints:}{If linear constraints are imposed, replace \eqn{\alpha} with \eqn{\xi} as described in the
+#'      argument \code{weigh_constraints}. If weight functions parameters are imposed to be fixed values, simply drop \eqn{\alpha}
+#'      from the parameter vector.}
+#'   }
 #' @param seed a single value, interpreted as an integer, or NULL, that sets seed for the random number generator in
 #'   the beginning of the function call. If calling \code{GAfit} from \code{fitSTVAR}, use the argument \code{seeds}
 #'   instead of passing the argument \code{seed}.
@@ -186,7 +201,8 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                   parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
                   ngen=200, popsize, smart_mu=min(100, ceiling(0.5*ngen)), initpop=NULL,  mu_scale, mu_scale2, omega_scale,
                   B_scale, weight_scale, ar_scale=0.2, upper_ar_scale=1, ar_scale2=1, regime_force_scale=1,
-                  red_criteria=c(0.05, 0.01), pre_smart_mu_prob=0, to_return=c("alt_ind", "best_ind"), minval, seed=NULL) {
+                  red_criteria=c(0.05, 0.01), pre_smart_mu_prob=0, to_return=c("alt_ind", "best_ind"), minval,
+                  fixed_params=NULL, seed=NULL) {
 
   # Required values and preliminary checks
   set.seed(seed)
@@ -207,6 +223,41 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
   npars <- n_params(p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars, cond_dist=cond_dist,
                     AR_constraints=AR_constraints, mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                     B_constraints=NULL, identification="reduced_form")
+  if(!is.null(fixed_params)) {
+    if(weight_function == "exogenous" || M == 1) {
+      n_weight_pars <- 0
+    } else {
+      if(is.null(weight_constraints)) {
+        if(weight_function == "relative_dens" || weight_function == "threshold") {
+          n_weight_pars <- M - 1
+        } else if(weight_function == "logistic" || weight_function == "exponential") {
+          n_weight_pars <- 2
+        } else if(weight_function == "mlogit") {
+          n_weight_pars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
+        }
+      } else { # Constraints on the weight parameters
+        if(all(weight_constraints[[1]] == 0)) {
+          n_weight_pars <- 0 # alpha = r, not in the parameter vector
+        } else {
+          stop("With fixed_params, only allowed weight_constraints fix the values of the weight params")
+        }
+      }
+    }
+    if(is.null(mean_constraints)) {
+      n_mean_pars <- M*d
+    } else { # Means constrained
+      stop("Mean constraints are not supported with fixed_params")
+    }
+    if(is.null(AR_constraints)) {
+      n_ar_pars <- M*p*d^2
+    } else { # AR matrices constrained
+      n_ar_pars <- ncol(AR_constraints)
+    }
+    n_fixed_pars <- n_mean_pars + n_ar_pars + n_weight_pars
+    if(length(fixed_params) != n_fixed_pars) {
+      stop("The fixed_params vector has wrong length")
+    }
+  }
 
   # Defaults and checks
   if(!all_pos_ints(c(ngen, smart_mu))) stop("Arguments ngen and smart_mu have to be positive integers")
