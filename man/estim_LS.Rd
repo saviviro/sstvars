@@ -124,7 +124,8 @@ Returns the estimated parameters in a vector of the form
 \details{
 Used internally in the multiple phase estimation procedure proposed by Koivisto,
  Luoto, and Virolainen (2025). Mean constraints are not supported. Only weight constraints that
- specify the threshold parameters as fixed values are supported.
+ specify the threshold parameters as fixed values are supported. Only intercept parametrization is
+ supported.
 }
 \references{
 \itemize{

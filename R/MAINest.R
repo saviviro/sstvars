@@ -1,11 +1,15 @@
-#' @title Two-phase maximum likelihood estimation of a reduced form smooth transition VAR model
+#' @title Two-phase or multiple-phase maximum likelihood estimation of a reduced form smooth transition VAR model
 #'
-#' @description \code{fitSTVAR} estimates a reduced form smooth transition VAR model in two phases:
-#'   in the first phase, it uses a genetic algorithm to find starting values for a gradient based
-#'   variable metric algorithm, which it then uses to finalize the estimation in the second phase.
+#' @description \code{fitSTVAR} estimates a reduced form smooth transition VAR model in two phases
+#'   or multiple phases (see details-section for the multiple phase estimation). In the two-phase
+#'   procedure:
+#'   in the first phase, it uses a genetic algorithm (GA) to find starting values for a gradient based
+#'   variable metric algorithm (VA), which it then uses to finalize the estimation in the second phase.
 #'   Parallel computing is utilized to perform multiple rounds of estimations in parallel.
 #'
 #' @inheritParams GAfit
+#' @param estim_method either \code{"two-phase"} or \code{"multiple-phase"} (the latter is the default
+#'   option for threshold models and the former is currently the only option for other models). See details.
 #' @param nrounds the number of estimation rounds that should be performed.
 #' @param ncores the number CPU cores to be used in parallel computing.
 #' @param maxit the maximum number of iterations in the variable metric algorithm.
@@ -20,6 +24,22 @@
 #'  If you wish to estimate a structural model, estimate first the reduced form model and then use the
 #'  use the function \code{fitSSTVAR} to create (and estimate if necessary) the structural model
 #'  based on the estimated reduced form model.
+#'
+#'  With \code{estim_method="multiple-phase"} (currently only available for threshold VAR models),
+#'  the following multiple-phase procedure proposed by Koivisto, Luoto, and Virolainen (2025) is employed:
+#'  \enumerate{
+#'    \item The AR and weight function parameters are estimated by the method of least squares.
+#'    \item The rest of the parameters are ML estimated conditional on the LS estimates of the AR parameters with
+#'      the two-phase procedure (GA + VA).
+#'    \item The AR parameters are ML estimated with VA conditional on the estimates of the rest of the parameters,
+#'      initializing the algorithm from the LS estimates.
+#'    \item All parameters are ML estimated by initializing VA from the estimates obtained in the previous step.
+#'  }
+#'  Note that \code{mean_constraints} are not supported in the multiple-phase procedure and only such \code{weight_constraints}
+#'  are supported that fix the values of the weight function parameters to known constants.
+#'  If structural model identified by non-Gaussianity is estimated, note that the identification can be weak with
+#'  respect to the ordering and signs of some of the columns of \eqn{B_2,...,B_M} (see Virolainen, 2024). You can
+#'  estimate models with different orderings of the columns of \eqn{B_2,...,B_M} with the function FILL IN.
 #'
 #'  Because of complexity and high multimodality of the log-likelihood function, it is \strong{not certain}
 #'  that the estimation algorithm will end up in the global maximum point. It is expected that many of the
@@ -70,6 +90,7 @@
 #'      \emph{Journal of Econometrics}, \strong{84}:1, 1-36.
 #'    \item Hubrich K., Teräsvirta. T. 2013. Thresholds and Smooth Transitions in Vector Autoregressive Models.
 #'      \emph{CREATES Research Paper 2013-18, Aarhus University.}
+#'    \item Koivisto T., Luoto J., Virolainen S. 2025. Unpublished working paper.
 #'    \item Lanne M., Virolainen S. 2024. A Gaussian smooth transition vector autoregressive model:
 #'       An application to the macroeconomic effects of severe weather shocks. Unpublished working
 #'       paper, available as arXiv:2403.14216.
@@ -199,11 +220,36 @@
 fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                      weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                      parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
-                     nrounds=(M + 1)^5, ncores=2, maxit=1000, seeds=NULL, print_res=TRUE, use_parallel=TRUE, filter_estimates=TRUE, ...) {
+                     estim_method, nrounds=(M + 1)^5, ncores=2, maxit=1000, seeds=NULL, print_res=TRUE, use_parallel=TRUE,
+                     filter_estimates=TRUE, ...) {
   # Initial checks etc
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
+  if(missing(estim_method)) { # Determine the estimation method
+    if(weight_function == "threshold" && is.null(mean_constraints)) {
+      if(is.null(weight_constraints)) {
+        estim_method <- "multiple-phase"
+      } else {
+        if(weight_constraints$R != 0) {
+          estim_method <- "two-phase"
+        } else {
+          estim_method <- "multiple-phase"
+        }
+      }
+    } else {
+      estim_method <- "two-phase"
+    }
+  } else {
+    stopifnot(estim_method %in% c("two-phase", "multiple-phase"))
+    if(estim_method == "multiple-phase" && weight_function != "threshold") {
+      stop("The multiple-phase estimation is currently only available for threshold models.")
+    } else if(estim_method == "multiple-phase" && !is.null(mean_constraints)) {
+      stop("The multiple-phase estimation does not support mean_constraints.")
+    } else if(estim_method == "multiple-phase" && !is.null(weight_constraints) && weight_constraints$R != 0) {
+      stop("The multiple-phase estimation only supports weight_constraints with R=0.")
+    }
+  }
   if(length(M) != 1 && !all_pos_ints(M)) stop("Argument M must be a positive integer")
   if(M == 1 && weight_function %in% c("logistic", "mlogit", "exponential")) {
     # Set to threshold if only regime (we assume two regimes for logistic and exponential weights)
@@ -237,202 +283,217 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   minval <- ifelse(is.null(dot_params$minval), get_minval(data), dot_params$minval)
   red_criteria <- ifelse(rep(is.null(dot_params$red_criteria), 2), c(0.05, 0.01), dot_params$red_criteria)
 
-  if(use_parallel) {
-    if(ncores > parallel::detectCores()) {
-      ncores <- parallel::detectCores()
-      message("ncores was set to be larger than the number of cores detected.")
+  # Parallel computing checks
+  if(ncores > parallel::detectCores()) {
+    ncores <- parallel::detectCores()
+    message("ncores was set to be larger than the number of cores detected.")
+  }
+  if(ncores > nrounds) {
+    ncores <- nrounds
+    message("ncores was set to be larger than the number of estimation rounds.")
+  }
+
+  ######### TWO-PHASE ESTIMATION #########
+  if(estim_method == "two-phase") {
+    if(use_parallel) {
+      message(paste("Using", ncores, "cores for", nrounds, "estimations rounds..."))
+
+      ### Optimization with the genetic algorithm ###
+      cl <- parallel::makeCluster(ncores)
+      on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.
+      parallel::clusterExport(cl, ls(environment(fitSTVAR)), envir=environment(fitSTVAR)) # assign all variables from package:sstvars
+      parallel::clusterEvalQ(cl, c(library(pbapply), library(Rcpp), library(RcppArmadillo), library(sstvars)))
+
+      message("Optimizing with a genetic algorithm...")
+      GAresults <- pbapply::pblapply(1:nrounds, function(i1) GAfit(data=data, p=p, M=M,
+                                                                   weight_function=weight_function,
+                                                                   weightfun_pars=weightfun_pars,
+                                                                   cond_dist=cond_dist,
+                                                                   parametrization=parametrization,
+                                                                   AR_constraints=AR_constraints,
+                                                                   mean_constraints=mean_constraints,
+                                                                   weight_constraints=weight_constraints,
+                                                                   seed=seeds[i1], ...), cl=cl)
+
+    } else {
+      if(!no_prints) message("Optimizing with a genetic algorithm...")
+
+      tmpfunGA <- function(i1, ...) {
+        if(!no_prints) message(i1, "/", nrounds, "\r")
+        GAfit(data=data, p=p, M=M,
+              weight_function=weight_function,
+              weightfun_pars=weightfun_pars,
+              cond_dist=cond_dist,
+              parametrization=parametrization,
+              AR_constraints=AR_constraints,
+              mean_constraints=mean_constraints,
+              weight_constraints=weight_constraints,
+              seed=seeds[i1], ...)
+      }
+      GAresults <- lapply(1:nrounds, function(i1) tmpfunGA(i1, ...))
     }
-    if(ncores > nrounds) {
-      ncores <- nrounds
-      message("ncores was set to be larger than the number of estimation rounds.")
+
+
+    loks <- vapply(1:nrounds, function(i1) loglikelihood(data=data, p=p, M=M,
+                                                         params=GAresults[[i1]],
+                                                         weight_function=weight_function,
+                                                         weightfun_pars=weightfun_pars,
+                                                         cond_dist=cond_dist,
+                                                         parametrization=parametrization,
+                                                         identification="reduced_form",
+                                                         AR_constraints=AR_constraints,
+                                                         mean_constraints=mean_constraints,
+                                                         weight_constraints=weight_constraints,
+                                                         B_constraints=NULL,
+                                                         to_return="loglik",
+                                                         check_params=TRUE,
+                                                         minval=minval,
+                                                         alt_par=TRUE), numeric(1))
+
+    if(print_res) {
+      print_loks <- function() {
+        printfun <- function(txt, FUN) message(paste(txt, round(FUN(loks), 3)))
+        printfun("The lowest loglik: ", min)
+        printfun("The largest loglik:", max)
+      }
+      message("Results from the genetic algorithm:")
+      print_loks()
     }
-    message(paste("Using", ncores, "cores for", nrounds, "estimations rounds..."))
 
-    ### Optimization with the genetic algorithm ###
-    cl <- parallel::makeCluster(ncores)
-    on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.
-    parallel::clusterExport(cl, ls(environment(fitSTVAR)), envir=environment(fitSTVAR)) # assign all variables from package:sstvars
-    parallel::clusterEvalQ(cl, c(library(pbapply), library(Rcpp), library(RcppArmadillo), library(sstvars)))
-
-    message("Optimizing with a genetic algorithm...")
-    GAresults <- pbapply::pblapply(1:nrounds, function(i1) GAfit(data=data, p=p, M=M,
-                                                                 weight_function=weight_function,
-                                                                 weightfun_pars=weightfun_pars,
-                                                                 cond_dist=cond_dist,
-                                                                 parametrization=parametrization,
-                                                                 AR_constraints=AR_constraints,
-                                                                 mean_constraints=mean_constraints,
-                                                                 weight_constraints=weight_constraints,
-                                                                 seed=seeds[i1], ...), cl=cl)
-
-  } else {
-    if(!no_prints) message("Optimizing with a genetic algorithm...")
-
-    tmpfunGA <- function(i1, ...) {
-      if(!no_prints) message(i1, "/", nrounds, "\r")
-      GAfit(data=data, p=p, M=M,
-            weight_function=weight_function,
-            weightfun_pars=weightfun_pars,
-            cond_dist=cond_dist,
-            parametrization=parametrization,
-            AR_constraints=AR_constraints,
-            mean_constraints=mean_constraints,
-            weight_constraints=weight_constraints,
-            seed=seeds[i1], ...)
+    ### Optimization with the variable metric algorithm ###
+    loglik_fn <- function(params) {
+      tryCatch(loglikelihood(data=data, p=p, M=M, params=params,
+                             weight_function=weight_function, weightfun_pars=weightfun_pars,
+                             cond_dist=cond_dist, parametrization=parametrization,
+                             identification="reduced_form", AR_constraints=AR_constraints,
+                             mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                             B_constraints=NULL, to_return="loglik", check_params=TRUE, minval=minval,
+                             alt_par=TRUE),
+               error=function(e) minval)
     }
-    GAresults <- lapply(1:nrounds, function(i1) tmpfunGA(i1, ...))
-  }
 
-
-  loks <- vapply(1:nrounds, function(i1) loglikelihood(data=data, p=p, M=M,
-                                                       params=GAresults[[i1]],
-                                                       weight_function=weight_function,
-                                                       weightfun_pars=weightfun_pars,
-                                                       cond_dist=cond_dist,
-                                                       parametrization=parametrization,
-                                                       identification="reduced_form",
-                                                       AR_constraints=AR_constraints,
-                                                       mean_constraints=mean_constraints,
-                                                       weight_constraints=weight_constraints,
-                                                       B_constraints=NULL,
-                                                       to_return="loglik",
-                                                       check_params=TRUE,
-                                                       minval=minval,
-                                                       alt_par=TRUE), numeric(1))
-
-  if(print_res) {
-    print_loks <- function() {
-      printfun <- function(txt, FUN) message(paste(txt, round(FUN(loks), 3)))
-      printfun("The lowest loglik: ", min)
-      printfun("The largest loglik:", max)
+    # Gradient of the log-likelihood function using central difference approximation
+    h <- 6e-6
+    I <- diag(rep(1, npars))
+    loglik_grad <- function(params) {
+      vapply(1:npars, function(i1) (loglik_fn(params + I[i1,]*h) - loglik_fn(params - I[i1,]*h))/(2*h), numeric(1))
     }
-    message("Results from the genetic algorithm:")
-    print_loks()
-  }
 
-  ### Optimization with the variable metric algorithm ###
-  loglik_fn <- function(params) {
-    tryCatch(loglikelihood(data=data, p=p, M=M, params=params,
-                           weight_function=weight_function, weightfun_pars=weightfun_pars,
-                           cond_dist=cond_dist, parametrization=parametrization,
-                           identification="reduced_form", AR_constraints=AR_constraints,
-                           mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                           B_constraints=NULL, to_return="loglik", check_params=TRUE, minval=minval,
-                           alt_par=TRUE),
-             error=function(e) minval)
-  }
-
-  # Gradient of the log-likelihood function using central difference approximation
-  h <- 6e-6
-  I <- diag(rep(1, npars))
-  loglik_grad <- function(params) {
-    vapply(1:npars, function(i1) (loglik_fn(params + I[i1,]*h) - loglik_fn(params - I[i1,]*h))/(2*h), numeric(1))
-  }
-
-  if(!no_prints) message("Optimizing with a variable metric algorithm...")
-  if(use_parallel) {
-    NEWTONresults <- pbapply::pblapply(1:nrounds, function(i1) optim(par=GAresults[[i1]], fn=loglik_fn, gr=loglik_grad,
-                                                                     method="BFGS", control=list(fnscale=-1, maxit=maxit)), cl=cl)
-    parallel::stopCluster(cl=cl)
-  } else {
-    tmpfunNE <- function(i1) {
-      if(!no_prints) message(i1, "/", nrounds, "\r")
-      optim(par=GAresults[[i1]], fn=loglik_fn, gr=loglik_grad, method="BFGS",
-            control=list(fnscale=-1, maxit=maxit))
+    if(!no_prints) message("Optimizing with a variable metric algorithm...")
+    if(use_parallel) {
+      NEWTONresults <- pbapply::pblapply(1:nrounds, function(i1) optim(par=GAresults[[i1]], fn=loglik_fn, gr=loglik_grad,
+                                                                       method="BFGS", control=list(fnscale=-1, maxit=maxit)), cl=cl)
+      parallel::stopCluster(cl=cl)
+    } else {
+      tmpfunNE <- function(i1) {
+        if(!no_prints) message(i1, "/", nrounds, "\r")
+        optim(par=GAresults[[i1]], fn=loglik_fn, gr=loglik_grad, method="BFGS",
+              control=list(fnscale=-1, maxit=maxit))
+      }
+      NEWTONresults <- lapply(1:nrounds, function(i1) tmpfunNE(i1))
     }
-    NEWTONresults <- lapply(1:nrounds, function(i1) tmpfunNE(i1))
-  }
 
-  loks <- vapply(1:nrounds, function(i1) NEWTONresults[[i1]]$value, numeric(1)) # Log-likelihoods
-  converged <- vapply(1:nrounds, function(i1) NEWTONresults[[i1]]$convergence == 0, logical(1)) # Which coverged
+    loks <- vapply(1:nrounds, function(i1) NEWTONresults[[i1]]$value, numeric(1)) # Log-likelihoods
+    converged <- vapply(1:nrounds, function(i1) NEWTONresults[[i1]]$convergence == 0, logical(1)) # Which coverged
 
-  if(print_res) {
-    message("Results from the variable metric algorithm:")
-    print_loks()
-  }
+    if(print_res) {
+      message("Results from the variable metric algorithm:")
+      print_loks()
+    }
 
-  ### Obtain estimates, change back to original parametrization, and filter the inapproriate estimates
-  all_estimates <- lapply(NEWTONresults, function(x) x$par)
-  if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") {
-    all_estimates <- lapply(all_estimates, function(pars) change_parametrization(p=p, M=M, d=d, params=pars,
-                                                                                 weight_function=weight_function,
-                                                                                 weightfun_pars=weightfun_pars,
-                                                                                 cond_dist=cond_dist,
-                                                                                 identification="reduced_form",
-                                                                                 AR_constraints=AR_constraints,
-                                                                                 mean_constraints=mean_constraints,
-                                                                                 weight_constraints=weight_constraints,
-                                                                                 B_constraints=NULL,
-                                                                                 change_to="orig"))
-  }
+    ### Obtain estimates, change back to original parametrization, and filter the inapproriate estimates
+    all_estimates <- lapply(NEWTONresults, function(x) x$par)
+    if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") {
+      all_estimates <- lapply(all_estimates, function(pars) change_parametrization(p=p, M=M, d=d, params=pars,
+                                                                                   weight_function=weight_function,
+                                                                                   weightfun_pars=weightfun_pars,
+                                                                                   cond_dist=cond_dist,
+                                                                                   identification="reduced_form",
+                                                                                   AR_constraints=AR_constraints,
+                                                                                   mean_constraints=mean_constraints,
+                                                                                   weight_constraints=weight_constraints,
+                                                                                   B_constraints=NULL,
+                                                                                   change_to="orig"))
+    }
 
-  if(filter_estimates) {
-    if(!no_prints) message("Filtering inappropriate estimates...")
-    ord_by_loks <- order(loks, decreasing=TRUE) # Ordering from largest loglik to smaller
+    if(filter_estimates) {
+      if(!no_prints) message("Filtering inappropriate estimates...")
+      ord_by_loks <- order(loks, decreasing=TRUE) # Ordering from largest loglik to smaller
 
-    # Go through estimates, take the estimate that yield the higher likelihood
-    # among estimates that are do not include wasted regimes or near-singular
-    # error term covariance matrices.
-    for(i1 in 1:length(all_estimates)) {
-       which_round <- ord_by_loks[i1] # Est round with i1:th largest loglik
-       pars <- all_estimates[[which_round]]
-       pars_std <- reform_constrained_pars(p=p, M=M, d=d, params=pars,
-                                           weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                           cond_dist=cond_dist, identification="reduced_form",
-                                           AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                                           weight_constraints=weight_constraints,
-                                           B_constraints=NULL) # Pars in standard form for pick pars fns
-       # Check Omegas
-       Omega_eigens <- get_omega_eigens_par(p=p, M=M, d=d, params=pars_std,
+      # Go through estimates, take the estimate that yield the higher likelihood
+      # among estimates that are do not include wasted regimes or near-singular
+      # error term covariance matrices.
+      for(i1 in 1:length(all_estimates)) {
+        which_round <- ord_by_loks[i1] # Est round with i1:th largest loglik
+        pars <- all_estimates[[which_round]]
+        pars_std <- reform_constrained_pars(p=p, M=M, d=d, params=pars,
                                             weight_function=weight_function, weightfun_pars=weightfun_pars,
                                             cond_dist=cond_dist, identification="reduced_form",
-                                            AR_constraints=NULL, mean_constraints=NULL,
-                                            weight_constraints=NULL, B_constraints=NULL)
-       Omegas_ok <- !any(Omega_eigens < 0.002)
+                                            AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                            weight_constraints=weight_constraints,
+                                            B_constraints=NULL) # Pars in standard form for pick pars fns
+        # Check Omegas
+        Omega_eigens <- get_omega_eigens_par(p=p, M=M, d=d, params=pars_std,
+                                             weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                             cond_dist=cond_dist, identification="reduced_form",
+                                             AR_constraints=NULL, mean_constraints=NULL,
+                                             weight_constraints=NULL, B_constraints=NULL)
+        Omegas_ok <- !any(Omega_eigens < 0.002)
 
-       # Checks AR matrices
-       boldA_eigens <- get_boldA_eigens_par(p=p, M=M, d=d, params=pars_std,
-                                            weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                            cond_dist=cond_dist, identification="reduced_form",
-                                            AR_constraints=NULL, mean_constraints=NULL,
-                                            weight_constraints=NULL, B_constraints=NULL)
-       stat_ok <- !any(boldA_eigens > 0.9985)
+        # Checks AR matrices
+        boldA_eigens <- get_boldA_eigens_par(p=p, M=M, d=d, params=pars_std,
+                                             weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                             cond_dist=cond_dist, identification="reduced_form",
+                                             AR_constraints=NULL, mean_constraints=NULL,
+                                             weight_constraints=NULL, B_constraints=NULL)
+        stat_ok <- !any(boldA_eigens > 0.9985)
 
-       # Check weight parameters
-       if(weight_function == "relative_dens") {
-         alphas <- pick_weightpars(p=p, M=M, d=d, params=pars_std, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                   cond_dist=cond_dist)
-         weightpars_ok <- !any(alphas < 0.01)
-       } else {
-         weightpars_ok <- TRUE
-       }
+        # Check weight parameters
+        if(weight_function == "relative_dens") {
+          alphas <- pick_weightpars(p=p, M=M, d=d, params=pars_std, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                    cond_dist=cond_dist)
+          weightpars_ok <- !any(alphas < 0.01)
+        } else {
+          weightpars_ok <- TRUE
+        }
 
-       # Check transition weights
-       tweights <- loglikelihood(data=data, p=p, M=M, params=pars_std,
-                                 weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                 cond_dist=cond_dist, parametrization=parametrization,
-                                 identification="reduced_form", AR_constraints=NULL,
-                                 mean_constraints=NULL, B_constraints=NULL, weight_constraints=NULL,
-                                 to_return="tw", check_params=TRUE, minval=matrix(0, nrow=n_obs-p, ncol=M))
-       tweights_ok <- !any(vapply(1:M, function(m) sum(tweights[,m] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
-       if(Omegas_ok && stat_ok && tweights_ok && weightpars_ok) {
-         which_best_fit <- which_round # The estimation round of the appropriate estimate with the largest loglik
-         break
-       }
-       if(i1 == length(all_estimates)) {
-         message("No 'appropriate' estimates were found!
+        # Check transition weights
+        tweights <- loglikelihood(data=data, p=p, M=M, params=pars_std,
+                                  weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                  cond_dist=cond_dist, parametrization=parametrization,
+                                  identification="reduced_form", AR_constraints=NULL,
+                                  mean_constraints=NULL, B_constraints=NULL, weight_constraints=NULL,
+                                  to_return="tw", check_params=TRUE, minval=matrix(0, nrow=n_obs-p, ncol=M))
+        tweights_ok <- !any(vapply(1:M, function(m) sum(tweights[,m] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
+        if(Omegas_ok && stat_ok && tweights_ok && weightpars_ok) {
+          which_best_fit <- which_round # The estimation round of the appropriate estimate with the largest loglik
+          break
+        }
+        if(i1 == length(all_estimates)) {
+          message("No 'appropriate' estimates were found!
                  Check that all the variables are scaled to vary in similar magninutes, also not very small or large magnitudes.
                  Consider running more estimation rounds or study the obtained estimates one-by-one with the function alt_stvar.")
-         if(M > 2) {
-           message("Consider also using smaller M. Too large M leads to identification problems.")
-         }
-         which_best_fit <- which(loks == max(loks))[1]
-       }
+          if(M > 2) {
+            message("Consider also using smaller M. Too large M leads to identification problems.")
+          }
+          which_best_fit <- which(loks == max(loks))[1]
+        }
+      }
+    } else {
+      which_best_fit <- which(loks == max(loks))[1]
     }
+    params <- all_estimates[[which_best_fit]] # The params to return
   } else {
-    which_best_fit <- which(loks == max(loks))[1]
+    ######### MULTIPLE-PHASE ESTIMATION #########
+
+    ## Phase 1: Estimate AR and weight parameters by least squares (always estimates with intercept parametrization)
+    LS_results <- estim_LS(data=data, p=p, M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                           cond_dist=cond_dist, parametrization=parametrization, AR_constraints=AR_constraints,
+                           mean_constraints=mean_constraints, weight_constraints=weight_constraints, ncores=ncores,
+                           use_parallel=use_parallel)
+
+    ## Phase 2, Part 1: Estimate the remaining parameters with the genetic algorithm
   }
-  params <- all_estimates[[which_best_fit]] # The params to return
 
   ### Obtain standard errors, calculate IC ###
   # Sort regimes if no constraints are employed (affects params only with specific weight_functions)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/MAINest.R
 \name{fitSTVAR}
 \alias{fitSTVAR}
-\title{Two-phase maximum likelihood estimation of a reduced form smooth transition VAR model}
+\title{Two-phase or multiple-phase maximum likelihood estimation of a reduced form smooth transition VAR model}
 \usage{
 fitSTVAR(
   data,
@@ -16,6 +16,7 @@ fitSTVAR(
   AR_constraints = NULL,
   mean_constraints = NULL,
   weight_constraints = NULL,
+  estim_method,
   nrounds = (M + 1)^5,
   ncores = 2,
   maxit = 1000,
@@ -102,6 +103,9 @@ constraint matrix of full column rank (\eqn{a} is the dimension of \eqn{\alpha})
 and \eqn{\xi} is an unknown \eqn{(l\times 1)} parameter. \strong{Alternatively}, set \eqn{R=0} in order to constrain the
 the weight parameter to the constant \eqn{r} (in this case, \eqn{\alpha} is dropped from the constrained parameter vector).}
 
+\item{estim_method}{either \code{"two-phase"} or \code{"multiple-phase"} (the latter is the default
+option for threshold models and the former is currently the only option for other models). See details.}
+
 \item{nrounds}{the number of estimation rounds that should be performed.}
 
 \item{ncores}{the number CPU cores to be used in parallel computing.}
@@ -143,15 +147,33 @@ Returns an S3 object of class \code{'stvar'} defining a smooth transition VAR mo
    \item{which_round}{Indicators of which round of optimization each estimate belongs to, if applicable.}
 }
 \description{
-\code{fitSTVAR} estimates a reduced form smooth transition VAR model in two phases:
-  in the first phase, it uses a genetic algorithm to find starting values for a gradient based
-  variable metric algorithm, which it then uses to finalize the estimation in the second phase.
+\code{fitSTVAR} estimates a reduced form smooth transition VAR model in two phases
+  or multiple phases (see details-section for the multiple phase estimation). In the two-phase
+  procedure:
+  in the first phase, it uses a genetic algorithm (GA) to find starting values for a gradient based
+  variable metric algorithm (VA), which it then uses to finalize the estimation in the second phase.
   Parallel computing is utilized to perform multiple rounds of estimations in parallel.
 }
 \details{
 If you wish to estimate a structural model, estimate first the reduced form model and then use the
  use the function \code{fitSSTVAR} to create (and estimate if necessary) the structural model
  based on the estimated reduced form model.
+
+ With \code{estim_method="multiple-phase"} (currently only available for threshold VAR models),
+ the following multiple-phase procedure proposed by Koivisto, Luoto, and Virolainen (2025) is employed:
+ \enumerate{
+   \item The AR and weight function parameters are estimated by the method of least squares.
+   \item The rest of the parameters are ML estimated conditional on the LS estimates of the AR parameters with
+     the two-phase procedure (GA + VA).
+   \item The AR parameters are ML estimated with VA conditional on the estimates of the rest of the parameters,
+     initializing the algorithm from the LS estimates.
+   \item All parameters are ML estimated by initializing VA from the estimates obtained in the previous step.
+ }
+ Note that \code{mean_constraints} are not supported in the multiple-phase procedure and only such \code{weight_constraints}
+ are supported that fix the values of the weight function parameters to known constants.
+ If structural model identified by non-Gaussianity is estimated, note that the identification can be weak with
+ respect to the ordering and signs of some of the columns of \eqn{B_2,...,B_M} (see Virolainen, 2024). You can
+ estimate models with different orderings of the columns of \eqn{B_2,...,B_M} with the function FILL IN.
 
  Because of complexity and high multimodality of the log-likelihood function, it is \strong{not certain}
  that the estimation algorithm will end up in the global maximum point. It is expected that many of the
@@ -317,6 +339,7 @@ summary(fitexp32cmw) # Summary printout of the estimates
      \emph{Journal of Econometrics}, \strong{84}:1, 1-36.
    \item Hubrich K., Teräsvirta. T. 2013. Thresholds and Smooth Transitions in Vector Autoregressive Models.
      \emph{CREATES Research Paper 2013-18, Aarhus University.}
+   \item Koivisto T., Luoto J., Virolainen S. 2025. Unpublished working paper.
    \item Lanne M., Virolainen S. 2024. A Gaussian smooth transition vector autoregressive model:
       An application to the macroeconomic effects of severe weather shocks. Unpublished working
       paper, available as arXiv:2403.14216.

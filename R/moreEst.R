@@ -738,7 +738,8 @@ fitbsSSTVAR <- function(data, p, M, params,
 #' @param use_parallel employ parallel computing? If \code{FALSE}, does not print anything.
 #' @details Used internally in the multiple phase estimation procedure proposed by Koivisto,
 #'  Luoto, and Virolainen (2025). Mean constraints are not supported. Only weight constraints that
-#'  specify the threshold parameters as fixed values are supported.
+#'  specify the threshold parameters as fixed values are supported. Only intercept parametrization is
+#'  supported.
 #' @return Returns the estimated parameters in a vector of the form
 #'  \eqn{(\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\alpha}, where
 #'  \itemize{
@@ -778,6 +779,8 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     stop("Mean constraints are not supported by the LS estimation")
   } else if(weight_function != "threshold") {
     stop("Only threshold weight function is supported by the LS estimation")
+  } else if(parametrization != "intercept") {
+    stop("Only the intercept parametrization is supported by the LS estimation")
   }
   # Check the weight constraints
   if(!is.null(weight_constraints)) {
@@ -980,7 +983,6 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     if(use_parallel) {
       if(ncores > parallel::detectCores()) {
         ncores <- parallel::detectCores()
-        message("ncores was set to be larger than the number of cores detected")
       }
       n_thresvecs <- ifelse(M == 1 || !is.null(weight_constraints), 1, nrow(thresvecs))
       message(paste("Estimating by least squares for ", n_thresvecs, " vectors of thresholds..."))
