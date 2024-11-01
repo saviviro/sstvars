@@ -106,7 +106,8 @@ weight parameters to the constant \eqn{r} (in this case, \eqn{\alpha} is dropped
 \item{estim_method}{either \code{"two-phase"} or \code{"multiple-phase"} (the latter is the default
 option for threshold models and the former is currently the only option for other models). See details.}
 
-\item{nrounds}{the number of estimation rounds that should be performed.}
+\item{nrounds}{the number of estimation rounds that should be performed. The default is \code{(M*ncol(data))^3}
+when \code{estim_method="two-phase"} and \code{(M*ncol(data))^2} when \code{estim_method="multiple-phase"}.}
 
 \item{ncores}{the number CPU cores to be used in parallel computing.}
 
@@ -176,16 +177,16 @@ If you wish to estimate a structural model, estimate first the reduced form mode
  estimate models with different orderings of the columns of \eqn{B_2,...,B_M} with the function FILL IN.
 
  Because of complexity and high multimodality of the log-likelihood function, it is \strong{not certain}
- that the estimation algorithm will end up in the global maximum point. It is expected that many of the
- estimation rounds will end up in some local maximum or a saddle point instead. Therefore, a (sometimes very large)
- number of estimation rounds is required for reliable results. Due to identification problems and high complexity of
- the surface of the log-likelihood function, the estimation may fail especially in the cases where the number of
- regimes is chosen too large.
+ that the estimation algorithm will end up in the global maximum point. When \code{estim_method="two-phase"},
+ it is expected that many of the estimation rounds will end up in some local maximum or a saddle point instead.
+ Therefore, a (sometimes very large) number of estimation rounds is required for reliable results
+ (when \code{estim_method="multiple-phase"} substantially smaller number should be sufficient). Due to
+ identification problems and high complexity of the surface of the log-likelihood function, the estimation may
+ fail especially in the cases where the number of regimes is chosen too large.
 
  The estimation process is computationally heavy and it might take considerably long time for large models to
- estimate. Note that estimation of model with \code{cond_dist == "ind_Student"} is computationally substantially
- more demanding than standard Gaussian and Student's t models due to the different structure of the log-likelihood
- function (parametrized directly via impact matrices rather than covariance matrices of the regimes).
+ estimate. Note that reliable estimation of model with \code{cond_dist == "ind_Student"} or \code{"ind_skewed_t"}
+ is more difficult than with Gaussian or Student's t models due to the increased complexity.
 
  If the iteration limit \code{maxit} in the variable metric algorithm is reached, one can continue the estimation by
  iterating more with the function \code{iterate_more}. Alternatively, one may use the found estimates as starting values
@@ -195,10 +196,10 @@ If you wish to estimate a structural model, estimate first the reduced form mode
  \strong{If the estimation algorithm performs poorly}, it usually helps to scale the individual series so that they
  vary roughly in the same scale. This makes it is easier to draw reasonable AR coefficients and (with some weight functions)
  weight parameter values in the genetic algorithm. Even if the estimation algorithm somewhat works, it should be preferred
- to scale the data so that most of the AR coefficients will not be very large, as the estimation algorithm works better with
+ to scale the data so that most of the AR coefficients will not be very large, as the genetic algorithm works better with
  relatively small AR coefficients. If needed, another package can be used to fit linear VARs to the series to see which scaling
  of the series results in relatively small AR coefficients. You should avoid very small (or very high) variance in the data as
- well so that the eigenvalues of the covariance matrices are in a reasonable range.
+ well, so that the eigenvalues of the covariance matrices are in a reasonable range.
 
  \strong{weight_constraints:} If you are using weight constraints other than restricting some of the weight parameters to known
  constants, make sure the constraints are sensible. Otherwise, the estimation may fail due to the estimation algorithm not being
@@ -211,7 +212,8 @@ If you wish to estimate a structural model, estimate first the reduced form mode
  stationarity is close to break), or transition weights such that they are close to zero for almost all \eqn{t} for at least
  one regime. You can also set \code{filter_estimates=FALSE} and find the solutions of interest yourself by using the
  function \code{alt_stvar} (which can used with \code{filter_estimates=TRUE} as well since results from all estimation rounds
- are saved).
+ are saved). If \code{estim_method = "multiple-phase"} filtering is always automatically applied in the second phase to facilitate
+ reasonable initial estimates in the subsequent phases.
 }
 \section{S3 methods}{
 

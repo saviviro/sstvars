@@ -380,8 +380,8 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
       } else if(i1 == n_attempts) {
         if(length(G) == 0) {
           if(!is.null(fixed_params)) {
-            stop("Failed to create initial population with good enough individuals. Check that fixed_params are reasonable
-                  estimates and satisfy the stability condition and other requirements.")
+            stop("Failed to create initial population with good enough individuals. Check that the data is reasonable for the model
+                 and that there are enough observations.")
           } else {
             stop(paste("Failed to create initial population with good enough individuals. Scaling the individual series",
                        "so that the AR coefficients (of a VAR model) will not be very large (preferably less than one)",
