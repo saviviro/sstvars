@@ -160,6 +160,7 @@ If you wish to estimate a structural model, estimate first the reduced form mode
  use the function \code{fitSSTVAR} to create (and estimate if necessary) the structural model
  based on the estimated reduced form model.
 
+ \strong{Multiple-phase estimation:}\\
  With \code{estim_method="multiple-phase"} (currently only available for threshold VAR models),
  the following multiple-phase procedure proposed by Koivisto, Luoto, and Virolainen (2025) is employed:
  \enumerate{
@@ -171,11 +172,15 @@ If you wish to estimate a structural model, estimate first the reduced form mode
    \item All parameters are ML estimated by initializing VA from the estimates obtained in the previous step.
  }
  Note that \code{mean_constraints} are not supported in the multiple-phase procedure and only such \code{weight_constraints}
- are supported that fix the values of the weight function parameters to known constants.
+ are supported that fix the values of the weight function parameters to known constants. Also, despite running multiple
+ estimation rounds in Phase~2, the multiple-phase estimation procedure produces only one final estimate, since the
+ best appropriate estimate is automatically selected after Phase~2 (see "Filtering inappropriate estimates" below).
+
  If structural model identified by non-Gaussianity is estimated, note that the identification can be weak with
  respect to the ordering and signs of some of the columns of \eqn{B_2,...,B_M} (see Virolainen, 2024). You can
  estimate models with different orderings of the columns of \eqn{B_2,...,B_M} with the function FILL IN.
 
+ \strong{Related also to the two-phase estimation:}\\
  Because of complexity and high multimodality of the log-likelihood function, it is \strong{not certain}
  that the estimation algorithm will end up in the global maximum point. When \code{estim_method="two-phase"},
  it is expected that many of the estimation rounds will end up in some local maximum or a saddle point instead.
@@ -185,8 +190,9 @@ If you wish to estimate a structural model, estimate first the reduced form mode
  fail especially in the cases where the number of regimes is chosen too large.
 
  The estimation process is computationally heavy and it might take considerably long time for large models to
- estimate. Note that reliable estimation of model with \code{cond_dist == "ind_Student"} or \code{"ind_skewed_t"}
- is more difficult than with Gaussian or Student's t models due to the increased complexity.
+ estimate, particularly if \code{estim_method="two-phase"}. Note that reliable estimation of model with
+ \code{cond_dist == "ind_Student"} or \code{"ind_skewed_t"} is more difficult than with Gaussian or Student's t
+ models due to the increased complexity.
 
  If the iteration limit \code{maxit} in the variable metric algorithm is reached, one can continue the estimation by
  iterating more with the function \code{iterate_more}. Alternatively, one may use the found estimates as starting values
@@ -212,7 +218,7 @@ If you wish to estimate a structural model, estimate first the reduced form mode
  stationarity is close to break), or transition weights such that they are close to zero for almost all \eqn{t} for at least
  one regime. You can also set \code{filter_estimates=FALSE} and find the solutions of interest yourself by using the
  function \code{alt_stvar} (which can used with \code{filter_estimates=TRUE} as well since results from all estimation rounds
- are saved). If \code{estim_method = "multiple-phase"} filtering is always automatically applied in the second phase to facilitate
+ are saved). If \code{estim_method = "multiple-phase"} filtering is always automatically applied after Phase~2 to facilitate
  reasonable initial estimates in the subsequent phases.
 }
 \section{S3 methods}{

@@ -559,6 +559,19 @@ check_constraints <- function(data, p, M, d,
         } else if(qr(weight_constraints[[1]])$rank != ncol(weight_constraints[[1]])) {
           stop("The first element of weight_constraints (matrix R) should have full column rank (or it should equal to zero).")
         }
+      } else {
+        # R is a matrix of zeros, so it should only be the constant zero
+        if(is.matrix(weight_constraints[[1]])) {
+          if(nrow(weight_constraints[[1]]) != 1 || ncol(weight_constraints[[1]]) != 1) {
+            stop(paste("The constraints matrix R in the first element of weight_constraints is matrix of zeros,",
+                       "so it should be the scalar zero."))
+          }
+        } else {
+          if(!is.numeric(weight_constraints[[1]]) || length(weight_constraints[[1]]) != 1) {
+            stop(paste("The constraints matrix R in the should be the scalar zero when constraining the weight parameters,",
+                       "to fixed values."))
+          }
+        }
       }
       # Check r
       if(!is.numeric(weight_constraints[[2]]) || !is.vector(weight_constraints[[2]])) {
