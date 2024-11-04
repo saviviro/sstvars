@@ -316,7 +316,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     # FUN = function to calculate the log-likelihood, with the parameter vector as the only argument
     # number_of_pars = number of parameters in the parameter vector that is the only argument of FUN
     I <- diag(rep(1, number_of_pars))
-    vapply(1:npars, function(i1) (FUN(params + I[i1,]*h) - FUN(params - I[i1,]*h))/(2*h), numeric(1))
+    vapply(1:number_of_pars, function(i1) (FUN(params + I[i1,]*h) - FUN(params - I[i1,]*h))/(2*h), numeric(1))
   }
 
   ## Function to filter inappropriate estimates
@@ -460,18 +460,18 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                              alt_par=TRUE), # alt_par used in the GA estimation
                error=function(e) minval)
     }
+    # A function to calculate the gradient of the log-likelihood function
+    loglik_grad1 <- function(params) loglik_grad(params, FUN=loglik_fn, number_of_pars=npars)
 
     if(!no_prints) message("Optimizing with a variable metric algorithm...")
     if(use_parallel) {
-      NEWTONresults <- pbapply::pblapply(1:nrounds, function(i1) optim(par=GAresults[[i1]], fn=loglik_fn, gr=loglik_grad,
-                                                                       FUN=loglik_fn, number_of_pars=npars, # Passed to loglik_grad
+      NEWTONresults <- pbapply::pblapply(1:nrounds, function(i1) optim(par=GAresults[[i1]], fn=loglik_fn, gr=loglik_grad1,
                                                                        method="BFGS", control=list(fnscale=-1, maxit=maxit)), cl=cl)
       parallel::stopCluster(cl=cl)
     } else {
       tmpfunNE <- function(i1) {
         if(!no_prints) message(i1, "/", nrounds, "\r")
-        optim(par=GAresults[[i1]], fn=loglik_fn, gr=loglik_grad,
-              FUN=loglik_fn, number_of_pars=npars, # Passed to loglik_grad
+        optim(par=GAresults[[i1]], fn=loglik_fn, gr=loglik_grad1,
               method="BFGS", control=list(fnscale=-1, maxit=maxit))
       }
       NEWTONresults <- lapply(1:nrounds, function(i1) tmpfunNE(i1))
@@ -514,19 +514,47 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       message(paste("Using", ncores, "cores for estimation..."))
     }
 
+    ############
     ### Phase 1: Estimate AR and weight parameters by least squares (always estimates with intercept parametrization)
+    ############
     if(!no_prints && !use_parallel) {
-      message("PHASE 1: Estimating AR and weight parameters by least squares...") # parallel prints inside estim_LS
+      message("PHASE 1: Estimating the AR and weight parameters by least squares...") # parallel prints inside estim_LS
     }
     LS_results <- estim_LS(data=data, p=p, M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
                            cond_dist=cond_dist, parametrization=parametrization, AR_constraints=AR_constraints,
                            mean_constraints=mean_constraints, weight_constraints=weight_constraints, ncores=ncores,
                            use_parallel=use_parallel)
 
+    # Check whether the least squares estimates satisfy the stability condition
+    if(!is.null(AR_constraints)) { # Expand the AR constraints
+      pars_to_check <- c(LS_results[1:(M*d)], AR_constraints%*%LS_results[(M*d+1):length(LS_results)])
+    } else {
+      pars_to_check <- LS_results
+    }
+    all_A <- pick_allA(p=p, M=M, d=d, params=pars_to_check)
+    all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
+    stab_ok <- logical(M)
+    for(m in 1:M) { # Check stability conditon for each regime
+      stab_ok[m] <- all(abs(eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$'values') < 1 - 1e-3)
+    }
+    if(!all(stab_ok)) {
+      message("The least squares estimates do not satisfy the stability condition!")
+      message("Trying to adjust the least squares estimates to satisfy the stability condition...")
+
+    }
+    # Voisi testata stab-conditionin ihan regiimeittäin, jotta parametreja voi adjustoida regiimeittäin.
+    # GA+VA:ssa painot on ennalta määrätty, joten adjustointi yhdellä regiimillä ei vaikuta niihin,
+    # mutta myöhemmässä phasessa huomattavan huonoksi mennyt regiimi voi menetettää havaintoja reippaasti, tms.
+
+    # Eigenvalue adjustment vaikuttaa järkevimmältä ratkaisulta. Huom! Adjustonnin pitää olla "reippaasti" enemmmän
+    # kuin toleranssi 0.001, jotta estimaatti ei aloita alueen reunalta, josta on hankala konvergoitua eteenpäin.
+
+    ############
     ### Phase 2: Estimate the remaining parameters conditional on the LS estimates of the AR and weight parameters
+    ############
 
     ## Part 1: Estimation by genetic algorithm ##
-    if(!no_prints) message(paste0("PHASE 2a: Estimating error distribution parameters with a genetic algorithm (",
+    if(!no_prints) message(paste0("PHASE 2a: Estimating the error distribution parameters with a genetic algorithm (",
                                   nrounds, " rounds)..."))
     if(use_parallel) {
       cl <- parallel::makeCluster(ncores)
@@ -617,7 +645,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       n_distpars <- 2*d
     }
 
-    # A function to calculate the log-likelihood function
+    # Functions to calculate the log-likelihood function and its gradient
     loglik_fn2 <- function(covmat_and_dist_pars) {
       if(n_weightpars == 0) {
         params <- c(LS_results[1:n_arpars], covmat_and_dist_pars)
@@ -635,6 +663,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                              alt_par=TRUE), # alt_par params procuded by the GA estimation
                error=function(e) minval)
     }
+    loglik_grad2 <- function(covmat_and_dist_pars) loglik_grad(covmat_and_dist_pars, FUN=loglik_fn2,
+                                                               number_of_pars=n_covmatpars+n_distpars)
 
     # Function that picks covmat and dist params from the full parameter vector
     get_covmat_and_dist_pars <- function(params) {
@@ -642,25 +672,21 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
         return(params[(n_arpars + 1):(n_arpars + n_covmatpars + n_distpars)])
       } else {
         return(c(params[(n_arpars + 1):(n_arpars + n_covmatpars)],
-                 params[(n_arpars + n_covmatpars + n_weight_pars + 1):(n_arpars + n_covmatpars + n_weightpars + n_distpars)]))
+                 params[(n_arpars + n_covmatpars + n_weightpars + 1):(n_arpars + n_covmatpars + n_weightpars + n_distpars)]))
       }
     }
 
-    if(!no_prints) message(paste0("PHASE 2b: Estimating error distribution parameters with a variable algorithm (",
+    if(!no_prints) message(paste0("PHASE 2b: Estimating the error distribution parameters with a variable algorithm (",
                                   nrounds, " rounds)..."))
     if(use_parallel) {
-      NEWTONresults <- pbapply::pblapply(1:nrounds,
-                                         function(i1) optim(par=get_covmat_and_dist_pars(GAresults[[i1]]),
-                                                            fn=loglik_fn2, gr=loglik_grad,
-                                                            FUN=loglik_fn2, number_of_pars=n_covmatpars+n_distpars, # passed to loglik_grad
-                                                            method="BFGS", control=list(fnscale=-1, maxit=maxit)), cl=cl)
+      NEWTONresults <- pbapply::pblapply(1:nrounds, function(i1) optim(par=get_covmat_and_dist_pars(GAresults[[i1]]),
+                                                                       fn=loglik_fn2, gr=loglik_grad2,
+                                                                       method="BFGS", control=list(fnscale=-1, maxit=maxit)), cl=cl)
       parallel::stopCluster(cl=cl)
     } else {
       tmpfunNE <- function(i1) {
         if(!no_prints) message(i1, "/", nrounds, "\r")
-        optim(par=get_covmat_and_dist_pars(GAresults[[i1]]),
-              fn=loglik_fn2, gr=loglik_grad,
-              FUN=loglik_fn2, number_of_pars=n_covmatpars+n_distpars, # passed to loglik_grad
+        optim(par=get_covmat_and_dist_pars(GAresults[[i1]]), fn=loglik_fn2, gr=loglik_grad2,
               method="BFGS", control=list(fnscale=-1, maxit=maxit))
       }
       NEWTONresults <- lapply(1:nrounds, function(i1) tmpfunNE(i1))
@@ -670,14 +696,24 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
 
     if(print_res) {
       message("Results from the variable metric algorithm:")
-      print_loks()
+      print_loks(loks)
     }
 
-    ## Obtain estimates, change back to original parametrization, and filter the inapproriate estimates
+    ### Obtain estimates, change back to original parametrization, and filter the inapproriate estimates
     all_estimates <- lapply(NEWTONresults, function(x) x$par)
 
-    ## TÄÄLLÄ PITÄÄ RAKENTAA TAKAISIN PARAMETRIVEKTORI KOKONAISEKSI KAIKILLE YKSILÖILLE
+    ## Create the full parameter vectors from the covmat and dist pars from the VA results
+    all_estimates <- lapply(all_estimates, function(pars) {
+      if(n_weightpars == 0) {
+        c(LS_results[1:n_arpars], pars)
+      } else {
+        c(LS_results[1:n_arpars], pars[1:n_covmatpars], # ar + covmat pars
+          LS_results[(n_arpars + 1):(n_arpars + n_weightpars)], # weight pars
+          pars[(n_covmatpars + 1):(n_covmatpars + n_distpars)]) # dist pars
+      }
+    })
 
+    ## Change back to original parametrization from alt_par
     if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") {
       all_estimates <- lapply(all_estimates, function(pars) change_parametrization(p=p, M=M, d=d, params=pars,
                                                                                    weight_function=weight_function,
@@ -695,7 +731,22 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     which_best_fit <- filter_estimates_fun(all_estimates=all_estimates, loks=loks)
     phase2_estimate <- all_estimates[[which_best_fit]] # The params to initialize the next phase with
 
+    print(loglikelihood(data=data, p=p, M=M, params=phase2_estimate,
+                        weight_function=weight_function, weightfun_pars=weightfun_pars,
+                        cond_dist=cond_dist, parametrization=parametrization,
+                        identification="reduced_form", AR_constraints=AR_constraints,
+                        mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                        B_constraints=NULL, to_return="loglik", check_params=TRUE, minval=minval,
+                        alt_par=FALSE))
+    check_params(data=data, p=p, M=M, d=d, params=phase2_estimate, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                 cond_dist=cond_dist, parametrization=parametrization, identification="reduced_form",
+                 AR_constraints=AR_constraints, mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                 B_constraints=NULL)
+
+    ############
     ### Phase 3: estimate the AR and weight parameters by ML with VA with the distribution parameters fixed
+    ############
+
     fixed_covmatpars <- phase2_estimate[(n_arpars + 1):(n_arpars + n_covmatpars)]
     fixed_distpars <- phase2_estimate[(n_arpars + n_covmatpars + n_weightpars + 1):
                                         (n_arpars + n_covmatpars + n_weightpars + n_distpars)]
@@ -706,13 +757,37 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                                       phase2_estimate[(n_arpars + n_covmatpars + 1):(n_arpars + n_covmatpars + n_weightpars)])
     }
 
-    ## Log-lik function and gradient with fixed covmat and distpars:
-    loglik_fn2 <- function(ar_and_weight_pars) {
-      # ar and weight_pars assumed to be in the form (phi_{1,0},...,phi_{M,9},varphi_{1},...,\varphi_{M},alpha)
+    print("Phase 2 estimates reconstructed check:")
+    print(loglikelihood(data=data, p=p, M=M, params=c(phase2_ar_and_weight_estim[1:n_arpars],
+                                                      fixed_covmatpars,
+                                                      phase2_ar_and_weight_estim[(n_arpars + 1):(n_arpars + n_weightpars)],
+                                                      fixed_distpars),
+                        weight_function=weight_function, weightfun_pars=weightfun_pars,
+                        cond_dist=cond_dist, parametrization=parametrization,
+                        identification="reduced_form", AR_constraints=AR_constraints,
+                        mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                        B_constraints=NULL, to_return="loglik", check_params=TRUE, minval=minval,
+                        alt_par=FALSE))
+    check_params(data=data, p=p, M=M, d=d, params=c(phase2_ar_and_weight_estim[1:n_arpars],
+                                                    fixed_covmatpars,
+                                                    phase2_ar_and_weight_estim[(n_arpars + 1):(n_arpars + n_weightpars)],
+                                                    fixed_distpars),
+                 weight_function=weight_function, weightfun_pars=weightfun_pars,
+                 cond_dist=cond_dist, parametrization=parametrization, identification="reduced_form",
+                 AR_constraints=AR_constraints, mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                 B_constraints=NULL)
 
-      ### TÄÄLLÄ HUOMIOI JÄLLEEN WEIGHTPARSSEJA OLLENKAAN!
-      params <- c(ar_and_weight_pars[1:n_arpars], fixed_covmatpars, ar_and_weight_pars[(n_arpars + 1):(n_arpars + n_weightpars)],
-                  fixed_distpars) # Create the full parameter vector with the fixed covmat and dist pars
+    ## Log-lik function and gradient with fixed covmat and distpars:
+    loglik_fn3 <- function(ar_and_weight_pars) {
+      # AR and weight pars assumed to be in the form (phi_{1,0},...,phi_{M,9},varphi_{1},...,\varphi_{M},alpha)
+      # Create the full parameter vector with the fixed covmat and dist pars:
+      if(n_weightpars == 0) {
+        params <- c(ar_and_weight_pars, fixed_covmatpars, fixed_distpars)
+      } else {
+        params <- c(ar_and_weight_pars[1:n_arpars], fixed_covmatpars, ar_and_weight_pars[(n_arpars + 1):(n_arpars + n_weightpars)],
+                    fixed_distpars)
+      }
+
       tryCatch(loglikelihood(data=data, p=p, M=M, params=params,
                              weight_function=weight_function, weightfun_pars=weightfun_pars,
                              cond_dist=cond_dist, parametrization=parametrization,
@@ -722,26 +797,39 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                              alt_par=FALSE), # We have swapped to orig parametrization here.
                error=function(e) minval)
     }
-    n_ar_and_weightpars <- n_arpars + n_weightpars
-    # I2 <- diag(rep(1, n_ar_and_weightpars))
-    # loglik_grad2 <- function(ar_and_weight_pars) {
-    #   # ar and weight_pars assumed to be inthe form (phi_{1,0},...,phi_{M,9},varphi_{1},...,\varphi_{M},alpha)
-    #   #params <- c(ar_and_weight_pars[1:n_arpars], fixed_covmatpars, ar_and_weight_pars[(n_arpars + 1):(n_arpars + n_weightpars)],
-    #   #            fixed_distpars) # Create the full parameter vector with the fixed covmat and dist pars
-    #   vapply(1:n_ar_and_weightpars, function(i1) {
-    #     # Determine the index of the i1:th param in ar_and_weight_pars in the full parameter vector
-    #     #if(i1 <= n_arpars) { # AR or mean param
-    #     #  i2 <- i1
-    #     #} else { # Weight param
-    #     #  i2 <- i1 + n_covmatpars
-    #     #}
-    #     #(loglik_fn(params + I[i2,]*h) - loglik_fn(params - I[i2,]*h))/(2*h)
-    #     (loglik_fn2(ar_and_weight_pars + I2[i1,]*h) - loglik_fn(ar_and_weight_pars - I2[i1,]*h))/(2*h)
-    #     }, numeric(1))
-    # }
+    loglik_fntmp <- function(ar_and_weight_pars) {
+      # AR and weight pars assumed to be in the form (phi_{1,0},...,phi_{M,9},varphi_{1},...,\varphi_{M},alpha)
+      # Create the full parameter vector with the fixed covmat and dist pars:
+      if(n_weightpars == 0) {
+        params <- c(ar_and_weight_pars, fixed_covmatpars, fixed_distpars)
+      } else {
+        params <- c(ar_and_weight_pars[1:n_arpars], fixed_covmatpars, ar_and_weight_pars[(n_arpars + 1):(n_arpars + n_weightpars)],
+                    fixed_distpars)
+      }
+      print(loglikelihood(data=data, p=p, M=M, params=params,
+                          weight_function=weight_function, weightfun_pars=weightfun_pars,
+                          cond_dist=cond_dist, parametrization=parametrization,
+                          identification="reduced_form", AR_constraints=AR_constraints,
+                          mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                          B_constraints=NULL, to_return="loglik", check_params=TRUE, minval=minval,
+                          alt_par=FALSE))
 
-    if(!no_prints) message("PHASE 3: Estimating AR and weight parameters with a variable metric algorithm...")
-    phase3_res <- optim(par=phase2_ar_and_weight_estim, fn=loglik_fn2, gr=loglik_grad2,
+      tryCatch(loglikelihood(data=data, p=p, M=M, params=params,
+                             weight_function=weight_function, weightfun_pars=weightfun_pars,
+                             cond_dist=cond_dist, parametrization=parametrization,
+                             identification="reduced_form", AR_constraints=AR_constraints,
+                             mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                             B_constraints=NULL, to_return="loglik", check_params=TRUE, minval=minval,
+                             alt_par=FALSE), # We have swapped to orig parametrization here.
+               error=function(e) minval)
+    }
+
+    n_ar_and_weightpars <- n_arpars + n_weightpars
+    loglik_grad3 <- function(ar_and_weight_pars) loglik_grad(ar_and_weight_pars, FUN=loglik_fn3,
+                                                             number_of_pars=n_ar_and_weightpars)
+
+    if(!no_prints) message("PHASE 3: Estimating the AR and weight parameters with a variable metric algorithm...")
+    phase3_res <- optim(par=phase2_ar_and_weight_estim, fn=loglik_fntmp, gr=loglik_grad3,
                         method="BFGS", control=list(fnscale=-1, maxit=maxit))
     phase3_ar_estimate <- phase3_res$par
     phase3_loglik <- phase3_res$value
@@ -753,24 +841,28 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                            phase3_ar_estimate[(n_arpars + 1):(n_arpars + n_weightpars)],
                            fixed_distpars) # Full Phase 3 estimate
     }
-    print(loglikelihood(data=data, p=p, M=M, params=phase3_estimate,
-                        weight_function=weight_function, weightfun_pars=weightfun_pars,
-                        cond_dist=cond_dist, parametrization=parametrization,
-                        identification="reduced_form", AR_constraints=AR_constraints,
-                        mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                        B_constraints=NULL, to_return="loglik", check_params=TRUE, minval=minval))
 
-    ### Phase 4: estimate all parameters by ML initializing VA from Phase 3 estimates:
+    ############
+    ### Phase 4: estimate all parameters by ML initializing VA from Phase 3 estimates
+    ############
+
+    ## Log-lik function and gradient with fixed covmat and distpars:
+    loglik_fn4 <- function(params) {
+      tryCatch(loglikelihood(data=data, p=p, M=M, params=params,
+                             weight_function=weight_function, weightfun_pars=weightfun_pars,
+                             cond_dist=cond_dist, parametrization=parametrization,
+                             identification="reduced_form", AR_constraints=AR_constraints,
+                             mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                             B_constraints=NULL, to_return="loglik", check_params=TRUE, minval=minval,
+                             alt_par=FALSE), # We have swapped to orig parametrization here.
+               error=function(e) minval)
+    }
+    loglik_grad4 <- function(params) loglik_grad(params, FUN=loglik_fn4, number_of_pars=npars)
+
     if(!no_prints) message("PHASE 4: Estimating all parameters with a variable metric algorithm...")
-    phase4_res <- optim(par=phase3_estimate, fn=loglik_fn, gr=loglik_grad,
+    phase4_res <- optim(par=phase3_estimate, fn=loglik_fn4, gr=loglik_grad4,
                         method="BFGS", control=list(fnscale=-1, maxit=maxit))
     if(print_res) message(paste("The log-likelihood from PHASE 4:", round(phase4_res$value, 3)))
-    print(loglikelihood(data=data, p=p, M=M, params=phase4_res$par,
-                        weight_function=weight_function, weightfun_pars=weightfun_pars,
-                        cond_dist=cond_dist, parametrization=parametrization,
-                        identification="reduced_form", AR_constraints=AR_constraints,
-                        mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                        B_constraints=NULL, to_return="loglik", check_params=TRUE, minval=minval))
 
     ## Obtain the results:
     converged <- phase4_res$convergence == 0 # Did the final result converge?
