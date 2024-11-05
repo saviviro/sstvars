@@ -527,7 +527,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
 
     # Check whether the least squares estimates satisfy the stability condition
     if(!is.null(AR_constraints)) { # Expand the AR constraints
-      pars_to_check <- c(LS_results[1:(M*d)], AR_constraints%*%LS_results[(M*d+1):length(LS_results)])
+      pars_to_check <- c(LS_results[1:(M*d)], AR_constraints%*%LS_results[(M*d + 1):(M*d + ncol(AR_constrants))])
     } else {
       pars_to_check <- LS_results
     }
@@ -574,7 +574,25 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       }
     }
 
-    print(paste("LS_results: ", paste(round(LS_results, 3), collapse=", ")))
+    print("LS_results: ")
+    print(paste(round(LS_results, 3), collapse=", "))
+
+    ## Change the LS_results to mean parametrization
+    if(is.null(AR_constraints)) {
+      mean_and_ar_pars <- LS_results[1:(M*d + M*p*d^2)]
+    } else {
+      # Expand the AR constraints:
+      mean_and_ar_pars <- c(LS_results[1:(M*d)], AR_constraints%*%LS_results[(M*d + 1):(M*d + ncol(AR_constrants))])
+    }
+
+    # Calculate and fill in the means from the estimated intercepts:
+    Id <- diag(nrow=d)
+    all_phi0 <- pick_phi0(M=M, d=d, params=mean_and_ar_pars)
+    all_A <- pick_allA(p=p, M=M, d=d, params=mean_and_ar_pars)
+    LS_results[1:(M*d)] <- vapply(1:M, function(m) solve(Id - rowSums(all_A[, , , m, drop=FALSE], dims=2), all_phi0[,m]), numeric(d))
+
+    print("LS_results after change to mean: ")
+    print(paste(round(LS_results, 3), collapse=", "))
 
     ############
     ### Phase 2: Estimate the remaining parameters conditional on the LS estimates of the AR and weight parameters
@@ -593,7 +611,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                                                                    weight_function=weight_function,
                                                                    weightfun_pars=weightfun_pars,
                                                                    cond_dist=cond_dist,
-                                                                   parametrization="intercept", # LS_results always intercept paramtrz
+                                                                   parametrization="mean",
                                                                    AR_constraints=AR_constraints,
                                                                    mean_constraints=mean_constraints,
                                                                    weight_constraints=weight_constraints,
@@ -606,7 +624,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
               weight_function=weight_function,
               weightfun_pars=weightfun_pars,
               cond_dist=cond_dist,
-              parametrization="intercept", # LS_results always intercept parametrized params
+              parametrization="mean",
               AR_constraints=AR_constraints,
               mean_constraints=mean_constraints,
               weight_constraints=weight_constraints,
@@ -616,25 +634,11 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       GAresults <- lapply(1:nrounds, function(i1) tmpfunGA(i1, ...))
     }
 
-    ## Change to mean parametrization if parametrization == "mean"
-    if(parametrization == "mean") {
-      GAresults <- lapply(GAresults, function(pars) change_parametrization(p=p, M=M, d=d, params=pars,
-                                                                           weight_function=weight_function,
-                                                                           weightfun_pars=weightfun_pars,
-                                                                           cond_dist=cond_dist,
-                                                                           identification="reduced_form",
-                                                                           AR_constraints=AR_constraints,
-                                                                           mean_constraints=mean_constraints,
-                                                                           weight_constraints=weight_constraints,
-                                                                           B_constraints=NULL,
-                                                                           change_to="mean"))
-    }
-
     # Print results from GA estimation
     if(print_res) {
       loks <- vapply(1:nrounds, function(i1) loglikelihood(data=data, p=p, M=M, params=GAresults[[i1]],
                                                            weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                                           cond_dist=cond_dist, parametrization=parametrization,
+                                                           cond_dist=cond_dist, parametrization="mean",
                                                            identification="reduced_form", AR_constraints=AR_constraints,
                                                            mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                                                            B_constraints=NULL, to_return="loglik", check_params=TRUE, minval=minval,
@@ -649,7 +653,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       print_loks(loks)
     }
 
-    print(paste("Phase 2 GA estimates (round 1): ", paste(round(GAresults[[1]][1:(M*d + M*p*d^2 + 1)], 3), collapse=", ")))
+    print("Phase 2 GA estimates (round 1): ")
+    print(paste(round(c(GAresults[[1]][1:(M*d + M*p*d^2)],GAresults[[1]][M*d + M*p*d^2 + M*d^2 + 1]), 3), collapse=", "))
 
     ## Part 2: Estimation by variable metric algorithm ##
     n_covmatpars <- ifelse(cond_dist %in% c("ind_Student", "ind_skewed_t"), M*d^2, M*d*(d+1)/2)
@@ -683,9 +688,10 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                     LS_results[(n_arpars + 1):(n_arpars + n_weightpars)],
                     covmat_and_dist_pars[(n_covmatpars + 1):(n_covmatpars + n_distpars)])
       }
+
       tryCatch(loglikelihood(data=data, p=p, M=M, params=params,
                              weight_function=weight_function, weightfun_pars=weightfun_pars,
-                             cond_dist=cond_dist, parametrization=parametrization,
+                             cond_dist=cond_dist, parametrization="mean",
                              identification="reduced_form", AR_constraints=AR_constraints,
                              mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                              B_constraints=NULL, to_return="loglik", check_params=TRUE, minval=minval,
@@ -704,6 +710,9 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                  params[(n_arpars + n_covmatpars + n_weightpars + 1):(n_arpars + n_covmatpars + n_weightpars + n_distpars)]))
       }
     }
+
+    print("Tästä loglikista newton estim alkaa:")
+    print(loglik_fn2(get_covmat_and_dist_pars(GAresults[[1]]))) # Tämä loglik on päin vittua
 
     if(!no_prints) message(paste0("PHASE 2b: Estimating the error distribution parameters with a variable algorithm (",
                                   nrounds, " rounds)..."))
@@ -728,6 +737,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       print_loks(loks)
     }
 
+    # ELI TÄHÄN ASTI NÄYTTÄÄ TOIMIVAN! SEN JÄLKEEN TAPAHTUU JOTAIN, KOSKA PHASE 3 ESTIMAATIT HUONOMPIA KUIN PHASE 2.
+
     ### Obtain estimates, change back to original parametrization, and filter the inapproriate estimates
     all_estimates <- lapply(NEWTONresults, function(x) x$par)
 
@@ -741,6 +752,21 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
           pars[(n_covmatpars + 1):(n_covmatpars + n_distpars)]) # dist pars
       }
     })
+
+    ## Change to intercept parametrization if parametrization == "intercept"
+    if(parametrization == "intercept") {
+      GAresults <- lapply(GAresults, function(pars) change_parametrization(p=p, M=M, d=d, params=pars,
+                                                                           weight_function=weight_function,
+                                                                           weightfun_pars=weightfun_pars,
+                                                                           cond_dist=cond_dist,
+                                                                           identification="reduced_form",
+                                                                           AR_constraints=AR_constraints,
+                                                                           mean_constraints=mean_constraints,
+                                                                           weight_constraints=weight_constraints,
+                                                                           B_constraints=NULL,
+                                                                           change_to="intercept"))
+    }
+    # Below this parametrization = parametrization can be used.
 
     ## Change back to original parametrization from alt_par
     if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") {
@@ -760,7 +786,9 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     which_best_fit <- filter_estimates_fun(all_estimates=all_estimates, loks=loks)
     phase2_estimate <- all_estimates[[which_best_fit]] # The params to initialize the next phase with
 
-    print(paste("Phase 2 VA estimates: ", paste(round(phase2_estimate[1:(M*d + M*p*d^2 + 1)], 3), collapse=", ")))
+    print(paste("Phase 2 VA estimates: ", paste(round(c(phase2_estimate[1:(M*d + M*p*d^2)],
+                                                        phase2_estimate[M*d + M*p*d^2 + M*d^2 + 1]), 3), collapse=", ")))
+
 
 
     ############
@@ -788,28 +816,11 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                              alt_par=FALSE), # We have swapped to orig parametrization here.
                error=function(e) minval)
     }
-    loglik_fn3_2 <- function(params) {
-      # print(loglikelihood(data=data, p=p, M=M, params=params,
-      #                     weight_function=weight_function, weightfun_pars=weightfun_pars,
-      #                     cond_dist=cond_dist, parametrization=parametrization,
-      #                     identification="reduced_form", AR_constraints=AR_constraints,
-      #                     mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-      #                     B_constraints=NULL, to_return="loglik", check_params=TRUE, minval=minval,
-      #                     alt_par=FALSE))
-      tryCatch(loglikelihood(data=data, p=p, M=M, params=params,
-                             weight_function=weight_function, weightfun_pars=weightfun_pars,
-                             cond_dist=cond_dist, parametrization=parametrization,
-                             identification="reduced_form", AR_constraints=AR_constraints,
-                             mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                             B_constraints=NULL, to_return="loglik", check_params=TRUE, minval=minval,
-                             alt_par=FALSE), # We have swapped to orig parametrization here.
-               error=function(e) minval)
-    }
 
     loglik_grad3 <- function(params) loglik_grad(params, FUN=loglik_fn3, number_of_pars=npars)
 
     if(!no_prints) message("PHASE 3: Estimating all parameters with a variable metric algorithm...")
-    phase3_res <- optim(par=phase2_estimate, fn=loglik_fn3_2, gr=loglik_grad3,
+    phase3_res <- optim(par=phase2_estimate, fn=loglik_fn3, gr=loglik_grad3,
                         method="BFGS", control=list(fnscale=-1, maxit=maxit))
     if(print_res) message(paste("The log-likelihood from PHASE 3:", round(phase3_res$value, 3)))
 

@@ -143,7 +143,7 @@
 #'   that should be fixed in the parameter vector. Should have the form:
 #'   \eqn{(\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\alpha}, where
 #'   \itemize{
-#'     \item{\eqn{\phi_{m,0} = } the \eqn{(d \times 1)} intercept vector of the \eqn{m}th regime.}
+#'     \item{\eqn{\mu_{m} = } the \eqn{(d \times 1)} mean vector of the \eqn{m}th regime.}
 #'     \item{\eqn{\varphi_m = (vec(A_{m,1}),...,vec(A_{m,p}))} \eqn{(pd^2 \times 1)}.}
 #'     \item{\eqn{\alpha = (r_1,...,r_{M-1})} the \eqn{(M-1\times 1)} vector of the threshold parameters.}
 #'   }
@@ -154,6 +154,7 @@
 #'      argument \code{weigh_constraints}. If weight functions parameters are imposed to be fixed values, simply drop \eqn{\alpha}
 #'      from the parameter vector.}
 #'   }
+#'   Note that \code{fixed_params} should always be in the mean parametrization.
 #' @param seed a single value, interpreted as an integer, or NULL, that sets seed for the random number generator in
 #'   the beginning of the function call. If calling \code{GAfit} from \code{fitSTVAR}, use the argument \code{seeds}
 #'   instead of passing the argument \code{seed}.
@@ -716,6 +717,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                                                                  ar_scale=ar_scale,
                                                                                  ar_scale2=ar_scale2,
                                                                                  fixed_params=fixed_params), numeric(npars))
+
     }
 
     # Sort components according to the transition weight parameters (for some weight functions). No sorting if constraints are employed.
@@ -754,7 +756,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
 
   # # GA always optimizes with mean parametrization
   # Return intercept parametrized estimate if parametrization=="intercept".
-  if(parametrization == "mean") { # This is always the case with mean_constraints
+  if(parametrization == "mean") {
     return(ret)
   } else {
     return(change_parametrization(p=p, M=M, d=d, params=ret, weight_function=weight_function, weightfun_pars=weightfun_pars,

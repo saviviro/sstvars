@@ -546,11 +546,13 @@ smart_ind <- function(p, M, d, params,
     }
     for(m in 1:M) {
       if(any(which_random) == m) { # Not a smart regime
-        new_pars[((m - 1)*d + 1):(m*d)] <- rnorm(d, mean=mu_scale, sd=mu_scale2) # Random mean
-        if(runif(1) > 0.5) {
-          new_pars[(M*d + (m - 1)*p*d^2 + 1):(M*d + m*p*d^2)] <- random_coefmats(d=d, how_many=p, scale=scale_A) # Without algorithm
-        } else {
-          new_pars[(M*d + (m - 1)*p*d^2 + 1):(M*d + m*p*d^2)] <- random_coefmats2(p=p, d=d, ar_scale=ar_scale) # Use the algorithm
+        if(is.null(fixed_params)) { # No random means or AR mats with fixed parameters
+          new_pars[((m - 1)*d + 1):(m*d)] <- rnorm(d, mean=mu_scale, sd=mu_scale2) # Random mean
+          if(runif(1) > 0.5) {
+            new_pars[(M*d + (m - 1)*p*d^2 + 1):(M*d + m*p*d^2)] <- random_coefmats(d=d, how_many=p, scale=scale_A) # Without algorithm
+          } else {
+            new_pars[(M*d + (m - 1)*p*d^2 + 1):(M*d + m*p*d^2)] <- random_coefmats2(p=p, d=d, ar_scale=ar_scale) # Use the algorithm
+          }
         }
         if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") { # Impact matrix parameters
           new_pars[(M*d + M*p*d^2 + (m - 1)*d^2 + 1):(M*d + M*p*d^2 + m*d^2)] <- random_impactmat(d=d, B_scale=B_scale, is_regime1=(m == 1))
