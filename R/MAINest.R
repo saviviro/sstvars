@@ -539,15 +539,42 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     }
     if(!all(stab_ok)) {
       message("The least squares estimates do not satisfy the stability condition!")
-      message("Trying to adjust the least squares estimates to satisfy the stability condition...")
+      message("Adjusting the least squares estimates to satisfy the stability condition...")
+      for(m in 1:M) {
+        if(!stab_ok[m]) {
+          # Eigenvalue adjustment approach to force stability to the estimates
+          eigen_decomp <- eigen(all_boldA[, , m], symmetric=FALSE)
+          eigenvals <- eigen_decomp$values # Eigenvalues, possibly imaginary
+          eigenvecs <- eigen_decomp$vectors # Eigenvalues, possibly imaginary
 
+          which_to_adjust <- which(abs(eigenvals) >= 1 - 1e-3) # Which eigenvalues do not satisfy stability condition
+
+          # Impose modulus to be 0.95 (but preserving the angles) so that it is clearly inside the stability region
+          eigenvals[which_to_adjust] <- 0.95*eigenvals[which_to_adjust]/abs(eigenvals[which_to_adjust])
+
+          # Remove the any neglible imaginary part due to numerical error, and obtain the adjusted companion form AR matrix:
+          new_boldA <- Re(eigenvecs%*%diag(eigenvals)%*%solve(eigenvecs))
+
+          # atan(Im(eigenvals[which_to_adjust])/Re(eigenvals[which_to_adjust]))
+          # = atan(Im(adjusted_eigens)/Re(adjusted_eigens))
+          # So the angles are preserved.
+
+          # Fill in the new AR matrices:
+          all_A[, , , m] <- as.vector(new_boldA[1:d, ])
+        }
+        if(is.null(AR_constraints)) {
+          # We can use the adjusted AR matrices directly:
+          LS_results[(M*d+1):(M*d + M*p*d^2)] <- as.vector(all_A)
+        } else { # AR_constraints employed
+          # We use Moore-Penrose Pseudoinverse of the AR constraints matrix (which has full column rank)
+          # to obtain a stable estimate of psi from the adjusted AR matrices:
+
+          LS_results[(M*d+1):(M*d + ncol(AR_constranints))] <- solve(crossprod(AR_constraints), AR_constraints)%*%as.vector(all_A)
+        }
+      }
     }
-    # Voisi testata stab-conditionin ihan regiimeittäin, jotta parametreja voi adjustoida regiimeittäin.
-    # GA+VA:ssa painot on ennalta määrätty, joten adjustointi yhdellä regiimillä ei vaikuta niihin,
-    # mutta myöhemmässä phasessa huomattavan huonoksi mennyt regiimi voi menetettää havaintoja reippaasti, tms.
 
-    # Eigenvalue adjustment vaikuttaa järkevimmältä ratkaisulta. Huom! Adjustonnin pitää olla "reippaasti" enemmmän
-    # kuin toleranssi 0.001, jotta estimaatti ei aloita alueen reunalta, josta on hankala konvergoitua eteenpäin.
+    print(paste("LS_results: ", paste(round(LS_results, 3), collapse=", ")))
 
     ############
     ### Phase 2: Estimate the remaining parameters conditional on the LS estimates of the AR and weight parameters
@@ -621,6 +648,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       message("Results from the genetic algorithm:")
       print_loks(loks)
     }
+
+    print(paste("Phase 2 GA estimates (round 1): ", paste(round(GAresults[[1]][1:(M*d + M*p*d^2 + 1)], 3), collapse=", ")))
 
     ## Part 2: Estimation by variable metric algorithm ##
     n_covmatpars <- ifelse(cond_dist %in% c("ind_Student", "ind_skewed_t"), M*d^2, M*d*(d+1)/2)
@@ -731,63 +760,25 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     which_best_fit <- filter_estimates_fun(all_estimates=all_estimates, loks=loks)
     phase2_estimate <- all_estimates[[which_best_fit]] # The params to initialize the next phase with
 
-    print(loglikelihood(data=data, p=p, M=M, params=phase2_estimate,
-                        weight_function=weight_function, weightfun_pars=weightfun_pars,
-                        cond_dist=cond_dist, parametrization=parametrization,
-                        identification="reduced_form", AR_constraints=AR_constraints,
-                        mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                        B_constraints=NULL, to_return="loglik", check_params=TRUE, minval=minval,
-                        alt_par=FALSE))
-    check_params(data=data, p=p, M=M, d=d, params=phase2_estimate, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                 cond_dist=cond_dist, parametrization=parametrization, identification="reduced_form",
-                 AR_constraints=AR_constraints, mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                 B_constraints=NULL)
+    print(paste("Phase 2 VA estimates: ", paste(round(phase2_estimate[1:(M*d + M*p*d^2 + 1)], 3), collapse=", ")))
+
 
     ############
-    ### Phase 3: estimate the AR and weight parameters by ML with VA with the distribution parameters fixed
+    ### Phase 3: estimate all parameters by ML with VA with the distribution parameters fixed
     ############
 
-    fixed_covmatpars <- phase2_estimate[(n_arpars + 1):(n_arpars + n_covmatpars)]
-    fixed_distpars <- phase2_estimate[(n_arpars + n_covmatpars + n_weightpars + 1):
-                                        (n_arpars + n_covmatpars + n_weightpars + n_distpars)]
-    if(n_weightpars == 0) {
-      phase2_ar_and_weight_estim <- phase2_estimate[1:n_arpars]
-    } else {
-      phase2_ar_and_weight_estim <- c(phase2_estimate[1:n_arpars],
-                                      phase2_estimate[(n_arpars + n_covmatpars + 1):(n_arpars + n_covmatpars + n_weightpars)])
-    }
-
-    print("Phase 2 estimates reconstructed check:")
-    print(loglikelihood(data=data, p=p, M=M, params=c(phase2_ar_and_weight_estim[1:n_arpars],
-                                                      fixed_covmatpars,
-                                                      phase2_ar_and_weight_estim[(n_arpars + 1):(n_arpars + n_weightpars)],
-                                                      fixed_distpars),
-                        weight_function=weight_function, weightfun_pars=weightfun_pars,
-                        cond_dist=cond_dist, parametrization=parametrization,
-                        identification="reduced_form", AR_constraints=AR_constraints,
-                        mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                        B_constraints=NULL, to_return="loglik", check_params=TRUE, minval=minval,
-                        alt_par=FALSE))
-    check_params(data=data, p=p, M=M, d=d, params=c(phase2_ar_and_weight_estim[1:n_arpars],
-                                                    fixed_covmatpars,
-                                                    phase2_ar_and_weight_estim[(n_arpars + 1):(n_arpars + n_weightpars)],
-                                                    fixed_distpars),
-                 weight_function=weight_function, weightfun_pars=weightfun_pars,
-                 cond_dist=cond_dist, parametrization=parametrization, identification="reduced_form",
-                 AR_constraints=AR_constraints, mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                 B_constraints=NULL)
+    # fixed_covmatpars <- phase2_estimate[(n_arpars + 1):(n_arpars + n_covmatpars)]
+    # fixed_distpars <- phase2_estimate[(n_arpars + n_covmatpars + n_weightpars + 1):
+    #                                     (n_arpars + n_covmatpars + n_weightpars + n_distpars)]
+    # if(n_weightpars == 0) {
+    #   phase2_ar_and_weight_estim <- phase2_estimate[1:n_arpars]
+    # } else {
+    #   phase2_ar_and_weight_estim <- c(phase2_estimate[1:n_arpars],
+    #                                   phase2_estimate[(n_arpars + n_covmatpars + 1):(n_arpars + n_covmatpars + n_weightpars)])
+    # }
 
     ## Log-lik function and gradient with fixed covmat and distpars:
-    loglik_fn3 <- function(ar_and_weight_pars) {
-      # AR and weight pars assumed to be in the form (phi_{1,0},...,phi_{M,9},varphi_{1},...,\varphi_{M},alpha)
-      # Create the full parameter vector with the fixed covmat and dist pars:
-      if(n_weightpars == 0) {
-        params <- c(ar_and_weight_pars, fixed_covmatpars, fixed_distpars)
-      } else {
-        params <- c(ar_and_weight_pars[1:n_arpars], fixed_covmatpars, ar_and_weight_pars[(n_arpars + 1):(n_arpars + n_weightpars)],
-                    fixed_distpars)
-      }
-
+    loglik_fn3 <- function(params) {
       tryCatch(loglikelihood(data=data, p=p, M=M, params=params,
                              weight_function=weight_function, weightfun_pars=weightfun_pars,
                              cond_dist=cond_dist, parametrization=parametrization,
@@ -797,23 +788,14 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                              alt_par=FALSE), # We have swapped to orig parametrization here.
                error=function(e) minval)
     }
-    loglik_fntmp <- function(ar_and_weight_pars) {
-      # AR and weight pars assumed to be in the form (phi_{1,0},...,phi_{M,9},varphi_{1},...,\varphi_{M},alpha)
-      # Create the full parameter vector with the fixed covmat and dist pars:
-      if(n_weightpars == 0) {
-        params <- c(ar_and_weight_pars, fixed_covmatpars, fixed_distpars)
-      } else {
-        params <- c(ar_and_weight_pars[1:n_arpars], fixed_covmatpars, ar_and_weight_pars[(n_arpars + 1):(n_arpars + n_weightpars)],
-                    fixed_distpars)
-      }
-      print(loglikelihood(data=data, p=p, M=M, params=params,
-                          weight_function=weight_function, weightfun_pars=weightfun_pars,
-                          cond_dist=cond_dist, parametrization=parametrization,
-                          identification="reduced_form", AR_constraints=AR_constraints,
-                          mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                          B_constraints=NULL, to_return="loglik", check_params=TRUE, minval=minval,
-                          alt_par=FALSE))
-
+    loglik_fn3_2 <- function(params) {
+      # print(loglikelihood(data=data, p=p, M=M, params=params,
+      #                     weight_function=weight_function, weightfun_pars=weightfun_pars,
+      #                     cond_dist=cond_dist, parametrization=parametrization,
+      #                     identification="reduced_form", AR_constraints=AR_constraints,
+      #                     mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+      #                     B_constraints=NULL, to_return="loglik", check_params=TRUE, minval=minval,
+      #                     alt_par=FALSE))
       tryCatch(loglikelihood(data=data, p=p, M=M, params=params,
                              weight_function=weight_function, weightfun_pars=weightfun_pars,
                              cond_dist=cond_dist, parametrization=parametrization,
@@ -824,52 +806,19 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                error=function(e) minval)
     }
 
-    n_ar_and_weightpars <- n_arpars + n_weightpars
-    loglik_grad3 <- function(ar_and_weight_pars) loglik_grad(ar_and_weight_pars, FUN=loglik_fn3,
-                                                             number_of_pars=n_ar_and_weightpars)
+    loglik_grad3 <- function(params) loglik_grad(params, FUN=loglik_fn3, number_of_pars=npars)
 
-    if(!no_prints) message("PHASE 3: Estimating the AR and weight parameters with a variable metric algorithm...")
-    phase3_res <- optim(par=phase2_ar_and_weight_estim, fn=loglik_fntmp, gr=loglik_grad3,
+    if(!no_prints) message("PHASE 3: Estimating all parameters with a variable metric algorithm...")
+    phase3_res <- optim(par=phase2_estimate, fn=loglik_fn3_2, gr=loglik_grad3,
                         method="BFGS", control=list(fnscale=-1, maxit=maxit))
-    phase3_ar_estimate <- phase3_res$par
-    phase3_loglik <- phase3_res$value
     if(print_res) message(paste("The log-likelihood from PHASE 3:", round(phase3_res$value, 3)))
-    if(n_weightpars == 0) { # No weight pars
-      phase3_estimate <- c(phase3_ar_estimate[1:n_arpars], fixed_covmatpars, fixed_distpars) # Full Phase 3 estimate
-    } else {
-      phase3_estimate <- c(phase3_ar_estimate[1:n_arpars], fixed_covmatpars,
-                           phase3_ar_estimate[(n_arpars + 1):(n_arpars + n_weightpars)],
-                           fixed_distpars) # Full Phase 3 estimate
-    }
-
-    ############
-    ### Phase 4: estimate all parameters by ML initializing VA from Phase 3 estimates
-    ############
-
-    ## Log-lik function and gradient with fixed covmat and distpars:
-    loglik_fn4 <- function(params) {
-      tryCatch(loglikelihood(data=data, p=p, M=M, params=params,
-                             weight_function=weight_function, weightfun_pars=weightfun_pars,
-                             cond_dist=cond_dist, parametrization=parametrization,
-                             identification="reduced_form", AR_constraints=AR_constraints,
-                             mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                             B_constraints=NULL, to_return="loglik", check_params=TRUE, minval=minval,
-                             alt_par=FALSE), # We have swapped to orig parametrization here.
-               error=function(e) minval)
-    }
-    loglik_grad4 <- function(params) loglik_grad(params, FUN=loglik_fn4, number_of_pars=npars)
-
-    if(!no_prints) message("PHASE 4: Estimating all parameters with a variable metric algorithm...")
-    phase4_res <- optim(par=phase3_estimate, fn=loglik_fn4, gr=loglik_grad4,
-                        method="BFGS", control=list(fnscale=-1, maxit=maxit))
-    if(print_res) message(paste("The log-likelihood from PHASE 4:", round(phase4_res$value, 3)))
 
     ## Obtain the results:
-    converged <- phase4_res$convergence == 0 # Did the final result converge?
+    converged <- phase3_res$convergence == 0 # Did the final result converge?
     which_best_fit <- 1 # Only one estimation round for the final estimate in multiple-phase estimation
-    all_estimates <- list(phase4_res$par) # Only one final estimate in multiple-phase estimation
-    loks <- phase4_res$value # The final log-likelihood, only one final estimate
-    params <- phase4_res$par # The final estimate
+    all_estimates <- list(phase3_res$par) # Only one final estimate in multiple-phase estimation
+    loks <- phase3_res$value # The final log-likelihood, only one final estimate
+    params <- phase3_res$par # The final estimate
   }
 
   ### Obtain standard errors, calculate IC ###
