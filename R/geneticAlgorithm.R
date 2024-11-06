@@ -140,7 +140,7 @@
 #'   Values smaller than this will be treated as they were \code{minval} and the corresponding individuals will
 #'   never survive. The default is \code{-(10^(ceiling(log10(n_obs)) + d) - 1)}.
 #' @param fixed_params a vector containing fixed parameter values for mean, autoregressive, and weight parameters
-#'   that should be fixed in the parameter vector. Should have the form:
+#'   that should be fixed in the \strong{initial population}. Should have the form:
 #'   \eqn{(\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\alpha}, where
 #'   \itemize{
 #'     \item{\eqn{\mu_{m} = } the \eqn{(d \times 1)} mean vector of the \eqn{m}th regime.}
@@ -154,7 +154,9 @@
 #'      argument \code{weigh_constraints}. If weight functions parameters are imposed to be fixed values, simply drop \eqn{\alpha}
 #'      from the parameter vector.}
 #'   }
-#'   Note that \code{fixed_params} should always be in the mean parametrization.
+#'   Note that \code{fixed_params} should always be in the mean parametrization (and \code{parametrization="mean"} should always be used).
+#'   \strong{Passing this argument from fitSTVAR in does not do anything, as it is designed to be used with the three-phase estimation
+#'           procedure only. Also, this argument does not do anything if the initial population is specified in the argument initpop.}
 #' @param seed a single value, interpreted as an integer, or NULL, that sets seed for the random number generator in
 #'   the beginning of the function call. If calling \code{GAfit} from \code{fitSTVAR}, use the argument \code{seeds}
 #'   instead of passing the argument \code{seed}.
@@ -215,6 +217,9 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
   data <- check_data(data=data, p=p)
   d <- ncol(data)
   n_obs <- nrow(data)
+  if(!is.null(fixed_params)) {
+    stopifnot(parametrization == "mean")
+  }
   weightfun_pars <- check_weightfun_pars(data=data, p=p, d=d, M=M, weight_function=weight_function,
                                          weightfun_pars=weightfun_pars, cond_dist=cond_dist)
   check_constraints(data=data, p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
@@ -620,7 +625,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                                                                  ar_scale=ar_scale,
                                                                                  weight_scale=weight_scale,
                                                                                  ar_scale2=ar_scale2,
-                                                                                 fixed_params=fixed_params), numeric(npars))
+                                                                                 fixed_params=NULL), numeric(npars))
 
     } else if(length(which_mutate) >= 1) { # Smart mutations
       stat_mu <- FALSE
@@ -642,7 +647,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
       ## 'Smart mutation': mutate close to a well fitting individual. We obviously don't mutate close to
       # redundant regimes but draw them at random ('rand_to_use' in what follows).
       if(!is.null(AR_constraints) || !is.null(mean_constraints) || !is.null(weight_constraints) ||
-         length(which_redundant) <= length(which_redundant_alt) || !is.null(fixed_params) || runif(1) > 0.5) {
+         length(which_redundant) <= length(which_redundant_alt) || runif(1) > 0.5) {
         # The first option for smart mutations: smart mutate to 'alt_ind' which is the best fitting individual
         # with the least redundant regimes.
         # Note that best_ind == alt_ind when length(which_redundant) <= length(which_redundant_alt).
@@ -716,7 +721,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                                                                  B_scale=B_scale,
                                                                                  ar_scale=ar_scale,
                                                                                  ar_scale2=ar_scale2,
-                                                                                 fixed_params=fixed_params), numeric(npars))
+                                                                                 fixed_params=NULL), numeric(npars))
 
     }
 

@@ -205,10 +205,10 @@ be very small. If set smaller than 1, be careful as it might lead to failure in 
 that satisfy the stability condition.}}
 
 \item{fixed_params}{a vector containing fixed parameter values for mean, autoregressive, and weight parameters
-that should be fixed in the parameter vector. Should have the form:
+that should be fixed in the \strong{initial population}. Should have the form:
 \eqn{(\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\alpha}, where
 \itemize{
-  \item{\eqn{\phi_{m,0} = } the \eqn{(d \times 1)} intercept vector of the \eqn{m}th regime.}
+  \item{\eqn{\mu_{m} = } the \eqn{(d \times 1)} mean vector of the \eqn{m}th regime.}
   \item{\eqn{\varphi_m = (vec(A_{m,1}),...,vec(A_{m,p}))} \eqn{(pd^2 \times 1)}.}
   \item{\eqn{\alpha = (r_1,...,r_{M-1})} the \eqn{(M-1\times 1)} vector of the threshold parameters.}
 }
@@ -218,7 +218,10 @@ For models with...
   \item{weight_constraints:}{If linear constraints are imposed, replace \eqn{\alpha} with \eqn{\xi} as described in the
    argument \code{weigh_constraints}. If weight functions parameters are imposed to be fixed values, simply drop \eqn{\alpha}
    from the parameter vector.}
-}}
+}
+Note that \code{fixed_params} should always be in the mean parametrization (and \code{parametrization="mean"} should always be used).
+\strong{Passing this argument from fitSTVAR in does not do anything, as it is designed to be used with the three-phase estimation
+        procedure only. Also, this argument does not do anything if the initial population is specified in the argument initpop.}}
 }
 \value{
 Returns random mean parametrized parameter vector that has the same form as the argument \code{params}
