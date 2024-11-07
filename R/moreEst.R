@@ -978,7 +978,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   estim_length <- if(is.null(AR_constraints)) M*d + M*p*d^2 + 1 else M*d + ncol(AR_constraints) + 1
 
   if(M == 1) {
-    message(paste("PHASE 1: Estimating AR and weight parameters by least squares..."))
+    if(use_parallel) message(paste("PHASE 1: Estimating AR and weight parameters by least squares..."))
     estims <- estim_fun(numeric(0))
   } else {
     if(use_parallel) {

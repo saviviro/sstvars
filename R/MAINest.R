@@ -304,10 +304,6 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     ncores <- parallel::detectCores()
     message("ncores was set to be larger than the number of cores detected.")
   }
-  if(ncores > nrounds) {
-    ncores <- nrounds
-    message("ncores was set to be larger than the number of estimation rounds.")
-  }
 
   if(use_parallel) {
     message(paste("Using", ncores, "cores for", nrounds, "estimations rounds..."))
@@ -328,10 +324,11 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
 
     # Check whether the least squares estimates satisfy the stability condition
     if(!is.null(AR_constraints)) { # Expand the AR constraints
-      pars_to_check <- c(LS_results[1:(M*d)], AR_constraints%*%LS_results[(M*d + 1):(M*d + ncol(AR_constrants))])
+      pars_to_check <- c(LS_results[1:(M*d)], AR_constraints%*%LS_results[(M*d + 1):(M*d + ncol(AR_constraints))])
     } else {
       pars_to_check <- LS_results
     }
+    all_phi0 <- pick_phi0(M=M, d=d, params=pars_to_check)
     all_A <- pick_allA(p=p, M=M, d=d, params=pars_to_check)
     all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
     stab_ok <- logical(M)
@@ -341,32 +338,60 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     if(!all(stab_ok)) {
       message("The least squares estimates do not satisfy the stability condition!")
       message("Adjusting the least squares estimates to satisfy the stability condition...")
+      Id <- diag(nrow=d)
+      means_prior_to_adjustment <- vapply(1:M, function(m) solve(Id - rowSums(all_A[, , , m, drop=FALSE], dims=2), all_phi0[,m]),
+                                          numeric(d)) # [,m]
+
       for(m in 1:M) {
         if(!stab_ok[m]) {
           # Eigenvalue adjustment approach to force stability to the estimates
           eigen_decomp <- eigen(all_boldA[, , m], symmetric=FALSE)
           eigenvals <- eigen_decomp$values # Eigenvalues, possibly imaginary
-          eigenvecs <- eigen_decomp$vectors # Eigenvalues, possibly imaginary
+          eigenvecs <- eigen_decomp$vectors # Eigenvectors, possibly imaginary
 
-          which_to_adjust <- which(abs(eigenvals) >= 1 - 1e-3) # Which eigenvalues do not satisfy stability condition
+          i1 <- 1
+          while(TRUE) { # Iteratively adjust eigenvalues until the produced AR matrices are stable
+            which_to_adjust <- which(abs(eigenvals) >= 1 - 1e-3) # Which eigenvalues do not satisfy stability condition
 
-          # Impose modulus to be 0.95 (but preserving the angles) so that it is clearly inside the stability region:
-          eigenvals[which_to_adjust] <- 0.95*eigenvals[which_to_adjust]/abs(eigenvals[which_to_adjust])
+            # Adjust the eigenvalues iteratively:
+            eigenvals[which_to_adjust] <- (0.9^i1)*eigenvals[which_to_adjust]
+            # Vastly decreasing scaling factor is required to ensure that the method converges to stable estimates
 
-          # Remove the any neglible imaginary part due to numerical error, and obtain the adjusted companion form AR matrix:
-          new_boldA <- Re(eigenvecs%*%diag(eigenvals)%*%solve(eigenvecs))
+            # Remove the any negligible imaginary part due to numerical error, and obtain the adjusted companion form AR matrix
+            # (since conjugate pairs are both equally adjusted, the resulting matrix is real up to numerical error):
+            new_boldA <- Re(eigenvecs%*%diag(eigenvals)%*%solve(eigenvecs))
 
-          # Fill in the new AR matrices:
-          all_A[, , , m] <- as.vector(new_boldA[1:d, ])
+            # Fill in the new AR matrices:
+            all_A[, , , m] <- as.vector(new_boldA[1:d, ])
+
+            # Reconstruct and refill the companion form AR matrix:
+            all_boldA[, , m] <- form_boldA(p=p, M=1, d=d, all_A=all_A[, , , m, drop=FALSE])
+
+            # Check the stability of the adjusted AR matrix:
+            eigenvals <- eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$values # Updated eigenvalues
+
+            if(all(abs(eigenvals) < 1 - 0.05)) { # Check whether the adjusted AR matrices are stable with large enough num tol
+              break # Stable estimates are found; break the loop.
+            }
+            i1 <- i1 + 1
+          }
+
+          # Adjust the intercepts so that the means are preserved (but the AR matrices are adjusted):
+          all_phi0[, m] <- (Id - apply(all_A[, , , m], MARGIN=1:2, sum))%*%means_prior_to_adjustment[, m]
         }
+
+        # Fill in the adjusted AR matrices:
         if(is.null(AR_constraints)) {
           # We can use the adjusted AR matrices directly:
-          LS_results[(M*d+1):(M*d + M*p*d^2)] <- as.vector(all_A)
+          LS_results[(M*d + 1):(M*d + M*p*d^2)] <- as.vector(all_A)
         } else { # AR_constraints employed
           # We use Moore-Penrose Pseudoinverse of the AR constraints matrix (which has full column rank)
           # to obtain a stable estimate of psi from the adjusted AR matrices:
-          LS_results[(M*d+1):(M*d + ncol(AR_constranints))] <- solve(crossprod(AR_constraints), AR_constraints)%*%as.vector(all_A)
+          LS_results[(M*d + 1):(M*d + ncol(AR_constraints))] <- solve(crossprod(AR_constraints), AR_constraints)%*%as.vector(all_A)
         }
+
+        # Fill in the adjusted intercepts
+        LS_results[1:(M*d)] <- as.vector(all_phi0)
       }
     }
 
@@ -375,14 +400,21 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       mean_and_ar_pars <- LS_results[1:(M*d + M*p*d^2)]
     } else {
       # Expand the AR constraints:
-      mean_and_ar_pars <- c(LS_results[1:(M*d)], AR_constraints%*%LS_results[(M*d + 1):(M*d + ncol(AR_constrants))])
+      mean_and_ar_pars <- c(LS_results[1:(M*d)], AR_constraints%*%LS_results[(M*d + 1):(M*d + ncol(AR_constraints))])
     }
 
     # Calculate and fill in the means from the estimated intercepts:
+    if(parametrization == "intercept") {
+      LS_res_to_ret <- LS_results # Return LS estimates in the intercept paramatrization
+    }
+
     Id <- diag(nrow=d)
     all_phi0 <- pick_phi0(M=M, d=d, params=mean_and_ar_pars)
     all_A <- pick_allA(p=p, M=M, d=d, params=mean_and_ar_pars)
     LS_results[1:(M*d)] <- vapply(1:M, function(m) solve(Id - rowSums(all_A[, , , m, drop=FALSE], dims=2), all_phi0[,m]), numeric(d))
+    if(parametrization == "mean") {
+      LS_res_to_ret <- LS_results # Return LS estimates in the mean paramatrization
+    }
   }
 
 
@@ -666,6 +698,9 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   ret$all_logliks <- loks
   ret$which_converged <- converged
   ret$which_round <- which_best_fit # Which estimation round induced the largest log-likelihood?
+  if(estim_method == "three-phase") {
+    ret$LS_estimates <- LS_res_to_ret # Least squares estimates (mean or intercept parametrization)
+  }
   warn_eigens(ret)
   if(!no_prints) message("Finished!\n")
   ret

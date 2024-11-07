@@ -30,6 +30,9 @@
 #'    \item{all_logliks}{The log-likelihood of the estimates from all estimation rounds, if applicable.}
 #'    \item{which_converged}{Indicators of which estimation rounds converged, if applicable.}
 #'    \item{which_round}{Indicators of which round of optimization each estimate belongs to, if applicable.}
+#'    \item{LS_estimates}{The least squares estimates of the parameters in the form
+#'      \eqn{(\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\alpha} (intercepts replaced by unconditional means
+#'      if mean parametrization is used), if applicable.}
 #' @section About S3 methods:
 #'   If data is not provided, only the \code{print} and \code{simulate} methods are available.
 #'   If data is provided, then in addition to the ones listed above, \code{predict} method is also available.

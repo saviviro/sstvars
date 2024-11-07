@@ -620,7 +620,7 @@ smart_ind <- function(p, M, d, params,
     # AR parameters
     if(is.null(AR_constraints)) {
       q <- M*p*d^2
-      if(is.null(fixed_arams)) {
+      if(is.null(fixed_params)) {
         all_A <- pick_allA(p=p, M=M, d=d, params=params_std)
         AR_pars <- vapply(1:M, function(m) {
           if(any(which_random) == m) { # Random AR matrix
