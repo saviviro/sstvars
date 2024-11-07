@@ -332,11 +332,21 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     all_A <- pick_allA(p=p, M=M, d=d, params=pars_to_check)
     all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
     stab_ok <- logical(M)
+    any_eigen_large <- FALSE
     for(m in 1:M) { # Check stability conditon for each regime
       stab_ok[m] <- all(abs(eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$'values') < 1 - 1e-3)
+      if(any(abs(eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$'values') > 1.3)) {
+        any_eigen_large <- TRUE
+      }
     }
     if(!all(stab_ok)) {
       message("The least squares estimates do not satisfy the stability condition!")
+      if(any_eigen_large) {
+        message(paste("\nThe LS estimates a substantially far from satisfying the usual stability condition",
+                      "(which is imposed in the ML estimation),",
+                      "so the three-phase procedure may not work very well.",
+                      "Consider using the two-phase estimation procedure!\n"))
+      }
       message("Adjusting the least squares estimates to satisfy the stability condition...")
       Id <- diag(nrow=d)
       means_prior_to_adjustment <- vapply(1:M, function(m) solve(Id - rowSums(all_A[, , , m, drop=FALSE], dims=2), all_phi0[,m]),
@@ -348,13 +358,14 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
           eigen_decomp <- eigen(all_boldA[, , m], symmetric=FALSE)
           eigenvals <- eigen_decomp$values # Eigenvalues, possibly imaginary
           eigenvecs <- eigen_decomp$vectors # Eigenvectors, possibly imaginary
+          orig_eigenvals <- eigenvals # Original eigenvalues
 
           i1 <- 1
           while(TRUE) { # Iteratively adjust eigenvalues until the produced AR matrices are stable
             which_to_adjust <- which(abs(eigenvals) >= 1 - 1e-3) # Which eigenvalues do not satisfy stability condition
 
             # Adjust the eigenvalues iteratively:
-            eigenvals[which_to_adjust] <- (0.9^i1)*eigenvals[which_to_adjust]
+            eigenvals[which_to_adjust] <- (0.98^i1)*orig_eigenvals[which_to_adjust] # Use original eigenvalues in the scaling
             # Vastly decreasing scaling factor is required to ensure that the method converges to stable estimates
 
             # Remove the any negligible imaginary part due to numerical error, and obtain the adjusted companion form AR matrix
