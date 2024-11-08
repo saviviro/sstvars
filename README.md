@@ -141,6 +141,10 @@ fithet
 fithet <- swap_B_signs(fithet, which_to_swap=1)
 fithet
 
+# Structural models based on different orderings of signs of the columns of any
+# single B_1,...B_M can be estimated by specifying the arguments B_pm_reg, B_perm,
+# and B_signs in fitSSTVAR. 
+
 
 # Estimate the generalized impulse response function (GIRF) for the recursively
 # identified model to one-standard-error positive shocks with the starting values

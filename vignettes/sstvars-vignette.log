@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  23 OCT 2024 11:16
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  8 NOV 2024 16:41
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -759,7 +759,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [31]
-Overfull \hbox (2.91833pt too wide) in paragraph at lines 921--922
+Overfull \hbox (2.91833pt too wide) in paragraph at lines 923--924
 \T1/lmr/m/n/10.95 groups of regimes that have the same mean pa-ram-e-ters us-in
 g the ar-gu-ment \T1/lmtt/m/n/10.95 mean_constraints\T1/lmr/m/n/10.95 .
  []
@@ -806,21 +806,21 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 
 [39]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 1090.
+(Font)              <10> on input line 1092.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 1090.
+(Font)              <7> on input line 1092.
 
-Underfull \hbox (badness 4454) in paragraph at lines 1102--1103
+Underfull \hbox (badness 4454) in paragraph at lines 1104--1105
 []\T1/lmr/m/n/10 Plot the graphs of the pro-file log-
  []
 
 
-Underfull \hbox (badness 2961) in paragraph at lines 1103--1104
+Underfull \hbox (badness 2961) in paragraph at lines 1105--1106
 []\T1/lmr/m/n/10 Calculate the (ad-justed) Port-man-teau
  []
 
 
-Underfull \hbox (badness 2277) in paragraph at lines 1111--1112
+Underfull \hbox (badness 2277) in paragraph at lines 1113--1114
 []\T1/lmr/m/n/10 Estimate gen-er-al-ized im-pulse re-sponse
  []
 
@@ -863,10 +863,10 @@ Package rerunfilecheck Info: File `sstvars-vignette.out' has not changed.
 (rerunfilecheck)             Checksum: 7DD508EE42304BD3CA922142ABE242BA;12566.
  ) 
 Here is how much of TeX's memory you used:
- 12543 strings out of 478353
- 199187 string characters out of 5848086
- 497300 words of memory out of 5000000
- 30195 multiletter control sequences out of 15000+600000
+ 12544 strings out of 478353
+ 199208 string characters out of 5848086
+ 497331 words of memory out of 5000000
+ 30196 multiletter control sequences out of 15000+600000
  510731 words of font info for 107 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  75i,13n,77p,1706b,506s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -899,10 +899,10 @@ e1/public/lm/lmsy8.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/l
 m/lmtt10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtti10.
 pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr
 /local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on sstvars-vignette.pdf (44 pages, 1025251 bytes).
+Output written on sstvars-vignette.pdf (44 pages, 1026065 bytes).
 PDF statistics:
- 999 PDF objects out of 1000 (max. 8388607)
- 881 compressed objects within 9 object streams
+ 1002 PDF objects out of 1200 (max. 8388607)
+ 884 compressed objects within 9 object streams
  237 named destinations out of 1000 (max. 500000)
  363 words of extra memory for PDF output out of 10000 (max. 10000000)
 
