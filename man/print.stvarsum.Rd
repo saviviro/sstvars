@@ -12,6 +12,10 @@
 \item{...}{currently not used.}
 
 \item{digits}{the number of digits to be printed.}
+
+\item{standard_error_print}{if set to \code{TRUE}, instead of printing the estimates,
+prints the approximate standard errors using square roots of the diagonal of inverse
+of the observed information matrix.}
 }
 \value{
 Returns the input object \code{x} invisibly.

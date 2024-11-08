@@ -1016,7 +1016,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       } else {
         grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=25)
       }
-      thresholds <- t(combn(x=grid_points, m=M - 1, simplify=TRUE)) # M-1 dim multisets of lexically ordered grid points
+      thresholds <- t(utils::combn(x=grid_points, m=M - 1, simplify=TRUE)) # M-1 dim multisets of lexically ordered grid points
     }
     if(M == 2) {
       thresvecs <- thresholds # Each row for each threshold vector (scalar in this case)

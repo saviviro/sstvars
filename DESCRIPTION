@@ -31,7 +31,8 @@ Imports:
     parallel (>= 4.0.0),
     pbapply (>= 1.7-0),
     stats (>= 4.0.0),
-    graphics (>= 4.0.0)
+    graphics (>= 4.0.0),
+    utils (>= 4.0.0)
 Suggests: 
     knitr,
     rmarkdown
