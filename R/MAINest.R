@@ -139,7 +139,8 @@
 #' # The first lag of the the second variable is specified as the switching variable,
 #' # and the threshold parameter constrained to the fixed value 1.
 #' fitthres32wit <- fitSTVAR(gdpdef, p=3, M=2, weight_function="threshold", weightfun_pars=c(2, 1),
-#'   cond_dist="ind_skewed_t", weight_constraints=list(R=0, r=1), nrounds=2, ncores=2, seeds=1:2)
+#'   cond_dist="ind_skewed_t", weight_constraints=list(R=0, r=1), estim_method="three-phase",
+#'   nrounds=2, ncores=2, seeds=1:2)
 #' plot(fitthres32wit) # Plot the fitted transition weights
 #'
 #' # Estimate a two-regime STVAR p=1 model with exogenous transition weights defined as the indicator
