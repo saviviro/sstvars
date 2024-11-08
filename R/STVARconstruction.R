@@ -129,7 +129,7 @@ STVAR <- function(data, p, M, d, params,
   identification <- match.arg(identification)
   if(cond_dist %in% c("ind_Student", "ind_skewed_t") && !(identification %in% c("reduced_form", "non-Gaussianity"))) {
     stop(paste("If cond_dist='ind_Student' or 'ind_skewed_t', identification must be 'reduced_form' or 'non-Gaussianity'",
-               "(note that short-run restriction can be imposed by specifying the argument 'B_constraints')"))
+               "(short-run restrictions can be imposed by specifying the argument 'B_constraints')"))
   } else if(!(cond_dist %in% c("ind_Student", "ind_skewed_t")) && identification == "non-Gaussianity") {
     stop("Identification by 'non-Gaussianity' is not available for models with cond_dist='Gaussian' or 'Student'.")
   }

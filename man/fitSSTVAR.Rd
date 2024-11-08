@@ -9,6 +9,7 @@ fitSSTVAR(
   stvar,
   identification = c("recursive", "heteroskedasticity", "non-Gaussianity"),
   B_constraints = NULL,
+  B_pm_reg = NULL,
   B_perm = NULL,
   B_signs = NULL,
   maxit = 1000,
@@ -37,9 +38,16 @@ a negative value indicating strict negative sign constraint, and zero indicating
 Currently only available for models with \code{identification="heteroskedasticity"} due to the (in)availability of appropriate
 parametrizations that allow such constraints to be imposed.}
 
-\item{B_perm}{FILL IN}
+\item{B_pm_reg}{an integer between \eqn{1} and \eqn{M} specifying the regime the permutations and sign changes of \eqn{B_m}
+specified in the arguments \code{B_perm} and \code{B_signs} are applied to.}
 
-\item{B_signs}{FILL IN}
+\item{B_perm}{a numeric vector of length \eqn{d} specifying the permutation of the columns of the impact matrix \eqn{B_m}
+of a single regime specified in the argument \code{B_pm_reg} prior to re-estimating the model. Applicable only for models
+with \code{cond_dist = "ind_Student"} or \code{"ind_skewed_t"}.}
+
+\item{B_signs}{a numeric vector specifying the columns of the impact matrix of a single regime specified in the argument
+\code{B_pm_reg} that should be multiplied by -1 \strong{prior} to reordering them according to \code{B_perm} (if specified).
+ Applicable only for models with \code{cond_dist = "ind_Student"} or \code{"ind_skewed_t"}.}
 
 \item{maxit}{the maximum number of iterations in the variable metric algorithm.}
 
@@ -84,10 +92,7 @@ Returns an S3 object of class \code{'stvar'} defining a smooth transition VAR mo
 \details{
 When the structural model does not impose overidentifying constraints, it is directly
   obtained from the reduced form model, and estimation is not required. When overidentifying constraints
-  are imposed, the model is estimated via ..
-
-  Structural models can be provided in the argument \code{stvar} if overidentifying constraints should be
-  imposed.
+  are imposed, the model is estimated subject to the constraints.
 
   Using the robust estimation method before switching to the variable metric can be useful if the initial
   estimates are not very close to the ML estimate of the structural model, as the variable metric algorithm
@@ -99,7 +104,11 @@ When the structural model does not impose overidentifying constraints, it is dir
   and estimation is not required, and often reasonable overidentifying constraints are close to the unrestricted estimate.
 
   Employs the estimation function \code{optim} from the package \code{stats} that implements the optimization
-  algorithms. See \code{?optim} for the documentation on the
+  algorithms. See \code{?optim} for the documentation on the optimization methods.
+
+  The arguments \code{B_pm_reg}, \code{B_perm}, and \code{B_signs} can be used to explore estimates based various orderings
+  and sign changes of the columns of the impact matrices \eqn{B_m} of specific regimes. This can be useful in the presence
+  of weak identification with respect to the ordering or signs of the columns \eqn{B_2,...,B_M} (see Virolainen 2024).
 }
 \examples{
 \donttest{
@@ -168,6 +177,9 @@ fit32cmls_hs3 <- fitSSTVAR(fit32cmls_hs2, identification="heteroskedasticity",
    \emph{Cambridge University Press}, Cambridge.
    \item Lütkepohl H., Netšunajev A. 2017. Structural vector autoregressions with smooth transition in variances.
      \emph{Journal of Economic Dynamics & Control}, \strong{84}, 43-57.
+   \item Virolainen S. 2024. Identification by non-Gaussianity in structural threshold and
+      smooth transition vector autoregressive models. Unpublished working
+      paper, available as arXiv:2404.19707.
  }
 }
 \seealso{

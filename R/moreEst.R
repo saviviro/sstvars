@@ -128,14 +128,17 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
 #'   a negative value indicating strict negative sign constraint, and zero indicating that the element is constrained to zero.
 #'   Currently only available for models with \code{identification="heteroskedasticity"} due to the (in)availability of appropriate
 #'   parametrizations that allow such constraints to be imposed.
-#' @param B_perm FILL IN
-#' @param B_signs FILL IN
+#' @param B_pm_reg an integer between \eqn{1} and \eqn{M} specifying the regime the permutations and sign changes of \eqn{B_m}
+#'   specified in the arguments \code{B_perm} and \code{B_signs} are applied to.
+#' @param B_perm a numeric vector of length \eqn{d} specifying the permutation of the columns of the impact matrix \eqn{B_m}
+#'   of a single regime specified in the argument \code{B_pm_reg} prior to re-estimating the model. Applicable only for models
+#'   with \code{cond_dist = "ind_Student"} or \code{"ind_skewed_t"}.
+#' @param B_signs a numeric vector specifying the columns of the impact matrix of a single regime specified in the argument
+#'   \code{B_pm_reg} that should be multiplied by -1 \strong{prior} to reordering them according to \code{B_perm} (if specified).
+#'    Applicable only for models with \code{cond_dist = "ind_Student"} or \code{"ind_skewed_t"}.
 #' @details When the structural model does not impose overidentifying constraints, it is directly
 #'   obtained from the reduced form model, and estimation is not required. When overidentifying constraints
-#'   are imposed, the model is estimated via ..
-#'
-#'   Structural models can be provided in the argument \code{stvar} if overidentifying constraints should be
-#'   imposed.
+#'   are imposed, the model is estimated subject to the constraints.
 #'
 #'   Using the robust estimation method before switching to the variable metric can be useful if the initial
 #'   estimates are not very close to the ML estimate of the structural model, as the variable metric algorithm
@@ -147,7 +150,11 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
 #'   and estimation is not required, and often reasonable overidentifying constraints are close to the unrestricted estimate.
 #'
 #'   Employs the estimation function \code{optim} from the package \code{stats} that implements the optimization
-#'   algorithms. See \code{?optim} for the documentation on the
+#'   algorithms. See \code{?optim} for the documentation on the optimization methods.
+#'
+#'   The arguments \code{B_pm_reg}, \code{B_perm}, and \code{B_signs} can be used to explore estimates based various orderings
+#'   and sign changes of the columns of the impact matrices \eqn{B_m} of specific regimes. This can be useful in the presence
+#'   of weak identification with respect to the ordering or signs of the columns \eqn{B_2,...,B_M} (see Virolainen 2024).
 #' @inherit STVAR return
 #' @seealso \code{\link{fitSTVAR}}, \code{\link{STVAR}}, \code{\link[stats]{optim}}
 #' @references
@@ -156,6 +163,9 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
 #'    \emph{Cambridge University Press}, Cambridge.
 #'    \item Lütkepohl H., Netšunajev A. 2017. Structural vector autoregressions with smooth transition in variances.
 #'      \emph{Journal of Economic Dynamics & Control}, \strong{84}, 43-57.
+#'    \item Virolainen S. 2024. Identification by non-Gaussianity in structural threshold and
+#'       smooth transition vector autoregressive models. Unpublished working
+#'       paper, available as arXiv:2404.19707.
 #'  }
 #' @examples
 #' \donttest{
@@ -220,8 +230,8 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
 #' @export
 
 fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity", "non-Gaussianity"), B_constraints=NULL,
-                      B_perm=NULL, B_signs=NULL, maxit=1000, maxit_robust=1000, robust_method=c("Nelder-Mead", "SANN", "none"),
-                      print_res=TRUE, calc_std_errors=TRUE) {
+                      B_pm_reg=NULL, B_perm=NULL, B_signs=NULL, maxit=1000, maxit_robust=1000,
+                      robust_method=c("Nelder-Mead", "SANN", "none"), print_res=TRUE, calc_std_errors=TRUE) {
   check_stvar(stvar)
   stopifnot(maxit %% 1 == 0 & maxit >= 1)
   stopifnot(maxit_robust %% 1 == 0 & maxit_robust >= 1)
@@ -242,6 +252,40 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
   old_B_constraints <- stvar$model$B_constraints
   weightfun_pars <- check_weightfun_pars(data=data, p=p, M=M, d=d, weight_function=weight_function,
                                          weightfun_pars=stvar$model$weightfun_pars, cond_dist=cond_dist)
+
+  # Check B_pm_reg, B_perm and B_signs
+  if(!is.null(B_pm_reg)) {
+    if(length(B_pm_reg) != 1 || !B_pm_reg %in% 1:M) {
+      stop("B_pm_reg should be an integer between 1 and M")
+    }
+  }
+  if(!is.null(B_perm)) {
+    if(cond_dist != "ind_Student" && cond_dist != "ind_skewed_t") {
+      stop("B_perm is only available for models with cond_dist='ind_Student' or 'ind_skewed_t'")
+    } else if(length(B_perm) != d) {
+      stop("The length of B_perm should be equal to the number of variables")
+    } else if(sort(B_perm, decreasing=FALSE) != 1:d) {
+      stop("B_perm should contain the integers from 1 to d, each exactly once")
+    }
+  }
+  if(!is.null(B_signs)) {
+    if(cond_dist != "ind_Student" && cond_dist != "ind_skewed_t") {
+      stop("B_signs are only available for models with cond_dist='ind_Student' or 'ind_skewed_t'")
+    } else if(length(B_signs) > d) {
+      stop("The length of B_signs should be at most equal to the number of variables")
+    }
+    B_signs <- unique(B_signs) # Take only unique elements in B_signs
+    if(!all(B_signs %in% 1:d)) {
+      stop("B_signs should only contain integers between 1 and d")
+    }
+  }
+  if(!is.null(B_constraints) || !is.null(old_B_constraints)) {
+    if(!is.null(B_perm) || !is.null(B_signs)) {
+      stop(paste("B_perm and B_signs cannot be used with B_constraints! You should first use B_perm and B_signs,",
+                 "and then you can impose further constraints on the impact matrix by running fitSSTVAR again."))
+    }
+  }
+
   minval <- get_minval(stvar$data)
   old_npars <- length(stvar$params) # old npars, B_constraints not adjusted!
 
@@ -348,9 +392,11 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
   n_pars <- n_mean_pars + n_ar_pars + n_covmat_pars + n_weight_pars + n_dist_pars
 
   if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t" || identification == "non-Gaussianity") {
-    if(!is.null(B_constraints) && length(which(B_constraints != 0)) != 0) {
+    if(!is.null(B_perm) || !is.null(B_signs)) {
+      alt_par <- FALSE # Columns are permutated or signs changed, use normal parametrization
+    } else if(!is.null(B_constraints) && length(which(B_constraints != 0)) != 0) {
       alt_par <- FALSE # Sign constraints employed, use normal parametrization
-    } else { # B_constraints not used or only used for zero constraints
+    } else { # no B_perm or B_signs, B_constraints not used or only used for zero constraints
       alt_par <- TRUE # Switch to parametrization with B_1*,...,B_M*
       params <- change_parametrization(p=p, M=M, d=d, params=params, cond_dist=cond_dist,
                                        weight_function=weight_function, weightfun_pars=weightfun_pars,
@@ -466,71 +512,79 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
               "then applying this function.\n"))
     }
   } else { # identification == "non-Gaussianity"
-    if(is.null(old_B_constraints) && is.null(B_constraints)) {
-      return(stvar) # Nothing to do here, return the original model
-    } else {
-      ## If arrived here, there are new B_constraints or the old ones are relaxed.
-      if(is.null(old_B_constraints)) {
-        old_B_constraints <- matrix(NA, nrow=d, ncol=d) # No constraints imposed here but avoids null problems below
-      }
-      if(is.null(B_constraints)) {
-        B_constraints <- matrix(NA, nrow=d, ncol=d) # No constraints imposed here but avoids null problems below
-      }
-    }
-    ## Construct initial estimates for the new model
-    # First obtain the old estimates, including the non-parametrized zeros:
-    params_std <- reform_constrained_pars(p=p, M=M, d=d, params=params, cond_dist=cond_dist,
-                                          weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                          identification=old_identification,
-                                          AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                                          weight_constraints=weight_constraints, B_constraints=old_B_constraints)
-    old_all_B <- pick_Omegas(p=p, M=M, d=d, params=params_std, cond_dist=cond_dist, identification=old_identification)
-    new_all_B <- array(NA, dim=c(d, d, M))
+    if(!is.null(B_perm) || !is.null(B_signs)) { # Permutate or swap signs of the columns of B_1,...,B_M
+      # Construct initial estimates after reordering the columns or swapping the signs
 
-    ## Construct the new B matrices based in the new set of constraints in B_constraints.
-    n_sign_changes <- 0 # Track the number of sign changes
+      # PITÄÄ SPESIFIOIDA MYÖS REGIIMI, JOSSA IMPAKTIMATRIISIN MERKIT TAI PERMUTOINNIT MUUTETAAN!
+      # ELI EI VOI KÄYTTÄÄ REORDER B COLUMNSSIA TAI SIGN CHANGEA!
 
-    # Go through the matrices old_B_constraints, B_constraints, and change the impact matrices accordingly
-    for(m in 1:M) {
-      for(i1 in 1:d) { # i1 marks the row
-        for(i2 in 1:d) { # i2 marks the column
-          so <- sign(old_B_constraints[i1, i2])
-          sn <- sign(B_constraints[i1, i2])
-          if(is.na(so)) { # If no constraint, just handle it as if there was sign constraint of the estimate's sign
-            so <- sign(old_all_B[i1, i2, m])
-          }
-          if(is.na(sn) && so != 0) { # No new constraint, old constraint is not zero
-            new_all_B[i1, i2, m] <- old_all_B[i1, i2, m] # Insert old param
-          } else if(is.na(sn) && so == 0) { # No new constraints, old constraint is zero
-            new_all_B[i1, i2, m] <- 1e-6  # Insert close to zero value: not exactly zero to avoid the parameter disappearing in Wvec
-          } else if(so == sn) { # Same constraint in new and old W
-            new_all_B[i1, i2, m] <- old_all_B[i1, i2, m] # Insert old param
-          } else if(sn == 0) { # Zero constraint in new W
-            new_all_B[i1, i2, m] <- 0 # Insert zero (which will be removed as it is not parametrized)
-          } else if(so > sn) { # sn must be negative, so could be zero or positive
-            new_all_B[i1, i2, m] <- -0.05 # Insert small negative number
-            n_sign_changes <- n_sign_changes + 1
-          } else { # It must be that so < sn, which implies sn > 0, while so could be zero or negative
-            new_all_B[i1, i2, m] <- 0.05 # Insert s mall positive number
-            n_sign_changes <- n_sign_changes + 1
+    } else { # B_constraints imposed or changed
+      if(is.null(old_B_constraints) && is.null(B_constraints)) {
+        return(stvar) # Nothing to do here, return the original model
+      } else {
+        ## If arrived here, there are new B_constraints or the old ones are relaxed.
+        if(is.null(old_B_constraints)) {
+          old_B_constraints <- matrix(NA, nrow=d, ncol=d) # No constraints imposed here but avoids null problems below
+        }
+        if(is.null(B_constraints)) {
+          B_constraints <- matrix(NA, nrow=d, ncol=d) # No constraints imposed here but avoids null problems below
+        }
+      }
+      ## Construct initial estimates for the new model
+      # First obtain the old estimates, including the non-parametrized zeros:
+      params_std <- reform_constrained_pars(p=p, M=M, d=d, params=params, cond_dist=cond_dist,
+                                            weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                            identification=old_identification,
+                                            AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                            weight_constraints=weight_constraints, B_constraints=old_B_constraints)
+      old_all_B <- pick_Omegas(p=p, M=M, d=d, params=params_std, cond_dist=cond_dist, identification=old_identification)
+      new_all_B <- array(NA, dim=c(d, d, M))
+
+      ## Construct the new B matrices based in the new set of constraints in B_constraints.
+      n_sign_changes <- 0 # Track the number of sign changes
+
+      # Go through the matrices old_B_constraints, B_constraints, and change the impact matrices accordingly
+      for(m in 1:M) {
+        for(i1 in 1:d) { # i1 marks the row
+          for(i2 in 1:d) { # i2 marks the column
+            so <- sign(old_B_constraints[i1, i2])
+            sn <- sign(B_constraints[i1, i2])
+            if(is.na(so)) { # If no constraint, just handle it as if there was sign constraint of the estimate's sign
+              so <- sign(old_all_B[i1, i2, m])
+            }
+            if(is.na(sn) && so != 0) { # No new constraint, old constraint is not zero
+              new_all_B[i1, i2, m] <- old_all_B[i1, i2, m] # Insert old param
+            } else if(is.na(sn) && so == 0) { # No new constraints, old constraint is zero
+              new_all_B[i1, i2, m] <- 1e-6  # Insert close to zero value: not exactly zero to avoid the parameter disappearing in Wvec
+            } else if(so == sn) { # Same constraint in new and old W
+              new_all_B[i1, i2, m] <- old_all_B[i1, i2, m] # Insert old param
+            } else if(sn == 0) { # Zero constraint in new W
+              new_all_B[i1, i2, m] <- 0 # Insert zero (which will be removed as it is not parametrized)
+            } else if(so > sn) { # sn must be negative, so could be zero or positive
+              new_all_B[i1, i2, m] <- -0.05 # Insert small negative number
+              n_sign_changes <- n_sign_changes + 1
+            } else { # It must be that so < sn, which implies sn > 0, while so could be zero or negative
+              new_all_B[i1, i2, m] <- 0.05 # Insert s mall positive number
+              n_sign_changes <- n_sign_changes + 1
+            }
           }
         }
       }
-    }
-    new_B_pars <- numeric(0)
-    for(m in 1:M) {
-      new_B_pars <- c(new_B_pars, Wvec(new_all_B[, , m])) # Remove non-parametrized zeros
-    }
+      new_B_pars <- numeric(0)
+      for(m in 1:M) {
+        new_B_pars <- c(new_B_pars, Wvec(new_all_B[, , m])) # Remove non-parametrized zeros
+      }
 
-    new_params <- c(params[1:(n_mean_pars + n_ar_pars)], new_B_pars,
-                    params[(n_mean_pars + n_ar_pars + M*d^2 - M*n_zeros_in_B + 1):length(params)])
+      new_params <- c(params[1:(n_mean_pars + n_ar_pars)], new_B_pars,
+                      params[(n_mean_pars + n_ar_pars + M*d^2 - M*n_zeros_in_B + 1):length(params)])
 
-    if(n_sign_changes > 0) {
-      message(paste0("There was in total of ", n_sign_changes,
-              " sign changes in the impact matrices of the regimes when creating preliminary estimates for the new model. ",
-              "The sign changes make the results more unrealiable. To obtain more reliable results, consider using ",
-              "the function 'swap_B_signs' to create a model that has the sign constraints readily satisfied and ",
-              "then applying this function.\n"))
+      if(n_sign_changes > 0) {
+        message(paste0("There was in total of ", n_sign_changes,
+                       " sign changes in the impact matrices of the regimes when creating preliminary estimates for the new model. ",
+                       "The sign changes make the results more unrealiable. To obtain more reliable results, consider using ",
+                       "the function 'swap_B_signs' to create a model that has the sign constraints readily satisfied and ",
+                       "then applying this function.\n"))
+      }
     }
   }
 
@@ -990,7 +1044,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       }
       n_thresvecs <- ifelse(M == 1 || !is.null(weight_constraints), 1, nrow(thresvecs))
       message(paste0("PHASE 1: Estimating AR and weight parameters by least squares for ", n_thresvecs,
-                    " vectors of thresholds...")) # "PHASE 1" print i related to the multiple-phase estimation procedure
+                     " vectors of thresholds...")) # "PHASE 1" print i related to the multiple-phase estimation procedure
       cl <- parallel::makeCluster(ncores)
       on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.
       parallel::clusterExport(cl, ls(environment(estim_LS)), envir=environment(estim_LS)) # assign all variables from package:sstvars
