@@ -40,7 +40,8 @@ Returns an S3 object of class \code{'stvar'} defining a smooth transition VAR mo
    \item{which_converged}{Indicators of which estimation rounds converged, if applicable.}
    \item{which_round}{Indicators of which round of optimization each estimate belongs to, if applicable.}
    \item{LS_estimates}{The least squares estimates of the parameters in the form
-     \eqn{(\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\alpha}, if applicable.}
+     \eqn{(\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\alpha} (intercepts replaced by unconditional means
+     if mean parametrization is used), if applicable.}
 }
 \description{
 \code{alt_stvar} constructs a STVAR model based on results from an arbitrary estimation

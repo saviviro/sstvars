@@ -9,6 +9,8 @@ fitSSTVAR(
   stvar,
   identification = c("recursive", "heteroskedasticity", "non-Gaussianity"),
   B_constraints = NULL,
+  B_perm = NULL,
+  B_signs = NULL,
   maxit = 1000,
   maxit_robust = 1000,
   robust_method = c("Nelder-Mead", "SANN", "none"),
@@ -34,6 +36,10 @@ A \eqn{(d \times d)} matrix with its entries imposing constraints on the impact 
 a negative value indicating strict negative sign constraint, and zero indicating that the element is constrained to zero.
 Currently only available for models with \code{identification="heteroskedasticity"} due to the (in)availability of appropriate
 parametrizations that allow such constraints to be imposed.}
+
+\item{B_perm}{FILL IN}
+
+\item{B_signs}{FILL IN}
 
 \item{maxit}{the maximum number of iterations in the variable metric algorithm.}
 
@@ -68,7 +74,8 @@ Returns an S3 object of class \code{'stvar'} defining a smooth transition VAR mo
    \item{which_converged}{Indicators of which estimation rounds converged, if applicable.}
    \item{which_round}{Indicators of which round of optimization each estimate belongs to, if applicable.}
    \item{LS_estimates}{The least squares estimates of the parameters in the form
-     \eqn{(\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\alpha}, if applicable.}
+     \eqn{(\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\alpha} (intercepts replaced by unconditional means
+     if mean parametrization is used), if applicable.}
 }
 \description{
 \code{fitSSTVAR} uses a robust method and a variable metric algorithm to estimate

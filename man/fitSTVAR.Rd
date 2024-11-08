@@ -147,42 +147,34 @@ Returns an S3 object of class \code{'stvar'} defining a smooth transition VAR mo
    \item{which_converged}{Indicators of which estimation rounds converged, if applicable.}
    \item{which_round}{Indicators of which round of optimization each estimate belongs to, if applicable.}
    \item{LS_estimates}{The least squares estimates of the parameters in the form
-     \eqn{(\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\alpha}, if applicable.}
+     \eqn{(\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\alpha} (intercepts replaced by unconditional means
+     if mean parametrization is used), if applicable.}
 }
 \description{
 \code{fitSTVAR} estimates a reduced form smooth transition VAR model in two phases
-  or multiple phases (see details-section for the multiple phase estimation). In the two-phase
-  procedure:
-  in the first phase, it uses a genetic algorithm (GA) to find starting values for a gradient based
+  or three phases. In the two-phase procedure:
+   in the first phase, it uses a genetic algorithm (GA) to find starting values for a gradient based
   variable metric algorithm (VA), which it then uses to finalize the estimation in the second phase.
   Parallel computing is utilized to perform multiple rounds of estimations in parallel.
+  In the three-phase procedure, the autoregressive and weight parameters are first estimated by least
+  squares to obtain initial estimates for GA, and the rest of the procedure proceeds as in the two-phase
+  procedure.
 }
 \details{
 If you wish to estimate a structural model, estimate first the reduced form model and then use the
  use the function \code{fitSSTVAR} to create (and estimate if necessary) the structural model
  based on the estimated reduced form model.
 
- \strong{three-phase estimation:}\\
- With \code{estim_method="three-phase"} (currently only available for threshold VAR models),
- the following three-phase procedure proposed by Koivisto, Luoto, and Virolainen (2025) is employed:
- \enumerate{
-   \item The AR and weight function parameters are estimated by the method of least squares.
-   \item The rest of the parameters are ML estimated conditional on the LS estimates of the AR parameters with
-     the two-phase procedure (GA + VA).
-   \item The AR parameters are ML estimated with VA conditional on the estimates of the rest of the parameters,
-     initializing the algorithm from the LS estimates.
-   \item All parameters are ML estimated by initializing VA from the estimates obtained in the previous step.
- }
- Note that \code{mean_constraints} are not supported in the three-phase procedure and only such \code{weight_constraints}
- are supported that fix the values of the weight function parameters to known constants. Also, despite running multiple
- estimation rounds in Phase~2, the three-phase estimation procedure produces only one final estimate, since the
- best appropriate estimate is automatically selected after Phase~2 (see "Filtering inappropriate estimates" below).
+ \strong{three-phase estimation.} With \code{estim_method="three-phase"} (currently only available
+ for threshold VAR models), an extra phase is added to the beginning of the two-phase estimation procedure:
+ the autoregressive and weight function parameters are first estimated by the method of least squares. Then,
+ these initial estimates are used to create an initial population to the genetic algorithm, and the rest of the
+ procedure proceeds as in the the two-phase procedure. This allows to use substantially decrease the required
+ number of estimation rounds, and thereby speeds up the estimation substantially. On the other hand, the three-phase
+ procedure tends to produce estimates close to the initial LS estimates, while the two-phase procedure explores
+ the parameter space more thoroughly.
 
- If structural model identified by non-Gaussianity is estimated, note that the identification can be weak with
- respect to the ordering and signs of some of the columns of \eqn{B_2,...,B_M} (see Virolainen, 2024). You can
- estimate models with different orderings of the columns of \eqn{B_2,...,B_M} with the function FILL IN.
-
- \strong{Related also to the two-phase estimation:}\\
+ \strong{The rest concerns both two-phase and three-phase procedures.}\\
  Because of complexity and high multimodality of the log-likelihood function, it is \strong{not certain}
  that the estimation algorithm will end up in the global maximum point. When \code{estim_method="two-phase"},
  it is expected that many of the estimation rounds will end up in some local maximum or a saddle point instead.
@@ -262,7 +254,8 @@ fitlogistict32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logistic", weightf
  cond_dist="Student", nrounds=2, ncores=2, seeds=1:2)
 summary(fitlogistict32) # Summary printout of the estimates
 
-# Estimate a two-regime threshold VAR p=3 model with independent skewed t shocks.
+# Estimate a two-regime threshold VAR p=3 model with independent skewed t shocks
+# using the three-phase estimation procedure.
 # The first lag of the the second variable is specified as the switching variable,
 # and the threshold parameter constrained to the fixed value 1.
 fitthres32wit <- fitSTVAR(gdpdef, p=3, M=2, weight_function="threshold", weightfun_pars=c(2, 1),

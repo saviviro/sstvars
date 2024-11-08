@@ -128,6 +128,8 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
 #'   a negative value indicating strict negative sign constraint, and zero indicating that the element is constrained to zero.
 #'   Currently only available for models with \code{identification="heteroskedasticity"} due to the (in)availability of appropriate
 #'   parametrizations that allow such constraints to be imposed.
+#' @param B_perm FILL IN
+#' @param B_signs FILL IN
 #' @details When the structural model does not impose overidentifying constraints, it is directly
 #'   obtained from the reduced form model, and estimation is not required. When overidentifying constraints
 #'   are imposed, the model is estimated via ..
@@ -218,8 +220,8 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
 #' @export
 
 fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity", "non-Gaussianity"), B_constraints=NULL,
-                      maxit=1000, maxit_robust=1000, robust_method=c("Nelder-Mead", "SANN", "none"), print_res=TRUE,
-                      calc_std_errors=TRUE) {
+                      B_perm=NULL, B_signs=NULL, maxit=1000, maxit_robust=1000, robust_method=c("Nelder-Mead", "SANN", "none"),
+                      print_res=TRUE, calc_std_errors=TRUE) {
   check_stvar(stvar)
   stopifnot(maxit %% 1 == 0 & maxit >= 1)
   stopifnot(maxit_robust %% 1 == 0 & maxit_robust >= 1)
@@ -806,6 +808,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   if(T_obs/M < T_min) { # Try smaller T_min
     T_min <- 1.5/d*ifelse(is.null(AR_constraints), (p + 1)*d^2 + d,
                         ncol(AR_constraints)/M + d + d^2)
+    message("The number of observations in relative to the number of parameters is small, consider decreasing p or M.")
     if(T_obs/M < T_min) {
       stop("The number of observations is too small for reasonable estimation. Decrease the order p or the number of regimes M.")
     }
