@@ -198,34 +198,25 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
 #' fit32cms_hs3 <- fitSSTVAR(fit32cms_hs2, identification="heteroskedasticity",
 #'  B_constraints=matrix(c(1, 0, 0, 1), nrow=2))
 #'
-#' # Estimate first a reduced form three-regime Student's t Threshold VAR p=3 model with
-#' # the first lag of the second variable as the switching variable, the means and AR
-#' # matrices constrained to be identical across the regimes:
-#' fit32cml <- fitSTVAR(gdpdef, p=3, M=3, cond_dist="Student",
-#'  AR_constraints=rbind(diag(3*2^2), diag(3*2^2), diag(3*2^2)),
-#'  weight_function="threshold", weightfun_pars=c(2, 1), mean_constraints=list(1:3),
-#'  parametrization="mean", nrounds=1, seeds=1, ncores=1)
+#' # Estimate first a reduced form two-regime Threshold VAR p=1 model with
+#' # with independent skewed t shocks, and the first lag of the second variable
+#' # as the switching variable, and AR matrices constrained to be identical
+#' # across the regimes:
+#' fit12c <- fitSTVAR(gdpdef, p=1, M=2, cond_dist="ind_skewed_t",
+#'  AR_constraints=rbind(diag(1*2^2), diag(1*2^2)), weight_function="threshold",
+#'  weightfun_pars=c(2, 1), nrounds=1, seeds=1, ncores=1)
 #'
-#' # Then, we estimate/create various structural models based on the reduced form model.
-#' # Create a structural model with the shocks identified recusively:
-#' fit32cmls_rec <- fitSSTVAR(fit32cml, identification="recursive")
+#' # Due to the independent non-Gaussian shocks, the structural shocks are readily
+#' # identified. The following returns the same model but marked as structural
+#' # with the shocks identified by non-Gaussianity:
+#' fit12c <- fitSSTVAR(fit12c)
 #'
-#' # Estimate a structural model with the shocks identified by conditional heteroskedasticity,
-#' # the model is overidentifying, as it has more than two regimes:
-#' fit32cmls_hs <- fitSSTVAR(fit32cml, identification="heteroskedasticity")
-#' fit32cmls_hs # Print the estimates
+#' # Estimate a model based on a reversed ordering of the columns of the impact matrix B_2:
+#' fit12c2 <- fitSSTVAR(fit12c, B_pm_reg=2, B_perm=c(2, 1))
 #'
-#' # Estimate a structural model with the shocks identified by conditional heteroskedasticity
-#' # and overidentifying constraints imposed on the impact matrix: zero lower left element,
-#' # estimation without employing a robust estimation method:
-#' fit32cmls_hs2 <- fitSSTVAR(fit32cmls_hs, identification="heteroskedasticity",
-#'  B_constraints=matrix(c(NA, 0, NA, NA), nrow=2),
-#'  robust_method="none")
-#'
-#' # Relax the zero constraint on the impact matrix and re-estimate the model:
-#' fit32cmls_hs3 <- fitSSTVAR(fit32cmls_hs2, identification="heteroskedasticity",
-#'  B_constraints=matrix(c(NA, NA, NA, NA), nrow=2),
-#'  robust_method="none")
+#' # Estimate a model based on reversed signs of the second column of B_2 and reversed
+#' # ordering of the columns of B_2:
+#' fit12c3 <- fitSSTVAR(fit12c, B_pm_reg=2, B_perm=c(2, 1), B_signs=2)
 #' }
 #' @export
 
@@ -264,7 +255,7 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
       stop("B_perm is only available for models with cond_dist='ind_Student' or 'ind_skewed_t'")
     } else if(length(B_perm) != d) {
       stop("The length of B_perm should be equal to the number of variables")
-    } else if(sort(B_perm, decreasing=FALSE) != 1:d) {
+    } else if(!all(sort(B_perm, decreasing=FALSE) == 1:d)) {
       stop("B_perm should contain the integers from 1 to d, each exactly once")
     }
   }
@@ -515,9 +506,26 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
     if(!is.null(B_perm) || !is.null(B_signs)) { # Permutate or swap signs of the columns of B_1,...,B_M
       # Construct initial estimates after reordering the columns or swapping the signs
 
-      # PITÄÄ SPESIFIOIDA MYÖS REGIIMI, JOSSA IMPAKTIMATRIISIN MERKIT TAI PERMUTOINNIT MUUTETAAN!
-      # ELI EI VOI KÄYTTÄÄ REORDER B COLUMNSSIA TAI SIGN CHANGEA!
+      # First obtain the old estimates (each B_m has d^2 parameters here, as no B_constraints are allowed)
+      stopifnot(n_covmat_pars == M*d^2)
+      all_Bm <- array(params[(n_mean_pars + n_ar_pars + 1):(n_mean_pars + n_ar_pars + n_covmat_pars)], dim=c(d, d, M))
 
+      # Take the B_m alter:
+      Bm <- all_Bm[, , B_pm_reg]
+
+      # Change the signs of the columns of B_m
+      if(!is.null(B_signs)) {
+        Bm[, B_signs] <- -Bm[, B_signs]
+      }
+
+      # Permutate the columns of B_m
+      if(!is.null(B_perm)) {
+        Bm <- Bm[, B_perm]
+      }
+
+      # Fill in the new B_m to the new_params, which is new initial parameter vector for estimation
+      all_Bm[, , B_pm_reg] <- Bm
+      new_params <- c(params[1:(n_mean_pars + n_ar_pars)], all_Bm, params[(n_mean_pars + n_ar_pars + n_covmat_pars + 1):length(params)])
     } else { # B_constraints imposed or changed
       if(is.null(old_B_constraints) && is.null(B_constraints)) {
         return(stvar) # Nothing to do here, return the original model
@@ -682,7 +690,6 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
         weight_constraints=weight_constraints, B_constraints=B_constraints,
         calc_std_errors=calc_std_errors)
 }
-
 
 
 
