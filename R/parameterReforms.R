@@ -437,17 +437,22 @@ reform_constrained_pars <- function(p, M, d, params,
 #'   is positive and in a decreasing order.
 #'
 #' @description \code{sort_impactmats} sorts and sign changes the columns of the impact matrices of the regimes so that the first element
-#'   in each column of \eqn{B_1} is positive and in a decreasing order. The same reordering and sign changes performed to the
-#'   columns of \eqn{B_1} are applied to the rest of the impact matrices to obtain an observationally equivalent model.
+#'   in each column of \eqn{B_1} is positive and in a decreasing order (for skewed distributions, the signs are not normalized).
+#'   The same reordering and sign changes performed to the columns of \eqn{B_1} are applied to the rest of the impact matrices to
+#'   obtain an observationally equivalent model.
 #'
 #' @inheritParams loglikelihood
-#' @details This function is internally used by \code{GAfit} and \code{fitSTVAR}, so structural models or \code{B_constraints} are not supported.
+#' @details This function is internally used by \code{GAfit} and \code{fitSTVAR}, so structural models or \code{B_constraints}
+#'   are not supported.
 #' @return Returns sorted parameter vector of the form described for the argument \code{params},
 #'   with the regimes sorted so that...
 #'   \describe{
-#'     \item{If \code{cond_dist == "ind_Student"} or \code{"ind_skewed_t"}:}{The parameter vector with the columns of the impact matrices sorted
-#'           and sign changed so that the first element in each column of \eqn{B_1} is positive and in a decreasing order. Sorts also the degrees
-#'           of feedom and skewness parameters (if any) accordingly.}
+#'     \item{If \code{cond_dist == "ind_Student"}:}{The parameter vector with the columns of the impact
+#'           matrices sorted and sign changed so that the first element in each column of \eqn{B_1} is
+#'           positive and in a decreasing order. Sorts also the degrees of freedom and skewness parameters
+#'           (if any) accordingly.}
+#'     \item{If \code{cond_dist == "ind_skewed_t"}:}{The parameter vector with the columns of the impact
+#'           matrices sorted so that the first element in each column of \eqn{B_1} are in a decreasing order.}
 #'     \item{Otherwise:}{Nothing to sort, so returns the original parameter vector given in \code{param}.}
 #'   }
 #' @keywords internal
@@ -491,13 +496,15 @@ sort_impactmats <- function(p, M, d, params,
                    dim=c(d, d, M))
 
   # Determine which columns should go through sign change, and change the signs of those columns
-  for(i1 in 1:d) {
-    if(all_B_m[1, i1, 1] < 0) {
-      all_B_m[, i1, 1] <- -all_B_m[, i1, 1]
-      # Change the signs of the corresponding columns in the rest of the impact matrices
-      if(M > 1) {
-        for(m in 2:M) {
-          all_B_m[, i1, m] <- -all_B_m[, i1, m]
+  if(cond_dist == "ind_Student") {
+    for(i1 in 1:d) {
+      if(all_B_m[1, i1, 1] < 0) {
+        all_B_m[, i1, 1] <- -all_B_m[, i1, 1]
+        # Change the signs of the corresponding columns in the rest of the impact matrices
+        if(M > 1) {
+          for(m in 2:M) {
+            all_B_m[, i1, m] <- -all_B_m[, i1, m]
+          }
         }
       }
     }

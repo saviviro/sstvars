@@ -1096,7 +1096,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       estims <- as.matrix(simplify2array(pbapply::pblapply(1:nrow(thresvecs), FUN=function(i1) estim_fun(thresvecs[i1,]), cl=cl)))
       if(prefer_stab) {
         # Check the stability condition and to what extend it is not satisfied.
-        message(paste0("Checking the stability condition for all LS estimates..."))
+        message(paste0("Checking the stability condition for all the LS estimates..."))
         stab_sums <- simplify2array(pbapply::pblapply(1:nrow(thresvecs), FUN=function(i1) check_stab(estims[,i1]), cl=cl))
       }
       parallel::stopCluster(cl=cl)

@@ -257,7 +257,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   }
   if(!is.list(LS_params) || length(LS_params) != 2) {
     stop("The argument 'LS_params' should be a list of lenght two.")
-  } else if(is.null(LS_params$prefer_stab) || is.null(LS_params$stab_cond)) {
+  } else if(is.null(LS_params$prefer_stab) || is.null(LS_params$stab_tol)) {
     stop("The argument 'LS_params' should contain elements 'prefer_stab' and 'stab_tol'.")
   } else if(!is.logical(LS_params$prefer_stab) || !is.numeric(LS_params$stab_tol)) {
     stop("The elements of 'LS_params' should be logical and numeric, respectively.")
@@ -658,7 +658,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   params <- all_estimates[[which_best_fit]]
 
 
-  ### Obtain standard errors, calculate IC ###
+  ## Obtain standard errors, calculate IC ###
   # Sort regimes if no constraints are employed (affects params only with specific weight_functions)
   if(is.null(AR_constraints) && is.null(mean_constraints) && is.null(weight_constraints)) {
     params <- sort_regimes(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,

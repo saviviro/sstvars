@@ -2195,10 +2195,15 @@ test_that("sort_regimes works correctly", {
 })
 
 B1_112_sorted <- matrix(c(0.7, -0.3, 0.5, 0.2), nrow=2)
+B2_112_sorted_skew <- B1_112
 B1_222_sorted <- matrix(c(0.5, 0.2, 0.1, -0.3), nrow=2)
 B2_222_sorted <- matrix(c(0.4, -0.1, 0.2, -0.3), nrow=2)
+B1_222_sorted_skew <- B1_222
+B2_222_sorted_skew <- B2_222
 B1_123_sorted <- matrix(c(1.0, 0.3, 0.1, 0.8, -1.1, 0.5, 0.1, 0.2, -0.4), nrow=3)
 B2_123_sorted <- matrix(c(0.3, -0.2, -0.7, 0.8, -1.2, -0.5, -0.1, 0.2, -1.1), nrow=3)
+B1_123_sorted_skew <- matrix(c(1, 0.3, 0.1, -0.1, -0.2, 0.4, -0.8, 1.1, -0.5), nrow=3)
+B2_123_sorted_skew <- matrix(c(0.3, -0.2, -0.7, 0.1, -0.2, 1.1, -0.8, 1.2, 0.5), nrow=3)
 B1_123_2 <- matrix(c(1.0, 0.3, 0.1, -0.8, 1.1, -0.5, -1.1, -0.2, 0.4), nrow=3)
 B2_123_2 <- matrix(c(0.3, -0.2, -0.7, -0.8, 1.2, 0.5, 0.1, -0.2, 1.1), nrow=3)
 theta_123expit_1_1_2 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vec(B1_123_2),
@@ -2208,10 +2213,15 @@ theta_123expikt_1_1_2 <- c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vec
 
 B1_123_2_sorted <- matrix(c(1.1, 0.2, -0.4, 1.0, 0.3, 0.1, 0.8, -1.1, 0.5), nrow=3)
 B2_123_2_sorted <- matrix(c(-0.1, 0.2, -1.1, 0.3, -0.2, -0.7, 0.8, -1.2, -0.5), nrow=3)
+B1_123_2_sorted_skew <- B1_123_2
+B2_123_2_sorted_skew <- B2_123_2
 
 B1_132_sorted <- matrix(c(0.6, 0.2, 0.1, -0.7), nrow=2)
 B2_132_sorted <- matrix(c(0.4, -0.1, 0.2, -0.5), nrow=2)
 B3_132_sorted <- matrix(c(0.9, -0.5, -0.2, -0.4), nrow=2)
+B1_132_sorted_skew <- B1_132
+B2_132_sorted_skew <- B2_132
+B3_132_sorted_skew <- B3_132
 
 B1_132_2 <- matrix(c(-0.6, 0.2, -0.8, -0.7), nrow=2)
 B2_132_2 <- matrix(c(0.4, -0.1, -0.2, 0.5), nrow=2)
@@ -2225,12 +2235,21 @@ B1_132_2_sorted <- matrix(c(0.8, 0.7, 0.6, -0.2), nrow=2)
 B2_132_2_sorted <- matrix(c(0.2, -0.5, -0.4, 0.1), nrow=2)
 B3_132_2_sorted <- matrix(c(-0.2, -0.4, -0.9, 0.5), nrow=2)
 
+B1_132_3 <- matrix(c(-0.6, 0.2, 0.1, -0.7), nrow=2)
+B2_132_3 <- matrix(c(0.4, -0.1, -0.2, 0.5), nrow=2)
+B3_132_3 <- matrix(c(0.9, -0.5, 0.2, 0.4), nrow=2)
+B1_132_3_sorted_skew <- matrix(c(0.1, -0.7, -0.6, 0.2), nrow=2)
+B2_132_3_sorted_skew <- matrix(c(-0.2, 0.5, 0.4, -0.1), nrow=2)
+B3_132_3_sorted_skew <- matrix(c(0.2, 0.4, 0.9, -0.5), nrow=2)
+
 theta_132thresmwit_1_1_2 <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vec(B1_132_2),
                               vec(B2_132_2), vec(B3_132_2), dfs_132_1_1) # ind_Student
 theta_123logisticcmit_3_1_2 <- c(phi10_123, vec(A11_123), vec(B1_123_2), vec(B2_123_2), c_and_gamma_123_3_1, dfs_123_3_1) # ind_Student
 
 theta_132thresmwikt_1_1_2 <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vec(B1_132_2),
-                              vec(B2_132_2), vec(B3_132_2), dfls_132_1_1) # ind_skewed_t
+                               vec(B2_132_2), vec(B3_132_2), dfls_132_1_1) # ind_skewed_t
+theta_132thresmwikt_1_1_3 <- c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vec(B1_132_3),
+                               vec(B2_132_3), vec(B3_132_3), dfls_132_1_1) # ind_skewed_t
 theta_123logisticcmikt_3_1_2 <- c(phi10_123, vec(A11_123), vec(B1_123_2), vec(B2_123_2), c_and_gamma_123_3_1, dfls_123_3_1) # ind_skewed_t
 
 
@@ -2285,52 +2304,48 @@ test_that("sort_impactmats works correctly", {
 
   # ind_skewed_t
   expect_equal(sort_impactmats(p=1, M=1, d=2, params=theta_112ikt, cond_dist="ind_skewed_t", weight_function="threshold",
-                               weightfun_pars=c(1, 1)), c(phi10_112, vec(A11_112), vec(B1_112_sorted), dfls_112[2:1], dfls_112[4:3]))
+                               weightfun_pars=c(1, 1)), theta_112ikt)
   expect_equal(sort_impactmats(p=2, M=2, d=2, params=theta_222logistikt_2_1, cond_dist="ind_skewed_t", weight_function="logistic",
-                               weightfun_pars=c(2, 1)), c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
-                                                          vec(B1_222_sorted), vec(B2_222_sorted), c_and_gamma_222_2_1, dfls_222_2_1))
+                               weightfun_pars=c(2, 1)), theta_222logistikt_2_1)
   expect_equal(sort_impactmats(p=1, M=2, d=2, params=theta_122logikt_1_1, weight_function="mlogit", weightfun_pars=list(vars=1, lags=1),
                                cond_dist="ind_skewed_t"), theta_122logikt_1_1)
   expect_equal(sort_impactmats(p=1, M=2, d=3, params=theta_123expikt_1_1, weight_function="exponential", weightfun_pars=c(1, 1),
-                               cond_dist="ind_skewed_t"), c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vec(B1_123_sorted),
-                                                           vec(B2_123_sorted), c_and_gamma_123_1_1, dfls_123_1_1))
+                               cond_dist="ind_skewed_t"), c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vec(B1_123_sorted_skew),
+                                                           vec(B2_123_sorted_skew), c_and_gamma_123_1_1,
+                                                           dfls_123_1_1[c(1, 3, 2, 4, 6, 5)]))
   expect_equal(sort_impactmats(p=1, M=2, d=3, params=theta_123expikt_1_1_2, weight_function="exponential", weightfun_pars=c(1, 1),
-                               cond_dist="ind_skewed_t"), c(phi10_123, phi20_123, vec(A11_123), vec(A21_123), vec(B1_123_2_sorted),
-                                                           vec(B2_123_2_sorted), c_and_gamma_123_1_1,
-                                                           dfls_123_1_1[c(3, 1, 2)], dfls_123_1_1[c(6, 4, 5)]))
+                               cond_dist="ind_skewed_t"), theta_123expikt_1_1_2)
   expect_equal(sort_impactmats(p=1, M=3, d=2, params=theta_132thresikt_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
-                               cond_dist="ind_skewed_t"), c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
-                                                           vec(B1_132_sorted), vec(B2_132_sorted), vec(B3_132_sorted), r1_132_1_1,
-                                                           r2_132_1_1, dfls_132_1_1))
+                               cond_dist="ind_skewed_t"), theta_132thresikt_1_1)
   expect_equal(sort_impactmats(p=1, M=3, d=2, params=theta_132thresikt_1_1_2, weight_function="threshold", weightfun_pars=c(1, 1),
-                               cond_dist="ind_skewed_t"), c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
-                                                           vec(B1_132_2_sorted), vec(B2_132_2_sorted), vec(B3_132_2_sorted), r1_132_1_1,
-                                                           r2_132_1_1, dfls_132_1_1[2:1], dfls_132_1_1[4:3]))
+                               cond_dist="ind_skewed_t"), theta_132thresikt_1_1_2)
   expect_equal(sort_impactmats(p=2, M=2, d=2, params=theta_222expcmwikt_2_1, weight_function="exponential", weightfun_pars=c(2, 1),
                                cond_dist="ind_skewed_t", mean_constraints=list(1:2), AR_constraints=C_222,
-                               weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))),
-               c(phi10_222, vec(A11_222), vec(A12_222), vec(B1_222_sorted), vec(B2_222_sorted), xi_222expcmw_2_1, dfls_122_2_1))
+                               weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))), theta_222expcmwikt_2_1)
+
   expect_equal(sort_impactmats(p=1, M=3, d=2, params=theta_132thresmwikt_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
                                cond_dist="ind_skewed_t", mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2))),
-               c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vec(B1_132_sorted), vec(B2_132_sorted),
-                 vec(B3_132_sorted), dfls_132_1_1))
+               theta_132thresmwikt_1_1)
+
   expect_equal(sort_impactmats(p=1, M=3, d=2, params=theta_132thresmwikt_1_1_2, weight_function="threshold", weightfun_pars=c(1, 1),
                                cond_dist="ind_skewed_t", mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2))),
-               c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vec(B1_132_2_sorted), vec(B2_132_2_sorted),
-                 vec(B3_132_2_sorted), dfls_132_1_1[2:1], dfls_132_1_1[4:3]))
+               theta_132thresmwikt_1_1_2)
+  expect_equal(sort_impactmats(p=1, M=3, d=2, params=theta_132thresmwikt_1_1_3, weight_function="threshold", weightfun_pars=c(1, 1),
+                               cond_dist="ind_skewed_t", mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2))),
+               c(phi10_132, phi20_132, vec(A11_132), vec(A21_132), vec(A31_132), vec(B1_132_3_sorted_skew), vec(B2_132_3_sorted_skew),
+                 vec(B3_132_3_sorted_skew), dfls_132_1_1[c(2, 1, 4, 3)]))
   expect_equal(sort_impactmats(p=1, M=2, d=3, params=theta_123logisticcmikt_3_1, weight_function="logistic", weightfun_pars=c(3, 1),
                                cond_dist="ind_skewed_t", mean_constraints=list(1:2), AR_constraints=C_123),
-               c(phi10_123, vec(A11_123), vec(B1_123_sorted), vec(B2_123_sorted), c_and_gamma_123_3_1, dfls_123_3_1))
+               c(phi10_123, vec(A11_123), vec(B1_123_sorted_skew), vec(B2_123_sorted_skew), c_and_gamma_123_3_1,
+                 dfls_123_3_1[c(1, 3, 2, 4, 6, 5)]))
   expect_equal(sort_impactmats(p=1, M=2, d=3, params=theta_123logisticcmikt_3_1_2, weight_function="logistic", weightfun_pars=c(3, 1),
                                cond_dist="ind_skewed_t", mean_constraints=list(1:2), AR_constraints=C_123),
-               c(phi10_123, vec(A11_123), vec(B1_123_2_sorted), vec(B2_123_2_sorted), c_and_gamma_123_3_1,
-                 dfls_123_3_1[c(3, 1, 2)], dfls_123_3_1[c(6, 4, 5)]))
+               theta_123logisticcmikt_3_1_2)
   expect_equal(sort_impactmats(p=2, M=2, d=2, params=theta_222logcikt_2_1, weight_function="mlogit", weightfun_pars=list(vars=2, lags=1),
-                               cond_dist="ind_skewed_t", AR_constraints=C_222),
-               c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(B1_222_sorted), vec(B2_222_sorted), gamma1_222_2_1, dfls_222_2_1))
+                               cond_dist="ind_skewed_t", AR_constraints=C_222), theta_222logcikt_2_1)
   expect_equal(sort_impactmats(p=2, M=2, d=2, params=theta_222exoikt, weight_function="exogenous",
                                weightfun_pars=cbind(c(1, 0.9, 0.8), c(0, 0.1, 0.2)), cond_dist="ind_skewed_t", AR_constraints=C_222),
-               c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(B1_222_sorted), vec(B2_222_sorted), dfls_222_2_1))
+               theta_222exoikt)
 
   # Gaussian and Student
   expect_equal(sort_impactmats(p=1, M=2, d=3, params=theta_123relg_2, weight_function="relative_dens", cond_dist="Gaussian"),
