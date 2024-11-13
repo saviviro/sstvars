@@ -328,8 +328,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     stab_tol_to_use <- 0.05
     any_eigen_large <- FALSE
     for(m in 1:M) { # Check stability conditon for each regime
-      stab_ok[m] <- all(abs(eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$'values') < 1 - stab_tol_to_use)
-      if(any(abs(eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$'values') > 1.3)) {
+      stab_ok[m] <- all(abs(eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$values) < 1 - stab_tol_to_use)
+      if(any(abs(eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$values) > 1.3)) {
         any_eigen_large <- TRUE
       }
     }

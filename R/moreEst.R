@@ -797,6 +797,10 @@ fitbsSSTVAR <- function(data, p, M, params,
 #'   by the method of least squares.
 #'
 #' @inheritParams loglikelihood
+#' @param prefer_stab should preferably estimates that satisfy the stability condition be returned (if possible)? Faster estimation
+#'   if \code{FALSE}, as the stability condition does not need to be checked for each vector of weight parameters.
+#' @param stab_tol the tolerance level for the stability condition (estimates with companion form AR matrix eigenvalues of all regimes
+#'   inside the unit circle by more than \code{stab_tol} are considered if \code{prefer_stab=TRUE}).
 #' @param ncores the number CPU cores to be used in parallel computing.
 #' @param use_parallel employ parallel computing? If \code{FALSE}, does not print anything.
 #' @details Used internally in the multiple phase estimation procedure proposed by Koivisto,
@@ -833,7 +837,7 @@ fitbsSSTVAR <- function(data, p, M, params,
 estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                      weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                      parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
-                     use_parallel=TRUE, ncores=2) {
+                     prefer_stab=TRUE, stab_tol=0.02, use_parallel=TRUE, ncores=2) {
   # Checks
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -875,13 +879,16 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     }
   }
 
+  ################################
+  ## Create estim etc functions ##
+  ################################
+
   ## Least squares estimation function given thresholds for models without AR constraints
-  LS_without_AR_constraints <- function(thresholds, index) {
+  LS_without_AR_constraints <- function(thresholds) {
     # threshold = length M-1 vector of the thresholds r_1,...,r_{M-1}; if M=1 anything is ok
     # Other arguments are taken from the parent environment.
 
     # Storage for the estimates
-    #estims <- array(NA, dim=c(d, d*p + 1, M)) # [, , m] for [\phi_{m,0} : A_{m,1} : ... : A_{m,p}]
     all_intercepts <- matrix(NA, nrow=d, ncol=M) # (d x M), [, m] for regime m
     all_AR_mats <- array(NA, dim=c(d, d*p, M)) # [, , m] for A_{m,1} : ... : A_{m,p}
 
@@ -988,6 +995,35 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     c(estims, ssr)
   }
 
+  ## A function to check whether the stability condition is satisfied for the AR matrices, and
+  ## if not, to what extend it is not satisfied (sum over modulus of eigenvalues greater than 1 - stab_tol)
+  check_stab <- function(estims) {
+    # Estims should be a vector of the form (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M)
+    if(!is.null(AR_constraints)) { # Expand the AR constraints
+      pars_to_check <- c(estims[1:(M*d)], AR_constraints%*%estims[(M*d + 1):(M*d + ncol(AR_constraints))])
+    } else {
+      pars_to_check <- estims[1:(M*d + M*p*d^2)]
+    }
+    all_phi0 <- pick_phi0(M=M, d=d, params=pars_to_check)
+    all_A <- pick_allA(p=p, M=M, d=d, params=pars_to_check)
+    all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
+    all_sum_over_stab <- numeric(M) # How much in each regime modulus of eigenvalues exceed 1 - stab_tol
+    for(m in 1:M) { # Check stability conditon for each regime
+      abs_eigs <- abs(eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$values)
+      abs_eigs_not_stab <- abs_eigs[abs_eigs > 1 - stab_tol] # abs eigens that are larger than 1 - stab_tol
+      if(length(abs_eigs_not_stab) == 0) {
+        all_sum_over_stab[m] <- 0
+      } else {
+        all_sum_over_stab[m] <- sum(abs_eigs_not_stab - (1 - stab_tol)) # How much abs eigens exceed 1 - stab_tol?
+      }
+    }
+    sum(all_sum_over_stab) # The sum over all regimes = the extend of which stability condition is not satisfied
+  }
+
+  ###########################################
+  ## Create threshold vectors and estimate ##
+  ###########################################
+
   ## Create the set of threshold vectors for the optimization; M=1 will use numeric(0) and run the LS only once
   if(is.null(weight_constraints)) {
     switch_var_series <- data[,weightfun_pars[1]] # The switching variable time series
@@ -1034,7 +1070,6 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   } else { # thresholds fixed to known numbers
     thresvecs <- matrix(weight_constraints[[2]], nrow=1, ncol=M - 1)
   }
-
   # Each row in thresvecs of a threshold vector
 
   ## Estimate the model for all thresholds vectors in thresvecs
@@ -1043,7 +1078,8 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
 
   if(M == 1) {
     if(use_parallel) message(paste("PHASE 1: Estimating AR and weight parameters by least squares..."))
-    estims <- estim_fun(numeric(0))
+    estims <- as.matrix(estim_fun(numeric(0)))
+    stab_sums <- check_stab(estims[,1])
   } else {
     if(use_parallel) {
       if(ncores > parallel::detectCores()) {
@@ -1056,18 +1092,41 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.
       parallel::clusterExport(cl, ls(environment(estim_LS)), envir=environment(estim_LS)) # assign all variables from package:sstvars
       parallel::clusterEvalQ(cl, c(library(pbapply), library(sstvars)))
-      estims <- simplify2array(pbapply::pblapply(1:nrow(thresvecs), FUN=function(i1) estim_fun(thresvecs[i1,]), cl=cl))
+
+      estims <- as.matrix(simplify2array(pbapply::pblapply(1:nrow(thresvecs), FUN=function(i1) estim_fun(thresvecs[i1,]), cl=cl)))
+      if(prefer_stab) {
+        # Check the stability condition and to what extend it is not satisfied.
+        message(paste0("Checking the stability condition for all LS estimates..."))
+        stab_sums <- simplify2array(pbapply::pblapply(1:nrow(thresvecs), FUN=function(i1) check_stab(estims[,i1]), cl=cl))
+      }
       parallel::stopCluster(cl=cl)
     } else { # No parallel computing
-      estims <- vapply(1:nrow(thresvecs), FUN=function(i1) estim_fun(thresvecs[i1,]),
-                       FUN.VALUE=numeric(estim_length))
+      estims <- as.matrix(vapply(1:nrow(thresvecs), FUN=function(i1) estim_fun(thresvecs[i1,]),
+                                 FUN.VALUE=numeric(estim_length)))
+      if(prefer_stab) {
+        # Check the stability condition and to what extend it is not satisfied.
+        stab_sums <- vapply(1:nrow(thresvecs), FUN=function(i1) check_stab(estims[,i1]), FUN.VALUE=numeric(1))
+      }
     }
   }
-  estims <- as.matrix(estims)
   # Each column in estims corresponds to each vector of thresholds
 
-  ## Find the index for which the sum of squares of residuals is the smallest
-  min_ssr_index <- which.min(estims[nrow(estims),])[1]
+  ## Obtain the LS estimates, possibly among stable estimates
+  if(prefer_stab) {
+    # Check whether estimates with stability condition satisfied are found:
+    which_stable <- which(stab_sums == 0) # thresvec indices for which the LS estimates are stable
+
+    if(length(which_stable) > 0) { # Stable estimates found
+      # Which stable estimate has the smaller SSR:
+      min_ssr_index <- which.min(estims[nrow(estims), which_stable])[1]
+    } else { # No stable estimates found
+      # Which estimate is the most stable?
+      min_ssr_index <- which.min(stab_sums)[1]
+    }
+  } else {
+    # Find the index for which the sum of squares of residuals is the smallest (regardless of stability)
+    min_ssr_index <- which.min(estims[nrow(estims),])[1]
+  }
 
   ## Obtain and return the estimates corresponding the smallest sum of squares of residuals
   int_and_ar_estims <- estims[1:(nrow(estims) - 1), min_ssr_index]
