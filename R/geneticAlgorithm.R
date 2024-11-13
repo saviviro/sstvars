@@ -625,7 +625,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                                                                  ar_scale=ar_scale,
                                                                                  weight_scale=weight_scale,
                                                                                  ar_scale2=ar_scale2,
-                                                                                 fixed_params=fixed_params), numeric(npars))
+                                                                                 fixed_params=NULL), numeric(npars))
 
     } else if(length(which_mutate) >= 1) { # Smart mutations
       stat_mu <- FALSE
