@@ -6,12 +6,15 @@
 #'   variable metric algorithm (VA), which it then uses to finalize the estimation in the second phase.
 #'   Parallel computing is utilized to perform multiple rounds of estimations in parallel.
 #'   In the three-phase procedure, the autoregressive and weight parameters are first estimated by least
-#'   squares to obtain initial estimates for GA, and the rest of the procedure proceeds as in the two-phase
+#'   squares (LS) to obtain initial estimates for GA, and the rest of the procedure proceeds as in the two-phase
 #'   procedure.
 #'
 #' @inheritParams GAfit
 #' @param estim_method either \code{"two-phase"} or \code{"three-phase"} (the latter is the default
 #'   option for threshold models and the former is currently the only option for other models). See details.
+#' @param LS_params A list of two elements specifying settings for LS estimations: \code{prefer_stab} (\code{TRUE} if
+#'   estimates satisfying the stability condition should be preferred; \code{FALSE} if not) and \code{stab_tol}
+#'   (numerical tolerance for the stability condition).
 #' @param nrounds the number of estimation rounds that should be performed. The default is \code{(M*ncol(data))^3}
 #'   when \code{estim_method="two-phase"} and \code{(M*ncol(data))^2} when \code{estim_method="three-phase"}.
 #' @param ncores the number CPU cores to be used in parallel computing.
@@ -221,7 +224,8 @@
 fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                      weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                      parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
-                     estim_method, nrounds=(M + 1)^5, ncores=2, maxit=1000, seeds=NULL, print_res=TRUE, use_parallel=TRUE,
+                     estim_method, LS_params=list(prefer_stab=TRUE, stab_tol=0.02), nrounds=(M + 1)^5, ncores=2, maxit=1000, seeds=NULL,
+                     print_res=TRUE, use_parallel=TRUE,
                      filter_estimates=TRUE, ...) {
   # Initial checks etc
   weight_function <- match.arg(weight_function)
@@ -251,6 +255,16 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       stop("The three-phase estimation only supports weight_constraints with R=0.")
     }
   }
+  if(!is.list(LS_params) || length(LS_params) != 2) {
+    stop("The argument 'LS_params' should be a list of lenght two.")
+  } else if(is.null(LS_params$prefer_stab) || is.null(LS_params$stab_cond)) {
+    stop("The argument 'LS_params' should contain elements 'prefer_stab' and 'stab_tol'.")
+  } else if(!is.logical(LS_params$prefer_stab) || !is.numeric(LS_params$stab_tol)) {
+    stop("The elements of 'LS_params' should be logical and numeric, respectively.")
+  } else if(LS_params$stab_tol <= 0.001 || LS_params$stab_tol >= 0.2) {
+    stop("The element 'stab_tol' in 'LS_params' should be between 0.001 and 0.2.")
+  }
+
   if(missing(nrounds)) {
     if(estim_method == "two-phase") {
       nrounds <- (M*ncol(data))^3
@@ -312,7 +326,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     }
     LS_results <- estim_LS(data=data, p=p, M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
                            cond_dist=cond_dist, parametrization="intercept", AR_constraints=AR_constraints,
-                           mean_constraints=mean_constraints, weight_constraints=weight_constraints, ncores=ncores,
+                           mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                           prefer_stab=LS_params$prefer_stab, stab_tol=LS_params$stab_tol, ncores=ncores,
                            use_parallel=use_parallel) # Always intercept parametrization used here
 
     # Check whether the least squares estimates satisfy the stability condition
@@ -325,7 +340,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     all_A <- pick_allA(p=p, M=M, d=d, params=pars_to_check)
     all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
     stab_ok <- logical(M)
-    stab_tol_to_use <- 0.05
+    stab_tol_to_use <- LS_params$stab_tol
     any_eigen_large <- FALSE
     for(m in 1:M) { # Check stability conditon for each regime
       stab_ok[m] <- all(abs(eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$values) < 1 - stab_tol_to_use)

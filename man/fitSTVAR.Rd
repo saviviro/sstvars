@@ -17,6 +17,7 @@ fitSTVAR(
   mean_constraints = NULL,
   weight_constraints = NULL,
   estim_method,
+  LS_params = list(prefer_stab = TRUE, stab_tol = 0.02),
   nrounds = (M + 1)^5,
   ncores = 2,
   maxit = 1000,
@@ -106,6 +107,10 @@ weight parameters to the constant \eqn{r} (in this case, \eqn{\alpha} is dropped
 \item{estim_method}{either \code{"two-phase"} or \code{"three-phase"} (the latter is the default
 option for threshold models and the former is currently the only option for other models). See details.}
 
+\item{LS_params}{A list of two elements specifying settings for LS estimations: \code{prefer_stab} (\code{TRUE} if
+estimates satisfying the stability condition should be preferred; \code{FALSE} if not) and \code{stab_tol}
+(numerical tolerance for the stability condition).}
+
 \item{nrounds}{the number of estimation rounds that should be performed. The default is \code{(M*ncol(data))^3}
 when \code{estim_method="two-phase"} and \code{(M*ncol(data))^2} when \code{estim_method="three-phase"}.}
 
@@ -157,7 +162,7 @@ Returns an S3 object of class \code{'stvar'} defining a smooth transition VAR mo
   variable metric algorithm (VA), which it then uses to finalize the estimation in the second phase.
   Parallel computing is utilized to perform multiple rounds of estimations in parallel.
   In the three-phase procedure, the autoregressive and weight parameters are first estimated by least
-  squares to obtain initial estimates for GA, and the rest of the procedure proceeds as in the two-phase
+  squares (LS) to obtain initial estimates for GA, and the rest of the procedure proceeds as in the two-phase
   procedure.
 }
 \details{
