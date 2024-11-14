@@ -60,7 +60,6 @@ The function goes through the estimates produced by \code{fitSTVAR} and checks w
  that are not deemed inappropriate
 }
 \examples{
-# FILL IN EXAMPLES (use donttest)
 \donttest{
  # Fit a two-regime STVAR model with logistic transition weights and Student's t errors
  fit12 <- fitSTVAR(gdpdef, p=1, M=2, weight_function="logistic", weightfun_pars=c(2, 1),

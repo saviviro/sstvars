@@ -884,7 +884,6 @@ swap_B_signs <- function(stvar, which_to_swap, calc_std_errors=FALSE) {
 #' @inherit STVAR return
 #' @seealso \code{\link{fitSTVAR}}, \code{\link{alt_stvar}}
 #' @examples
-#' # FILL IN EXAMPLES (use donttest)
 #' \donttest{
 #'  # Fit a two-regime STVAR model with logistic transition weights and Student's t errors
 #'  fit12 <- fitSTVAR(gdpdef, p=1, M=2, weight_function="logistic", weightfun_pars=c(2, 1),
