@@ -858,3 +858,7 @@ swap_B_signs <- function(stvar, which_to_swap, calc_std_errors=FALSE) {
         identification=identification, AR_constraints=AR_constraints, mean_constraints=mean_constraints,
         weight_constraints=weight_constraints, B_constraints=new_B_constraints, calc_std_errors=calc_std_errors)
 }
+
+
+
+

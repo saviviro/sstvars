@@ -24,7 +24,6 @@ fitSTVAR(
   seeds = NULL,
   print_res = TRUE,
   use_parallel = TRUE,
-  filter_estimates = TRUE,
   ...
 )
 }
@@ -126,8 +125,6 @@ for each call to the genetic algorithm, or \code{NULL} for not initializing the 
 \item{use_parallel}{employ parallel computing? If \code{use_parallel=FALSE && print_res=FALSE},
 nothing is printed during the estimation process.}
 
-\item{filter_estimates}{should the likely inappropriate estimates be filtered? See details.}
-
 \item{...}{additional settings passed to the function \code{GAfit} employing the genetic algorithm.}
 }
 \value{
@@ -210,15 +207,13 @@ If you wish to estimate a structural model, estimate first the reduced form mode
  constants, make sure the constraints are sensible. Otherwise, the estimation may fail due to the estimation algorithm not being
  able to generate reasonable random guesses for the values of the constrained weight parameters.
 
- \strong{Filtering inappropriate estimates:} If \code{filter_estimates == TRUE}, the code will automatically filter
- through estimates that it deems "inappropriate". That is, estimates that are not likely solutions of interest.
+ \strong{Filtering inappropriate estimates:} \code{fitSTVAR == TRUE} automatically filters through estimates
+ that it deems "inappropriate". That is, estimates that are not likely solutions of interest.
  Specifically, solutions that incorporate a near-singular error term covariance matrix (any eigenvalue less than \eqn{0.002}),
  any modulus of the eigenvalues of the companion form AR matrices larger than $0.9985$ (indicating the necessary condition for
  stationarity is close to break), or transition weights such that they are close to zero for almost all \eqn{t} for at least
- one regime. You can also set \code{filter_estimates=FALSE} and find the solutions of interest yourself by using the
- function \code{alt_stvar} (which can used with \code{filter_estimates=TRUE} as well since results from all estimation rounds
- are saved). If \code{estim_method = "three-phase"} filtering is always automatically applied after Phase~2 to facilitate
- reasonable initial estimates in the subsequent phases.
+ one regime. You can also always find the solutions of interest yourself by using the function \code{alt_stvar} as well since
+ results from all estimation rounds are saved).
 }
 \section{S3 methods}{
 

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  8 NOV 2024 16:41
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  14 NOV 2024 11:29
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -869,7 +869,7 @@ Here is how much of TeX's memory you used:
  30196 multiletter control sequences out of 15000+600000
  510731 words of font info for 107 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,13n,77p,1706b,506s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 75i,13n,77p,1706b,512s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2021/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/local/
 texlive/2021/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/local/texlive/2021/
 texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/local/texlive/2021/texmf-dist
@@ -899,7 +899,7 @@ e1/public/lm/lmsy8.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/l
 m/lmtt10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtti10.
 pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr
 /local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on sstvars-vignette.pdf (44 pages, 1026065 bytes).
+Output written on sstvars-vignette.pdf (44 pages, 1025886 bytes).
 PDF statistics:
  1002 PDF objects out of 1200 (max. 8388607)
  884 compressed objects within 9 object streams

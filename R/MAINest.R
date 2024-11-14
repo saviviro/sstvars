@@ -24,7 +24,6 @@
 #' @param print_res should summaries of estimation results be printed?
 #' @param use_parallel employ parallel computing? If \code{use_parallel=FALSE && print_res=FALSE},
 #'  nothing is printed during the estimation process.
-#' @param filter_estimates should the likely inappropriate estimates be filtered? See details.
 #' @param ... additional settings passed to the function \code{GAfit} employing the genetic algorithm.
 #' @details
 #'  If you wish to estimate a structural model, estimate first the reduced form model and then use the
@@ -71,15 +70,13 @@
 #'  constants, make sure the constraints are sensible. Otherwise, the estimation may fail due to the estimation algorithm not being
 #'  able to generate reasonable random guesses for the values of the constrained weight parameters.
 #'
-#'  \strong{Filtering inappropriate estimates:} If \code{filter_estimates == TRUE}, the code will automatically filter
-#'  through estimates that it deems "inappropriate". That is, estimates that are not likely solutions of interest.
+#'  \strong{Filtering inappropriate estimates:} \code{fitSTVAR == TRUE} automatically filters through estimates
+#'  that it deems "inappropriate". That is, estimates that are not likely solutions of interest.
 #'  Specifically, solutions that incorporate a near-singular error term covariance matrix (any eigenvalue less than \eqn{0.002}),
 #'  any modulus of the eigenvalues of the companion form AR matrices larger than $0.9985$ (indicating the necessary condition for
 #'  stationarity is close to break), or transition weights such that they are close to zero for almost all \eqn{t} for at least
-#'  one regime. You can also set \code{filter_estimates=FALSE} and find the solutions of interest yourself by using the
-#'  function \code{alt_stvar} (which can used with \code{filter_estimates=TRUE} as well since results from all estimation rounds
-#'  are saved). If \code{estim_method = "three-phase"} filtering is always automatically applied after Phase~2 to facilitate
-#'  reasonable initial estimates in the subsequent phases.
+#'  one regime. You can also always find the solutions of interest yourself by using the function \code{alt_stvar} as well since
+#'  results from all estimation rounds are saved).
 #'
 #' @inherit STVAR return
 #' @section S3 methods:
@@ -225,8 +222,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                      weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                      parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
                      estim_method, LS_params=list(prefer_stab=FALSE, stab_tol=0.05), nrounds=(M + 1)^5, ncores=2, maxit=1000, seeds=NULL,
-                     print_res=TRUE, use_parallel=TRUE,
-                     filter_estimates=TRUE, ...) {
+                     print_res=TRUE, use_parallel=TRUE, ...) {
   # Initial checks etc
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -591,69 +587,65 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   # Go through estimates, take the estimate that yield the higher likelihood
   # among estimates that are do not include wasted regimes or near-singular
   # error term covariance matrices.
-  if(filter_estimates) {
-    for(i1 in 1:length(all_estimates)) {
-      which_round <- ord_by_loks[i1] # Est round with i1:th largest loglik
-      pars <- all_estimates[[which_round]]
-      pars_std <- reform_constrained_pars(p=p, M=M, d=d, params=pars,
-                                          weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                          cond_dist=cond_dist, identification="reduced_form",
-                                          AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                                          weight_constraints=weight_constraints,
-                                          B_constraints=NULL) # Pars in standard form for pick pars fns
-      # Check Omegas
-      Omega_eigens <- get_omega_eigens_par(p=p, M=M, d=d, params=pars_std,
-                                           weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                           cond_dist=cond_dist, identification="reduced_form",
-                                           AR_constraints=NULL, mean_constraints=NULL,
-                                           weight_constraints=NULL, B_constraints=NULL)
-      Omegas_ok <- !any(Omega_eigens < 0.002)
+  for(i1 in 1:length(all_estimates)) {
+    which_round <- ord_by_loks[i1] # Est round with i1:th largest loglik
+    pars <- all_estimates[[which_round]]
+    pars_std <- reform_constrained_pars(p=p, M=M, d=d, params=pars,
+                                        weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                        cond_dist=cond_dist, identification="reduced_form",
+                                        AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                        weight_constraints=weight_constraints,
+                                        B_constraints=NULL) # Pars in standard form for pick pars fns
+    # Check Omegas
+    Omega_eigens <- get_omega_eigens_par(p=p, M=M, d=d, params=pars_std,
+                                         weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                         cond_dist=cond_dist, identification="reduced_form",
+                                         AR_constraints=NULL, mean_constraints=NULL,
+                                         weight_constraints=NULL, B_constraints=NULL)
+    Omegas_ok <- !any(Omega_eigens < 0.002)
 
-      # Checks AR matrices
-      boldA_eigens <- get_boldA_eigens_par(p=p, M=M, d=d, params=pars_std,
-                                           weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                           cond_dist=cond_dist, identification="reduced_form",
-                                           AR_constraints=NULL, mean_constraints=NULL,
-                                           weight_constraints=NULL, B_constraints=NULL)
-      stat_ok <- !any(boldA_eigens > 0.9985)
+    # Checks AR matrices
+    boldA_eigens <- get_boldA_eigens_par(p=p, M=M, d=d, params=pars_std,
+                                         weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                         cond_dist=cond_dist, identification="reduced_form",
+                                         AR_constraints=NULL, mean_constraints=NULL,
+                                         weight_constraints=NULL, B_constraints=NULL)
+    stat_ok <- !any(boldA_eigens > 0.9985)
 
-      # Check weight parameters
-      if(weight_function == "relative_dens") {
-        alphas <- pick_weightpars(p=p, M=M, d=d, params=pars_std, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                  cond_dist=cond_dist)
-        weightpars_ok <- !any(alphas < 0.01)
-      } else {
-        weightpars_ok <- TRUE
-      }
-
-      # Check transition weights
-      tweights <- loglikelihood(data=data, p=p, M=M, params=pars_std,
-                                weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                cond_dist=cond_dist, parametrization=parametrization,
-                                identification="reduced_form", AR_constraints=NULL,
-                                mean_constraints=NULL, B_constraints=NULL, weight_constraints=NULL,
-                                to_return="tw", check_params=TRUE, minval=matrix(0, nrow=n_obs-p, ncol=M))
-      tweights_ok <- !any(vapply(1:M, function(m) sum(tweights[,m] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
-      if(Omegas_ok && stat_ok && tweights_ok && weightpars_ok) {
-        which_best_fit <- which_round # The estimation round of the appropriate estimate with the largest loglik
-        if(!no_prints && i1 != 1) message(paste("Filtered out", i1-1, "inappropriate estimates with a larger log-likelihood"))
-        break
-      }
-      if(i1 == length(all_estimates)) {
-        message(paste("No 'appropriate' estimates were found! Check that all the variables are scaled to vary in similar magninutes,",
-                      "also not very small or large magnitudes."))
-        if(estim_method == "two-phase") {
-          message("Consider running more estimation rounds or study the obtained estimates one-by-one with the function alt_stvar.")
-        }
-        if(M > 2) {
-          message("Consider also using smaller M. Too large M leads to identification problems.")
-        }
-
-        which_best_fit <- which(loks == max(loks))[1]
-      }
+    # Check weight parameters
+    if(weight_function == "relative_dens") {
+      alphas <- pick_weightpars(p=p, M=M, d=d, params=pars_std, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                cond_dist=cond_dist)
+      weightpars_ok <- !any(alphas < 0.01)
+    } else {
+      weightpars_ok <- TRUE
     }
-  } else { # No filtering
-    which_best_fit <- which(loks == max(loks))[1]
+
+    # Check transition weights
+    tweights <- loglikelihood(data=data, p=p, M=M, params=pars_std,
+                              weight_function=weight_function, weightfun_pars=weightfun_pars,
+                              cond_dist=cond_dist, parametrization=parametrization,
+                              identification="reduced_form", AR_constraints=NULL,
+                              mean_constraints=NULL, B_constraints=NULL, weight_constraints=NULL,
+                              to_return="tw", check_params=TRUE, minval=matrix(0, nrow=n_obs-p, ncol=M))
+    tweights_ok <- !any(vapply(1:M, function(m) sum(tweights[,m] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
+    if(Omegas_ok && stat_ok && tweights_ok && weightpars_ok) {
+      which_best_fit <- which_round # The estimation round of the appropriate estimate with the largest loglik
+      if(!no_prints && i1 != 1) message(paste("Filtered out", i1-1, "inappropriate estimates with a larger log-likelihood"))
+      break
+    }
+    if(i1 == length(all_estimates)) {
+      message(paste("No 'appropriate' estimates were found! Check that all the variables are scaled to vary in similar magninutes,",
+                    "also not very small or large magnitudes."))
+      if(estim_method == "two-phase") {
+        message("Consider running more estimation rounds or study the obtained estimates one-by-one with the function alt_stvar.")
+      }
+      if(M > 2) {
+        message("Consider also using smaller M. Too large M leads to identification problems.")
+      }
+
+      which_best_fit <- which(loks == max(loks))[1]
+    }
   }
   params <- all_estimates[[which_best_fit]]
 
