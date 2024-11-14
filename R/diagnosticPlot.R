@@ -156,8 +156,6 @@ diagnostic_plot <- function(stvar, type=c("all", "series", "ac", "ch", "dist"), 
     if(cond_dist == "Gaussian") {
       distpars <- rep(NA, times=d) # No dist pars here, df intentionally redundant argument below
       dens_fun <- function(y, df) dnorm(y)
-      #qqplot_fun <- function(y, df) qqnorm(y, main="", ylab="", xlab="")
-      #qqline_fun <- function(y, df) qqline(y, col="darkred")
     } else if(cond_dist %in% c("Student", "ind_Student")) {
       if(cond_dist == "Student") {
         distpars <- stvar$params[length(stvar$params)] # The last param is always the df param here
@@ -166,14 +164,6 @@ diagnostic_plot <- function(stvar, type=c("all", "series", "ac", "ch", "dist"), 
         distpars <- stvar$params[(length(stvar$params) - d + 1):length(stvar$params)] # The last d params are always the df params here
       }
       dens_fun <- function(y, df) stand_t_dens(y=y, nu=df)
-      # qqplot_fun <- function(y, df){
-      #   y <- sort(y, decreasing=FALSE) # Sorted sample quantiles
-      #   T_obs <- length(y)
-      #   p <- (1:T_obs - 0.5)/T_obs  # Probs; 0.5 substracted to avoid 0 and 1 that would result in -Inf and Inf
-      #   t_quantiles <- sqrt((df-2)/df)*qt(p, df=df)  # Theoretical quantiles
-      #   plot(x=t_quantiles, y=y, main="", xlab="", ylab="") # Plot sample quantiles against theoretical quantiles
-      # }
-      #qqline_fun <- function(y, df) qqline(y, col="darkred", distribution=function(p) sqrt((df - 2)/df)*qt(p, df=df))
     } else if(cond_dist == "ind_skewed_t") {
       distpars <- stvar$params[(length(stvar$params) - 2*d + 1):length(stvar$params)]
       all_nu <- distpars[1:d] # df params
@@ -186,26 +176,24 @@ diagnostic_plot <- function(stvar, type=c("all", "series", "ac", "ch", "dist"), 
 
       # The quantile function
       quant_fun <- function(p, nu, lambda, which_series) {
-        tmp <- max(abs(min(res[,which_series])), max(res[,which_series])) + 10
+        #tmp <- max(abs(min(res[,which_series])), max(res[,which_series])) + 10
         vapply(p, function(p_i) {
-          uniroot(function(y) cum_fun(y, nu=nu, lambda=lambda) - p_i, lower=-tmp, upper=tmp, tol=0.01)$root
+          # Initial bounds to try
+          lower <- -2
+          upper <- 2
+
+          # Expand the bounds so that the cum_fun crosses zero from lower bound to upper bound
+          while(cum_fun(lower, nu=nu, lambda=lambda) - p_i > 0) {
+            lower <- lower - 2
+          }
+          while(cum_fun(upper, nu=nu, lambda=lambda) - p_i < 0) {
+            upper <- upper + 2
+          }
+
+          # Calculate the solution y to the equation cum_fun(y) = p_i (= the quantile function value)
+          uniroot(function(y) cum_fun(y, nu=nu, lambda=lambda) - p_i, lower=lower, upper=upper, tol=0.01)$root
         }, numeric(1))
       }
-
-      # The qqplot function
-      # qqplot_fun <- function(y, nu, lambda, which_series){
-      #   y <- sort(y, decreasing=FALSE) # Sorted sample quantiles
-      #   T_obs <- length(y)
-      #   p <- (1:T_obs - 0.5)/T_obs  # Probs; 0.5 substracted to avoid 0 and 1 that would result in -Inf and Inf
-      #   t_quantiles <- vapply(p, function(i1) quant_fun(i1, nu=nu, lambda=lambda, which_series=which_series),
-      #                         numeric(1))  # Theoretical quantiles
-      #   plot(x=t_quantiles, y=y, main="", xlab="", ylab="") # Plot sample quantiles against theoretical quantiles
-      # }
-
-      # The qqline function
-      #qqline_fun <- function(y, nu, lambda, which_series) {
-      #  qqline(y, col="darkred", distribution=function(p) quant_fun(p, nu=nu, lambda=lambda, which_series=which_series))
-      #}
     }
     # Plot histograms with theoretical density
     for(i1 in 1:d) {
