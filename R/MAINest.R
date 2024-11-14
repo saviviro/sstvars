@@ -70,7 +70,7 @@
 #'  constants, make sure the constraints are sensible. Otherwise, the estimation may fail due to the estimation algorithm not being
 #'  able to generate reasonable random guesses for the values of the constrained weight parameters.
 #'
-#'  \strong{Filtering inappropriate estimates:} \code{fitSTVAR == TRUE} automatically filters through estimates
+#'  \strong{Filtering inappropriate estimates:} \code{fitSTVAR} automatically filters through estimates
 #'  that it deems "inappropriate". That is, estimates that are not likely solutions of interest.
 #'  Specifically, solutions that incorporate a near-singular error term covariance matrix (any eigenvalue less than \eqn{0.002}),
 #'  any modulus of the eigenvalues of the companion form AR matrices larger than $0.9985$ (indicating the necessary condition for
@@ -82,7 +82,7 @@
 #' @section S3 methods:
 #'   The following S3 methods are supported for class \code{'stvar'}: \code{logLik}, \code{residuals}, \code{print}, \code{summary},
 #'    \code{predict}, \code{simulate}, and \code{plot}.
-#' @seealso \code{\link{fitSSTVAR}}, \code{\link{STVAR}}, \code{\link{GAfit}}, \code{\link{iterate_more}}
+#' @seealso \code{\link{fitSSTVAR}}, \code{\link{STVAR}}, \code{\link{GAfit}}, \code{\link{iterate_more}}, \code{\link{filter_estimates}}
 #' @references
 #'  \itemize{
 #'    \item Anderson H., Vahid F. 1998. Testing multiple equation systems for common nonlinear components.
@@ -582,7 +582,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
 
   ### Filter inappropriate estimates ###
   if(!no_prints) message("Filtering inappropriate estimates...")
-  ord_by_loks <- order(loks, decreasing=TRUE) # Ordering from largest loglik to smaller
+  ord_by_loks <- order(loks, decreasing=TRUE) # Ordering from the largest loglik to the smallest
 
   # Go through estimates, take the estimate that yield the higher likelihood
   # among estimates that are do not include wasted regimes or near-singular
@@ -631,15 +631,13 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     tweights_ok <- !any(vapply(1:M, function(m) sum(tweights[,m] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
     if(Omegas_ok && stat_ok && tweights_ok && weightpars_ok) {
       which_best_fit <- which_round # The estimation round of the appropriate estimate with the largest loglik
-      if(!no_prints && i1 != 1) message(paste("Filtered out", i1-1, "inappropriate estimates with a larger log-likelihood"))
+      if(!no_prints) message(paste("Filtered through", i1-1, "inappropriate estimates with a larger log-likelihood"))
       break
     }
     if(i1 == length(all_estimates)) {
-      message(paste("No 'appropriate' estimates were found! Check that all the variables are scaled to vary in similar magninutes,",
+      message(paste("No 'appropriate' estimates found! Check that all the variables are scaled to vary in similar magninutes,",
                     "also not very small or large magnitudes."))
-      if(estim_method == "two-phase") {
-        message("Consider running more estimation rounds or study the obtained estimates one-by-one with the function alt_stvar.")
-      }
+      message("Consider running more estimation rounds or study the obtained estimates one-by-one with the function alt_stvar.")
       if(M > 2) {
         message("Consider also using smaller M. Too large M leads to identification problems.")
       }

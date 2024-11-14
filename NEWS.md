@@ -16,6 +16,7 @@
 * MAJOR: Implemented independent skewed t distribution as a new conditional distribution.
 * MAJOR: Implemented a three phase estimation for TVAR models to enhance computational efficiency.
 * Changed the random parameter generation for ind_Student models (estimation results with specific seeds are not backward compatible).
+* A new function: filer_estimates, which can be used considers includes estimates that are not deemed inappropriate).
 * Some (minor) adjustments to fitSTVAR.
 * Removed the argument "filter_estimates" from fitSTVAR as a redundancy (it is now always applied), since the function alt_stvar can in
   any case be used to browse the estimates from any estimation round. 

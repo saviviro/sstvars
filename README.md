@@ -65,6 +65,8 @@ get_foc(fit) # The first order condition (gradient of the log-likelihood functio
 get_soc(fit) # The second order condition (eigenvalues of approximated Hessian)
 profile_logliks(fit) # Plot profile log-likelihood functions about the estimate
 
+# See also the functions alt_stvar and filter_estimates.
+
 # Check the stationarity condition for the estimated model, i.e., that the 
 # upper bound of the joint spectral radius is less than one:
 bound_JSR(fit, epsilon=0.1, ncores=2) # Adjust epsilon for a tighter bound

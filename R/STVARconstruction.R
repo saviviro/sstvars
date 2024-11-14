@@ -852,7 +852,7 @@ swap_B_signs <- function(stvar, which_to_swap, calc_std_errors=FALSE) {
     new_B_constraints <- NULL
   }
 
-  # Construct the Sstvar model based on the obtained structural parameters
+  # Construct the SSTVAR model based on the obtained structural parameters
   STVAR(data=stvar$data, p=p, M=M, d=d, params=new_params, weight_function=weight_function,
         weightfun_pars=weightfun_pars, cond_dist=cond_dist, parametrization=stvar$model$parametrization,
         identification=identification, AR_constraints=AR_constraints, mean_constraints=mean_constraints,
@@ -860,5 +860,152 @@ swap_B_signs <- function(stvar, which_to_swap, calc_std_errors=FALSE) {
 }
 
 
+#' @title Filter inappropriate the estimates produced by fitSTVAR
+#'
+#' @description \code{filter_estimates} filters out inappropriate estimates produced by \code{fitSTVAR}:
+#'   can be used to obtain the (possibly) appropriate estimate with the largest found log-likelihood
+#'   (among possibly appropriate estimates) as well as (possibly) appropriate estimates based on smaller
+#'   log-likelihoods.
+#'
+#' @inheritParams reorder_B_columns
+#' @param which_largest an integer at least one specifying the (possibly) appropriate estimate corresponding
+#'  to which largest log-likelihood should be returned. E.g., if \code{which_largest=2}, the function will
+#'  return among the estimates that it does not deem inappropriate the one that has the second largest log-likelihood.
+#' @details The function goes through the estimates produced by \code{fitSTVAR} and checks which estimates are
+#'  deemed inappropriate. That is, estimates that are not likely solutions of interest. Specifically, solutions
+#'  that incorporate a near-singular error term covariance matrix (any eigenvalue less than \eqn{0.002}),
+#'  any modulus of the eigenvalues of the companion form AR matrices larger than $0.9985$ (indicating the
+#'  necessary condition for stationarity is close to break), or transition weights such that they are close to zero
+#'  for almost all \eqn{t} for at least one regime. Then, among the solutions are not deemed inappropriate, it
+#'  returns a STVAR models based on the estimate that has the \code{which_largest} largest log-likelihood.
+#'
+#'  The function \code{filter_estimates} is kind of a version of \code{alt_stvar} that only considers estimates
+#'  that are not deemed inappropriate
+#' @inherit STVAR return
+#' @seealso \code{\link{fitSTVAR}}, \code{\link{alt_stvar}}
+#' @examples
+#' # FILL IN EXAMPLES (use donttest)
+#' \donttest{
+#'  # Fit a two-regime STVAR model with logistic transition weights and Student's t errors
+#'  fit12 <- fitSTVAR(gdpdef, p=1, M=2, weight_function="logistic", weightfun_pars=c(2, 1),
+#'   cond_dist="Student", nrounds=2, ncores=2, seeds=c(2, 5))
+#'  fit12
+#'
+#'  # Filter through inappropriate estimates and obtain the second best appropriate solution:
+#'  fit12_2 <- filter_estimates(fit12, which_largest=2)
+#'  fit12_2 # The same model since the two estimation rounds yielded the same estimate
+#' }
+#' @export
 
+filter_estimates <- function(stvar, which_largest=1, calc_std_errors=FALSE) {
+  check_stvar(stvar)
+  stopifnot(all_pos_ints(which_largest))
+  p <- stvar$model$p
+  M <- stvar$model$M
+  d <- stvar$model$d
+  data <- stvar$data
+  pars_orig <- stvar$params
+  weight_function <- stvar$model$weight_function
+  cond_dist <- stvar$model$cond_dist
+  parametrization <- stvar$model$parametrization
+  identification <- stvar$model$identification
+  AR_constraints <- stvar$model$AR_constraints
+  mean_constraints <- stvar$model$mean_constraints
+  weight_constraints <- stvar$model$weight_constraints
+  B_constraints <- stvar$model$B_constraints
+  weightfun_pars <- stvar$model$weightfun_pars
+  all_estimates <- stvar$all_estimates
+  all_logliks <- stvar$all_logliks
+  red_criteria <- c(0.05, 0.01)
+  n_obs <- nrow(data)
+  if(identification != "reduced_form") stop("Only reduced form models are supported!")
+  if(is.null(all_estimates)) stop("No multiple estimates found in the model object; was it created by fitSTVAR?")
+  if(is.null(all_logliks)) stop("No multiple log-likelihoods found in the model object; was it created by fitSTVAR?")
+  if(length(all_estimates) != length(all_logliks)) stop("The number of estimates and log-likelihoods do not match")
 
+  # Ordering from the largest loglik to the smallest:
+  ord_by_loks <- order(all_logliks, decreasing=TRUE)
+
+  # Go through estimates, take the estimate that yield the higher likelihood among estimates that are do not
+  # include wasted regimes or near-singular error term covariance matrices.
+  where_at_which_largest <- 0
+  for(i1 in 1:length(all_estimates)) {
+    which_round <- ord_by_loks[i1] # Est round with i1:th largest loglik
+    pars <- all_estimates[[which_round]]
+    pars_std <- reform_constrained_pars(p=p, M=M, d=d, params=pars,
+                                        weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                        cond_dist=cond_dist, identification=identification,
+                                        AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                        weight_constraints=weight_constraints,
+                                        B_constraints=NULL) # Pars in standard form for pick pars fns
+    # Check Omegas
+    Omega_eigens <- get_omega_eigens_par(p=p, M=M, d=d, params=pars_std,
+                                         weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                         cond_dist=cond_dist, identification=identification,
+                                         AR_constraints=NULL, mean_constraints=NULL,
+                                         weight_constraints=NULL, B_constraints=NULL)
+    Omegas_ok <- !any(Omega_eigens < 0.002)
+
+    # Checks AR matrices
+    boldA_eigens <- get_boldA_eigens_par(p=p, M=M, d=d, params=pars_std,
+                                         weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                         cond_dist=cond_dist, identification=identification,
+                                         AR_constraints=NULL, mean_constraints=NULL,
+                                         weight_constraints=NULL, B_constraints=NULL)
+    stat_ok <- !any(boldA_eigens > 0.9985)
+
+    # Check weight parameters
+    if(weight_function == "relative_dens") {
+      alphas <- pick_weightpars(p=p, M=M, d=d, params=pars_std, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                cond_dist=cond_dist)
+      weightpars_ok <- !any(alphas < 0.01)
+    } else {
+      weightpars_ok <- TRUE
+    }
+
+    # Check transition weights
+    tweights <- loglikelihood(data=data, p=p, M=M, params=pars_std,
+                              weight_function=weight_function, weightfun_pars=weightfun_pars,
+                              cond_dist=cond_dist, parametrization=parametrization,
+                              identification=identification, AR_constraints=NULL,
+                              mean_constraints=NULL, B_constraints=NULL, weight_constraints=NULL,
+                              to_return="tw", check_params=TRUE, minval=matrix(0, nrow=n_obs-p, ncol=M))
+    tweights_ok <- !any(vapply(1:M, function(m) sum(tweights[,m] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
+    if(Omegas_ok && stat_ok && tweights_ok && weightpars_ok) {
+      where_at_which_largest <- where_at_which_largest + 1
+      if(where_at_which_largest == which_largest) {
+        which_round <- which_round # The estimation round of the appropriate estimate with the which_largest largest loglik
+        message(paste("Filtered through", i1-1, "'estimates' with a larger log-likelihood"))
+        break
+      }
+    }
+    if(i1 == length(all_estimates)) {
+      message(paste("No (more) 'appropriate' estimates found! Returing the supplied model."))
+      return(stvar)
+    }
+  }
+
+  # Build a STVAR model from the obtained estimates
+  ret <- STVAR(data=data, p=p, M=M, d=d,
+               params=all_estimates[[which_round]],
+               weight_function=weight_function,
+               weightfun_pars=weightfun_pars,
+               cond_dist=cond_dist,
+               parametrization=parametrization,
+               identification=identification,
+               AR_constraints=AR_constraints,
+               mean_constraints=mean_constraints,
+               weight_constraints=weight_constraints,
+               B_constraints=B_constraints,
+               calc_std_errors=calc_std_errors)
+
+  # Pass the estimation results to the new object
+  ret$all_estimates <- all_estimates
+  ret$all_logliks <- all_logliks
+  ret$which_converged <- stvar$which_converged
+  if(!is.null(stvar$which_round)) {
+    ret$which_round <- which_round
+  }
+  warn_eigens(ret)
+  ret
+}

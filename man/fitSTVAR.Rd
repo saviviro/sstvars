@@ -207,7 +207,7 @@ If you wish to estimate a structural model, estimate first the reduced form mode
  constants, make sure the constraints are sensible. Otherwise, the estimation may fail due to the estimation algorithm not being
  able to generate reasonable random guesses for the values of the constrained weight parameters.
 
- \strong{Filtering inappropriate estimates:} \code{fitSTVAR == TRUE} automatically filters through estimates
+ \strong{Filtering inappropriate estimates:} \code{fitSTVAR} automatically filters through estimates
  that it deems "inappropriate". That is, estimates that are not likely solutions of interest.
  Specifically, solutions that incorporate a near-singular error term covariance matrix (any eigenvalue less than \eqn{0.002}),
  any modulus of the eigenvalues of the companion form AR matrices larger than $0.9985$ (indicating the necessary condition for
@@ -357,5 +357,5 @@ summary(fitexp32cmw) # Summary printout of the estimates
  }
 }
 \seealso{
-\code{\link{fitSSTVAR}}, \code{\link{STVAR}}, \code{\link{GAfit}}, \code{\link{iterate_more}}
+\code{\link{fitSSTVAR}}, \code{\link{STVAR}}, \code{\link{GAfit}}, \code{\link{iterate_more}}, \code{\link{filter_estimates}}
 }

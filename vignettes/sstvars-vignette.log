@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  14 NOV 2024 11:29
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  14 NOV 2024 12:29
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -662,14 +662,14 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [20]
-Overfull \hbox (14.5993pt too wide) in paragraph at lines 493--495
+Overfull \hbox (14.5993pt too wide) in paragraph at lines 494--496
 \T1/lmr/m/n/10.95 For mod-els in-cor-po-rat-ing mu-tu-ally in-de-pen-dent Stu-d
 ent's $\OML/lmm/m/it/10.95 t$ \T1/lmr/m/n/10.95 shocks (\T1/lmtt/m/n/10.95 cond
 _dist="ind_Student"\T1/lmr/m/n/10.95 ),
  []
 
 LaTeX Font Info:    Trying to load font information for TS1+lmtt on input line 
-512.
+513.
 (/usr/local/texlive/2021/texmf-dist/tex/latex/lm/ts1lmtt.fd
 File: ts1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
@@ -678,7 +678,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [21]
-Overfull \hbox (10.03676pt too wide) in paragraph at lines 548--549
+Overfull \hbox (10.03676pt too wide) in paragraph at lines 549--550
 []\T1/lmr/m/n/10.95 Approximate stan-dard er-rors can be printed by spec-i-fy-i
 ng the ar-gu-ment \T1/lmtt/m/n/10.95 standard_error_print
  []
@@ -697,7 +697,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 <figures/seriesplot.png, id=598, 1545.775pt x 1104.125pt>
 File: figures/seriesplot.png Graphic file (type png)
 <use figures/seriesplot.png>
-Package pdftex.def Info: figures/seriesplot.png  used on input line 646.
+Package pdftex.def Info: figures/seriesplot.png  used on input line 647.
 (pdftex.def)             Requested size: 354.12434pt x 252.9494pt.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -713,7 +713,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 <figures/profilelogliks.png, id=614, 1545.775pt x 1104.125pt>
 File: figures/profilelogliks.png Graphic file (type png)
 <use figures/profilelogliks.png>
-Package pdftex.def Info: figures/profilelogliks.png  used on input line 709.
+Package pdftex.def Info: figures/profilelogliks.png  used on input line 710.
 (pdftex.def)             Requested size: 354.12434pt x 252.9494pt.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -731,13 +731,13 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [28]
-Overfull \hbox (9.58008pt too wide) in paragraph at lines 770--771
+Overfull \hbox (9.58008pt too wide) in paragraph at lines 771--772
 \T1/lmr/m/n/10.95 stric-tions can be im-posed on the im-pact ma-trix by set-tin
 g them in the ar-gu-ment \T1/lmtt/m/n/10.95 B_constraints\T1/lmr/m/n/10.95 .
  []
 
 
-Overfull \hbox (1.85449pt too wide) in paragraph at lines 774--776
+Overfull \hbox (1.85449pt too wide) in paragraph at lines 775--777
 \T1/lmr/m/n/10.95 struc-tural model \T1/lmtt/m/n/10.95 fit12het \T1/lmr/m/n/10.
 95 by set-ting the ar-gu-ment \T1/lmtt/m/n/10.95 identification="heteroskedasti
 city"
@@ -759,7 +759,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [31]
-Overfull \hbox (2.91833pt too wide) in paragraph at lines 923--924
+Overfull \hbox (2.91833pt too wide) in paragraph at lines 924--925
 \T1/lmr/m/n/10.95 groups of regimes that have the same mean pa-ram-e-ters us-in
 g the ar-gu-ment \T1/lmtt/m/n/10.95 mean_constraints\T1/lmr/m/n/10.95 .
  []
@@ -806,23 +806,26 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 
 [39]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 1092.
+(Font)              <10> on input line 1093.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 1092.
+(Font)              <7> on input line 1093.
 
-Underfull \hbox (badness 4454) in paragraph at lines 1104--1105
+Underfull \hbox (badness 4454) in paragraph at lines 1106--1107
 []\T1/lmr/m/n/10 Plot the graphs of the pro-file log-
  []
 
 
-Underfull \hbox (badness 2961) in paragraph at lines 1105--1106
+Underfull \hbox (badness 2961) in paragraph at lines 1107--1108
 []\T1/lmr/m/n/10 Calculate the (ad-justed) Port-man-teau
  []
 
 
-Underfull \hbox (badness 2277) in paragraph at lines 1113--1114
+Underfull \hbox (badness 2277) in paragraph at lines 1115--1116
 []\T1/lmr/m/n/10 Estimate gen-er-al-ized im-pulse re-sponse
  []
+
+
+LaTeX Warning: Float too large for page by 13.08037pt on input line 1128.
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
@@ -899,7 +902,7 @@ e1/public/lm/lmsy8.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/l
 m/lmtt10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtti10.
 pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr
 /local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on sstvars-vignette.pdf (44 pages, 1025886 bytes).
+Output written on sstvars-vignette.pdf (44 pages, 1026035 bytes).
 PDF statistics:
  1002 PDF objects out of 1200 (max. 8388607)
  884 compressed objects within 9 object streams
