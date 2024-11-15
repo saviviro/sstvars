@@ -1241,8 +1241,21 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
   ## Create estim etc functions ##
   ################################
 
-  ## Least squares estimation function given thresholds for models without AR constraints
-  LS_without_AR_constraints <- function(thresholds) {
+  # Create the permutation matrix that expand \tilde{C}\tilde{\psi} to \beta for AR constraints:
+  P <- matrix(0, nrow=M*d + M*p*d^2, ncol=M*d + M*p*d^2)
+  I_d <- diag(nrow=d)
+  I_pd2 <- diag(nrow=p*d^2)
+  for(m in 1:M) { # Go through the regimes
+    # Insert the identity matrix for the intercepts
+    P[((m - 1)*d + (m - 1)*p*d^2 + 1):(m*d + (m - 1)*p*d^2), ((m - 1)*d + 1):(m*d)] <- I_d
+
+    # Insert the identity matrix for the AR matrices
+    P[(m*d + (m - 1)*p*d^2 + 1):(m*d + m*p*d^2), (M*d + (m - 1)*p*d^2 + 1):(M*d + m*p*d^2)] <- I_pd2
+  }
+  ## THE ABOVE WILL GO INSIDE THE NLS EST FUNCTION LATER
+
+  ## Nonlinear least squares estimation function given thresholds for models without AR constraints
+  NLS_est <- function(weigthpars, AR_constraints) {
     # threshold = length M-1 vector of the thresholds r_1,...,r_{M-1}; if M=1 anything is ok
     # Other arguments are taken from the parent environment.
 
