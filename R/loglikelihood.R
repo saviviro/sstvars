@@ -475,7 +475,8 @@ loglikelihood <- function(data, p, M, params,
 #' @inherit in_paramspace references
 #' @keywords internal
 
-get_alpha_mt <- function(data, Y2, p, M, d, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
+get_alpha_mt <- function(data, Y2, p, M, d,
+                         weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                          weightfun_pars=NULL, all_A, all_boldA, all_Omegas, weightpars, all_mu, epsilon, log_mvdvalues=NULL) {
   weight_function <- match.arg(weight_function)
   if(weight_function == "exogenous") {

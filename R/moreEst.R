@@ -1254,10 +1254,10 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
   }
   ## THE ABOVE WILL GO INSIDE THE NLS EST FUNCTION LATER
 
-  ## Nonlinear least squares estimation function given thresholds for models without AR constraints
+  ## Nonlinear least squares estimation function given weight parameters
   NLS_est <- function(weigthpars, AR_constraints) {
-    # threshold = length M-1 vector of the thresholds r_1,...,r_{M-1}; if M=1 anything is ok
-    # Other arguments are taken from the parent environment.
+    # weightpars = vector of the weight parameters, AR_constraints = as usual
+    # Other arguments are taken from the parent env
 
     # Storage for the estimates
     all_intercepts <- matrix(NA, nrow=d, ncol=M) # (d x M), [, m] for regime m
