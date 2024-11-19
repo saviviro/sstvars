@@ -917,8 +917,8 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       X_m <- cbind(1, Y2[m_periods, , drop=FALSE]) # (T_m x d(p+1))
 
       # Calculate the lest squares estimates
-      C_m <- tryCatch(qr.solve(crossprod(X_m, X_m), crossprod(X_m, Y_m)), # (d x d(p+1)), [\phi_{m,0} : A_{m,1} : ... : A_{m,p}]
-                      error=function(e) matrix(0, nrow=d, ncol=d*p + 1)) # zero estimates are legal but bad, dummy estimates
+      C_m <- tryCatch(solve(crossprod(X_m, X_m), crossprod(X_m, Y_m)), # (d x d(p+1)), [\phi_{m,0} : A_{m,1} : ... : A_{m,p}]
+                      error=function(e) matrix(0, nrow=d*p + 1, ncol=d)) # zero estimates are legal but bad, dummy estimates
       tC_m <- t(C_m)
 
       # Store the estimates
@@ -984,7 +984,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     # Integrate the constraints into the design matrix
     X_bold <- X%*%C_tilde # (Td x q)
 
-    estims <- tryCatch(qr.solve(crossprod(X_bold, X_bold), crossprod(X_bold, Y)), # (M*d + q x 1)
+    estims <- tryCatch(solve(crossprod(X_bold, X_bold), crossprod(X_bold, Y)), # (M*d + q x 1)
                        error=function(e) matrix(0, nrow=M*d + q, ncol=1)) # zero estimates are legal but bad, dummy estimates
 
     # Calculate the sum of squares of residuals
@@ -1288,8 +1288,8 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
       X_m <- cbind(1, Y2[m_periods, , drop=FALSE]) # (T_m x d(p+1))
 
       # Calculate the lest squares estimates
-      C_m <- tryCatch(qr.solve(crossprod(X_m, X_m), crossprod(X_m, Y_m)), # (d x d(p+1)), [\phi_{m,0} : A_{m,1} : ... : A_{m,p}]
-                      error=function(e) matrix(0, nrow=d, ncol=d*p + 1)) # zero estimates are legal but bad, dummy estimates
+      C_m <- tryCatch(solve(crossprod(X_m, X_m), crossprod(X_m, Y_m)), # (d x d(p+1)), [\phi_{m,0} : A_{m,1} : ... : A_{m,p}]
+                      error=function(e) matrix(0, nrow=d*p + 1, ncol=d)) # zero estimates are legal but bad, dummy estimates
       tC_m <- t(C_m)
 
       # Store the estimates
@@ -1355,7 +1355,7 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
     # Integrate the constraints into the design matrix
     X_bold <- X%*%C_tilde # (Td x q)
 
-    estims <- tryCatch(qr.solve(crossprod(X_bold, X_bold), crossprod(X_bold, Y)), # (M*d + q x 1)
+    estims <- tryCatch(solve(crossprod(X_bold, X_bold), crossprod(X_bold, Y)), # (M*d + q x 1)
                        error=function(e) matrix(0, nrow=M*d + q, ncol=1)) # zero estimates are legal but bad, dummy estimates
 
     # Calculate the sum of squares of residuals

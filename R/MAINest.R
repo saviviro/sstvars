@@ -339,8 +339,10 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     stab_tol_to_use <- LS_params$stab_tol
     any_eigen_large <- FALSE
     for(m in 1:M) { # Check stability conditon for each regime
-      stab_ok[m] <- all(abs(eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$values) < 1 - stab_tol_to_use)
-      if(any(abs(eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$values) > 1.3)) {
+      boldA_mods <- abs(eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$values)
+      cat("\nRegime", m, ":", boldA_mods, "\n\n")
+      stab_ok[m] <- all(boldA_mods < 1 - stab_tol_to_use)
+      if(any(boldA_mods > 1.3)) {
         any_eigen_large <- TRUE
       }
     }
@@ -536,10 +538,12 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   }
 
   ## A function to calculate the gradient of the log-likelihood function# using central difference approximation:
-  h <- 6e-6 # The difference used in the gradient
+  h <- 1e-4 # The difference used in the gradient
   I <- diag(rep(1, times=npars))
   loglik_grad <- function(params) {
-    vapply(1:npars, function(i1) (loglik_fn(params + I[i1,]*h) - loglik_fn(params - I[i1,]*h))/(2*h), numeric(1))
+    step_sizes <- 1e-4*(1 + abs(params)) # Step sizes for the gradient calculation
+    vapply(1:npars, function(i1) (loglik_fn(params + I[i1,]*step_sizes[i1]) - loglik_fn(params - I[i1,]*step_sizes[i1]))/(2*step_sizes[i1]),
+           numeric(1))
   }
 
   which_phase <- ifelse(estim_method == "three-phase", "PHASE 3", "PHASE 2")
@@ -551,7 +555,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   } else {
     tmpfunNE <- function(i1) {
       if(!no_prints) message(i1, "/", nrounds, "\r")
-      optim(par=GAresults[[i1]], fn=loglik_fn, gr=loglik_grad,
+      optim(par=GAresults[[i1]], fn=loglik_fn,  gr=loglik_grad,
             method="BFGS", control=list(fnscale=-1, maxit=maxit))
     }
     NEWTONresults <- lapply(1:nrounds, function(i1) tmpfunNE(i1))

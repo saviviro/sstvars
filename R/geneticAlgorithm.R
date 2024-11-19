@@ -522,6 +522,23 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
       }
     }
 
+    print(paste("Generation:", i1))
+    print(paste("Best log-likelihood:", round(max(logliks[i1,]))))
+
+    # Insert the best individuals of the previous round to some locations:
+    if(i1 > 1) {
+      which_to_best_ind <- sample.int(n=popsize, size=ceiling(popsize/20), replace=FALSE, prob=rep(1, popsize))
+      G[, which_to_best_ind] <- alt_ind # Use the best ind with the least number of reduntant regimes
+      generations[, , i1] <- G
+      logliks[i1, which_to_best_ind] <- loglikelihood(data=data, p=p, M=M, params=alt_ind, weight_function=weight_function,
+                                                      weightfun_pars=weightfun_pars, cond_dist=cond_dist,
+                                                      parametrization="mean", identification="reduced_form",
+                                                      AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                                      weight_constraints=weight_constraints, B_constraints=NULL,
+                                                      to_return="loglik", check_params=TRUE, minval=minval, alt_par=TRUE)
+      redundants[i1, which_to_best_ind] <- length(which_redundant)
+    }
+
     # Take care of individuals that are not good enough + calculate the numbers redundant regimes
     if(anyNA(logliks[i1,])) {
       which_inds_na <- which(is.na(logliks[i1,]))
@@ -758,6 +775,22 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
   #                                 mean_constraints=mean_constraints, weight_constraints=weight_constraints,
   #                                 B_constraints=NULL, change_to="alt")
   # }
+
+  print("Best ind loglik in GA:")
+  print(loglikelihood(data=data, p=p, M=M, params=best_ind, weight_function=weight_function,
+                      weightfun_pars=weightfun_pars, cond_dist=cond_dist,
+                      parametrization="mean", identification="reduced_form",
+                      AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                      weight_constraints=weight_constraints, B_constraints=NULL,
+                      to_return="loglik", check_params=TRUE, minval=minval, alt_par=TRUE))
+
+  print("Ret loglik in GA:")
+  print(loglikelihood(data=data, p=p, M=M, params=ret, weight_function=weight_function,
+                      weightfun_pars=weightfun_pars, cond_dist=cond_dist,
+                      parametrization="mean", identification="reduced_form",
+                      AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                      weight_constraints=weight_constraints, B_constraints=NULL,
+                      to_return="loglik", check_params=TRUE, minval=minval, alt_par=TRUE))
 
   # # GA always optimizes with mean parametrization
   # Return intercept parametrized estimate if parametrization=="intercept".
