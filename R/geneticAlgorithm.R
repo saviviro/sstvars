@@ -343,7 +343,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
     pars_per_reg <- ifelse(is.null(mean_constraints), d, length(mean_constraints)*d/M) + # mean/int params
       ifelse(is.null(AR_constraints), p*d^2, ncol(AR_constraints)/M) + # AR params
       ifelse(cond_dist %in% c("ind_Student", "ind_skewed_t"), d^2, d*(d + 1)/2) # Covmat params
-    if(pars_per_reg <= 1.3*d*T_obs/M) { # Margin for the bound by weights
+    if(pars_per_reg > d*T_obs/M/1.1) { # Margin for the bound by weights
       bound_by_weights <- FALSE
     } else {
       bound_by_weights <- TRUE
@@ -610,13 +610,13 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
     best_index0 <- which(logliks == max(logliks), arr.ind=TRUE)
     best_index <- best_index0[order(best_index0[,1], decreasing=FALSE)[1],] # First generation when the best loglik occurred
     best_ind <- generations[, best_index[2], best_index[1]]
-    best_mw <- loglikelihood(data=data, p=p, M=M, params=best_ind, weight_function=weight_function, weightfun_pars=weightfun_pars,
+    best_tw <- loglikelihood(data=data, p=p, M=M, params=best_ind, weight_function=weight_function, weightfun_pars=weightfun_pars,
                              cond_dist=cond_dist, parametrization="mean", identification="reduced_form", AR_constraints=AR_constraints,
                              mean_constraints=mean_constraints, weight_constraints=weight_constraints, B_constraints=NULL,
                              to_return="tw", check_params=FALSE, bound_by_weights=bound_by_weights, minval=minval, alt_par=TRUE)
 
     # Which regimes are wasted:
-    which_redundant <- which(vapply(1:M, function(i2) sum(best_mw[,i2] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
+    which_redundant <- which(vapply(1:M, function(i2) sum(best_tw[,i2] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
 
     # Keep track of "the alternative best individual" that has (weakly) less reduntant regimes than the current best one.
     if(length(which_redundant) <= length(which_redundant_alt)) {

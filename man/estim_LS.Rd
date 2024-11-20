@@ -18,6 +18,8 @@ estim_LS(
   mean_constraints = NULL,
   weight_constraints = NULL,
   prefer_stab = FALSE,
+  penalized = TRUE,
+  tuning_par = 0.01,
   stab_tol = 0.05,
   use_parallel = TRUE,
   ncores = 2
@@ -101,6 +103,11 @@ weight parameters to the constant \eqn{r} (in this case, \eqn{\alpha} is dropped
 
 \item{prefer_stab}{should preferably estimates that satisfy the stability condition be returned (if possible)? Faster estimation
 if \code{FALSE}, as the stability condition does not need to be checked for each vector of weight parameters.}
+
+\item{penalized}{Perform penalized LS estimation that minimizes penalized RSS in which estimates close to breaking or not satifying the
+usual stability condition are penalized? If \code{TRUE}, the tuning parameter is set by the argument \code{tuning_par}.}
+
+\item{tuning_par}{The tuning parameter for the penalized LS estimation: higher value penalizes unstable estimates more.}
 
 \item{stab_tol}{the tolerance level for the stability condition (estimates with companion form AR matrix eigenvalues of all regimes
 inside the unit circle by more than \code{stab_tol} are considered if \code{prefer_stab=TRUE}).}

@@ -304,8 +304,13 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     ifelse(cond_dist %in% c("ind_Student", "ind_skewed_t"), d^2, d*(d + 1)/2) # Covmat params
 
   dot_params <- list(...)
-  if(pars_per_reg <= 1.2*d*T_obs/M) {
-    message("The model has a large number of parameters per regime, which may lead to overfitting.")
+
+  if(pars_per_reg > d*T_obs/M/2) {
+    if(estim_method == "two-phase") { # For three phase, a message is given in LS_estim or NLS_estim
+      message("The model has a large number of parameters per regime, which may lead to overfitting.")
+    }
+  }
+  if(pars_per_reg > d*T_obs/M/1.1) {
     bound_by_weights <- FALSE
   } else {
     if(is.null(dot_params$bound_by_weights)) {
@@ -356,7 +361,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     any_eigen_large <- FALSE
     for(m in 1:M) { # Check stability conditon for each regime
       boldA_mods <- abs(eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$values)
-      cat("\nRegime", m, ":", boldA_mods, "\n\n")
+      cat("\nRegime", m, ":", round(boldA_mods, 4), "\n\n")
       stab_ok[m] <- all(boldA_mods < 1 - stab_tol_to_use)
       if(any(boldA_mods > 1.3)) {
         any_eigen_large <- TRUE
@@ -451,6 +456,19 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     }
   }
 
+  ############
+  Y <- reform_data(data, p) # (T_obs + 1 x dp)
+  Y2 <- Y[1:T_obs, , drop=FALSE] # Last row removed; not needed when only lagged observations used
+
+  # The transition weights: (T x M) matrix, the t:th row is for the time point t and the m:th column is for the regime m.
+  alpha_mt <- get_alpha_mt(data, Y2=Y2, p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                           weightpars=LS_results[length(LS_results)]) # Transition weights (T x M), t:th row
+  print("Obs per reg in LS estim (not multiplied by d):")
+  print(colSums(alpha_mt))
+  print("Obs per reg in LS estim (multiplied by d):")
+  print(d*colSums(alpha_mt))
+  print("Pars per regime:")
+  print(pars_per_reg)
 
   #####################################################################
   ## PHASE 1 or 2: estimate all parameters with ta genetic algorithm ##
@@ -726,7 +744,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                mean_constraints=mean_constraints,
                weight_constraints=weight_constraints,
                B_constraints=NULL,
-               calc_std_errors=TRUE)
+               calc_std_errors=FALSE)
   ret$all_estimates <- all_estimates
   ret$all_logliks <- loks
   ret$which_converged <- converged

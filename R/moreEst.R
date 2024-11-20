@@ -799,6 +799,9 @@ fitbsSSTVAR <- function(data, p, M, params,
 #' @inheritParams loglikelihood
 #' @param prefer_stab should preferably estimates that satisfy the stability condition be returned (if possible)? Faster estimation
 #'   if \code{FALSE}, as the stability condition does not need to be checked for each vector of weight parameters.
+#' @param penalized Perform penalized LS estimation that minimizes penalized RSS in which estimates close to breaking or not satifying the
+#'   usual stability condition are penalized? If \code{TRUE}, the tuning parameter is set by the argument \code{tuning_par}.
+#' @param tuning_par The tuning parameter for the penalized LS estimation: higher value penalizes unstable estimates more.
 #' @param stab_tol the tolerance level for the stability condition (estimates with companion form AR matrix eigenvalues of all regimes
 #'   inside the unit circle by more than \code{stab_tol} are considered if \code{prefer_stab=TRUE}).
 #' @param ncores the number CPU cores to be used in parallel computing.
@@ -837,7 +840,7 @@ fitbsSSTVAR <- function(data, p, M, params,
 estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                      weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                      parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
-                     prefer_stab=FALSE, stab_tol=0.05, use_parallel=TRUE, ncores=2) {
+                     prefer_stab=FALSE, penalized=TRUE, tuning_par=0.01, stab_tol=0.05, use_parallel=TRUE, ncores=2) {
   # Checks
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -849,6 +852,8 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   } else if(parametrization != "intercept") {
     stop("Only the intercept parametrization is supported by the LS estimation")
   }
+  stopifnot(tuning_par >= 0)
+
   # Check the weight constraints
   if(!is.null(weight_constraints)) {
     if(weight_constraints[[1]] != 0) {
@@ -868,12 +873,11 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   # Obtain relevant statistics
   n_obs <- nrow(data)
   T_obs <- n_obs - p
-  T_min <- 2/d*ifelse(is.null(AR_constraints), (p + 1)*d^2 + d,
-                      ncol(AR_constraints)/M + d + d^2) # Minimum number of obs in each regime
+  pars_per_regime <- d + ifelse(is.null(AR_constraints), p*d^2, ncol(AR_constraints)/M) + d^2
+  T_min <- 2/d*pars_per_regime # Minimum number of obs in each regime
   if(T_obs/M < T_min) { # Try smaller T_min
-    T_min <- 1.5/d*ifelse(is.null(AR_constraints), (p + 1)*d^2 + d,
-                        ncol(AR_constraints)/M + d + d^2)
-    message("The number of observations in relative to the number of parameters is small, consider decreasing p or M.")
+    T_min <- 1.5/d*pars_per_regime
+    message("The number of observations relative to the number of parameters is small, consider decreasing p or M.")
     if(T_obs/M < T_min) {
       stop("The number of observations is too small for reasonable estimation. Decrease the order p or the number of regimes M.")
     }
@@ -893,7 +897,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     all_AR_mats <- array(NA, dim=c(d, d*p, M)) # [, , m] for A_{m,1} : ... : A_{m,p}
 
     # Storage for the sums of squares of residuals
-    all_ssr <- numeric(M) # The sum of squares of residuals for each regime
+    all_rss <- numeric(M) # The sum of squares of residuals for each regime
 
     # In Y, i:th row denotes the vector \bold{y_{i-1}} = (y_{i-1},...,y_{i-p}) (dpx1),
     # assuming the observed data is y_{-p+1},...,y_0,y_1,...,y_{T}. The last row is for
@@ -927,14 +931,14 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
 
       # Calculate the sum of squares of residuals
       U_m <- Y_m - X_m%*%C_m # (T_m x d), residuals
-      all_ssr[m] <- sum(diag((crossprod(U_m, U_m)))) # The sum of squares of residuals
+      all_rss[m] <- sum(diag((crossprod(U_m, U_m)))) # The sum of squares of residuals
     }
 
     # Obtain the estimates in the vector (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M)
     estims <- c(all_intercepts, all_AR_mats)
 
-    # Return the estimates and the sum of squares of residuals, the last element is the for ssr
-    c(estims, sum(all_ssr))
+    # Return the estimates and the sum of squares of residuals, the last element is the for rss
+    c(estims, sum(all_rss))
   }
 
   ## Least squares estimation function given thresholds for models with AR constraints
@@ -989,10 +993,10 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
 
     # Calculate the sum of squares of residuals
     U <- Y - X_bold%*%estims # (Td x 1), residuals
-    ssr <- crossprod(U, U) # The sum of squares of residuals
+    rss <- crossprod(U, U) # The sum of squares of residuals
 
-    # Return the estimates and the sum of squares of residuals, the last element is the for ssr
-    c(estims, ssr)
+    # Return the estimates and the sum of squares of residuals, the last element is the for rss
+    c(estims, rss)
   }
 
   ## A function to check whether the stability condition is satisfied for the AR matrices, and
@@ -1018,6 +1022,26 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       }
     }
     sum(all_sum_over_stab) # The sum over all regimes = the extend of which stability condition is not satisfied
+  }
+
+  ## A function to check whether the stability condition is satisfied for the AR matrices, and
+  ## if not, to what extend it is not satisfied.
+  stab_exceeded <- function(estims) {
+    # Estims should be a vector of the form (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M)
+    if(!is.null(AR_constraints)) { # Expand the AR constraints
+      pars_to_check <- c(estims[1:(M*d)], AR_constraints%*%estims[(M*d + 1):(M*d + ncol(AR_constraints))])
+    } else {
+      pars_to_check <- estims[1:(M*d + M*p*d^2)]
+    }
+    all_phi0 <- pick_phi0(M=M, d=d, params=pars_to_check)
+    all_A <- pick_allA(p=p, M=M, d=d, params=pars_to_check)
+    all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
+    all_stab_exceeds <- matrix(nrow=nrow(all_boldA[, , 1]), ncol=M) # Square of how much modulus of eigenvalues exceed 1 - stab_tol
+    for(m in 1:M) { # Check stability condition for each regime
+      abs_eigs <- abs(eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$values)
+      all_stab_exceeds[, m] <- pmax(0, abs_eigs - (1 - stab_tol))^2 # How much abs eigens exceed 1 - stab_tol, squared
+    }
+    sum(all_stab_exceeds) # Sum of the squared exceeded values of stab cond
   }
 
   ###########################################
@@ -1092,18 +1116,24 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.
       parallel::clusterExport(cl, ls(environment(estim_LS)), envir=environment(estim_LS)) # assign all variables from package:sstvars
       parallel::clusterEvalQ(cl, c(library(pbapply), library(sstvars)))
-
       estims <- as.matrix(simplify2array(pbapply::pblapply(1:nrow(thresvecs), FUN=function(i1) estim_fun(thresvecs[i1,]), cl=cl)))
-      if(prefer_stab) {
+
+      if(penalized) {
+        message(paste0("Checking the stability condition for all the LS estimates..."))
+        stab_sums <- simplify2array(pbapply::pblapply(1:nrow(thresvecs), FUN=function(i1) stab_exceeded(estims[,i1]), cl=cl))
+      } else if(prefer_stab) {
         # Check the stability condition and to what extend it is not satisfied.
         message(paste0("Checking the stability condition for all the LS estimates..."))
-        stab_sums <- simplify2array(pbapply::pblapply(1:nrow(thresvecs), FUN=function(i1) check_stab(estims[,i1]), cl=cl))
+        all_stab_ex <- simplify2array(pbapply::pblapply(1:nrow(thresvecs), FUN=function(i1) check_stab(estims[,i1]), cl=cl))
       }
       parallel::stopCluster(cl=cl)
     } else { # No parallel computing
       estims <- as.matrix(vapply(1:nrow(thresvecs), FUN=function(i1) estim_fun(thresvecs[i1,]),
                                  FUN.VALUE=numeric(estim_length)))
-      if(prefer_stab) {
+
+      if(penalized) {
+        all_stab_ex <- vapply(1:nrow(thresvecs), FUN=function(i1) stab_exceeded(estims[,i1]), FUN.VALUE=numeric(1))
+      } else if(prefer_stab) {
         # Check the stability condition and to what extend it is not satisfied.
         stab_sums <- vapply(1:nrow(thresvecs), FUN=function(i1) check_stab(estims[,i1]), FUN.VALUE=numeric(1))
       }
@@ -1112,28 +1142,38 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   # Each column in estims corresponds to each vector of thresholds
 
   ## Obtain the LS estimates, possibly among stable estimates
-  if(prefer_stab) {
+  if(penalized) {
+    # Determine the tuning parameter value that controls the extend of the penalization
+    all_rss <- estims[nrow(estims),]
+    min_rss <- min(all_rss) # The smallest residual sum of squares
+    penalty_coef <- tuning_par*min_rss/d # The penalty coefficient
+
+    # Obtain the index with the smallest penalized sum of squares
+    penalized_stab_ex <- penalty_coef*all_stab_ex # Penalization for non-stable estimates
+    all_pen_rss <- all_rss + penalized_stab_ex # Penalized sum of squares of residuals
+    min_rss_index <- which.min(all_pen_rss)[1] # The index for which the penalized sum of squares is the smallest
+  } else if(prefer_stab) {
     # Check whether estimates with stability condition satisfied are found:
     which_stable <- which(stab_sums == 0) # thresvec indices for which the LS estimates are stable
 
     if(length(which_stable) > 0) { # Stable estimates found
-      # Which stable estimate has the smaller SSR:
-      min_ssr_index <- which.min(estims[nrow(estims), which_stable])[1]
+      # Which stable estimate has the smaller RSS:
+      min_rss_index <- which.min(estims[nrow(estims), which_stable])[1]
     } else { # No stable estimates found
       # Which estimate is the most stable?
-      min_ssr_index <- which.min(stab_sums)[1]
+      min_rss_index <- which.min(stab_sums)[1]
     }
   } else {
     # Find the index for which the sum of squares of residuals is the smallest (regardless of stability)
-    min_ssr_index <- which.min(estims[nrow(estims),])[1]
+    min_rss_index <- which.min(estims[nrow(estims),])[1]
   }
 
   ## Obtain and return the estimates corresponding the smallest sum of squares of residuals
-  int_and_ar_estims <- estims[1:(nrow(estims) - 1), min_ssr_index]
+  int_and_ar_estims <- estims[1:(nrow(estims) - 1), min_rss_index]
   if(M == 1 || !is.null(weight_constraints)) {
     threshold_estims <- numeric(0) # No threshold estimates
   } else {
-    threshold_estims <- thresvecs[min_ssr_index,]
+    threshold_estims <- thresvecs[min_rss_index,]
   }
   c(int_and_ar_estims, threshold_estims) # Return the estimates
 }
@@ -1263,8 +1303,8 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
     all_intercepts <- matrix(NA, nrow=d, ncol=M) # (d x M), [, m] for regime m
     all_AR_mats <- array(NA, dim=c(d, d*p, M)) # [, , m] for A_{m,1} : ... : A_{m,p}
 
-    # Storage for the sums of squares of residuals
-    all_ssr <- numeric(M) # The sum of squares of residuals for each regime
+    # Storage for the residual sums of squares
+    all_rss <- numeric(M) # The sum of squares of residuals for each regime
 
     # In Y, i:th row denotes the vector \bold{y_{i-1}} = (y_{i-1},...,y_{i-p}) (dpx1),
     # assuming the observed data is y_{-p+1},...,y_0,y_1,...,y_{T}. The last row is for
@@ -1298,14 +1338,14 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
 
       # Calculate the sum of squares of residuals
       U_m <- Y_m - X_m%*%C_m # (T_m x d), residuals
-      all_ssr[m] <- sum(diag((crossprod(U_m, U_m)))) # The sum of squares of residuals
+      all_rss[m] <- sum(diag((crossprod(U_m, U_m)))) # The sum of squares of residuals
     }
 
     # Obtain the estimates in the vector (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M)
     estims <- c(all_intercepts, all_AR_mats)
 
-    # Return the estimates and the sum of squares of residuals, the last element is the for ssr
-    c(estims, sum(all_ssr))
+    # Return the estimates and the sum of squares of residuals, the last element is the for rss
+    c(estims, sum(all_rss))
   }
 
   ## Least squares estimation function given thresholds for models with AR constraints
@@ -1360,10 +1400,10 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
 
     # Calculate the sum of squares of residuals
     U <- Y - X_bold%*%estims # (Td x 1), residuals
-    ssr <- crossprod(U, U) # The sum of squares of residuals
+    rss <- crossprod(U, U) # The sum of squares of residuals
 
-    # Return the estimates and the sum of squares of residuals, the last element is the for ssr
-    c(estims, ssr)
+    # Return the estimates and the sum of squares of residuals, the last element is the for rss
+    c(estims, rss)
   }
 
   ## A function to check whether the stability condition is satisfied for the AR matrices, and
@@ -1488,23 +1528,23 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
     which_stable <- which(stab_sums == 0) # thresvec indices for which the LS estimates are stable
 
     if(length(which_stable) > 0) { # Stable estimates found
-      # Which stable estimate has the smaller SSR:
-      min_ssr_index <- which.min(estims[nrow(estims), which_stable])[1]
+      # Which stable estimate has the smaller RSS:
+      min_rss_index <- which.min(estims[nrow(estims), which_stable])[1]
     } else { # No stable estimates found
       # Which estimate is the most stable?
-      min_ssr_index <- which.min(stab_sums)[1]
+      min_rss_index <- which.min(stab_sums)[1]
     }
   } else {
     # Find the index for which the sum of squares of residuals is the smallest (regardless of stability)
-    min_ssr_index <- which.min(estims[nrow(estims),])[1]
+    min_rss_index <- which.min(estims[nrow(estims),])[1]
   }
 
   ## Obtain and return the estimates corresponding the smallest sum of squares of residuals
-  int_and_ar_estims <- estims[1:(nrow(estims) - 1), min_ssr_index]
+  int_and_ar_estims <- estims[1:(nrow(estims) - 1), min_rss_index]
   if(M == 1 || !is.null(weight_constraints)) {
     threshold_estims <- numeric(0) # No threshold estimates
   } else {
-    threshold_estims <- thresvecs[min_ssr_index,]
+    threshold_estims <- thresvecs[min_rss_index,]
   }
   c(int_and_ar_estims, threshold_estims) # Return the estimates
 }
