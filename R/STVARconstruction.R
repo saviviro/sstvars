@@ -122,7 +122,7 @@ STVAR <- function(data, p, M, d, params,
                   parametrization=c("intercept", "mean"),
                   identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                   AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
-                  calc_std_errors=FALSE) {
+                  penalized=FALSE, penalty_params=c(0.05, 1), allow_non_stab=FALSE, calc_std_errors=FALSE) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
@@ -132,6 +132,12 @@ STVAR <- function(data, p, M, d, params,
                "(short-run restrictions can be imposed by specifying the argument 'B_constraints')"))
   } else if(!(cond_dist %in% c("ind_Student", "ind_skewed_t")) && identification == "non-Gaussianity") {
     stop("Identification by 'non-Gaussianity' is not available for models with cond_dist='Gaussian' or 'Student'.")
+  }
+  stopifnot(is.logical(penalized))
+  stopifnot(is.numeric(penalty_params) && length(penalty_params) == 2 && all(penalty_params >= 0) && penalty_params[1] < 1)
+  if(weight_function == "relative_dens" && allow_non_stab) {
+    message("allow_non_stab cannot be used with the relative_dens weight function")
+    allow_non_stab <- FALSE
   }
   if(missing(data) & missing(d)) stop("data or d must be provided")
   if(missing(data) || is.null(data)) {
@@ -159,7 +165,8 @@ STVAR <- function(data, p, M, d, params,
                     mean_constraints=mean_constraints, weight_constraints=weight_constraints, B_constraints=B_constraints)
   check_params(data=data, p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
                cond_dist=cond_dist, parametrization=parametrization, identification=identification, AR_constraints=AR_constraints,
-               mean_constraints=mean_constraints, weight_constraints=weight_constraints, B_constraints=B_constraints)
+               mean_constraints=mean_constraints, weight_constraints=weight_constraints, B_constraints=B_constraints,
+               allow_non_stab=allow_non_stab)
   npars <- n_params(p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
                     cond_dist=cond_dist, identification=identification, AR_constraints=AR_constraints,
                     mean_constraints=mean_constraints, weight_constraints=weight_constraints,
@@ -179,19 +186,23 @@ STVAR <- function(data, p, M, d, params,
                                 identification=identification, AR_constraints=AR_constraints,
                                 mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                                 B_constraints=B_constraints, to_return="loglik_and_tw",
-                                check_params=TRUE, minval=NA)
+                                penalized=penalized, penalty_params=penalty_params,
+                                allow_non_stab=allow_non_stab, check_params=TRUE, minval=NA)
     residuals_raw <- get_residuals(data=data, p=p, M=M, params=params,
                                    weight_function=weight_function, weightfun_pars=weightfun_pars,
                                    cond_dist=cond_dist, parametrization=parametrization,
                                    identification=identification, AR_constraints=AR_constraints,
                                    mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                                   B_constraints=B_constraints, standardize=FALSE)
+                                   B_constraints=B_constraints, standardize=FALSE,
+                                   penalized=penalized, penalty_params=penalty_params,
+                                   allow_non_stab=allow_non_stab)
     residuals_std <- get_residuals(data=data, p=p, M=M, params=params,
                                    weight_function=weight_function, weightfun_pars=weightfun_pars,
                                    cond_dist=cond_dist, parametrization=parametrization,
                                    identification=identification, AR_constraints=AR_constraints,
                                    mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                                   B_constraints=B_constraints, standardize=TRUE)
+                                   B_constraints=B_constraints, standardize=TRUE,
+                                   penalized=penalized, penalty_params=penalty_params, allow_non_stab=allow_non_stab)
     IC <- get_IC(loglik=lok_and_tw$loglik, npars=npars, T_obs=nrow(data) - p)
     if(identification == "reduced_form" && cond_dist != "ind_Student" && cond_dist != "ind_skewed_t") {
       # Struct shocks are available for ind_Student and skewed_t mods
@@ -202,7 +213,8 @@ STVAR <- function(data, p, M, d, params,
                                          cond_dist=cond_dist, parametrization=parametrization,
                                          identification=identification, AR_constraints=AR_constraints,
                                          mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                                         B_constraints=B_constraints, structural_shocks=TRUE)
+                                         B_constraints=B_constraints, structural_shocks=TRUE,
+                                         penalized=penalized, penalty_params=penalty_params, allow_non_stab=allow_non_stab)
     }
   }
 
@@ -216,7 +228,8 @@ STVAR <- function(data, p, M, d, params,
                                              weightfun_pars=weightfun_pars, cond_dist=cond_dist,
                                              parametrization=parametrization, identification=identification,
                                              AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                                             weight_constraints=weight_constraints, B_constraints=B_constraints),
+                                             weight_constraints=weight_constraints, B_constraints=B_constraints,
+                                             penalized=penalized, penalty_params=penalty_params, allow_non_stab=allow_non_stab),
                              error=function(e) {
                                warning("Approximate standard errors can't be calculated:")
                                warning(e)
@@ -237,24 +250,43 @@ STVAR <- function(data, p, M, d, params,
                                                 identification=identification, AR_constraints=AR_constraints,
                                                 mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                                                 B_constraints=B_constraints, to_return=to_return,
-                                                check_params=TRUE, minval=NA)
+                                                check_params=TRUE, penalized=penalized, penalty_params=penalty_params,
+                                                allow_non_stab=allow_non_stab, minval=NA)
     regime_cmeans <- get_cm("regime_cmeans")
     total_cmeans <- get_cm("total_cmeans")
     total_ccovs <- get_cm("total_ccovs")
   }
 
   # Some unconditional moments
-  regime_autocovs <- get_regime_autocovs(p=p, M=M, d=d, params=params, weight_function=weight_function,
-                                         weightfun_pars=weightfun_pars, cond_dist=cond_dist,
-                                         identification=identification, AR_constraints=AR_constraints,
-                                         mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                                         B_constraints=B_constraints)
-  regime_vars <- vapply(1:M, function(m) diag(regime_autocovs[, , 1, m]), numeric(d))
-  regime_means <- get_regime_means(p=p, M=M, d=d, params=params, weight_function=weight_function,
-                                   weightfun_pars=weightfun_pars, cond_dist=cond_dist,
-                                   parametrization=parametrization, identification=identification,
-                                   AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                                   weight_constraints=weight_constraints, B_constraints=B_constraints)
+  if(allow_non_stab) {
+    # Check whether the stability condition is satisfied
+    params_std <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function,
+                                          cond_dist=cond_dist, identification=identification,
+                                          AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                          weight_constraints=weight_constraints, B_constraints=B_constraints,
+                                          weightfun_pars=weightfun_pars)
+    is_stable <- stab_conds_satisfied(p=p, M=M, d=d, params=params_std)
+  } else { # Always stable if unstable is not allowed
+    is_stable <- TRUE
+  }
+  if(is_stable) {
+    regime_autocovs <- get_regime_autocovs(p=p, M=M, d=d, params=params, weight_function=weight_function,
+                                           weightfun_pars=weightfun_pars, cond_dist=cond_dist,
+                                           identification=identification, AR_constraints=AR_constraints,
+                                           mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                                           B_constraints=B_constraints)
+    regime_vars <- vapply(1:M, function(m) diag(regime_autocovs[, , 1, m]), numeric(d))
+    regime_means <- get_regime_means(p=p, M=M, d=d, params=params, weight_function=weight_function,
+                                     weightfun_pars=weightfun_pars, cond_dist=cond_dist,
+                                     parametrization=parametrization, identification=identification,
+                                     AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                     weight_constraints=weight_constraints, B_constraints=B_constraints)
+  } else { # Cannot calculate unconditional moments if the
+    regime_autocovs <- array(NA, dim=c(d, d, p + 1, M))
+    regime_vars <- matrix(NA, nrow=d, ncol=M)
+    regime_means <- matrix(NA, nrow=d, ncol=M)
+  }
+
 
   # Return
   structure(list(data=data,
@@ -286,6 +318,9 @@ STVAR <- function(data, p, M, d, params,
                                   class="logLik",
                                   df=npars),
                  IC=IC,
+                 penalized=penalized,
+                 penalty_params=penalty_params,
+                 allow_non_stab=allow_non_stab,
                  all_estimates=NULL,
                  all_logliks=NULL,
                  which_converged=NULL,
@@ -356,6 +391,9 @@ alt_stvar <- function(stvar, which_largest=1, which_round, calc_std_errors=FALSE
                mean_constraints=stvar$model$mean_constraints,
                weight_constraints=stvar$model$weight_constraints,
                B_constraints=stvar$model$B_constraints,
+               penalized=stvar$penalized,
+               penalty_params=stvar$penalty_params,
+               allow_non_stab=stvar$allow_non_stab,
                calc_std_errors=calc_std_errors)
 
   # Pass the estimation results to the new object
@@ -418,6 +456,20 @@ swap_parametrization <- function(stvar, calc_std_errors=FALSE) {
     stop("Cannot change parametrization to intercept if the mean parameters are constrained")
   }
   change_to <- ifelse(stvar$model$parametrization == "intercept", "mean", "intercept")
+  if(stvar$allow_non_stab) {
+    # Check whether the stability condition is satisfied
+    params_std <- reform_constrained_pars(p=stvar$model$p, M=stvar$model$M, d=stvar$model$d, params=stvar$params,
+                                          weight_function=stvar$model$weight_function, weightfun_pars=stvar$model$weightfun_pars,
+                                          cond_dist=stvar$model$cond_dist, identification=stvar$model$identification,
+                                          AR_constraints=stvar$model$AR_constraints, mean_constraints=stvar$model$mean_constraints,
+                                          weight_constraints=stvar$model$weight_constraints, B_constraints=stvar$model$B_constraints)
+    is_stable <- stab_conds_satisfied(p=stvar$model$p, M=stvar$model$M, d=stvar$model$d, params=params_std)
+  } else { # Always stable if unstable is not allowed
+    is_stable <- TRUE
+  }
+  if(!is.stable) {
+    stop("Cannot swap parametrization if the model does not satisfy the usual stability condition (in all regimes)")
+  }
   new_params <- change_parametrization(p=stvar$model$p, M=stvar$model$M, d=stvar$model$d, params=stvar$params,
                                        weight_function=stvar$model$weight_function, weightfun_pars=stvar$model$weightfun_pars,
                                        cond_dist=stvar$model$cond_dist, identification=stvar$model$identification,
@@ -429,6 +481,7 @@ swap_parametrization <- function(stvar, calc_std_errors=FALSE) {
         cond_dist=stvar$model$cond_dist, identification=stvar$model$identification,
         AR_constraints=stvar$model$AR_constraints, mean_constraints=stvar$model$mean_constraints,
         weight_constraints=stvar$model$weight_constraints, B_constraints=stvar$model$B_constraints,
+        penalized=stvar$penalized, penalty_params=stvar$penalty_params, allow_non_stab=stvar$allow_non_stab,
         calc_std_errors=calc_std_errors)
 }
 
@@ -543,7 +596,8 @@ get_hetsked_sstvar <- function(stvar, calc_std_errors=FALSE) {
         parametrization=parametrization, identification="heteroskedasticity",
         AR_constraints=AR_constraints, mean_constraints=mean_constraints,
         weight_constraints=weight_constraints, B_constraints=NULL,
-        calc_std_errors=calc_std_errors)
+        penalized=stvar$penalized, penalty_params=stvar$penalty_params,
+        allow_non_stab=stvar$allow_non_stab, calc_std_errors=calc_std_errors)
 }
 
 
@@ -709,9 +763,10 @@ reorder_B_columns <- function(stvar, perm, calc_std_errors=FALSE) {
   STVAR(data=stvar$data, p=p, M=M, d=d, params=new_params, weight_function=weight_function,
         weightfun_pars=weightfun_pars, cond_dist=cond_dist, parametrization=stvar$model$parametrization,
         identification=identification, AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-        weight_constraints=weight_constraints, B_constraints=new_B_constraints, calc_std_errors=calc_std_errors)
+        weight_constraints=weight_constraints, B_constraints=new_B_constraints,
+        penalized=stvar$penalized, penalty_params=stvar$penalty_params, allow_non_stab=stvar$allow_non_stab,
+        calc_std_errors=calc_std_errors)
 }
-
 
 
 
@@ -856,7 +911,9 @@ swap_B_signs <- function(stvar, which_to_swap, calc_std_errors=FALSE) {
   STVAR(data=stvar$data, p=p, M=M, d=d, params=new_params, weight_function=weight_function,
         weightfun_pars=weightfun_pars, cond_dist=cond_dist, parametrization=stvar$model$parametrization,
         identification=identification, AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-        weight_constraints=weight_constraints, B_constraints=new_B_constraints, calc_std_errors=calc_std_errors)
+        weight_constraints=weight_constraints, B_constraints=new_B_constraints,
+        penalized=stvar$penalized, penalty_params=stvar$penalty_params, allow_non_stab=stvar$allow_non_stab,
+        calc_std_errors=calc_std_errors)
 }
 
 
@@ -871,6 +928,7 @@ swap_B_signs <- function(stvar, which_to_swap, calc_std_errors=FALSE) {
 #' @param which_largest an integer at least one specifying the (possibly) appropriate estimate corresponding
 #'  to which largest log-likelihood should be returned. E.g., if \code{which_largest=2}, the function will
 #'  return among the estimates that it does not deem inappropriate the one that has the second largest log-likelihood.
+#' @param filter_stab Should estimates close to breaking the usual stability condition be filtered out?
 #' @details The function goes through the estimates produced by \code{fitSTVAR} and checks which estimates are
 #'  deemed inappropriate. That is, estimates that are not likely solutions of interest. Specifically, solutions
 #'  that incorporate a near-singular error term covariance matrix (any eigenvalue less than \eqn{0.002}),
@@ -896,7 +954,7 @@ swap_B_signs <- function(stvar, which_to_swap, calc_std_errors=FALSE) {
 #' }
 #' @export
 
-filter_estimates <- function(stvar, which_largest=1, calc_std_errors=FALSE) {
+filter_estimates <- function(stvar, which_largest=1, filter_stab=TRUE, calc_std_errors=FALSE) {
   check_stvar(stvar)
   stopifnot(all_pos_ints(which_largest))
   p <- stvar$model$p
@@ -915,6 +973,9 @@ filter_estimates <- function(stvar, which_largest=1, calc_std_errors=FALSE) {
   weightfun_pars <- stvar$model$weightfun_pars
   all_estimates <- stvar$all_estimates
   all_logliks <- stvar$all_logliks
+  penalized <- stvar$penalized
+  penalty_params <- stvar$penalty_params
+  allow_non_stab <- stvar$allow_non_stab
   red_criteria <- c(0.05, 0.01)
   n_obs <- nrow(data)
   if(identification != "reduced_form") stop("Only reduced form models are supported!")
@@ -946,12 +1007,16 @@ filter_estimates <- function(stvar, which_largest=1, calc_std_errors=FALSE) {
     Omegas_ok <- !any(Omega_eigens < 0.002)
 
     # Checks AR matrices
-    boldA_eigens <- get_boldA_eigens_par(p=p, M=M, d=d, params=pars_std,
-                                         weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                         cond_dist=cond_dist, identification=identification,
-                                         AR_constraints=NULL, mean_constraints=NULL,
-                                         weight_constraints=NULL, B_constraints=NULL)
-    stat_ok <- !any(boldA_eigens > 0.9985)
+    if(filter_stab) {
+      boldA_eigens <- get_boldA_eigens_par(p=p, M=M, d=d, params=pars_std,
+                                           weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                           cond_dist=cond_dist, identification=identification,
+                                           AR_constraints=NULL, mean_constraints=NULL,
+                                           weight_constraints=NULL, B_constraints=NULL)
+      stat_ok <- !any(boldA_eigens > 0.9985)
+    } else {
+      stat_ok <- TRUE
+    }
 
     # Check weight parameters
     if(weight_function == "relative_dens") {
@@ -968,6 +1033,7 @@ filter_estimates <- function(stvar, which_largest=1, calc_std_errors=FALSE) {
                               cond_dist=cond_dist, parametrization=parametrization,
                               identification=identification, AR_constraints=NULL,
                               mean_constraints=NULL, B_constraints=NULL, weight_constraints=NULL,
+                              penalized=penalized, penalty_params=penalty_params, allow_non_stab=allow_non_stab,
                               to_return="tw", check_params=TRUE, minval=matrix(0, nrow=n_obs-p, ncol=M))
     tweights_ok <- !any(vapply(1:M, function(m) sum(tweights[,m] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
     if(Omegas_ok && stat_ok && tweights_ok && weightpars_ok) {
@@ -996,6 +1062,9 @@ filter_estimates <- function(stvar, which_largest=1, calc_std_errors=FALSE) {
                mean_constraints=mean_constraints,
                weight_constraints=weight_constraints,
                B_constraints=B_constraints,
+               penalized=penalized,
+               penalty_params=penalty_params,
+               allow_non_stab=allow_non_stab,
                calc_std_errors=calc_std_errors)
 
   # Pass the estimation results to the new object

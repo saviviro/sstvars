@@ -4,7 +4,12 @@
 \alias{filter_estimates}
 \title{Filter inappropriate the estimates produced by fitSTVAR}
 \usage{
-filter_estimates(stvar, which_largest = 1, calc_std_errors = FALSE)
+filter_estimates(
+  stvar,
+  which_largest = 1,
+  filter_stab = TRUE,
+  calc_std_errors = FALSE
+)
 }
 \arguments{
 \item{stvar}{a class 'stvar' object defining a structural STVAR model that is identified by heteroskedasticity
@@ -13,6 +18,8 @@ or non-Gaussianity, typically created with \code{fitSSTVAR}.}
 \item{which_largest}{an integer at least one specifying the (possibly) appropriate estimate corresponding
 to which largest log-likelihood should be returned. E.g., if \code{which_largest=2}, the function will
 return among the estimates that it does not deem inappropriate the one that has the second largest log-likelihood.}
+
+\item{filter_stab}{Should estimates close to breaking the usual stability condition be filtered out?}
 
 \item{calc_std_errors}{should approximate standard errors be calculated?}
 }

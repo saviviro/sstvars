@@ -21,7 +21,10 @@ get_residuals(
   weight_constraints = NULL,
   B_constraints = NULL,
   standardize = TRUE,
-  structural_shocks = FALSE
+  structural_shocks = FALSE,
+  penalized = FALSE,
+  penalty_params = c(0.05, 0.5),
+  allow_non_stab = FALSE
 )
 }
 \arguments{
@@ -187,6 +190,18 @@ Currently only available for models with \code{identification="heteroskedasticit
 \item{structural_shocks}{If \code{TRUE}, returns structural shocks instead of residuals
 (not available if \code{identification == "reduced_form"}, argument \code{standardize}
 is if structural shocks are to be returned).}
+
+\item{penalized}{Perform penalized LS estimation that minimizes penalized RSS in which estimates close to breaking or not satisfying the
+usual stability condition are penalized? If \code{TRUE}, the tuning parameter is set by the argument \code{penalty_params[2]},
+and the penalization starts when the eigenvalues of the companion form AR matrix are larger than \code{1 - penalty_params[1]}.}
+
+\item{penalty_params}{a numeric vector with two positive elements specifying the penalization parameters:
+the first element determined how far from the boundary of the stability region the penalization starts
+(a number between zero and one, smaller number starts penalization closer to the boundary) and the second element
+is a tuning parameter for the penalization (a positive real number, a higher value penalizes non-stability more).}
+
+\item{allow_non_stab}{If \code{TRUE}, estimates not satisfying the stability condition are allowed. Always \code{FALSE} if
+\code{weight_function="relative_dens"}.}
 }
 \value{
 Returns a \eqn{(T \times d)} matrix containing...

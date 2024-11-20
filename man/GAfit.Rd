@@ -29,6 +29,9 @@ GAfit(
   upper_ar_scale = 1,
   ar_scale2 = 1,
   regime_force_scale = 1,
+  penalized,
+  penalty_params = c(0.05, 0.5),
+  allow_non_stab,
   red_criteria = c(0.05, 0.01),
   bound_by_weights,
   pre_smart_mu_prob = 0,
@@ -245,6 +248,18 @@ the population and the algorithm might converge poorly. Default is \code{1} and 
 probability weights for individuals with no wasted regimes compared to individuals with one wasted regime.
 Number \code{2} would give \eqn{3x} larger probability weights etc.}
 
+\item{penalized}{Perform penalized LS estimation that minimizes penalized RSS in which estimates close to breaking or not satisfying the
+usual stability condition are penalized? If \code{TRUE}, the tuning parameter is set by the argument \code{penalty_params[2]},
+and the penalization starts when the eigenvalues of the companion form AR matrix are larger than \code{1 - penalty_params[1]}.}
+
+\item{penalty_params}{a numeric vector with two positive elements specifying the penalization parameters:
+the first element determined how far from the boundary of the stability region the penalization starts
+(a number between zero and one, smaller number starts penalization closer to the boundary) and the second element
+is a tuning parameter for the penalization (a positive real number, a higher value penalizes non-stability more).}
+
+\item{allow_non_stab}{If \code{TRUE}, estimates not satisfying the stability condition are allowed. Always \code{FALSE} if
+\code{weight_function="relative_dens"}.}
+
 \item{red_criteria}{a length 2 numeric vector specifying the criteria that is used to determine whether a regime is
 redundant (or "wasted") or not.
 Any regime \code{m} which satisfies \code{sum(transitionWeights[,m] > red_criteria[1]) < red_criteria[2]*n_obs} will
@@ -266,13 +281,13 @@ in general (\code{"best_ind"}) but might have more wasted regimes?}
 Values smaller than this will be treated as they were \code{minval} and the corresponding individuals will
 never survive. The default is \code{-(10^(ceiling(log10(n_obs)) + d) - 1)}.}
 
-\item{fixed_params}{a vector containing fixed parameter values for mean, autoregressive, and weight parameters
+\item{fixed_params}{a vector containing fixed parameter values for intercept, autoregressive, and weight parameters
 that should be fixed in the \strong{initial population}. Should have the form:
 \eqn{(\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\alpha}, where
 \itemize{
-  \item{\eqn{\mu_{m} = } the \eqn{(d \times 1)} mean vector of the \eqn{m}th regime.}
+  \item{\eqn{(\phi_{m,0} = } the \eqn{(d \times 1)} intercept vector of the \eqn{m}th regime.}
   \item{\eqn{\varphi_m = (vec(A_{m,1}),...,vec(A_{m,p}))} \eqn{(pd^2 \times 1)}.}
-  \item{\eqn{\alpha = (r_1,...,r_{M-1})} the \eqn{(M-1\times 1)} vector of the threshold parameters.}
+  \item{\eqn{\alpha} vector of the weight parameters.}
 }
 For models with...
 \describe{
@@ -281,7 +296,7 @@ For models with...
    argument \code{weigh_constraints}. If weight functions parameters are imposed to be fixed values, simply drop \eqn{\alpha}
    from the parameter vector.}
 }
-Note that \code{fixed_params} should always be in the mean parametrization (and \code{parametrization="mean"} should always be used).
+Note that \code{fixed_params} should always be in the intercept parametrization (and \code{parametrization="intercept"} should always be used).
 \strong{Passing this argument from fitSTVAR in does not do anything, as it is designed to be used with the three-phase estimation
         procedure only. Also, this argument does not do anything if the initial population is specified in the argument initpop.}}
 

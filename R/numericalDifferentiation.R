@@ -10,7 +10,9 @@
 #' @inheritParams get_boldA_eigens
 #' @param x a numeric vector specifying the point where the gradient or Hessian should be calculated.
 #' @param fn a function that takes in argument \code{x} as the \strong{first} argument.
-#' @param h difference used to approximate the derivatives.
+#' @param h difference used to approximate the derivatives: either a positive real number of a vector of
+#'   positive real numbers with the same length as \code{x}. Default adjusts the step size depending on
+#'   the magnitude of the elements in \code{x}.
 #' @param ... other arguments passed to \code{fn}
 #' @details In particular, the functions \code{get_foc} and \code{get_soc} can be used to check whether
 #'   the found estimates denote a (local) maximum point, a saddle point, or something else. Note that
@@ -46,11 +48,18 @@
 #' get_soc(mod112)
 #' @export
 
-calc_gradient <- function(x, fn, h=6e-06, ...) {
+calc_gradient <- function(x, fn, h, ...) {
   fn <- match.fun(fn)
   n <- length(x)
   I <- diag(1, nrow=n, ncol=n)
-  h <- rep(h, times=n)
+  if(missing(h)) {
+    h <- 1e-4*(1 + abs(x)) # The difference used in the gradient
+  } else {
+    stopifnot(is.numeric(h) && (length(h) == 1 || length(h) == n) && all(h > 0))
+    if(length(h) == 1) {
+      h <- rep(h, times=n)
+    }
+  }
   vapply(1:n, function(i1) (fn(x + h[i1]*I[i1,], ...) - fn(x - h[i1]*I[i1,], ...))/(2*h[i1]), numeric(1))
 }
 
@@ -58,11 +67,18 @@ calc_gradient <- function(x, fn, h=6e-06, ...) {
 #' @rdname calc_gradient
 #' @export
 
-calc_hessian <- function(x, fn, h=6e-06, ...) {
+calc_hessian <- function(x, fn, h, ...) {
   fn <- match.fun(fn)
   n <- length(x)
   I <- diag(1, nrow=n, ncol=n)
-  h <- rep(h, times=n)
+  if(missing(h)) {
+    h <- 1e-4*(1 + abs(x)) # The difference used in the gradient
+  } else {
+    stopifnot(is.numeric(h) && (length(h) == 1 || length(h) == n) && all(h > 0))
+    if(length(h) == 1) {
+      h <- rep(h, times=n)
+    }
+  }
   Hess <- matrix(ncol=n, nrow=n)
   for(i1 in 1:n) {
     for(i2 in i1:n) {
@@ -93,6 +109,9 @@ get_gradient <- function(stvar) {
                   mean_constraints=stvar$model$mean_constraints,
                   weight_constraints=stvar$model$weight_constraints,
                   B_constraints=stvar$model$B_constraints,
+                  penalized=stvar$penalized,
+                  penalty_params=stvar$penalty_params,
+                  allow_non_stab=stvar$allow_non_stab,
                   to_return="loglik", minval=NA)
   }
   calc_gradient(x=stvar$params, fn=foo)
@@ -117,6 +136,9 @@ get_hessian <- function(stvar) {
                   mean_constraints=stvar$model$mean_constraints,
                   weight_constraints=stvar$model$weight_constraints,
                   B_constraints=stvar$model$B_constraints,
+                  penalized=stvar$penalized,
+                  penalty_params=stvar$penalty_params,
+                  allow_non_stab=stvar$allow_non_stab,
                   to_return="loglik", minval=NA)
   }
   calc_hessian(x=stvar$params, fn=foo)

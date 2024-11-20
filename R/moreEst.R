@@ -6,6 +6,9 @@
 #' @inheritParams fitSTVAR
 #' @inheritParams STVAR
 #' @param stvar an object of class \code{'stvar'}, created by, e.g., \code{fitSTVAR} or \code{fitSSTVAR}.
+#' @param h the step sizes used in the central difference approximation of the gradient of the log-likelihood function
+#'   for each parameter are given as \code{h*(1 + abs(params))}. Thus, \code{h} should be a small positive number.
+#' @param print_trace should the trace of the optimization algorithm be printed?
 #' @details The purpose of \code{iterate_more} is to provide a simple and convenient tool to finalize
 #'   the estimation when the maximum number of iterations is reached when estimating a STVAR model
 #'   with the main estimation function \code{fitSTVAR} or \code{fitSSTVAR}.
@@ -34,7 +37,7 @@
 #' }
 #' @export
 
-iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
+iterate_more <- function(stvar, maxit=100, h=1e-4, penalized, penalty_params, calc_std_errors=TRUE, print_trace=TRUE) {
   check_stvar(stvar)
   stopifnot(maxit %% 1 == 0 & maxit >= 1)
   p <- stvar$model$p
@@ -49,10 +52,22 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
   mean_constraints <- stvar$model$mean_constraints
   weight_constraints <- stvar$model$weight_constraints
   B_constraints <- stvar$model$B_constraints
+  if(missing(penalized)) {
+    penalized <- stvar$penalized
+  } else {
+    stopifnot(is.logical(penalized))
+  }
+  if(missing(penalty_params)) {
+    penalty_params <- stvar$penalty_params
+  } else {
+    stopifnot(is.numeric(penalty_params) && length(penalty_params) == 2 && all(penalty_params >= 0) && penalty_params[1] < 1)
+  }
+  allow_non_stab <- stvar$allow_non_stab
   weightfun_pars <- check_weightfun_pars(data=data, p=p, M=M, d=d, weight_function=weight_function,
                                          weightfun_pars=stvar$model$weightfun_pars, cond_dist=cond_dist)
   minval <- get_minval(stvar$data)
   npars <- length(stvar$params)
+  stopifnot(h > 0)
 
   # Function to optimize
   loglik_fn <- function(params) {
@@ -61,18 +76,22 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
                            cond_dist=cond_dist, parametrization=parametrization,
                            identification=identification, AR_constraints=AR_constraints,
                            mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                           B_constraints=B_constraints, to_return="loglik", check_params=TRUE, minval=minval),
+                           B_constraints=B_constraints, to_return="loglik", check_params=TRUE,
+                           penalized=penalized, penalty_params=penalty_params,
+                           allow_non_stab=allow_non_stab, minval=minval),
              error=function(e) minval)
   }
 
   # Gradient of the log-likelihood function using central difference approximation
-  h <- 6e-6
   I <- diag(rep(1, times=npars))
   loglik_grad <- function(params) {
-    vapply(1:npars, function(i1) (loglik_fn(params + I[i1,]*h) - loglik_fn(params - I[i1,]*h))/(2*h), numeric(1))
+    step_sizes <- h*(1 + abs(params)) # The difference used in the gradient
+    vapply(1:npars, function(i1) (loglik_fn(params + I[i1,]*step_sizes[i1]) - loglik_fn(params - I[i1,]*step_sizes[i1]))/(2*step_sizes[i1]),
+           numeric(1))
   }
 
-  res <- optim(par=stvar$params, fn=loglik_fn, gr=loglik_grad, method=c("BFGS"), control=list(fnscale=-1, maxit=maxit))
+  res <- optim(par=stvar$params, fn=loglik_fn, gr=loglik_grad, method=c("BFGS"),
+               control=list(fnscale=-1, maxit=maxit, trace=ifelse(print_trace, 6, 0)))
   if(res$convergence == 1) message("The maximum number of iterations was reached! Consired iterating more.")
 
   ret <- STVAR(data=data, p=p, M=M, d=d, params=res$par,
@@ -85,6 +104,9 @@ iterate_more <- function(stvar, maxit=100, calc_std_errors=TRUE) {
                mean_constraints=mean_constraints,
                weight_constraints=weight_constraints,
                B_constraints=B_constraints,
+               penalized=penalized,
+               penalty_params=penalty_params,
+               allow_non_stab=allow_non_stab,
                calc_std_errors=calc_std_errors)
 
   ret$all_estimates <- stvar$all_estimates
@@ -241,6 +263,9 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
   mean_constraints <- stvar$model$mean_constraints
   weight_constraints <- stvar$model$weight_constraints
   old_B_constraints <- stvar$model$B_constraints
+  penalized <- stvar$penalized
+  penalty_params <- stvar$penalty_params
+  allow_non_stab <- stvar$allow_non_stab
   weightfun_pars <- check_weightfun_pars(data=data, p=p, M=M, d=d, weight_function=weight_function,
                                          weightfun_pars=stvar$model$weightfun_pars, cond_dist=cond_dist)
 
@@ -311,7 +336,9 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
                  weight_function=weight_function, weightfun_pars=weightfun_pars,
                  parametrization=parametrization, identification=identification,
                  AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                 weight_constraints=weight_constraints, B_constraints=NULL, calc_std_errors=calc_std_errors))
+                 weight_constraints=weight_constraints, B_constraints=NULL,
+                 penalized=penalized, penalty_params=penalty_params, allow_non_stab=allow_non_stab,
+                 calc_std_errors=calc_std_errors))
   }
 
   # Check the new B_constraints
@@ -602,7 +629,9 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
                               parametrization=parametrization, identification=identification,
                               AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                               weight_constraints=weight_constraints, B_constraints=B_constraints,
-                              to_return="loglik", check_params=TRUE, minval=NULL, alt_par=alt_par)
+                              penalized=penalized, penalty_params=penalty_params,
+                              allow_non_stab=allow_non_stab, to_return="loglik", check_params=TRUE, minval=NULL,
+                              alt_par=alt_par)
 
   if(is.null(new_loglik)) {
     message("Problem with the new parameter vector - try different B_constraints?\n See:")
@@ -610,7 +639,8 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
                  weight_function=weight_function, weightfun_pars=weightfun_pars,
                  parametrization=parametrization, identification=identification,
                  AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                 weight_constraints=weight_constraints, B_constraints=B_constraints)
+                 weight_constraints=weight_constraints, B_constraints=B_constraints,
+                 allow_non_stab=allow_non_stab)
   }
 
   if(print_res) {
@@ -636,6 +666,7 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
                  parametrization=parametrization, identification=identification,
                  AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                  weight_constraints=weight_constraints, B_constraints=B_constraints,
+                 penalized=penalized, penalty_params=penalty_params, allow_non_stab=allow_non_stab,
                  calc_std_errors=FALSE))
   }
 
@@ -648,6 +679,7 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
                            identification=identification, AR_constraints=AR_constraints,
                            mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                            B_constraints=B_constraints, to_return="loglik", check_params=TRUE,
+                           penalized=penalized, penalty_params=penalty_params, allow_non_stab=allow_non_stab,
                            minval=minval, alt_par=alt_par),
              error=function(e) minval)
   }
@@ -752,16 +784,18 @@ fitbsSSTVAR <- function(data, p, M, params,
                            identification=identification, AR_constraints=AR_constraints,
                            mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                            B_constraints=B_constraints, other_constraints=other_constraints, to_return="loglik",
-                           check_params=TRUE, minval=minval, alt_par=alt_par),
+                           check_params=TRUE, penalized=penalized, penalty_params=penalty_params,
+                           allow_non_stab=allow_non_stab, minval=minval, alt_par=alt_par),
              error=function(e) minval)
   }
 
   ## Gradient of the log-likelihood function using central difference approximation
   npars <- length(params)
-  h <- 6e-6
   I <- diag(rep(1, times=npars))
   loglik_grad <- function(params) {
-    vapply(1:npars, function(i1) (loglik_fn(params + I[i1,]*h) - loglik_fn(params - I[i1,]*h))/(2*h), numeric(1))
+    step_sizes <- 1e-4*(1 + abs(params)) # The difference used in the gradient
+    vapply(1:npars, function(i1) (loglik_fn(params + I[i1,]*step_sizes[i1]) - loglik_fn(params - I[i1,]*step_sizes[i1]))/(2*step_sizes[i1]),
+           numeric(1))
   }
 
   ## Estimation by robust method
@@ -797,13 +831,6 @@ fitbsSSTVAR <- function(data, p, M, params,
 #'   by the method of least squares.
 #'
 #' @inheritParams loglikelihood
-#' @param prefer_stab should preferably estimates that satisfy the stability condition be returned (if possible)? Faster estimation
-#'   if \code{FALSE}, as the stability condition does not need to be checked for each vector of weight parameters.
-#' @param penalized Perform penalized LS estimation that minimizes penalized RSS in which estimates close to breaking or not satifying the
-#'   usual stability condition are penalized? If \code{TRUE}, the tuning parameter is set by the argument \code{tuning_par}.
-#' @param tuning_par The tuning parameter for the penalized LS estimation: higher value penalizes unstable estimates more.
-#' @param stab_tol the tolerance level for the stability condition (estimates with companion form AR matrix eigenvalues of all regimes
-#'   inside the unit circle by more than \code{stab_tol} are considered if \code{prefer_stab=TRUE}).
 #' @param ncores the number CPU cores to be used in parallel computing.
 #' @param use_parallel employ parallel computing? If \code{FALSE}, does not print anything.
 #' @details Used internally in the multiple phase estimation procedure proposed by Koivisto,
@@ -840,7 +867,7 @@ fitbsSSTVAR <- function(data, p, M, params,
 estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                      weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                      parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
-                     prefer_stab=FALSE, penalized=TRUE, tuning_par=0.01, stab_tol=0.05, use_parallel=TRUE, ncores=2) {
+                     penalized=TRUE, penalty_params=c(0.05, 0.5), use_parallel=TRUE, ncores=2) {
   # Checks
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -852,7 +879,9 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   } else if(parametrization != "intercept") {
     stop("Only the intercept parametrization is supported by the LS estimation")
   }
-  stopifnot(tuning_par >= 0)
+  stopifnot(is.numeric(penalty_params) && length(penalty_params) == 2 && all(penalty_params >= 0) && penalty_params[1] < 1)
+  stab_tol <- penalty_params[1]
+  tuning_par <- penalty_params[2]
 
   # Check the weight constraints
   if(!is.null(weight_constraints)) {
@@ -1000,31 +1029,6 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   }
 
   ## A function to check whether the stability condition is satisfied for the AR matrices, and
-  ## if not, to what extend it is not satisfied (sum over modulus of eigenvalues greater than 1 - stab_tol)
-  check_stab <- function(estims) {
-    # Estims should be a vector of the form (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M)
-    if(!is.null(AR_constraints)) { # Expand the AR constraints
-      pars_to_check <- c(estims[1:(M*d)], AR_constraints%*%estims[(M*d + 1):(M*d + ncol(AR_constraints))])
-    } else {
-      pars_to_check <- estims[1:(M*d + M*p*d^2)]
-    }
-    all_phi0 <- pick_phi0(M=M, d=d, params=pars_to_check)
-    all_A <- pick_allA(p=p, M=M, d=d, params=pars_to_check)
-    all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
-    all_sum_over_stab <- numeric(M) # How much in each regime modulus of eigenvalues exceed 1 - stab_tol
-    for(m in 1:M) { # Check stability conditon for each regime
-      abs_eigs <- abs(eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$values)
-      abs_eigs_not_stab <- abs_eigs[abs_eigs > 1 - stab_tol] # abs eigens that are larger than 1 - stab_tol
-      if(length(abs_eigs_not_stab) == 0) {
-        all_sum_over_stab[m] <- 0
-      } else {
-        all_sum_over_stab[m] <- sum(abs_eigs_not_stab - (1 - stab_tol)) # How much abs eigens exceed 1 - stab_tol?
-      }
-    }
-    sum(all_sum_over_stab) # The sum over all regimes = the extend of which stability condition is not satisfied
-  }
-
-  ## A function to check whether the stability condition is satisfied for the AR matrices, and
   ## if not, to what extend it is not satisfied.
   stab_exceeded <- function(estims) {
     # Estims should be a vector of the form (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M)
@@ -1104,6 +1108,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     if(use_parallel) message(paste("PHASE 1: Estimating AR and weight parameters by least squares..."))
     estims <- as.matrix(estim_fun(numeric(0)))
     stab_sums <- check_stab(estims[,1])
+    all_stab_ex <- stab_exceeded(estims[,1])
   } else {
     if(use_parallel) {
       if(ncores > parallel::detectCores()) {
@@ -1121,10 +1126,6 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       if(penalized) {
         message(paste0("Checking the stability condition for all the LS estimates..."))
         stab_sums <- simplify2array(pbapply::pblapply(1:nrow(thresvecs), FUN=function(i1) stab_exceeded(estims[,i1]), cl=cl))
-      } else if(prefer_stab) {
-        # Check the stability condition and to what extend it is not satisfied.
-        message(paste0("Checking the stability condition for all the LS estimates..."))
-        all_stab_ex <- simplify2array(pbapply::pblapply(1:nrow(thresvecs), FUN=function(i1) check_stab(estims[,i1]), cl=cl))
       }
       parallel::stopCluster(cl=cl)
     } else { # No parallel computing
@@ -1152,6 +1153,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     penalized_stab_ex <- penalty_coef*all_stab_ex # Penalization for non-stable estimates
     all_pen_rss <- all_rss + penalized_stab_ex # Penalized sum of squares of residuals
     min_rss_index <- which.min(all_pen_rss)[1] # The index for which the penalized sum of squares is the smallest
+
   } else if(prefer_stab) {
     # Check whether estimates with stability condition satisfied are found:
     which_stable <- which(stab_sums == 0) # thresvec indices for which the LS estimates are stable
@@ -1167,6 +1169,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     # Find the index for which the sum of squares of residuals is the smallest (regardless of stability)
     min_rss_index <- which.min(estims[nrow(estims),])[1]
   }
+
 
   ## Obtain and return the estimates corresponding the smallest sum of squares of residuals
   int_and_ar_estims <- estims[1:(nrow(estims) - 1), min_rss_index]

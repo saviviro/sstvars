@@ -22,6 +22,7 @@ check_params(
   weight_constraints = NULL,
   B_constraints = NULL,
   transition_weights,
+  allow_non_stab = FALSE,
   stab_tol = 0.001,
   posdef_tol = 1e-08,
   distpar_tol = 1e-08,
@@ -191,6 +192,9 @@ Currently only available for models with \code{identification="heteroskedasticit
 \item{transition_weights}{(optional; only for models with \code{cond_dist="ind_Student"} or \code{identification="non-Gaussianity"})
 A \eqn{T \times M} matrix containing the transition weights. If \code{cond_dist="ind_Student"} checks that the impact matrix
 \eqn{\sum_{m=1}^M\alpha_{m,t}^{1/2}B_m} is invertible for all \eqn{t=1,...,T}.}
+
+\item{allow_non_stab}{If \code{TRUE}, estimates not satisfying the stability condition are allowed. Always \code{FALSE} if
+\code{weight_function="relative_dens"}.}
 
 \item{stab_tol}{numerical tolerance for stability of condition of the regimes: if the "bold A" matrix of any regime
 has eigenvalues larger that \code{1 - stat_tol} the parameter is considered to be outside the parameter space.

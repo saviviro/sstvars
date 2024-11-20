@@ -4,14 +4,37 @@
 \alias{iterate_more}
 \title{Maximum likelihood estimation of a reduced form or structural STVAR model based on preliminary estimates}
 \usage{
-iterate_more(stvar, maxit = 100, calc_std_errors = TRUE)
+iterate_more(
+  stvar,
+  maxit = 100,
+  h = 1e-04,
+  penalized,
+  penalty_params,
+  calc_std_errors = TRUE,
+  print_trace = TRUE
+)
 }
 \arguments{
 \item{stvar}{an object of class \code{'stvar'}, created by, e.g., \code{fitSTVAR} or \code{fitSSTVAR}.}
 
 \item{maxit}{the maximum number of iterations in the variable metric algorithm.}
 
+\item{h}{the step sizes used in the central difference approximation of the gradient of the log-likelihood function
+for each parameter are given as \code{h*(1 + abs(params))}. Thus, \code{h} should be a small positive number.}
+
+\item{penalized}{should penalized log-likelihood function be used that penalizes the log-likelihood function when
+the parameter values are close the boundary of the stability region or outside it? If \code{TRUE}, estimates
+that do not satisfy the stability condition are allowed (except when \code{weight_function="relative_dens"}).
+The default is \code{TRUE} for three-phase estimation and \code{FALSE} for two-phase estimation.}
+
+\item{penalty_params}{a numeric vector with two positive elements specifying the penalization parameters:
+the first element determined how far from the boundary of the stability region the penalization starts
+(a number between zero and one, smaller number starts penalization closer to the boundary) and the second element
+is a tuning parameter for the penalization (a positive real number, a higher value penalizes non-stability more).}
+
 \item{calc_std_errors}{should approximate standard errors be calculated?}
+
+\item{print_trace}{should the trace of the optimization algorithm be printed?}
 }
 \value{
 Returns an S3 object of class \code{'stvar'} defining a smooth transition VAR model. The returned list

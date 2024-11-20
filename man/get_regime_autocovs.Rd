@@ -174,7 +174,7 @@ Currently only available for models with \code{identification="heteroskedasticit
 (in)availability of appropriate parametrizations that allow such constraints to be imposed.}
 }
 \value{
-Returns an \eqn{(d x d x p+1 x M)} array containing the first p regimewise autocovariance matrices.
+Returns an \eqn{(d \times d \times p+1 \times M)} array containing the first p regimewise autocovariance matrices.
   The subset \code{[, , j, m]} contains the j-1:th lag autocovariance matrix of the m:th regime.
 }
 \description{

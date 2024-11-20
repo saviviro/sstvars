@@ -9,9 +9,9 @@
 \alias{get_soc}
 \title{Calculate gradient or Hessian matrix}
 \usage{
-calc_gradient(x, fn, h = 6e-06, ...)
+calc_gradient(x, fn, h, ...)
 
-calc_hessian(x, fn, h = 6e-06, ...)
+calc_hessian(x, fn, h, ...)
 
 get_gradient(stvar)
 
@@ -26,7 +26,9 @@ get_soc(stvar)
 
 \item{fn}{a function that takes in argument \code{x} as the \strong{first} argument.}
 
-\item{h}{difference used to approximate the derivatives.}
+\item{h}{difference used to approximate the derivatives: either a positive real number of a vector of
+positive real numbers with the same length as \code{x}. Default adjusts the step size depending on
+the magnitude of the elements in \code{x}.}
 
 \item{...}{other arguments passed to \code{fn}}
 

@@ -24,6 +24,9 @@ loglikelihood(
   to_return = c("loglik", "tw", "loglik_and_tw", "terms", "regime_cmeans",
     "total_cmeans", "total_ccovs", "B_t"),
   check_params = TRUE,
+  penalized = FALSE,
+  penalty_params = c(0.05, 0.5),
+  allow_non_stab = FALSE,
   bound_by_weights = FALSE,
   indt_R = FALSE,
   alt_par = FALSE,
@@ -207,6 +210,18 @@ See the section "Value" for all the options.}
 
 \item{check_params}{should it be checked that the parameter vector satisfies the model assumptions? Can be skipped to save
 computation time if it does for sure.}
+
+\item{penalized}{Perform penalized LS estimation that minimizes penalized RSS in which estimates close to breaking or not satisfying the
+usual stability condition are penalized? If \code{TRUE}, the tuning parameter is set by the argument \code{penalty_params[2]},
+and the penalization starts when the eigenvalues of the companion form AR matrix are larger than \code{1 - penalty_params[1]}.}
+
+\item{penalty_params}{a numeric vector with two positive elements specifying the penalization parameters:
+the first element determined how far from the boundary of the stability region the penalization starts
+(a number between zero and one, smaller number starts penalization closer to the boundary) and the second element
+is a tuning parameter for the penalization (a positive real number, a higher value penalizes non-stability more).}
+
+\item{allow_non_stab}{If \code{TRUE}, estimates not satisfying the stability condition are allowed. Always \code{FALSE} if
+\code{weight_function="relative_dens"}.}
 
 \item{bound_by_weights}{should \code{minval} be returned if the transition weights do not allocate enough weights to a regime
 compared to the number of observations in the regime? See the source code for details.}

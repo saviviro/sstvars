@@ -17,7 +17,8 @@ fitSTVAR(
   mean_constraints = NULL,
   weight_constraints = NULL,
   estim_method,
-  LS_params = list(prefer_stab = FALSE, stab_tol = 0.05),
+  penalized,
+  penalty_params = c(0.05, 0.5),
   nrounds = (M + 1)^5,
   ncores = 2,
   maxit = 1000,
@@ -106,9 +107,15 @@ weight parameters to the constant \eqn{r} (in this case, \eqn{\alpha} is dropped
 \item{estim_method}{either \code{"two-phase"} or \code{"three-phase"} (the latter is the default
 option for threshold models and the former is currently the only option for other models). See details.}
 
-\item{LS_params}{A list of two elements specifying settings for LS estimations: \code{prefer_stab} (\code{TRUE} if
-estimates satisfying the stability condition should be preferred; \code{FALSE} if not) and \code{stab_tol}
-(numerical tolerance for the stability condition).}
+\item{penalized}{should penalized log-likelihood function be used that penalizes the log-likelihood function when
+the parameter values are close the boundary of the stability region or outside it? If \code{TRUE}, estimates
+that do not satisfy the stability condition are allowed (except when \code{weight_function="relative_dens"}).
+The default is \code{TRUE} for three-phase estimation and \code{FALSE} for two-phase estimation.}
+
+\item{penalty_params}{a numeric vector with two positive elements specifying the penalization parameters:
+the first element determined how far from the boundary of the stability region the penalization starts
+(a number between zero and one, smaller number starts penalization closer to the boundary) and the second element
+is a tuning parameter for the penalization (a positive real number, a higher value penalizes non-stability more).}
 
 \item{nrounds}{the number of estimation rounds that should be performed. The default is \code{(M*ncol(data))^3}
 when \code{estim_method="two-phase"} and \code{(M*ncol(data))^2} when \code{estim_method="three-phase"}.}

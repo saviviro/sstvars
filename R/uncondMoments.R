@@ -159,7 +159,7 @@ get_Sigmas <- function(p, M, d, all_A, all_boldA, all_Omegas) {
 #'
 #' @inheritParams loglikelihood
 #' @inheritParams stab_conds_satisfied
-#' @return Returns a \eqn{(dxM)} matrix containing regime mean \eqn{\mu_{m}} in the m:th column, \eqn{m=1,..,M}.
+#' @return Returns a \eqn{(d\times M)} matrix containing regime mean \eqn{\mu_{m}} in the m:th column, \eqn{m=1,..,M}.
 #' @section Warning:
 #'  No argument checks!
 #' @inherit stab_conds_satisfied references
@@ -205,7 +205,7 @@ get_regime_means <- function(p, M, d, params,
 #'
 #' @inheritParams loglikelihood
 #' @inheritParams reform_constrained_pars
-#' @return Returns an \eqn{(d x d x p+1 x M)} array containing the first p regimewise autocovariance matrices.
+#' @return Returns an \eqn{(d \times d \times p+1 \times M)} array containing the first p regimewise autocovariance matrices.
 #'   The subset \code{[, , j, m]} contains the j-1:th lag autocovariance matrix of the m:th regime.
 #' @references
 #'   \itemize{

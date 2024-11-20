@@ -12,9 +12,14 @@
 #' @inheritParams GAfit
 #' @param estim_method either \code{"two-phase"} or \code{"three-phase"} (the latter is the default
 #'   option for threshold models and the former is currently the only option for other models). See details.
-#' @param LS_params A list of two elements specifying settings for LS estimations: \code{prefer_stab} (\code{TRUE} if
-#'   estimates satisfying the stability condition should be preferred; \code{FALSE} if not) and \code{stab_tol}
-#'   (numerical tolerance for the stability condition).
+#' @param penalized should penalized log-likelihood function be used that penalizes the log-likelihood function when
+#'   the parameter values are close the boundary of the stability region or outside it? If \code{TRUE}, estimates
+#'   that do not satisfy the stability condition are allowed (except when \code{weight_function="relative_dens"}).
+#'   The default is \code{TRUE} for three-phase estimation and \code{FALSE} for two-phase estimation.
+#' @param penalty_params a numeric vector with two positive elements specifying the penalization parameters:
+#'   the first element determined how far from the boundary of the stability region the penalization starts
+#'   (a number between zero and one, smaller number starts penalization closer to the boundary) and the second element
+#'   is a tuning parameter for the penalization (a positive real number, a higher value penalizes non-stability more).
 #' @param nrounds the number of estimation rounds that should be performed. The default is \code{(M*ncol(data))^3}
 #'   when \code{estim_method="two-phase"} and \code{(M*ncol(data))^2} when \code{estim_method="three-phase"}.
 #' @param ncores the number CPU cores to be used in parallel computing.
@@ -221,7 +226,7 @@
 fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                      weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                      parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
-                     estim_method, LS_params=list(prefer_stab=FALSE, stab_tol=0.05), nrounds=(M + 1)^5, ncores=2, maxit=1000, seeds=NULL,
+                     estim_method, penalized, penalty_params=c(0.05, 0.5), nrounds=(M + 1)^5, ncores=2, maxit=1000, seeds=NULL,
                      print_res=TRUE, use_parallel=TRUE, ...) {
   # Initial checks etc
   weight_function <- match.arg(weight_function)
@@ -251,14 +256,15 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       stop("The three-phase estimation only supports weight_constraints with R=0.")
     }
   }
-  if(!is.list(LS_params) || length(LS_params) != 2) {
-    stop("The argument 'LS_params' should be a list of lenght two.")
-  } else if(is.null(LS_params$prefer_stab) || is.null(LS_params$stab_tol)) {
-    stop("The argument 'LS_params' should contain elements 'prefer_stab' and 'stab_tol'.")
-  } else if(!is.logical(LS_params$prefer_stab) || !is.numeric(LS_params$stab_tol)) {
-    stop("The elements of 'LS_params' should be logical and numeric, respectively.")
-  } else if(LS_params$stab_tol <= 0.001 || LS_params$stab_tol >= 0.2) {
-    stop("The element 'stab_tol' in 'LS_params' should be between 0.001 and 0.2.")
+  if(missing(penalized)) { # Penalize estimates close to the boundary of the stability region or outside it?
+    penalized <- estim_method == "three-phase" # Penalize in three-phase estimation
+  }
+  stopifnot(is.numeric(penalty_params) && length(penalty_params) == 2 && all(penalty_params >= 0) && penalty_params[1] < 1)
+  allow_non_stab <- ifelse(weight_function == "relative_dens", FALSE, penalized) # Allow unstable estimates?
+
+  if(parametrization == "mean") {
+    message("Unstable estimates are cannot be allowed with mean parametrization")
+    allow_non_stab <- FALSE
   }
 
   if(missing(nrounds)) {
@@ -319,6 +325,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       bound_by_weights <- dot_params$bound_by_weights
     }
   }
+  bound_by_weights <- FALSE
 
   minval <- ifelse(is.null(dot_params$minval), get_minval(data), dot_params$minval)
   red_criteria <- ifelse(rep(is.null(dot_params$red_criteria), 2), c(0.05, 0.01), dot_params$red_criteria)
@@ -344,8 +351,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     LS_results <- estim_LS(data=data, p=p, M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
                            cond_dist=cond_dist, parametrization="intercept", AR_constraints=AR_constraints,
                            mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                           prefer_stab=LS_params$prefer_stab, stab_tol=LS_params$stab_tol, ncores=ncores,
-                           use_parallel=use_parallel) # Always intercept parametrization used here
+                           penalized=penalized, stab_tol=penalty_params[1], tuning_par=penalty_params[2],
+                           ncores=ncores, use_parallel=use_parallel) # Always intercept parametrization used here
 
     # Check whether the least squares estimates satisfy the stability condition
     if(!is.null(AR_constraints)) { # Expand the AR constraints
@@ -357,7 +364,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     all_A <- pick_allA(p=p, M=M, d=d, params=pars_to_check)
     all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
     stab_ok <- logical(M)
-    stab_tol_to_use <- LS_params$stab_tol
+    stab_tol_to_use <- penalty_params[1]
     any_eigen_large <- FALSE
     for(m in 1:M) { # Check stability conditon for each regime
       boldA_mods <- abs(eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$values)
@@ -367,92 +374,93 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
         any_eigen_large <- TRUE
       }
     }
-    if(!all(stab_ok)) {
-      message("The least squares estimates do not satisfy the stability condition (with a large enough margin)!")
-      if(any_eigen_large) {
-        message(paste("\nThe LS estimates a substantially far from satisfying the usual stability condition",
-                      "(which is imposed in the ML estimation),",
-                      "so the three-phase procedure may not work very well.",
-                      "Consider using the two-phase estimation procedure!\n"))
-      }
-      message("Adjusting the least squares estimates to satisfy the stability condition...")
-      Id <- diag(nrow=d)
-      means_prior_to_adjustment <- vapply(1:M, function(m) solve(Id - rowSums(all_A[, , , m, drop=FALSE], dims=2), all_phi0[,m]),
-                                          numeric(d)) # [,m]
 
-      for(m in 1:M) {
-        if(!stab_ok[m]) {
-          # Eigenvalue adjustment approach to force stability to the estimates
-          eigen_decomp <- eigen(all_boldA[, , m], symmetric=FALSE)
-          eigenvals <- eigen_decomp$values # Eigenvalues, possibly imaginary
-          eigenvecs <- eigen_decomp$vectors # Eigenvectors, possibly imaginary
-          orig_eigenvals <- eigenvals # Original eigenvalues
+    if(!allow_non_stab) {
+      if(!all(stab_ok)) {
+        message("The least squares estimates do not satisfy the stability condition (with a large enough margin)!")
+        if(any_eigen_large) {
+          message(paste("\nThe LS estimates a substantially far from satisfying the usual stability condition",
+                        "(which is imposed in the ML estimation),",
+                        "so the three-phase procedure may not work very well.",
+                        "Consider using the two-phase estimation procedure!\n"))
+        }
+        message("Adjusting the least squares estimates to satisfy the stability condition...")
+        Id <- diag(nrow=d)
+        means_prior_to_adjustment <- vapply(1:M, function(m) solve(Id - rowSums(all_A[, , , m, drop=FALSE], dims=2), all_phi0[,m]),
+                                            numeric(d)) # [,m]
 
-          i1 <- 1
-          while(TRUE) { # Iteratively adjust eigenvalues until the produced AR matrices are stable
-            which_to_adjust <- which(abs(eigenvals) >= 1 - stab_tol_to_use) # Which eigenvalues do not satisfy stability condition
+        for(m in 1:M) {
+          if(!stab_ok[m]) {
+            # Eigenvalue adjustment approach to force stability to the estimates
+            eigen_decomp <- eigen(all_boldA[, , m], symmetric=FALSE)
+            eigenvals <- eigen_decomp$values # Eigenvalues, possibly imaginary
+            eigenvecs <- eigen_decomp$vectors # Eigenvectors, possibly imaginary
+            orig_eigenvals <- eigenvals # Original eigenvalues
 
-            # Adjust the eigenvalues iteratively:
-            eigenvals[which_to_adjust] <- (0.98^i1)*orig_eigenvals[which_to_adjust] # Use original eigenvalues in the scaling
-            # Vastly decreasing scaling factor is required to ensure that the method converges to stable estimates
+            i1 <- 1
+            while(TRUE) { # Iteratively adjust eigenvalues until the produced AR matrices are stable
+              which_to_adjust <- which(abs(eigenvals) >= 1 - stab_tol_to_use) # Which eigenvalues do not satisfy stability condition
 
-            # Remove the any negligible imaginary part due to numerical error, and obtain the adjusted companion form AR matrix
-            # (since conjugate pairs are both equally adjusted, the resulting matrix is real up to numerical error):
-            new_boldA <- Re(eigenvecs%*%diag(eigenvals)%*%solve(eigenvecs))
+              # Adjust the eigenvalues iteratively:
+              eigenvals[which_to_adjust] <- (0.98^i1)*orig_eigenvals[which_to_adjust] # Use original eigenvalues in the scaling
+              # Vastly decreasing scaling factor is required to ensure that the method converges to stable estimates
 
-            # Fill in the new AR matrices:
-            all_A[, , , m] <- as.vector(new_boldA[1:d, ])
+              # Remove the any negligible imaginary part due to numerical error, and obtain the adjusted companion form AR matrix
+              # (since conjugate pairs are both equally adjusted, the resulting matrix is real up to numerical error):
+              new_boldA <- Re(eigenvecs%*%diag(eigenvals)%*%solve(eigenvecs))
 
-            # Reconstruct and refill the companion form AR matrix:
-            all_boldA[, , m] <- form_boldA(p=p, M=1, d=d, all_A=all_A[, , , m, drop=FALSE])
+              # Fill in the new AR matrices:
+              all_A[, , , m] <- as.vector(new_boldA[1:d, ])
 
-            # Check the stability of the adjusted AR matrix:
-            eigenvals <- eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$values # Updated eigenvalues
+              # Reconstruct and refill the companion form AR matrix:
+              all_boldA[, , m] <- form_boldA(p=p, M=1, d=d, all_A=all_A[, , , m, drop=FALSE])
 
-            if(all(abs(eigenvals) < 1 - stab_tol_to_use)) { # Check whether the adjusted AR matrices are stable with large enough num tol
-              break # Stable estimates are found; break the loop.
+              # Check the stability of the adjusted AR matrix:
+              eigenvals <- eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$values # Updated eigenvalues
+
+              if(all(abs(eigenvals) < 1 - stab_tol_to_use)) { # Check whether the adjusted AR matrices are stable with large enough num tol
+                break # Stable estimates are found; break the loop.
+              }
+              i1 <- i1 + 1
             }
-            i1 <- i1 + 1
+
+            # Adjust the intercepts so that the means are preserved (but the AR matrices are adjusted):
+            all_phi0[, m] <- (Id - apply(all_A[, , , m], MARGIN=1:2, sum))%*%means_prior_to_adjustment[, m]
           }
 
-          # Adjust the intercepts so that the means are preserved (but the AR matrices are adjusted):
-          all_phi0[, m] <- (Id - apply(all_A[, , , m], MARGIN=1:2, sum))%*%means_prior_to_adjustment[, m]
-        }
+          # Fill in the adjusted AR matrices:
+          if(is.null(AR_constraints)) {
+            # We can use the adjusted AR matrices directly:
+            LS_results[(M*d + 1):(M*d + M*p*d^2)] <- as.vector(all_A)
+          } else { # AR_constraints employed
+            # We use Moore-Penrose Pseudoinverse of the AR constraints matrix (which has full column rank)
+            # to obtain a stable estimate of psi from the adjusted AR matrices:
+            LS_results[(M*d + 1):(M*d + ncol(AR_constraints))] <- solve(crossprod(AR_constraints), AR_constraints)%*%as.vector(all_A)
+          }
 
-        # Fill in the adjusted AR matrices:
-        if(is.null(AR_constraints)) {
-          # We can use the adjusted AR matrices directly:
-          LS_results[(M*d + 1):(M*d + M*p*d^2)] <- as.vector(all_A)
-        } else { # AR_constraints employed
-          # We use Moore-Penrose Pseudoinverse of the AR constraints matrix (which has full column rank)
-          # to obtain a stable estimate of psi from the adjusted AR matrices:
-          LS_results[(M*d + 1):(M*d + ncol(AR_constraints))] <- solve(crossprod(AR_constraints), AR_constraints)%*%as.vector(all_A)
+          # Fill in the adjusted intercepts
+          LS_results[1:(M*d)] <- as.vector(all_phi0)
         }
-
-        # Fill in the adjusted intercepts
-        LS_results[1:(M*d)] <- as.vector(all_phi0)
       }
     }
 
-    ## Change the LS_results to mean parametrization
-    if(is.null(AR_constraints)) {
-      mean_and_ar_pars <- LS_results[1:(M*d + M*p*d^2)]
-    } else {
-      # Expand the AR constraints:
-      mean_and_ar_pars <- c(LS_results[1:(M*d)], AR_constraints%*%LS_results[(M*d + 1):(M*d + ncol(AR_constraints))])
-    }
-
-    # Calculate and fill in the means from the estimated intercepts:
+    ## Obtain the LS results with the correct parametrization (to be included in the returned object):
     if(parametrization == "intercept") {
       LS_res_to_ret <- LS_results # Return LS estimates in the intercept paramatrization
-    }
-
-    Id <- diag(nrow=d)
-    all_phi0 <- pick_phi0(M=M, d=d, params=mean_and_ar_pars)
-    all_A <- pick_allA(p=p, M=M, d=d, params=mean_and_ar_pars)
-    LS_results[1:(M*d)] <- vapply(1:M, function(m) solve(Id - rowSums(all_A[, , , m, drop=FALSE], dims=2), all_phi0[,m]), numeric(d))
-    if(parametrization == "mean") {
-      LS_res_to_ret <- LS_results # Return LS estimates in the mean paramatrization
+    } else { # Parametrization = "mean" and thus, allow_non_stab = FALSE
+      # Change the LS_res_to_ret to mean parametrization:
+      if(is.null(AR_constraints)) {
+        mean_and_ar_pars <- LS_results[1:(M*d + M*p*d^2)]
+      } else {
+        # Expand the AR constraints:
+        mean_and_ar_pars <- c(LS_results[1:(M*d)], AR_constraints%*%LS_results[(M*d + 1):(M*d + ncol(AR_constraints))])
+      }
+      # Change to mean parametrization
+      Id <- diag(nrow=d)
+      all_phi0 <- pick_phi0(M=M, d=d, params=mean_and_ar_pars)
+      all_A <- pick_allA(p=p, M=M, d=d, params=mean_and_ar_pars)
+      LS_res_to_ret <- LS_results
+      LS_res_to_ret[1:(M*d)] <- vapply(1:M, function(m) solve(Id - rowSums(all_A[, , , m, drop=FALSE], dims=2), all_phi0[,m]), numeric(d))
     }
   }
 
@@ -475,7 +483,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   #####################################################################
 
   ### Optimization with the genetic algorithm ###
-  GA_parametrization <- ifelse(estim_method == "three-phase", "mean", parametrization) # parametrization to be used GAfit
+  GA_parametrization <- ifelse(estim_method == "three-phase", "intercept", parametrization) # parametrization to be used GAfit
   which_phase <- ifelse(estim_method == "three-phase", "PHASE 2", "PHASE 1")
 
   if(estim_method == "three-phase") {
@@ -501,6 +509,9 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                                                                  mean_constraints=mean_constraints,
                                                                  weight_constraints=weight_constraints,
                                                                  fixed_params=fixed_params,
+                                                                 penalized=penalized,
+                                                                 penalty_params=penalty_params,
+                                                                 allow_non_stab=allow_non_stab,
                                                                  seed=seeds[i1], ...), cl=cl)
 
   } else {
@@ -515,6 +526,9 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
             mean_constraints=mean_constraints,
             weight_constraints=weight_constraints,
             fixed_params=fixed_params,
+            penalized=penalized,
+            penalty_params=penalty_params,
+            allow_non_stab=allow_non_stab,
             seed=seeds[i1], ...)
     }
     GAresults <- lapply(1:nrounds, function(i1) tmpfunGA(i1, ...))
@@ -523,10 +537,12 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   ## Calculate the log-likelihoods
   loks <- vapply(1:nrounds, function(i1) loglikelihood(data=data, p=p, M=M, params=GAresults[[i1]],
                                                        weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                                       cond_dist=cond_dist, parametrization="mean",
+                                                       cond_dist=cond_dist, parametrization=GA_parametrization,
                                                        identification="reduced_form", AR_constraints=AR_constraints,
                                                        mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                                                        B_constraints=NULL, to_return="loglik", check_params=TRUE,
+                                                       penalized=penalized, stab_tol_pen=penalty_params[1],
+                                                       tuning_par=penalty_params[2], allow_non_stab=allow_non_stab,
                                                        bound_by_weights=bound_by_weights, minval=minval,
                                                        alt_par=TRUE), numeric(1)) # GA results always in alt_par
 
@@ -540,9 +556,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     print_loks(loks)
   }
 
-  ## Change to intercept parametrization if parametrization == "intercept" and three-method is used
-  ## (with two-phase method GA returns parameter vector with the correct parametrization (but with alt_parametrization))
-  if(parametrization == "intercept" && estim_method == "three-phase") {
+  ## Change to intercept parametrization if parametrization == "intercept" and GA returns mean parametrization:
+  if(parametrization == "intercept" && GA_parametrization == "mean") {
     GAresults <- lapply(GAresults, function(pars) change_parametrization(p=p, M=M, d=d, params=pars,
                                                                          weight_function=weight_function,
                                                                          weightfun_pars=weightfun_pars,
@@ -567,16 +582,17 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                            cond_dist=cond_dist, parametrization=parametrization,
                            identification="reduced_form", AR_constraints=AR_constraints,
                            mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                           B_constraints=NULL, to_return="loglik", check_params=TRUE, bound_by_weights=bound_by_weights,
+                           B_constraints=NULL, to_return="loglik", check_params=TRUE, penalized=penalized,
+                           stab_tol_pen=penalty_params[1], tuning_par=penalty_params[2],
+                           allow_non_stab=allow_non_stab, bound_by_weights=bound_by_weights,
                            minval=minval, alt_par=TRUE), # alt_par used in the GA estimation
              error=function(e) minval)
   }
 
   ## A function to calculate the gradient of the log-likelihood function# using central difference approximation:
-  h <- 1e-4 # The difference used in the gradient
   I <- diag(rep(1, times=npars))
   loglik_grad <- function(params) {
-    step_sizes <- 1e-4*(1 + abs(params)) # Step sizes for the gradient calculation
+    step_sizes <- 1e-4*(1 + abs(params)) # The difference used in the gradient
     vapply(1:npars, function(i1) (loglik_fn(params + I[i1,]*step_sizes[i1]) - loglik_fn(params - I[i1,]*step_sizes[i1]))/(2*step_sizes[i1]),
            numeric(1))
   }
@@ -591,7 +607,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     tmpfunNE <- function(i1) {
       if(!no_prints) message(i1, "/", nrounds, "\r")
       optim(par=GAresults[[i1]], fn=loglik_fn,  gr=loglik_grad,
-            method="BFGS", control=list(fnscale=-1, maxit=maxit))
+            method="BFGS", control=list(fnscale=-1, maxit=maxit, trace=6))
     }
     NEWTONresults <- lapply(1:nrounds, function(i1) tmpfunNE(i1))
   }
@@ -666,17 +682,20 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                               cond_dist=cond_dist, parametrization=parametrization,
                               identification="reduced_form", AR_constraints=NULL,
                               mean_constraints=NULL, B_constraints=NULL, weight_constraints=NULL,
-                              to_return="tw", check_params=TRUE, bound_by_weights=bound_by_weights,
-                              minval=matrix(0, nrow=n_obs-p, ncol=M))
+                              to_return="tw", check_params=TRUE, penalized=penalized, stab_tol_pen=penalty_params[1],
+                              tuning_par=penalty_params[2], allow_non_stab=allow_non_stab,
+                              bound_by_weights=bound_by_weights, minval=matrix(0, nrow=n_obs-p, ncol=M))
     tweights_ok <- !any(vapply(1:M, function(m) sum(tweights[,m] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
     if(Omegas_ok && stat_ok && tweights_ok && weightpars_ok) {
       which_best_fit <- which_round # The estimation round of the appropriate estimate with the largest loglik
-      if(!no_prints) message(paste("Filtered through", i1-1, "inappropriate estimates with a larger log-likelihood"))
+      if(!no_prints) message(paste0("Filtered through ", i1-1, " inappropriate ", ifelse(allow_non_stab, "(or unstable)", ""),
+                                   " estimates with a larger log-likelihood"))
       break
     }
     if(i1 == length(all_estimates)) {
-      message(paste("No 'appropriate' estimates found! Check that all the variables are scaled to vary in similar magninutes,",
-                    "also not very small or large magnitudes."))
+      message(paste0("No 'appropriate'", ifelse(allow_non_stab, "(or unstable)", ""),
+                     "estimates found! Check that all the variables are scaled to vary in similar magninutes, ",
+                     "also not very small or large magnitudes."))
       message("Consider running more estimation rounds or study the obtained estimates one-by-one with the function alt_stvar.")
       if(M > 2) {
         message("Consider also using smaller M. Too large M leads to identification problems.")
@@ -726,7 +745,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                                       cond_dist=cond_dist, parametrization=parametrization,
                                       identification="reduced_form", AR_constraints=AR_constraints,
                                       mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                                      B_constraints=NULL, to_return="tw", check_params=TRUE,
+                                      B_constraints=NULL, to_return="tw", check_params=TRUE, penalized=penalized,
+                                      stab_tol_pen=penalty_params[1], tuning_par=penalty_params[2], allow_non_stab=allow_non_stab,
                                       bound_by_weights=bound_by_weights, minval=minval)
   if(any(vapply(1:M, function(i1) sum(transition_weights[,i1] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))) {
     message("At least one of the regimes in the estimated model seems to be wasted in the best fitting individual!")
@@ -744,6 +764,9 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                mean_constraints=mean_constraints,
                weight_constraints=weight_constraints,
                B_constraints=NULL,
+               penalized=penalized,
+               penalty_params=penalty_params,
+               allow_non_stab=allow_non_stab,
                calc_std_errors=FALSE)
   ret$all_estimates <- all_estimates
   ret$all_logliks <- loks

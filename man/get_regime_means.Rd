@@ -180,7 +180,7 @@ Currently only available for models with \code{identification="heteroskedasticit
 (in)availability of appropriate parametrizations that allow such constraints to be imposed.}
 }
 \value{
-Returns a \eqn{(dxM)} matrix containing regime mean \eqn{\mu_{m}} in the m:th column, \eqn{m=1,..,M}.
+Returns a \eqn{(d\times M)} matrix containing regime mean \eqn{\mu_{m}} in the m:th column, \eqn{m=1,..,M}.
 }
 \description{
 \code{get_regime_means} calculates regime means \eqn{\mu_{m} = (I - \sum A)^(-1))}

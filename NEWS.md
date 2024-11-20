@@ -15,6 +15,11 @@
 
 * MAJOR: Implemented independent skewed t distribution as a new conditional distribution.
 * MAJOR: Implemented a three phase estimation for TVAR models to enhance computational efficiency.
+* Implemented a possibility to maximize penalized log-likelihood function that penalizes from unstable and close-to-unstable estimates.
+  Significantly improves the performance of the estimation algorithm in some cases, particularly when the time series are very persistent. 
+* Estimates not satisfying the usual stability condition for the regimes can now be allowed. 
+* Adjusted the step sizes in finite difference numerical differentation. 
+* The step size in finite difference numerical differentations can now be adjusted in the function iterate_more().
 * Changed the random parameter generation for ind_Student models (estimation results with specific seeds are not backward compatible).
 * A new function: filer_estimates, which can be used considers includes estimates that are not deemed inappropriate).
 * Some adjustments to estimation with fitSTVAR. NOTE: estimation results with a particular seed may be different to the earlier version. 

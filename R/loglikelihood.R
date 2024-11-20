@@ -160,6 +160,15 @@
 #'   See the section "Value" for all the options.
 #' @param check_params should it be checked that the parameter vector satisfies the model assumptions? Can be skipped to save
 #'   computation time if it does for sure.
+#' @param penalized Perform penalized LS estimation that minimizes penalized RSS in which estimates close to breaking or not satisfying the
+#'   usual stability condition are penalized? If \code{TRUE}, the tuning parameter is set by the argument \code{penalty_params[2]},
+#'   and the penalization starts when the eigenvalues of the companion form AR matrix are larger than \code{1 - penalty_params[1]}.
+#' @param penalty_params a numeric vector with two positive elements specifying the penalization parameters:
+#'   the first element determined how far from the boundary of the stability region the penalization starts
+#'   (a number between zero and one, smaller number starts penalization closer to the boundary) and the second element
+#'   is a tuning parameter for the penalization (a positive real number, a higher value penalizes non-stability more).
+#' @param allow_non_stab If \code{TRUE}, estimates not satisfying the stability condition are allowed. Always \code{FALSE} if
+#'  \code{weight_function="relative_dens"}.
 #' @param bound_by_weights should \code{minval} be returned if the transition weights do not allocate enough weights to a regime
 #'   compared to the number of observations in the regime? See the source code for details.
 #' @param indt_R If \code{TRUE} calculates the independent Student's t density in R instead of C++ without any approximations
@@ -228,8 +237,8 @@ loglikelihood <- function(data, p, M, params,
                           AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                           other_constraints=NULL,
                           to_return=c("loglik", "tw", "loglik_and_tw", "terms", "regime_cmeans", "total_cmeans", "total_ccovs", "B_t"),
-                          check_params=TRUE, bound_by_weights=FALSE, indt_R=FALSE, alt_par=FALSE, minval=NULL,
-                          stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
+                          check_params=TRUE, penalized=FALSE, penalty_params=c(0.05, 0.5), allow_non_stab=FALSE, bound_by_weights=FALSE,
+                          indt_R=FALSE, alt_par=FALSE, minval=NULL, stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
 
   # Match args
   weight_function <- match.arg(weight_function)
@@ -237,6 +246,10 @@ loglikelihood <- function(data, p, M, params,
   parametrization <- match.arg(parametrization)
   identification <- match.arg(identification)
   to_return <- match.arg(to_return)
+  if(weight_function == "relative_dens") {
+    allow_non_stab <- FALSE
+  }
+  stopifnot(is.numeric(penalty_params) && length(penalty_params) == 2 && all(penalty_params >= 0) && penalty_params[1] < 1)
 
   # Compute some required statistics
   epsilon <- round(log(.Machine$double.xmin) + 10) # Logarithm of the smallest value that can be handled normally
@@ -281,8 +294,8 @@ loglikelihood <- function(data, p, M, params,
     if(!in_paramspace(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
                       identification=identification, B_constraints=B_constraints, other_constraints=other_constraints,
                       all_boldA=all_boldA, all_Omegas=all_Omegas, weightpars=weightpars, distpars=distpars,
-                      weightfun_pars=weightfun_pars, stab_tol=stab_tol, posdef_tol=posdef_tol, distpar_tol=distpar_tol,
-                      weightpar_tol=weightpar_tol)) {
+                      weightfun_pars=weightfun_pars, allow_non_stab=allow_non_stab, stab_tol=stab_tol, posdef_tol=posdef_tol,
+                      distpar_tol=distpar_tol, weightpar_tol=weightpar_tol)) {
       return(minval)
     }
   }
@@ -295,8 +308,12 @@ loglikelihood <- function(data, p, M, params,
   # Calculate unconditional regime-specific expected values (column per component) or phi0-parameters if using mean-parametrization
   Id <- diag(nrow=d)
   if(parametrization == "intercept") {
-    all_mu <- vapply(1:M, function(m) solve(Id - rowSums(all_A[, , , m, drop=FALSE], dims=2),
-                                            all_phi0[,m]), numeric(d)) # sum over dims+1=3
+    if(weight_function == "relative_dens") {
+      all_mu <- vapply(1:M, function(m) solve(Id - rowSums(all_A[, , , m, drop=FALSE], dims=2),
+                                              all_phi0[,m]), numeric(d)) # sum over dims+1=3
+    } else {
+      all_mu <- NULL # unconditional means are needed only for the relative density weights
+    }
   } else {
     all_phi0 <- vapply(1:M, function(m) (Id - rowSums(all_A[, , , m, drop=FALSE], dims=2))%*%all_mu[,m], numeric(d))
   }
@@ -458,13 +475,29 @@ loglikelihood <- function(data, p, M, params,
     }
   }
 
+  # Calculate the penalty term for the log-likelihood
+  if(penalized) {
+    # Calculate how much the stability condition is exceeded:
+    all_stab_exceeds <- matrix(nrow=nrow(all_boldA[, , 1]), ncol=M) # Square of how much modulus of eigenvalues exceed 1 - stab_tol
+    for(m in 1:M) { # Check stability condition for each regime
+      abs_eigs <- abs(eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$values)
+      all_stab_exceeds[, m] <- pmax(0, abs_eigs - (1 - penalty_params[1]))^2 # How much abs eigens exceed 1 - stab_tol, squared
+    }
+    stab_ex <- sum(all_stab_exceeds) # Sum of the squared exceeded values of stab cond
+
+    # Calculate the penalty term
+    penalty <- penalty_params[2]*T_obs*d*stab_ex
+  } else {
+    penalty <- 0
+  }
+
   if(to_return == "terms") {
     return(all_lt)
   } else if(to_return == "loglik_and_tw") {
-    return(list(loglik=sum(all_lt),
+    return(list(loglik=sum(all_lt) - penalty,
                 tw=alpha_mt))
   }
-  sum(all_lt)
+  sum(all_lt) - penalty
 }
 
 
