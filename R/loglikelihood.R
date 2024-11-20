@@ -160,6 +160,8 @@
 #'   See the section "Value" for all the options.
 #' @param check_params should it be checked that the parameter vector satisfies the model assumptions? Can be skipped to save
 #'   computation time if it does for sure.
+#' @param bound_by_weights should \code{minval} be returned if the transition weights do not allocate enough weights to a regime
+#'   compared to the number of observations in the regime? See the source code for details.
 #' @param indt_R If \code{TRUE} calculates the independent Student's t density in R instead of C++ without any approximations
 #'   employed for speed-up.
 #' @param alt_par If \code{TRUE} assumes that models identified by non-Gaussianiaty (or \code{cond_dist="Student"}) are
@@ -226,7 +228,7 @@ loglikelihood <- function(data, p, M, params,
                           AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                           other_constraints=NULL,
                           to_return=c("loglik", "tw", "loglik_and_tw", "terms", "regime_cmeans", "total_cmeans", "total_ccovs", "B_t"),
-                          check_params=TRUE, indt_R=FALSE, alt_par=FALSE, minval=NULL,
+                          check_params=TRUE, bound_by_weights=FALSE, indt_R=FALSE, alt_par=FALSE, minval=NULL,
                           stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
 
   # Match args
@@ -305,6 +307,16 @@ loglikelihood <- function(data, p, M, params,
 
   if(to_return == "tw") {
     return(alpha_mt)
+  }
+
+  if(bound_by_weights) {
+    pars_per_reg <- ifelse(is.null(mean_constraints), d, length(mean_constraints)*d/M) + # mean/int params
+      ifelse(is.null(AR_constraints), p*d^2, ncol(AR_constraints)/M) + # AR params
+      ifelse(cond_dist %in% c("ind_Student", "ind_skewed_t"), d^2, d*(d + 1)/2) # Covmat params
+    obs_per_reg <- d*colSums(alpha_mt)
+    if(any(obs_per_reg < 1.2*pars_per_reg)) {
+      return(minval)
+    }
   }
 
   # Calculate the conditional means mu_{m,t}

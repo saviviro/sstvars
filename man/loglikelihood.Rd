@@ -24,6 +24,7 @@ loglikelihood(
   to_return = c("loglik", "tw", "loglik_and_tw", "terms", "regime_cmeans",
     "total_cmeans", "total_ccovs", "B_t"),
   check_params = TRUE,
+  bound_by_weights = FALSE,
   indt_R = FALSE,
   alt_par = FALSE,
   minval = NULL,
@@ -206,6 +207,9 @@ See the section "Value" for all the options.}
 
 \item{check_params}{should it be checked that the parameter vector satisfies the model assumptions? Can be skipped to save
 computation time if it does for sure.}
+
+\item{bound_by_weights}{should \code{minval} be returned if the transition weights do not allocate enough weights to a regime
+compared to the number of observations in the regime? See the source code for details.}
 
 \item{indt_R}{If \code{TRUE} calculates the independent Student's t density in R instead of C++ without any approximations
 employed for speed-up.}

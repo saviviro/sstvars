@@ -136,6 +136,9 @@
 #' @param to_return should the genetic algorithm return the best fitting individual which has "positive enough" mixing
 #'   weights for as many regimes as possible (\code{"alt_ind"}) or the individual which has the highest log-likelihood
 #'   in general (\code{"best_ind"}) but might have more wasted regimes?
+#' @param bound_by_weights should the parameter space be constrained to areas where the transition weights do allocate
+#'   enough weights to each regime compared to the number of observations in the regime? See the source code of
+#'   the function \code{loglikelihood} for details.
 #' @param minval a real number defining the minimum value of the log-likelihood function that will be considered.
 #'   Values smaller than this will be treated as they were \code{minval} and the corresponding individuals will
 #'   never survive. The default is \code{-(10^(ceiling(log10(n_obs)) + d) - 1)}.
@@ -336,6 +339,16 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
       }
     }
   }
+  if(missing(bound_by_weights)) { # Bound parameter space so that enough obs are allocated to each regime
+    pars_per_reg <- ifelse(is.null(mean_constraints), d, length(mean_constraints)*d/M) + # mean/int params
+      ifelse(is.null(AR_constraints), p*d^2, ncol(AR_constraints)/M) + # AR params
+      ifelse(cond_dist %in% c("ind_Student", "ind_skewed_t"), d^2, d*(d + 1)/2) # Covmat params
+    if(pars_per_reg <= 1.3*d*T_obs/M) { # Margin for the bound by weights
+      bound_by_weights <- FALSE
+    } else {
+      bound_by_weights <- TRUE
+    }
+  }
 
   stopifnot(pre_smart_mu_prob >= 0 && pre_smart_mu_prob <= 1)
   if(length(ar_scale) != 1 | ar_scale <= 0) {
@@ -377,7 +390,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                                                identification="reduced_form",
                                                                AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                                                                weight_constraints=weight_constraints, B_constraints=NULL,
-                                                               to_return="loglik", check_params=TRUE,
+                                                               to_return="loglik", check_params=TRUE, bound_by_weights=bound_by_weights,
                                                                minval=minval, alt_par=TRUE), numeric(1))
       G <- cbind(G, inds[, ind_loks > minval]) # Take good enough individuals
       if(ncol(G) >= popsize) {
@@ -467,7 +480,8 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                      parametrization="mean", identification="reduced_form",
                                      AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                                      weight_constraints=weight_constraints, B_constraints=NULL,
-                                     to_return="loglik_and_tw", check_params=TRUE, minval=minval, alt_par=TRUE)
+                                     to_return="loglik_and_tw", check_params=TRUE, bound_by_weights=bound_by_weights,
+                                     minval=minval, alt_par=TRUE)
         fill_lok_and_red(i1, i2, loks_and_tw)
       }
     } else {
@@ -506,7 +520,8 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                                   parametrization="mean", identification="reduced_form",
                                                   AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                                                   weight_constraints=weight_constraints, B_constraints=NULL,
-                                                  to_return="loglik_and_tw", check_params=FALSE, minval=minval, alt_par=TRUE),
+                                                  to_return="loglik_and_tw", check_params=FALSE, bound_by_weights=bound_by_weights,
+                                                  minval=minval, alt_par=TRUE),
                                     error=function(e) minval)
           } else {
             loks_and_tw <- tryCatch(loglikelihood(data=data, p=p, M=M, params=G[,i2], weight_function=weight_function,
@@ -514,7 +529,8 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                                   parametrization="mean", identification="reduced_form",
                                                   AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                                                   weight_constraints=weight_constraints, B_constraints=NULL,
-                                                  to_return="loglik_and_tw", check_params=TRUE, minval=minval, alt_par=TRUE),
+                                                  to_return="loglik_and_tw", check_params=TRUE, bound_by_weights=bound_by_weights,
+                                                  minval=minval, alt_par=TRUE),
                                     error=function(e) minval)
           }
           fill_lok_and_red(i1, i2, loks_and_tw)
@@ -535,7 +551,8 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                                       parametrization="mean", identification="reduced_form",
                                                       AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                                                       weight_constraints=weight_constraints, B_constraints=NULL,
-                                                      to_return="loglik", check_params=TRUE, minval=minval, alt_par=TRUE)
+                                                      to_return="loglik", check_params=TRUE, bound_by_weights=bound_by_weights,
+                                                      minval=minval, alt_par=TRUE)
       redundants[i1, which_to_best_ind] <- length(which_redundant)
     }
 
@@ -596,7 +613,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
     best_mw <- loglikelihood(data=data, p=p, M=M, params=best_ind, weight_function=weight_function, weightfun_pars=weightfun_pars,
                              cond_dist=cond_dist, parametrization="mean", identification="reduced_form", AR_constraints=AR_constraints,
                              mean_constraints=mean_constraints, weight_constraints=weight_constraints, B_constraints=NULL,
-                             to_return="tw", check_params=FALSE, minval=minval, alt_par=TRUE)
+                             to_return="tw", check_params=FALSE, bound_by_weights=bound_by_weights, minval=minval, alt_par=TRUE)
 
     # Which regimes are wasted:
     which_redundant <- which(vapply(1:M, function(i2) sum(best_mw[,i2] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
@@ -782,7 +799,8 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                       parametrization="mean", identification="reduced_form",
                       AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                       weight_constraints=weight_constraints, B_constraints=NULL,
-                      to_return="loglik", check_params=TRUE, minval=minval, alt_par=TRUE))
+                      to_return="loglik", check_params=TRUE, bound_by_weights=bound_by_weights,
+                      minval=minval, alt_par=TRUE))
 
   print("Ret loglik in GA:")
   print(loglikelihood(data=data, p=p, M=M, params=ret, weight_function=weight_function,
@@ -790,7 +808,8 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                       parametrization="mean", identification="reduced_form",
                       AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                       weight_constraints=weight_constraints, B_constraints=NULL,
-                      to_return="loglik", check_params=TRUE, minval=minval, alt_par=TRUE))
+                      to_return="loglik", check_params=TRUE, bound_by_weights=bound_by_weights,
+                      minval=minval, alt_par=TRUE))
 
   # # GA always optimizes with mean parametrization
   # Return intercept parametrized estimate if parametrization=="intercept".

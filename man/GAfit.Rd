@@ -283,6 +283,10 @@ Note that \code{fixed_params} should always be in the mean parametrization (and 
 \item{seed}{a single value, interpreted as an integer, or NULL, that sets seed for the random number generator in
 the beginning of the function call. If calling \code{GAfit} from \code{fitSTVAR}, use the argument \code{seeds}
 instead of passing the argument \code{seed}.}
+
+\item{bound_by_weights}{should the parameter space be constrained to areas where the transition weights do allocate
+enough weights to each regime compared to the number of observations in the regime? See the source code of
+the function \code{loglikelihood} for details.}
 }
 \value{
 Returns the estimated parameter vector which has the form described in \code{initpop},

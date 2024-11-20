@@ -283,6 +283,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   data <- check_data(data=data, p=p)
   d <- ncol(data)
   n_obs <- nrow(data)
+  T_obs <- n_obs - p
   weightfun_pars <- check_weightfun_pars(data=data, p=p, d=d, M=M, weight_function=weight_function,
                                          weightfun_pars=weightfun_pars, cond_dist=cond_dist)
   if(!is.null(mean_constraints) && parametrization == "intercept") {
@@ -296,9 +297,24 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   npars <- n_params(p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars, cond_dist=cond_dist,
                     AR_constraints=AR_constraints, mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                     B_constraints=NULL, identification="reduced_form")
-  if(npars >= d*nrow(data)) stop(paste("There are at least as many parameters in the model as there are observations in the data,",
-                                       "so you should use smaller p or M."))
+  if(npars >= d*T_obs) stop(paste("There are at least as many parameters in the model as there are observations in the data,",
+                                  "so you should use smaller p or M."))
+  pars_per_reg <- ifelse(is.null(mean_constraints), d, length(mean_constraints)*d/M) + # mean/int params
+    ifelse(is.null(AR_constraints), p*d^2, ncol(AR_constraints)/M) + # AR params
+    ifelse(cond_dist %in% c("ind_Student", "ind_skewed_t"), d^2, d*(d + 1)/2) # Covmat params
+
   dot_params <- list(...)
+  if(pars_per_reg <= 1.2*d*T_obs/M) {
+    message("The model has a large number of parameters per regime, which may lead to overfitting.")
+    bound_by_weights <- FALSE
+  } else {
+    if(is.null(dot_params$bound_by_weights)) {
+      bound_by_weights <- TRUE
+    } else {
+      bound_by_weights <- dot_params$bound_by_weights
+    }
+  }
+
   minval <- ifelse(is.null(dot_params$minval), get_minval(data), dot_params$minval)
   red_criteria <- ifelse(rep(is.null(dot_params$red_criteria), 2), c(0.05, 0.01), dot_params$red_criteria)
 
@@ -492,7 +508,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                                                        cond_dist=cond_dist, parametrization="mean",
                                                        identification="reduced_form", AR_constraints=AR_constraints,
                                                        mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                                                       B_constraints=NULL, to_return="loglik", check_params=TRUE, minval=minval,
+                                                       B_constraints=NULL, to_return="loglik", check_params=TRUE,
+                                                       bound_by_weights=bound_by_weights, minval=minval,
                                                        alt_par=TRUE), numeric(1)) # GA results always in alt_par
 
   if(print_res) {
@@ -532,8 +549,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                            cond_dist=cond_dist, parametrization=parametrization,
                            identification="reduced_form", AR_constraints=AR_constraints,
                            mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                           B_constraints=NULL, to_return="loglik", check_params=TRUE, minval=minval,
-                           alt_par=TRUE), # alt_par used in the GA estimation
+                           B_constraints=NULL, to_return="loglik", check_params=TRUE, bound_by_weights=bound_by_weights,
+                           minval=minval, alt_par=TRUE), # alt_par used in the GA estimation
              error=function(e) minval)
   }
 
@@ -631,7 +648,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                               cond_dist=cond_dist, parametrization=parametrization,
                               identification="reduced_form", AR_constraints=NULL,
                               mean_constraints=NULL, B_constraints=NULL, weight_constraints=NULL,
-                              to_return="tw", check_params=TRUE, minval=matrix(0, nrow=n_obs-p, ncol=M))
+                              to_return="tw", check_params=TRUE, bound_by_weights=bound_by_weights,
+                              minval=matrix(0, nrow=n_obs-p, ncol=M))
     tweights_ok <- !any(vapply(1:M, function(m) sum(tweights[,m] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
     if(Omegas_ok && stat_ok && tweights_ok && weightpars_ok) {
       which_best_fit <- which_round # The estimation round of the appropriate estimate with the largest loglik
@@ -690,7 +708,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                                       cond_dist=cond_dist, parametrization=parametrization,
                                       identification="reduced_form", AR_constraints=AR_constraints,
                                       mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                                      B_constraints=NULL, to_return="tw", check_params=TRUE, minval=minval)
+                                      B_constraints=NULL, to_return="tw", check_params=TRUE,
+                                      bound_by_weights=bound_by_weights, minval=minval)
   if(any(vapply(1:M, function(i1) sum(transition_weights[,i1] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))) {
     message("At least one of the regimes in the estimated model seems to be wasted in the best fitting individual!")
   }
