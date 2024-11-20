@@ -30,6 +30,7 @@ GAfit(
   ar_scale2 = 1,
   regime_force_scale = 1,
   red_criteria = c(0.05, 0.01),
+  bound_by_weights,
   pre_smart_mu_prob = 0,
   to_return = c("alt_ind", "best_ind"),
   minval,
@@ -250,6 +251,10 @@ Any regime \code{m} which satisfies \code{sum(transitionWeights[,m] > red_criter
 be considered "redundant". One should be careful when adjusting this argument (set \code{c(0, 0)} to fully disable
 the 'redundant regime' features from the algorithm).}
 
+\item{bound_by_weights}{should the parameter space be constrained to areas where the transition weights do allocate
+enough weights to each regime compared to the number of observations in the regime? See the source code of
+the function \code{loglikelihood} for details.}
+
 \item{pre_smart_mu_prob}{A number in \eqn{[0,1]} giving a probability of a "smart mutation" occuring randomly in each
 iteration before the iteration given by the argument \code{smart_mu}.}
 
@@ -283,10 +288,6 @@ Note that \code{fixed_params} should always be in the mean parametrization (and 
 \item{seed}{a single value, interpreted as an integer, or NULL, that sets seed for the random number generator in
 the beginning of the function call. If calling \code{GAfit} from \code{fitSTVAR}, use the argument \code{seeds}
 instead of passing the argument \code{seed}.}
-
-\item{bound_by_weights}{should the parameter space be constrained to areas where the transition weights do allocate
-enough weights to each regime compared to the number of observations in the regime? See the source code of
-the function \code{loglikelihood} for details.}
 }
 \value{
 Returns the estimated parameter vector which has the form described in \code{initpop},

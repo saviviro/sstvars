@@ -131,14 +131,14 @@
 #'   Any regime \code{m} which satisfies \code{sum(transitionWeights[,m] > red_criteria[1]) < red_criteria[2]*n_obs} will
 #'   be considered "redundant". One should be careful when adjusting this argument (set \code{c(0, 0)} to fully disable
 #'   the 'redundant regime' features from the algorithm).
+#' @param bound_by_weights should the parameter space be constrained to areas where the transition weights do allocate
+#'   enough weights to each regime compared to the number of observations in the regime? See the source code of
+#'   the function \code{loglikelihood} for details.
 #' @param pre_smart_mu_prob A number in \eqn{[0,1]} giving a probability of a "smart mutation" occuring randomly in each
 #'   iteration before the iteration given by the argument \code{smart_mu}.
 #' @param to_return should the genetic algorithm return the best fitting individual which has "positive enough" mixing
 #'   weights for as many regimes as possible (\code{"alt_ind"}) or the individual which has the highest log-likelihood
 #'   in general (\code{"best_ind"}) but might have more wasted regimes?
-#' @param bound_by_weights should the parameter space be constrained to areas where the transition weights do allocate
-#'   enough weights to each regime compared to the number of observations in the regime? See the source code of
-#'   the function \code{loglikelihood} for details.
 #' @param minval a real number defining the minimum value of the log-likelihood function that will be considered.
 #'   Values smaller than this will be treated as they were \code{minval} and the corresponding individuals will
 #'   never survive. The default is \code{-(10^(ceiling(log10(n_obs)) + d) - 1)}.
@@ -207,7 +207,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                   parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
                   ngen=200, popsize, smart_mu=min(100, ceiling(0.5*ngen)), initpop=NULL,  mu_scale, mu_scale2, omega_scale,
                   B_scale, weight_scale, ar_scale=0.2, upper_ar_scale=1, ar_scale2=1, regime_force_scale=1,
-                  red_criteria=c(0.05, 0.01), pre_smart_mu_prob=0, to_return=c("alt_ind", "best_ind"), minval,
+                  red_criteria=c(0.05, 0.01), bound_by_weights, pre_smart_mu_prob=0, to_return=c("alt_ind", "best_ind"), minval,
                   fixed_params=NULL, seed=NULL) {
 
   # Required values and preliminary checks
