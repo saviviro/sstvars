@@ -52,9 +52,9 @@
 Portmanteau_test <- function(stvar, nlags=20, which_test=c("autocorr", "het.sked")) {
   which_test <- match.arg(which_test)
   if(is.null(stvar$residuals_raw) && which_test == "autocorr") {
-    stop("The model needs to contain residuals_raw for autocorrelation test")
+    stop("The model needs to contain residuals_raw for the autocorrelation test")
   } else if(is.null(stvar$residuals_std) && which_test == "het.sked") {
-    stop("The model needs to contain residuals_std for heteroskedasticity test")
+    stop("The model needs to contain residuals_std for the heteroskedasticity test")
   }
   if(length(nlags) != 1 || nlags < 1 || nlags%%1 != 0) {
     stop("The argument nlags should be a strictly positive interger")

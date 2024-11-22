@@ -46,10 +46,21 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE, standard_error_pr
   var_names <- colnames(stvar$data)
   if(is.null(var_names)) var_names <- paste0("Var.", 1:d)
 
+  if(stvar$allow_unstab) { # Check the stability condition
+    stab_satisfied <- stab_conds_satisfied(p=p, M=M, d=d, params=params)
+  } else {
+    stab_satisfied <- TRUE
+  }
+
   # Regular / summary print
   if(!standard_error_print) {
-    all_mu <- stvar$uncond_moments$regime_means
-    all_sd <- sqrt(stvar$uncond_moments$regime_vars)
+    if(stab_satisfied) {
+      all_mu <- stvar$uncond_moments$regime_means
+      all_sd <- sqrt(stvar$uncond_moments$regime_vars)
+    } else { # Cannot calculate uncond means/sds if stab conds are not satisfied
+      all_mu <- matrix(NA, nrow=d, ncol=M)
+      all_sd <- matrix(NA, nrow=d, ncol=M)
+    }
     npars <- length(params)
     T_obs <- ifelse(is.null(stvar$data), NA, nrow(stvar$data) - p)
     params <- reform_constrained_pars(p=p, M=M, d=d, params=params,
@@ -95,6 +106,9 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE, standard_error_pr
       cat("\n")
     } else {
       cat("\n\n")
+    }
+    if(!stab_satisfied) {
+      cat("The usual stability condition is not satisfied for all regimes!\n\n")
     }
 
     if(summary_print) {

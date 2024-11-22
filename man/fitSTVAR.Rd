@@ -19,12 +19,14 @@ fitSTVAR(
   estim_method,
   penalized,
   penalty_params = c(0.05, 0.2),
-  nrounds = (M + 1)^5,
+  allow_unstab,
+  nrounds,
   ncores = 2,
   maxit = 1000,
   seeds = NULL,
   print_res = TRUE,
   use_parallel = TRUE,
+  calc_std_errors = TRUE,
   ...
 )
 }
@@ -116,6 +118,9 @@ The default is \code{TRUE} for three-phase estimation and \code{FALSE} for two-p
 the first element determined how far from the boundary of the stability region the penalization starts
 (a number between zero and one, smaller number starts penalization closer to the boundary) and the second element
 is a tuning parameter for the penalization (a positive real number, a higher value penalizes non-stability more).}
+
+\item{allow_unstab}{If \code{TRUE}, estimates not satisfying the stability condition are allowed. Always \code{FALSE} if
+\code{weight_function="relative_dens"}.}
 
 \item{nrounds}{the number of estimation rounds that should be performed. The default is \code{(M*ncol(data))^3}
 when \code{estim_method="two-phase"} and \code{(M*ncol(data))^2} when \code{estim_method="three-phase"}.}

@@ -16,7 +16,7 @@ standard_errors <- function(data, p, M, params,
                             parametrization=c("intercept", "mean"),
                             identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                             AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
-                            penalized=FALSE, penalty_params=c(0.05, 0.2), allow_non_stab=FALSE, minval) {
+                            penalized=FALSE, penalty_params=c(0.05, 0.2), allow_unstab=FALSE, minval) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
@@ -40,7 +40,7 @@ standard_errors <- function(data, p, M, params,
                            identification=identification, AR_constraints=AR_constraints,
                            mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                            B_constraints=B_constraints, check_params=TRUE, penalized=penalized,
-                           penalty_params=penalty_params, allow_non_stab=allow_non_stab,
+                           penalty_params=penalty_params, allow_unstab=allow_unstab,
                            to_return="loglik", minval=minval),
              error=function(e) NA)
   }

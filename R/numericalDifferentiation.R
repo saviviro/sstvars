@@ -62,7 +62,7 @@ calc_gradient <- function(x, fn, h=1e-3, ...) {
 #' @rdname calc_gradient
 #' @export
 
-calc_hessian <- function(x, fn, h, ...) {
+calc_hessian <- function(x, fn, h=1e-3, ...) {
   fn <- match.fun(fn)
   n <- length(x)
   I <- diag(1, nrow=n, ncol=n)
@@ -101,7 +101,7 @@ get_gradient <- function(stvar, ...) {
                   B_constraints=stvar$model$B_constraints,
                   penalized=stvar$penalized,
                   penalty_params=stvar$penalty_params,
-                  allow_non_stab=stvar$allow_non_stab,
+                  allow_unstab=stvar$allow_unstab,
                   to_return="loglik", minval=NA)
   }
   calc_gradient(x=stvar$params, fn=foo, ...)
@@ -128,7 +128,7 @@ get_hessian <- function(stvar, ...) {
                   B_constraints=stvar$model$B_constraints,
                   penalized=stvar$penalized,
                   penalty_params=stvar$penalty_params,
-                  allow_non_stab=stvar$allow_non_stab,
+                  allow_unstab=stvar$allow_unstab,
                   to_return="loglik", minval=NA)
   }
   calc_hessian(x=stvar$params, fn=foo, ...)

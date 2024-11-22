@@ -60,6 +60,9 @@ profile_logliks <- function(stvar, which_pars, scale=0.1, nrows, ncols, precisio
   mean_constraints <- stvar$model$mean_constraints
   weight_constraints <- stvar$model$weight_constraints
   B_constraints <- stvar$model$B_constraints
+  penalized <- stvar$penalized
+  penalty_params <- stvar$penalty_params
+  allow_unstab <- stvar$allow_unstab
 
   # Checks, default arguments etc
   if(missing(which_pars)) which_pars <- 1:length(params)
@@ -148,13 +151,15 @@ profile_logliks <- function(stvar, which_pars, scale=0.1, nrows, ncols, precisio
     logliks <- vapply(vals, function(val) { # Log-likelihoods about the estimate
       new_pars <- pars
       new_pars[i1] <- val # Change the single parameter value
-      loglikelihood(data=stvar$data, p=p, M=M, params=new_pars, weight_function=weight_function,
-                    weightfun_pars=weightfun_pars, cond_dist=cond_dist,
-                    parametrization=parametrization, identification=identification,
-                    AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                    weight_constraints=weight_constraints, B_constraints=B_constraints,
-                    to_return="loglik", check_params=TRUE, minval=NA,
-                    stab_tol=stab_tol, posdef_tol=posdef_tol, distpar_tol=distpar_tol, weightpar_tol=weightpar_tol)
+      loglikelihood(data=stvar$data, p=p, M=M, params=new_pars,
+                    weight_function=weight_function, weightfun_pars=weightfun_pars,
+                    cond_dist=cond_dist, parametrization=parametrization,
+                    identification=identification, AR_constraints=AR_constraints,
+                    mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                    B_constraints=B_constraints, to_return="loglik", check_params=TRUE,
+                    minval=NA, penalized=penalized, penalty_params=penalty_params,
+                    allow_unstab=allow_unstab, stab_tol=stab_tol, posdef_tol=posdef_tol,
+                    distpar_tol=distpar_tol, weightpar_tol=weightpar_tol)
     }, numeric(1))
 
     # Determine which type of parameter is i1 to determine the label for the individual plot

@@ -198,7 +198,7 @@ diagnostic_plot <- function(stvar, type=c("all", "series", "ac", "ch", "dist"), 
     # Plot histograms with theoretical density
     for(i1 in 1:d) {
       hs <- hist(res[,i1], breaks="Scott", probability=TRUE, col="skyblue", plot=TRUE,
-                 main=colnames(res)[i1], ylim=c(0, 0.5), ylab="", xlab="")
+                 main=colnames(res)[i1], ylab="", xlab="")
       x <- seq(from=min(hs$breaks), to=max(hs$breaks), length.out=1000)
       if(cond_dist == "ind_skewed_t") { # Also skewness pars
         lines(x=x, y=skewed_t_dens(y=x, nu=all_nu[i1], lambda=all_lambda[i1]), lty=2, col="darkred", lwd=2)

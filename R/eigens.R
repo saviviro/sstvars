@@ -139,7 +139,7 @@ get_omega_eigens_par <- function(p, M, d, params,
 #' @return Doesn't return anything.
 #' @keywords internal
 
-warn_eigens <- function(stvar, tol=0.002, allow_non_stab=FALSE) {
+warn_eigens <- function(stvar, tol=0.002, allow_unstab=FALSE) {
   boldA_eigens <- get_boldA_eigens(stvar)
   omega_eigens <- get_omega_eigens(stvar)
   M <- stvar$model$M
@@ -148,10 +148,10 @@ warn_eigens <- function(stvar, tol=0.002, allow_non_stab=FALSE) {
   if(any(near_nonstat)) {
     my_string1 <- ifelse(sum(near_nonstat) == 1,
                          paste("Regime", which(near_nonstat),
-                               ifelse(allow_non_stab, "has near-unit-roots (or roots outside the unit circle)! ",
+                               ifelse(allow_unstab, "has near-unit-roots (or roots outside the unit circle)! ",
                                       "has near-unit-roots! ")),
                          paste("Regimes", paste(which(near_nonstat), collapse=" and "),
-                               ifelse(allow_non_stab, "have near-unit-roots (or roots outside the unit circle)! ",
+                               ifelse(allow_unstab, "have near-unit-roots (or roots outside the unit circle)! ",
                                       "has near-unit-roots! ")))
   } else {
     my_string1 <- NULL

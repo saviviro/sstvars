@@ -11,7 +11,7 @@
 \usage{
 calc_gradient(x, fn, h = 0.001, ...)
 
-calc_hessian(x, fn, h, ...)
+calc_hessian(x, fn, h = 0.001, ...)
 
 get_gradient(stvar, ...)
 

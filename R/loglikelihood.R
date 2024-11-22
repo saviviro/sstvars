@@ -167,7 +167,7 @@
 #'   the first element determined how far from the boundary of the stability region the penalization starts
 #'   (a number between zero and one, smaller number starts penalization closer to the boundary) and the second element
 #'   is a tuning parameter for the penalization (a positive real number, a higher value penalizes non-stability more).
-#' @param allow_non_stab If \code{TRUE}, estimates not satisfying the stability condition are allowed. Always \code{FALSE} if
+#' @param allow_unstab If \code{TRUE}, estimates not satisfying the stability condition are allowed. Always \code{FALSE} if
 #'  \code{weight_function="relative_dens"}.
 #' @param bound_by_weights should \code{minval} be returned if the transition weights do not allocate enough weights to a regime
 #'   compared to the number of observations in the regime? See the source code for details.
@@ -237,7 +237,7 @@ loglikelihood <- function(data, p, M, params,
                           AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                           other_constraints=NULL,
                           to_return=c("loglik", "tw", "loglik_and_tw", "terms", "regime_cmeans", "total_cmeans", "total_ccovs", "B_t"),
-                          check_params=TRUE, penalized=FALSE, penalty_params=c(0.05, 0.2), allow_non_stab=FALSE, bound_by_weights=FALSE,
+                          check_params=TRUE, penalized=FALSE, penalty_params=c(0.05, 0.2), allow_unstab=FALSE, bound_by_weights=FALSE,
                           indt_R=FALSE, alt_par=FALSE, minval=NULL, stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
 
   # Match args
@@ -247,7 +247,7 @@ loglikelihood <- function(data, p, M, params,
   identification <- match.arg(identification)
   to_return <- match.arg(to_return)
   if(weight_function == "relative_dens") {
-    allow_non_stab <- FALSE
+    allow_unstab <- FALSE
   }
   stopifnot(is.numeric(penalty_params) && length(penalty_params) == 2 && all(penalty_params >= 0) && penalty_params[1] < 1)
 
@@ -294,7 +294,7 @@ loglikelihood <- function(data, p, M, params,
     if(!in_paramspace(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist,
                       identification=identification, B_constraints=B_constraints, other_constraints=other_constraints,
                       all_boldA=all_boldA, all_Omegas=all_Omegas, weightpars=weightpars, distpars=distpars,
-                      weightfun_pars=weightfun_pars, allow_non_stab=allow_non_stab, stab_tol=stab_tol, posdef_tol=posdef_tol,
+                      weightfun_pars=weightfun_pars, allow_unstab=allow_unstab, stab_tol=stab_tol, posdef_tol=posdef_tol,
                       distpar_tol=distpar_tol, weightpar_tol=weightpar_tol)) {
       return(minval)
     }

@@ -340,11 +340,19 @@ uncond_moments <- function(stvar) {
   mean_constraints <- stvar$model$mean_constraints
   weight_constraints <- stvar$model$weight_constraints
   B_constraints <- stvar$model$B_constraints
+
   params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weigth_function,
                                     weightfun_pars=weightfun_pars, cond_dist=cond_dist,
                                     identification=identification, AR_constraints=AR_constraints,
                                     mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                                     B_constraints=B_constraints)
+
+  if(stvar$allow_unstab) { # Check that the stability condition is satisfied
+    if(!stab_conds_satisfied(p=p, M=M, d=d, params=params)) {
+      warnings("Cannot calculate unconditonal moments: the stability condition is not satisfied for all regimes.")
+      return(NULL)
+    }
+  }
 
   reg_means <- get_regime_means(p=p, M=M, d=d, params=params, weight_function=weigth_function,
                                 weightfun_pars=weightfun_pars, cond_dist=cond_dist,

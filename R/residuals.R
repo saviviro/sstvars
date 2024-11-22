@@ -25,7 +25,7 @@ get_residuals <- function(data, p, M, params,
                           identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                           AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                           standardize=TRUE, structural_shocks=FALSE, penalized=FALSE, penalty_params=c(0.05, 0.5),
-                          allow_non_stab=FALSE) {
+                          allow_unstab=FALSE) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
@@ -48,7 +48,7 @@ get_residuals <- function(data, p, M, params,
                         AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                         weight_constraints=weight_constraints, B_constraints=B_constraints,
                         check_params=TRUE, penalized=penalized, penalty_params=penalty_params,
-                        allow_non_stab=allow_non_stab, to_return="total_cmeans")
+                        allow_unstab=allow_unstab, to_return="total_cmeans")
 
   y_minus_mu <- data[(p + 1):nrow(data),] - mu_t # nonstandardized residuals [T_obs, d]
   if(!standardize) {
@@ -60,7 +60,7 @@ get_residuals <- function(data, p, M, params,
                            AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                            weight_constraints=weight_constraints, B_constraints=B_constraints,
                            check_params=TRUE, penalized=penalized, penalty_params=penalty_params,
-                           allow_non_stab=allow_non_stab, to_return="total_ccovs")
+                           allow_unstab=allow_unstab, to_return="total_ccovs")
 
   all_residuals <- matrix(nrow=T_obs, ncol=d)
   transition_weights <- loglikelihood(data=data, p=p, M=M, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
@@ -68,7 +68,7 @@ get_residuals <- function(data, p, M, params,
                                       AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                                       weight_constraints=weight_constraints, B_constraints=B_constraints,
                                       check_params=TRUE, penalized=penalized, penalty_params=penalty_params,
-                                      allow_non_stab=allow_non_stab,to_return="tw")
+                                      allow_unstab=allow_unstab,to_return="tw")
 
   if(structural_shocks && identification == "heteroskedasticity") { # Obtain W and lambdas
      params_std <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function,
@@ -96,7 +96,7 @@ get_residuals <- function(data, p, M, params,
                               AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                               weight_constraints=weight_constraints, B_constraints=B_constraints,
                               check_params=TRUE, penalized=penalized, penalty_params=penalty_params,
-                              allow_non_stab=allow_non_stab, to_return="tw")
+                              allow_unstab=allow_unstab, to_return="tw")
     all_Bt <- get_Bt_Cpp(all_Omegas=all_Omegas, alpha_mt=alpha_mt)
   }
 

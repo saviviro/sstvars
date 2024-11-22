@@ -75,7 +75,7 @@ in_paramspace <- function(p, M, d, params,
                           weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                           identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                           B_constraints=NULL, other_constraints=NULL, all_boldA, all_Omegas, weightpars, distpars,
-                          transition_weights, allow_non_stab=FALSE, stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8,
+                          transition_weights, allow_unstab=FALSE, stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8,
                           weightpar_tol=1e-8) {
   # in_paramspace is internal function that always takes in non-constrained reduced form parameter vector
   # Reform the parameter vectors before checking with in_paramspace
@@ -123,7 +123,7 @@ in_paramspace <- function(p, M, d, params,
   }
 
   # Check stability conditions of a linear VAR
-  if(!allow_non_stab && !stab_conds_satisfied(p=p, M=M, d=d, all_boldA=all_boldA, tolerance=stab_tol)) {
+  if(!allow_unstab && !stab_conds_satisfied(p=p, M=M, d=d, all_boldA=all_boldA, tolerance=stab_tol)) {
     return(FALSE)
   }
 
@@ -212,7 +212,7 @@ check_params <- function(data, p, M, d, params,
                          parametrization=c("intercept", "mean"),
                          identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                          AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL, transition_weights,
-                         allow_non_stab=FALSE, stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
+                         allow_unstab=FALSE, stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
@@ -305,7 +305,7 @@ check_params <- function(data, p, M, d, params,
   } else if(weight_function == "exogenous") {
     # No weightpars to test
   }
-  if(!allow_non_stab && !stab_conds_satisfied(p=p, M=M, d=d, all_boldA=all_boldA, tolerance=stab_tol)) {
+  if(!allow_unstab && !stab_conds_satisfied(p=p, M=M, d=d, all_boldA=all_boldA, tolerance=stab_tol)) {
     stop("At least one of the regimes does not satisfy the stability condition (with large enough numerical tolerance)!")
   }
   if(cond_dist != "ind_Student" && cond_dist != "ind_skewed_t" && identification != "non-Gaussianity") {

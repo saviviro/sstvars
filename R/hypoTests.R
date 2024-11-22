@@ -247,7 +247,7 @@ Rao_test <- function(stvar) {
   B_constraints <- stvar$model$B_constraints
   penalized <- stvar$penalized
   penalty_params <- stvar$penalty_params
-  allow_non_stab <- stvar$allow_non_stab
+  allow_unstab <- stvar$allow_unstab
   params <- reform_constrained_pars(p=p, M=M, d=d, params=params,
                                     weight_function=weight_function, weightfun_pars=weightfun_pars,
                                     cond_dist=cond_dist, identification=identification, AR_constraints=AR_constraints,
@@ -257,7 +257,7 @@ Rao_test <- function(stvar) {
                      weight_function=weight_function, weightfun_pars=weightfun_pars,
                      cond_dist=cond_dist, identification=identification, AR_constraints=NULL,
                      mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
-                     penalized=penalized, penalty_params=penalty_params, allow_non_stab=allow_non_stab)
+                     penalized=penalized, penalty_params=penalty_params, allow_unstab=allow_unstab)
 
   # Calculate the gradient:
   Grad <- tryCatch(get_gradient(new_stvar),
@@ -282,7 +282,7 @@ Rao_test <- function(stvar) {
                     weight_constraints=new_stvar$model$weight_constraints,
                     B_constraints=new_stvar$model$B_constraints,
                     penalized=new_stvar$penalized, penalty_params=new_stvar$penalty_params,
-                    allow_non_stab=new_stvar$allow_non_stab, to_return="terms", minval=NA,)[which_obs]
+                    allow_unstab=new_stvar$allow_unstab, to_return="terms", minval=NA,)[which_obs]
   }
   T_obs <- nrow(new_stvar$data) - new_stvar$model$p
   outer_prods <- array(dim=c(length(Grad), length(Grad), T_obs))

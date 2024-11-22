@@ -491,7 +491,7 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
                                    B_constraints=stvar$model$B_constraints, mean_constraints=stvar$model$mean_constraints,
                                    AR_constraints=stvar$model$AR_constraints, weight_constraints=stvar$model$weight_constraints,
                                    penalized=stvar$penalized, penalty_params=stvar$penalty_params,
-                                   allow_non_stab=stvar$allow_non_stab, structural_shocks=TRUE)
+                                   allow_unstab=stvar$allow_unstab, structural_shocks=TRUE)
     } else {
       data_shocks <- stvar$structural_shocks
     }

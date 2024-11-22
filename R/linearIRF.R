@@ -153,6 +153,10 @@ linear_IRF <- function(stvar, N=30, regime=1, which_cumulative=numeric(0), scale
   mean_constraints <- stvar$model$mean_constraints
   weight_constraints <- stvar$model$weight_constraints
   B_constraints <- stvar$model$B_constraints
+  penalized <- stvar$penalized
+  penalty_params <- stvar$penalty_params
+  allow_unstab <- stvar$allow_unstab
+
   stopifnot(regime <= M)
   params <- reform_constrained_pars(p=p, M=M, d=d, params=params,
                                     weight_function=weight_function, weightfun_pars=weightfun_pars,
@@ -166,12 +170,6 @@ linear_IRF <- function(stvar, N=30, regime=1, which_cumulative=numeric(0), scale
                                      AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
                                      B_constraints=NULL, change_to="intercept")
   }
-  all_mu <- get_regime_means(p=p, M=M, d=d, params=params,
-                             weight_function=weight_function, weightfun_pars=weightfun_pars,
-                             cond_dist=cond_dist, parametrization="intercept",
-                             identification=identification,
-                             AR_constraints=NULL, mean_constraints=NULL,
-                             weight_constraints=NULL, B_constraints=NULL)
   all_phi0 <- pick_phi0(M=M, d=d, params=params)
   all_A <- pick_allA(p=p, M=M, d=d, params=params)
   all_Omega <- pick_Omegas(p=p, M=M, d=d, params=params, cond_dist=cond_dist,
@@ -412,6 +410,7 @@ linear_IRF <- function(stvar, N=30, regime=1, which_cumulative=numeric(0), scale
                                identification=identification, AR_constraints=AR_constraints,
                                mean_constraints=mean_constraints, weight_constraints=new_weight_constraints,
                                B_constraints=new_B_constraints, other_constraints=other_constraints,
+                               penalized=penalized, penalty_params=penalty_params, allow_unstab=allow_unstab,
                                seed=seed)
 
       # Get the IRF from the bootstrap replication

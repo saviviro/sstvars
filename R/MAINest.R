@@ -226,8 +226,8 @@
 fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                      weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                      parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
-                     estim_method, penalized, penalty_params=c(0.05, 0.2), nrounds=(M + 1)^5, ncores=2, maxit=1000, seeds=NULL,
-                     print_res=TRUE, use_parallel=TRUE, ...) {
+                     estim_method, penalized, penalty_params=c(0.05, 0.2), allow_unstab, nrounds, ncores=2, maxit=1000, seeds=NULL,
+                     print_res=TRUE, use_parallel=TRUE, calc_std_errors=TRUE, ...) {
   # Initial checks etc
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -260,11 +260,13 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     penalized <- estim_method == "three-phase" # Penalize in three-phase estimation
   }
   stopifnot(is.numeric(penalty_params) && length(penalty_params) == 2 && all(penalty_params >= 0) && penalty_params[1] < 1)
-  allow_non_stab <- ifelse(weight_function == "relative_dens", FALSE, penalized) # Allow unstable estimates?
+  if(missing(allow_unstab)) {
+    allow_unstab <- ifelse(weight_function == "relative_dens", FALSE, penalized) # Allow unstable estimates?
 
+  }
   if(parametrization == "mean") {
     message("Unstable estimates are cannot be allowed with mean parametrization")
-    allow_non_stab <- FALSE
+    allow_unstab <- FALSE
   }
 
   if(missing(nrounds)) {
@@ -273,6 +275,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     } else { # three-phase estimation, GA estimation of distribution params only
       nrounds <- (M*ncol(data))^2
     }
+  } else {
+    stopifnot(length(nrounds) == 1 && all_pos_ints(nrounds))
   }
 
   if(length(M) != 1 && !all_pos_ints(M)) stop("Argument M must be a positive integer")
@@ -309,24 +313,13 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     ifelse(is.null(AR_constraints), p*d^2, ncol(AR_constraints)/M) + # AR params
     ifelse(cond_dist %in% c("ind_Student", "ind_skewed_t"), d^2, d*(d + 1)/2) # Covmat params
 
-  dot_params <- list(...)
-
   if(pars_per_reg > d*T_obs/M/2) {
     if(estim_method == "two-phase") { # For three phase, a message is given in LS_estim or NLS_estim
       message("The model has a large number of parameters per regime, which may lead to overfitting.")
     }
   }
-  if(pars_per_reg > d*T_obs/M/1.1) {
-    bound_by_weights <- FALSE
-  } else {
-    if(is.null(dot_params$bound_by_weights)) {
-      bound_by_weights <- TRUE
-    } else {
-      bound_by_weights <- dot_params$bound_by_weights
-    }
-  }
-  bound_by_weights <- FALSE
 
+  dot_params <- list(...)
   minval <- ifelse(is.null(dot_params$minval), get_minval(data), dot_params$minval)
   red_criteria <- ifelse(rep(is.null(dot_params$red_criteria), 2), c(0.05, 0.01), dot_params$red_criteria)
 
@@ -368,14 +361,13 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     any_eigen_large <- FALSE
     for(m in 1:M) { # Check stability conditon for each regime
       boldA_mods <- abs(eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$values)
-      cat("\nRegime", m, ":", round(boldA_mods, 4), "\n\n")
       stab_ok[m] <- all(boldA_mods < 1 - stab_tol_to_use)
       if(any(boldA_mods > 1.3)) {
         any_eigen_large <- TRUE
       }
     }
 
-    if(!allow_non_stab) {
+    if(!allow_unstab) {
       if(!all(stab_ok)) {
         message("The least squares estimates do not satisfy the stability condition (with a large enough margin)!")
         if(any_eigen_large) {
@@ -447,7 +439,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     ## Obtain the LS results with the correct parametrization (to be included in the returned object):
     if(parametrization == "intercept") {
       LS_res_to_ret <- LS_results # Return LS estimates in the intercept paramatrization
-    } else { # Parametrization = "mean" and thus, allow_non_stab = FALSE
+    } else { # Parametrization = "mean" and thus, allow_unstab = FALSE
       # Change the LS_res_to_ret to mean parametrization:
       if(is.null(AR_constraints)) {
         mean_and_ar_pars <- LS_results[1:(M*d + M*p*d^2)]
@@ -463,23 +455,6 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       LS_res_to_ret[1:(M*d)] <- vapply(1:M, function(m) solve(Id - rowSums(all_A[, , , m, drop=FALSE], dims=2), all_phi0[,m]), numeric(d))
     }
   }
-
-  ############
-  Y <- reform_data(data, p) # (T_obs + 1 x dp)
-  Y2 <- Y[1:T_obs, , drop=FALSE] # Last row removed; not needed when only lagged observations used
-
-  # The transition weights: (T x M) matrix, the t:th row is for the time point t and the m:th column is for the regime m.
-  alpha_mt <- get_alpha_mt(data, Y2=Y2, p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                           weightpars=LS_results[length(LS_results)]) # Transition weights (T x M), t:th row
-  print("Obs per reg in LS estim (not multiplied by d):")
-  print(colSums(alpha_mt))
-  print("Obs per reg in LS estim (multiplied by d):")
-  print(d*colSums(alpha_mt))
-  print("Pars per regime:")
-  print(pars_per_reg)
-
-  print("Threshold par LS estim:")
-  print(round(LS_results[length(LS_results)], 3))
 
   #####################################################################
   ## PHASE 1 or 2: estimate all parameters with ta genetic algorithm ##
@@ -514,7 +489,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                                                                  fixed_params=fixed_params,
                                                                  penalized=penalized,
                                                                  penalty_params=penalty_params,
-                                                                 allow_non_stab=allow_non_stab,
+                                                                 allow_unstab=allow_unstab,
                                                                  seed=seeds[i1], ...), cl=cl)
 
   } else {
@@ -531,7 +506,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
             fixed_params=fixed_params,
             penalized=penalized,
             penalty_params=penalty_params,
-            allow_non_stab=allow_non_stab,
+            allow_unstab=allow_unstab,
             seed=seeds[i1], ...)
     }
     GAresults <- lapply(1:nrounds, function(i1) tmpfunGA(i1, ...))
@@ -544,9 +519,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                                                        identification="reduced_form", AR_constraints=AR_constraints,
                                                        mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                                                        B_constraints=NULL, to_return="loglik", check_params=TRUE,
-                                                       penalized=penalized, penalty_params=penalty_params, allow_non_stab=allow_non_stab,
-                                                       bound_by_weights=bound_by_weights, minval=minval,
-                                                       alt_par=TRUE), numeric(1)) # GA results always in alt_par
+                                                       penalized=penalized, penalty_params=penalty_params, allow_unstab=allow_unstab,
+                                                       minval=minval, alt_par=TRUE), numeric(1)) # GA results always in alt_par
 
   if(print_res) {
     print_loks <- function(loks) {
@@ -586,8 +560,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                            mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                            B_constraints=NULL, to_return="loglik", check_params=TRUE, penalized=penalized,
                            penalty_params=penalty_params,
-                           allow_non_stab=allow_non_stab, bound_by_weights=bound_by_weights,
-                           minval=minval, alt_par=TRUE), # alt_par used in the GA estimation
+                           allow_unstab=allow_unstab, minval=minval, alt_par=TRUE), # alt_par used in the GA estimation
              error=function(e) minval)
   }
 
@@ -609,7 +582,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     tmpfunNE <- function(i1) {
       if(!no_prints) message(i1, "/", nrounds, "\r")
       optim(par=GAresults[[i1]], fn=loglik_fn,  gr=loglik_grad,
-            method="BFGS", control=list(fnscale=-1, maxit=maxit, trace=6))
+            method="BFGS", control=list(fnscale=-1, maxit=maxit, trace=0))
     }
     NEWTONresults <- lapply(1:nrounds, function(i1) tmpfunNE(i1))
   }
@@ -685,21 +658,20 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                               identification="reduced_form", AR_constraints=NULL,
                               mean_constraints=NULL, B_constraints=NULL, weight_constraints=NULL,
                               to_return="tw", check_params=TRUE, penalized=penalized, penalty_params=penalty_params,
-                              allow_non_stab=allow_non_stab,
-                              bound_by_weights=bound_by_weights, minval=matrix(0, nrow=n_obs-p, ncol=M))
+                              allow_unstab=allow_unstab, minval=matrix(0, nrow=n_obs-p, ncol=M))
     tweights_ok <- !any(vapply(1:M, function(m) sum(tweights[,m] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
     if(Omegas_ok && stat_ok && tweights_ok && weightpars_ok) {
       which_best_fit <- which_round # The estimation round of the appropriate estimate with the largest loglik
-      if(!no_prints) message(paste0("Filtered through ", i1-1, " inappropriate ", ifelse(allow_non_stab, "(or unstable)", ""),
+      if(!no_prints) message(paste0("Filtered through ", i1-1, " inappropriate ", ifelse(allow_unstab, "(or unstable)", ""),
                                    " estimates with a larger log-likelihood"))
       break
     }
     if(i1 == length(all_estimates)) {
-      message(paste0("No 'appropriate'", ifelse(allow_non_stab, "(or unstable)", ""),
+      message(paste0("No 'appropriate'", ifelse(allow_unstab, "(or unstable)", ""),
                      "estimates found! Check that all the variables are scaled to vary in similar magninutes, ",
                      "also not very small or large magnitudes."))
       message("Consider running more estimation rounds or study the obtained estimates one-by-one with the function alt_stvar.")
-      if(allow_non_stab) {
+      if(allow_unstab) {
         message("Unstable estimates were allowed in the estimation. Consider also using penalized estimation with a higher value
                  for the tuning parameter in 'penalty_params'.")
       }
@@ -752,8 +724,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                                       identification="reduced_form", AR_constraints=AR_constraints,
                                       mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                                       B_constraints=NULL, to_return="tw", check_params=TRUE, penalized=penalized,
-                                      penalty_params=penalty_params, allow_non_stab=allow_non_stab,
-                                      bound_by_weights=bound_by_weights, minval=minval)
+                                      penalty_params=penalty_params, allow_unstab=allow_unstab, minval=minval)
   if(any(vapply(1:M, function(i1) sum(transition_weights[,i1] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))) {
     message("At least one of the regimes in the estimated model seems to be wasted in the best fitting individual!")
   }
@@ -772,8 +743,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                B_constraints=NULL,
                penalized=penalized,
                penalty_params=penalty_params,
-               allow_non_stab=allow_non_stab,
-               calc_std_errors=FALSE)
+               allow_unstab=allow_unstab,
+               calc_std_errors=calc_std_errors)
   ret$all_estimates <- all_estimates
   ret$all_logliks <- loks
   ret$which_converged <- converged
@@ -781,7 +752,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   if(estim_method == "three-phase") {
     ret$LS_estimates <- LS_res_to_ret # Least squares estimates (mean or intercept parametrization)
   }
-  warn_eigens(ret, allow_non_stab=allow_non_stab)
+  warn_eigens(ret, allow_unstab=allow_unstab)
   if(!no_prints) message("Finished!\n")
   ret
 }

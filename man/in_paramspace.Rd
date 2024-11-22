@@ -22,7 +22,7 @@ in_paramspace(
   weightpars,
   distpars,
   transition_weights,
-  allow_non_stab = FALSE,
+  allow_unstab = FALSE,
   stab_tol = 0.001,
   posdef_tol = 1e-08,
   distpar_tol = 1e-08,
@@ -193,7 +193,7 @@ obtained from \code{form_boldA}. Will be computed if not given.}
 A \eqn{T \times M} matrix containing the transition weights. If \code{cond_dist="ind_Student"} checks that the impact matrix
 \eqn{\sum_{m=1}^M\alpha_{m,t}^{1/2}B_m} is invertible for all \eqn{t=1,...,T}.}
 
-\item{allow_non_stab}{If \code{TRUE}, estimates not satisfying the stability condition are allowed. Always \code{FALSE} if
+\item{allow_unstab}{If \code{TRUE}, estimates not satisfying the stability condition are allowed. Always \code{FALSE} if
 \code{weight_function="relative_dens"}.}
 
 \item{stab_tol}{numerical tolerance for stability of condition of the regimes: if the "bold A" matrix of any regime

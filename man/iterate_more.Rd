@@ -10,7 +10,7 @@ iterate_more(
   h = 0.001,
   penalized,
   penalty_params,
-  allow_non_stab,
+  allow_unstab,
   calc_std_errors = TRUE,
   print_trace = TRUE
 )
@@ -33,7 +33,7 @@ the first element determined how far from the boundary of the stability region t
 (a number between zero and one, smaller number starts penalization closer to the boundary) and the second element
 is a tuning parameter for the penalization (a positive real number, a higher value penalizes non-stability more).}
 
-\item{allow_non_stab}{If \code{TRUE}, estimates not satisfying the stability condition are allowed. Always \code{FALSE} if
+\item{allow_unstab}{If \code{TRUE}, estimates not satisfying the stability condition are allowed. Always \code{FALSE} if
 \code{weight_function="relative_dens"}.}
 
 \item{calc_std_errors}{should approximate standard errors be calculated?}

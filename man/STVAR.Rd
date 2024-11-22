@@ -29,7 +29,7 @@ STVAR(
   B_constraints = NULL,
   penalized = FALSE,
   penalty_params = c(0.05, 1),
-  allow_non_stab = FALSE,
+  allow_unstab = FALSE,
   calc_std_errors = FALSE
 )
 
@@ -213,7 +213,7 @@ the first element determined how far from the boundary of the stability region t
 (a number between zero and one, smaller number starts penalization closer to the boundary) and the second element
 is a tuning parameter for the penalization (a positive real number, a higher value penalizes non-stability more).}
 
-\item{allow_non_stab}{If \code{TRUE}, estimates not satisfying the stability condition are allowed. Always \code{FALSE} if
+\item{allow_unstab}{If \code{TRUE}, estimates not satisfying the stability condition are allowed. Always \code{FALSE} if
 \code{weight_function="relative_dens"}.}
 
 \item{calc_std_errors}{should approximate standard errors be calculated?}
