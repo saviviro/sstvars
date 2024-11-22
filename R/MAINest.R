@@ -591,41 +591,6 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
              error=function(e) minval)
   }
 
-  loglik_fn2 <- function(params) {
-    pars_std <- reform_constrained_pars(p=p, M=M, d=d, params=params,
-                                        weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                        cond_dist=cond_dist, identification="reduced_form",
-                                        AR_constraints=AR_constraints, mean_constraints=mean_constraints,
-                                        weight_constraints=weight_constraints,
-                                        B_constraints=NULL) # Pars in standard form for pick pars fns
-    boldA_eigens <- get_boldA_eigens_par(p=p, M=M, d=d, params=pars_std,
-                                         weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                         cond_dist=cond_dist, identification="reduced_form",
-                                         AR_constraints=NULL, mean_constraints=NULL,
-                                         weight_constraints=NULL, B_constraints=NULL)
-    print(paste("Bold A eigs:", paste(round(c(boldA_eigens[1:2,]), 3), collapse=", "), "| Loglik:",
-          round(loglikelihood(data=data, p=p, M=M, params=params,
-                              weight_function=weight_function, weightfun_pars=weightfun_pars,
-                              cond_dist=cond_dist, parametrization=parametrization,
-                              identification="reduced_form", AR_constraints=AR_constraints,
-                              mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                              B_constraints=NULL, to_return="loglik", check_params=TRUE, penalized=penalized,
-                              penalty_params=penalty_params,
-                              allow_non_stab=allow_non_stab, bound_by_weights=bound_by_weights,
-                              minval=minval, alt_par=TRUE), 3)))
-
-    tryCatch(loglikelihood(data=data, p=p, M=M, params=params,
-                           weight_function=weight_function, weightfun_pars=weightfun_pars,
-                           cond_dist=cond_dist, parametrization=parametrization,
-                           identification="reduced_form", AR_constraints=AR_constraints,
-                           mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                           B_constraints=NULL, to_return="loglik", check_params=TRUE, penalized=penalized,
-                           penalty_params=penalty_params,
-                           allow_non_stab=allow_non_stab, bound_by_weights=bound_by_weights,
-                           minval=minval, alt_par=TRUE), # alt_par used in the GA estimation
-             error=function(e) minval)
-  }
-
   ## A function to calculate the gradient of the log-likelihood function# using central difference approximation:
   h <- 1e-3
   I <- diag(rep(1, times=npars))
@@ -643,7 +608,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   } else {
     tmpfunNE <- function(i1) {
       if(!no_prints) message(i1, "/", nrounds, "\r")
-      optim(par=GAresults[[i1]], fn=loglik_fn2,  gr=loglik_grad,
+      optim(par=GAresults[[i1]], fn=loglik_fn,  gr=loglik_grad,
             method="BFGS", control=list(fnscale=-1, maxit=maxit, trace=6))
     }
     NEWTONresults <- lapply(1:nrounds, function(i1) tmpfunNE(i1))

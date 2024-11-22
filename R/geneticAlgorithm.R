@@ -223,6 +223,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
   data <- check_data(data=data, p=p)
   d <- ncol(data)
   n_obs <- nrow(data)
+  T_obs <- nrow(data) - p
   if(!is.null(fixed_params) && parametrization != "intercept") {
     stop("fixed_params should be used with parametrization='intercept'")
   }
