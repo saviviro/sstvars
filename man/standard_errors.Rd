@@ -21,7 +21,7 @@ standard_errors(
   weight_constraints = NULL,
   B_constraints = NULL,
   penalized = FALSE,
-  penalty_params = c(0.05, 0.5),
+  penalty_params = c(0.05, 0.2),
   allow_non_stab = FALSE,
   minval
 )

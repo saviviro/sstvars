@@ -7,9 +7,10 @@
 iterate_more(
   stvar,
   maxit = 100,
-  h = 1e-04,
+  h = 0.001,
   penalized,
   penalty_params,
+  allow_non_stab,
   calc_std_errors = TRUE,
   print_trace = TRUE
 )
@@ -19,8 +20,8 @@ iterate_more(
 
 \item{maxit}{the maximum number of iterations in the variable metric algorithm.}
 
-\item{h}{the step sizes used in the central difference approximation of the gradient of the log-likelihood function
-for each parameter are given as \code{h*(1 + abs(params))}. Thus, \code{h} should be a small positive number.}
+\item{h}{the step size used in the central difference approximation of the gradient of the log-likelihood function, so
+\code{h} should be a small positive real number.}
 
 \item{penalized}{should penalized log-likelihood function be used that penalizes the log-likelihood function when
 the parameter values are close the boundary of the stability region or outside it? If \code{TRUE}, estimates
@@ -31,6 +32,9 @@ The default is \code{TRUE} for three-phase estimation and \code{FALSE} for two-p
 the first element determined how far from the boundary of the stability region the penalization starts
 (a number between zero and one, smaller number starts penalization closer to the boundary) and the second element
 is a tuning parameter for the penalization (a positive real number, a higher value penalizes non-stability more).}
+
+\item{allow_non_stab}{If \code{TRUE}, estimates not satisfying the stability condition are allowed. Always \code{FALSE} if
+\code{weight_function="relative_dens"}.}
 
 \item{calc_std_errors}{should approximate standard errors be calculated?}
 

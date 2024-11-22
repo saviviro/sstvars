@@ -115,6 +115,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   mean_constraints <- stvar$model$mean_constraints
   weight_constraints <- stvar$model$weight_constraints
   B_constraints <- stvar$model$B_constraints
+  allow_non_stab <- stvar$allow_non_stab # Always FALSE with relative_dens weight function
 
   # Check the exogenous weights given for simulation
   if(weight_function == "exogenous") {
@@ -152,7 +153,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
                              cond_dist=cond_dist, parametrization="intercept",
                              identification=identification,
                              AR_constraints=NULL, mean_constraints=NULL,
-                             weight_constraints=NULL, B_constraints=NULL)
+                             weight_constraints=NULL, B_constraints=NULL) # Not necessarily valid if allow_non_stab
   all_phi0 <- pick_phi0(M=M, d=d, params=params)
   all_A <- pick_allA(p=p, M=M, d=d, params=params)
   all_A2 <- array(all_A, dim=c(d, d*p, M)) # cbind coefficient matrices of each component: m:th component is obtained at [, , m]
@@ -170,7 +171,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   }
 
   # Calculate statistics that remain constant through the iterations
-  if(cond_dist == "Gaussian" || weight_function == "relative_dens") {
+  if((cond_dist == "Gaussian" && !allow_non_stab) || weight_function == "relative_dens") {
     # Initial regime Gaussian stat dist simu + relative_dens weight function uses this;
     # relative dens only has Gaussian cond dist, but it is used in simulate_from_regime with Student cond dist
      Sigmas <- get_Sigmas(p=p, M=M, d=d, all_A=all_A, all_boldA=all_boldA, all_Omegas=all_Omegas)
@@ -201,7 +202,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
 
   # Set/generate initial values
   if(is.null(init_values)) {
-    if(cond_dist == "Gaussian") {
+    if(cond_dist == "Gaussian" && !allow_non_stab) {
       # Generate the initial values from the stationary distribution of init_regime; Gaussian dist
       mu <- rep(all_mu[, init_regime], p)
       L <- t(chol_Sigmas[, , init_regime]) # Lower triangle
@@ -492,6 +493,7 @@ simulate_from_regime <- function(stvar, regime=1, nsim=1, init_values=NULL, use_
   mean_constraints <- stvar$model$mean_constraints
   weight_constraints <- stvar$model$weight_constraints
   B_constraints <- stvar$model$B_constraints
+  allow_non_stab <- stvar$allow_non_stab
 
   # Collect parameter values
   params <- reform_constrained_pars(p=p, M=M, d=d, params=stvar$params,
@@ -525,7 +527,7 @@ simulate_from_regime <- function(stvar, regime=1, nsim=1, init_values=NULL, use_
   # to building the model.
   new_stvar <- STVAR(p=p, M=1, d=d, params=new_params, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist=cond_dist,
                      parametrization="intercept", identification="reduced_form", AR_constraints=NULL, mean_constraints=NULL,
-                     weight_constraints=NULL, B_constraints=NULL, calc_std_errors=FALSE)
+                     weight_constraints=NULL, B_constraints=NULL, calc_std_errors=FALSE, allow_non_stab=allow_non_stab)
 
   if(is.null(init_values)) {
     all_mu <- get_regime_means(p=p, M=M, d=d, params=params,
@@ -547,7 +549,7 @@ simulate_from_regime <- function(stvar, regime=1, nsim=1, init_values=NULL, use_
                         cond_dist=stvar$model$cond_dist, parametrization=stvar$model$parametrization,
                         identification=stvar$model$identification, AR_constraints=stvar$model$AR_constraints,
                         mean_constraints=stvar$model$mean_constraints, weight_constraints=stvar$model$weight_constraints,
-                        B_constraints=stvar$model$B_constraints, to_return="tw")
+                        B_constraints=stvar$model$B_constraints, to_return="tw", allow_non_stab=allow_non_stab)
     tw <- tw[(nsim + 1):(nrow(tw)), regime] # Take the transition weights of the last 100 observations
     twmax_ind <- which(abs(tw - max(tw)) < 0.001)[1] # Ind with highest tw, but not exactly to avoid overly skewed results
     samp <- ret[(nsim-p+1):nrow(ret), , drop=FALSE] # -p so the twmax_ind is tw_ind - p + 1

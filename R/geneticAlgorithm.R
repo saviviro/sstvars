@@ -160,6 +160,8 @@
 #'   Note that \code{fixed_params} should always be in the intercept parametrization (and \code{parametrization="intercept"} should always be used).
 #'   \strong{Passing this argument from fitSTVAR in does not do anything, as it is designed to be used with the three-phase estimation
 #'           procedure only. Also, this argument does not do anything if the initial population is specified in the argument initpop.}
+#' @param fixed_params_in_smart_mu should the fixed parameters be fixed in the smart mutation phase as well? If \code{TRUE}, the fixed
+#'   parameters stay fixed throughout the whole GA estimation.
 #' @param seed a single value, interpreted as an integer, or NULL, that sets seed for the random number generator in
 #'   the beginning of the function call. If calling \code{GAfit} from \code{fitSTVAR}, use the argument \code{seeds}
 #'   instead of passing the argument \code{seed}.
@@ -208,7 +210,8 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                   ngen=200, popsize, smart_mu=min(100, ceiling(0.5*ngen)), initpop=NULL,  mu_scale, mu_scale2, omega_scale,
                   B_scale, weight_scale, ar_scale=0.2, upper_ar_scale=1, ar_scale2=1, regime_force_scale=1,
                   penalized, penalty_params=c(0.05, 0.5), allow_non_stab, red_criteria=c(0.05, 0.01), bound_by_weights,
-                  pre_smart_mu_prob=0, to_return=c("alt_ind", "best_ind"), minval,fixed_params=NULL, seed=NULL) {
+                  pre_smart_mu_prob=0, to_return=c("alt_ind", "best_ind"), minval, fixed_params=NULL,
+                  fixed_params_in_smart_mu=TRUE, seed=NULL) {
 
   # Required values and preliminary checks
   set.seed(seed)
@@ -365,6 +368,11 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
       message("allow_non_stab is not possible with relative_dens weight function")
       allow_non_stab <- FALSE
     }
+  }
+  if(!is.null(fixed_params) && fixed_params_in_smart_mu) {
+    sm_fixed_params <- fixed_params
+  } else {
+    sm_fixed_params <- NULL
   }
 
   stopifnot(pre_smart_mu_prob >= 0 && pre_smart_mu_prob <= 1)

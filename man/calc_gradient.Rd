@@ -9,17 +9,17 @@
 \alias{get_soc}
 \title{Calculate gradient or Hessian matrix}
 \usage{
-calc_gradient(x, fn, h, ...)
+calc_gradient(x, fn, h = 0.001, ...)
 
 calc_hessian(x, fn, h, ...)
 
-get_gradient(stvar)
+get_gradient(stvar, ...)
 
-get_hessian(stvar)
+get_hessian(stvar, ...)
 
-get_foc(stvar)
+get_foc(stvar, ...)
 
-get_soc(stvar)
+get_soc(stvar, ...)
 }
 \arguments{
 \item{x}{a numeric vector specifying the point where the gradient or Hessian should be calculated.}
@@ -27,10 +27,9 @@ get_soc(stvar)
 \item{fn}{a function that takes in argument \code{x} as the \strong{first} argument.}
 
 \item{h}{difference used to approximate the derivatives: either a positive real number of a vector of
-positive real numbers with the same length as \code{x}. Default adjusts the step size depending on
-the magnitude of the elements in \code{x}.}
+positive real numbers with the same length as \code{x}.}
 
-\item{...}{other arguments passed to \code{fn}}
+\item{...}{other arguments passed to \code{fn} (or argument passed to \code{calc_gradient} or \code{calc_hessian}).}
 
 \item{stvar}{object of class \code{"stvar"}}
 }

@@ -237,7 +237,7 @@ loglikelihood <- function(data, p, M, params,
                           AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                           other_constraints=NULL,
                           to_return=c("loglik", "tw", "loglik_and_tw", "terms", "regime_cmeans", "total_cmeans", "total_ccovs", "B_t"),
-                          check_params=TRUE, penalized=FALSE, penalty_params=c(0.05, 0.5), allow_non_stab=FALSE, bound_by_weights=FALSE,
+                          check_params=TRUE, penalized=FALSE, penalty_params=c(0.05, 0.2), allow_non_stab=FALSE, bound_by_weights=FALSE,
                           indt_R=FALSE, alt_par=FALSE, minval=NULL, stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
 
   # Match args

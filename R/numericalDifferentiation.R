@@ -11,9 +11,8 @@
 #' @param x a numeric vector specifying the point where the gradient or Hessian should be calculated.
 #' @param fn a function that takes in argument \code{x} as the \strong{first} argument.
 #' @param h difference used to approximate the derivatives: either a positive real number of a vector of
-#'   positive real numbers with the same length as \code{x}. Default adjusts the step size depending on
-#'   the magnitude of the elements in \code{x}.
-#' @param ... other arguments passed to \code{fn}
+#'   positive real numbers with the same length as \code{x}.
+#' @param ... other arguments passed to \code{fn} (or argument passed to \code{calc_gradient} or \code{calc_hessian}).
 #' @details In particular, the functions \code{get_foc} and \code{get_soc} can be used to check whether
 #'   the found estimates denote a (local) maximum point, a saddle point, or something else. Note that
 #'   profile log-likelihood functions can be conveniently plotted with the function \code{profile_logliks}.
@@ -48,17 +47,13 @@
 #' get_soc(mod112)
 #' @export
 
-calc_gradient <- function(x, fn, h, ...) {
+calc_gradient <- function(x, fn, h=1e-3, ...) {
   fn <- match.fun(fn)
   n <- length(x)
   I <- diag(1, nrow=n, ncol=n)
-  if(missing(h)) {
-    h <- 1e-4*(1 + abs(x)) # The difference used in the gradient
-  } else {
-    stopifnot(is.numeric(h) && (length(h) == 1 || length(h) == n) && all(h > 0))
-    if(length(h) == 1) {
-      h <- rep(h, times=n)
-    }
+  stopifnot(is.numeric(h) && (length(h) == 1 || length(h) == n) && all(h > 0))
+  if(length(h) == 1) {
+    h <- rep(h, times=n)
   }
   vapply(1:n, function(i1) (fn(x + h[i1]*I[i1,], ...) - fn(x - h[i1]*I[i1,], ...))/(2*h[i1]), numeric(1))
 }
@@ -71,13 +66,9 @@ calc_hessian <- function(x, fn, h, ...) {
   fn <- match.fun(fn)
   n <- length(x)
   I <- diag(1, nrow=n, ncol=n)
-  if(missing(h)) {
-    h <- 1e-4*(1 + abs(x)) # The difference used in the gradient
-  } else {
-    stopifnot(is.numeric(h) && (length(h) == 1 || length(h) == n) && all(h > 0))
-    if(length(h) == 1) {
-      h <- rep(h, times=n)
-    }
+  stopifnot(is.numeric(h) && (length(h) == 1 || length(h) == n) && all(h > 0))
+  if(length(h) == 1) {
+    h <- rep(h, times=n)
   }
   Hess <- matrix(ncol=n, nrow=n)
   for(i1 in 1:n) {
@@ -95,7 +86,33 @@ calc_hessian <- function(x, fn, h, ...) {
 #' @rdname calc_gradient
 #' @export
 
-get_gradient <- function(stvar) {
+get_gradient <- function(stvar, ...) {
+  foo <- function(x) {
+    # Log-likelihood function as a function of the parameter
+    loglikelihood(data=stvar$data, p=stvar$model$p, M=stvar$model$M, params=x,
+                  weight_function=stvar$model$weight_function,
+                  weightfun_pars=stvar$model$weightfun_pars,
+                  cond_dist=stvar$model$cond_dist,
+                  parametrization=stvar$model$parametrization,
+                  identification=stvar$model$identification,
+                  AR_constraints=stvar$model$AR_constraints,
+                  mean_constraints=stvar$model$mean_constraints,
+                  weight_constraints=stvar$model$weight_constraints,
+                  B_constraints=stvar$model$B_constraints,
+                  penalized=stvar$penalized,
+                  penalty_params=stvar$penalty_params,
+                  allow_non_stab=stvar$allow_non_stab,
+                  to_return="loglik", minval=NA)
+  }
+  calc_gradient(x=stvar$params, fn=foo, ...)
+}
+
+
+
+#' @rdname calc_gradient
+#' @export
+
+get_hessian <- function(stvar, ...) {
   check_stvar(stvar)
   foo <- function(x) {
     # Log-likelihood function as a function of the parameter
@@ -114,45 +131,18 @@ get_gradient <- function(stvar) {
                   allow_non_stab=stvar$allow_non_stab,
                   to_return="loglik", minval=NA)
   }
-  calc_gradient(x=stvar$params, fn=foo)
-}
-
-
-
-#' @rdname calc_gradient
-#' @export
-
-get_hessian <- function(stvar) {
-  check_stvar(stvar)
-  foo <- function(x) {
-    # Log-likelihood function as a function of the parameter
-    loglikelihood(data=stvar$data, p=stvar$model$p, M=stvar$model$M, params=x,
-                  weight_function=stvar$model$weight_function,
-                  weightfun_pars=stvar$model$weightfun_pars,
-                  cond_dist=stvar$model$cond_dist,
-                  parametrization=stvar$model$parametrization,
-                  identification=stvar$model$identification,
-                  AR_constraints=stvar$model$AR_constraints,
-                  mean_constraints=stvar$model$mean_constraints,
-                  weight_constraints=stvar$model$weight_constraints,
-                  B_constraints=stvar$model$B_constraints,
-                  penalized=stvar$penalized,
-                  penalty_params=stvar$penalty_params,
-                  allow_non_stab=stvar$allow_non_stab,
-                  to_return="loglik", minval=NA)
-  }
-  calc_hessian(x=stvar$params, fn=foo)
+  calc_hessian(x=stvar$params, fn=foo, ...)
 }
 
 #' @rdname calc_gradient
 #' @export
-get_foc <- function(stvar) {
+get_foc <- function(stvar, ...) {
   get_gradient(stvar)
 }
 
 #' @rdname calc_gradient
 #' @export
-get_soc <- function(stvar) {
+get_soc <- function(stvar, ...) {
   eigen(get_hessian(stvar))$values
 }
 

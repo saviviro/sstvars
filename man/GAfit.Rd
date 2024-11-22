@@ -38,6 +38,7 @@ GAfit(
   to_return = c("alt_ind", "best_ind"),
   minval,
   fixed_params = NULL,
+  fixed_params_in_smart_mu = TRUE,
   seed = NULL
 )
 }
@@ -299,6 +300,9 @@ For models with...
 Note that \code{fixed_params} should always be in the intercept parametrization (and \code{parametrization="intercept"} should always be used).
 \strong{Passing this argument from fitSTVAR in does not do anything, as it is designed to be used with the three-phase estimation
         procedure only. Also, this argument does not do anything if the initial population is specified in the argument initpop.}}
+
+\item{fixed_params_in_smart_mu}{should the fixed parameters be fixed in the smart mutation phase as well? If \code{TRUE}, the fixed
+parameters stay fixed throughout the whole GA estimation.}
 
 \item{seed}{a single value, interpreted as an integer, or NULL, that sets seed for the random number generator in
 the beginning of the function call. If calling \code{GAfit} from \code{fitSTVAR}, use the argument \code{seeds}

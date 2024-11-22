@@ -4,12 +4,15 @@
 \alias{warn_eigens}
 \title{Warn about near-unit-roots in some regimes}
 \usage{
-warn_eigens(stvar, tol = 0.002)
+warn_eigens(stvar, tol = 0.002, allow_non_stab = FALSE)
 }
 \arguments{
 \item{stvar}{object of class \code{"stvar"}}
 
 \item{tol}{if eigenvalue is closer than \code{tol} to its bound, a warning is thrown}
+
+\item{allow_non_stab}{If \code{TRUE}, estimates not satisfying the stability condition are allowed. Always \code{FALSE} if
+\code{weight_function="relative_dens"}.}
 }
 \value{
 Doesn't return anything.

@@ -226,7 +226,7 @@
 fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                      weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                      parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
-                     estim_method, penalized, penalty_params=c(0.05, 0.5), nrounds=(M + 1)^5, ncores=2, maxit=1000, seeds=NULL,
+                     estim_method, penalized, penalty_params=c(0.05, 0.2), nrounds=(M + 1)^5, ncores=2, maxit=1000, seeds=NULL,
                      print_res=TRUE, use_parallel=TRUE, ...) {
   # Initial checks etc
   weight_function <- match.arg(weight_function)
@@ -351,7 +351,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     LS_results <- estim_LS(data=data, p=p, M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
                            cond_dist=cond_dist, parametrization="intercept", AR_constraints=AR_constraints,
                            mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                           penalized=penalized, stab_tol=penalty_params[1], tuning_par=penalty_params[2],
+                           penalized=penalized, penalty_params=penalty_params,
                            ncores=ncores, use_parallel=use_parallel) # Always intercept parametrization used here
 
     # Check whether the least squares estimates satisfy the stability condition
@@ -478,6 +478,9 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   print("Pars per regime:")
   print(pars_per_reg)
 
+  print("Threshold par LS estim:")
+  print(round(LS_results[length(LS_results)], 3))
+
   #####################################################################
   ## PHASE 1 or 2: estimate all parameters with ta genetic algorithm ##
   #####################################################################
@@ -541,8 +544,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                                                        identification="reduced_form", AR_constraints=AR_constraints,
                                                        mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                                                        B_constraints=NULL, to_return="loglik", check_params=TRUE,
-                                                       penalized=penalized, stab_tol_pen=penalty_params[1],
-                                                       tuning_par=penalty_params[2], allow_non_stab=allow_non_stab,
+                                                       penalized=penalized, penalty_params=penalty_params, allow_non_stab=allow_non_stab,
                                                        bound_by_weights=bound_by_weights, minval=minval,
                                                        alt_par=TRUE), numeric(1)) # GA results always in alt_par
 
@@ -583,17 +585,52 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                            identification="reduced_form", AR_constraints=AR_constraints,
                            mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                            B_constraints=NULL, to_return="loglik", check_params=TRUE, penalized=penalized,
-                           stab_tol_pen=penalty_params[1], tuning_par=penalty_params[2],
+                           penalty_params=penalty_params,
+                           allow_non_stab=allow_non_stab, bound_by_weights=bound_by_weights,
+                           minval=minval, alt_par=TRUE), # alt_par used in the GA estimation
+             error=function(e) minval)
+  }
+
+  loglik_fn2 <- function(params) {
+    pars_std <- reform_constrained_pars(p=p, M=M, d=d, params=params,
+                                        weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                        cond_dist=cond_dist, identification="reduced_form",
+                                        AR_constraints=AR_constraints, mean_constraints=mean_constraints,
+                                        weight_constraints=weight_constraints,
+                                        B_constraints=NULL) # Pars in standard form for pick pars fns
+    boldA_eigens <- get_boldA_eigens_par(p=p, M=M, d=d, params=pars_std,
+                                         weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                         cond_dist=cond_dist, identification="reduced_form",
+                                         AR_constraints=NULL, mean_constraints=NULL,
+                                         weight_constraints=NULL, B_constraints=NULL)
+    print(paste("Bold A eigs:", paste(round(c(boldA_eigens[1:2,]), 3), collapse=", "), "| Loglik:",
+          round(loglikelihood(data=data, p=p, M=M, params=params,
+                              weight_function=weight_function, weightfun_pars=weightfun_pars,
+                              cond_dist=cond_dist, parametrization=parametrization,
+                              identification="reduced_form", AR_constraints=AR_constraints,
+                              mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                              B_constraints=NULL, to_return="loglik", check_params=TRUE, penalized=penalized,
+                              penalty_params=penalty_params,
+                              allow_non_stab=allow_non_stab, bound_by_weights=bound_by_weights,
+                              minval=minval, alt_par=TRUE), 3)))
+
+    tryCatch(loglikelihood(data=data, p=p, M=M, params=params,
+                           weight_function=weight_function, weightfun_pars=weightfun_pars,
+                           cond_dist=cond_dist, parametrization=parametrization,
+                           identification="reduced_form", AR_constraints=AR_constraints,
+                           mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                           B_constraints=NULL, to_return="loglik", check_params=TRUE, penalized=penalized,
+                           penalty_params=penalty_params,
                            allow_non_stab=allow_non_stab, bound_by_weights=bound_by_weights,
                            minval=minval, alt_par=TRUE), # alt_par used in the GA estimation
              error=function(e) minval)
   }
 
   ## A function to calculate the gradient of the log-likelihood function# using central difference approximation:
+  h <- 1e-3
   I <- diag(rep(1, times=npars))
   loglik_grad <- function(params) {
-    step_sizes <- 1e-4*(1 + abs(params)) # The difference used in the gradient
-    vapply(1:npars, function(i1) (loglik_fn(params + I[i1,]*step_sizes[i1]) - loglik_fn(params - I[i1,]*step_sizes[i1]))/(2*step_sizes[i1]),
+    vapply(1:npars, function(i1) (loglik_fn(params + I[i1,]*h) - loglik_fn(params - I[i1,]*h))/(2*h),
            numeric(1))
   }
 
@@ -606,7 +643,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   } else {
     tmpfunNE <- function(i1) {
       if(!no_prints) message(i1, "/", nrounds, "\r")
-      optim(par=GAresults[[i1]], fn=loglik_fn,  gr=loglik_grad,
+      optim(par=GAresults[[i1]], fn=loglik_fn2,  gr=loglik_grad,
             method="BFGS", control=list(fnscale=-1, maxit=maxit, trace=6))
     }
     NEWTONresults <- lapply(1:nrounds, function(i1) tmpfunNE(i1))
@@ -682,8 +719,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                               cond_dist=cond_dist, parametrization=parametrization,
                               identification="reduced_form", AR_constraints=NULL,
                               mean_constraints=NULL, B_constraints=NULL, weight_constraints=NULL,
-                              to_return="tw", check_params=TRUE, penalized=penalized, stab_tol_pen=penalty_params[1],
-                              tuning_par=penalty_params[2], allow_non_stab=allow_non_stab,
+                              to_return="tw", check_params=TRUE, penalized=penalized, penalty_params=penalty_params,
+                              allow_non_stab=allow_non_stab,
                               bound_by_weights=bound_by_weights, minval=matrix(0, nrow=n_obs-p, ncol=M))
     tweights_ok <- !any(vapply(1:M, function(m) sum(tweights[,m] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))
     if(Omegas_ok && stat_ok && tweights_ok && weightpars_ok) {
@@ -697,6 +734,10 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                      "estimates found! Check that all the variables are scaled to vary in similar magninutes, ",
                      "also not very small or large magnitudes."))
       message("Consider running more estimation rounds or study the obtained estimates one-by-one with the function alt_stvar.")
+      if(allow_non_stab) {
+        message("Unstable estimates were allowed in the estimation. Consider also using penalized estimation with a higher value
+                 for the tuning parameter in 'penalty_params'.")
+      }
       if(M > 2) {
         message("Consider also using smaller M. Too large M leads to identification problems.")
       }
@@ -746,7 +787,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                                       identification="reduced_form", AR_constraints=AR_constraints,
                                       mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                                       B_constraints=NULL, to_return="tw", check_params=TRUE, penalized=penalized,
-                                      stab_tol_pen=penalty_params[1], tuning_par=penalty_params[2], allow_non_stab=allow_non_stab,
+                                      penalty_params=penalty_params, allow_non_stab=allow_non_stab,
                                       bound_by_weights=bound_by_weights, minval=minval)
   if(any(vapply(1:M, function(i1) sum(transition_weights[,i1] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))) {
     message("At least one of the regimes in the estimated model seems to be wasted in the best fitting individual!")
@@ -775,7 +816,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   if(estim_method == "three-phase") {
     ret$LS_estimates <- LS_res_to_ret # Least squares estimates (mean or intercept parametrization)
   }
-  warn_eigens(ret)
+  warn_eigens(ret, allow_non_stab=allow_non_stab)
   if(!no_prints) message("Finished!\n")
   ret
 }

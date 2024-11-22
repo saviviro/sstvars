@@ -25,7 +25,7 @@ loglikelihood(
     "total_cmeans", "total_ccovs", "B_t"),
   check_params = TRUE,
   penalized = FALSE,
-  penalty_params = c(0.05, 0.5),
+  penalty_params = c(0.05, 0.2),
   allow_non_stab = FALSE,
   bound_by_weights = FALSE,
   indt_R = FALSE,

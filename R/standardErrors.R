@@ -16,7 +16,7 @@ standard_errors <- function(data, p, M, params,
                             parametrization=c("intercept", "mean"),
                             identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                             AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
-                            penalized=FALSE, penalty_params=c(0.05, 0.5), allow_non_stab=FALSE, minval) {
+                            penalized=FALSE, penalty_params=c(0.05, 0.2), allow_non_stab=FALSE, minval) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
@@ -46,7 +46,7 @@ standard_errors <- function(data, p, M, params,
   }
 
   # Calculate Hessian
-  Hess <- calc_hessian(x=params, fn=loglik_fn, h=6e-6)
+  Hess <- calc_hessian(x=params, fn=loglik_fn, h=1e-3)
 
   # Inverse of the observed information matrix
   inv_obs_inf <- tryCatch(solve(-Hess), error=function(e) matrix(NA, nrow=length(params), ncol=length(params)))

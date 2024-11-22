@@ -39,7 +39,7 @@
 #' profile_logliks(mod12thres, which_pars=1:4, precision=100)
 #' @export
 
-profile_logliks <- function(stvar, which_pars, scale=0.02, nrows, ncols, precision=50,
+profile_logliks <- function(stvar, which_pars, scale=0.1, nrows, ncols, precision=50,
                             stab_tol=0.001, posdef_tol=1e-08, distpar_tol=1e-08, weightpar_tol=1e-08) {
   # Initial checks
   check_stvar(stvar)

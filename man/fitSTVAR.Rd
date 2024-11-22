@@ -18,7 +18,7 @@ fitSTVAR(
   weight_constraints = NULL,
   estim_method,
   penalized,
-  penalty_params = c(0.05, 0.5),
+  penalty_params = c(0.05, 0.2),
   nrounds = (M + 1)^5,
   ncores = 2,
   maxit = 1000,

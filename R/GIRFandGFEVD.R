@@ -490,7 +490,8 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
                                    parametrization=stvar$model$parametrization, identification="recursive",
                                    B_constraints=stvar$model$B_constraints, mean_constraints=stvar$model$mean_constraints,
                                    AR_constraints=stvar$model$AR_constraints, weight_constraints=stvar$model$weight_constraints,
-                                   structural_shocks=TRUE)
+                                   penalized=stvar$penalized, penalty_params=stvar$penalty_params,
+                                   allow_non_stab=stvar$allow_non_stab, structural_shocks=TRUE)
     } else {
       data_shocks <- stvar$structural_shocks
     }

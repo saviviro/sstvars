@@ -6,8 +6,8 @@
 #' @inheritParams fitSTVAR
 #' @inheritParams STVAR
 #' @param stvar an object of class \code{'stvar'}, created by, e.g., \code{fitSTVAR} or \code{fitSSTVAR}.
-#' @param h the step sizes used in the central difference approximation of the gradient of the log-likelihood function
-#'   for each parameter are given as \code{h*(1 + abs(params))}. Thus, \code{h} should be a small positive number.
+#' @param h the step size used in the central difference approximation of the gradient of the log-likelihood function, so
+#'   \code{h} should be a small positive real number.
 #' @param print_trace should the trace of the optimization algorithm be printed?
 #' @details The purpose of \code{iterate_more} is to provide a simple and convenient tool to finalize
 #'   the estimation when the maximum number of iterations is reached when estimating a STVAR model
@@ -37,7 +37,7 @@
 #' }
 #' @export
 
-iterate_more <- function(stvar, maxit=100, h=1e-4, penalized, penalty_params, calc_std_errors=TRUE, print_trace=TRUE) {
+iterate_more <- function(stvar, maxit=100, h=1e-3, penalized, penalty_params, allow_non_stab, calc_std_errors=TRUE, print_trace=TRUE) {
   check_stvar(stvar)
   stopifnot(maxit %% 1 == 0 & maxit >= 1)
   p <- stvar$model$p
@@ -62,7 +62,11 @@ iterate_more <- function(stvar, maxit=100, h=1e-4, penalized, penalty_params, ca
   } else {
     stopifnot(is.numeric(penalty_params) && length(penalty_params) == 2 && all(penalty_params >= 0) && penalty_params[1] < 1)
   }
-  allow_non_stab <- stvar$allow_non_stab
+  if(missing(allow_non_stab)) {
+    allow_non_stab <- stvar$allow_non_stab
+  } else {
+    stopifnot(is.logical(allow_non_stab))
+  }
   weightfun_pars <- check_weightfun_pars(data=data, p=p, M=M, d=d, weight_function=weight_function,
                                          weightfun_pars=stvar$model$weightfun_pars, cond_dist=cond_dist)
   minval <- get_minval(stvar$data)
@@ -85,9 +89,7 @@ iterate_more <- function(stvar, maxit=100, h=1e-4, penalized, penalty_params, ca
   # Gradient of the log-likelihood function using central difference approximation
   I <- diag(rep(1, times=npars))
   loglik_grad <- function(params) {
-    step_sizes <- h*(1 + abs(params)) # The difference used in the gradient
-    vapply(1:npars, function(i1) (loglik_fn(params + I[i1,]*step_sizes[i1]) - loglik_fn(params - I[i1,]*step_sizes[i1]))/(2*step_sizes[i1]),
-           numeric(1))
+    vapply(1:npars, function(i1) (loglik_fn(params + I[i1,]*h) - loglik_fn(params - I[i1,]*h))/(2*h), numeric(1))
   }
 
   res <- optim(par=stvar$params, fn=loglik_fn, gr=loglik_grad, method=c("BFGS"),
@@ -118,7 +120,7 @@ iterate_more <- function(stvar, maxit=100, h=1e-4, penalized, penalty_params, ca
     ret$all_logliks[stvar$which_round] <- ret$loglik
     ret$which_converged[stvar$which_round] <- res$convergence == 0
   }
-  warn_eigens(ret)
+  warn_eigens(ret, allow_non_stab=allow_non_stab)
   ret
 }
 
@@ -686,7 +688,7 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
 
   ## Gradient of the log-likelihood function using central difference approximation
   npars <- length(new_params)
-  h <- 6e-6
+  h <- 1e-3
   I <- diag(rep(1, times=npars))
   loglik_grad <- function(params) {
     vapply(1:npars, function(i1) (loglik_fn(params + I[i1,]*h) - loglik_fn(params - I[i1,]*h))/(2*h), numeric(1))
@@ -792,10 +794,9 @@ fitbsSSTVAR <- function(data, p, M, params,
   ## Gradient of the log-likelihood function using central difference approximation
   npars <- length(params)
   I <- diag(rep(1, times=npars))
+  h <- 1e-3
   loglik_grad <- function(params) {
-    step_sizes <- 1e-4*(1 + abs(params)) # The difference used in the gradient
-    vapply(1:npars, function(i1) (loglik_fn(params + I[i1,]*step_sizes[i1]) - loglik_fn(params - I[i1,]*step_sizes[i1]))/(2*step_sizes[i1]),
-           numeric(1))
+    vapply(1:npars, function(i1) (loglik_fn(params + I[i1,]*h) - loglik_fn(params - I[i1,]*h))/(2*h), numeric(1))
   }
 
   ## Estimation by robust method
@@ -867,7 +868,7 @@ fitbsSSTVAR <- function(data, p, M, params,
 estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                      weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                      parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
-                     penalized=TRUE, penalty_params=c(0.05, 0.5), use_parallel=TRUE, ncores=2) {
+                     penalized=TRUE, penalty_params=c(0.05, 0.2), use_parallel=TRUE, ncores=2) {
   # Checks
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -1064,9 +1065,9 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     max_switchvar <- max(switch_var_sorted)
 
     # The maximum number of grid points is calculated so that the number M-1 dimensional of multisets
-    # is at most 10000 for M <= 4.
+    # is at most 20000 for M <= 4.
     if(M >= 2) { # M=1 case is separately handled
-      max_thresholds <- 400 # The maximum number of threshold values to considered
+      max_thresholds <- 1000 # The maximum number of threshold values to considered
       if(M == 2) {
         if(length(switch_var_sorted) < max_thresholds) {
           grid_points <- switch_var_sorted
@@ -1074,11 +1075,11 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
           grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=max_thresholds)
         }
       } else if(M == 3) {
-        grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=min(140, max_thresholds))
+        grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=min(200, max_thresholds))
       } else if(M == 4) {
-        grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=40)
+        grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=50)
       } else {
-        grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=25)
+        grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=30)
       }
       thresholds <- t(utils::combn(x=grid_points, m=M - 1, simplify=TRUE)) # M-1 dim multisets of lexically ordered grid points
     }
@@ -1124,8 +1125,12 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       estims <- as.matrix(simplify2array(pbapply::pblapply(1:nrow(thresvecs), FUN=function(i1) estim_fun(thresvecs[i1,]), cl=cl)))
 
       if(penalized) {
-        message(paste0("Checking the stability condition for all the LS estimates..."))
-        stab_sums <- simplify2array(pbapply::pblapply(1:nrow(thresvecs), FUN=function(i1) stab_exceeded(estims[,i1]), cl=cl))
+        if(M > 2) {
+          message(paste0("Checking the stability condition for all the LS estimates..."))
+          stab_sums <- simplify2array(pbapply::pblapply(1:nrow(thresvecs), FUN=function(i1) stab_exceeded(estims[,i1]), cl=cl))
+        } else { # Less prints, since the calculations are fast enough
+          stab_sums <- simplify2array(parallel::mclapply(1:nrow(thresvecs), FUN=function(i1) stab_exceeded(estims[,i1]), mc.cores=ncores))
+        }
       }
       parallel::stopCluster(cl=cl)
     } else { # No parallel computing

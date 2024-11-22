@@ -18,7 +18,7 @@ estim_LS(
   mean_constraints = NULL,
   weight_constraints = NULL,
   penalized = TRUE,
-  penalty_params = c(0.05, 0.5),
+  penalty_params = c(0.05, 0.2),
   use_parallel = TRUE,
   ncores = 2
 )

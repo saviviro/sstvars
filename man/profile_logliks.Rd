@@ -7,7 +7,7 @@
 profile_logliks(
   stvar,
   which_pars,
-  scale = 0.02,
+  scale = 0.1,
   nrows,
   ncols,
   precision = 50,

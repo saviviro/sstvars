@@ -132,13 +132,14 @@ get_omega_eigens_par <- function(p, M, d, params,
 #' @description \code{warn_eigens} warns if the model contains near-unit-roots in some regimes
 #'
 #' @inheritParams get_boldA_eigens
+#' @inheritParams loglikelihood
 #' @param tol if eigenvalue is closer than \code{tol} to its bound, a warning is thrown
 #' @details Warns if, for some regime, some moduli of "bold A" eigenvalues are larger than \code{1 - tol} or
 #'  some eigenvalue of the error term covariance matrix is smaller than \code{tol}.
 #' @return Doesn't return anything.
 #' @keywords internal
 
-warn_eigens <- function(stvar, tol=0.002) {
+warn_eigens <- function(stvar, tol=0.002, allow_non_stab=FALSE) {
   boldA_eigens <- get_boldA_eigens(stvar)
   omega_eigens <- get_omega_eigens(stvar)
   M <- stvar$model$M
@@ -146,8 +147,12 @@ warn_eigens <- function(stvar, tol=0.002) {
   near_singular <- vapply(1:M, function(i1) any(abs(omega_eigens[,i1]) < tol), logical(1))
   if(any(near_nonstat)) {
     my_string1 <- ifelse(sum(near_nonstat) == 1,
-                         paste("Regime", which(near_nonstat),"has near-unit-roots! "),
-                         paste("Regimes", paste(which(near_nonstat), collapse=" and ") ,"have near-unit-roots! "))
+                         paste("Regime", which(near_nonstat),
+                               ifelse(allow_non_stab, "has near-unit-roots (or roots outside the unit circle)! ",
+                                      "has near-unit-roots! ")),
+                         paste("Regimes", paste(which(near_nonstat), collapse=" and "),
+                               ifelse(allow_non_stab, "have near-unit-roots (or roots outside the unit circle)! ",
+                                      "has near-unit-roots! ")))
   } else {
     my_string1 <- NULL
   }
