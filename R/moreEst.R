@@ -1128,7 +1128,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
           message(paste0("Checking the stability condition for all the LS estimates..."))
           all_stab_ex <- simplify2array(pbapply::pblapply(1:nrow(thresvecs), FUN=function(i1) stab_exceeded(estims[,i1]), cl=cl))
         } else { # Less prints, since the calculations are fast enough
-          all_stab_ex <- simplify2array(parallel::mclapply(1:nrow(thresvecs), FUN=function(i1) stab_exceeded(estims[,i1]), mc.cores=ncores))
+          all_stab_ex <- simplify2array(pbapply::pblapply(1:nrow(thresvecs), FUN=function(i1) stab_exceeded(estims[,i1]), cl=cl))
         }
       }
       parallel::stopCluster(cl=cl)
