@@ -66,10 +66,19 @@ profile_logliks <- function(stvar, which_pars, scale=0.1, nrows, ncols, precisio
 
   # Checks, default arguments etc
   if(missing(which_pars)) which_pars <- 1:length(params)
-  if(!all_pos_ints(which_pars) || any(which_pars > length(params))) {
-    stop("The argument 'which_pars' should contain strictly positive integers not larger than length of the parameter vector.")
-  } else if(anyDuplicated(which_pars) != 0) {
-    stop("There are dublicates in which_pars")
+  if(!all_pos_ints(which_pars)) {
+    stop("The argument 'which_pars' should contain strictly positive integers.")
+  }
+  if(any(which_pars > length(params))) {
+    warning("Some elements in which_pars are larger than the number of parameters.")
+    which_pars <- which_pars[which_pars <= length(params)]
+    if(length(which_pars) == 0) {
+      stop("All elements in which_pars are larger than the number of parameters.")
+    }
+  }
+  if(anyDuplicated(which_pars) != 0) {
+    warning("There are dublicates in which_pars")
+    which_pars <- unique(which_pars)
   }
   npars <- length(which_pars)
   if(missing(nrows)) nrows <- max(ceiling(log2(npars) - 1), 1)

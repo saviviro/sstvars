@@ -1155,17 +1155,6 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     all_pen_rss <- all_rss + penalized_stab_ex # Penalized sum of squares of residuals
     min_rss_index <- which.min(all_pen_rss)[1] # The index for which the penalized sum of squares is the smallest
 
-  } else if(prefer_stab) {
-    # Check whether estimates with stability condition satisfied are found:
-    which_stable <- which(stab_sums == 0) # thresvec indices for which the LS estimates are stable
-
-    if(length(which_stable) > 0) { # Stable estimates found
-      # Which stable estimate has the smaller RSS:
-      min_rss_index <- which.min(estims[nrow(estims), which_stable])[1]
-    } else { # No stable estimates found
-      # Which estimate is the most stable?
-      min_rss_index <- which.min(stab_sums)[1]
-    }
   } else {
     # Find the index for which the sum of squares of residuals is the smallest (regardless of stability)
     min_rss_index <- which.min(estims[nrow(estims),])[1]
@@ -1239,7 +1228,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
 estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                       weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                       parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
-                      prefer_stab=FALSE, stab_tol=0.05, use_parallel=TRUE, ncores=2) {
+                      stab_tol=0.05, use_parallel=TRUE, ncores=2) {
   # Checks
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -1495,21 +1484,8 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
   # Each column in estims corresponds to each vector of thresholds
 
   ## Obtain the LS estimates, possibly among stable estimates
-  if(prefer_stab) {
-    # Check whether estimates with stability condition satisfied are found:
-    which_stable <- which(stab_sums == 0) # thresvec indices for which the LS estimates are stable
-
-    if(length(which_stable) > 0) { # Stable estimates found
-      # Which stable estimate has the smaller RSS:
-      min_rss_index <- which.min(estims[nrow(estims), which_stable])[1]
-    } else { # No stable estimates found
-      # Which estimate is the most stable?
-      min_rss_index <- which.min(stab_sums)[1]
-    }
-  } else {
-    # Find the index for which the sum of squares of residuals is the smallest (regardless of stability)
-    min_rss_index <- which.min(estims[nrow(estims),])[1]
-  }
+  # Find the index for which the sum of squares of residuals is the smallest (regardless of stability)
+  min_rss_index <- which.min(estims[nrow(estims),])[1]
 
   ## Obtain and return the estimates corresponding the smallest sum of squares of residuals
   int_and_ar_estims <- estims[1:(nrow(estims) - 1), min_rss_index]

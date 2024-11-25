@@ -23,6 +23,14 @@
 \newtheorem{proposition}{Proposition}
 \newtheorem{assumption}{Assumption}
 
+%% TOC:
+\makeatletter
+\def\tableofcontents{%
+  \section*{\contentsname}%
+  \@starttoc{toc}%
+}
+\makeatother
+
 
 %% For Sweave-based articles about R packages:
 %% need no \usepackage{Sweave}
@@ -76,7 +84,10 @@ SVAR, STVAR, maximum likelihood estimation}
 
 \begin{document}
 
+\tableofcontents
+
 \section{Introduction}
+\addcontentsline{toc}{section}{Introduction}
 Linear vector autoregressive (VAR) models are a standard tools in time series econometrics. They can be employed to answer questions about the statistical relationships of different variables or to forecast future values of the process, for example. Structural VAR models, in particular, allow to trace out the effects of economic shocks. With an appropriate choice of the autoregressive order $p$, a linear VAR model is often able to filter out autocorrelation from the series very well. If the errors are assumed to follow an autoregressive conditional heteroskedasticity (ARCH) process, the model is also often able to adequately filter out conditional heteroskedasticity from the series.
 
 In some cases, linear VAR models are not, however, capable of capturing all the relevant characteristics of the data. This includes shifts in the mean or volatility, and changes in the autoregressive dynamics of the process. Such nonlinear features frequently occur in economic time series when the underlying data generating dynamics vary in time, for example, depending the specific state of the economy. Various types of time series models capable of capturing this kind of regime-switching behavior have been proposed, one of them is the smooth transition vector autoregressive (STVAR) models that allow to capture gradual shifts in the dynamics of the data. They consist of a finite number of regimes, each of which are linear vector autoregressions that are characterized by different autoregressive coefficients or error term covariance matrices. The package \pkg{sstvars} considers STVAR models in which, at each point of time, the observation is a weighted average of the conditional means of the regimes plus a random error whose covariance matrix is a weighted average of the covariance matrices of the regimes. The weights, in turn, are expressed in terms of time-varying transition weights that depend on the preceding observations. Different STVAR models can be created by specifying the transition weights or the error distribution in various ways.
@@ -88,6 +99,7 @@ The estimation of the model parameters can, in some cases, be rather tricky. Par
 The remainder of this paper is organized as follows. Section~\ref{sec:models} defines the implemented reduced form STVAR models and discusses some of their properties. Section~\ref{sec:struct_stvar} discusses the accommodated structural STVAR models and discusses identification of the structural shocks. Section~\ref{sec:estimation} discusses estimation of the model parameters. We also illustrate how the STVAR models can be estimated and examined with \pkg{sstvars} and how various parameter restrictions can be imposed in the estimation. Section~\ref{sec:res} discusses how to evaluate the model adequacy with \pkg{sstvars} using residual based diagnostics. Section~\ref{sec:impulseresponse} discusses impulse response analysis, including generalized impulse response functions and generalized forecast error variance decompositions. Section~\ref{sec:STVAR} shows how the STVAR models can be constructed with given parameter values. In Section~\ref{sec:simufore}, we first show how to simulate observations from a STVAR process, and then we illustrate how to forecast future values of a STVAR process with a simulation-based Monte Carlo method. Finally, Section~\ref{sec:summary} concludes and collects some useful functions in \pkg{sstvars} to a single table for convenience. Throughout this paper, we illustrate the use of \pkg{sstvars} with a quarterly series consisting of two U.S. variables: the percentage change of real GDP and the percentage change of GDP implicit price deflator, covering the period from 1959Q1 to 2019Q4.
 
 \section{Smooth Transition Vector Autoregressive Models}\label{sec:models}
+\addcontentsline{toc}{section}{Smooth Transition Vector Autoregressive Models}
 This section describes the STVAR models implemented in \pkg{sstvars}. First, we describe the general framework of STVAR models accommodated by \pkg{sstvars} and present a sufficient condition for their ergodic stationarity. Then, we present the implemented specifications of transition weight functions and conditional distributions. Finally, we discuss structural STVAR models and implemented methods for identification of the shocks.
 
 \subsection{General framework for STVAR models}\label{sec:genstvar}
@@ -296,6 +308,7 @@ Compared to smoothly varying transition weights, threshold transition weights ha
 In addition to the endogenous transition weights described above, \pkg{sstvars} accommodates completely exogenous transition weights. These weights are specified by the user by supplying them as a matrix. The only restrictions are that they must sum to one for each time period $t$ and they must be weakly larger than zero. If exogenous weights are provided, the stationarity condition does not apply, but \pkg{sstvars} still assumes that each of the regimes satisfies the usual stability condition. Moreover, computation of the generalized impulse response functions requires that the exogenous transition weights that should be used for the sample paths are provided by the user. Linear impulse response functions based on a specific regime can, nonetheless, be calculated.
 
 \section{Structural STVAR models}\label{sec:struct_stvar}
+\addcontentsline{toc}{section}{Structural STVAR models}
 Constructing a structural STVAR model from a reduced form STVAR model amounts to identifying the mutually and serially uncorrelated structural shocks $e_t=(e_{t1},..,e_{td})$. The structural shocks are recovered from the reduced form innovations $u_t$ based on the identity $e_t=B_t^{-1}u_t$, where $B_t$ is a time-varying invertible $(d\times d)$ impact matrix that governs the contemporaneous relationships of the shocks.  Since many different solutions to the impact matrix generally lead to observationally equivalent models, further assumptions are required for unique identification of the structural shocks.
 
 The R package \pkg{sstvars} currently accommodates three types of identification methods: recursive identification, identification by heteroskedasticity, and identification by non-Gaussianity. Identification by non-Gaussianity requires mutually independent shocks at most one of which can be Gaussian \citep{Virolainen2:2024}, and therefore, it is available only for model with independent Student's $t$ errors distribution. In that case, the shocks are statistically identified without further assumptions, and thus we have excluded the availability of the other two identification methods to these models. Overidentifying restrictions on the impact responses of the variables to the shocks can, however, be imposed. Structural models incorporating Gaussian or conventional $t$ shocks can be identified in \pkg{sstvars} recursively or by heteroskedasticity.
@@ -383,6 +396,7 @@ Labelling the shocks based on the estimates of the impact matrices $B_1,...,B_M$
 In the presence of weak identification with respect to the ordering and signs of the columns, there are multiple local maximums points of the log-likelihood function such that their log-likelihoods are very close to each other. The ML estimation method implemented to \pkg{sstvars} produces a set of local solutions to the estimation problem, the researcher can check whether there are multiple local solutions that yield log-likelihoods close to each other. Given that such local solutions are otherwise mostly very similar but incorporating different ordering or signs of some of the columns of $B_m$ in some regime, the weak identification is related to the ordering and signs of the columns. In practice, one can thereby simply choose among the almost equally well fitting local solutions the solution that facilitates labelling the shock(s) of interest to the same column of the impact matrix in all of the regimes. In \pkg{sstvars} different local solutions are most conveniently examined with the function \code{alt_stvar}. Formally, this procedure can be implemented by imposing economically motivated short-run sign restrictions on the impact matrices, which can also be supplemented with testable zero restrictions and other types of information. See \cite{Virolainen2:2024} for an illustrative example. Restricted structural models can be estimated with the function \code{fitSSTVAR}.
 
 \section{Estimation}\label{sec:estimation}
+\addcontentsline{toc}{section}{Estimation}
 The parameters of the reduced form STVAR model are collected to the vector
 \begin{equation}\label{eq:paramvector}
 \boldsymbol{\theta}=(\phi_{1,0},...,\phi_{m,0},\varphi_1,...,\varphi_M,\sigma,\alpha,\nu),
@@ -973,12 +987,14 @@ where $\mathcal{J}(\hat{\boldsymbol{\theta}})$ is the observed information matri
 Finally, Rao's test is implemented to the function \code{Rao_test}. See the function documentation on how to use it.
 
 \section{Residual based model diagnostics}\label{sec:res}
+\addcontentsline{toc}{section}{Residual based model diagnostics}
 \pkg{sstvars} employs residual based diagnostics for assessing the adequacy of the fitted model. Conventional graphical diagnostics can be examined with function \code{diagnostic_plot}, which plots the residual time series, auto- and crosscorrelation functions of the residuals, auto- and crosscorrelation functions of the squared residuals, and normal quantile-quantile plots as well as histograms of the residuals. The plots can be created for both unstandardized residuals or for standardized residuals by adjusting the argument \code{standardize} to \code{FALSE} or \code{TRUE} according. Using unstandardized residuals is advisable when checking for remaining autocorrelation. But standardized residuals should be used to check for remaining conditional heteroskedasticity and to check the model's adequacy to capture the marginal distribution of the series, because the STVAR models are conditionally heteroskedastic and the unstandardized residuals do not take into account the time-varying conditional covariance matrix.
 
 Remaining autocorrelation in the residuals can also be tested with the (adjusted) Portmanteau test, which is implemented to the function \code{Portmantau_test}. The test can also be applied to standardized squared residuals to test for remaining conditional heteroskedasticity by setting the argument \code{which_test="het.sked"}. The number of lags that should be taken into account in the test is set with the argument \code{nlags}.
 
 
 \section{Impulse response analysis}\label{sec:impulseresponse}
+\addcontentsline{toc}{section}{Impulse response analysis}
 
 \subsection{Generalized impulse response function}
 The expected effects of the structural shocks in the structural STVAR models generally depend on the initial values as well as on the sign and size of the shock, which makes the conventional way of calculating impulse responses unsuitable \citep[see, e.g.,][Chapter~4]{Kilian+Lutkepohl:2017}. Therefore, we  consider the generalized impulse response function (GIRF) \citep{Koop+Pesaran+Potter:1996} defined as
@@ -1059,6 +1075,7 @@ Regime means: 0.73, 1.71
 It is possible to include data in the models built with \code{STVAR} by either providing the data in the argument \code{data}. When the model is supplied with data, the transition weights and other data dependent statistics are calculated for the model as well.
 
 \section{Simulation and forecasting}\label{sec:simufore}
+\addcontentsline{toc}{section}{Simulation and forecasting}
 
 \subsection{Simulation}\label{sec:simu}
 \pkg{sstvars} implements the S3 method \code{simulate} for simulating observations from STVAR processes (see \code{?simulate.stvar}). The method requires the process to be given as a class \code{stvar} object, which are typically created either by estimating a model with the function \code{fitSTVAR} (or \code{fitSSTVAR}) or by specifying the parameter values by hand and building the model with the constructor function \code{STVAR}. The initial values required to simulate the first $p$ observations can be either set by hand (with the argument \code{init_values}) or drawn from (the stationary distribution of) some regime (with the argument \code{init_regime}). The argument \code{nsim} sets the length of the sample path to be simulated.
@@ -1131,6 +1148,8 @@ Other          & \code{bound_JSR} & Calculate bounds for the joint spectral radi
 \end{table}
 
 \section{Summary}\label{sec:summary}
+\addcontentsline{toc}{section}{Summary}
+
 Smooth transition vector autoregressive models are a valuable tool in modelling multivariate time series in which the data generating dynamics vary in time, exhibiting gradual shifts in the autoregressive coefficients or conditional covariance matrices. We described the \proglang{R} package \pkg{sstvars}, which accommodates STVAR models with various transition weight functions, including exogenous weights, logistic weights \citep{Anderson+Vahid:1998}, multinomial logit weights, exponential weights \citep[e.g.,][]{Hubrich+Terasvirta:2013}, threshold weights \citep{Tsay:1998}, and transition weights that defined as weighted relative likelihoods of the regimes corresponding to the preceding $p$ observations \citep{Lanne+Virolainen:2024}. Currently, the accommodated conditional distributions include Gaussian distribution, Student's $t$ distribution, Student's $t$ distribution with mutually independent components, and skewed $t$ distribution with mutually independent components \citep[see][]{Hansen:1994}. The accommodated identification methods include recursive identification, identification by heteroskedasticity, and identification by non-Gaussianity. We discussed the various model specifications and several features implemented in \pkg{sstvars} for STVAR modeling: unconstrained and constrained maximum likelihood estimation of the model parameters, impulse response analysis, residual based diagnostics, hypothesis testing, simulation, forecasting, and more. For convenience, we have collected some useful functions in \pkg{sstvars} to Table~\ref{tab:functions}. For all the exported functions and their usage, see the reference manual.
 
 \section*{Computational details}

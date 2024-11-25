@@ -30,5 +30,7 @@
   of weak identification with respect to ordering or signs of the columns of B_2,...,B_M)
 * Fixed a bug in the simulation algorithm for models incorporating independent Student's t conditional distributions
   (the variance of each structural shock was not scaled to one). 
-* The argument standard_error_print can now be used directly in the summarfunction to obtain printout of standard errors. 
+* Made the function profile_logliks more user friendly. 
+* Added a simplified table of contents to the vignette. 
+* The argument standard_error_print can now be used directly in the summary-function to obtain printout of standard errors. 
 * Updated the documentation. 

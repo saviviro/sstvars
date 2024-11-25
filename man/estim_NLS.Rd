@@ -17,7 +17,6 @@ estim_NLS(
   AR_constraints = NULL,
   mean_constraints = NULL,
   weight_constraints = NULL,
-  prefer_stab = FALSE,
   stab_tol = 0.05,
   use_parallel = TRUE,
   ncores = 2

@@ -362,7 +362,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     for(m in 1:M) { # Check stability conditon for each regime
       boldA_mods <- abs(eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$values)
       stab_ok[m] <- all(boldA_mods < 1 - stab_tol_to_use)
-      if(any(boldA_mods > 1.3)) {
+      if(any(boldA_mods > 1.2)) {
         any_eigen_large <- TRUE
       }
     }
@@ -372,9 +372,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
         message("The least squares estimates do not satisfy the stability condition (with a large enough margin)!")
         if(any_eigen_large) {
           message(paste("\nThe LS estimates a substantially far from satisfying the usual stability condition",
-                        "(which is imposed in the ML estimation),",
-                        "so the three-phase procedure may not work very well.",
-                        "Consider using the two-phase estimation procedure!\n"))
+                        "(which will be imposed in the ML estimation)!\n"))
         }
         message("Adjusting the least squares estimates to satisfy the stability condition...")
         Id <- diag(nrow=d)
@@ -463,6 +461,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   ### Optimization with the genetic algorithm ###
   GA_parametrization <- ifelse(estim_method == "three-phase", "intercept", parametrization) # parametrization to be used GAfit
   which_phase <- ifelse(estim_method == "three-phase", "PHASE 2", "PHASE 1")
+  which_pars_est <- ifelse(estim_method == "three-phase", "the error distribution", "all")
 
   if(estim_method == "three-phase") {
     fixed_params <- LS_results
@@ -470,7 +469,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     fixed_params <- NULL
   }
 
-  if(!no_prints) message(paste0(which_phase, ": Estimating all parameters with a genetic algorithm..."))
+  if(!no_prints) message(paste0(which_phase, ": Estimating ", which_pars_est, " parameters with a genetic algorithm..."))
 
   if(use_parallel) {
     cl <- parallel::makeCluster(ncores)

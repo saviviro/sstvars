@@ -1,0 +1,8 @@
+\contentsline {section}{Introduction}{2}{section.1}%
+\contentsline {section}{Smooth Transition Vector Autoregressive Models}{3}{section.2}%
+\contentsline {section}{Structural STVAR models}{12}{section.3}%
+\contentsline {section}{Estimation}{17}{section.4}%
+\contentsline {section}{Residual based model diagnostics}{35}{section.5}%
+\contentsline {section}{Impulse response analysis}{36}{section.6}%
+\contentsline {section}{Simulation and forecasting}{39}{section.8}%
+\contentsline {section}{Summary}{40}{section.9}%
