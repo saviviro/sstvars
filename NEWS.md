@@ -28,9 +28,9 @@
 * Added a new functionality to fitSSTVAR: structural models identified by non-Gaussianity can be estimated based on different orderings
   or signs of the columns of any of B_1,...,B_M (to conveniently examine models corresponding to various orderings and signs in the presence
   of weak identification with respect to ordering or signs of the columns of B_2,...,B_M)
-* Fixed a bug in the simulation algorithm for models incorporating independent Student's t conditional distributions
+* FIXED A BUG in the simulation algorithm for models incorporating independent Student's t conditional distributions
   (the variance of each structural shock was not scaled to one). 
-* Fixed a bug in the GIRF simulation algorithm: the transition weights were not necessarily high for 'init_regime' at impact (but
+* FIXED A BUG in the GIRF simulation algorithm: the transition weights were not necessarily high for 'init_regime' at impact (but
   the initial values were generated from the correct regimes).
 * Made the function profile_logliks more user friendly. 
 * Added a simplified table of contents to the vignette. 

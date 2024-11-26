@@ -64,6 +64,12 @@ theta_313relg <- c(0.14652, 0.07905, -0.06877, 0.85178, -0.0212, 0.15671, -0.057
                    -0.29614, -0.05912, -0.48768, -0.13135, -0.0019, 0.04491, -0.1174, 0.10878, -0.27825,
                    0.22554, -0.0108, 0.24196, 0.78022, 0.03763, 0.11717, 0.07114, 0.01935, 0.57962)
 
+# p=3, M=1, d=3, allow_unstab=TRUE, samone
+theta_313relg_unstab <- c(0.14652, 0.07905, -0.06877, 2.85178, -0.0212, 0.15671, -0.05778, 0.49156, 0.12683,
+                          0.04203, 0.06951, 1.19613, 2.08181, 0.02087, -0.03947, 0.1369, 0.31143, 0.52774,
+                          -0.29614, -0.05912, -0.48768, -0.13135, -0.0019, 0.04491, -0.1174, 0.10878, -0.27825,
+                          0.22554, -0.0108, 0.24196, 0.78022, 0.03763, 0.11717, 0.07114, 0.01935, 0.57962)
+
 # p=1, M=2, d=3, usamone
 theta_123relg <- c(0.10741, 0.13813, -0.12092, 3.48957, 0.60615, 0.45646, 0.87227, -0.01595, 0.14124,
                    -0.08611, 0.61865, 0.34311, -0.02047, 0.025, 0.97548, 0.74976, 0.02187, 0.29213,
@@ -940,12 +946,6 @@ theta_222exoiktngb_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222
                                 Wvec(B1_222c), Wvec(B2_222c), dfls_222_2_1)
 theta_222exoiktngb_2_1_alt <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), Wvec(B1_222c), Wvec(B2_222c)-Wvec(B1_222c), dfls_222_2_1)
 
-###################
-################### Speed test ##
-# 825.3056 764.3835
-# microbenchmark::microbenchmark(loglikelihood(data=usamone, p=1, M=2, params=theta_123expikt_1_1, weight_function="exponential",
-#                                              weightfun_pars=c(1, 1), cond_dist="ind_skewed_t"), times=5000L)
-###################
 
 test_that("loglikelihood works correctly", {
 
@@ -957,8 +957,13 @@ test_that("loglikelihood works correctly", {
 
   expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122relg, weight_function="relative_dens"), -314.6693, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222relg, weight_function="relative_dens"), -239.3485, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222relg, weight_function="relative_dens",
+                             penalized=TRUE, penalty_params=c(0.5, 0.1)), -254.771, tolerance=1e-3)
 
   expect_equal(loglikelihood(data=usamone, p=3, M=1, params=theta_313relg, weight_function="relative_dens"), -669.5716, tolerance=1e-3)
+  expect_equal(loglikelihood(data=usamone, p=3, M=1, params=theta_313relg_unstab, weight_function="threshold", weightfun_pars=c(1, 1),
+                             allow_unstab=TRUE), -7491.638, tolerance=1e-2)
+
   expect_equal(loglikelihood(data=usamone, p=1, M=2, params=theta_123relg, weight_function="relative_dens"), -570.019, tolerance=1e-3)
   expect_equal(loglikelihood(data=usamone, p=3, M=2, params=theta_323relg, weight_function="relative_dens"), -490.9401, tolerance=1e-3)
 
@@ -969,6 +974,14 @@ test_that("loglikelihood works correctly", {
                              weightfun_pars=c(2, 1)), -291.4979, tolerance=1e-3)
   expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222logistic_1_2, weight_function="logistic",
                              weightfun_pars=c(1, 2)), -303.1628, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222logistic_1_2, weight_function="logistic",
+                             weightfun_pars=c(1, 2), penalized=TRUE, penalty_params=c(0.3, 0.2)), -308.7045, tolerance=1e-3)
+  tmp_pars <- theta_222logistic_1_2
+  tmp_pars[8] <- 3
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=tmp_pars, weight_function="logistic", weightfun_pars=c(1, 2),
+                             penalized=TRUE, penalty_params=c(0.3, 0.2), allow_unstab=TRUE), -3211.04, tolerance=1e-2)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=tmp_pars, weight_function="logistic", weightfun_pars=c(1, 2),
+                             penalized=TRUE, penalty_params=c(0.01, 0.001), allow_unstab=TRUE), -2653.194, tolerance=1e-3)
 
   # mlogit STVAR
   expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=theta_122log_1_1, weight_function="mlogit",
@@ -1108,6 +1121,9 @@ test_that("loglikelihood works correctly", {
                              weightfun_pars=c(1, 1), cond_dist="Student"), -2233.18, tolerance=1e-2)
   expect_equal(loglikelihood(data=usamone, p=1, M=2, params=c(theta_123thres_2_1, 2.01), weight_function="threshold",
                              weightfun_pars=c(2, 1), cond_dist="Student"), -1448.457, tolerance=1e-2)
+  expect_equal(loglikelihood(data=usamone, p=1, M=2, params=c(theta_123thres_2_1, 2.01), weight_function="threshold",
+                             weightfun_pars=c(2, 1), cond_dist="Student", penalized=TRUE, penalty_params=c(0.2, 0.1)),
+               -1452.174, tolerance=1e-2)
 
   expect_equal(loglikelihood(data=gdpdef, p=1, M=2, params=c(theta_122logc_12_1, 4.4), weight_function="mlogit",
                              weightfun_pars=list(vars=1:2, lags=1), AR_constraints=C_122, cond_dist="Student"), -307.7079, tolerance=1e-3)
@@ -1270,6 +1286,16 @@ test_that("loglikelihood works correctly", {
                              weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), identification="non-Gaussianity",
                              B_constraints=matrix(c(NA, -1, 0, 1), nrow=2)),
                -1589.59, tolerance=1e-2)
+
+  tmp_pars <- theta_222expcmwitngb_2_1
+  tmp_pars[9] <- 3
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=tmp_pars, weight_function="exponential", weightfun_pars=c(2, 1),
+                             cond_dist="ind_Student", mean_constraints=list(1:2), AR_constraints=C_222,
+                             weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), identification="non-Gaussianity",
+                             B_constraints=matrix(c(NA, -1, 0, 1), nrow=2), allow_unstab=TRUE,
+                             penalized=TRUE, penalty_params=c(0.1, 0.11)), -5393.25, tolerance=1e-2)
+
+
   expect_equal(loglikelihood(data=gdpdef, p=1, M=3, params=theta_132thresmwitngb_1_1, weight_function="threshold", weightfun_pars=c(1, 1),
                              cond_dist="ind_Student", mean_constraints=list(1, 2:3), weight_constraints=list(R=0, r=c(0, 1.2)),
                              identification="non-Gaussianity", B_constraints=matrix(c(1, 0, NA, 1), nrow=2)),
@@ -1396,6 +1422,19 @@ test_that("loglikelihood works correctly", {
                              weightfun_pars=weightfun_pars222, cond_dist="ind_skewed_t", AR_constraints=C_222,
                              identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, 0, 1), nrow=2)),
                -2750.308, tolerance=1e-3)
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222exoiktngb_2_1, weight_function="exogenous",
+                             weightfun_pars=weightfun_pars222, cond_dist="ind_skewed_t", AR_constraints=C_222,
+                             identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, 0, 1), nrow=2),
+                             penalized=TRUE, penalty_params=c(0.6, 0.2)),
+               -2804.673, tolerance=1e-3)
+  tmp_pars <- theta_222exoiktngb_2_1
+  tmp_pars[9] <- 3
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=tmp_pars, weight_function="exogenous",
+                             weightfun_pars=weightfun_pars222, cond_dist="ind_skewed_t", AR_constraints=C_222,
+                             identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, 0, 1), nrow=2),
+                             penalized=TRUE, penalty_params=c(0.1, 0.2), allow_unstab=TRUE),
+               -7895.042, tolerance=1e-3)
+
   expect_equal(c(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222exoiktngb_2_1, weight_function="exogenous",
                                weightfun_pars=weightfun_pars222, cond_dist="ind_skewed_t", AR_constraints=C_222,
                                identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, 0, 1), nrow=2), to_return="total_ccovs")[, , 242]),
