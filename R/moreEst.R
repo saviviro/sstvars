@@ -1228,7 +1228,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
 estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                       weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                       parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
-                      stab_tol=0.05, use_parallel=TRUE, ncores=2) {
+                      penalized=TRUE, penalty_params=c(0.05, 0.2), use_parallel=TRUE, ncores=2) {
   # Checks
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -1274,129 +1274,113 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
   ## Create estim etc functions ##
   ################################
 
-  # Create the permutation matrix that expand \tilde{C}\tilde{\psi} to \beta for AR constraints:
-  P <- matrix(0, nrow=M*d + M*p*d^2, ncol=M*d + M*p*d^2)
-  I_d <- diag(nrow=d)
-  I_pd2 <- diag(nrow=p*d^2)
-  for(m in 1:M) { # Go through the regimes
-    # Insert the identity matrix for the intercepts
-    P[((m - 1)*d + (m - 1)*p*d^2 + 1):(m*d + (m - 1)*p*d^2), ((m - 1)*d + 1):(m*d)] <- I_d
-
-    # Insert the identity matrix for the AR matrices
-    P[(m*d + (m - 1)*p*d^2 + 1):(m*d + m*p*d^2), (M*d + (m - 1)*p*d^2 + 1):(M*d + m*p*d^2)] <- I_pd2
-  }
-  ## THE ABOVE WILL GO INSIDE THE NLS EST FUNCTION LATER
-
   ## Nonlinear least squares estimation function given weight parameters
   NLS_est <- function(weigthpars, AR_constraints) {
     # weightpars = vector of the weight parameters, AR_constraints = as usual
     # Other arguments are taken from the parent env
 
-    # Storage for the estimates
-    all_intercepts <- matrix(NA, nrow=d, ncol=M) # (d x M), [, m] for regime m
-    all_AR_mats <- array(NA, dim=c(d, d*p, M)) # [, , m] for A_{m,1} : ... : A_{m,p}
+    if(!is.null(AR_constraints)) {
+      # Create the matrix C_tilde that sets dummy constraints for the intercepts:
+      q <- ncol(AR_constraints) # The number of intercept and AR parameters under constraints
+      C_tilde <- rbind(cbind(diag(rep(1, times=M*d)), matrix(0, nrow=M*d, ncol=q)),
+                       cbind(matrix(0, nrow=M*p*d^2, ncol=M*d), AR_constraints))
 
-    # Storage for the residual sums of squares
-    all_rss <- numeric(M) # The sum of squares of residuals for each regime
+      # Create the permutation matrix that expand \tilde{C}\tilde{\psi} to \beta for AR constraints:
+      P <- matrix(0, nrow=M*d + M*p*d^2, ncol=M*d + M*p*d^2)
+      I_d <- diag(nrow=d)
+      I_pd2 <- diag(nrow=p*d^2)
+      for(m in 1:M) { # Go through the regimes
+        # Insert the identity matrix for the intercepts
+        P[((m - 1)*d + (m - 1)*p*d^2 + 1):(m*d + (m - 1)*p*d^2), ((m - 1)*d + 1):(m*d)] <- I_d
 
-    # In Y, i:th row denotes the vector \bold{y_{i-1}} = (y_{i-1},...,y_{i-p}) (dpx1),
-    # assuming the observed data is y_{-p+1},...,y_0,y_1,...,y_{T}. The last row is for
-    # the vector (y_{T},...,y_{T-p}).
-    Y <- reform_data(data, p) # (T_obs + 1 x dp)
-    Y2 <- Y[1:T_obs, , drop=FALSE] # Last row removed; not needed when only lagged observations used
-
-    # The transition weights: (T x M) matrix, the t:th row is for the time point t and the m:th column is for the regime m.
-    alpha_mt <- get_alpha_mt(data, Y2=Y2, p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                             weightpars=thresholds) # Transition weights (T x M), t:th row
-
-    # Go through the regimes
-    for(m in 1:M) {
-      # Obtain the time periods during which regime m prevails
-      m_periods <- which(abs(alpha_mt[, m] - 1) < 1e-6) # The time periods t when regime m prevails
-
-      # Create the matrix Y for regime m; the first p values in data are the initial valus
-      Y_m <- data[m_periods + p, , drop=FALSE] # (T_m x d)]
-
-      # Create the matrix X for regime m
-      X_m <- cbind(1, Y2[m_periods, , drop=FALSE]) # (T_m x d(p+1))
-
-      # Calculate the lest squares estimates
-      C_m <- tryCatch(solve(crossprod(X_m, X_m), crossprod(X_m, Y_m)), # (d x d(p+1)), [\phi_{m,0} : A_{m,1} : ... : A_{m,p}]
-                      error=function(e) matrix(0, nrow=d*p + 1, ncol=d)) # zero estimates are legal but bad, dummy estimates
-      tC_m <- t(C_m)
-
-      # Store the estimates
-      all_intercepts[, m] <- tC_m[, 1]
-      all_AR_mats[, , m] <- tC_m[, -1]
-
-      # Calculate the sum of squares of residuals
-      U_m <- Y_m - X_m%*%C_m # (T_m x d), residuals
-      all_rss[m] <- sum(diag((crossprod(U_m, U_m)))) # The sum of squares of residuals
-    }
-
-    # Obtain the estimates in the vector (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M)
-    estims <- c(all_intercepts, all_AR_mats)
-
-    # Return the estimates and the sum of squares of residuals, the last element is the for rss
-    c(estims, sum(all_rss))
-  }
-
-  ## Least squares estimation function given thresholds for models with AR constraints
-  LS_with_AR_constraints <- function(thresholds) {
-    # threshold = length M-1 vector of the thresholds r_1,...,r_{M-1}; if M=1 anything is ok
-    # Other arguments are taken from the parent environment.
-
-    # Create the constraint matrix \tilde{C} with dummy constraints for the intercepts as well
-    q <- ncol(AR_constraints) # The number of intercept and AR parameters under constraints
-    C_tilde <- rbind(cbind(diag(rep(1, times=M*d)), matrix(0, nrow=M*d, ncol=q)),
-                     cbind(matrix(0, nrow=M*p*d^2, ncol=M*d), AR_constraints))
-
-    # Storage for the estimates
-    estims <- array(NA, dim=c(d, d*p + 1, M)) # [, , m] for [\phi_{m,0} : A_{m,1} : ... : A_{m,p}]
-
-    # In Y, i:th row denotes the vector \bold{y_{i-1}} = (y_{i-1},...,y_{i-p}) (dpx1),
-    # assuming the observed data is y_{-p+1},...,y_0,y_1,...,y_{T}. The last row is for
-    # the vector (y_{T},...,y_{T-p}).
-    Y <- reform_data(data, p) # (T_obs + 1 x dp)
-    Y2 <- Y[1:T_obs, , drop=FALSE] # Last row removed; not needed when only lagged observations used
-
-    # The transition weights: (T x M) matrix, the t:th row is for the time point t and the m:th column is for the regime m.
-    alpha_mt <- get_alpha_mt(data, Y2=Y2, p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                             weightpars=thresholds) # Transition weights (T x M), t:th row
-
-    # Now the observations are stored to a (Td x 1) vector defining the matrix Y.
-    Y <- as.matrix(vec(t(data[(p+1):nrow(data),]))) # (Td x 1), we don't take the first p observations (init values)
-
-    # Initialize the matrix of regressors X.
-    X <- matrix(0, nrow=d*T_obs, ncol=M*d + M*p*d^2) # (Td x Md + Mpd^2)
-
-    # We construct the (Td x Md + Mpd^2) matrix X consisting of (d x Md + Mpd^2) blocks X_t for each time period t.
-    # Each block X_t can be partioned to the intercept part X_t_phi (d x Md) and the AR part X_t_A (d x Mpd^2).
-    I_d <- diag(rep(1, times=d)) # The (d x d) identity matrix
-    for(t in 1:T_obs) { # We need to loop through all time periods
-      m <- which(abs(alpha_mt[t, ] - 1) < 1e-6) # The regime m that prevails at time t
-      X_t_phi <- cbind(matrix(0, nrow=d, ncol=(m - 1)*d), I_d, matrix(0, nrow=d, ncol=(M - m)*d)) # (d x Md)
-      X_t_A <- matrix(0, nrow=d, ncol=M*p*d^2) # (d x Mpd^2), initialize the AR part
-      for(j in 1:p) { # Go through the lags and fill in the blocks
-        # The Block_{A_{m,j}} is the columns: (dp*(m - 1)+ d*(j - 1) + 1):(dp*(m - 1) + d*j)
-        X_t_A[, ((m - 1)*p*d^2 + (j - 1)*d^2 + 1):((m - 1)*p*d^2 + j*d^2)] <- kronecker(t(data[t + p - j,]), I_d) # (d x d^2) block
+        # Insert the identity matrix for the AR matrices
+        P[(m*d + (m - 1)*p*d^2 + 1):(m*d + m*p*d^2), (M*d + (m - 1)*p*d^2 + 1):(M*d + m*p*d^2)] <- I_pd2
       }
-      # Will in the X_t block to the X matrix
-      X[((t - 1)*d + 1):((t - 1)*d + d), ] <- cbind(X_t_phi, X_t_A) # (d x Md + Mpd^2)
+
+      # Calculate the multiplication of P and C_tilde that expands psi_tilde to the usual parameter vector:
+      PC <- P%*%C_tilde
     }
 
-    # Integrate the constraints into the design matrix
-    X_bold <- X%*%C_tilde # (Td x q)
+    # In Y, i:th row denotes the vector \bold{y_{i-1}} = (y_{i-1},...,y_{i-p}) (dpx1),
+    # assuming the observed data is y_{-p+1},...,y_0,y_1,...,y_{T}. The last row is for
+    # the vector (y_{T},...,y_{T-p}).
+    Y <- reform_data(data, p) # (T_obs + 1 x dp)
+    Y2 <- Y[1:T_obs, , drop=FALSE] # Last row removed; not needed when only lagged observations used
 
-    estims <- tryCatch(solve(crossprod(X_bold, X_bold), crossprod(X_bold, Y)), # (M*d + q x 1)
-                       error=function(e) matrix(0, nrow=M*d + q, ncol=1)) # zero estimates are legal but bad, dummy estimates
+    # The transition weights: (T x M) matrix, the t:th row is for the time point t and the m:th column is for the regime m.
+    alpha_mt <- get_alpha_mt(data, Y2=Y2, p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                             weightpars=weightpars) # Transition weights (T x M), t:th row
 
-    # Calculate the sum of squares of residuals
-    U <- Y - X_bold%*%estims # (Td x 1), residuals
-    rss <- crossprod(U, U) # The sum of squares of residuals
+    # Storage for the data matrices \Psi_t in the form y_t = \Psi_t\beta + u_t,
+    # \beta = (vec(\Phi_1),...,vec(\Phi_M)), \Phi_m = [\phi_{m,0} : A_{m,1} : ... : A_{m,p}].
+    all_Psi <- array(NA, dim=c(d, M*d + M*p*d^2, T_obs)) # [, , t] for \Psi_t
+    all_cPsi <- array(NA, dim=c(M*d + M*p*d^2, M*d + M*p*d^2, T_obs)) # [, , t] for crossprod(\Psi_t)
+    all_tPsiy <- array(NA, dim=c(M*d + M*p*d^2, 1, T_obs)) # [, , t] for \Psi_t'y_t
 
-    # Return the estimates and the sum of squares of residuals, the last element is the for rss
-    c(estims, rss)
+    # Storages for models with AR constraints
+    if(!is.null(AR_constraints)) {
+      all_PsiPC <- array(NA, dim=c(d, ncol(C_tilde), T_obs)) # [, , t] for \Psi_tPC
+      all_cPsiPC <- array(NA, dim=c(ncol(C_tilde), ncol(C_tilde), T_obs)) # [, , t] for crossprod(\Psi_tPC)
+      all_tPsiPCy <- array(NA, dim=c(ncol(C_tilde), 1, T_obs)) # [,  ,t] for (\Psi_tPC)'y_t
+    }
+
+    # Go through the time periods
+    for(t in 1:T_obs) {
+      # Create the vector Z_t = (1, y_{t-1},...,y_{t-p}) (1 + dp x 1), and calculate Knonecker product between Z_t' and I_d
+      Z_kron <- kronecker(matrix(c(1, Y[t,]), nrow=1), diag(d)) # (d x d(1 + dp)), the Kronecker product
+
+      # Go through the regimes
+      for(m in 1:M) {
+        all_Psi[, ((m - 1)*(d + p*d^2) + 1):(m*(d + p*d^2)), t] <- alpha_mt[t, m]*Z_kron # Fill in Psi_t, also for AR_constraints
+      }
+
+      if(!is.null(AR_constraints)) {
+        all_PsiPC[, , t] <- all_Psi[, , t]%*%PC # Multiply Psi_t with PC
+        all_cPsiPC[, , t] <- crossprod(all_PsiPC[, , t]) # Fill in Psi_t'Psi_t
+        all_tPsiyPC[, , t] <- tcrossprod(all_PsiPC[, , t], data[p + t,]) # Fill in \Psi_t'y_t
+      } else {
+        all_cPsi[, , t] <- crossprod(all_Psi[, , t]) # Fill in Psi_t'Psi_t
+        all_tPsiy[, , t] <- tcrossprod(all_Psi[, , t], data[p + t,]) # Fill in \Psi_t'y_t
+      }
+    }
+
+    # Sum over the time periods in cPsi and tPsiy
+    if(!is.null(AR_constraints)) {
+      sum_cPsi <- apply(all_cPsiPC, MARGIN=c(1, 2), FUN=sum)
+      sum_tPsiy <- apply(all_tPsiyPC, MARGIN=c(1, 2), FUN=sum)
+    } else {
+      sum_cPsi <- apply(all_cPsi, MARGIN=c(1, 2), FUN=sum)
+      sum_tPsiy <- apply(all_tPsiy, MARGIN=c(1, 2), FUN=sum)
+    }
+
+    ## Obtain the estimates in the vector \beta = (vec(\Phi_1),...,vec(\Phi_M)), where \Phi_m = [\phi_{m,0} : A_{m,1} : ... : A_{m,p}]
+    # (with AR_constraints \beta = (\phi_{1,0},...,\phi_{M,0},\psi)
+    estims <- solve(sum_cPsi, sum_tPsiy) # (M*d + M*p*d^2 x 1)
+    #tryCatch(solve(sum_cPsi, sum_tPsiy), # (M*d + M*p*d^2 x 1)
+    #         error=function(e) matrix(0, nrow=M*d + M*p*d^2, ncol=1)) # zero estimates are legal but bad, dummy estimates
+
+    ## Calculate the residual sums of squares
+    if(is.null(AR_constraints)) {
+      est_to_use <- estims
+    } else {
+      est_to_use <- C_tilde%*%estims # Estimates in the standard form
+    }
+    all_rss <- numeric(T_obs) # Storage for all residual sums of squares
+    for(t in 1:T_obs) { # Go through the time periods again
+      u_t <- data[p + t,] - all_Psi[, , t]%*%est_to_use # The residual for time period t
+      all_rss[t] <- crossprod(u_t, u_t) # The residual sum of squares for time period t
+    }
+
+    ## Obtain the estimates in the vector (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M)
+    # (for models with AR constraints (\phi_{1,0},...,\phi_{M,0},\psi), already in the correct form):
+    if(is.null(AR_constraints)) {
+      estims <- matrix(estims, nrow=d) # estims in the form [Phi_1,...,Phi_M]
+      int_cols <- 0:(M - 1)*(d*p + 1) + 1 # which columns have the intercept parameters
+      estims <- c(estims[, int_cols], estims[, -int_cols]) # Estimates in the form (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M)
+    }
+
+    ## Return the estimates and the sum of squares of residuals, the last element is the for rss
+    c(estims, sum(all_rss))
   }
 
   ## A function to check whether the stability condition is satisfied for the AR matrices, and
