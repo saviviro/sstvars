@@ -550,9 +550,11 @@ simulate_from_regime <- function(stvar, regime=1, nsim=1, init_values=NULL, use_
                         identification=stvar$model$identification, AR_constraints=stvar$model$AR_constraints,
                         mean_constraints=stvar$model$mean_constraints, weight_constraints=stvar$model$weight_constraints,
                         B_constraints=stvar$model$B_constraints, to_return="tw", allow_unstab=allow_unstab)
-    tw <- tw[(nsim + 1):(nrow(tw)), regime] # Take the transition weights of the last 100 observations
+
+    tw_both <- tw[(nsim + 1):(nrow(tw)), ]
+    tw <- tw[(nsim + 1):(nrow(tw)), regime] # Take the transition weights of the last 100 observations (nsim+100+p obs simulated)
     twmax_ind <- which(abs(tw - max(tw)) < 0.001)[1] # Ind with highest tw, but not exactly to avoid overly skewed results
-    samp <- ret[(nsim-p+1):nrow(ret), , drop=FALSE] # -p so the twmax_ind is tw_ind - p + 1
+    samp <- ret[(nsim+1):nrow(ret), , drop=FALSE] # Take the last nsim obs
     ret <- samp[twmax_ind:(twmax_ind + p - 1), , drop=FALSE] # Return the previous p obs from the one with highest tw
   }
   ret
