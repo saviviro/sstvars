@@ -1259,14 +1259,16 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
   # Obtain relevant statistics
   n_obs <- nrow(data)
   T_obs <- n_obs - p
-  T_min <- 2/d*ifelse(is.null(AR_constraints), (p + 1)*d^2 + d,
-                      ncol(AR_constraints)/M + d + d^2) # Minimum number of obs in each regime
-  if(T_obs/M < T_min) { # Try smaller T_min
-    T_min <- 1.5/d*ifelse(is.null(AR_constraints), (p + 1)*d^2 + d,
-                          ncol(AR_constraints)/M + d + d^2)
-    message("The number of observations in relative to the number of parameters is small, consider decreasing p or M.")
-    if(T_obs/M < T_min) {
-      stop("The number of observations is too small for reasonable estimation. Decrease the order p or the number of regimes M.")
+  if(weightfun != "exogenous") {
+    T_min <- 2/d*ifelse(is.null(AR_constraints), (p + 1)*d^2 + d,
+                        ncol(AR_constraints)/M + d + d^2) # Minimum number of obs in each regime
+    if(T_obs/M < T_min) { # Try smaller T_min
+      T_min <- 1.5/d*ifelse(is.null(AR_constraints), (p + 1)*d^2 + d,
+                            ncol(AR_constraints)/M + d + d^2)
+      message("The number of observations in relative to the number of parameters is small, consider decreasing p or M.")
+      if(T_obs/M < T_min) {
+        stop("The number of observations is too small for reasonable estimation. Decrease the order p or the number of regimes M.")
+      }
     }
   }
 
@@ -1384,99 +1386,162 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
   }
 
   ## A function to check whether the stability condition is satisfied for the AR matrices, and
-  ## if not, to what extend it is not satisfied (sum over modulus of eigenvalues greater than 1 - stab_tol)
+  ## if not, to what extend it is not satisfied.
+  stab_exceeded <- function(estims) {
+    # Estims should be a vector of the form (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M)
+    if(!is.null(AR_constraints)) { # Expand the AR constraints
+      pars_to_check <- c(estims[1:(M*d)], AR_constraints%*%estims[(M*d + 1):(M*d + ncol(AR_constraints))])
+    } else {
+      pars_to_check <- estims[1:(M*d + M*p*d^2)]
+    }
+    all_phi0 <- pick_phi0(M=M, d=d, params=pars_to_check)
+    all_A <- pick_allA(p=p, M=M, d=d, params=pars_to_check)
+    all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A)
+    all_stab_exceeds <- matrix(nrow=nrow(all_boldA[, , 1]), ncol=M) # Square of how much modulus of eigenvalues exceed 1 - stab_tol
+    for(m in 1:M) { # Check stability condition for each regime
+      abs_eigs <- abs(eigen(all_boldA[, , m], symmetric=FALSE, only.values=TRUE)$values)
+      all_stab_exceeds[, m] <- pmax(0, abs_eigs - (1 - stab_tol))^2 # How much abs eigens exceed 1 - stab_tol, squared
+    }
+    sum(all_stab_exceeds) # Sum of the squared exceeded values of stab cond
+  }
 
-  ###########################################
-  ## Create threshold vectors and estimate ##
-  ###########################################
+  ############################################
+  ## Create weight par vectors and estimate ##
+  ############################################
 
-  ## Create the set of threshold vectors for the optimization; M=1 will use numeric(0) and run the LS only once
-  if(is.null(weight_constraints)) {
+  ## Create the set of weight parameters for the optimization; M=1 will use numeric(0) and run the NLS only once
+  if(is.null(weight_constraints) && weight_function != "exogenous") {
     switch_var_series <- data[,weightfun_pars[1]] # The switching variable time series
     sv_sorted_full <- sort(switch_var_series, decreasing=FALSE) # The sorted switch variable series
-
-    # Remove the values from the sorted switch variable series that would leave less than T_min observations
-    # smaller or larger than the threshold.
-    switch_var_sorted <- sv_sorted_full[T_min:(length(switch_var_series) - T_min)]
+    switch_var_sorted <- sv_sorted_full[T_min:(length(switch_var_series) - T_min)] # Switch var vals >=T_min vals below and above
     min_switchvar <- min(switch_var_sorted)
     max_switchvar <- max(switch_var_sorted)
 
-    # The maximum number of grid points is calculated so that the number M-1 dimensional of multisets
-    # is at most 10000 for M <= 4.
-    if(M >= 2) { # M=1 case is separately handled
-      max_thresholds <- 400 # The maximum number of threshold values to considered
-      if(M == 2) {
-        if(length(switch_var_sorted) < max_thresholds) {
-          grid_points <- switch_var_sorted
-        } else {
-          grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=max_thresholds)
-        }
-      } else if(M == 3) {
-        grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=min(140, max_thresholds))
-      } else if(M == 4) {
-        grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=40)
-      } else {
-        grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=25)
-      }
-      thresholds <- t(utils::combn(x=grid_points, m=M - 1, simplify=TRUE)) # M-1 dim multisets of lexically ordered grid points
-    }
-    if(M == 2) {
-      thresvecs <- thresholds # Each row for each threshold vector (scalar in this case)
-    } else if(M > 2) {
-      obs_between_thresholds <-  matrix(NA, nrow=nrow(thresholds), ncol=M - 2) # The number of observations between the thresholds
-      for(m in 1:(M - 2)) {
-        n_at_most_upper <- findInterval(x=thresholds[, m + 1], vec=sv_sorted_full, left.open=TRUE, rightmost.closed=TRUE)
-        n_at_most_lower <- findInterval(x=thresholds[, m], vec=sv_sorted_full, left.open=TRUE, rightmost.closed=TRUE)
-        obs_between_thresholds[,m] <- n_at_most_upper - n_at_most_lower # Number of observations between lower and upper threshold
-      }
-      # The threshold vectors with enough observations in all regimes
-      #print(which(rowSums(obs_between_thresholds >= T_min) == ncol(obs_between_thresholds)))
-      thresvecs <- thresholds[which(rowSums(obs_between_thresholds >= T_min) == ncol(obs_between_thresholds)), , drop=FALSE]
-    }
-  } else { # thresholds fixed to known numbers
-    thresvecs <- matrix(weight_constraints[[2]], nrow=1, ncol=M - 1)
-  }
-  # Each row in thresvecs of a threshold vector
+    if(weight_function %in% c("logistics", "exponential")) {
+      # Here always M=2, the first weight parameter is location parameter, and the second one is strictly positive scale parameter
+      c_grid <- seq(from=min_switchvar, to=max_switchvar, length.out=100) # The grid for the location parameter
+      gamma_grid <- seq(from=0.1, to=200, length.out=100) # The grid for the scale parameter
+      weightparvecs <- unname(simplify2array(expand.grid(c_grid, gamma_grid))) # Each row for a vector of weight parameters
+    } else if(weight_function == "mlogit") {
+      n_weight_pars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
+      weightparvecs <- unname(simplify2array(expand.grid(replicate(n=n_weight_pars,
+                                                                 expr=seq(from=-10, to=10,
+                                                                          length.out=max(2, ceiling(10000^(1/n_weight_pars)))),
+                                                                 simplify=FALSE)))) # Roughly 10000-100000 grid points
+    } else if(weight_function == "threshold") {
+      # Remove the values from the sorted switch variable series that would leave less than T_min observations
+      # smaller or larger than the threshold.
+      switch_var_sorted <- sv_sorted_full[T_min:(length(switch_var_series) - T_min)]
+      min_switchvar <- min(switch_var_sorted)
+      max_switchvar <- max(switch_var_sorted)
 
-  ## Estimate the model for all thresholds vectors in thresvecs
-  estim_fun <- if(is.null(AR_constraints)) LS_without_AR_constraints else LS_with_AR_constraints
+      # The maximum number of grid points is calculated so that the number M-1 dimensional of multisets
+      # is at most 20000 for M <= 4.
+      if(M >= 2) { # M=1 case is separately handled
+        max_thresholds <- 1000 # The maximum number of threshold values to considered
+        if(M == 2) {
+          if(length(switch_var_sorted) < max_thresholds) {
+            grid_points <- switch_var_sorted
+          } else {
+            grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=max_thresholds)
+          }
+        } else if(M == 3) {
+          grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=min(200, max_thresholds))
+        } else if(M == 4) {
+          grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=50)
+        } else {
+          grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=30)
+        }
+        thresholds <- t(utils::combn(x=grid_points, m=M - 1, simplify=TRUE)) # M-1 dim multisets of lexically ordered grid points
+      }
+      if(M == 2) {
+        weightparvecs <- thresholds # Each row for each threshold vector (scalar in this case)
+      } else if(M > 2) {
+        obs_between_thresholds <-  matrix(NA, nrow=nrow(thresholds), ncol=M - 2) # The number of observations between the thresholds
+        for(m in 1:(M - 2)) {
+          n_at_most_upper <- findInterval(x=thresholds[, m + 1], vec=sv_sorted_full, left.open=TRUE, rightmost.closed=TRUE)
+          n_at_most_lower <- findInterval(x=thresholds[, m], vec=sv_sorted_full, left.open=TRUE, rightmost.closed=TRUE)
+          obs_between_thresholds[,m] <- n_at_most_upper - n_at_most_lower # Number of observations between lower and upper threshold
+        }
+        # The threshold vectors with enough observations in all regimes
+        weightparvecs <- thresholds[which(rowSums(obs_between_thresholds >= T_min) == ncol(obs_between_thresholds)), , drop=FALSE]
+      }
+    }
+
+  } else if(weight_function == "exogenous") { # Exogenous weights
+    weightparvecs <- weightfun_pars
+  } else { # weight parameters fixed to known numbers
+    weightparvecs <- matrix(weight_constraints[[2]], nrow=1)
+  }
+  # Each row in weightparvecs correspond to one vector of weight parameters
+
+  ## Estimate the model for all weight pars in weight_pars
   estim_length <- if(is.null(AR_constraints)) M*d + M*p*d^2 + 1 else M*d + ncol(AR_constraints) + 1
 
   if(M == 1) {
-    if(use_parallel) message(paste("PHASE 1: Estimating AR and weight parameters by least squares..."))
+    if(use_parallel) message(paste("PHASE 1: Estimating AR and weight parameters by nonlinear least squares..."))
     estims <- as.matrix(estim_fun(numeric(0)))
+    all_stab_ex <- stab_exceeded(estims[,1])
   } else {
     if(use_parallel) {
       if(ncores > parallel::detectCores()) {
         ncores <- parallel::detectCores()
       }
-      n_thresvecs <- ifelse(M == 1 || !is.null(weight_constraints), 1, nrow(thresvecs))
+      n_weightvecs <- ifelse(M == 1 || !is.null(weight_constraints), 1, nrow(weightparvecs))
       message(paste0("PHASE 1: Estimating AR and weight parameters by least squares for ", n_thresvecs,
                      " vectors of thresholds...")) # "PHASE 1" print i related to the multiple-phase estimation procedure
       cl <- parallel::makeCluster(ncores)
       on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.
       parallel::clusterExport(cl, ls(environment(estim_LS)), envir=environment(estim_LS)) # assign all variables from package:sstvars
       parallel::clusterEvalQ(cl, c(library(pbapply), library(sstvars)))
+      estims <- as.matrix(simplify2array(pbapply::pblapply(1:nrow(weightparvecs),
+                                                           FUN=function(i1) NLS_est(weightparvecs[i1,],
+                                                                                    AR_constraints=AR_constraints), cl=cl)))
 
-      estims <- as.matrix(simplify2array(pbapply::pblapply(1:nrow(thresvecs), FUN=function(i1) estim_fun(thresvecs[i1,]), cl=cl)))
+      if(penalized) {
+        if(M > 2) {
+          message(paste0("Checking the stability condition for all the LS estimates..."))
+          all_stab_ex <- simplify2array(pbapply::pblapply(1:nrow(weightparvecs), FUN=function(i1) stab_exceeded(estims[,i1]), cl=cl))
+        } else { # Less prints, since the calculations are fast enough
+          all_stab_ex <- simplify2array(pbapply::pblapply(1:nrow(weightparvecs), FUN=function(i1) stab_exceeded(estims[,i1]), cl=cl))
+        }
+      }
       parallel::stopCluster(cl=cl)
     } else { # No parallel computing
-      estims <- as.matrix(vapply(1:nrow(thresvecs), FUN=function(i1) estim_fun(thresvecs[i1,]),
+      estims <- as.matrix(vapply(1:nrow(weightparvecs), FUN=function(i1) NLS_est(weightparvecs[i1,], AR_constraints=AR_constraints),
                                  FUN.VALUE=numeric(estim_length)))
+
+      if(penalized) {
+        all_stab_ex <- vapply(1:nrow(weightparvecs), FUN=function(i1) stab_exceeded(estims[,i1]), FUN.VALUE=numeric(1))
+      }
     }
   }
   # Each column in estims corresponds to each vector of thresholds
 
   ## Obtain the LS estimates, possibly among stable estimates
-  # Find the index for which the sum of squares of residuals is the smallest (regardless of stability)
-  min_rss_index <- which.min(estims[nrow(estims),])[1]
+  if(penalized) {
+    # Determine the tuning parameter value that controls the extend of the penalization
+    all_rss <- estims[nrow(estims),]
+    min_rss <- min(all_rss) # The smallest residual sum of squares
+    penalty_coef <- tuning_par*min_rss/d # The penalty coefficient
+
+    # Obtain the index with the smallest penalized sum of squares
+    penalized_stab_ex <- penalty_coef*all_stab_ex # Penalization for non-stable estimates
+    all_pen_rss <- all_rss + penalized_stab_ex # Penalized sum of squares of residuals
+    min_rss_index <- which.min(all_pen_rss)[1] # The index for which the penalized sum of squares is the smallest
+
+  } else {
+    # Find the index for which the sum of squares of residuals is the smallest (regardless of stability)
+    min_rss_index <- which.min(estims[nrow(estims),])[1]
+  }
+
 
   ## Obtain and return the estimates corresponding the smallest sum of squares of residuals
   int_and_ar_estims <- estims[1:(nrow(estims) - 1), min_rss_index]
-  if(M == 1 || !is.null(weight_constraints)) {
-    threshold_estims <- numeric(0) # No threshold estimates
+  if(M == 1 || !is.null(weight_constraints) || weight_function == "exogenous") {
+    weightpar_estims <- numeric(0) # No weightpar estimates
   } else {
-    threshold_estims <- thresvecs[min_rss_index,]
+    weightpar_estims <- weightparvecs[min_rss_index,]
   }
-  c(int_and_ar_estims, threshold_estims) # Return the estimates
+  c(int_and_ar_estims, weightpar_estims) # Return the estimates
 }

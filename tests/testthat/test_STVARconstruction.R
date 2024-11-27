@@ -89,6 +89,10 @@ mod222logisticcmw_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logis
                                weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222, parametrization="mean",
                                weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)))
 
+tmppars <- c(theta_222relg[-length(theta_222relg)], c(0.75, 100))
+tmpmod <- STVAR(data=gdpdef, p=2, M=2, d=2, params=tmppars, weight_function="exponential", weightfun_pars=c(2, 1))
+plot(tmpmod)
+
 # p=2, M=2, d=2, weight_function="exponential", weightfun_pars=c(2, 1), mean_constraints=list(1:2), AR_constraints=C_222,
 # weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0))
 xi_222expcmw_2_1 <- c(0.33)
