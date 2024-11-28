@@ -477,7 +477,7 @@ random_ind <- function(p, M, d, weight_function=c("relative_dens", "logistic", "
   }
 
   # Generate weight params
-  if(M > 1) {
+  if(M > 1 && weight_function != "exogenous") {
     if(is.null(fixed_params)) {
       weight_pars <- random_weightpars(M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
                                        AR_constraints=AR_constraints, mean_constraints=mean_constraints,

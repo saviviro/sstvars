@@ -886,7 +886,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
 
   # Check the weight constraints
   if(!is.null(weight_constraints)) {
-    if(weight_constraints[[1]] != 0) {
+    if(!all(weight_constraints[[1]] == 0)) {
       stop(paste("Only such weight_constraints that specify the threshold parameters some known fixed values",
                  "are supported in the least squares estimation."))
     }
@@ -1148,7 +1148,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     # Determine the tuning parameter value that controls the extend of the penalization
     all_rss <- estims[nrow(estims),]
     min_rss <- min(all_rss) # The smallest residual sum of squares
-    penalty_coef <- tuning_par*min_rss/d # The penalty coefficient
+    penalty_coef <- tuning_par*min_rss # The penalty coefficient
 
     # Obtain the index with the smallest penalized sum of squares
     penalized_stab_ex <- penalty_coef*all_stab_ex # Penalization for non-stable estimates
@@ -1242,7 +1242,7 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
   }
   # Check the weight constraints
   if(!is.null(weight_constraints)) {
-    if(weight_constraints[[1]] != 0) {
+    if(!all(weight_constraints[[1]] == 0)) {
       stop(paste("Only such weight_constraints that specify the threshold parameters some known fixed values",
                  "are supported in the least squares estimation."))
     }
@@ -1347,7 +1347,7 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
       if(!is.null(AR_constraints)) {
         all_PsiPC[, , t] <- all_Psi[, , t]%*%PC # Multiply Psi_t with PC
         all_cPsiPC[, , t] <- crossprod(all_PsiPC[, , t]) # Fill in Psi_t'Psi_t
-        all_tPsiyPC[, , t] <- crossprod(all_PsiPC[, , t], data[p + t,]) # Fill in \Psi_t'y_t
+        all_tPsiPCy[, , t] <- crossprod(all_PsiPC[, , t], data[p + t,]) # Fill in \Psi_t'y_t
       } else {
         all_cPsi[, , t] <- crossprod(all_Psi[, , t]) # Fill in Psi_t'Psi_t
         all_tPsiy[, , t] <- crossprod(all_Psi[, , t], data[p + t,]) # Fill in \Psi_t'y_t
@@ -1357,16 +1357,16 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
     # Sum over the time periods in cPsi and tPsiy
     if(!is.null(AR_constraints)) {
       sum_cPsi <- apply(all_cPsiPC, MARGIN=c(1, 2), FUN=sum)
-      sum_tPsiy <- apply(all_tPsiyPC, MARGIN=c(1, 2), FUN=sum)
+      sum_tPsiy <- apply(all_tPsiPCy, MARGIN=c(1, 2), FUN=sum)
     } else {
       sum_cPsi <- apply(all_cPsi, MARGIN=c(1, 2), FUN=sum)
       sum_tPsiy <- apply(all_tPsiy, MARGIN=c(1, 2), FUN=sum)
     }
     ## Obtain the estimates in the vector \beta = (vec(\Phi_1),...,vec(\Phi_M)), where \Phi_m = [\phi_{m,0} : A_{m,1} : ... : A_{m,p}]
     # (with AR_constraints \beta = (\phi_{1,0},...,\phi_{M,0},\psi)
-    estims <- solve(sum_cPsi, sum_tPsiy) # (M*d + M*p*d^2 x 1)
-    #tryCatch(solve(sum_cPsi, sum_tPsiy), # (M*d + M*p*d^2 x 1)
-    #         error=function(e) matrix(0, nrow=M*d + M*p*d^2, ncol=1)) # zero estimates are legal but bad, dummy estimates
+    #estims <- solve(sum_cPsi, sum_tPsiy) # (M*d + M*p*d^2 x 1)
+    estims <- tryCatch(solve(sum_cPsi, sum_tPsiy), # (M*d + M*p*d^2 x 1), fails if the system is singular
+                       error=function(e) matrix(0, nrow=M*d + M*p*d^2, ncol=1)) # zero estimates are legal but bad, dummy estimates
 
     ## Calculate the residual sums of squares
     if(is.null(AR_constraints)) {
@@ -1418,12 +1418,13 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
 
   ## Create the set of weight parameters for the optimization; M=1 will use numeric(0) and run the NLS only once
   if(is.null(weight_constraints) && weight_function != "exogenous") {
-    switch_var_series <- data[,weightfun_pars[1]] # The switching variable time series
-    sv_sorted_full <- sort(switch_var_series, decreasing=FALSE) # The sorted switch variable series
-    switch_var_sorted <- sv_sorted_full[T_min:(length(switch_var_series) - T_min)] # Switch var vals >=T_min vals below and above
-    min_switchvar <- min(switch_var_sorted)
-    max_switchvar <- max(switch_var_sorted)
-
+    if(weight_function != "mlogit") {
+      switch_var_series <- data[,weightfun_pars[1]] # The switching variable time series
+      sv_sorted_full <- sort(switch_var_series, decreasing=FALSE) # The sorted switch variable series
+      switch_var_sorted <- sv_sorted_full[T_min:(length(switch_var_series) - T_min)] # Switch var vals >=T_min vals below and above
+      min_switchvar <- min(switch_var_sorted)
+      max_switchvar <- max(switch_var_sorted)
+    }
     if(weight_function %in% c("logistic", "exponential")) {
       # Here always M=2, the first weight parameter is location parameter, and the second one is strictly positive scale parameter
       c_grid <- seq(from=min_switchvar, to=max_switchvar, length.out=100) # The grid for the location parameter
@@ -1530,7 +1531,7 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
     # Determine the tuning parameter value that controls the extend of the penalization
     all_rss <- estims[nrow(estims),]
     min_rss <- min(all_rss) # The smallest residual sum of squares
-    penalty_coef <- tuning_par*min_rss/d # The penalty coefficient
+    penalty_coef <- tuning_par*min_rss # The penalty coefficient
 
     # Obtain the index with the smallest penalized sum of squares
     penalized_stab_ex <- penalty_coef*all_stab_ex # Penalization for non-stable estimates

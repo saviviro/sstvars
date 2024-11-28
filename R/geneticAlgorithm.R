@@ -584,7 +584,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
     logliks[i1, which(logliks[i1,] < minval)] <- minval
     redundants[i1, which(logliks[i1,] <= minval)] <- M
 
-    print(paste("Generation", i1, "Best log-lik:", max(logliks[i1,]), "Mean log-lik:", mean(logliks[i1,])))
+    print(paste("Generation", i1, "Best log-lik:", round(max(logliks[i1,]), 2), "Mean log-lik:", round(mean(logliks[i1,]), 2)))
 
     ## Selection and the reproduction pool ##
     if(length(unique(logliks[i1,])) == 1) {

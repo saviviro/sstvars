@@ -248,8 +248,8 @@ If you wish to estimate a structural model, estimate first the reduced form mode
 # with the weighted relative stationary densities of the regimes as the transition
 # weight function. The estimation is performed with 2 rounds and 2 CPU cores, with
 # the random number generator seeds set for reproducibility.
-fit32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="relative_dens",
- cond_dist="Gaussian", nrounds=2, ncores=2, seeds=1:2)
+fit32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="relative_dens", cond_dist="Gaussian",
+ nrounds=2, ncores=2, seeds=1:2)
 
 # Examine the results:
 fit32 # Printout of the estimates
@@ -271,8 +271,7 @@ summary(fitlogistict32) # Summary printout of the estimates
 # The first lag of the the second variable is specified as the switching variable,
 # and the threshold parameter constrained to the fixed value 1.
 fitthres32wit <- fitSTVAR(gdpdef, p=3, M=2, weight_function="threshold", weightfun_pars=c(2, 1),
-  cond_dist="ind_skewed_t", weight_constraints=list(R=0, r=1), estim_method="three-phase",
-  nrounds=2, ncores=2, seeds=1:2)
+  cond_dist="ind_skewed_t", weight_constraints=list(R=0, r=1), nrounds=2, ncores=2, seeds=1:2)
 plot(fitthres32wit) # Plot the fitted transition weights
 
 # Estimate a two-regime STVAR p=1 model with exogenous transition weights defined as the indicator
@@ -302,32 +301,26 @@ C_122 <- rbind(diag(1*2^2), diag(1*2^2))
 # Step 4: Estimate the model by specifying the weights in the argument 'weightfun_pars'
 # and the constraint matrix in the argument 'AR_constraints':
 fitexo12cit <- fitSTVAR(gdpdef, p=1, M=2, weight_function="exogenous", weightfun_pars=twmat,
-  cond_dist="ind_Student", AR_constraints=C_122, nrounds=2, ncores=2, seeds=1:2)
+ cond_dist="ind_Student", AR_constraints=C_122, nrounds=2, ncores=2, seeds=1:2)
 plot(fitexo12cit) # Plot the transition weights
 summary(fitexo12cit) # Summary printout of the estimates
 
 # Estimate a two-regime Gaussian STVAR p=1 model with the weighted relative stationary densities
-# of the regimes as the transition weight function, and the means of the regimes
-# and AR matrices constrained to be identical across the regimes (i.e., allowing for time-varying
-# conditional covariance matrix only):
-fit12cm <- fitSTVAR(gdpdef, p=1, M=2, weight_function="relative_dens", cond_dist="Gaussian",
- AR_constraints=C_122, mean_constraints=list(1:2), parametrization="mean", nrounds=2, seeds=1:2)
-fit12cm # Print the estimates
-
-# Estimate a two-regime Gaussian STVAR p=1 model with the weighted relative stationary densities
 # of the regimes as the transition weight function; constrain AR matrices to be identical
 # across the regimes and also constrain the off-diagonal elements of the AR matrices to be zero.
+# Moreover, constrain the unconditional means of both regimes to be equal.
 mat0 <- matrix(c(1, rep(0, 10), 1, rep(0, 8), 1, rep(0, 10), 1), nrow=2*2^2, byrow=FALSE)
 C_222 <- rbind(mat0, mat0) # The constraint matrix
-fit22c <- fitSTVAR(gdpdef, p=2, M=2, weight_function="relative_dens", cond_dist="Gaussian",
- AR_constraints=C_222, nrounds=2, seeds=1:2)
-fit22c # Print the estimates
+fit22cm <- fitSTVAR(gdpdef, p=2, M=2, weight_function="relative_dens", cond_dist="Gaussian",
+ parametrization="mean", AR_constraints=C_222, mean_constraints=list(1:2), nrounds=2, seeds=1:2)
+fit22cm # Print the estimates
 
-# Estimate a two-regime Student's t STVAR p=3 model with logistic transition weights
-# and the first lag of the second variable as the switching variable. Constraint the location
-# parameter to the fixed value 1 and leave the scale parameter unconstrained.
+# Estimate a two-regime Student's t STVAR p=3 model with logistic transition weights and the
+# first lag of the second variable as the switching variable. Constraint the location parameter
+# to the fixed value 1 and leave the scale parameter unconstrained.
 fitlogistic32w <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logistic", weightfun_pars=c(2, 1),
- weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(1, 0)), nrounds=2, seeds=1:2)
+ cond_dist="Student", weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(1, 0)), nrounds=2,
+ seeds=1:2, use_parallel=FALSE)
 plot(fitlogistic32w) # Plot the fitted transition weights
 
 # Estimate a two-regime Gaussian STVAR p=3 model with multinomial logit transition weights
