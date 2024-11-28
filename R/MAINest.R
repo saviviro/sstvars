@@ -233,7 +233,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
   if(missing(estim_method)) { # Determine the estimation method
-    if(weight_function == "threshold" && is.null(mean_constraints)) {
+    if(weight_function != "relative_dens" && is.null(mean_constraints)) {
       if(is.null(weight_constraints)) {
         estim_method <- "three-phase"
       } else {
@@ -248,8 +248,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     }
   } else {
     stopifnot(estim_method %in% c("two-phase", "three-phase"))
-    if(estim_method == "three-phase" && weight_function != "threshold") {
-      stop("The three-phase estimation is currently only available for threshold models.")
+    if(estim_method == "three-phase" && weight_function == "relative_dens") {
+      stop("The three-phase estimation is not available for models with relative_dens weight function.")
     } else if(estim_method == "three-phase" && !is.null(mean_constraints)) {
       stop("The three-phase estimation does not support mean_constraints.")
     } else if(estim_method == "three-phase" && !is.null(weight_constraints) && weight_constraints$R != 0) {
@@ -265,7 +265,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
 
   }
   if(parametrization == "mean") {
-    message("Unstable estimates are cannot be allowed with mean parametrization")
+    message("Unstable estimates are cannot be allowed with parametrization='mean' (how do you derive the mean?)")
     allow_unstab <- FALSE
   }
 
@@ -339,13 +339,24 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     ###################################################################
 
     if(!no_prints && !use_parallel) {
-      message("PHASE 1: Estimating the AR and weight parameters by least squares...") # parallel prints inside estim_LS
+      message(paste0("PHASE 1: Estimating the AR and weight parameters by ",
+                     ifelse(weight_function == "threshold", "least squares", "nonlinear least squares"),
+                     "...")) # parallel prints inside estim_LS/NLS
     }
-    LS_results <- estim_LS(data=data, p=p, M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                           cond_dist=cond_dist, parametrization="intercept", AR_constraints=AR_constraints,
-                           mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                           penalized=penalized, penalty_params=penalty_params,
-                           ncores=ncores, use_parallel=use_parallel) # Always intercept parametrization used here
+
+    if(weight_function == "threshold") { # Use least squares
+      LS_results <- estim_LS(data=data, p=p, M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                             cond_dist=cond_dist, parametrization="intercept", AR_constraints=AR_constraints,
+                             mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                             penalized=penalized, penalty_params=penalty_params,
+                             ncores=ncores, use_parallel=use_parallel) # Always intercept parametrization used here
+    } else { # Use nonlinear least squares
+      LS_results <- estim_NLS(data=data, p=p, M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                              cond_dist=cond_dist, parametrization="intercept", AR_constraints=AR_constraints,
+                              mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                              penalized=penalized, penalty_params=penalty_params,
+                              ncores=ncores, use_parallel=use_parallel) # Always intercept parametrization used here
+    }
 
     # Check whether the least squares estimates satisfy the stability condition
     if(!is.null(AR_constraints)) { # Expand the AR constraints
@@ -371,10 +382,12 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       if(!all(stab_ok)) {
         message("The least squares estimates do not satisfy the stability condition (with a large enough margin)!")
         if(any_eigen_large) {
-          message(paste("\nThe LS estimates a substantially far from satisfying the usual stability condition",
+          message(paste("\nThe", ifelse(weight_function == "threshold", "LS", "NSL"),
+                        "estimates a substantially far from satisfying the usual stability condition",
                         "(which will be imposed in the ML estimation)!\n"))
         }
-        message("Adjusting the least squares estimates to satisfy the stability condition...")
+        message(paste("Adjusting the", ifelse(weight_function == "threshold", "LS", "NSL"),
+                      "estimates to satisfy the stability condition..."))
         Id <- diag(nrow=d)
         means_prior_to_adjustment <- vapply(1:M, function(m) solve(Id - rowSums(all_A[, , , m, drop=FALSE], dims=2), all_phi0[,m]),
                                             numeric(d)) # [,m]
@@ -581,7 +594,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     tmpfunNE <- function(i1) {
       if(!no_prints) message(i1, "/", nrounds, "\r")
       optim(par=GAresults[[i1]], fn=loglik_fn,  gr=loglik_grad,
-            method="BFGS", control=list(fnscale=-1, maxit=maxit, trace=0))
+            method="BFGS", control=list(fnscale=-1, maxit=maxit, trace=6))
     }
     NEWTONresults <- lapply(1:nrounds, function(i1) tmpfunNE(i1))
   }
@@ -743,7 +756,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                penalized=penalized,
                penalty_params=penalty_params,
                allow_unstab=allow_unstab,
-               calc_std_errors=calc_std_errors)
+               calc_std_errors=FALSE)
   ret$all_estimates <- all_estimates
   ret$all_logliks <- loks
   ret$which_converged <- converged

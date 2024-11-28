@@ -1256,10 +1256,14 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
                     AR_constraints=AR_constraints, mean_constraints=mean_constraints,
                     weight_constraints=weight_constraints, B_constraints=NULL)
 
+  stopifnot(is.numeric(penalty_params) && length(penalty_params) == 2 && all(penalty_params >= 0) && penalty_params[1] < 1)
+  stab_tol <- penalty_params[1]
+  tuning_par <- penalty_params[2]
+
   # Obtain relevant statistics
   n_obs <- nrow(data)
   T_obs <- n_obs - p
-  if(weightfun != "exogenous") {
+  if(weight_function != "exogenous") {
     T_min <- 2/d*ifelse(is.null(AR_constraints), (p + 1)*d^2 + d,
                         ncol(AR_constraints)/M + d + d^2) # Minimum number of obs in each regime
     if(T_obs/M < T_min) { # Try smaller T_min
@@ -1276,8 +1280,11 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
   ## Create estim etc functions ##
   ################################
 
+  # Logarithm of the smallest value that can be handled normally (used in get_alpha_mt)
+  epsilon <- round(log(.Machine$double.xmin) + 10)
+
   ## Nonlinear least squares estimation function given weight parameters
-  NLS_est <- function(weigthpars, AR_constraints) {
+  NLS_est <- function(weightpars, AR_constraints) {
     # weightpars = vector of the weight parameters, AR_constraints = as usual
     # Other arguments are taken from the parent env
 
@@ -1311,7 +1318,7 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
 
     # The transition weights: (T x M) matrix, the t:th row is for the time point t and the m:th column is for the regime m.
     alpha_mt <- get_alpha_mt(data, Y2=Y2, p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                             weightpars=weightpars) # Transition weights (T x M), t:th row
+                             weightpars=weightpars, epsilon=epsilon) # Transition weights (T x M), t:th row
 
     # Storage for the data matrices \Psi_t in the form y_t = \Psi_t\beta + u_t,
     # \beta = (vec(\Phi_1),...,vec(\Phi_M)), \Phi_m = [\phi_{m,0} : A_{m,1} : ... : A_{m,p}].
@@ -1328,6 +1335,7 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
 
     # Go through the time periods
     for(t in 1:T_obs) {
+
       # Create the vector Z_t = (1, y_{t-1},...,y_{t-p}) (1 + dp x 1), and calculate Knonecker product between Z_t' and I_d
       Z_kron <- kronecker(matrix(c(1, Y[t,]), nrow=1), diag(d)) # (d x d(1 + dp)), the Kronecker product
 
@@ -1339,10 +1347,10 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
       if(!is.null(AR_constraints)) {
         all_PsiPC[, , t] <- all_Psi[, , t]%*%PC # Multiply Psi_t with PC
         all_cPsiPC[, , t] <- crossprod(all_PsiPC[, , t]) # Fill in Psi_t'Psi_t
-        all_tPsiyPC[, , t] <- tcrossprod(all_PsiPC[, , t], data[p + t,]) # Fill in \Psi_t'y_t
+        all_tPsiyPC[, , t] <- crossprod(all_PsiPC[, , t], data[p + t,]) # Fill in \Psi_t'y_t
       } else {
         all_cPsi[, , t] <- crossprod(all_Psi[, , t]) # Fill in Psi_t'Psi_t
-        all_tPsiy[, , t] <- tcrossprod(all_Psi[, , t], data[p + t,]) # Fill in \Psi_t'y_t
+        all_tPsiy[, , t] <- crossprod(all_Psi[, , t], data[p + t,]) # Fill in \Psi_t'y_t
       }
     }
 
@@ -1354,7 +1362,6 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
       sum_cPsi <- apply(all_cPsi, MARGIN=c(1, 2), FUN=sum)
       sum_tPsiy <- apply(all_tPsiy, MARGIN=c(1, 2), FUN=sum)
     }
-
     ## Obtain the estimates in the vector \beta = (vec(\Phi_1),...,vec(\Phi_M)), where \Phi_m = [\phi_{m,0} : A_{m,1} : ... : A_{m,p}]
     # (with AR_constraints \beta = (\phi_{1,0},...,\phi_{M,0},\psi)
     estims <- solve(sum_cPsi, sum_tPsiy) # (M*d + M*p*d^2 x 1)
@@ -1417,7 +1424,7 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
     min_switchvar <- min(switch_var_sorted)
     max_switchvar <- max(switch_var_sorted)
 
-    if(weight_function %in% c("logistics", "exponential")) {
+    if(weight_function %in% c("logistic", "exponential")) {
       # Here always M=2, the first weight parameter is location parameter, and the second one is strictly positive scale parameter
       c_grid <- seq(from=min_switchvar, to=max_switchvar, length.out=100) # The grid for the location parameter
       gamma_grid <- seq(from=0.1, to=200, length.out=100) # The grid for the scale parameter
