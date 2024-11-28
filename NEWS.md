@@ -21,7 +21,8 @@
 * Adjusted the step sizes in finite difference numerical differentiation. 
 * The step size in finite difference numerical differentiation can now be adjusted in the function iterate_more.
 * Changed the random parameter generation for ind_Student models (estimation results with specific seeds are not backward compatible).
-* A new function: filer_estimates, which can be used considers includes estimates that are not deemed inappropriate).
+* A new function: filter_estimates, which can be used considers includes estimates that are not deemed inappropriate).
+* A new function: plot_struct_shocks, which plots the structural shock time series. 
 * Some adjustments to estimation with fitSTVAR. NOTE: estimation results with a particular seed may be different to the earlier version. 
 * Removed the argument "filter_estimates" from fitSTVAR as a redundancy (it is now always applied), since the function alt_stvar can in
   any case be used to browse the estimates from any estimation round. 
