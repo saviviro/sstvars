@@ -193,26 +193,8 @@
 #' # to the fixed value 1 and leave the scale parameter unconstrained.
 #' fitlogistic32w <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logistic", weightfun_pars=c(2, 1),
 #'  cond_dist="Student", weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(1, 0)), nrounds=2,
-#'  seeds=1:2, use_parallel=FALSE)
+#'  seeds=1:2)
 #' plot(fitlogistic32w) # Plot the fitted transition weights
-#'
-#' # Estimate a two-regime Gaussian STVAR p=3 model with multinomial logit transition weights
-#' # using the second variable is the switching variable with two lags. Constrain the AR matrices
-#' # identical across the regimes (allowing for time-variation in the intercepts and covariance
-#' # matrix).
-#' C_322 <- rbind(diag(3*2^2), diag(3*2^2)) # The constraint matrix
-#' fitmlogit32c <- fitSTVAR(gdpdef, p=3, M=2, weight_function="mlogit", cond_dist="Gaussian",
-#'  weightfun_pars=list(vars=2, lags=2), AR_constraints=C_322, nrounds=1, seeds=3, ncores=1)
-#' plot(fitmlogit32c) # Plot the fitted transition weights
-#'
-#' # Estimate a two-regime Gaussian STVAR p=3 model with exponential transition weights and the first
-#' # lag of the second variable as switching variable, and AR parameter constrained identical across
-#' # the regimes, means constrained identical across the regimes, and the location parameter
-#' # constrained to 0.5 (but scale parameter unconstrained).
-#' fitexp32cmw <- fitSTVAR(gdpdef, p=3, M=2, weight_function="exponential", weightfun_pars=c(2, 1),
-#'  cond_dist="Student", AR_constraints=C_322, mean_constraints=list(1:2),
-#'  weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.5, 0)), nrounds=1, seeds=1, ncores=1)
-#' summary(fitexp32cmw) # Summary printout of the estimates
 #' }
 #' @export
 
