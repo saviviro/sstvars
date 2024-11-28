@@ -1,13 +1,7 @@
-#' @title Two-phase or three-phase maximum likelihood estimation of a reduced form smooth transition VAR model
+#' @title Two-phase or three-phase (penalized) maximum likelihood estimation of a reduced form smooth transition VAR model
 #'
 #' @description \code{fitSTVAR} estimates a reduced form smooth transition VAR model in two phases
-#'   or three phases. In the two-phase procedure:
-#'    in the first phase, it uses a genetic algorithm (GA) to find starting values for a gradient based
-#'   variable metric algorithm (VA), which it then uses to finalize the estimation in the second phase.
-#'   Parallel computing is utilized to perform multiple rounds of estimations in parallel.
-#'   In the three-phase procedure, the autoregressive and weight parameters are first estimated by least
-#'   squares (LS) to obtain initial estimates for GA, and the rest of the procedure proceeds as in the two-phase
-#'   procedure.
+#'   or three phases. In additional ML estimation, also penalized ML estimation is available.
 #'
 #' @inheritParams GAfit
 #' @param estim_method either \code{"two-phase"} or \code{"three-phase"} (the latter is the default
@@ -35,14 +29,23 @@
 #'  use the function \code{fitSSTVAR} to create (and estimate if necessary) the structural model
 #'  based on the estimated reduced form model.
 #'
-#'  \strong{three-phase estimation.} With \code{estim_method="three-phase"} (currently only available
-#'  for threshold VAR models), an extra phase is added to the beginning of the two-phase estimation procedure:
-#'  the autoregressive and weight function parameters are first estimated by the method of least squares. Then,
-#'  these initial estimates are used to create an initial population to the genetic algorithm, and the rest of the
-#'  procedure proceeds as in the the two-phase procedure. This allows to use substantially decrease the required
-#'  number of estimation rounds, and thereby speeds up the estimation substantially. On the other hand, the three-phase
-#'  procedure tends to produce estimates close to the initial LS estimates, while the two-phase procedure explores
-#'  the parameter space more thoroughly.
+#'  \strong{three-phase estimation.} With \code{estim_method="three-phase"} (not available for models with \code{relative_dens}
+#'  weight function), an extra phase is added to the beginning of the two-phase estimation procedure:
+#'  the autoregressive and weight function parameters are first estimated by the method of (penalized) least squares. Then,
+#'  the rest of the parameters are estimated by (penalized) ML with the genetic algorithm conditionally on the LS estimates.
+#'  Finally, all the parameters are estimated by (penalized) ML by initializing a gradient based variable metric algorithm
+#'  from initial estimates obtained from the first two phases. This allows to use substantially decrease the required
+#'  number of estimation rounds, and thereby typically speeds up the estimation substantially. On the other hand, the three-phase
+#'  procedure tends to produce estimates close to the initial (penalized) LS estimates, while the two-phase procedure explores
+#'  the parameter space more thoroughly (when a large enough number of estimation rounds is ran).
+#'
+#'  \strong{Penalized estimation.} The penalized estimation (\code{penalized=TRUE}) maximizes the penalized log-likelihood function
+#'  in which a penalty term is added. The penalty term becomes nonzero when the parameter values are close to the boundary of the
+#'  stability region or outside it, it increases in the modulus of the eigenvalues of the companion form AR matrices of the regimes.
+#'  With \code{allow_unstab=TRUE}, allowing for unstable estimates, it allows the estimation algorithms to explore the parameter space
+#'  outside the stability region, but with high enough penalization, the optimization algorithm eventually converges back to the
+#'  stability region. By default, penalized estimation (with unstable estimates allow) is used for \code{estim_method="three-phase"}
+#'  and not used for \code{estim_method="two-phase"}.
 #'
 #'  \strong{The rest concerns both two-phase and three-phase procedures.}\\
 #'  Because of complexity and high multimodality of the log-likelihood function, it is \strong{not certain}

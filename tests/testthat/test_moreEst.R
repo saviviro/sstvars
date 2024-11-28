@@ -107,3 +107,84 @@ test_that("estim_LS works correctly", {
                  0.04541, 0.49218, 0.29722, -0.01916, -0.15529, 0.31985, 0.2107, 0.01915, 0.06456, 0.55056, 0.14858, 0.05162, -0.23531,
                  0.33567), tolerance=1e-4)
 })
+
+
+test_that("estim_NLS works correctly", {
+  # M=1 models
+  expect_equal(estim_NLS(gdpdef, p=1, M=1, weight_function="threshold", weightfun_pars=c(1, 1), use_parallel=FALSE),
+               c(0.64952757, 0.06650693, 0.28852542, 0.02176643, -0.14402552, 0.89710291), tolerance=1e-4)
+  expect_equal(estim_NLS(gdpdef, p=3, M=1, weight_function="threshold", weightfun_pars=c(1, 1), use_parallel=FALSE),
+               c(0.56446992, -0.00112219, 0.24472216, 0.01715902, -0.13104438, 0.61071319, 0.19089925, 0.01448693, 0.15980970,
+                 0.13639022, -0.03491110, 0.03055308, -0.17216331, 0.19668905), tolerance=1e-4)
+  expect_equal(estim_NLS(usamone, p=2, M=1, weight_function="threshold", weightfun_pars=c(1, 1), use_parallel=FALSE),
+               c(0.210079734, 0.085210004, -0.029968781, 0.871229633, -0.021505139, 0.159748400, -0.224477388, 0.528035630, -0.042948559,
+                 0.007392181, 0.075415536, 1.145718677, -0.083871763, 0.016815872, -0.040748637, 0.206061999, 0.357275942, 0.445073600,
+                 -0.051452440, -0.072672532, -0.207935880), tolerance=1e-4)
+
+  expect_equal(estim_NLS(gdpdef, p=1, M=1, weight_function="threshold", weightfun_pars=c(1, 1), AR_constraints=diag(1*1*2^2),
+                         use_parallel=FALSE),
+               c(0.64952757, 0.06650693, 0.28852542, 0.02176643, -0.14402552, 0.89710291), tolerance=1e-4)
+  expect_equal(estim_NLS(usamone, p=2, M=1, weight_function="threshold", weightfun_pars=c(1, 1), AR_constraints=diag(1*2*3^2),
+                         use_parallel=FALSE),
+               c(0.210079734, 0.085210004, -0.029968781, 0.871229633, -0.021505139, 0.159748400, -0.224477388, 0.528035630, -0.042948559,
+                 0.007392181, 0.075415536, 1.145718677, -0.083871763, 0.016815872, -0.040748637, 0.206061999, 0.357275942, 0.445073600,
+                 -0.051452440, -0.072672532, -0.207935880), tolerance=1e-4)
+
+  # M=2 models
+  expect_equal(estim_NLS(gdpdef[1:20,], p=1, M=2, weight_function="threshold", weightfun_pars=c(1, 1), use_parallel=FALSE),
+               c(0.34473, 0.433277, 2.351077, 0.139007, -0.175962, 0.091294, 0.704325, -0.240483, -0.5348, 0.194315, -1.088311,
+                 -0.604939, 0.6556), tolerance=1e-4)
+  expect_equal(estim_NLS(gdpdef[1:20,], p=1, M=2, weight_function="threshold", weightfun_pars=c(1, 1), AR_constraints=diag(2*1*2^2),
+                         use_parallel=FALSE),
+               c(0.34473, 0.433277, 2.351077, 0.139007, -0.175962, 0.091294, 0.704325, -0.240483, -0.5348, 0.194315, -1.088311,
+                 -0.604939, 0.6556), tolerance=1e-4)
+  expect_equal(estim_NLS(gdpdef[1:20,], p=1, M=2, weight_function="threshold", weightfun_pars=c(1, 1),
+                        AR_constraints=rbind(diag(1*2^2), diag(1*2^2)), use_parallel=FALSE),
+               c(1.1522529, 0.4571413, 1.8530941, 0.1888232, -0.1940042, 0.1311513, -1.3653882, -0.4211367, 0.6749000), tolerance=1e-4)
+
+  #expect_equal(estim_NLS(gdpdef[1:30,], p=1, M=2, weight_function="logistic", weightfun_pars=c(1, 1), use_parallel=FALSE),
+  #             c(-0.17291360, 0.37857095, 1.83926953, -0.09261452, 0.02913881, 0.09136100, 3.14098530, -0.02978985, -0.42089036, 0.22668045,
+  #               0.57120842, 0.20068665, 0.67490000, 38.46464646), tolerance=1e-4) # Takes too long to compute but can be uncommented for testing
+
+  expect_equal(estim_NLS(gdpdef[1:30,], p=1, M=2, weight_function="logistic", weightfun_pars=c(1, 1), use_parallel=FALSE,
+                         weight_constraints=list(R=0, r=c(0.5, 2))),
+               c(-1.15590557, 0.82829333, 3.01236194, -0.69803392, -0.63134283, 0.47766326, 3.30057926, 0.02734005, -0.91632485, 0.48707751,
+                 0.56006051, 0.17498810), tolerance=1e-4)
+  expect_equal(estim_NLS(gdpdef[1:30,], p=1, M=2, weight_function="logistic", weightfun_pars=c(1, 1), AR_constraints=diag(2*1*2^2),
+                         use_parallel=FALSE, weight_constraints=list(R=0, r=c(0.5, 2))),
+               c(-1.15590557, 0.82829333, 3.01236194, -0.69803392, -0.63134283, 0.47766326, 3.30057926, 0.02734005, -0.91632485, 0.48707751,
+                 0.56006051, 0.17498810), tolerance=1e-4)
+  expect_equal(estim_NLS(gdpdef[1:20,], p=1, M=2, weight_function="logistic", weightfun_pars=c(1, 1),
+                         AR_constraints=rbind(diag(1*2^2), diag(1*2^2)), use_parallel=FALSE, weight_constraints=list(R=0, r=c(0.5, 4))),
+               c(0.5727287, 0.7042587, 2.5227436, -0.1069938, -0.5779311, 0.3004377, -1.2132161, -0.4901011), tolerance=1e-4)
+
+  expect_equal(estim_NLS(gdpdef[1:30,], p=1, M=2, weight_function="exponential", weightfun_pars=c(1, 1), use_parallel=FALSE,
+                         weight_constraints=list(R=0, r=c(0.5, 2))),
+               c(0.17288528, 0.53099751, 0.81191988, 0.18943739, 0.97580964, -0.42119335, 1.72768163, 0.06092438, 0.11608078, 0.07478986,
+                 0.33425175, 0.31072873), tolerance=1e-4)
+  expect_equal(estim_NLS(gdpdef[1:30,], p=1, M=2, weight_function="exponential", weightfun_pars=c(1, 1), AR_constraints=diag(2*1*2^2),
+                         use_parallel=FALSE, weight_constraints=list(R=0, r=c(0.5, 2))),
+               c(0.17288528, 0.53099751, 0.81191988, 0.18943739, 0.97580964, -0.42119335, 1.72768163, 0.06092438, 0.11608078, 0.07478986,
+                 0.33425175, 0.31072873), tolerance=1e-4)
+
+  expect_equal(estim_NLS(gdpdef[1:30,], p=1, M=2, weight_function="exogenous", use_parallel=FALSE,
+                         weightfun_pars=cbind(c(rep(0.2, times=15), rep(0.6, times=14)), c(rep(0.8, times=15), rep(0.4, times=14)))),
+               c(1.85072178, 0.15252943, 1.17258260, 0.29669609, -0.79740161, 0.28395474, 3.81914999, 0.10263741, 0.37082979, -0.07181246,
+                 -3.17175965, 0.06883980), tolerance=1e-4)
+  expect_equal(estim_NLS(gdpdef[1:30,], p=1, M=2, weight_function="exogenous", use_parallel=FALSE, AR_constraints=diag(2*1*2^2),
+                         weightfun_pars=cbind(c(rep(0.2, times=15), rep(0.6, times=14)), c(rep(0.8, times=15), rep(0.4, times=14)))),
+               c(1.85072178, 0.15252943, 1.17258260, 0.29669609, -0.79740161, 0.28395474, 3.81914999, 0.10263741, 0.37082979, -0.07181246,
+                 -3.17175965, 0.06883980), tolerance=1e-4)
+
+  # M=3 models
+  # expect_equal(suppressMessages(estim_NLS(gdpdef[1:50,], p=1, M=3, weight_function="mlogit", weightfun_pars=list(1, 1), use_parallel=FALSE)),
+  #              c(-0.92276098, -0.47639232, 1.00711707, 0.11671792, 0.96729336, 0.29141893, -0.87444879, -0.22949753, 1.94699160,
+  #                1.32570209, 0.22321649, -0.01105715, -0.64472324, 0.91148656, 0.85783938, -0.29305193, -0.37929860, 0.72152604,
+  #                -11.11111111, -20.00000000, -15.55555556, 20.00000000), tolerance=1e-4) # Takes too long but can be used for testing
+
+  expect_equal(suppressMessages(estim_NLS(gdpdef[1:25,], p=1, M=3, weight_function="mlogit", weightfun_pars=list(1, 1), use_parallel=FALSE,
+                                          weight_constraints=list(R=0, r=c(-1, 2, 3, -4)))),
+               c(24.1395409, 0.4047623, -2.0222824, 0.5912925, 10.2521473, -1.2205443, -8.9641456, 0.1025496, -3.9468535, -0.8824704
+                 -0.9285072, 0.2379848, 5.5731187, -0.3015204, -44.4804178, 0.4699969, 3.1929059, 2.2664230), tolerance=1e-4)
+})
+

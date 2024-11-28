@@ -1372,7 +1372,7 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
     if(is.null(AR_constraints)) {
       est_to_use <- estims
     } else {
-      est_to_use <- C_tilde%*%estims # Estimates in the standard form
+      est_to_use <- PC%*%estims # Estimates in the standard form
     }
     all_rss <- numeric(T_obs) # Storage for all residual sums of squares
     for(t in 1:T_obs) { # Go through the time periods again
@@ -1433,9 +1433,9 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
     } else if(weight_function == "mlogit") {
       n_weight_pars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
       weightparvecs <- unname(simplify2array(expand.grid(replicate(n=n_weight_pars,
-                                                                 expr=seq(from=-10, to=10,
-                                                                          length.out=max(2, ceiling(10000^(1/n_weight_pars)))),
-                                                                 simplify=FALSE)))) # Roughly 10000-100000 grid points
+                                                                   expr=seq(from=-20, to=20,
+                                                                            length.out=max(2, ceiling(10000^(1/n_weight_pars)))),
+                                                                   simplify=FALSE)))) # Roughly 10000-100000 grid points
     } else if(weight_function == "threshold") {
       # Remove the values from the sorted switch variable series that would leave less than T_min observations
       # smaller or larger than the threshold.
@@ -1488,7 +1488,7 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
 
   if(M == 1) {
     if(use_parallel) message(paste("PHASE 1: Estimating AR and weight parameters by nonlinear least squares..."))
-    estims <- as.matrix(estim_fun(numeric(0)))
+    estims <- as.matrix(NLS_est(numeric(0), AR_constraints=AR_constraints))
     all_stab_ex <- stab_exceeded(estims[,1])
   } else {
     if(use_parallel) {
