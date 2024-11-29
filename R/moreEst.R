@@ -33,7 +33,7 @@
 #' fit12 <- iterate_more(fit12)
 #'
 #' # The gradient of the log-likelihood function after iterating more:
-#' get_foc(fit12) # Close to zero!
+#' get_foc(fit12) # Close (enough) to zero!
 #' }
 #' @export
 
@@ -251,7 +251,12 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
   stopifnot(maxit %% 1 == 0 & maxit >= 1)
   stopifnot(maxit_robust %% 1 == 0 & maxit_robust >= 1)
   robust_method <- match.arg(robust_method)
-  identification <- match.arg(identification)
+  if(length(identification > 1) && match.arg(identification) == "recursive"
+     && stvar$model$cond_dist %in% c("ind_Student", "ind_skewed_t")) {
+    identification <- "non-Gaussianity"
+  } else {
+    identification <- match.arg(identification)
+  }
   p <- stvar$model$p
   M <- stvar$model$M
   d <- stvar$model$d
@@ -1106,7 +1111,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   estim_length <- if(is.null(AR_constraints)) M*d + M*p*d^2 + 1 else M*d + ncol(AR_constraints) + 1
 
   if(M == 1) {
-    if(use_parallel) message(paste("PHASE 1: Estimating AR and weight parameters by least squares..."))
+    if(use_parallel) message(paste("PHASE 1: Estimating the AR and weight parameters by least squares..."))
     estims <- as.matrix(estim_fun(numeric(0)))
     all_stab_ex <- stab_exceeded(estims[,1])
   } else {
@@ -1115,7 +1120,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
         ncores <- parallel::detectCores()
       }
       n_thresvecs <- ifelse(M == 1 || !is.null(weight_constraints), 1, nrow(thresvecs))
-      message(paste0("PHASE 1: Estimating AR and weight parameters by least squares for ", n_thresvecs,
+      message(paste0("PHASE 1: Estimating the AR and weight parameters by least squares for ", n_thresvecs,
                      " vectors of thresholds...")) # "PHASE 1" print i related to the multiple-phase estimation procedure
       cl <- parallel::makeCluster(ncores)
       on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.
@@ -1487,7 +1492,7 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
   estim_length <- if(is.null(AR_constraints)) M*d + M*p*d^2 + 1 else M*d + ncol(AR_constraints) + 1
 
   if(M == 1) {
-    if(use_parallel) message(paste("PHASE 1: Estimating AR and weight parameters by nonlinear least squares..."))
+    if(use_parallel) message(paste("PHASE 1: Estimating the AR and weight parameters by nonlinear least squares..."))
     estims <- as.matrix(NLS_est(numeric(0), AR_constraints=AR_constraints))
     all_stab_ex <- stab_exceeded(estims[,1])
   } else {
@@ -1496,7 +1501,7 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
         ncores <- parallel::detectCores()
       }
       n_weightvecs <- ifelse(M == 1 || !is.null(weight_constraints), 1, nrow(weightparvecs))
-      message(paste0("PHASE 1: Estimating AR and weight parameters by least squares for ", n_weightvecs,
+      message(paste0("PHASE 1: Estimating the AR and weight parameters by least squares for ", n_weightvecs,
                      " vectors of thresholds...")) # "PHASE 1" print i related to the multiple-phase estimation procedure
       cl <- parallel::makeCluster(ncores)
       on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.

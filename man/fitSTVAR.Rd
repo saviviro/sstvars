@@ -250,7 +250,7 @@ If you wish to estimate a structural model, estimate first the reduced form mode
 # Estimate Gaussian STVAR model of autoregressive order p=3 and two regimes (M=2),
 # with the weighted relative stationary densities of the regimes as the transition
 # weight function. The estimation is performed with 2 rounds and 2 CPU cores, with
-# the random number generator seeds set for reproducibility.
+# the random number generator seeds set for reproducibility (two-phase estimation):
 fit32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="relative_dens", cond_dist="Gaussian",
  nrounds=2, ncores=2, seeds=1:2)
 
@@ -264,7 +264,7 @@ profile_logliks(fit32) # Profile log-likelihood functions about the estimate
 
 # Estimate a two-regime Student's t STVAR p=3 model with logistic transition weights
 # and the first lag of the second variable as the switching variable, only two
-# estimation rounds using two CPU cores:
+# estimation rounds using two CPU cores (three-phase estimation):
 fitlogistict32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logistic", weightfun_pars=c(2, 1),
  cond_dist="Student", nrounds=2, ncores=2, seeds=1:2)
 summary(fitlogistict32) # Summary printout of the estimates
@@ -272,7 +272,7 @@ summary(fitlogistict32) # Summary printout of the estimates
 # Estimate a two-regime threshold VAR p=3 model with independent skewed t shocks
 # using the three-phase estimation procedure.
 # The first lag of the the second variable is specified as the switching variable,
-# and the threshold parameter constrained to the fixed value 1.
+# and the threshold parameter constrained to the fixed value 1 (three-phase estimation):
 fitthres32wit <- fitSTVAR(gdpdef, p=3, M=2, weight_function="threshold", weightfun_pars=c(2, 1),
   cond_dist="ind_skewed_t", weight_constraints=list(R=0, r=1), nrounds=2, ncores=2, seeds=1:2)
 plot(fitthres32wit) # Plot the fitted transition weights
@@ -280,7 +280,7 @@ plot(fitthres32wit) # Plot the fitted transition weights
 # Estimate a two-regime STVAR p=1 model with exogenous transition weights defined as the indicator
 # of NBER based U.S. recessions (source: St. Louis Fed database). Moreover, restrict the AR matrices
 # to be identical across the regimes (i.e., allowing for time-variation in the intercepts and the
-# covariance matrix only):
+# covariance matrix only), (three-phase estimation):
 
 # Step 1: Define transition weights of Regime 1 as the indicator of NBER based U.S. recessions
 # (the start date of weights is start of data + p, since the first p values are used as the initial
@@ -311,7 +311,7 @@ summary(fitexo12cit) # Summary printout of the estimates
 # Estimate a two-regime Gaussian STVAR p=1 model with the weighted relative stationary densities
 # of the regimes as the transition weight function; constrain AR matrices to be identical
 # across the regimes and also constrain the off-diagonal elements of the AR matrices to be zero.
-# Moreover, constrain the unconditional means of both regimes to be equal.
+# Moreover, constrain the unconditional means of both regimes to be equal (two-phase estimation):
 mat0 <- matrix(c(1, rep(0, 10), 1, rep(0, 8), 1, rep(0, 10), 1), nrow=2*2^2, byrow=FALSE)
 C_222 <- rbind(mat0, mat0) # The constraint matrix
 fit22cm <- fitSTVAR(gdpdef, p=2, M=2, weight_function="relative_dens", cond_dist="Gaussian",
@@ -320,7 +320,7 @@ fit22cm # Print the estimates
 
 # Estimate a two-regime Student's t STVAR p=3 model with logistic transition weights and the
 # first lag of the second variable as the switching variable. Constraint the location parameter
-# to the fixed value 1 and leave the scale parameter unconstrained.
+# to the fixed value 1 and leave the scale parameter unconstrained (three-phase estimation):
 fitlogistic32w <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logistic", weightfun_pars=c(2, 1),
  cond_dist="Student", weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(1, 0)), nrounds=2,
  seeds=1:2)

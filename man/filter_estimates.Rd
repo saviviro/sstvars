@@ -68,9 +68,10 @@ The function goes through the estimates produced by \code{fitSTVAR} and checks w
 }
 \examples{
 \donttest{
- # Fit a two-regime STVAR model with logistic transition weights and Student's t errors
+ # Fit a two-regime STVAR model with logistic transition weights and Student's t errors,
+ # and use two-phase estimation method:
  fit12 <- fitSTVAR(gdpdef, p=1, M=2, weight_function="logistic", weightfun_pars=c(2, 1),
-  cond_dist="Student", nrounds=2, ncores=2, seeds=c(2, 5))
+  cond_dist="Student", nrounds=2, ncores=2, seeds=1:2, estim_method="two-phase")
  fit12
 
  # Filter through inappropriate estimates and obtain the second best appropriate solution:

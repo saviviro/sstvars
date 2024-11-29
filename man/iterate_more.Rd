@@ -91,7 +91,7 @@ get_foc(fit12) # Not close to zero!
 fit12 <- iterate_more(fit12)
 
 # The gradient of the log-likelihood function after iterating more:
-get_foc(fit12) # Close to zero!
+get_foc(fit12) # Close (enough) to zero!
 }
 }
 \references{
