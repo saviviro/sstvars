@@ -23,6 +23,7 @@
 #' @param print_res should summaries of estimation results be printed?
 #' @param use_parallel employ parallel computing? If \code{use_parallel=FALSE && print_res=FALSE},
 #'  nothing is printed during the estimation process.
+#' @param calc_std_errors Calculate approximate standard errors (based on standard asymptotics)?
 #' @param ... additional settings passed to the function \code{GAfit} employing the genetic algorithm.
 #' @details
 #'  If you wish to estimate a structural model, estimate first the reduced form model and then use the
@@ -734,7 +735,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                penalized=penalized,
                penalty_params=penalty_params,
                allow_unstab=allow_unstab,
-               calc_std_errors=TRUE)
+               calc_std_errors=calc_std_errors)
   ret$all_estimates <- all_estimates
   ret$all_logliks <- loks
   ret$which_converged <- converged

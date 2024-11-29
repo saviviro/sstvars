@@ -137,6 +137,8 @@ for each call to the genetic algorithm, or \code{NULL} for not initializing the 
 \item{use_parallel}{employ parallel computing? If \code{use_parallel=FALSE && print_res=FALSE},
 nothing is printed during the estimation process.}
 
+\item{calc_std_errors}{Calculate approximate standard errors (based on standard asymptotics)?}
+
 \item{...}{additional settings passed to the function \code{GAfit} employing the genetic algorithm.}
 }
 \value{

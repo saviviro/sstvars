@@ -36,7 +36,7 @@ is a tuning parameter for the penalization (a positive real number, a higher val
 \item{allow_unstab}{If \code{TRUE}, estimates not satisfying the stability condition are allowed. Always \code{FALSE} if
 \code{weight_function="relative_dens"}.}
 
-\item{calc_std_errors}{should approximate standard errors be calculated?}
+\item{calc_std_errors}{Calculate approximate standard errors (based on standard asymptotics)?}
 
 \item{print_trace}{should the trace of the optimization algorithm be printed?}
 }

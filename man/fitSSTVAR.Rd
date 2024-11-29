@@ -58,7 +58,7 @@ to the gradient based variable metric algorithm? See details.}
 
 \item{print_res}{should summaries of estimation results be printed?}
 
-\item{calc_std_errors}{should approximate standard errors be calculated?}
+\item{calc_std_errors}{Calculate approximate standard errors (based on standard asymptotics)?}
 }
 \value{
 Returns an S3 object of class \code{'stvar'} defining a smooth transition VAR model. The returned list

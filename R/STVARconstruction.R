@@ -403,7 +403,7 @@ alt_stvar <- function(stvar, which_largest=1, which_round, calc_std_errors=FALSE
   if(!is.null(stvar$which_round)) {
     ret$which_round <- which_round
   }
-  warn_eigens(ret, allow_unstab=allow_unstab)
+  warn_eigens(ret, allow_unstab=stvar$allow_unstab)
   ret
 }
 
@@ -1102,7 +1102,8 @@ filter_estimates <- function(stvar, which_largest=1, filter_stab=TRUE, calc_std_
 #'
 #' # Update to include the new elements (does not do anything they are already
 #' # included):
-#' mod112 <- update_stvar_to_sstvar110(mod112)
+#' mod112 <- stvar_to_sstvars110(mod112)
+#' @export
 
 stvar_to_sstvars110 <- function(stvar) {
   check_stvar(stvar)

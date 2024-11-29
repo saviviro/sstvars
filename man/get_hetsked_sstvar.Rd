@@ -10,7 +10,7 @@ get_hetsked_sstvar(stvar, calc_std_errors = FALSE)
 \item{stvar}{a an object of class \code{'stvar'}, created by, e.g., \code{fitSTVAR},
 specifying a reduced form or a structural model}
 
-\item{calc_std_errors}{should approximate standard errors be calculated?}
+\item{calc_std_errors}{Calculate approximate standard errors (based on standard asymptotics)?}
 }
 \value{
 Returns an object of class \code{'stvar'} defining a structural STVAR model identified by heteroskedasticity,

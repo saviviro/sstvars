@@ -39,7 +39,7 @@ zero lower bound does not bind.
 \references{
 \itemize{
    \item American Academy of Actuaries, Canadian Institute of Actuaries, Casualty Actuarial Society,
-    and Society of Actuaries, 2023. Actuaries Climate Index. \url{https://actuariesclimateindex.org}.
+    and Society of Actuaries, 2023. Actuaries Climate Index. https://actuariesclimateindex.org.
   \item Federal Reserve Bank of Chicago, 2023. Monthly GDP Growth Rate Data. \url{https://www.chicagofed.org/publications/bbki/index}.
    \item Wu J. and Xia F. 2016. Measuring the macroeconomic impact of monetary policy at the zero lower bound.
      \emph{Journal of Money, Credit and Banking}, 48(2-3): 253-291.

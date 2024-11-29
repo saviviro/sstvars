@@ -758,6 +758,7 @@ fitbsSSTVAR <- function(data, p, M, params,
                         identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                         AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
                         other_constraints=NULL, robust_method=c("Nelder-Mead", "SANN", "none"),
+                        penalized=FALSE, penalty_params=c(0.05, 0.2), allow_unstab=FALSE, minval=NULL,
                         maxit=1000, maxit_robust=1000, seed=NULL) {
   set.seed(seed)
   weight_function <- match.arg(weight_function)

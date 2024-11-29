@@ -23,6 +23,10 @@ fitbsSSTVAR(
   B_constraints = NULL,
   other_constraints = NULL,
   robust_method = c("Nelder-Mead", "SANN", "none"),
+  penalized = FALSE,
+  penalty_params = c(0.05, 0.2),
+  allow_unstab = FALSE,
+  minval = NULL,
   maxit = 1000,
   maxit_robust = 1000,
   seed = NULL
@@ -198,6 +202,21 @@ Currently only available for models with \code{identification="heteroskedasticit
 
 \item{robust_method}{Should some robust estimation method be used in the estimation before switching
 to the gradient based variable metric algorithm? See details.}
+
+\item{penalized}{Perform penalized LS estimation that minimizes penalized RSS in which estimates close to breaking or not satisfying the
+usual stability condition are penalized? If \code{TRUE}, the tuning parameter is set by the argument \code{penalty_params[2]},
+and the penalization starts when the eigenvalues of the companion form AR matrix are larger than \code{1 - penalty_params[1]}.}
+
+\item{penalty_params}{a numeric vector with two positive elements specifying the penalization parameters:
+the first element determined how far from the boundary of the stability region the penalization starts
+(a number between zero and one, smaller number starts penalization closer to the boundary) and the second element
+is a tuning parameter for the penalization (a positive real number, a higher value penalizes non-stability more).}
+
+\item{allow_unstab}{If \code{TRUE}, estimates not satisfying the stability condition are allowed. Always \code{FALSE} if
+\code{weight_function="relative_dens"}.}
+
+\item{minval}{the value that will be returned if the parameter vector does not lie in the parameter space
+(excluding the identification condition).}
 
 \item{maxit}{the maximum number of iterations in the variable metric algorithm.}
 
