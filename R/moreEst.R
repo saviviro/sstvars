@@ -1433,7 +1433,7 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
     if(weight_function %in% c("logistic", "exponential")) {
       # Here always M=2, the first weight parameter is location parameter, and the second one is strictly positive scale parameter
       c_grid <- seq(from=min_switchvar, to=max_switchvar, length.out=100) # The grid for the location parameter
-      gamma_grid <- seq(from=0.1, to=200, length.out=100) # The grid for the scale parameter
+      gamma_grid <- seq(from=0.1, to=100, length.out=100) # The grid for the scale parameter
       weightparvecs <- unname(simplify2array(expand.grid(c_grid, gamma_grid))) # Each row for a vector of weight parameters
     } else if(weight_function == "mlogit") {
       n_weight_pars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])

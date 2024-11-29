@@ -91,26 +91,30 @@ diagnostic_plot <- function(stvar, type=c("all", "series", "ac", "ch", "dist"), 
                             4) histograms and QQ-plots")
 
   if(type == "series" || type == "all") {
-    par(mfrow=c(d, 1), las=1)
+    empty_plot <- function() plot(0, xaxt='n', yaxt='n', bty='n', pch='', ylab='', xlab='')
+    par(mar=c(0, 3, 0, 0.5), las=1)
+    layout(matrix(seq_len(d + 2), ncol=1), heights=c(0.35, rep(1, times=d), 0.35))
+    empty_plot()
+    text(x=1, y=0.0, "Residual time series", cex=1.5, font=2)
     for(d1 in 1:d) {
       xaxt <- "n"
-      if(d1 == 1) {
-        par(mar=c(0.5, 2.5, 2.1, 1))
-      } else if(d1 == d) {
+      if(d1 == d) {
         xaxt <- "s"
-        par(mar=c(2.5, 2.5, 0.1, 1))
-      } else {
-        par(mar=c(0.5, 2.5, 0.1, 1))
       }
       yaxt1 <- round(min(res[,d1]))
       yaxt2 <- round(max(res[,d1]))
-      main <- ifelse(all.equal(d1, 1), "Residual time series", "")
-      plot(res[,d1], yaxt="n", xaxt=xaxt, type="l", col=grDevices::rgb(0, 0, 0, 1), ylab="", xlab="", main=main)
+      plot(res[,d1], yaxt="n", xaxt=xaxt, type="l", col=grDevices::rgb(0, 0, 0, 1), ylab="", xlab="", main="")
       axis(2, at=yaxt1:yaxt2, labels=yaxt1:yaxt2)
       abline(h=0, col=grDevices::rgb(1, 0, 0, 0.3), lwd=2)
       legend("topleft", legend=names_ts[d1], bty="n", col="black", text.font=2, cex=0.65, x.intersp=0.5, y.intersp=1)
     }
+    empty_plot()
   }
+
+  # Restrore the layout:
+  par(old_par)
+  par(las=1)
+
   if(type == "ac" || type == "all") {
     par(mar=c(2.3, 2.8, 3.5, 1.0))
     acf(res, lag.max=maxlag, plot=TRUE, ylab="")

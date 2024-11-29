@@ -46,21 +46,21 @@ examples how to conduct some further analysis.
 # from 1959Q1 to 2019Q4.
 data(gdpdef, package="sstvars")
 
-# Some of the below examples are computationally demanding. Running them all will take approximately 15 minutes.
+# Some of the below examples are computationally demanding. Running them all will take approximately 10 minutes.
 
 ### Reduced form STVAR models ###
 
-# Estimate a reduced form two-regime Student's t STVAR p=3 model with logistic transition weight function using the first
-# lag of the second variable (GDP deflator) as the switching variable. The below estimation is based on 20 estimation
+# Estimate a reduced form two-regime Student's t STVAR p=2 model with threshold transition weight function using the first
+# lag of the first variable (GDP) as the switching variable. The below estimation is based on two estimation
 # rounds with seeds set for reproducibility.
-# (IMPORTANT: typically empirical applications require more estimation rounds, e.g., hundreds or thousands).
-fit <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="Student",
-                nrounds=20, ncores=2, seeds=1:20)
+# (IMPORTANT: typically empirical applications require more estimation rounds, e.g., tens, hundreds or even thousand, depending
+# on the size of the model, and with the two-phase procedure often much more).
+fit <- fitSTVAR(gdpdef, p=2, M=2, weight_function="threshold", weightfun_pars=c(2, 1), cond_dist="Student",
+                estim_method="three-phase", nrounds=2, ncores=2, seeds=1:2)
                 
 # Information on the estimated model:
 plot(fit) # Plot the estimated transition weight function with data
 summary(fit) # Summary printoout of the estimated model
-print(fit, standard_error_print=TRUE) # Print standard errors of the estimates (assuming the standard asymptotics on the ML estimator)
 get_foc(fit) # The first order condition (gradient of the log-likelihood function)
 get_soc(fit) # The second order condition (eigenvalues of approximated Hessian)
 profile_logliks(fit) # Plot profile log-likelihood functions about the estimate
@@ -73,22 +73,23 @@ bound_JSR(fit, epsilon=0.1, ncores=2) # Adjust epsilon for a tighter bound
 
 # Estimate the above model but with the autoregressive matrices restricted to be equal in both regimes
 # (so that only the intercepts and the conditional covariance matrix vary in time):
-C_mat <- rbind(diag(3*2^2), diag(3*2^2))
-fitc <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="Student",
-                 AR_constraints=C_mat, nrounds=20, ncores=2, seeds=1:20)
+C_mat <- rbind(diag(2*2^2), diag(2*2^2))
+fitc <- fitSTVAR(gdpdef, p=2, M=2, weight_function="threshold", weightfun_pars=c(2, 1), cond_dist="Student",
+                 AR_constraints=C_mat, nrounds=2, ncores=2, seeds=1:2)
 
 # Estimate the above model but with the autoregressive matrices and unconditional means restricted to be equal
-# in both regimes (so that only the conditional covariance matrix varies in time):
-fitcm <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="Student",
-                  AR_constraints=C_mat, mean_constraints=list(1:2), nrounds=20, ncores=2, seeds=1:20)
+# in both regimes (so that only the conditional covariance matrix varies in time), two-phase estimation 
+# is used because mean-constraints are not supported in the three-phase estimation:
+fitcm <- fitSTVAR(gdpdef, p=2, M=2, weight_function="threshold", weightfun_pars=c(2, 1), cond_dist="Student",
+                  AR_constraints=C_mat, mean_constraints=list(1:2), nrounds=2, ncores=2, seeds=1:2)
 
 # Estimate the above logistic STVAR model without constraints on the autoregressive parameters but with the 
-# the location parameter constrained to 1 and scale parameter unconstrained.
-fitw <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="Student",
-                 weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(1, 0)), nrounds=20, ncores=2, seeds=1:20)
+# the location parameter constrained to 1 and scale parameter unconstrained. Two-phase estimation is used because
+# this type of weight constraints  are not supported in the three-phase estimation:
+fitw <- fitSTVAR(gdpdef, p=2, M=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="Student",
+                 weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(1, 0)), nrounds=2, ncores=2, seeds=1:2)
 
-# Test the constraint on the location parameter with the likelihood ratio test:
-LR_test(fit, fitw) # See also Wald_test and Rao_test
+# The constraints can be tested with the functions LR_test, Wald_test, and Rao_test.
 
 # Residual based model diagnostics:
 diagnostic_plot(fit, type="series", resid_type="standardized") # Standardized residual time series
@@ -115,11 +116,11 @@ plot(pred)
 # is not overidentifying, the model is merely reparametrized and no estimation is
 # required (recursively identified models are just reduced form models marked as structural). 
 
-# Identify the above logistic STVAR model by recursive identification:
+# Identify the above threshold VAR model by recursive identification:
 fitrec <- fitSSTVAR(fit, identification="recursive")
 fitrec
 
-# Identify the above logistic STVAR model by heteroskedasticity:
+# Identify the above threshold VAR model by heteroskedasticity:
 fithet <- fitSSTVAR(fit, identification="heteroskedasticity")
 fithet
 
@@ -127,9 +128,10 @@ fithet
 # or independent skewed t distribution as the conditional distribution. The reduced form model is
 # then readily identified by non-Gaussianity. Estimate a reduced form model identified by
 # non-Gaussianity with independent Student's t shocks: 
-fitindt <- fitSTVAR(gdpdef, p=2, M=2, weight_function="logistic", weightfun_pars=c(2, 1),
-                    cond_dist="ind_Student", nrounds=20, ncores=2, seeds=1:20)
+fitindt <- fitSTVAR(gdpdef, p=1, M=2, weight_function="logistic", weightfun_pars=c(1, 1),
+                    cond_dist="ind_Student", nrounds=2, ncores=2, seeds=1:2)
 fitindt
+
 # Impose overidentying constraint with the argument B_constraints by estimating
 # with fitSSTVARs:
 fitindtb <- fitSSTVAR(fitindt, identification="non-Gaussianity",
