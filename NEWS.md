@@ -23,6 +23,7 @@
 * Changed the random parameter generation for ind_Student models (estimation results with specific seeds are not backward compatible).
 * A new function: filter_estimates, which can be used considers includes estimates that are not deemed inappropriate).
 * A new function: plot_struct_shocks, which plots the structural shock time series. 
+* A new function: stvar_to_sstvars110, which makes STVAR models estimated with package versions <1.1.0 compatible with package versions >=1.1.0.
 * Some adjustments to estimation with fitSTVAR. NOTE: estimation results with a particular seed may be different to the earlier version. 
 * Removed the argument "filter_estimates" from fitSTVAR as a redundancy (it is now always applied), since the function alt_stvar can in
   any case be used to browse the estimates from any estimation round. 

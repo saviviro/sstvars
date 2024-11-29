@@ -1078,3 +1078,45 @@ filter_estimates <- function(stvar, which_largest=1, filter_stab=TRUE, calc_std_
   warn_eigens(ret, allow_unstab=allow_unstab)
   ret
 }
+
+
+
+#' @title Update STVAR model estimated with a version of the package <1.1.0 to
+#'   be compatible with the versions >=1.1.0.
+#'
+#' @description \code{update_stvar_to_sstvar110} updates a STVAR model estimated with a version of
+#'   the package <1.1.0 to be compatible with the versions >=1.1.0 by adding the elements
+#'   \code{$penalized}, \code{$penalty_params}, and \code{$allow_unstab} to the model object.
+#'
+#' @inheritParams diagnostic_plot
+#' @details The function is useful when a STVAR model estimated with a version of the package <1.1.0.
+#'   Does not do anything if the elements \code{$penalized}, \code{$penalty_params}, and \code{$allow_unstab}
+#'   are already containing in the model object.
+#' @return Returns an object of class \code{'stvar'} with the elements \code{$penalized},
+#'  \code{$penalty_params}, and \code{$allow_unstab} added to it if they were missing.
+#' @examples
+#' # Linear Gaussian VAR(p=1) model:
+#' theta_112 <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103,
+#'   0.601786, -0.002945, 0.067224)
+#' mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112)
+#'
+#' # Update to include the new elements (does not do anything they are already
+#' # included):
+#' mod112 <- update_stvar_to_sstvar110(mod112)
+
+stvar_to_sstvars110 <- function(stvar) {
+  check_stvar(stvar)
+  if(!is.null(stvar$penalized) && !is.null(stvar$penalty_params) && !is.null(stvar$allow_unstab)) {
+    return(stvar)
+  }
+  if(!is.null(stvar$penalized)) {
+    stvar$penalized <- FALSE
+  }
+  if(!is.null(stvar$penalty_params)) {
+    stvar$penalty_params <- c(0.05, 0)
+  }
+  if(!is.null(stvar$allow_unstab)) {
+    stvar$allow_unstab <- FALSE
+  }
+  stvar
+}
