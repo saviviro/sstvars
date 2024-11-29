@@ -3,6 +3,12 @@
 %% -- LaTeX packages and custom commands ---------------------------------------
 %\VignetteIndexEntry{sstvars: Structural Smooth Transition Vector Autoregressive Models R}
 
+% Margin setup
+\usepackage[margin=1in]{geometry}
+
+% Adjustwidth environment
+\usepackage{changepage}
+
 %% recommended packages
 \usepackage{thumbpdf, lmodern}
 
@@ -55,15 +61,13 @@
 
 %% - \Abstract{} almost as usual
 \Abstract{
-  We describe the \proglang{R} package \pkg{sstvars}, which provides tools for estimating and analyzing the reduced form and structural smooth transition vector autoregressive (STVAR) models. This includes also threshold vector autoregressive models. The package implements various transition weight functions, conditional distributions, identification methods, and parameter restrictions. The model parameters are estimated with the method of maximum likelihood by running multiple rounds of a two-phase estimation procedure in which a genetic algorithm is used to find starting values for a gradient based variable metric algorithm. For evaluating the adequacy of the estimated models, \pkg{sstvars} utilizes residuals based diagnostics and provides functions for graphical diagnostics and for calculating formal diagnostic tests. \pkg{sstvars} also accommodates the estimation of linear impulse response functions, nonlinear generalized impulse response functions, and generalized forecast error variance decompositions. Further functionality includes hypothesis testing, plotting the profile log-likelihood functions about the estimate, simulation from STVAR processes, and forecasting, for example. We illustrate the use of \pkg{sstvars} with a quarterly series consisting of two U.S. variables: the percentage change of real GDP and the percentage change of GDP implicit price deflator.}
+  We describe the \proglang{R} package \pkg{sstvars}, which provides tools for estimating and analyzing the reduced form and structural smooth transition vector autoregressive (STVAR) models. This includes also threshold vector autoregressive models. The package implements various transition weight functions, conditional distributions, identification methods, and parameter restrictions. The model parameters are estimated with the method of (penalized) maximum likelihood (ML) by running multiple rounds of a two-phase or a three-phase procedure estimation procedure. In the two-phase procedure, a genetic algorithm is used in the first phase to find starting values for a gradient based variable metric algorithm, which is ran in the second phase. In the three-phase procedure, autoregressive and weight parameters are first estimated by (nonlinear) least squares, then the rest of the parameters are estimated by ML conditional on them with a genetic algorithm, and finally all the parameters are estimated by (penalized) ML by initializing the variable metric algorithm from the initial estimates obtained from the first two steps. Both penalized and "normal" ML estimation are supported. For evaluating the adequacy of the estimated models, \pkg{sstvars} utilizes residuals based diagnostics and provides functions for graphical diagnostics and for calculating formal diagnostic tests. \pkg{sstvars} also accommodates the estimation of linear impulse response functions, nonlinear generalized impulse response functions, and generalized forecast error variance decompositions. Further functionality includes hypothesis testing, plotting the profile log-likelihood functions about the estimate, simulation from STVAR processes, and forecasting, to name a few. We illustrate the use of \pkg{sstvars} with a quarterly series consisting of two U.S. variables: the percentage change of real GDP and the percentage change of GDP implicit price deflator.}
 
 %% - \Keywords{} with LaTeX markup, at least one required
 %% - \Plainkeywords{} without LaTeX markup (if necessary)
 %% - Should be comma-separated and in sentence case.
-\Keywords{smooth transition vector autoregressive model, structural smooth transition vector autoregressive model, regime-switching,
-SVAR, STVAR, maximum likelihood estimation}
-\Plainkeywords{smooth transition vector autoregressive model, structural smooth transition vector autoregressive model, regime-switching,
-SVAR, STVAR, maximum likelihood estimation}
+\Keywords{smooth transition vector autoregressive model, structural smooth transition vector autoregressive model, regime-switching, threshold VAR model, SVAR, TVAR, STVAR}
+\Plainkeywords{smooth transition vector autoregressive model, structural smooth transition vector autoregressive model, regime-switching, threshold VAR model, SVAR, TVAR, STVAR}
 
 %% - \Address{} of at least one author
 %% - May contain multiple affiliations for each author
@@ -81,25 +85,38 @@ SVAR, STVAR, maximum likelihood estimation}
 
 \begin{document}
 
+% Table of contents
+\pagenumbering{gobble}
+\pagebreak
 \tableofcontents
+\vfill
+\pagebreak
+\pagenumbering{arabic}
 
 \section{Introduction}
 \addcontentsline{toc}{section}{Introduction}
 Linear vector autoregressive (VAR) models are a standard tools in time series econometrics. They can be employed to answer questions about the statistical relationships of different variables or to forecast future values of the process, for example. Structural VAR models, in particular, allow to trace out the effects of economic shocks. With an appropriate choice of the autoregressive order $p$, a linear VAR model is often able to filter out autocorrelation from the series very well. If the errors are assumed to follow an autoregressive conditional heteroskedasticity (ARCH) process, the model is also often able to adequately filter out conditional heteroskedasticity from the series.
 
-In some cases, linear VAR models are not, however, capable of capturing all the relevant characteristics of the data. This includes shifts in the mean or volatility, and changes in the autoregressive dynamics of the process. Such nonlinear features frequently occur in economic time series when the underlying data generating dynamics vary in time, for example, depending the specific state of the economy. Various types of time series models capable of capturing this kind of regime-switching behavior have been proposed, one of them is the smooth transition vector autoregressive (STVAR) models that allow to capture gradual shifts in the dynamics of the data. They consist of a finite number of regimes, each of which are linear vector autoregressions that are characterized by different autoregressive coefficients or error term covariance matrices. The package \pkg{sstvars} considers STVAR models in which, at each point of time, the observation is a weighted average of the conditional means of the regimes plus a random error whose covariance matrix is a weighted average of the covariance matrices of the regimes. The weights, in turn, are expressed in terms of time-varying transition weights that depend on the preceding observations. Different STVAR models can be created by specifying the transition weights or the error distribution in various ways.
+In some cases, linear VAR models are not, however, capable of capturing all the relevant characteristics of the data. This includes shifts in the mean or volatility, and changes in the autoregressive dynamics of the process. Such nonlinear features frequently occur in economic time series when the underlying data generating dynamics vary in time, for example, depending the specific state of the economy. Various types of time series models capable of capturing this kind of regime-switching behavior have been proposed, one of them is the smooth transition vector autoregressive (STVAR) models that allow to capture gradual shifts in the dynamics of the data. They consist of a finite number of regimes, each of which are linear vector autoregressions that are characterized by different autoregressive coefficients or error term covariance matrices. The package \pkg{sstvars} considers STVAR models in which, at each point of time, the observation is a weighted average of the conditional means of the regimes plus a random error whose covariance matrix is a weighted average of the covariance matrices of the regimes. The weights, in turn, are expressed in terms of time-varying transition weights that either depend on the preceding observations or are exogenous. Different STVAR models can be created by specifying the transition weights or the error distribution in various ways.
 
-This manuscript describes the \proglang{R} package \pkg{sstvars} providing a set of easy-to-use tools for STVAR modeling, including also threshold vector autoregressive models. There are tools for unconstrained and constrained maximum likelihood (ML) estimation of the model parameters, residual based model diagnostics, estimation of linear impulse response functions, nonlinear generalized impulse response functions, and generalized forecast error variance decompositions. Further functionality includes hypothesis testing, plotting the profile log-likelihood functions about the estimate, simulation from STVAR processes, and forecasting, for example. Various transition weight functions are accommodated, including exogenous weights, logistic weights \citep{Anderson+Vahid:1998}, multinomial logit weights, exponential weights \citep[e.g.,][]{Hubrich+Terasvirta:2013}, threshold weights \citep{Tsay:1998}, and transition weights that defined as weighted relative likelihoods of the regimes corresponding to the preceding $p$ observations \citep{Lanne+Virolainen:2024}. Currently, the accommodated conditional distributions include Gaussian distribution, Student's $t$ distribution, Student's $t$ distribution with mutually independent components, and skewed $t$ distribution with mutually independent components. The accommodated identification methods include recursive identification, identification by heteroskedasticity \citep{Lutkepohl+Netsunajev:2017}, and identification by non-Gaussianity \citep{Virolainen2:2024}.
+This manuscript describes the \proglang{R} package \pkg{sstvars} providing a set of easy-to-use tools for STVAR modeling, including also threshold vector autoregressive models. There are tools for unconstrained and constrained (penalized) maximum likelihood (ML) estimation of the model parameters, residual based model diagnostics, estimation of linear impulse response functions, nonlinear generalized impulse response functions, and generalized forecast error variance decompositions. In addition to "normal" ML estimation, \pkg{sstvars} also accommodates penalized ML estimation, in which nonstationarity of the parameters is allowed in the estimation (enhancing the performance of the numerical algorithms), but nonstationarity is penalized so that the optimization algorithms typically eventually converge back to the stationarity region. Further functionality includes hypothesis testing, plotting the profile log-likelihood functions about the estimate, simulation from STVAR processes, and forecasting, to name a few. Various transition weight functions are accommodated, including exogenous weights, logistic weights \citep{Anderson+Vahid:1998}, multinomial logit weights, exponential weights \citep[e.g.,][]{Hubrich+Terasvirta:2013}, threshold weights \citep{Tsay:1998}, and transition weights that defined as weighted relative likelihoods of the regimes corresponding to the preceding $p$ observations \citep{Lanne+Virolainen:2024}. Currently, the accommodated conditional distributions include Gaussian distribution, Student's $t$ distribution, Student's $t$ distribution with mutually independent components, and skewed $t$ distribution with mutually independent components. The accommodated identification methods include recursive identification, identification by heteroskedasticity \citep{Lutkepohl+Netsunajev:2017}, and identification by non-Gaussianity \citep{Virolainen2:2024}.
 
-The estimation of the model parameters can, in some cases, be rather tricky. Particularly when the transition weights are determined endogenously, there is a very large number of modes to the log-likelihood function, and large areas of the parameter space, where the log-likelihood function is flat in multiple directions. Therefore, the model parameters are estimated by running multiple rounds of a two-phase estimation procedure in which a modified genetic algorithm is used to find starting values for a gradient based variable metric algorithm. Because of the multimodality of the log-likelihood function, some of the estimation rounds may end up in different local maximum points, thereby enabling the researcher to build models not only based on the global maximum point but also on the local ones. The estimated models can be conveniently examined with the \code{summary} and \code{plot} methods.
+The estimation of the model parameters can, in some cases, be rather tricky. Particularly when the transition weights are determined endogenously, there is a very large number of modes to the log-likelihood function, and large areas of the parameter space, where the log-likelihood function is flat in multiple directions. Therefore, the model parameters are estimated by running multiple rounds of a two-phase or three phase estimation procedure. In the two-phase procedure, a genetic algorithm is used in the first phase to find starting values for a gradient based variable metric algorithm, which is ran in the second phase. In the three-phase procedure, autoregressive and weight parameters are first estimated by (nonlinear) least squares (LS), then the rest of the parameters are estimated by ML conditional on them with a genetic algorithm, and finally all the parameters are estimated by (penalized) ML by initializing the variable metric algorithm from the initial estimates obtained from the first two steps. Because of the multimodality of the log-likelihood function, some of the estimation rounds may end up in different local maximum points, thereby enabling the researcher to build models not only based on the global maximum point but also on the local ones. The estimated models can be conveniently examined with the \code{summary} and \code{plot} methods.
 
-The remainder of this paper is organized as follows. Section~\ref{sec:models} defines the implemented reduced form STVAR models and discusses some of their properties. Section~\ref{sec:struct_stvar} discusses the accommodated structural STVAR models and discusses identification of the structural shocks. Section~\ref{sec:estimation} discusses estimation of the model parameters. We also illustrate how the STVAR models can be estimated and examined with \pkg{sstvars} and how various parameter restrictions can be imposed in the estimation. Section~\ref{sec:res} discusses how to evaluate the model adequacy with \pkg{sstvars} using residual based diagnostics. Section~\ref{sec:impulseresponse} discusses impulse response analysis, including generalized impulse response functions and generalized forecast error variance decompositions. Section~\ref{sec:STVAR} shows how the STVAR models can be constructed with given parameter values. In Section~\ref{sec:simufore}, we first show how to simulate observations from a STVAR process, and then we illustrate how to forecast future values of a STVAR process with a simulation-based Monte Carlo method. Finally, Section~\ref{sec:summary} concludes and collects some useful functions in \pkg{sstvars} to a single table for convenience. Throughout this paper, we illustrate the use of \pkg{sstvars} with a quarterly series consisting of two U.S. variables: the percentage change of real GDP and the percentage change of GDP implicit price deflator, covering the period from 1959Q1 to 2019Q4.
+The three-phase procedure facilitates estimating larger model and substantially reduces to computation time as opposed to the two-phase procedure, as a substantially smaller number of estimation rounds are required due to the initial estimates from (nonlinear) LS estimation. However, the three-phase procedure tends to produce estimates that are close to the initial (N)LS estimates, while the two-phase procedure expolores the parameter space more thoroughly (when a large enough number of estimation rounds is ran). The penalized ML estimation is particularly useful when the data is very persistant, as it allows the optimization algorithm to explore the nonstationarity region of the parameter space. Moreover, penalized estimation can more effective make use of (N)LS estimates that are outside the stationarity region, as with penalized estimation they do not need to be adjusted when switching to ML estimation in the latter phases.
+
+The remainder of this paper is organized as follows. Section~\ref{sec:models} defines the implemented reduced form STVAR models and discusses some of their properties. Section~\ref{sec:struct_stvar} discusses the accommodated structural STVAR models and discusses identification of the structural shocks. Section~\ref{sec:estimation} discusses estimation of the model parameters. We also illustrate how the STVAR models can be estimated and examined with \pkg{sstvars} and how various parameter restrictions can be imposed in the estimation. Section~\ref{sec:res} discusses how to evaluate the model adequacy with \pkg{sstvars} using residual based diagnostics. Section~\ref{sec:impulseresponse} discusses impulse response analysis, including generalized impulse response functions and generalized forecast error variance decompositions. Section~\ref{sec:STVAR} shows how the STVAR models can be constructed with given parameter values. In Section~\ref{sec:simufore}, we first show how to simulate observations from a STVAR process, and then we illustrate how to forecast future values of a STVAR process with a simulation-based Monte Carlo method. Finally, Section~\ref{sec:summary} concludes, and some useful functions in \pkg{sstvars} are collected to a single table in Section~\ref{sec:table} for convenience. Throughout this paper, we illustrate the use of \pkg{sstvars} with a quarterly series consisting of two U.S. variables: the percentage change of real GDP and the percentage change of GDP implicit price deflator, covering the period from 1959Q1 to 2019Q4.
+
 
 \section{Smooth Transition Vector Autoregressive Models}\label{sec:models}
 \addcontentsline{toc}{section}{Smooth Transition Vector Autoregressive Models}
+
 This section describes the STVAR models implemented in \pkg{sstvars}. First, we describe the general framework of STVAR models accommodated by \pkg{sstvars} and present a sufficient condition for their ergodic stationarity. Then, we present the implemented specifications of transition weight functions and conditional distributions. Finally, we discuss structural STVAR models and implemented methods for identification of the shocks.
 
+
 \subsection{General framework for STVAR models}\label{sec:genstvar}
+\addcontentsline{toc}{subsection}{General framework for STVAR models}
+
 Let $y_t$, $t=1,2,...$, be the $d$-dimensional time series of interest and $\mathcal{F}_{t-1}$ denote the $\sigma$-algebra generated by the random vectors $\lbrace y_{t-j}, j>0 \rbrace$. We consider STVAR models with $M$ regimes and autoregressive order $p$ assumed to satisfy
 \begin{align}
 y_t &=\sum_{m=1}^M \alpha_{m,t}\mu_{m,t} + u_t, \quad u_{t} \sim MD(0, I_d)\label{eq:stvar1} \\
@@ -121,7 +138,10 @@ where $\Omega_m\equiv B_mB_m'$ and $\Omega_{m,n}\equiv B_mB_n'$.
 
 Different STVAR models are obtained by specifying the transition weights or the error distribution (i.e., the conditional distribution) in various ways. See \cite{Hubrich+Terasvirta:2013} for a survey on STVAR literature, including formulations more general than our framework. The package \pkg{sstvars} accommodates completely exogenous transition weight functions as well as transition weights are functions of $\lbrace y_{t-j}, j=1,...,p \rbrace$. In the latter case, the stationarity condition presented below applies. Moreover, $\mathcal{F}_{t-1}$-measurability of the transition weights ensures that the true generalized impulse responses functions \citep{Koop+Pesaran+Potter:1996} can be easily estimated, as completely exogenous switching-variables are excluded from affecting the weights. We also assume that the transition weights are identical for all the individual equations in (\ref{eq:stvar1}) and (\ref{eq:stvar3}), which is also required for applicability of the stationarity condition. Consequently, at each $t$‚ the process can be described as a weighted sum of linear vector autoregressions.
 
-\subsubsection{Stationarity condition}\label{sec:stationarity}
+
+\subsection{Stationarity condition}\label{sec:stationarity}
+\addcontentsline{toc}{subsection}{Stationarity condition}
+
 Excluding models with exogenous transition weights, it can be shown that a sufficient condition for the ergodic stationarity of the STVAR model (\ref{eq:stvar1})-(\ref{eq:stvar3}) can expressed in terms of the joint spectral radius (JSR) of certain matrices \citep{Kheifets+Saikkonen:2020}. The JSR of a finite set of square matrices $\mathcal{A}$ is defined by
 \begin{equation}
 \rho(\mathcal{A}) = \underset{j\rightarrow \infty}{\limsup}\left(\underset{A\in \mathcal{A}^j}{\sup}\rho(A) \right)^{1/j},
@@ -153,10 +173,17 @@ where $\rho(\boldsymbol{A}_m)$ is the spectral radius of $\boldsymbol{A}_m$, $m=
 
 Note that validity Condition~\ref{cond:necessary} does not imply the validity of Condition~\ref{cond:sufficient}, which guarantees ergodic stationarity of the model. However, in practice models that satisfy Condition~\ref{cond:necessary} and are not very close to breaking this condition usually satisfy Condition~\ref{cond:sufficient}. For checking the validity of Condition~\ref{cond:sufficient}, \pkg{sstvars} implements (the function \code{bound_JSR}) implements the branch-and-bound method by \cite{Gripenberg:1996}. For large models Gripenberg's method may, however, take very long if tight bounds are required. Other implementations of methods bounding the JSR include the \proglang{MATLAB} toolbox \pkg{JSR} by \cite{Jungers:2023}, which automatically combines several methods and finds accurate bounds faster than \pkg{sstvars}.
 
+The \proglang{R} package \pkg{sstvars} operates largely by assuming that all of the regimes satisfy the usual stability condition. In our experience, this is a very strong indicator that also the sufficient condition for stationarity is satisfied. However, also estimates that do not satisfy the usual stability condition are allowed in \pkg{sstvars}. In this case, the argument \code{allow_unstab} should be set to \code{TRUE}.
+
+
 \subsection{Specifications of the conditional distribution}\label{sec:cond_dist}
+\addcontentsline{toc}{subsection}{Specifications of the conditional distribution}
+
 Currently, \pkg{sstvars} accommodates two types of error distributions: Gaussian distribution, Student's $t$, and independent Student's $t$ distribution, which are discussed below.
 
 \subsubsection{Gaussian distribution}
+\addcontentsline{toc}{subsubsection}{Gaussian distribution}
+
 Assuming the structural errors $e_t$ have standard normal distributions, the conditional distribution of $y_t$ conditional on $\mathcal{F}_{t-1}$ is Gaussian and characterized by the density function
 \begin{equation}
 f(y_t|\mathcal{F}_{t-1}) = n_d(y_t;\mu_{t},\Omega_{t})=(2\pi)^{-d/2}\det(\Omega_t)^{-1/2}\exp\left\lbrace -\frac{1}{2}(y_t - \mu_t)'\Omega_t^{-1}(y_t - \mu_t) \right\rbrace .
@@ -164,6 +191,8 @@ f(y_t|\mathcal{F}_{t-1}) = n_d(y_t;\mu_{t},\Omega_{t})=(2\pi)^{-d/2}\det(\Omega_
 That is, the conditional distribution is simply the $d$-dimensional Gaussian distribution with mean $\mu_t$ and covariance matrix $\Omega_t$. The Gaussian distribution simple and can be used with all of our transition weight functions, but in some cases it is useful to employ the more heavy tailed Student's $t$ distribution instead.
 
 \subsubsection{Student's t distribution}\label{sec:student}
+\addcontentsline{toc}{subsubsection}{Student's t distribution}
+
 To accommodate more heavy tailed data, instead of using Gaussian errors one may consider Student's $t$ errors and assume the shocks $e_t$ are Student's $t$ distributed with the mean zero, identity covariance matrix, and $\nu>2$ degrees of freedom (where the assumption $\nu>2$ is made to ensure the existence of second moments). The Student's $t$ STVAR model has the conditional distribution, conditional $\mathcal{F}_{t-1}$, characterized by the density function
 \begin{equation}
 f(y_t|\mathcal{F}_{t-1}) = t_d(y_t;\mu_t,\Omega_t,\nu)=C_d(\nu)\text{det}(\Omega_t)^{-1/2}\left(1+\frac{(y_t -\mu_t)'\Omega_t^{-1}(y_t - \mu_t)}{\nu-2}\right)^{-(d+\nu)/2},
@@ -177,6 +206,8 @@ and $\Gamma\left(\cdot\right)$ is the gamma function. The conditional distributi
 The Student's $t$ errors are more flexible than the Gaussian ones, but they cannot be used with the transition weight function that is defined as weighted ratios of the regime's stationary densities (see Section~\ref{sec:rel_dens}). This is because it requires the knowledge of the stationary distributions of the regimes corresponding to $p$ consecutive observations, and the stationary distribution is not known for the Student's $t$ regimes. Moreover, Student's $t$ STVAR models are more difficult estimate in practice than the Gaussian ones, and estimation of the STVAR models can be demanding.
 
 \subsubsection{Independent Student's t distribution}\label{sec:indstudent}
+\addcontentsline{toc}{subsubsection}{Independent Student's t distribution}
+
 In addition to the conventional multivariate Student's $t$ distribution, \pkg{sstvars} accommodates Student's $t$ distribution with mutually independent components, i.e., each component of the error term follows a univariate Student's $t$ distribution independently from the the other components. The independent Student's $t$ STVAR model has the conditional distribution, conditional $\mathcal{F}_{t-1}$, characterized by the density function
 \begin{equation}
 f(y_t|\mathcal{F}_{t-1}) = |\det(B_t)|^{-1}\prod_{i=1}^d t_1(\iota_i'B_t^{-1}(y_t - \mu_t);0,1,\nu_i)
@@ -190,6 +221,8 @@ where $B_1,...,B_M$ are invertible $(d\times d)$ impact matrices of the regimes.
 The independent Student's $t$ distribution is more flexible than the conventional $t$-distribution, as it allows for different degrees of freedom parameter values for each component. However, the for structural analysis, a more substantial advantage is that under mutually independent Student's $t$ shocks, the structural shocks are statistically identified without further restrictions on the model \citep{Virolainen2:2024}. But this comes at a cost: due to the structure of the conditional distribution, evaluation of the log-likelihood function is computationally more costly than with the conventional $t$-distribution. Therefore, maximum likelihood estimation of STVAR with independent Student's $t$ shocks is somewhat slower.
 
 \subsubsection{Independent skewed t distribution}\label{sec:ind_skewed_t}
+\addcontentsline{toc}{subsubsection}{Independent skewed t distribution}
+
 We also accommodate the skewed $t$ distribution with mutually independent components as conditional distribution. In other words, each shock $e_{it}$ in the structural error $e_t=(e_{1t},...,e_{dt})$ is assumed to follow a univariate skewed $t$ distribution described in \citet[][Section~2.4]{Hansen:1994} independently from the other shocks. The independent skewed $t$ STVAR model has the conditional distribution, conditional $\mathcal{F}_{t-1}$, characterized by the density function
 %
 \begin{equation}
@@ -213,9 +246,13 @@ where $\Gamma(\cdot)$ is Gamma function.
 Independent skewed $t$ distribution accommodates the independent Student's $t$ distribution as the special case $\lambda_i=0$. The independent skewed $t$ distribution is, however, more flexible than the independent Student's $t$ distribution, as it allows for skewed distributions for each component. On the other hand, models incorporating skewed shocks can be substantially more difficult to estimate in practice, because of the increased complexity and since the estimation algorithm might have difficulties in distinguishing between skewness and shifts in the mean.
 
 \subsection{Specifications of the transition weights}
+\addcontentsline{toc}{subsection}{Specifications of the transition weights}
+
 Various specifications of the transition weights $\alpha_{m,t}$ can be considered to obtain smooth transition VARs with different properties. We assume that the transition weights are either completely exogenous or functions of $\lbrace y_{t-j}, j=1,...,p \rbrace$. Under the latter type of weights, the stationarity condition discussed in Section~\ref{sec:stationarity} applies. Moreover, $\mathcal{F}_{t-1}$-measurability of the transition weights ensures that the true generalized impulse responses functions can be easily estimated, as completely exogenous switching-variables are excluded from affecting the weights.\footnote{Weaker forms of exogeneity of specific variables can also be imposed by constraining the AR matrices $A_{m,i}$, $m=1,...,M$, $i=1,...,p$, or the impact matrix $B_t$ accordingly (see Section~\ref{sec:examp_const}).} We also assume that the transition weights are identical for all the individual equations in (\ref{eq:stvar1}) and (\ref{eq:stvar3}), which is required for applicability of the stationarity condition. Consequently, at each $t$‚ the process can be described as a weighted sum of linear VARs.
 
 \subsubsection{Weighted relative likelihoods}\label{sec:rel_dens}
+\addcontentsline{toc}{subsubsection}{Weighted relative likelihoods}
+
 If the conditional distribution is specified to be Gaussian, weighted relative likelihoods of the regimes can be used as transition weights \citep{Lanne+Virolainen:2024}. In this specification, the transitions weights depend on the full distribution of the preceding $p$ observations, they are defined identically to the mixing weights in the Gaussian mixture vector autoregressive (GMVAR) model of \cite{Kalliovirta+Meitz+Saikkonen:2016}.
 Denoting $\boldsymbol{y}_{t-1}=(y_{t-1},...,y_{t-p})$, the transition weights are defined as
 \begin{equation}\label{eq:alpha_mt}
@@ -228,6 +265,8 @@ The transition weights are thus weighted ratios of the stationary densities of t
 In the GMVAR model \citep{Kalliovirta+Meitz+Saikkonen:2016}, the definition of the mixing weights also leads to attractive theoretical properties such as the the knowledge of the stationary distribution of $p+1$ consecutive observations. But this is not the case in our STVAR model, as the structure of the model is different. The GMVAR model has been implemented to the R package \pkg{gmvarkit} \citep{gmvarkit}, which works quite similarly to \pkg{sstvars}.
 
 \subsubsection{Logistic transition weights}\label{sec:logistic_weights}
+\addcontentsline{toc}{subsubsection}{Logistic transition weights}
+
 A common specification assumes logistic transition weights \citep[e.g.,][]{Anderson+Vahid:1998} that vary according to the level of the switching variable, which we assume to be a lagged endogenous variable. Here we assume that the model has only two regimes ($M=2$), and in the next section, we show how the logistic weights generalize to multinomial logit weights that accommodate more regimes.
 
 The logistic transition weights are defined as
@@ -240,6 +279,8 @@ where $y_{it-j}$ is the $j$th lagged observation ($j\in \lbrace 1,...,p \rbrace$
 Compared to weighted relative likelihoods, an advantage of the logistic weights is that it allows to specify switching variables in a way that leads to the regimes the econometrician is interested in in a specific application. For instance, if one is interested in how the effects of the shocks vary along with business cycle fluctuations, $y_{it-j}$ may be set as a lagged output gap variable. STVAR models with logistics weights are also easier to estimate than those with the transition weights determined by weighted relative likelihoods of the regimes. A disadvantage is that the empirical results depend highly on the choice of the switching variable, and only the level of the switching variable affects the transition weights.
 
 \subsubsection{Multinomial logit transition weights}
+\addcontentsline{toc}{subsubsection}{Multinomial logit transition weights}
+
 The logistic transition weights can be generalized to multinomial logit weights that accommodate more than two regimes as well as multiple lags of multiple switching variables as regressors in the logit sub model. The generality, however, comes at the cost of significantly more difficult estimation in the practice and loss of the intuitive interpretations of the parameters of the transition function.  With $M\geq 2$ regimes, we specify the multinomial logit weights as
 \begin{equation}\label{eq:logistic_alphas}
 \alpha_{m,t} = \frac{\exp\lbrace{\gamma_m'z_{t-1}\rbrace}}{\sum_{n=1}^M \exp\lbrace{\gamma_n'z_{t-1} \rbrace}}, \ \ m=1,...,M,
@@ -274,9 +315,11 @@ R=
 \end{equation}
 so $\xi = (\gamma_{1,1},\gamma_{j+1,1})$, where $\gamma_{l,m}$ is the $l$th element of $\gamma_{m}$.
 
-A direct calculation shows that the "scale parameter" is $-\gamma_{j+1,1)}$ and the "location parameter" is $\frac{\gamma_{1,1}}{-\gamma_{j+1,1}}$. The linear constraints (\ref{eq:weightconstraints}) do not, however, enable to constrain the location parameter $\frac{\gamma_{1,1}}{-\gamma_{j+1,1)}}$ to a specific value while leaving the scale parameter $-\gamma_{(j+1),1)}$ unconstrained (or vice versa), or to constrain the scale parameter strictly positive. Therefore, it is more convenient to use the logistic weights and parametrization discussed in Section~\ref{sec:logistic_weights} when only two regimes and one lag of one switching variable are used.
+A direct calculation shows that the "scale parameter" is $-\gamma_{j+1,1)}$ and the "location parameter" is $\frac{\gamma_{1,1}}{-\gamma_{j+1,1}}$. The linear constraints (\ref{eq:weightconstraints}) do not, however, enable to constrain the location parameter $\frac{\gamma_{1,1}}{-\gamma_{j+1,1)}}$ to a specific value while leaving the scale parameter $-\gamma_{(j+1),1)}$ unconstrained (or vice versa), or to constrain the scale parameter strictly positive. Therefore, it is more convenient to use the logistic weights and parametrization discussed in Section~\ref{sec:logistic_weights} when only two regimes and one lag of one switching variable are used. Also, due to the structure of the weights, the multinomial logit weights are more difficult to estimate than the logistic weights.
 
 \subsubsection{Exponential transition weights}
+\addcontentsline{toc}{subsubsection}{Exponential transition weights}
+
 Exponential transition weights \citep[see, e.g.,][]{Terasvirta:1994} vary according to the level of the switching variable, which we assume to be a lagged endogenous variable. Similarly to the logistic transition weights discussed in Section~\ref{sec:logistic_weights}, the exponential weights depend on a location parameter $c$ and a scale parameter $\gamma$ that determine the mid point of the transition curve and smoothness of the transitions, respectively. But instead of logistic transition function, we consider an exponential transition function.
 
 Specifically, we assume $M=2$ and define the exponential transition weights as
@@ -287,6 +330,8 @@ Specifically, we assume $M=2$ and define the exponential transition weights as
 where $y_{it-j}$ is the $j$th lagged observation ($j\in \lbrace 1,...,p \rbrace$) of the $i$th variable ($i\in \lbrace 1,...,d \rbrace$), $c\in\mathbb{R}$ is a location parameter, and $\gamma > 0$ is a scale parameter. The location parameter $c$ determines the value of the (lagged) switching variable when the process is completely in first regime, i.e., $\alpha_{1,t}=1$ and $\alpha_{2,t}=0$. The closer $y_{it-j}$ is to $c$, the greater the weight of the first regime is. Conversely, when the deviation of $y_{it-j}$ from $c$ increases, the weight of the second regime increases (and the weight of the first regime decreases). The scale parameter $\gamma$, in turn, determines the smoothness of the transitions (smaller $\gamma$ implies smoother transitions), and it is assumed strictly positive so that $\alpha_{2,t}\in[0,1]$ for all $y_{it-j}$.
 
 \subsubsection{Threshold transition weights}
+\addcontentsline{toc}{subsubsection}{Threshold transition weights}
+
 Threshold transition weights assume discrete regime switches such that the regime switches when the level of the switching variable exceeds or falls below a threshold value. This type model nonlinear VARs are often referred to as Threshold VAR (TVAR) models \citep{Tsay:1998} or self-exciting TVAR models (due to the endogenous switching-variable). We interpret the TVAR model as a special case of the STVAR models, despite of the regime switches being discrete rather than smooth.
 
 For a model with $M>1$ regimes, consider the $M-1$ threshold values $r_1,.,..,r_{M - 1}\in\mathbb{R}$ such that $r_1<\cdots<r_{M-1}$, and suppose the switching variable is $i\in \lbrace 1,...,d \rbrace$ with the lag $j\in \lbrace 1,...,p \rbrace$. The transition function is defined as
@@ -302,7 +347,10 @@ where $r_0\equiv-\infty$, $r_M\equiv\infty$, and $m=1,...,M$. In other words, at
 Compared to smoothly varying transition weights, threshold transition weights have the advantage that the resulting model is easier to estimate in practice and the regimes have clearer interpretations. An obvious disadvantage is the inability to capture gradual shifts between the regimes or more complex regime-switching dynamics that depend on other factors than just on the level of the switching variable.
 
 \subsubsection{Exogenous transition weights}
+\addcontentsline{toc}{subsubsection}{Exogenous transition weights}
+
 In addition to the endogenous transition weights described above, \pkg{sstvars} accommodates completely exogenous transition weights. These weights are specified by the user by supplying them as a matrix. The only restrictions are that they must sum to one for each time period $t$ and they must be weakly larger than zero. If exogenous weights are provided, the stationarity condition does not apply, but \pkg{sstvars} still assumes that each of the regimes satisfies the usual stability condition. Moreover, computation of the generalized impulse response functions requires that the exogenous transition weights that should be used for the sample paths are provided by the user. Linear impulse response functions based on a specific regime can, nonetheless, be calculated.
+
 
 \section{Structural STVAR models}\label{sec:struct_stvar}
 \addcontentsline{toc}{section}{Structural STVAR models}
@@ -310,12 +358,17 @@ Constructing a structural STVAR model from a reduced form STVAR model amounts to
 
 The R package \pkg{sstvars} currently accommodates three types of identification methods: recursive identification, identification by heteroskedasticity, and identification by non-Gaussianity. Identification by non-Gaussianity requires mutually independent shocks at most one of which can be Gaussian \citep{Virolainen2:2024}, and therefore, it is available only for model with independent Student's $t$ errors distribution. In that case, the shocks are statistically identified without further assumptions, and thus we have excluded the availability of the other two identification methods to these models. Overidentifying restrictions on the impact responses of the variables to the shocks can, however, be imposed. Structural models incorporating Gaussian or conventional $t$ shocks can be identified in \pkg{sstvars} recursively or by heteroskedasticity.
 
+
 \subsection{Recursive identification}
+\addcontentsline{toc}{subsection}{Recursive identification}
+
 A conventional way of identifying the shocks is to impose restrictions on the impact responses of variables. A commonly applied identification is to assume a recursive lower-triangular structure on $B_t$, implying that $B_t$ is obtained as the Cholesky decomposition of the conditional covariance matrix $\Omega_{y,t}$. The recursive identification is straightforward to apply and it allows many of the impact responses to vary in time but constraints many of them to zero. This is particularly disadvantageous if the shock of interest is ordered last or almost last (which is typically the case in small-scale monetary policy shock applications), as then the impact responses of many of the variables to the shock of interest are zero, and therefore, time-invariant.
 
 With our specification of the STVAR model, recursive identification does not, however, allow to impose over-identifying restrictions on the impact matrix $B_t$. This is because there does not exist a direct parametrization of a lower-triangular $B_t$ such that the conditional covariance matrix $\Omega_{y,t}$ is a weighted sum of the regime-specific covariance matrices with time-varying weights.
 
 \subsection{Identification via heteroskedasticity}
+\addcontentsline{toc}{subsection}{Identification via heteroskedasticity}
+
 An alternative identification method proposed by \cite{Lutkepohl+Netsunajev:2017} for structural VARs with smooth transitions in variances \citep[see also the seminal paper by][]{Rigobon:2003} identifies the shocks by simultaneously diagonalizing the covariance matrices $\Omega_1,...,\Omega_M$. This restricts the relative impact responses of the variables to be constant over time (for each shock) but does not necessarily require any zero restrictions. Since \cite{Lutkepohl+Netsunajev:2017} assume only two regimes and do not normalize the conditional covariance matrix of the structural error to a constant, their specification does not directly apply to our model. Therefore, we adopt the more suitable specification of \cite{Virolainen:2024}, and decompose the covariance matrices as
 \begin{equation}\label{eq:decomp}
 \Omega_m=W\Lambda_mW', \quad m=1,...,M,
@@ -331,6 +384,8 @@ where $\Lambda_1=I_d$. The shocks are identified up to ordering and sign if none
 Shocks identified by heteroskedasticity impose constant relative impact responses for the variables, making them unsuitable for some applications concerned with time-varying impulse response functions. Similarly to the recursive identification, this method is straightforward to apply, but unlike the recursive identification, it does not necessarily require any zero constraints on the impact responses. Compared to the recursive identification, identification by heteroskedasticity is therefore particularly advantageous when the recursive identification would imply that the shock of interest is order last. In this case, the assumption of time-invariant relative impact responses is less restrictive than the zero restrictions of the recursive identification. In contrast, the recursive identification is particularly appealing when the shock of interest is ordered first (or almost first), as then the impact responses to the shock of interest can vary freely in time.
 
 \subsection{Identification by non-Gaussianity}\label{sec:ident_non_gauss}
+\addcontentsline{toc}{subsection}{Identification by non-Gaussianity}
+
 When to shocks are mutually independent and at most one of them is Gaussian (i.e., under independent $t$ shocks or skewed $t$ shocks, see Sections~\ref{sec:indstudent} and \ref{sec:ind_skewed_t}), they are generally statistically identified without imposing further restrictions on the models \citep{Virolainen2:2024}. Specifically, the required identifying assumptions are:
 \begin{assumption}\label{as:shocks}
 \begin{enumerate}%[label=(\roman*)]
@@ -347,6 +402,8 @@ Considering the functional form of $B_{y,t}$ in Equation~(\ref{eq:Bt}), in order
 A suitable strategy for fixing the ordering and signs of the columns of $B_1,...,B_M$ depends on the transition weights and distributions of the shocks, as for some specifications constraints that are not restrictive in some specifications can be overidentifying in others. Conversely, constraints that are identifying in some specifications may not be enough for identification in others. Therefore, it is useful to divide the discussion on the identification in two separate cases: when the transition weights are binary (i.e., $\alpha_{m,t}\in\lbrace 0, 1\rbrace$) and when the transition weights exhibit more variation.
 
 \subsubsection{Identification of the shocks in TVAR models}\label{sec:identtvar}
+\addcontentsline{toc}{subsubsection}{Identification of the shocks in TVAR models}
+
 Suppose the transition weights are binary, $\alpha_{m,t}\in\lbrace 0, 1\rbrace$, for all $t$ and $m=1,...,M$. Then, at every $t$, the process is completely in one of the regimes and the impact matrix is $B_{y,t}=B_m$ for the regime $m$ with $\alpha_{m,t}=1$. By Lemma~2 of \cite{Virolainen2:2024}, the impact matrix $B_{y,t}$ is thereby identified up to ordering and signs of its columns in each of the regimes, implying that identification is obtained by fixing the ordering and signs of the columns of $B_1,...,B_M$. However, whether fixing the ordering or signs of the columns of $B_m$, $m=1,...,M$‚ separately in each regime is overidentifying depends on the distributions of the shocks $e_t=(e_{1t},...,e_{dt})$ \citep[see the discussion in]{Virolainen2:2024}
 
 The required identification conditions depend on the distributions of the shocks, so it is useful to make some assumptions on them, which are stated in the following proposition providing the identification result for TVAR models \citep[][Proposition~1]{Virolainen2:2024}.
@@ -369,6 +426,8 @@ To exemplify, independent Student's $t$ distributions satisfy Condition~\ref{con
 If the shocks follow independent skewed $t$ distributions, fixing the signs of the columns of $B_1,...,B_M$ is can be restrictive, as the distributions are not symmetric about zero. In this case, it generally suffices to fix the signs of the columns of $B_1$ to obtain an identification. However, the identification can be weak with respect to the signs of the columns of $B_2,...,B_M$ if the skewness parameter estimates are close to zero. Similarly to the independent Student's $t$ distributions, the identification can also be weak with respect to the ordering of the columns of $B_2,...,B_M$ if the skewness parameter estimates are close to each other. For further details, see the discussion in FILL IN REFERENCE.
 
 \subsection{Identification of the shocks in STVAR models}\label{sec:identstvar}
+\addcontentsline{toc}{subsection}{Identification of the shocks in STVAR models}
+
 Having established the identification result for TVAR models, or more generally to models incorporating discrete regime switches, we now assume that the transition weights exhibit more variation. Specifically, under the conditions of the following proposition \citep[][Proposition~2]{Virolainen2:2024}, the matrices $B_1,...,B_M$ are uniquely identified almost everywhere in $[B_1:...:B_M] \in\mathbb{R}^{d\times dM}$.
 
 \begin{proposition}\label{prop:stvar_ident}
@@ -386,14 +445,19 @@ The concerns of weak identification with respect to the ordering of the columns 
 Weak identification with respect to the ordering and signs of the columns of $B_2,...,B_M$ can be a problem in practice for labelling the shocks. This is because a shock is labelled to one of the columns of $B_{y,t}$, and different ordering or signs of the columns of $B_2,...,B_M$ can thereby have a substantial effect on the (generalized) impulse response functions. Using a wrong ordering of the columns of $B_2,...,B_M$ would essentially label the shock to a wrong column of the impact matrix in these regimes, implying that impulse response functions would not estimate of the effects of the intended shock but of a linear combination of the structural shocks. Therefore, the next section discusses a procedure proposed by \cite{Virolainen2:2024} to facilitate reliable labelling of the shocks by making use of short-run sign restrictions, which can also be combined with testable zero restrictions and other types of information.
 
 \subsubsection{Labelling the shocks}
+\addcontentsline{toc}{subsubsection}{Labelling the shocks}
+
 Similarly to the identification by heteroskedasticity, the shocks are statistically identified without further restrictions or assumptions. Labelling the shocks by the economic shocks of interest, however, requires external information. The labelling can be done based on the unrestricted impact responses of the variables, and testable overidentifying restrictions can also be imposed on the impact responses. It is, however, important to notice that since each regime has its own impact matrix, the same column of the impact matrix must be associated to the same shock in all of the regimes. This complicates the labelling, as it the same shock might induce very different impact responses on different regimes. In this case, imposing testable overidentifying restrictions on the impact matrix may facilitate the labelling of the shocks.
 
 Labelling the shocks based on the estimates of the impact matrices $B_1,...,B_M$ might not always be straightforward, because the same shock needs to be associated to the same column of the impact matrix $B_m$ in all of the regimes. For example, if a positive supply shock should increase output and decrease prices at impact, labelling the $i$th shock as the supply shock requires that the $i$th column of all $B_1,...,B_M$ satisfy such signs of the impact responses of the variables. If the required signs are not satisfied by the estimates of $B_1,...,B_M$, the appropriate overidentifying restrictions can be imposed on $B_1,...,B_M$. In particular, due to the problem of weak identification with respect to the ordering and signs of the columns of $B_2,...,B_M$, discussed in \cite{Virolainen2:2024}, the ordering and signs of the columns of $B_2,...,B_M$ is often practically arbitrary even when the ordering and signs are uniquely identified by Proposition~\ref{prop:stvar_ident}. Weak identification with respect to ordering and signs of the columns $B_2,...,B_M$ is not, that big of an issue, because the researcher can simply choose among the statistically practically equally fitting local solutions the one that allows to label the shock of interest to the same column of each $B_1,...,B_M$.
 
 In the presence of weak identification with respect to the ordering and signs of the columns, there are multiple local maximums points of the log-likelihood function such that their log-likelihoods are very close to each other. The ML estimation method implemented to \pkg{sstvars} produces a set of local solutions to the estimation problem, the researcher can check whether there are multiple local solutions that yield log-likelihoods close to each other. Given that such local solutions are otherwise mostly very similar but incorporating different ordering or signs of some of the columns of $B_m$ in some regime, the weak identification is related to the ordering and signs of the columns. In practice, one can thereby simply choose among the almost equally well fitting local solutions the solution that facilitates labelling the shock(s) of interest to the same column of the impact matrix in all of the regimes. In \pkg{sstvars} different local solutions are most conveniently examined with the function \code{alt_stvar}. Formally, this procedure can be implemented by imposing economically motivated short-run sign restrictions on the impact matrices, which can also be supplemented with testable zero restrictions and other types of information. See \cite{Virolainen2:2024} for an illustrative example. Restricted structural models can be estimated with the function \code{fitSSTVAR}.
 
+
 \section{Estimation}\label{sec:estimation}
 \addcontentsline{toc}{section}{Estimation}
+We consider maximum likelihood estimation (ML) as well as penalized maximum likelihood (PML) estimation of the STVAR models. The formed maximizes the log-likelihood function, and the latter maximizes the penalized log-likelihood function that penalizes from estimates that are close to the boundary or outside the stability region (i.e., a region where the usual stability condition is satisfied by each of the regimes). In either case, the numerical estimation will be conducted in two or three phases,which are discussed after introducing the log-likelihood function and the penalized log-likelihood function.
+
 The parameters of the reduced form STVAR model are collected to the vector
 \begin{equation}\label{eq:paramvector}
 \boldsymbol{\theta}=(\phi_{1,0},...,\phi_{m,0},\varphi_1,...,\varphi_M,\sigma,\alpha,\nu),
@@ -402,14 +466,16 @@ where $\varphi_m=(\text{vec}(A_{m,1}),....,\text{vec}(A_{m,p}))$, $m=1,...,M$, $
 
 If relative stationary densities are used as transition weights, $\alpha=(\alpha_1,...,\alpha_{M-1})$ ($\alpha_M$ is not included because it is obtained from the constraint $\sum_{m=1}^M \alpha_m=1$), where we assume, for identification, that $\alpha_1,...,\alpha_{M-1}$ are in a decreasing order. For exponential and logistic transition weights, $\alpha=(c,\gamma)$, for multinomial logit transition weights  $\alpha=(\gamma_1,...,\gamma_{M-1})$ ($\gamma_M$ is not included because $\gamma_M=0$ is assumed for identification), and with threshold transition weights, $\alpha=(r_1,...,r_{M-1})$. With exogenous transition weights, the parameter $\alpha$ is dropped.
 
-\subsection{Log-likelihood function}\label{sec:loglik}
+\subsection{The log-likelihood function}\label{sec:loglik}
+\addcontentsline{toc}{subsection}{The log-likelihood function}
+
 \pkg{sstvars} employs the method of maximum likelihood (ML) for estimating the parameters of the STVAR models. Indexing the observed data as $y_{-p+1},...,y_0,y_1,...,y_T$, the conditional log-likelihood function conditional on the initial values $\boldsymbol{y}_0=(y_{-p+1},...,y_0)$ is given as
 \begin{equation}\label{eq:loglik1}
 L_t(\boldsymbol{\theta})=\sum_{t=1}^T l_t(\boldsymbol{\theta}) = \sum_{t=1}^T \log d_d(y_t;\mu_{y,t},\Omega_{y,t},\nu).
 \end{equation}
 where $d_d(y_t;\mu_{y,t},\Omega_{y,t},\nu)$ is the $d$-dimensional conditional density of the process, conditional on $\mathcal{F}_{t-1}$, at time $t$, given in Section~\ref{sec:cond_dist}. When the conditional distribution is Gaussian, the degrees of freedom parameter(s) $\nu$ is/are dropped from the right side of (\ref{eq:loglik1}). The ML estimator of $\boldsymbol{\theta}$ maximizes the log-likelihood function $L_t(\boldsymbol{\theta})$ over the parameter space specified in the below assumption.
 
-We summarize the constraints imposed on the parameter space in the following assumption.
+We summarize the constraints (often) imposed on the parameter space in the following assumption.
 %
 \begin{assumption}\label{as:mle}
 The true parameter value $\boldsymbol{\theta}_0$ is an interior point of $\boldsymbol{\Theta}$, which is a compact subset of
@@ -421,13 +487,55 @@ Above, $S=(0,1)^{M-1}$ for relative densities transition weights, $S=\mathbb{R}\
 
 As noted before, Condition~\ref{cond:sufficient} is not necessary, but it ensures stationarity and ergodicity of the process, unless the transition weights are exogenous. In estimation, we impose the more easily verified Condition~\ref{cond:necessary}, however, and the sufficient condition can be check after the estimation with the function \code{bound_JSR}. As noted in Section~\ref{sec:stationarity}, the sufficient condition is in practice usually satisfied if the necessary condition is satisfied and not very close to being violated. Given that under Condition~\ref{cond:sufficient} the process is ergodic stationary, there is no particular reason to believe that the standard asymptotic results of consistency and limiting Gaussian distribution would not apply to the ML estimator.
 
+As also noted before, we also allow estimation does not impose Condition~\ref{cond:necessary}, in particular, with the penalized ML estimation. This is particularly beneficial when the data is persisent or the estimated model is large, as allowing the estimation algorithm to explore the parameter space more freely generally seems to improve the performance of the estimation algorithms (in our experience). Moreover, in the three-phase estimation the initial (nonlinear) LS estimates do not often satisfy the usual stability condition, and allowing for unstable estimates thereby allows to use them more effectively. When penalized ML estimation is used, unstability of the estimates is penalized in the objective function, so that the optimization algorithm often eventually converge back to the stability region.
+
+\subsection{The penalized log-likelihood function}
+\addcontentsline{toc}{subsection}{The penalized log-likelihood function}
+
+The penalized likelihood function can be written as
+\begin{equation}\label{eq:penloglik}
+PL(\boldsymbol{\theta}) = L(\boldsymbol{\theta}) - P(\boldsymbol{\theta}),
+\end{equation}
+where $L(\boldsymbol{\theta})$ is defined in~(\ref{eq:loglik1}) and $p(\boldsymbol{\theta})\geq 0$ is a penalization term that penalizes the log-likelihood function from parameter values that are close to entering or are in an uninteresting region of the parameter space. We focus on avoiding estimates that do not satisfy the usual stability condition for all the regimes. Hence, we define the penalization term as
+\begin{equation}\label{eq:penterm}
+P(\boldsymbol{\theta}) = \kappa Td \sum_{m=1}^M\sum_{i=1}^{dp} \text{max}\lbrace 0, |\rho(\boldsymbol{A}_m(\boldsymbol{\theta}))_i| - (1 - \eta) \rbrace^2,
+\end{equation}
+where $|\rho(\boldsymbol{A}_m(\boldsymbol{\theta}))_i|$ is the modulus of the $i$th eigenvalue of the companion form AR matrix of Regime~$m$, the tuning parameter $\eta\in (0, 1)$ determines how close to the boundary of the stability region the penalization starts, and $\kappa>0$ determines the strength of the penalization. The PML estimate of $\boldsymbol{\theta}$ maximizes the log-likelihood function~(\ref{eq:penloglik}) with respect to $\boldsymbol{\theta}$.
+
+Whenever the companion form AR matrix of a regime has eigenvalues greater than $(1 - \eta)$ in modulus, the penalization term~(\ref{eq:penterm}) is greater than zero, and it increases in the modulus of these eigenvalues. Finally, our penalization term has the multiplicative coefficient $Td$, as the value of the log-likelihood function~(\ref{eq:loglik1}) tends to scale both with number of observations $T$ and with the number of variables $d$. The default values of tuning parameter values are $\eta = 0.05$ and $\kappa = 0.2$, thus, penalizing significantly estimates that are outside the stability region, while maintaining some flexibility near the boundary.
+
+Penalized log-likelihood estimation can be used both with the two-phase and three-phase estimation procedures. As already noted, the penalized ML estimation is particularly useful with persistent data and more complex models, because it allows the estimation algorithm to explore the parameter space more freely, assuming that \code{allow_unstab=TRUE} is used. The penalized ML estimation is particularly useful in the three-phase estimation when the initial (nonlinear) LS estimates are unstable, as the penalization term in the objective function often eventually drives the optimization algorithm back to the stability region.
+
 \subsection{Two-phase estimation procedure}\label{sec:estimscheme}
+\addcontentsline{toc}{subsection}{Two-phase estimation procedure}
+
 Finding the ML estimate amounts maximizing the log-likelihood function (\ref{eq:loglik1}) over a high dimensional parameter space satisfying the constraints summarized in Assumption~\ref{as:mle}. Due to the complexity of the log-likelihood function, numerical optimization methods are required. The maximization problem can be challenging in practice due to the dependence of the transition weights on the preceding observations, which induces a large number of modes to the surface of the log-likelihood function, and large areas to the parameter space, where it is flat in multiple directions.
 
 Therefore, we follow \cite{Meitz+Preve+Saikkonen:2023} and \cite{Virolainen:2022} and employ a two-phase estimation procedure that is run for a large number of times. In the first phase, a genetic algorithm is used to find parameter values (hopefully) near local maximums. Since genetic algorithms tend to converge slowly near local solutions, a gradient based variable algorithm \cite[algorithm 21, implemented by \citealp{R}]{Nash:1990} is ran for each of the starting values, resulting in a number of alternative local solutions. Some of the estimation rounds may end up in saddle points or near-the-boundary points that are not local solutions, and some of the local solutions may be  inappropriate for econometric inference (for instance, there might be only a few observations from some of the regimes). After the estimation rounds have been ran, the researcher can choose the local solution that maximizes the log-likelihood among the appropriate local solutions. Inappropriate solutions are automatically filtered by \pkg{sstvars}, but this functionality can also be turned off and the researchers can use estimates based any estimation round. The R package \pkg{sstvars} employs a modified genetic algorithm that works similarly to the one described in the R packages \pkg{uGMAR} \citep{uGMAR} and \pkg{gmvarkit} \citep{gmvarkit} \citep[the genetic algorithm and implemented in former is briefly described in][]{Virolainen:2022}. See \citet[Chapter~3]{Virolainen2:2022} for a related discussion on complex numerical estimation problems using the two-phase procedure.
 
+\subsection{Three-phase estimation procedure}\label{sec:three-phase}
+\addcontentsline{toc}{subsection}{Three-phase estimation procedure}
+
+The two-phase procedure facilitates finding the ML estimate, but often a very large number of estimation rounds is required to obtain reliable results, particularly when the model is large. Running a very large number of estimation rounds, however, often requires very substantial computation power, making the estimation tedious in practice. Consequently, estimation of large models often infeasible with computer available for the practitioners.
+
+To address the issue of the extreme computation power required for estimating large models, we propose a substantially more computationally efficient three-phase estimation procedure (a work paper version of the paper will be available somewhere in the relatively near future). Our three-phasen procedure, combines the two-phase procedure of \cite{Virolainen2:2024} with the three-step procedure proposed by \cite{Lanne+Meitz+Saikkonen:2017} for estimating a linear SVAR model identified by non-Gaussianity. The three-phase estimation procedure operates with the following steps:
+\begin{enumerate}
+  \item Estimate the autoregressive and the threshold parameters $\boldsymbol{\theta}_1\equiv (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\alpha)$ by the method of (penalized) least squares (P)LS. Denote this estimate of $\boldsymbol{\theta}_1$ as $\hat{\boldsymbol{\theta}}_1^{PLS}$.\label{step:LS}
+
+  \item Estimate the error distribution parameters $\boldsymbol{\theta}_2\equiv (\sigma,\nu)$ by (P)ML with a genetic algorithm conditionally on the PLS estimate $\hat{\boldsymbol{\theta}}_1^{PLS}$. Denote the obtained estimate of $\boldsymbol{\theta}_2$ as $\hat{\boldsymbol{\theta}}_2^{GA}$.\label{step:GA}
+
+ \item Estimate the full parameter vector $\boldsymbol{\theta}=(\boldsymbol{\theta}_1,\boldsymbol{\theta}_2)$ by (P)ML by initializing a gradient based optimization algorithm such as a variable metric algorithm \citep[e.g.,][Algorithm~21]{Nash:1990} from $(\hat{\boldsymbol{\theta}}_1^{PLS},\hat{\boldsymbol{\theta}}_2^{GA})$.\label{step:VA}
+\end{enumerate}
+
+Step~\ref{step:LS} obtains initial estimates for the AR and threshold parameters, and it is comparable to Step~1 estimation of \cite{Lanne+Meitz+Saikkonen:2017} but with the nonlinearity of the model explicitly accounted for. Step~\ref{step:GA} is comparable to Step~2 estimation of \cite{Lanne+Meitz+Saikkonen:2017}, but the multimodality of the (partial) log-likelihood function is taken into account by making use of a robust estimation algorithm that is able escape from local maxima. Step~\ref{step:GA} is also comparable to Phase~1 estimation of \cite{Virolainen2:2024}, but here we only estimate the error distribution parameters, simplifying the challenging optimization problem, as initial estimates are already obtained from Step~\ref{step:LS} for the rest of the parameters. Finally, Step~\ref{step:VA} finalizes the estimation by initializing a standard gradient based optimization algorithm from the initial estimates obtained from the previous steps, often converging to a nearby local maximum of the penalized log-likelihood function. This steps is comparable to Step~3 estimation of \cite{Lanne+Meitz+Saikkonen:2017} and to Phase~2 estimation of \cite{Virolainen2:2024}.
+
+Due to the complexity and high multimodality of the log-likelihood function, Step~\ref{step:GA} should be ran a number times to improve the reliability of the results. Since multiple estimation rounds are ran, the procedure produces a set of estimates, possibly corresponding to different local maximums of the penalized log-likelihood function, similarly to the procedure of \cite{Virolainen2:2024}. However, due to the initial estimates obtained from Step~\ref{step:LS}, a substantially smaller number of estimation rounds is required than in the two-phase procedure.
+
+
 \subsection{Examples of unconstrained estimation}\label{sec:example_estim}
-In this section, we demonstrate how to estimate STVAR models with \pkg{sstvars}. In the examples, we only consider $p=1$ models for simplicity and merely because then the code outputs fit in the margins better. This order may not be the best in the modeling perspective, however.
+\addcontentsline{toc}{subsection}{Examples of unconstrained estimation}
+
+In this section, we demonstrate how to estimate STVAR models with \pkg{sstvars}. \textbf{The examples use two-phase estimation, but three-phase estimation can be employed in a similar manner}. In the examples, we only consider $p=1$ models for simplicity and merely because then the code outputs fit in the margins better. This order may not be the best in the modeling perspective, however.
 
 In \pkg{sstvars}, the STVAR models are defined as class \code{stvar} S3 objects, which can be created with given parameter values using the constructor function \code{STVAR} (see Section~\ref{sec:STVAR}) or by using the estimation function \code{fitSTVAR}, which estimates the parameters and then builds the (reduced form) model. Structural models are estimated based on a reduced form model with the function \code{fitSSTVAR}. For estimation, \code{fitSTVAR} needs to be supplied with a multivariate time series and the arguments specifying the model. The necessary arguments for specifying the model include the autoregressive order \code{p}, the number of regimes \code{M}, the transition weight function \code{weight_function}, with some weight functions the switching variable(s) \code{weightfun_pars}, and the conditional distribution \code{cond_dist}.
 
@@ -444,8 +552,8 @@ The argument \code{seeds} supplies the seeds that initialize the random number g
 R> library(sstvars)
 R> data("gdpdef", package="sstvars")
 R> fit12 <- fitSTVAR(gdpdef, p=1, M=2, weight_function="logistic",
-+    weightfun_pars=c(2, 1), cond_dist="Student", nrounds=24, ncores=8,
-+    seeds=1:24)
++    weightfun_pars=c(2, 1), cond_dist="Student", estim_method="two-phase",
++    nrounds=24, ncores=8, seeds=1:24)
 \end{CodeInput}
 \begin{CodeOutput}
 Using 8 cores for 24 estimations rounds...
@@ -576,8 +684,8 @@ A two-regime $p=1$ STVAR model with the randomly drawn exogenous transition weig
 \begin{CodeChunk}
 \begin{CodeInput}
 R> fitexo12 <- fitSTVAR(gdpdef, p=1, M=2, weight_function="exogenous",
-+    weightfun_pars=twmat, cond_dist="ind_Student", nrounds=24, ncores=8,
-+    seeds=1:24)
++    weightfun_pars=twmat, cond_dist="ind_Student", estim_method="two-phase",
++    nrounds=24, ncores=8, seeds=1:24)
 \end{CodeInput}
 \begin{CodeOutput}
 Using 8 cores for 24 estimations rounds...
@@ -646,6 +754,8 @@ Print approximate standard errors with the argument 'standard_error_print=TRUE'.
 As the above printout shows, the impact matrices of the regimes, $B_1,...,B_M$ are directly estimated and their estimates presented in the place where the estimates of $\Omega_m$ are for models with \code{cond_dist="Gaussian"} or \code{cond_dist="ind_Student"}.
 
 \subsection{Further examination of the estimates}\label{sec:examestim}
+\addcontentsline{toc}{subsection}{Further examination of the estimates}
+
 In addition to examining the summary printout, it is often useful to visualize the model by plotting the transition weights together with the time series. That is exactly what the plot method for STVAR models does. The following command creates the time series plot along with estimated transition weights:
 %
 \begin{CodeChunk}
@@ -733,6 +843,8 @@ We have discussed tools that can be utilized to evaluate whether the found estim
 If the model is very large, a very large number of estimation rounds may be required to find the global maximum. If there are two regimes in the model, $p$ is reasonable, and the dimension of the time series at most four, the required number of estimation rounds typically varies from several hundred to several thousand depending on the model and the data. In the simpler models, less estimation rounds are required. In the larger models, and in particular if $M>2$ or $d>4$, a significantly large number of estimation rounds may be required obtain the MLE. Another thing that makes the estimation more challenging, are exotic parameter constraints that do not reduce the dimension of the parameter much. Constraints that greatly reduce complexity of the parameter space (such as constraining the autoregressive matrices to be identical in all regimes\footnote{Models constrained in this way can often be reliably estimated with a reasonable number of estimation rounds even when $M>2$}), on the other hand, make the estimation easier, and reliable estimation of such models thereby require less estimation rounds. Constrained estimation is discussed in Section~\ref{sec:examp_const}.
 
 \subsection{Estimation of structural STVAR models}\label{sec:estim_structural}
+\addcontentsline{toc}{subsection}{Estimation of structural STVAR models}
+
 As explained, \pkg{sstvars} currently supports three types of structural models: structural models identified recursively by the lower triangular Cholesky decomposition, structural models identified by conditional heteroskedasticity, and structural models identified by non-Gaussianity. In either case, the structural models are estimated with the function \code{fitSSTVAR} based on preliminary estimates from a reduced form model. If the structural model is not overidentifying, which is always the case for recursively identified models, model identified by non-Gaussianity, as well as for models identified by heteroskedasticity when there are two regimes and further constraints are not imposed on the impact matrix, there is no need for estimation but at most for a reparametrization of the model. In any case, the \code{fitSSTVAR} constructs the structural model appropriately.
 
 To exemplify, we first create a recursively identified structural model based on the reduced form model \code{fit12} by setting the argument \code{identification="recursive"}. Then, we will study an example of a structural model identified by heteroskedasticity. The following code builds the recursively identified model:
@@ -810,6 +922,8 @@ If \code{cond_dist = "ind_Student"} or \code{"ind_skewed_t"}, i.e., the shocks a
 \pkg{sstvars} supports constrained ML estimation of the STVAR models, including several types of constraints. Linear constraints can be imposed on the autoregressive matrices (argument \code{AR_constraints}), unconditional means of the regimes can be constrained equal across (groups of) regimes (argument \code{mean_constraints}), and weight function parameters can be constrained to a fixed value or linear constraints can be impose on them (argument \code{weight_constraints}). Following sections give examples of constrained estimation imposing some of these constraints.
 
 \subsubsection{Linear constraints on the autoregressive parameters}
+\addcontentsline{toc}{subsubsection}{Linear constraints on the autoregressive parameters}
+
 Imposing linear constraints on the autoregressive parameters of a STVAR model is straightforward in \pkg{sstvars}. The constraints are expressed in a somewhat general form which allows to impose a wide class of constraints but one needs to take the time to construct the constraint matrix carefully for each particular case.
 
 We consider constraints of form
@@ -856,7 +970,8 @@ The command
 \begin{CodeChunk}
 \begin{CodeInput}
 R> fit12c1 <- fitSTVAR(gdpdef, p=1, M=2, weight_function="logistic",
-+    weightfun_pars=c(2, 1), cond_dist="Student", AR_constraints=C1)
++    weightfun_pars=c(2, 1), cond_dist="Student", AR_constraints=C1,
++    estim_method="two-phase")
 \end{CodeInput}
 \end{CodeChunk}
 would then estimate a logistic Student's $t$ STVAR($1,2$) model with first lag of the second variable as the switching variable such that the AR matrices constrained to be the equal in both regimes. We omit the output for brevity. In practice, you might want to adjust the number of CPU cores used (\code{ncores}), the of estimation rounds (\code{nrounds}), and set seeds (\code{seeds}).
@@ -928,13 +1043,16 @@ The command
 \begin{CodeChunk}
 \begin{CodeInput}
 R> fit12c2 <- fitSTVAR(gdpdef, p=2, M=2, weight_function="logistic",
-+    weightfun_pars=c(2, 1), cond_dist="Student", AR_constraints=C2)
++    weightfun_pars=c(2, 1), cond_dist="Student", AR_constraints=C2,
++    estim_method="two-phase")
 \end{CodeInput}
 \end{CodeChunk}
 would then estimate a logistic Student's $t$ STVAR($1,2$) model with first lag of the second variable as the switching variable such that the AR matrices are constrained to be the equal in both regimes and the off-diagonal elements are restricted to zero. Again, we omit the output for brevity (and you may want to adjust the arguments \code{nrounds}, \code{ncores}, and \code{seeds} when estimating the model in practice).
 
 
 \subsubsection{Constraining the unconditional means of some regimes to be equal}
+\addcontentsline{toc}{subsubsection}{Constraining the unconditional means of some regimes to be equal}
+
 In addition to constraining the autoregressive parameters, \pkg{sstvars} allows to constrain the unconditional means of some regimes to be the equal. This feature is, however, only available for models that are parametrized with the unconditional means instead of intercepts (because some of the estimation is always done with mean-parametrization and one cannot generally swap the parametrization when constraints are imposed on means/intercepts). With the mean-parametrization employed (by setting \code{parametrization="mean"}), one may define groups of regimes that have the same mean parameters using the argument \code{mean_constraints}. For instance, with three regime model $(M=3)$ the argument \code{mean_constraints=list(c(1, 3), 2)} sets the unconditional means of the first and third regimes to be the same while allows the second regime to have different mean.
 
 One can also combine linear constraints on the AR parameters with constraining some of the means to be the same. This allows, for instance, to estimate a model in which only the covariance matrix varies in time. To exemplify, the following code estimates a Student's $t$ logistic STVAR($p=1, M=2$) model such that the unconditional means and autoregression matrices are constrained be the same in both regimes. The resulting model thereby has time-varying covariance matrix but otherwise it is linear.
@@ -943,13 +1061,16 @@ One can also combine linear constraints on the AR parameters with constraining s
 \begin{CodeInput}
 R> fit12c3 <- fitSTVAR(gdpdef, p=1, M=2, weight_function="logistic",
 +    weightfun_pars=c(2, 1), cond_dist="Student", AR_constraints=C1,
-+    mean_constraints=list(1:2), parametrization="mean")
++    mean_constraints=list(1:2), parametrization="mean",
++    estim_method="two-phase")
 \end{CodeInput}
 \end{CodeChunk}
 %
 The output is omitted for brevity.
 
 \subsubsection{Constraining weight functions parameters}
+\addcontentsline{toc}{subsubsection}{Constraining weight functions parameters}
+
 It is also possible to constrain the weight functions parameters $\alpha$ (e.g., the location and scale parameters for logistic models). \pkg{sstvars} accommodates two types of alternative constraints on the weight function parameters: linear constraints and fixed values. Note that weights constraints are not available for models with exogenous weights, as they do not contain any weight function parameters.
 
 \textbf{Linear constraints}\\
@@ -962,7 +1083,9 @@ where $\alpha$ ($a \times 1$) contains the weight funtion parameters, $R$ is a k
 \textbf{Fixed values}\\
 Imposing the weight function parameters to be known fixed values is very straightforward. In this case, the argument \code{weight_constraints} should still be a list including the elements $R$ and $r$, but the former is set to zero, $R=0$, and the latter is set to the desired fixed values. For instance the following argument imposes constraints for the location and location parameters of a logistic STVAR model (in which $\alpha = (c,\gamma)$) such that the location parameter is $0.3$ and the scale parameter is $0.5$: \code{weight_constraints=list(R=0, r=c(0.3, 0.5)}.
 
-\subsection{Testing parameter constraints}\label{sec:testconst}
+\section{Testing parameter constraints}\label{sec:testconst}
+\addcontentsline{toc}{section}{Testing parameter constraints}
+
 One way to asses the validity of the imposed constraints is to compare the values of information criteria of the constrained and unconstrained models. \pkg{sstvars}, however, also provides functions for testing the constraints with the likelihood ratio test, Wald test, and Rao's test, whose applicability requires that the ML estimator of the STVAR model has the conventional asymptotic distribution. As noted before, this is a mere assumption, but given the process is ergodic stationary, there is no particular reason to believe that the standard asymptotic results would not hold. For a discussion on the tests, see \citet{Buse:1982} and the references therein, for example.
 
 The likelihood ratio test considers the null hypothesis that the true parameter value $\boldsymbol{\theta}_0$ satisfies some constraints imposed on these parameters (such that the constrained parameter space is a subset of the parameter space, which is presented in Assumption~\ref{as:mle}). Denoting by $\hat{L}_U$ and $\hat{L}_C$ the (maximized) log-likelihoods based on the unconstrained and constrained ML estimates, respectively, the test statistic takes the form
@@ -983,8 +1106,10 @@ where $\mathcal{J}(\hat{\boldsymbol{\theta}})$ is the observed information matri
 
 Finally, Rao's test is implemented to the function \code{Rao_test}. See the function documentation on how to use it.
 
+
 \section{Residual based model diagnostics}\label{sec:res}
 \addcontentsline{toc}{section}{Residual based model diagnostics}
+
 \pkg{sstvars} employs residual based diagnostics for assessing the adequacy of the fitted model. Conventional graphical diagnostics can be examined with function \code{diagnostic_plot}, which plots the residual time series, auto- and crosscorrelation functions of the residuals, auto- and crosscorrelation functions of the squared residuals, and normal quantile-quantile plots as well as histograms of the residuals. The plots can be created for both unstandardized residuals or for standardized residuals by adjusting the argument \code{standardize} to \code{FALSE} or \code{TRUE} according. Using unstandardized residuals is advisable when checking for remaining autocorrelation. But standardized residuals should be used to check for remaining conditional heteroskedasticity and to check the model's adequacy to capture the marginal distribution of the series, because the STVAR models are conditionally heteroskedastic and the unstandardized residuals do not take into account the time-varying conditional covariance matrix.
 
 Remaining autocorrelation in the residuals can also be tested with the (adjusted) Portmanteau test, which is implemented to the function \code{Portmantau_test}. The test can also be applied to standardized squared residuals to test for remaining conditional heteroskedasticity by setting the argument \code{which_test="het.sked"}. The number of lags that should be taken into account in the test is set with the argument \code{nlags}.
@@ -1013,6 +1138,8 @@ Due to the nonlinear nature of the model, GIRFs estimated from different startin
 Because estimating the GIRF and their confidence intervals is computationally demanding, parallel computing is taken use of to shorten the estimation time. The number of CPU cores used can be set with the argument \code{ncores}. The objects returned by the \code{GIRF} function have their own \code{plot} and \code{print} methods. Also, cumulative impulse responses of the specified variables can be obtained directly by specifying the argument \code{which_cumulative}.
 
 \subsection{Generalized forecast error variance decomposition}
+\addcontentsline{toc}{subsection}{Generalized forecast error variance decomposition}
+
 Similarly to the conventional impulse response functions are unsuitable for impulse response analysis (due to their inability to capture asymmetries the effects of the shocks), the conventional forecast error variance decomposition is unsuitable for tracking the contribution of each shock to the variance of the forecast errors. We consider the generalized forecast error variance decomposition (GFEVD) \citep{Lanne+Nyberg:2016}  that is defined for variable $i$, shock $j$, and horizon $h$ as
 \begin{equation}
 \text{GFEVD}(j,y_{it}, \delta_j,\mathcal{F}_{t-1}) = \frac{\sum_{l=0}^h\text{GIRF}(l,\delta_j,\mathcal{F}_{t-1})_i^2}{\sum_{k=1}^d\sum_{l=0}^h\text{GIRF}(l,\delta_k,\mathcal{F}_{t-1})_i^2},
@@ -1030,9 +1157,14 @@ The shock size is the same for all scalar components of the structural shock and
 \code{sstvars} also implements a special feature in which for every possible length p history in the data, the GFEVD is estimated for a shock that has the sign and size of the corresponding structural shock recovered from the fitted model. This can be done by setting the argument \code{use_data_shocks=TRUE}. The GFEVD is then calculated as the average of the GFEVDs obtained from the GIRFs estimated for the data shocks. The plot and print methods can be used as usual for this GFEVD. However, this feature also estimates the contribution of each shock to the variance of the forecast errors at various horizons in specific historical points of time. This can be done by using the plot method with the argument \code{data_shock_pars}. Note that the arguments \code{shock_size}, \code{initval_type}, and \code{init_regime} are ignored if \code{use_data_shocks == TRUE}.
 
 \subsection{Linear impulse response functions}
+\addcontentsline{toc}{subsection}{Linear impulse response functions}
+
 It is also possible to calculate linear impulse response functions (IRF) based on a specific regime of the estimated model by using the function \code{linear_IRF}. If the autoregressive dynamics of the model are linear (i.e., either $M=1$ or mean and AR parameters are constrained identical across the regimes), confidence bounds can be estimated based on a type of a fixed-design wild residual bootstrap method. \code{sstvars} implements the method proposed \cite{Herwartz+Lutkepohl:2014}.
 
+
 \section{Building a STVAR model with specific parameter values}\label{sec:STVAR}
+\addcontentsline{toc}{section}{Building a STVAR model with specific parameter values}
+
 The function \code{STVAR} facilitates building STVAR models without estimation, for instance, in order to simulate observations from a STVAR process with specific parameter values. The function should be supplied at least with the arguments \code{p}, \code{M}, and \code{d} specifying the autoregressive order, the number of regimes, and the dimension of the time series, respectively. The argument \code{params} should be used to specify the parameter values, whereas the weight function and weight function parameters are specified in the arguments \code{weight_function} and \code{weightfun_pars}, respectively, and the conditional distribution in the function \code{cond_dist}.
 
 To exemplify, we build a reduced form Gaussian STVAR $p=1$, $M=1$, $d=2$ model with relative stationary densities as the transition weights. The model has intercept parametrization and parameter values $\varphi_{1,0}=(0, 1)$, $\varphi_{12,0}=(0, 2)$, $\text{vec}(A_{1,1}) = (0.2, 0.2, 0.2, -0.2)$, $\text{vec}(A_{1,1}) = (0.3, 0.3, 0.3, -0.3)$, $\text{vech}(\Omega_1) = (1, 0.1, 1)$, $\text{vech}(\Omega_2) = (4, 0.4, 4)$, and $\alpha_1$=0.6. After building the model, we use the \code{print} method to examine it:
@@ -1069,12 +1201,15 @@ Regime means: 0.73, 1.71
 \end{CodeChunk}
 %
 
-It is possible to include data in the models built with \code{STVAR} by either providing the data in the argument \code{data}. When the model is supplied with data, the transition weights and other data dependent statistics are calculated for the model as well.
+It is possible to include data in the models built with \code{STVAR} by either providing the data in the argument \code{data}. When the model is supplied with data, the transition weights and other data dependent statistics are calculated for the model as well. It is also possible to build models that do not satisfy the usual stability condition for all the regimes. In this case, you should set the argument \code{allow_unstab} to \code{FALSE}.
+
 
 \section{Simulation and forecasting}\label{sec:simufore}
 \addcontentsline{toc}{section}{Simulation and forecasting}
 
 \subsection{Simulation}\label{sec:simu}
+\addcontentsline{toc}{subsection}{Simulation}
+
 \pkg{sstvars} implements the S3 method \code{simulate} for simulating observations from STVAR processes (see \code{?simulate.stvar}). The method requires the process to be given as a class \code{stvar} object, which are typically created either by estimating a model with the function \code{fitSTVAR} (or \code{fitSSTVAR}) or by specifying the parameter values by hand and building the model with the constructor function \code{STVAR}. The initial values required to simulate the first $p$ observations can be either set by hand (with the argument \code{init_values}) or drawn from (the stationary distribution of) some regime (with the argument \code{init_regime}). The argument \code{nsim} sets the length of the sample path to be simulated.
 
 To give an example, the following code sets the random number generator seed to one and simulates $500$ observations long sample from the STVAR model built in Section~\ref{sec:STVAR}, drawing initial values from the first regime:
@@ -1088,6 +1223,8 @@ R> mysim <- simulate(mod122, nsim=500, init_regime=1, seed=1)
 Our implementation of \code{simulate} returns a list containing the simulated sample path in \code{\$sample}, the mixture component that generated each observation in \code{\$component}, and the transition weights in \code{\$transition_weights}.
 
 \subsection{Simulation based forecasting}
+\addcontentsline{toc}{subsection}{Simulation based forecasting}
+
 Deriving multiple-steps-ahead point predictions and prediction intervals analytically for the STVAR models is complicated, so \pkg{sstvars} employs the following simulation-based method. By using the last $p$ observations of the data up to the date of forecasting as initial values, a large number of sample paths for the future values of the process are simulated. Then, sample quantiles from the simulated sample paths are calculated to obtain prediction intervals, and the median or mean is used for point predictions. A similar procedure is also applied to forecast future values of the transition weights, which might be of interest because the researcher can often associate statistical characteristics or economic interpretations to the regimes.
 
 Forecasting is most conveniently done with the \code{predict} method (see \code{?predict.stvar}). The available arguments include the number of steps ahead to be predicted (\code{nsteps}), the number sample paths the forecast is based on (\code{nsim}), possibly multiple confidence levels for prediction intervals (\code{pi}), prediction type (\code{pred_type}), and prediction interval type (\code{pi_type}). The prediction type can be either \code{median}, \code{mean} for the point forecast.
@@ -1104,10 +1241,21 @@ R> mypred <- predict(fit12, nsteps=10, nsim=10000, pred_type="mean",
 The results can be printed with the print method using the command \code{print(mypred)} or plotted with the plot method using the command \code{plot(mypred)}.
 
 
-\begin{table}
+\section{Summary}\label{sec:summary}
+\addcontentsline{toc}{section}{Summary}
+
+Smooth transition vector autoregressive models are a valuable tool in modelling multivariate time series in which the data generating dynamics vary in time, exhibiting gradual shifts in the autoregressive coefficients or conditional covariance matrices. We described the \proglang{R} package \pkg{sstvars}, which accommodates STVAR models with various transition weight functions, including exogenous weights, logistic weights \citep{Anderson+Vahid:1998}, multinomial logit weights, exponential weights \citep[e.g.,][]{Hubrich+Terasvirta:2013}, threshold weights \citep{Tsay:1998}, and transition weights that defined as weighted relative likelihoods of the regimes corresponding to the preceding $p$ observations \citep{Lanne+Virolainen:2024}. Currently, the accommodated conditional distributions include Gaussian distribution, Student's $t$ distribution, Student's $t$ distribution with mutually independent components, and skewed $t$ distribution with mutually independent components \citep[see][]{Hansen:1994}. The accommodated identification methods include recursive identification, identification by heteroskedasticity, and identification by non-Gaussianity. We discussed the various model specifications and several features implemented in \pkg{sstvars} for STVAR modeling: unconstrained and constrained maximum likelihood estimation of the model parameters, impulse response analysis, residual based diagnostics, hypothesis testing, simulation, forecasting, and more. For convenience, we have collected some useful functions in \pkg{sstvars} to Table~\ref{tab:functions}. For all the exported functions and their usage, see the reference manual.
+
+
+\cleardoublepage
+\section*{A table of some useful functions}\label{sec:table}
+\addcontentsline{toc}{section}{A table of some useful functions}
+
+\begin{table}[!h]
+\begin{adjustwidth}{-0cm}{} % Shifts the table to the left
 \centering
 \small
-\begin{tabular}{llp{6.4cm}}
+\begin{tabular}{llp{8.0cm}}
 \hline
 Related to     & Name                      & Description \\ \hline
 Estimation     & \code{fitSTVAR}           & Estimate STVAR models.\\
@@ -1121,6 +1269,7 @@ Estimates      & \code{print} (method)     & Print the estimates or their approx
                & \code{get_foc}            & Calculate numerically approximated gradient of the log-likelihood function evaluated at the estimate.\\
                & \code{get_soc}            & Calculate eigenvalues of numerically approximated Hessian of the log-likelihood function evaluated at the estimate.\\
                & \code{profile_logliks}    & Plot the graphs of the profile log-likelihood functions about the estimate.\\
+               & \code{profile_struct_shocks} & Plot the time series of the structural shocks.\\
 Diagnostics    & \code{Portmanteau_test}   & Calculate the (adjusted) Portmanteau test.\\
                & \code{diagnostic_plot}    & Plot residual diagnostics (raw or standardized residuals).\\
 Forecasting    & \code{predict} (method)   & Forecast future observations and transition weights of the process.\\
@@ -1133,28 +1282,19 @@ Impulse responses & \code{GIRF}    & Estimate generalized impulse response funct
                & \code{GFEVD}              & Estimate generalized forecast error variance decomposition.\\
                & \code{linear_IRF}         & Estimate linear impulse response functions.\\
 Other          & \code{bound_JSR} & Calculate bounds for the joint spectral radius of the companion form AR matrices of the regimes.\\
-%               & \code{swap_parametrization} & Swap between mean and intercept parametrizations \\
-%               & \code{uncond_moments}     & Calculate unconditional moments of the regimes.\\
-%               & \code{check_params}       & Check whether given parameter values satisfy our assumptions.\\
-               & \code{swap_B_signs}       & Swap the signs of the columns of the impact matrix of models identified by heteroskedasticity. \\
-               & \code{reorder_B_columns}  & Reorder the columns of the impact matrix of models identified by heteroskedasticity. \\
+               & \code{swap_parametrization} & Swap between mean and intercept parametrizations \\
+               & \code{uncond_moments}     & Calculate unconditional moments of the regimes.\\
+               & \code{check_params}       & Check whether given parameter values satisfy our assumptions.\\
+               & \code{swap_B_signs}       & Swap the signs of the columns of the impact matrix of models identified by heteroskedasticity or non-Gaussianity. \\
+               & \code{reorder_B_columns}  & Reorder the columns of the impact matrix of models identified by heteroskedasticity or non-Gaussianity. \\
 \hline
 \end{tabular}
 \caption{Some useful functions in \pkg{sstvars} sorted according to their usage. The note "method" in parentheses after the name of a function signifies that it is an S3 method for a class \code{stvar} object (often generated by the function \code{fitSTVAR}, \code{fitSSTVAR} or \code{STVAR}).}
 \label{tab:functions}
+\end{adjustwidth}
 \end{table}
 
-\section{Summary}\label{sec:summary}
-\addcontentsline{toc}{section}{Summary}
-
-Smooth transition vector autoregressive models are a valuable tool in modelling multivariate time series in which the data generating dynamics vary in time, exhibiting gradual shifts in the autoregressive coefficients or conditional covariance matrices. We described the \proglang{R} package \pkg{sstvars}, which accommodates STVAR models with various transition weight functions, including exogenous weights, logistic weights \citep{Anderson+Vahid:1998}, multinomial logit weights, exponential weights \citep[e.g.,][]{Hubrich+Terasvirta:2013}, threshold weights \citep{Tsay:1998}, and transition weights that defined as weighted relative likelihoods of the regimes corresponding to the preceding $p$ observations \citep{Lanne+Virolainen:2024}. Currently, the accommodated conditional distributions include Gaussian distribution, Student's $t$ distribution, Student's $t$ distribution with mutually independent components, and skewed $t$ distribution with mutually independent components \citep[see][]{Hansen:1994}. The accommodated identification methods include recursive identification, identification by heteroskedasticity, and identification by non-Gaussianity. We discussed the various model specifications and several features implemented in \pkg{sstvars} for STVAR modeling: unconstrained and constrained maximum likelihood estimation of the model parameters, impulse response analysis, residual based diagnostics, hypothesis testing, simulation, forecasting, and more. For convenience, we have collected some useful functions in \pkg{sstvars} to Table~\ref{tab:functions}. For all the exported functions and their usage, see the reference manual.
-
-\section*{Computational details}
-The results in this paper were obtained using \proglang{R}~4.3.1 and \pkg{sstvars}~1.0.0 package running on MacBook Pro 14", 2021, with Apple M1 Pro processor, 16 Gt of unified RAM, and macOS Sonoma 14.2.1 operating system.
-
-Some of the estimation results (and thereby everything that is calculated based on the estimates) may vary slightly when running the code on different computers. This is likely due to the numerical error caused by the limited precision of the float point representation.
-
-\pagebreak
+\cleardoublepage
 \bibliography{refs}
 
 \end{document}
