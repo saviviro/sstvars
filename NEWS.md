@@ -41,4 +41,6 @@
 
 # sstvars 1.1.1
 
-
+* Added the argument min_obs_coef to fitSTVAR to let the user to control the smallest accepted number of observations from each regime in
+  the LS/NLS step of the three-phase estimation. Also increased its default value.
+* Fixed CRAN check issues. 

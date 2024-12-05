@@ -14,6 +14,8 @@
 #'   the first element determined how far from the boundary of the stability region the penalization starts
 #'   (a number between zero and one, smaller number starts penalization closer to the boundary) and the second element
 #'   is a tuning parameter for the penalization (a positive real number, a higher value penalizes non-stability more).
+#' @param min_obs_coef In the LS/NLS step of the three phase estimation, the smallest accepted number of observations
+#'   (times variables) from each regime relative to the number of parameters in the regime.
 #' @param nrounds the number of estimation rounds that should be performed. The default is \code{(M*ncol(data))^3}
 #'   when \code{estim_method="two-phase"} and \code{(M*ncol(data))^2} when \code{estim_method="three-phase"}.
 #' @param ncores the number CPU cores to be used in parallel computing.
@@ -205,7 +207,7 @@
 fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                      weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                      parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
-                     estim_method, penalized, penalty_params=c(0.05, 0.2), allow_unstab, nrounds, ncores=2, maxit=1000, seeds=NULL,
+                     estim_method, penalized, penalty_params=c(0.05, 0.2), allow_unstab, min_obs_coef=3, nrounds, ncores=2, maxit=1000, seeds=NULL,
                      print_res=TRUE, use_parallel=TRUE, calc_std_errors=TRUE, ...) {
   # Initial checks etc
   weight_function <- match.arg(weight_function)

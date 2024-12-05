@@ -19,6 +19,7 @@ estim_NLS(
   weight_constraints = NULL,
   penalized = TRUE,
   penalty_params = c(0.05, 0.2),
+  min_obs_coef = 3,
   use_parallel = TRUE,
   ncores = 2
 )
@@ -107,6 +108,9 @@ and the penalization starts when the eigenvalues of the companion form AR matrix
 the first element determined how far from the boundary of the stability region the penalization starts
 (a number between zero and one, smaller number starts penalization closer to the boundary) and the second element
 is a tuning parameter for the penalization (a positive real number, a higher value penalizes non-stability more).}
+
+\item{min_obs_coef}{the smallest accepted number of observations (times variables) from each regime
+relative to the number of parameters in the regime.}
 
 \item{use_parallel}{employ parallel computing? If \code{FALSE}, does not print anything.}
 

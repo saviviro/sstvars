@@ -6,6 +6,8 @@
 #'
 #' @inheritParams loglikelihood
 #' @param ncores the number CPU cores to be used in parallel computing.
+#' @param min_obs_coef the smallest accepted number of observations (times variables) from each regime
+#'  relative to the number of parameters in the regime.
 #' @param use_parallel employ parallel computing? If \code{FALSE}, does not print anything.
 #' @details Used internally in the multiple phase estimation procedure proposed by Koivisto,
 #'  Luoto, and Virolainen (2025). Mean constraints are not supported. Only weight constraints that
@@ -41,7 +43,7 @@
 estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                      weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                      parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
-                     penalized=TRUE, penalty_params=c(0.05, 0.2), use_parallel=TRUE, ncores=2) {
+                     penalized=TRUE, penalty_params=c(0.05, 0.2), min_obs_coef=3, use_parallel=TRUE, ncores=2) {
   # Checks
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -56,6 +58,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   stopifnot(is.numeric(penalty_params) && length(penalty_params) == 2 && all(penalty_params >= 0) && penalty_params[1] < 1)
   stab_tol <- penalty_params[1]
   tuning_par <- penalty_params[2]
+  stopifnot(is.numeric(min_obs_coef) && length(min_obs_coef) == 1 && min_obs_coef > 0)
 
   # Check the weight constraints
   if(!is.null(weight_constraints)) {
@@ -77,13 +80,10 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   n_obs <- nrow(data)
   T_obs <- n_obs - p
   pars_per_regime <- d + ifelse(is.null(AR_constraints), p*d^2, ncol(AR_constraints)/M) + d^2
-  T_min <- 2/d*pars_per_regime # Minimum number of obs in each regime
+  T_min <- min_obs_coef/d*pars_per_regime # Minimum number of obs in each regime
   if(T_obs/M < T_min) { # Try smaller T_min
-    T_min <- 1.5/d*pars_per_regime
-    message("The number of observations relative to the number of parameters is small, consider decreasing p or M.")
-    if(T_obs/M < T_min) {
-      stop("The number of observations is too small for reasonable estimation. Decrease the order p or the number of regimes M.")
-    }
+    stop(paste("The number of observations is too small for reasonable estimation (according to the argument 'min_obs_coef'.",
+               "Decrease the order p or the number of regimes M."))
   }
 
   ################################
@@ -401,7 +401,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
 estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                       weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                       parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
-                      penalized=TRUE, penalty_params=c(0.05, 0.2), use_parallel=TRUE, ncores=2) {
+                      penalized=TRUE, penalty_params=c(0.05, 0.2), min_obs_coef=3, use_parallel=TRUE, ncores=2) {
   # Checks
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -432,20 +432,17 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
   stopifnot(is.numeric(penalty_params) && length(penalty_params) == 2 && all(penalty_params >= 0) && penalty_params[1] < 1)
   stab_tol <- penalty_params[1]
   tuning_par <- penalty_params[2]
+  stopifnot(is.numeric(min_obs_coef) && length(min_obs_coef) == 1 && min_obs_coef > 0)
 
   # Obtain relevant statistics
   n_obs <- nrow(data)
   T_obs <- n_obs - p
   if(weight_function != "exogenous") {
-    T_min <- 2/d*ifelse(is.null(AR_constraints), (p + 1)*d^2 + d,
+    T_min <- min_obs_coef/d*ifelse(is.null(AR_constraints), (p + 1)*d^2 + d,
                         ncol(AR_constraints)/M + d + d^2) # Minimum number of obs in each regime
     if(T_obs/M < T_min) { # Try smaller T_min
-      T_min <- 1.5/d*ifelse(is.null(AR_constraints), (p + 1)*d^2 + d,
-                            ncol(AR_constraints)/M + d + d^2)
-      message("The number of observations in relative to the number of parameters is small, consider decreasing p or M.")
-      if(T_obs/M < T_min) {
-        stop("The number of observations is too small for reasonable estimation. Decrease the order p or the number of regimes M.")
-      }
+       stop(paste("The number of observations is too small for reasonable estimation (according to the argument 'min_obs_coef'.",
+                  "Decrease the order p or the number of regimes M."))
     }
   }
 
