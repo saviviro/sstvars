@@ -58,7 +58,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   stopifnot(is.numeric(penalty_params) && length(penalty_params) == 2 && all(penalty_params >= 0) && penalty_params[1] < 1)
   stab_tol <- penalty_params[1]
   tuning_par <- penalty_params[2]
-  stopifnot(is.numeric(min_obs_coef) && length(min_obs_coef) == 1 && min_obs_coef > 0)
+  stopifnot(is.numeric(min_obs_coef) && length(min_obs_coef) == 1 && min_obs_coef > 1)
 
   # Check the weight constraints
   if(!is.null(weight_constraints)) {
@@ -432,7 +432,7 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
   stopifnot(is.numeric(penalty_params) && length(penalty_params) == 2 && all(penalty_params >= 0) && penalty_params[1] < 1)
   stab_tol <- penalty_params[1]
   tuning_par <- penalty_params[2]
-  stopifnot(is.numeric(min_obs_coef) && length(min_obs_coef) == 1 && min_obs_coef > 0)
+  stopifnot(is.numeric(min_obs_coef) && length(min_obs_coef) == 1 && min_obs_coef > 1)
 
   # Obtain relevant statistics
   n_obs <- nrow(data)
@@ -493,8 +493,12 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
     # Check whether there are enough observations from each regime
     if(weight_function != "exogenous") {
       if(any(colSums(alpha_mt) < T_min)) { # Enough observations from each regime?
-        estims <- matrix(0, nrow=M*d + M*p*d^2, ncol=1) # Dummy estimates, legal but very bad
         all_Psi <- array(0, dim=c(d, M*d + M*p*d^2, T_obs)) # [, , t] for \Psi_t, dummy Psi
+        if(is.null(AR_constraints)) {
+          estims <- matrix(0, nrow=M*d + M*p*d^2, ncol=1) # Dummy estimates, legal but very bad
+        } else {
+          estims <- matrix(0, nrow=ncol(C_tilde), ncol=1) # Dummy estimates, legal but very bad
+        }
         calc_estims <- FALSE
       } else {
         calc_estims <- TRUE
@@ -550,7 +554,13 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
       # (with AR_constraints \beta = (\phi_{1,0},...,\phi_{M,0},\psi)
       #estims <- solve(sum_cPsi, sum_tPsiy) # (M*d + M*p*d^2 x 1)
       estims <- tryCatch(solve(sum_cPsi, sum_tPsiy), # (M*d + M*p*d^2 x 1), fails if the system is singular
-                         error=function(e) matrix(0, nrow=M*d + M*p*d^2, ncol=1)) # zero estimates are legal but bad, dummy estimates
+                         error=function(e) {
+                           if(is.null(AR_constraints)) {
+                             return(matrix(0, nrow=M*d + M*p*d^2, ncol=1))
+                           } else {
+                             return(matrix(0, nrow=ncol(C_tilde), ncol=1))
+                           }
+                         }) # zero estimates are legal but bad, dummy estimates
     }
 
     ## Calculate the residual sums of squares
