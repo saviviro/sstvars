@@ -43,6 +43,7 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE, standard_error_pr
   weight_constraints <- stvar$model$weight_constraints
   B_constraints <- stvar$model$B_constraints
   IC <- stvar$IC
+  penalized <- stvar$penalized
   var_names <- colnames(stvar$data)
   if(is.null(var_names)) var_names <- paste0("Var.", 1:d)
 
@@ -115,7 +116,7 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE, standard_error_pr
       all_boldA_eigens <- get_boldA_eigens(stvar)
       all_omega_eigens <- get_omega_eigens(stvar)
       form_val2 <- function(txt, val) paste(txt, format_value(val))
-      cat(paste(form_val2("loglik/T:", stvar$loglik/T_obs),
+      cat(paste(form_val2(paste0(ifelse(penalized, "(penalized) ", ""), "loglik/T:"), stvar$loglik/T_obs),
                 form_val2("AIC:", IC$AIC),
                 form_val2("HQIC:", IC$HQIC),
                 form_val2("BIC:", IC$BIC),

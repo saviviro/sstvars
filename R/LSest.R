@@ -82,7 +82,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   pars_per_regime <- d + ifelse(is.null(AR_constraints), p*d^2, ncol(AR_constraints)/M) + d^2
   T_min <- min_obs_coef/d*pars_per_regime # Minimum number of obs in each regime
   if(T_obs/M < T_min) { # Try smaller T_min
-    stop(paste("The number of observations is too small for reasonable estimation (according to the argument 'min_obs_coef'.",
+    stop(paste("The number of observations is too small for reasonable estimation (according to the argument 'min_obs_coef').",
                "Decrease the order p or the number of regimes M."))
   }
 
@@ -441,7 +441,7 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
     T_min <- min_obs_coef/d*ifelse(is.null(AR_constraints), (p + 1)*d^2 + d,
                         ncol(AR_constraints)/M + d + d^2) # Minimum number of obs in each regime
     if(T_obs/M < T_min) { # Try smaller T_min
-       stop(paste("The number of observations is too small for reasonable estimation (according to the argument 'min_obs_coef'.",
+       stop(paste("The number of observations is too small for reasonable estimation (according to the argument 'min_obs_coef').",
                   "Decrease the order p or the number of regimes M."))
     }
   }
@@ -490,53 +490,68 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
     alpha_mt <- get_alpha_mt(data, Y2=Y2, p=p, M=M, d=d, weight_function=weight_function, weightfun_pars=weightfun_pars,
                              weightpars=weightpars, epsilon=epsilon) # Transition weights (T x M), t:th row
 
-    # Storage for the data matrices \Psi_t in the form y_t = \Psi_t\beta + u_t,
-    # \beta = (vec(\Phi_1),...,vec(\Phi_M)), \Phi_m = [\phi_{m,0} : A_{m,1} : ... : A_{m,p}].
-    all_Psi <- array(NA, dim=c(d, M*d + M*p*d^2, T_obs)) # [, , t] for \Psi_t
-    all_cPsi <- array(NA, dim=c(M*d + M*p*d^2, M*d + M*p*d^2, T_obs)) # [, , t] for crossprod(\Psi_t)
-    all_tPsiy <- array(NA, dim=c(M*d + M*p*d^2, 1, T_obs)) # [, , t] for \Psi_t'y_t
-
-    # Storages for models with AR constraints
-    if(!is.null(AR_constraints)) {
-      all_PsiPC <- array(NA, dim=c(d, ncol(C_tilde), T_obs)) # [, , t] for \Psi_tPC
-      all_cPsiPC <- array(NA, dim=c(ncol(C_tilde), ncol(C_tilde), T_obs)) # [, , t] for crossprod(\Psi_tPC)
-      all_tPsiPCy <- array(NA, dim=c(ncol(C_tilde), 1, T_obs)) # [,  ,t] for (\Psi_tPC)'y_t
-    }
-
-    # Go through the time periods
-    for(t in 1:T_obs) {
-
-      # Create the vector Z_t = (1, y_{t-1},...,y_{t-p}) (1 + dp x 1), and calculate Knonecker product between Z_t' and I_d
-      Z_kron <- kronecker(matrix(c(1, Y[t,]), nrow=1), diag(d)) # (d x d(1 + dp)), the Kronecker product
-
-      # Go through the regimes
-      for(m in 1:M) {
-        all_Psi[, ((m - 1)*(d + p*d^2) + 1):(m*(d + p*d^2)), t] <- alpha_mt[t, m]*Z_kron # Fill in Psi_t, also for AR_constraints
-      }
-
-      if(!is.null(AR_constraints)) {
-        all_PsiPC[, , t] <- all_Psi[, , t]%*%PC # Multiply Psi_t with PC
-        all_cPsiPC[, , t] <- crossprod(all_PsiPC[, , t]) # Fill in Psi_t'Psi_t
-        all_tPsiPCy[, , t] <- crossprod(all_PsiPC[, , t], data[p + t,]) # Fill in \Psi_t'y_t
+    # Check whether there are enough observations from each regime
+    if(weight_function != "exogenous") {
+      if(any(colSums(alpha_mt) < T_min)) { # Enough observations from each regime?
+        estims <- matrix(0, nrow=M*d + M*p*d^2, ncol=1) # Dummy estimates, legal but very bad
+        all_Psi <- array(0, dim=c(d, M*d + M*p*d^2, T_obs)) # [, , t] for \Psi_t, dummy Psi
+        calc_estims <- FALSE
       } else {
-        all_cPsi[, , t] <- crossprod(all_Psi[, , t]) # Fill in Psi_t'Psi_t
-        all_tPsiy[, , t] <- crossprod(all_Psi[, , t], data[p + t,]) # Fill in \Psi_t'y_t
+        calc_estims <- TRUE
       }
+    } else {
+      calc_estims <- TRUE
     }
 
-    # Sum over the time periods in cPsi and tPsiy
-    if(!is.null(AR_constraints)) {
-      sum_cPsi <- apply(all_cPsiPC, MARGIN=c(1, 2), FUN=sum)
-      sum_tPsiy <- apply(all_tPsiPCy, MARGIN=c(1, 2), FUN=sum)
-    } else {
-      sum_cPsi <- apply(all_cPsi, MARGIN=c(1, 2), FUN=sum)
-      sum_tPsiy <- apply(all_tPsiy, MARGIN=c(1, 2), FUN=sum)
+    if(calc_estims) { # Exo weights or enough observations, no dummy estims at least yet
+      # Storage for the data matrices \Psi_t in the form y_t = \Psi_t\beta + u_t,
+      # \beta = (vec(\Phi_1),...,vec(\Phi_M)), \Phi_m = [\phi_{m,0} : A_{m,1} : ... : A_{m,p}].
+      all_Psi <- array(NA, dim=c(d, M*d + M*p*d^2, T_obs)) # [, , t] for \Psi_t
+      all_cPsi <- array(NA, dim=c(M*d + M*p*d^2, M*d + M*p*d^2, T_obs)) # [, , t] for crossprod(\Psi_t)
+      all_tPsiy <- array(NA, dim=c(M*d + M*p*d^2, 1, T_obs)) # [, , t] for \Psi_t'y_t
+
+      # Storages for models with AR constraints
+      if(!is.null(AR_constraints)) {
+        all_PsiPC <- array(NA, dim=c(d, ncol(C_tilde), T_obs)) # [, , t] for \Psi_tPC
+        all_cPsiPC <- array(NA, dim=c(ncol(C_tilde), ncol(C_tilde), T_obs)) # [, , t] for crossprod(\Psi_tPC)
+        all_tPsiPCy <- array(NA, dim=c(ncol(C_tilde), 1, T_obs)) # [,  ,t] for (\Psi_tPC)'y_t
+      }
+
+      # Go through the time periods
+      for(t in 1:T_obs) {
+
+        # Create the vector Z_t = (1, y_{t-1},...,y_{t-p}) (1 + dp x 1), and calculate Knonecker product between Z_t' and I_d
+        Z_kron <- kronecker(matrix(c(1, Y[t,]), nrow=1), diag(d)) # (d x d(1 + dp)), the Kronecker product
+
+        # Go through the regimes
+        for(m in 1:M) {
+          all_Psi[, ((m - 1)*(d + p*d^2) + 1):(m*(d + p*d^2)), t] <- alpha_mt[t, m]*Z_kron # Fill in Psi_t, also for AR_constraints
+        }
+
+        if(!is.null(AR_constraints)) {
+          all_PsiPC[, , t] <- all_Psi[, , t]%*%PC # Multiply Psi_t with PC
+          all_cPsiPC[, , t] <- crossprod(all_PsiPC[, , t]) # Fill in Psi_t'Psi_t
+          all_tPsiPCy[, , t] <- crossprod(all_PsiPC[, , t], data[p + t,]) # Fill in \Psi_t'y_t
+        } else {
+          all_cPsi[, , t] <- crossprod(all_Psi[, , t]) # Fill in Psi_t'Psi_t
+          all_tPsiy[, , t] <- crossprod(all_Psi[, , t], data[p + t,]) # Fill in \Psi_t'y_t
+        }
+      }
+
+      # Sum over the time periods in cPsi and tPsiy
+      if(!is.null(AR_constraints)) {
+        sum_cPsi <- apply(all_cPsiPC, MARGIN=c(1, 2), FUN=sum)
+        sum_tPsiy <- apply(all_tPsiPCy, MARGIN=c(1, 2), FUN=sum)
+      } else {
+        sum_cPsi <- apply(all_cPsi, MARGIN=c(1, 2), FUN=sum)
+        sum_tPsiy <- apply(all_tPsiy, MARGIN=c(1, 2), FUN=sum)
+      }
+      ## Obtain the estimates in the vector \beta = (vec(\Phi_1),...,vec(\Phi_M)), where \Phi_m = [\phi_{m,0} : A_{m,1} : ... : A_{m,p}]
+      # (with AR_constraints \beta = (\phi_{1,0},...,\phi_{M,0},\psi)
+      #estims <- solve(sum_cPsi, sum_tPsiy) # (M*d + M*p*d^2 x 1)
+      estims <- tryCatch(solve(sum_cPsi, sum_tPsiy), # (M*d + M*p*d^2 x 1), fails if the system is singular
+                         error=function(e) matrix(0, nrow=M*d + M*p*d^2, ncol=1)) # zero estimates are legal but bad, dummy estimates
     }
-    ## Obtain the estimates in the vector \beta = (vec(\Phi_1),...,vec(\Phi_M)), where \Phi_m = [\phi_{m,0} : A_{m,1} : ... : A_{m,p}]
-    # (with AR_constraints \beta = (\phi_{1,0},...,\phi_{M,0},\psi)
-    #estims <- solve(sum_cPsi, sum_tPsiy) # (M*d + M*p*d^2 x 1)
-    estims <- tryCatch(solve(sum_cPsi, sum_tPsiy), # (M*d + M*p*d^2 x 1), fails if the system is singular
-                       error=function(e) matrix(0, nrow=M*d + M*p*d^2, ncol=1)) # zero estimates are legal but bad, dummy estimates
 
     ## Calculate the residual sums of squares
     if(is.null(AR_constraints)) {
@@ -667,7 +682,7 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
       }
       n_weightvecs <- ifelse(M == 1 || !is.null(weight_constraints), 1, nrow(weightparvecs))
       message(paste0("PHASE 1: Estimating the AR and weight parameters by least squares for ", n_weightvecs,
-                     " vectors of thresholds...")) # "PHASE 1" print i related to the multiple-phase estimation procedure
+                     " vectors of weight parameters...")) # "PHASE 1" print i related to the multiple-phase estimation procedure
       cl <- parallel::makeCluster(ncores)
       on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.
       parallel::clusterExport(cl, ls(environment(estim_LS)), envir=environment(estim_LS)) # assign all variables from package:sstvars

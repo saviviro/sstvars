@@ -41,6 +41,10 @@
 
 # sstvars 1.1.1
 
+* Now also the NLS step in the three-phase estimation estimation checks that there are enough observations from each regime
+  (previously only LS estimation checked this).
 * Added the argument min_obs_coef to fitSTVAR to let the user to control the smallest accepted number of observations from each regime in
   the LS/NLS step of the three-phase estimation. Also increased its default value.
+* Now alt_stvar, iterate_more, and filter_estimates retain LS_estimates if the original model contains them. 
+* Now summary printout of class sstvar objects tells if the log-likelihood function is penalized. 
 * Fixed CRAN check issues. 

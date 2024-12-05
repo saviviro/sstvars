@@ -138,7 +138,7 @@
 #' get_soc(fit32) # Eigenvalues of the Hessian of the log-lik. fn. about the estimate
 #' profile_logliks(fit32) # Profile log-likelihood functions about the estimate
 #'
-#' # Estimate a two-regime Student's t STVAR p=3 model with logistic transition weights
+#' # Estimate a two-regime Student's t STVAR p=5 model with logistic transition weights
 #' # and the first lag of the second variable as the switching variable, only two
 #' # estimation rounds using two CPU cores (three-phase estimation):
 #' fitlogistict32 <- fitSTVAR(gdpdef, p=3, M=2, weight_function="logistic", weightfun_pars=c(2, 1),

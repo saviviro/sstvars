@@ -403,6 +403,7 @@ alt_stvar <- function(stvar, which_largest=1, which_round, calc_std_errors=FALSE
   if(!is.null(stvar$which_round)) {
     ret$which_round <- which_round
   }
+  ret$LS_estimates <- stvar$LS_estimates
   warn_eigens(ret, allow_unstab=stvar$allow_unstab)
   ret
 }
@@ -1075,6 +1076,7 @@ filter_estimates <- function(stvar, which_largest=1, filter_stab=TRUE, calc_std_
   if(!is.null(stvar$which_round)) {
     ret$which_round <- which_round
   }
+  ret$LS_estimates <- stvar$LS_estimates
   warn_eigens(ret, allow_unstab=allow_unstab)
   ret
 }
