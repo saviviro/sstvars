@@ -3,6 +3,10 @@
 %% -- LaTeX packages and custom commands ---------------------------------------
 %\VignetteIndexEntry{sstvars: Structural Smooth Transition Vector Autoregressive Models R}
 
+% The below barely changes the size of the vignette
+%\pdfcompresslevel=9
+%\pdfobjcompresslevel=3
+
 % Margin setup
 \usepackage[margin=1in]{geometry}
 
@@ -557,17 +561,18 @@ R> fit12 <- fitSTVAR(gdpdef, p=1, M=2, weight_function="logistic",
 \end{CodeInput}
 \begin{CodeOutput}
 Using 8 cores for 24 estimations rounds...
-Optimizing with a genetic algorithm...
-  |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% elapsed=31s
+PHASE 1: Estimating all the parameters with a genetic algorithm...
+  |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% elapsed=16s
 Results from the genetic algorithm:
-The lowest loglik:  -283.893
-The largest loglik: -253.864
-Optimizing with a variable metric algorithm...
-  |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% elapsed=03s
+The lowest loglik:  -278.505
+The largest loglik: -251.32
+PHASE 2: Estimating all the parameters with a variable metric algorithm...
+  |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% elapsed=02s
 Results from the variable metric algorithm:
-The lowest loglik:  -276.669
+The lowest loglik:  -273.766
 The largest loglik: -250.236
 Filtering inappropriate estimates...
+Filtered through 0 inappropriate  estimates with a larger log-likelihood
 Calculating approximate standard errors...
 Finished!
 \end{CodeOutput}
@@ -689,17 +694,18 @@ R> fitexo12 <- fitSTVAR(gdpdef, p=1, M=2, weight_function="exogenous",
 \end{CodeInput}
 \begin{CodeOutput}
 Using 8 cores for 24 estimations rounds...
-Optimizing with a genetic algorithm...
-  |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% elapsed=42s
+PHASE 1: Estimating all the parameters with a genetic algorithm...
+  |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% elapsed=24s
 Results from the genetic algorithm:
-The lowest loglik:  -292.906
-The largest loglik: -273.537
-Optimizing with a variable metric algorithm...
-  |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% elapsed=06s
+The lowest loglik:  -287.191
+The largest loglik: -272.426
+PHASE 2: Estimating all the parameters with a variable metric algorithm...
+  |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% elapsed=01s
 Results from the variable metric algorithm:
-The lowest loglik:  -274.461
-The largest loglik: -271.494
+The lowest loglik:  -271.593
+The largest loglik: -271.593
 Filtering inappropriate estimates...
+Filtered through 0 inappropriate  estimates with a larger log-likelihood
 Calculating approximate standard errors...
 Finished!
 \end{CodeOutput}
@@ -768,7 +774,7 @@ The resulting plot is presented in Figure~\ref{fig:seriesplot}. The figure confi
 
 \begin{figure}[t]
   \centering
-  \includegraphics{figures/seriesplot.png}
+  \includegraphics{figures/seriesplot.pdf}
   \caption{The figure produced by the command \code{plot(fit12)}. On the top, a quarterly series consisting of two U.S. variables: the percentage change of real GDP and the percentage change of GDP implicit price deflator, covering the period from 1959Q1 to 2019Q4. On the bottom, the estimated transition weights of the STVAR model \code{fit12gs} fitted the series.}
 \label{fig:seriesplot}\end{figure}
 
@@ -792,12 +798,11 @@ For example, the following code calculates the first order condition for the G-S
 R> get_foc(fit12)
 \end{CodeInput}
 \begin{CodeOutput}
- [1]  4.262025e-04  4.048578e-04  1.281037e-04 -5.780028e-04
- [5]  3.221411e-04  1.776783e-04  2.645895e-04 -3.844178e-04
- [9] -2.174971e-05  1.380419e-04  1.664494e-04 -8.551879e-04
-[13]  1.246268e-04 -3.826628e-04 -2.131233e-03 -2.536638e-06
-[17]  1.432667e-04  1.818326e-04  3.602239e-04  1.000681e-05
-[21] -3.700270e-05
+ [1]  0.0013350596  0.0338560277  0.0001781006  0.0027846292  0.0011998654
+ [6]  0.0313456858  0.0003378474  0.0179776013  0.0003544770  0.0051172636
+[11]  0.0002186068  0.0022140706 -0.0055795827  0.0071732765  0.5804849358
+[16] -0.0002884765  0.0008926041  0.0258026645 -0.0204821154 -0.0018359291
+[21]  0.0004548983
 \end{CodeOutput}
 \end{CodeChunk}
 %
@@ -808,12 +813,11 @@ and the following code calculates the second order condition:
 R> get_soc(fit12)
 \end{CodeInput}
 \begin{CodeOutput}
- [1] -1.494320e-01 -2.682544e-01 -1.047386e+00 -6.177532e+00
- [5] -9.934297e+00 -1.654975e+01 -5.366908e+01 -7.191557e+01
- [9] -1.215715e+02 -1.673756e+02 -1.859815e+02 -2.718937e+02
-[13] -3.775367e+02 -3.834231e+02 -6.567316e+02 -9.911009e+02
-[17] -1.227186e+03 -1.377650e+03 -8.775102e+03 -9.731932e+03
-[21] -3.895717e+04
+ [1]  0.0013350596  0.0338560277  0.0001781006  0.0027846292  0.0011998654
+ [6]  0.0313456858  0.0003378474  0.0179776013  0.0003544770  0.0051172636
+[11]  0.0002186068  0.0022140706 -0.0055795827  0.0071732765  0.5804849358
+[16] -0.0002884765  0.0008926041  0.0258026645 -0.0204821154 -0.0018359291
+[21]  0.0004548983
 \end{CodeOutput}
 \end{CodeChunk}
 %
@@ -823,7 +827,7 @@ The exemplify, the following command plots the graphs of profile log-likelihood 
 %
 \begin{CodeChunk}
 \begin{CodeInput}
-R> profile_logliks(fit12, scale=0.02, precision=200)
+R> profile_logliks(fit12)
 \end{CodeInput}
 \end{CodeChunk}
 %
@@ -831,8 +835,8 @@ The resulting plot is presented in Figure~\ref{fig:proflogliks}.
 
 \begin{figure}[t]
   \centering
-  \includegraphics{figures/profilelogliks.png}
-  \caption{The figure produced by the command \code{profile\_logliks(fit12, scale=0.02, precision=200)}. The graphs of the profile log-likelihood functions of the logistic Student's $t$ STVAR model drawn about the estimate. The red vertical lines denote the estimate.}
+  \includegraphics{figures/profilelogliks.pdf}
+  \caption{The figure produced by the command \code{profile\_logliks(fit12)}. The graphs of the profile log-likelihood functions of the logistic Student's $t$ STVAR model drawn about the estimate. The red vertical lines denote the estimate.}
 \label{fig:proflogliks}
 \end{figure}
 
