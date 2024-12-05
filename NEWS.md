@@ -38,3 +38,5 @@
 * Added a simplified table of contents to the vignette. 
 * The argument standard_error_print can now be used directly in the summary-function to obtain printout of standard errors. 
 * Updated the documentation. 
+
+# sstvars 1.1.1
