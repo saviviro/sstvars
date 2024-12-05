@@ -16,7 +16,7 @@
 \usepackage{amsmath} % \align, etc.
 \usepackage{amssymb} % \mathbb, etc.
 \usepackage{mathtools} % matrix*: [c] centered, [l] left-aligned, [r] right-aligned
-\usepackage{bbm} % Indicator function \mathbbm{1}
+%\usepackage{bbm} % Indicator function \mathbbm{1}, causes issues in CRAN checks
 
 % Font encoding and fonts
 \usepackage[T1]{fontenc}
@@ -232,10 +232,10 @@ f(y_t|\mathcal{F}_{t-1}) = |\det(B_t)|^{-1}\prod_{i=1}^d st(\iota_i'B_t^{-1}(y_t
 where $\iota_i=(0,...0,1,0,..,0)$ is a $(d\times 1)$ has one in the $i$th entry and zeros in the other entries, $B_{y,t}$ is as in~(\ref{eq:Bt}), and $st(\cdot;\nu_i,\lambda_i)$ is the density function of univariate skewed $t$-distribution with zero mean, unit variance, $\nu_i$ degrees of freedom, and skewness controlled by the parameter $\lambda_i\in (-1, 1)$. The density function of the skewed $t$-distribution, $st(\cdot; \nu_i, \lambda_i)$, is given as \citep[][Equations~(10)-(13)]{Hansen:1994}:
 %
 \begin{equation}\label{eq:skew_t_dens}
-st(e_{it}; \nu_i, \lambda_i) = b_ic_i\left(1 + \frac{1}{\nu_i - 2}\left(\frac{b_ie_{it} + a_i}{1 - \mathbbm{1}\lbrace e_{it}<-a_i/b_i  \rbrace\lambda_i + \mathbbm{1}\lbrace e_{it}\geq -a_i/b_i \rbrace\lambda_i} \right)^2 \right)^{-(\nu_i + 1)/2}
+st(e_{it}; \nu_i, \lambda_i) = b_ic_i\left(1 + \frac{1}{\nu_i - 2}\left(\frac{b_ie_{it} + a_i}{1 - \boldsymbol{1}\lbrace e_{it}<-a_i/b_i  \rbrace\lambda_i + \boldsymbol{1}\lbrace e_{it}\geq -a_i/b_i \rbrace\lambda_i} \right)^2 \right)^{-(\nu_i + 1)/2}
 \end{equation}
 %
-where $\mathbbm{1} \lbrace e_{it}<-a_i/b_i \rbrace$ is an indicator function that takes the value one if $e_{it}<-a_i/b_i$ and zero otherwise, and $\mathbbm{1}\lbrace e_{it}\geq -a_i/b_i\rbrace$ is an indicator function that takes the value one if $e_{it}\geq -a_i/b_i$ and zero otherwise. The constants $a_i, b_i$, and $c_i$ are defined as
+where $\boldsymbol{1} \lbrace e_{it}<-a_i/b_i \rbrace$ is an indicator function that takes the value one if $e_{it}<-a_i/b_i$ and zero otherwise, and $\boldsymbol{1}\lbrace e_{it}\geq -a_i/b_i\rbrace$ is an indicator function that takes the value one if $e_{it}\geq -a_i/b_i$ and zero otherwise. The constants $a_i, b_i$, and $c_i$ are defined as
 \begin{align}
 a_i &= 4\lambda_i c_i\left(\frac{\nu_i - 2}{\nu_i - 1}\right),\\
 b_i &= (1 + 3\lambda_i^2 - a_i^2)^{1/2}, \ \ \text{and}\\

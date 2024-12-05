@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  5 DEC 2024 13:37
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  5 DEC 2024 13:45
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -404,13 +404,6 @@ LaTeX Info: Thecontrolsequence`\]'isalreadyrobust on input line 130.
 \xmathstrut@box=\box53
 \xmathstrut@dim=\dimen171
 )
-(/usr/local/texlive/2021/texmf-dist/tex/latex/bbm-macros/bbm.sty
-Package: bbm 1999/03/15 V 1.2 provides fonts for set symbols - TH
-LaTeX Font Info:    Overwriting math alphabet `\mathbbm' in version `bold'
-(Font)                  U/bbm/m/n --> U/bbm/bx/n on input line 33.
-LaTeX Font Info:    Overwriting math alphabet `\mathbbmss' in version `bold'
-(Font)                  U/bbmss/m/n --> U/bbmss/bx/n on input line 35.
-)
 (/usr/local/texlive/2021/texmf-dist/tex/latex/base/fontenc.sty
 Package: fontenc 2021/04/29 v2.0v Standard LaTeX package
 LaTeX Font Info:    Trying to load font information for T1+lmr on input line 11
@@ -638,11 +631,6 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [5]
-LaTeX Font Info:    Trying to load font information for U+bbm on input line 235
-.
- (/usr/local/texlive/2021/texmf-dist/tex/latex/bbm-macros/ubbm.fd
-File: ubbm.fd 1999/03/15 V 1.2 Font definition for bbm font - TH
-)
 LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <9> on input line 251.
 LaTeX Font Info:    External font `lmex10' loaded for size
@@ -769,7 +757,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [23]
-<figures/seriesplot.png, id=848, 642.4pt x 458.71375pt>
+<figures/seriesplot.png, id=847, 642.4pt x 458.71375pt>
 File: figures/seriesplot.png Graphic file (type png)
 <use figures/seriesplot.png>
 Package pdftex.def Info: figures/seriesplot.png  used on input line 771.
@@ -780,7 +768,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [24 <./figures/seriesplot.png>]
-<figures/profilelogliks.png, id=857, 642.4pt x 458.71375pt>
+<figures/profilelogliks.png, id=856, 642.4pt x 458.71375pt>
 File: figures/profilelogliks.png Graphic file (type png)
 <use figures/profilelogliks.png>
 Package pdftex.def Info: figures/profilelogliks.png  used on input line 834.
@@ -920,46 +908,45 @@ Package rerunfilecheck Info: File `sstvars-vignette.out' has not changed.
 (rerunfilecheck)             Checksum: E4A2AB4755A8EEAF0F27F9A96A9D017F;22326.
  ) 
 Here is how much of TeX's memory you used:
- 13159 strings out of 478353
- 209269 string characters out of 5848086
- 514539 words of memory out of 5000000
- 30789 multiletter control sequences out of 15000+600000
- 510731 words of font info for 107 fonts, out of 8000000 for 9000
+ 13098 strings out of 478353
+ 207862 string characters out of 5848086
+ 514378 words of memory out of 5000000
+ 30741 multiletter control sequences out of 15000+600000
+ 509807 words of font info for 100 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  75i,13n,77p,1978b,506s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2021/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/local/
 texlive/2021/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/local/texlive/2021/
 texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/local/texlive/2021/texmf-dist
 /fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2021/texmf-dist/fonts/enc/dvi
-ps/lm/lm-mathit.enc} </Users/savi/Library/texlive/2021/texmf-var/fonts/pk/ljfou
-r/public/bbm/bbm10.657pk>{/usr/local/texlive/2021/texmf-dist/fonts/enc/dvips/lm
-/lm-mathex.enc}</usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmb10.
-pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></usr/
-local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></usr/local/texl
-ive/2021/texmf-dist/fonts/type1/public/lm/lmex10.pfb></usr/local/texlive/2021/t
-exmf-dist/fonts/type1/public/lm/lmmi10.pfb></usr/local/texlive/2021/texmf-dist/
-fonts/type1/public/lm/lmmi6.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1
-/public/lm/lmmi8.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/
-lmmi9.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmmib10.pfb
-></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmr10.pfb></usr/loca
-l/texlive/2021/texmf-dist/fonts/type1/public/lm/lmr6.pfb></usr/local/texlive/20
-21/texmf-dist/fonts/type1/public/lm/lmr8.pfb></usr/local/texlive/2021/texmf-dis
-t/fonts/type1/public/lm/lmr9.pfb></usr/local/texlive/2021/texmf-dist/fonts/type
-1/public/lm/lmri10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/l
-m/lmri12.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmro10.p
-fb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmss10.pfb></usr/l
-ocal/texlive/2021/texmf-dist/fonts/type1/public/lm/lmssbx10.pfb></usr/local/tex
-live/2021/texmf-dist/fonts/type1/public/lm/lmsso10.pfb></usr/local/texlive/2021
-/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></usr/local/texlive/2021/texmf-dis
-t/fonts/type1/public/lm/lmsy6.pfb></usr/local/texlive/2021/texmf-dist/fonts/typ
-e1/public/lm/lmsy8.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/l
-m/lmtt10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtti10.
-pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr
-/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on sstvars-vignette.pdf (46 pages, 874853 bytes).
+ps/lm/lm-mathit.enc}{/usr/local/texlive/2021/texmf-dist/fonts/enc/dvips/lm/lm-m
+athex.enc}</usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmb10.pfb><
+/usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></usr/local
+/texlive/2021/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></usr/local/texlive/2
+021/texmf-dist/fonts/type1/public/lm/lmex10.pfb></usr/local/texlive/2021/texmf-
+dist/fonts/type1/public/lm/lmmi10.pfb></usr/local/texlive/2021/texmf-dist/fonts
+/type1/public/lm/lmmi6.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/publ
+ic/lm/lmmi8.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmmi9
+.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmmib10.pfb></us
+r/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmr10.pfb></usr/local/tex
+live/2021/texmf-dist/fonts/type1/public/lm/lmr6.pfb></usr/local/texlive/2021/te
+xmf-dist/fonts/type1/public/lm/lmr8.pfb></usr/local/texlive/2021/texmf-dist/fon
+ts/type1/public/lm/lmr9.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/pub
+lic/lm/lmri10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmr
+i12.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmro10.pfb></
+usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmss10.pfb></usr/local/
+texlive/2021/texmf-dist/fonts/type1/public/lm/lmssbx10.pfb></usr/local/texlive/
+2021/texmf-dist/fonts/type1/public/lm/lmsso10.pfb></usr/local/texlive/2021/texm
+f-dist/fonts/type1/public/lm/lmsy10.pfb></usr/local/texlive/2021/texmf-dist/fon
+ts/type1/public/lm/lmsy6.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/pu
+blic/lm/lmsy8.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmt
+t10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtti10.pfb><
+/usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr/loca
+l/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
+Output written on sstvars-vignette.pdf (46 pages, 874478 bytes).
 PDF statistics:
- 1236 PDF objects out of 1440 (max. 8388607)
- 1113 compressed objects within 12 object streams
+ 1231 PDF objects out of 1440 (max. 8388607)
+ 1109 compressed objects within 12 object streams
  246 named destinations out of 1000 (max. 500000)
  739 words of extra memory for PDF output out of 10000 (max. 10000000)
 
