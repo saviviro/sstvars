@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  29 NOV 2024 13:30
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  5 DEC 2024 13:37
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -769,22 +769,22 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [23]
-<figures/seriesplot.png, id=848, 1545.775pt x 1104.125pt>
+<figures/seriesplot.png, id=848, 642.4pt x 458.71375pt>
 File: figures/seriesplot.png Graphic file (type png)
 <use figures/seriesplot.png>
 Package pdftex.def Info: figures/seriesplot.png  used on input line 771.
-(pdftex.def)             Requested size: 362.37569pt x 258.82921pt.
+(pdftex.def)             Requested size: 362.37569pt x 258.76778pt.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 24 []
  []
 
 [24 <./figures/seriesplot.png>]
-<figures/profilelogliks.png, id=857, 1545.775pt x 1104.125pt>
+<figures/profilelogliks.png, id=857, 642.4pt x 458.71375pt>
 File: figures/profilelogliks.png Graphic file (type png)
 <use figures/profilelogliks.png>
 Package pdftex.def Info: figures/profilelogliks.png  used on input line 834.
-(pdftex.def)             Requested size: 362.37569pt x 258.82921pt.
+(pdftex.def)             Requested size: 362.37569pt x 258.76778pt.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 25
@@ -956,7 +956,7 @@ e1/public/lm/lmsy8.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/l
 m/lmtt10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtti10.
 pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr
 /local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on sstvars-vignette.pdf (46 pages, 1042749 bytes).
+Output written on sstvars-vignette.pdf (46 pages, 874853 bytes).
 PDF statistics:
  1236 PDF objects out of 1440 (max. 8388607)
  1113 compressed objects within 12 object streams
