@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  5 DEC 2024 14:23
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  5 DEC 2024 18:23
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -424,24 +424,24 @@ File: l3backend-pdftex.def 2021-12-14 L3 backend support: PDF output (pdfTeX)
 (./sstvars-vignette.aux)
 \openout1 = `sstvars-vignette.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 90.
-LaTeX Font Info:    ... okay on input line 90.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 90.
-LaTeX Font Info:    ... okay on input line 90.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 90.
-LaTeX Font Info:    ... okay on input line 90.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 90.
-LaTeX Font Info:    ... okay on input line 90.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 90.
-LaTeX Font Info:    ... okay on input line 90.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 90.
-LaTeX Font Info:    ... okay on input line 90.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 90.
-LaTeX Font Info:    ... okay on input line 90.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 90.
-LaTeX Font Info:    ... okay on input line 90.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 90.
-LaTeX Font Info:    ... okay on input line 90.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 91.
+LaTeX Font Info:    ... okay on input line 91.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 91.
+LaTeX Font Info:    ... okay on input line 91.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 91.
+LaTeX Font Info:    ... okay on input line 91.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 91.
+LaTeX Font Info:    ... okay on input line 91.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 91.
+LaTeX Font Info:    ... okay on input line 91.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 91.
+LaTeX Font Info:    ... okay on input line 91.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 91.
+LaTeX Font Info:    ... okay on input line 91.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 91.
+LaTeX Font Info:    ... okay on input line 91.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 91.
+LaTeX Font Info:    ... okay on input line 91.
 
 (/usr/local/texlive/2021/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
@@ -473,7 +473,7 @@ G,.JBIG2,.JB2,.eps]
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-Package hyperref Info: Link coloring ON on input line 90.
+Package hyperref Info: Link coloring ON on input line 91.
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2021-04-02 v2.47 Cross-referencing by name of section
@@ -487,56 +487,56 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 )
 \c@section@level=\count302
 )
-LaTeX Info: Redefining \ref on input line 90.
-LaTeX Info: Redefining \pageref on input line 90.
-LaTeX Info: Redefining \nameref on input line 90.
+LaTeX Info: Redefining \ref on input line 91.
+LaTeX Info: Redefining \pageref on input line 91.
+LaTeX Info: Redefining \nameref on input line 91.
  (./sstvars-vignette.out) (./sstvars-vignette.out)
 \@outlinefile=\write4
 \openout4 = `sstvars-vignette.out'.
 
 LaTeX Font Info:    Trying to load font information for T1+lmss on input line 9
-0.
+1.
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/lm/t1lmss.fd
 File: t1lmss.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 9
-0.
+1.
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OML+lmm on input line 9
-0.
+1.
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 
-90.
+91.
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 
-90.
+91.
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/lm/omxlmex.fd
 File: omxlmex.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10.95> on input line 90.
+(Font)              <10.95> on input line 91.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 90.
+(Font)              <8> on input line 91.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 90.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 90.
+(Font)              <6> on input line 91.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 91.
 
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 90.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 91.
 
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/amsfonts/umsb.fd
@@ -595,10 +595,10 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
 een already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.98 \pagenumbering
+l.99 \pagenumbering
                    {arabic} [3]
 LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 1
-08.
+09.
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
@@ -632,9 +632,9 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 
 [5]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <9> on input line 255.
+(Font)              <9> on input line 256.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 255.
+(Font)              <5> on input line 256.
 
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 6 []
@@ -671,13 +671,13 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [12]
-Overfull \hbox (15.03554pt too wide) in paragraph at lines 416--419
+Overfull \hbox (15.03554pt too wide) in paragraph at lines 417--420
 []\T1/lmr/m/it/10.95 Consider the STVAR model de-fined in Equa-tions ([][]1[][]
 ), ([][]2[][]), and ([][]12[][]) with $\OML/lmm/m/it/10.95 B[]; :::; B[]$
  []
 
 
-Overfull \hbox (3.10243pt too wide) in paragraph at lines 442--443
+Overfull \hbox (3.10243pt too wide) in paragraph at lines 443--444
 []\T1/lmr/m/it/10.95 the vec-tor $\OT1/lmr/m/n/10.95 (\OML/lmm/m/it/10.95 []; 
 :::; []\OT1/lmr/m/n/10.95 )$ \T1/lmr/m/it/10.95 and all its sub-vec-tors $\OT1
 /lmr/m/n/10.95 (\OML/lmm/m/it/10.95 []; :::; []\OT1/lmr/m/n/10.95 )$\T1/lmr/m
@@ -715,7 +715,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [17]
-Overfull \hbox (4.45988pt too wide) in paragraph at lines 527--528
+Overfull \hbox (4.45988pt too wide) in paragraph at lines 528--529
 []\T1/lmr/m/n/10.95 Estimate the au-tore-gres-sive and the thresh-old pa-ram-e-
 ters $[][] \OMS/lmsy/m/n/10.95 ^^Q \OT1/lmr/m/n/10.95 (\OML/lmm/m/it/10.95 ^^^[
 ]; :::; ^^^[]; '[]; :::; '[]; \OT1/lmr/m/n/10.95 )$
@@ -738,7 +738,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 
 [20]
 LaTeX Font Info:    Trying to load font information for TS1+lmtt on input line 
-640.
+641.
  (/usr/local/texlive/2021/texmf-dist/tex/latex/lm/ts1lmtt.fd
 File: ts1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
@@ -760,7 +760,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 <figures/seriesplot.pdf, id=847, 469.755pt x 364.36125pt>
 File: figures/seriesplot.pdf Graphic file (type pdf)
 <use figures/seriesplot.pdf>
-Package pdftex.def Info: figures/seriesplot.pdf  used on input line 777.
+Package pdftex.def Info: figures/seriesplot.pdf  used on input line 778.
 (pdftex.def)             Requested size: 362.37569pt x 281.07051pt.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -771,7 +771,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 <figures/profilelogliks.pdf, id=860, 449.68pt x 364.36125pt>
 File: figures/profilelogliks.pdf Graphic file (type pdf)
 <use figures/profilelogliks.pdf>
-Package pdftex.def Info: figures/profilelogliks.pdf  used on input line 838.
+Package pdftex.def Info: figures/profilelogliks.pdf  used on input line 839.
 (pdftex.def)             Requested size: 362.37569pt x 293.63542pt.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -799,7 +799,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [29]
-Overfull \hbox (10.14369pt too wide) in paragraph at lines 983--985
+Overfull \hbox (10.14369pt too wide) in paragraph at lines 984--986
 \T1/lmr/m/n/10.95 con-strained pa-ram-e-ters $\OT1/lmr/m/n/10.95 ([][]\OML/lmm/
 m/it/10.95 ; :::; [][]\OT1/lmr/m/n/10.95 )$\T1/lmr/m/n/10.95 , where the re-str
 ic-tions im-ply $[][] \OT1/lmr/m/n/10.95 = [] = (\OML/lmm/m/it/10.95 vec\OT1/lm
@@ -854,11 +854,11 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 
 [38]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 1262.
+(Font)              <10> on input line 1263.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 1262.
+(Font)              <7> on input line 1263.
 
-Overfull \hbox (1.90445pt too wide) in paragraph at lines 1262--1296
+Overfull \hbox (1.90445pt too wide) in paragraph at lines 1263--1297
  [] 
  []
 
