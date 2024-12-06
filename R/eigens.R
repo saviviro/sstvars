@@ -167,7 +167,7 @@ warn_eigens <- function(stvar, tol=0.002, allow_unstab=FALSE) {
   if(any(near_nonstat) || any(near_singular)) {
     warning(paste0(my_string1, my_string2,
                    "Consider building a model from the next-largest local maximum with the function 'alt_stvar' ",
-                   "by adjusting its argument 'which_largest'."))
+                   "by adjusting its argument 'which_largest' (or use the function 'filter_estimates')."))
   }
 }
 
