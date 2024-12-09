@@ -48,3 +48,7 @@
 * Now alt_stvar, iterate_more, and filter_estimates retain LS_estimates if the original model contains them. 
 * Now summary printout of class sstvar objects tells if the log-likelihood function is penalized. 
 * Fixed CRAN check issues. 
+
+# sstvars 1.1.2
+
+

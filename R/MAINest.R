@@ -656,7 +656,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     if(Omegas_ok && stat_ok && tweights_ok && weightpars_ok) {
       which_best_fit <- which_round # The estimation round of the appropriate estimate with the largest loglik
       if(!no_prints) message(paste0("Filtered through ", i1-1, " inappropriate ", ifelse(allow_unstab, "(or unstable)", ""),
-                                   " estimates with a larger log-likelihood"))
+                                    " estimates with a larger", ifelse(penalized, " (penalized) ", " "), "log-likelihood"))
       break
     }
     if(i1 == length(all_estimates)) {
