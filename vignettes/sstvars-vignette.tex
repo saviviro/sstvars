@@ -374,7 +374,7 @@ With our specification of the STVAR model, recursive identification does not, ho
 \subsection{Identification via heteroskedasticity}
 \addcontentsline{toc}{subsection}{Identification via heteroskedasticity}
 
-An alternative identification method proposed by \cite{Lutkepohl+Netsunajev:2017} for structural VARs with smooth transitions in variances \citep[see also the seminal paper by][]{Rigobon:2003} identifies the shocks by simultaneously diagonalizing the covariance matrices $\Omega_1,...,\Omega_M$. This restricts the relative impact responses of the variables to be constant over time (for each shock) but does not necessarily require any zero restrictions. Since \cite{Lutkepohl+Netsunajev:2017} assume only two regimes and do not normalize the conditional covariance matrix of the structural error to a constant, their specification does not directly apply to our model. Therefore, we adopt the more suitable specification of \cite{Virolainen:2024}, and decompose the covariance matrices as
+An alternative identification method proposed by \cite{Lutkepohl+Netsunajev:2017} for structural VARs with smooth transitions in variances \citep[see also the seminal paper by][]{Rigobon:2003} identifies the shocks by simultaneously diagonalizing the covariance matrices $\Omega_1,...,\Omega_M$. This restricts the relative impact responses of the variables to be constant over time (for each shock) but does not necessarily require any zero restrictions. Since \cite{Lutkepohl+Netsunajev:2017} assume only two regimes and do not normalize the conditional covariance matrix of the structural error to a constant, their specification does not directly apply to our model. Therefore, we adopt the more suitable specification of \cite{Virolainen:2025}, and decompose the covariance matrices as
 \begin{equation}\label{eq:decomp}
 \Omega_m=W\Lambda_mW', \quad m=1,...,M,
 \end{equation}
@@ -384,7 +384,7 @@ The impact matrix is then obtained as
 \begin{equation}
 B_t=W\left(\sum_{m=1}^M\alpha_{m,t}\Lambda_m\right)^{1/2},
 \end{equation}
-where $\Lambda_1=I_d$. The shocks are identified up to ordering and sign if none of the pairs of $\lambda_{mi}$, $i=1,...,d$, is identical for all $m=2,...,M$. Assuming that his condition is satisfied, the shocks can be labelled according to the unrestricted impact responses on $B_t$, and if necessary, further economically motivated restrictions can be imposed. The additional economic restrictions on the impact matrix are testable, as they are overidentifying. See \cite{Virolainen:2024} for a more detailed discussion on the identification and labelling of the shocks.
+where $\Lambda_1=I_d$. The shocks are identified up to ordering and sign if none of the pairs of $\lambda_{mi}$, $i=1,...,d$, is identical for all $m=2,...,M$. Assuming that his condition is satisfied, the shocks can be labelled according to the unrestricted impact responses on $B_t$, and if necessary, further economically motivated restrictions can be imposed. The additional economic restrictions on the impact matrix are testable, as they are overidentifying. See \cite{Virolainen:2025} for a more detailed discussion on the identification and labelling of the shocks.
 
 Shocks identified by heteroskedasticity impose constant relative impact responses for the variables, making them unsuitable for some applications concerned with time-varying impulse response functions. Similarly to the recursive identification, this method is straightforward to apply, but unlike the recursive identification, it does not necessarily require any zero constraints on the impact responses. Compared to the recursive identification, identification by heteroskedasticity is therefore particularly advantageous when the recursive identification would imply that the shock of interest is order last. In this case, the assumption of time-invariant relative impact responses is less restrictive than the zero restrictions of the recursive identification. In contrast, the recursive identification is particularly appealing when the shock of interest is ordered first (or almost first), as then the impact responses to the shock of interest can vary freely in time.
 
@@ -1299,7 +1299,7 @@ Other          & \code{bound_JSR} & Calculate bounds for the joint spectral radi
 \end{adjustwidth}
 \end{table}
 
-\cleardoublepage
+\pagebreak
 \bibliography{refs}
 
 \end{document}

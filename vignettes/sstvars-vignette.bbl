@@ -196,8 +196,8 @@ Tsay R (1998).
   \textbf{93}(443), 1188--1202.
 \newblock \doi{10.1080/01621459.1998.10473779}.
 
-\bibitem[{Virolainen(2024{\natexlab{a}})}]{Virolainen2:2024}
-Virolainen (2024{\natexlab{a}}).
+\bibitem[{Virolainen(2024)}]{Virolainen2:2024}
+Virolainen (2024).
 \newblock \enquote{Identification by {non-Gaussianity} in structural threshold
   and smooth transition vector autoregressive models.}
 \newblock \emph{Unpublished working paper, available as arXiv:2404.19707}.
@@ -233,11 +233,12 @@ Virolainen S (2022{\natexlab{b}}).
   559--580.
 \newblock \doi{10.1515/snde-2020-0060}.
 
-\bibitem[{Virolainen(2024{\natexlab{b}})}]{Virolainen:2024}
-Virolainen S (2024{\natexlab{b}}).
+\bibitem[{Virolainen(2025)}]{Virolainen:2025}
+Virolainen S (2025).
 \newblock \enquote{A statistically identified structural vector autoregression
   with endogeneously switching volatility regime.}
-\newblock \emph{Journal of Business \& Economic Statistics}.
+\newblock \emph{Journal of Business \& Economic Statistics}, \textbf{43}(1),
+  44--54.
 \newblock \doi{10.1080/07350015.2024.2322090}.
 
 \end{thebibliography}
