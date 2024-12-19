@@ -148,6 +148,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
                                      AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
                                      B_constraints=NULL, change_to="intercept")
   }
+
   all_mu <- get_regime_means(p=p, M=M, d=d, params=params,
                              weight_function=weight_function, weightfun_pars=weightfun_pars,
                              cond_dist=cond_dist, parametrization="intercept",
@@ -214,7 +215,6 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   }
   # Take the last p rows of initial values as the initial values
   init_values <- init_values[(nrow(init_values) - p + 1):nrow(init_values), , drop=FALSE]
-
 
   # Container for the simulated values and initial values. First row row initial values vector, and t:th row for (y_{i-1},...,y_{i-p})
   Y <- matrix(nrow=nsim + 1, ncol=d*p)

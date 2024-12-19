@@ -433,7 +433,7 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
   initval_type <- match.arg(initval_type)
   cond_dist <- stvar$model$cond_dist
   if(stvar$model$identification == "reduced_form" && cond_dist != "ind_Student" && cond_dist != "ind_skewed_t") {
-    warning(paste("Reduced form model supplied, so using recursive identification"))
+    message(paste("Reduced form model supplied, so using recursive identification"))
     stvar$model$identification <- "recursive"
   } else if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") {
     stvar$model$identification <- "non-Gaussianity" # Readily identified by non-Gaussianity
@@ -482,18 +482,13 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
   # Calculate the shock sizes for each history in the data
   if(use_data_shocks) {
     # Recover the structural shocks for each initial value in all_initvals:
-    if(stvar$model$identification == "reduced_form" && cond_dist != "ind_Student" && cond_dist != "ind_skewed_t") {
-      # Recover the structural shocks from the reduced form shocks using recursive identification:
-      data_shocks <- get_residuals(data=stvar$data, p=p, M=M, params=stvar$params, weight_function=stvar$model$weight_function,
-                                   weightfun_pars=stvar$model$weightfun_pars, cond_dist=stvar$model$cond_dist,
-                                   parametrization=stvar$model$parametrization, identification="recursive",
-                                   B_constraints=stvar$model$B_constraints, mean_constraints=stvar$model$mean_constraints,
-                                   AR_constraints=stvar$model$AR_constraints, weight_constraints=stvar$model$weight_constraints,
-                                   penalized=stvar$penalized, penalty_params=stvar$penalty_params,
-                                   allow_unstab=stvar$allow_unstab, structural_shocks=TRUE)
-    } else {
-      data_shocks <- stvar$structural_shocks
-    }
+    data_shocks <- get_residuals(data=stvar$data, p=p, M=M, params=stvar$params, weight_function=stvar$model$weight_function,
+                                 weightfun_pars=stvar$model$weightfun_pars, cond_dist=stvar$model$cond_dist,
+                                 parametrization=stvar$model$parametrization, identification="recursive",
+                                 B_constraints=stvar$model$B_constraints, mean_constraints=stvar$model$mean_constraints,
+                                 AR_constraints=stvar$model$AR_constraints, weight_constraints=stvar$model$weight_constraints,
+                                 penalized=stvar$penalized, penalty_params=stvar$penalty_params,
+                                 allow_unstab=stvar$allow_unstab, structural_shocks=TRUE)
   }
 
   # Function that estimates GIRF
@@ -536,10 +531,10 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
     parallel::stopCluster(cl=cl)
   } else { # No parallel computing
     for(i1 in 1:d) {
-      GIRF_shocks[[i1]] <- lapply(1:R2, function(i2) get_one_girf(shock_numb=i1,
+      GIRF_shocks[[i1]] <- lapply(1:R2, function(i2) {print(i2); get_one_girf(shock_numb=i1,
                                                                   shock_size=ifelse(use_data_shocks, data_shocks[i2, i1], shock_size),
                                                                   seed=seeds[i2],
-                                                                  init_values_for_1girf=matrix(all_initvals[, , i2], nrow=p, ncol=d)))
+                                                                  init_values_for_1girf=matrix(all_initvals[, , i2], nrow=p, ncol=d))})
     }
   }
 

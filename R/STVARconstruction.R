@@ -1102,7 +1102,7 @@ filter_estimates <- function(stvar, which_largest=1, filter_stab=TRUE, calc_std_
 #'   0.601786, -0.002945, 0.067224)
 #' mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112)
 #'
-#' # Update to include the new elements (does not do anything they are already
+#' # Update to include the new elements (does not do anything if they are already
 #' # included):
 #' mod112 <- stvar_to_sstvars110(mod112)
 #' @export
@@ -1112,13 +1112,13 @@ stvar_to_sstvars110 <- function(stvar) {
   if(!is.null(stvar$penalized) && !is.null(stvar$penalty_params) && !is.null(stvar$allow_unstab)) {
     return(stvar)
   }
-  if(!is.null(stvar$penalized)) {
+  if(is.null(stvar$penalized)) {
     stvar$penalized <- FALSE
   }
-  if(!is.null(stvar$penalty_params)) {
+  if(is.null(stvar$penalty_params)) {
     stvar$penalty_params <- c(0.05, 0)
   }
-  if(!is.null(stvar$allow_unstab)) {
+  if(is.null(stvar$allow_unstab)) {
     stvar$allow_unstab <- FALSE
   }
   stvar

@@ -30,7 +30,7 @@ theta_112 <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103,
   0.601786, -0.002945, 0.067224)
 mod112 <- STVAR(data=gdpdef, p=1, M=1, params=theta_112)
 
-# Update to include the new elements (does not do anything they are already
+# Update to include the new elements (does not do anything if they are already
 # included):
 mod112 <- stvar_to_sstvars110(mod112)
 }
