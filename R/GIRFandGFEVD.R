@@ -344,6 +344,13 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 #' @param use_data_shocks \code{TRUE} for a special feature in which for every possible length \eqn{p} history in the data,
 #'   the GFEVD is estimated for a shock that has the sign and size of the corresponding structural shock recovered from the data.
 #'   See the details section.
+#' @param data_shock_pars a length three numeric vector with the following elements. The first element determines whether
+#'   the GFEVD should be calculated using all length \eqn{p} histories in the data (set to \code{0}), or only histories that
+#'   correspond to dominance of a specific regime (set to a number between \code{1} and \code{M} signifying the regime).
+#'   The second element is a number between \code{0.5} and \code{1} that determines how large transition weights a regime should
+#'   be to be considered dominant. The third element should be either \code{-1}, \code{0}, or \code{1} and determines whether all
+#'   the GFEVD should calculated for negative shocks, all shocks, or positive shocks, respectively. Note that the first two elements
+#'   can used with \code{initval_type="data"} even if \code{use_data_shocks=FALSE}.
 #' @param R2 the number of initial values to be drawn/used if \code{initval_type="random"} or \code{"fixed"}.
 #' @param seeds a numeric vector containing the random number generator seed for estimation
 #'   of each GIRF. Should have the length...
@@ -427,8 +434,8 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 #' @export
 
 GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "fixed"), use_data_shocks=FALSE,
-                  R1=250, R2=250, init_regime=1, init_values=NULL, which_cumulative=numeric(0), ncores=2,
-                  burn_in=1000, exo_weights=NULL, seeds=NULL, use_parallel=TRUE) {
+                  data_shock_pars=c(0, 0.75, 0), R1=250, R2=250, init_regime=1, init_values=NULL, which_cumulative=numeric(0),
+                  ncores=2, burn_in=1000, exo_weights=NULL, seeds=NULL, use_parallel=TRUE) {
   check_stvar(stvar)
   initval_type <- match.arg(initval_type)
   cond_dist <- stvar$model$cond_dist
@@ -484,7 +491,7 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
     # Recover the structural shocks for each initial value in all_initvals:
     data_shocks <- get_residuals(data=stvar$data, p=p, M=M, params=stvar$params, weight_function=stvar$model$weight_function,
                                  weightfun_pars=stvar$model$weightfun_pars, cond_dist=stvar$model$cond_dist,
-                                 parametrization=stvar$model$parametrization, identification="recursive",
+                                 parametrization=stvar$model$parametrization, identification=stvar$model$identification,
                                  B_constraints=stvar$model$B_constraints, mean_constraints=stvar$model$mean_constraints,
                                  AR_constraints=stvar$model$AR_constraints, weight_constraints=stvar$model$weight_constraints,
                                  penalized=stvar$penalized, penalty_params=stvar$penalty_params,
@@ -531,10 +538,10 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
     parallel::stopCluster(cl=cl)
   } else { # No parallel computing
     for(i1 in 1:d) {
-      GIRF_shocks[[i1]] <- lapply(1:R2, function(i2) {print(i2); get_one_girf(shock_numb=i1,
+      GIRF_shocks[[i1]] <- lapply(1:R2, function(i2) get_one_girf(shock_numb=i1,
                                                                   shock_size=ifelse(use_data_shocks, data_shocks[i2, i1], shock_size),
                                                                   seed=seeds[i2],
-                                                                  init_values_for_1girf=matrix(all_initvals[, , i2], nrow=p, ncol=d))})
+                                                                  init_values_for_1girf=matrix(all_initvals[, , i2], nrow=p, ncol=d)))
     }
   }
 
