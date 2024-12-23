@@ -103,7 +103,7 @@ the GIRF won't thus be estimated multiple times).}
 See the details section.}
 
 \item{exo_weights}{if \code{weight_function="exogenous"}, provide a size
-\eqn{(N+1 x M)} matrix of exogenous transition weights for the regimes: \code{[h, m]}
+\eqn{(N+1 \times M)} matrix of exogenous transition weights for the regimes: \code{[h, m]}
 for the (after-the-impact) period \eqn{h-1} and regime \eqn{m} weight (\code{[1, m]}
 is for the impact period). Ignored if \code{weight_function!="exogenous"}.}
 

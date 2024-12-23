@@ -53,7 +53,7 @@
 #'   single core computing is supported if an initial value is specified (and
 #'   the GIRF won't thus be estimated multiple times).
 #' @param exo_weights if \code{weight_function="exogenous"}, provide a size
-#'  \eqn{(N+1 x M)} matrix of exogenous transition weights for the regimes: \code{[h, m]}
+#'  \eqn{(N+1 \times M)} matrix of exogenous transition weights for the regimes: \code{[h, m]}
 #'  for the (after-the-impact) period \eqn{h-1} and regime \eqn{m} weight (\code{[1, m]}
 #'  is for the impact period). Ignored if \code{weight_function!="exogenous"}.
 #' @param seeds a length \code{R2} vector containing the random number generator
@@ -344,13 +344,21 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 #' @param use_data_shocks \code{TRUE} for a special feature in which for every possible length \eqn{p} history in the data,
 #'   the GFEVD is estimated for a shock that has the sign and size of the corresponding structural shock recovered from the data.
 #'   See the details section.
-#' @param data_shock_pars a length three numeric vector with the following elements. The first element determines whether
-#'   the GFEVD should be calculated using all length \eqn{p} histories in the data (set to \code{0}), or only histories that
-#'   correspond to dominance of a specific regime (set to a number between \code{1} and \code{M} signifying the regime).
-#'   The second element is a number between \code{0.5} and \code{1} that determines how large transition weights a regime should
-#'   be to be considered dominant. The third element should be either \code{-1}, \code{0}, or \code{1} and determines whether all
-#'   the GFEVD should calculated for negative shocks, all shocks, or positive shocks, respectively. Note that the first two elements
-#'   can used with \code{initval_type="data"} even if \code{use_data_shocks=FALSE}.
+#' @param data_gfevd_pars a length five numeric vector with the following elements.
+#'   \enumerate{
+#'     \item An integer between \code{0} and \code{M} determining the (dominant) regime for which the GFEVD should be calculated (\code{0}
+#'       for all regimes).
+#'     \item A number between \code{0.5} and \code{1} determining how large transition weight a regime should have to be considered dominant
+#'       in a given time period (i.e., determining which histories should be included in the GFEVD if the first element is not \code{0}).
+#'     \item Either \code{0}, \code{-1}, or \code{1}, determining whether the GFEVD should be calculated using all the shocks, only negative shocks,
+#'       or only positive shocks, respectively.
+#'     \item Either, \code{0}, \code{1}, or \code{2}, determining whether the GFEVD should be calculated for all the shocks, only small shocks,
+#'       or only large shocks, respectively.
+#'     \item A strictly positive real number determining what size shocks are considered large and what size small "in the scale of standard
+#'       deviations" (for example, if set to \code{2}, shocks larger than two standard deviations are considered large and shocks smaller than that
+#'       are considered small).
+#'   }
+#'   Note that the first two elements can used with \code{initval_type="data"} even if \code{use_data_shocks=FALSE}.
 #' @param R2 the number of initial values to be drawn/used if \code{initval_type="random"} or \code{"fixed"}.
 #' @param seeds a numeric vector containing the random number generator seed for estimation
 #'   of each GIRF. Should have the length...
@@ -434,7 +442,7 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 #' @export
 
 GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "fixed"), use_data_shocks=FALSE,
-                  data_shock_pars=c(0, 0.75, 0), R1=250, R2=250, init_regime=1, init_values=NULL, which_cumulative=numeric(0),
+                  data_gfevd_pars=c(0, 0.75, 0, 1), R1=250, R2=250, init_regime=1, init_values=NULL, which_cumulative=numeric(0),
                   ncores=2, burn_in=1000, exo_weights=NULL, seeds=NULL, use_parallel=TRUE) {
   check_stvar(stvar)
   initval_type <- match.arg(initval_type)
