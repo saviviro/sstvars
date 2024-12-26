@@ -575,7 +575,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     tmpfunNE <- function(i1) {
       if(!no_prints) message(i1, "/", nrounds, "\r")
       optim(par=GAresults[[i1]], fn=loglik_fn,  gr=loglik_grad,
-            method="BFGS", control=list(fnscale=-1, maxit=maxit, trace=6))
+            method="BFGS", control=list(fnscale=-1, maxit=maxit))
     }
     NEWTONresults <- lapply(1:nrounds, function(i1) tmpfunNE(i1))
   }
