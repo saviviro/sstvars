@@ -49,6 +49,25 @@
 #'   drawn from the regime specified in \code{init_regimes}.
 #' @param ci a numeric vector with elements in \eqn{(0, 1)} specifying the
 #'   confidence levels of the confidence intervals.
+#' @param use_data_shocks set \code{TRUE} for a special feature in which for every possible length \eqn{p} history in the data,
+#'   or a subset of them if so specified in the argument \code{data_girf_pars}, the GIRF is estimated for a shock that has the
+#'   sign and size of the corresponding structural shock recovered from the data. If used, the argument \code{which_shocks}
+#'   must specify only one shock. See the details section.
+#' @param data_girf_pars a length five numeric vector with the following elements determining settings for \code{use_data_shocks=TRUE}
+#'   (concerns the single shock specified in the argument \code{which_shocks}):
+#'   \enumerate{
+#'     \item An integer between \code{0} and \code{M} determining the (dominant) regime for which the GIRF should be calculated (\code{0}
+#'       for all regimes).
+#'     \item A number between \code{0.5} and \code{1} determining how large transition weight a regime should have to be considered dominant
+#'       in a given time period (i.e., determining which histories are used to calculate the GIRF if the first element is not \code{0}).
+#'     \item Either \code{0}, \code{-1}, or \code{1}, determining whether the GIRF should be calculated using shocks of all signs,
+#'       only negative shocks, or only positive shocks, respectively.
+#'     \item Either, \code{0}, \code{1}, or \code{2}, determining whether the GIRF should be calculated using shocks of all sizes,
+#'       only small shocks, or only large shocks, respectively.
+#'     \item A strictly positive real number determining what size shocks are considered large and what size small "in the scale of standard
+#'       deviations" (for example, if set to \code{2}, shocks larger than that are considered large and shocks smaller than that are considered
+#'       small; note that the standard deviations of the shocks are normalized to unity).
+#'   }
 #' @param ncores the number CPU cores to be used in parallel computing. Only
 #'   single core computing is supported if an initial value is specified (and
 #'   the GIRF won't thus be estimated multiple times).
@@ -56,10 +75,16 @@
 #'  \eqn{(N+1 \times M)} matrix of exogenous transition weights for the regimes: \code{[h, m]}
 #'  for the (after-the-impact) period \eqn{h-1} and regime \eqn{m} weight (\code{[1, m]}
 #'  is for the impact period). Ignored if \code{weight_function!="exogenous"}.
-#' @param seeds a length \code{R2} vector containing the random number generator
-#'   seed for estimation of each GIRF. A single number of an initial value is
-#'   specified. or \code{NULL} for not initializing the seed. Exists for
-#'   creating reproducible results.
+#' @param seeds A numeric vector initializing the seeds for the random number generator
+#'  for estimation of each GIRF. Should have the length of at least (extra seeds are removed
+#'  from the end of the vector)...
+#'   \describe{
+#'     \item{If initial values are drawn using \code{init_regime}:}{\code{R2}}
+#'     \item{If initial values are specified in \code{init_values}:}{\code{dim(init_values)[3]}}
+#'     \item{If \code{use_data_shocks=TRUE}:}{1 (the vector of seeds are generated according on the number of histories
+#'       in the data that satisfy the conditions given in the argument \code{data_girf_pars}).}
+#'   }
+#'   Set \code{NULL} for not initializing the seed.
 #' @param use_parallel employ parallel computing? If \code{FALSE}, does not print
 #'   anything.
 #' @details The confidence bounds reflect uncertainty about the initial state (but
@@ -74,6 +99,11 @@
 #'   the Monte Carlo simulations for the future sample paths of the process must
 #'   the given in the argument \code{exo_weights}. The same weights are used as
 #'   the transition weights across the Monte Carlo repetitions.
+#'
+#'   If \code{use_data_shocks=TRUE}, the GIRF is estimated using all, or a subset of, the length p histories in the data
+#'   as the initial values,  and using the sign and size of the corresponding structural shock recovered from the fitted model.
+#'   The subset of the length p histories are determined based in the settings given in the argument \code{data_girf_pars}.
+#'   Note that the arguments \code{shock_size}  and \code{init_regime} are ignored if \code{use_data_shocks=TRUE}.
 #' @return Returns a class \code{'girf'} list with the GIRFs in the first
 #'   element (\code{$girf_res}) and the used arguments the rest. The first
 #'   element containing the GIRFs is a list with the \eqn{m}th element
@@ -127,12 +157,22 @@
 #'  girf3 <- GIRF(mod32logt, which_shocks=1, shock_size=-2, N=50, R1=50, R2=50,
 #'   init_regime=1, scale_type="instant", scale=c(1, 1, 0.5))
 #'  plot(girf3) # Plot the GIRFs
+#'
+#'  # GIRFs for the first shock, using the length p histories in the data where
+#'  # the first regime is dominant (its transition weight is at least 0.75),
+#'  # the shock is negative, and the size of the shock is less than 1.5.
+#'  # The responses are scaled to correspond a unit instantanous increase of the
+#'  # first variable.
+#'  girf4 <- GIRF(mod32logt, which_shocks=1, N=30, R1=10, use_data_shocks=TRUE,
+#'   data_girf_pars=c(1, 0.75, -1, 1, 1.5), scale_type="instant", scale=c(1, 1, 0.5))
+#'  plot(girf4) # Plot the GIRFs
 #'  }
 #' @export
 
 GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_regime=1, init_values=NULL,
                  which_cumulative=numeric(0), scale=NULL, scale_type=c("instant", "peak"), scale_horizon=N,
-                 ci=c(0.95, 0.80), ncores=2, burn_in=1000, exo_weights=NULL, seeds=NULL, use_parallel=TRUE) {
+                 ci=c(0.95, 0.80), use_data_shocks=FALSE, data_girf_pars=c(0, 0.75, 0, 0, 1.5), ncores=2,
+                 burn_in=1000, exo_weights=NULL, seeds=NULL, use_parallel=TRUE) {
   check_stvar(stvar)
   scale_type <- match.arg(scale_type)
   cond_dist <- stvar$model$cond_dist
@@ -170,12 +210,43 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
     }
   }
   if(missing(which_shocks)) {
-    which_shocks <- 1:d
+    if(use_data_shocks) {
+      message("The shock of interest is not specified, using which_shocks=1.")
+      which_shocks <- 1
+    } else {
+      which_shocks <- 1:d
+    }
   } else {
     stopifnot(all(which_shocks %in% 1:d))
     which_shocks <- unique(which_shocks)
+    if(use_data_shocks && length(which_shocks) > 1) {
+      message(paste("The argument 'which_shocks' must specify only one shock when 'use_data_shocks' is set to TRUE.",
+                    "Using the first shock specified in which_shocks."))
+      which_shocks <- which_shocks[1]
+    }
   }
-  if(!is.null(seeds) && length(seeds) != R2) stop("The argument 'seeds' needs be NULL or a vector of length 'R2'")
+  if(use_data_shocks) {
+    if(is.null(stvar$data)) {
+      stop("The model does not contain data! Add data with the function 'add_data' or set 'use_data_shocks=FALSE'.")
+    }
+    stopifnot(nrow(stvar$data) >= p)
+    # The number of length p histories in the data: the last history is not used, because the last history is used
+    # by the time index T+1 for which the shock cannot be recovered.
+    R2 <- nrow(stvar$data) - p # The number of length p histories to be used
+    all_initvals <- array(vapply(1:R2, function(i1) stvar$data[i1:(i1 + p - 1),], numeric(p*d)),
+                          dim=c(p, d, R2)) # [, , i1] for i1 initval
+  }
+  if(use_data_shocks) {
+    if(!is.null(seeds) && length(seeds) < 1) stop("The length fo the vector 'seeds' given as an argument is too short!")
+    if(!is.null(seeds) && length(seeds) > 1) {
+      seeds <- seeds[1]
+    }
+  } else {
+    if(!is.null(seeds) && length(seeds) < R2) stop("The length fo the vector 'seeds' given as an argument is too short!")
+    if(!is.null(seeds) && length(seeds) > R2) {
+      seeds <- seeds[1:R2]
+    }
+  }
   stopifnot(init_regime %in% 1:M)
   stopifnot(length(ci) > 0 && all(ci > 0 & ci < 1))
   if(length(shock_size) != 1) {
@@ -200,6 +271,62 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
   if(length(which_cumulative) > 0) {
      which_cumulative <- unique(which_cumulative)
      stopifnot(all(which_cumulative %in% 1:d))
+  }
+
+  # Obtain the length p histories that satisfy the conditions specified in the argument data_girf_pars
+  if(use_data_shocks) {
+    transition_weights <- stvar$transition_weights
+    if(data_girf_pars[1] == 0) { # Take all R2 length p histories
+      which_tw <- 1:R2
+    } else { # Take only the histories with the transition weight larger than data_gfevd_pars[2]
+      which_tw <- which(transition_weights[, data_girf_pars[1]] >= data_girf_pars[2])
+    }
+
+    # Recover the structural shocks for each initial value in all_initvals:
+    data_shocks <- get_residuals(data=stvar$data, p=p, M=M, params=stvar$params, weight_function=stvar$model$weight_function,
+                                 weightfun_pars=stvar$model$weightfun_pars, cond_dist=stvar$model$cond_dist,
+                                 parametrization=stvar$model$parametrization, identification=stvar$model$identification,
+                                 B_constraints=stvar$model$B_constraints, mean_constraints=stvar$model$mean_constraints,
+                                 AR_constraints=stvar$model$AR_constraints, weight_constraints=stvar$model$weight_constraints,
+                                 penalized=stvar$penalized, penalty_params=stvar$penalty_params,
+                                 allow_unstab=stvar$allow_unstab, structural_shocks=TRUE)
+
+    # Select all, negative, or negative shocks:
+    if(data_girf_pars[3] == 0) {
+      which_sign <- 1:R2
+    } else if(data_girf_pars[3] == -1) {
+      which_sign <- which(data_shocks[, which_shocks] < 0)
+    } else {
+      which_sign <- which(data_shocks[, which_shocks] > 0)
+    }
+
+    # Select all, small, or large shocks:
+    if(data_girf_pars[4] == 0) {
+      which_size <- 1:R2
+    } else if(data_girf_pars[4] == 1) {
+      which_size <- which(abs(data_shocks[, which_shocks]) <= data_girf_pars[5])
+    } else {
+      which_size <- which(abs(data_shocks[, which_shocks]) > data_girf_pars[5])
+    }
+
+    # Which initial values to use for the GIRF estimation:
+    which_initvals1 <- intersect(which_tw, which_sign) # Takes in only two sets
+    which_initvals <- intersect(which_initvals1, which_size)
+
+    # Select the initial values that satisfy the conditions:
+    init_values <- all_initvals[, , which_initvals, drop=FALSE]
+    if(length(which_initvals) == 0) {
+      stop("No histories to calculate the GIRF for (after selecting the desired length p histories)!")
+    } else {
+      R2 <- length(which_initvals) # Update the number of histories to be used
+    }
+
+    # Select also the shocks for the selected histories:
+    data_shocks <- data_shocks[which_initvals, which_shocks, drop=TRUE]
+
+    # Create the vector of seeds:
+    set.seed(seeds) # Set the single seed
+    seeds <- sample.int(n=10^6, size=R2, replace=TRUE) # The generated vector of seeds, one for each history
   }
 
   # Function that estimates GIRF
@@ -238,7 +365,8 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
     for(i1 in 1:length(which_shocks)) {
       message(paste0("Estimating GIRFs for structural shock ", which_shocks[i1], "..."))
       GIRF_shocks[[i1]] <- pbapply::pblapply(1:R2, function(i2) get_one_girf(shock_numb=which_shocks[i1],
-                                                                             shock_size=shock_size, seed=seeds[i2],
+                                                                             shock_size=ifelse(use_data_shocks, data_shocks[i2], shock_size),
+                                                                             seed=seeds[i2],
                                                                              rep_numb=i2), cl=cl)
     }
     parallel::stopCluster(cl=cl)
@@ -341,8 +469,9 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 #'        specified by the argument \code{init_regimes}. The number of initial values is set with the argument \code{R2}.}
 #'     \item{\code{"fixed"}:}{Estimate the GIRF for the initial values specified with the argument \code{init_values}.}
 #'   }
-#' @param use_data_shocks \code{TRUE} for a special feature in which for every possible length \eqn{p} history in the data,
-#'   the GFEVD is estimated for a shock that has the sign and size of the corresponding structural shock recovered from the data.
+#' @param use_data_shocks set \code{TRUE} for a special feature in which for every possible length \eqn{p} history in the data,
+#'   or a subset of them if so specified in the argument \code{data_gfevd_pars}, the GFEVD is estimated for a shock that
+#'   has the sign and size of the corresponding structural shock recovered from the data.
 #'   See the details section.
 #' @param data_gfevd_pars a length two numeric vector with the following elements determining settings for \code{initval_type="data"}
 #'   and \code{use_data_shocks=TRUE}:
@@ -350,7 +479,7 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 #'     \item An integer between \code{0} and \code{M} determining the (dominant) regime for which the GFEVD should be calculated (\code{0}
 #'       for all regimes).
 #'     \item A number between \code{0.5} and \code{1} determining how large transition weight a regime should have to be considered dominant
-#'       in a given time period (i.e., determining which histories should be included in the GFEVD if the first element is not \code{0}).
+#'       in a given time period (i.e., determining which histories are used to calculate the GFEVD if the first element is not \code{0}).
 #'   }
 #' @param R2 the number of initial values to be drawn/used if \code{initval_type="random"} or \code{"fixed"}.
 #' @param seeds a numeric vector containing the random number generator seed for estimation
@@ -365,14 +494,15 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 #' @details  The GFEVD is a forecast error variance decomposition calculated with the generalized
 #'   impulse response function (GIRF). See Lanne and Nyberg (2016) for details.
 #'
-#'   If \code{use_data_shocks == TRUE}, the GIRF is estimated for a shock that has the sign and size of the
+#'   If \code{use_data_shocks=TRUE}, each GIRF in the GFEVD is estimated for a shock that has the sign and size of the
 #'   corresponding structural shock recovered from the fitted model. This is done for every possible length \eqn{p} history
-#'   in the data. The GFEVD is then calculated as the average of the GFEVDs obtained from the GIRFs estimated for
+#'   in the data, or to a subset of the histories based in the settings given in the argument \code{data_gfevd_pars}.
+#'   The GFEVD is then calculated as the average of the GFEVDs obtained from the GIRFs estimated for
 #'   the data shocks. The plot and print methods can be used as usual for this GFEVD. However, this feature also
 #'   obtain the contribution of each shock to the variance of the forecast errors at various horizons in specific
 #'   historical points of time. This can be done by using the plot method with the argument \code{data_shock_pars}.
 #'   Note that the arguments \code{shock_size}, \code{initval_type}, and \code{init_regime} are ignored if
-#'   \code{use_data_shocks == TRUE}.
+#'   \code{use_data_shocks=TRUE}.
 #' @return Returns and object of class 'gfevd' containing the GFEVD for all the variables and to
 #'   the transition weights. Note that the decomposition does not exist at horizon zero for transition weights
 #'   because the related GIRFs are always zero at impact.
@@ -437,7 +567,8 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 #'  # for each history, the structural shock recovered from the fitted model is
 #'  # used, and only include the histories in which Regime 1 is dominant (its
 #'  # transition weight is at least 0.75):
-#'  gfevd5 <- GFEVD(mod32logt, N=20, use_data_shocks=TRUE, data_gfevd_pars=c(1, 0.75), R1=10, use_parallel=FALSE)
+#'  gfevd5 <- GFEVD(mod32logt, N=20, use_data_shocks=TRUE, data_gfevd_pars=c(1, 0.75),
+#'    R1=10)
 #'  plot(gfevd5) # Plot the GFEVD
 #'  }
 #' @export
@@ -485,7 +616,7 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
     all_initvals <- array(vapply(1:R2, function(i1) stvar$data[i1:(i1 + p - 1),], numeric(p*d)),
                           dim=c(p, d, R2)) # [, , i1] for i1 initval
   } else if(initval_type == "random") {
-    stopifnot(init_regime%in% 1:M)
+    stopifnot(init_regime %in% 1:M)
     all_initvals <- array(dim=c(1, 1, R2)) # This won't be used. NULL init_values will be used.
   } else if(initval_type == "fixed") {
     if(is.null(init_values)) stop(paste0("Initial values were not specified! Specify the initial values with the argument",
@@ -494,7 +625,7 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
     all_initvals <- init_values
   }
   if(!is.null(seeds) && length(seeds) < R2) stop("The length fo the vector 'seeds' given as an argument is too short!")
-  if(length(seeds) > R2) {
+  if(!is.null(seeds) && length(seeds) > R2) {
     seeds <- seeds[1:R2]
   }
   stopifnot(length(shock_size) == 1)
@@ -509,13 +640,13 @@ GFEVD <- function(stvar, shock_size=1, N=30, initval_type=c("data", "random", "f
     if(data_gfevd_pars[1] == 0) { # Take all R2 length p histories
       which_initvals <- 1:R2
     } else { # Take only the histories with the transition weight larger than data_gfevd_pars[2]
-      which_initvals <- which(transition_weights[data_gfevd_pars[1], ] >= data_gfevd_pars[2])
+      which_initvals <- which(transition_weights[, data_gfevd_pars[1]] >= data_gfevd_pars[2])
     }
     all_initvals <- all_initvals[, , which_initvals, drop=FALSE]
 
     if(length(which_initvals) == 0) {
       stop("No histories to calculate the GFEVD for (after selecting the desired length p histories)!")
-    } else if(length(which_initvals) < R2) {
+    } else if(!is.null(seeds) && length(which_initvals) < length(seeds)) {
       seeds <- seeds[1:length(which_initvals)]
     }
     R2 <- length(which_initvals) # Update the number of histories to be used

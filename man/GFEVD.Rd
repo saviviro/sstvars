@@ -47,8 +47,9 @@ covariance matrix of the structural error is an identity matrix.}
   \item{\code{"fixed"}:}{Estimate the GIRF for the initial values specified with the argument \code{init_values}.}
 }}
 
-\item{use_data_shocks}{\code{TRUE} for a special feature in which for every possible length \eqn{p} history in the data,
-the GFEVD is estimated for a shock that has the sign and size of the corresponding structural shock recovered from the data.
+\item{use_data_shocks}{set \code{TRUE} for a special feature in which for every possible length \eqn{p} history in the data,
+or a subset of them if so specified in the argument \code{data_gfevd_pars}, the GFEVD is estimated for a shock that
+has the sign and size of the corresponding structural shock recovered from the data.
 See the details section.}
 
 \item{data_gfevd_pars}{a length two numeric vector with the following elements determining settings for \code{initval_type="data"}
@@ -57,7 +58,7 @@ and \code{use_data_shocks=TRUE}:
   \item An integer between \code{0} and \code{M} determining the (dominant) regime for which the GFEVD should be calculated (\code{0}
     for all regimes).
   \item A number between \code{0.5} and \code{1} determining how large transition weight a regime should have to be considered dominant
-    in a given time period (i.e., determining which histories should be included in the GFEVD if the first element is not \code{0}).
+    in a given time period (i.e., determining which histories are used to calculate the GFEVD if the first element is not \code{0}).
 }}
 
 \item{R1}{the number of repetitions used to estimate GIRF for each initial
@@ -135,14 +136,15 @@ Returns and object of class 'gfevd' containing the GFEVD for all the variables a
 The GFEVD is a forecast error variance decomposition calculated with the generalized
   impulse response function (GIRF). See Lanne and Nyberg (2016) for details.
 
-  If \code{use_data_shocks == TRUE}, the GIRF is estimated for a shock that has the sign and size of the
+  If \code{use_data_shocks=TRUE}, each GIRF in the GFEVD is estimated for a shock that has the sign and size of the
   corresponding structural shock recovered from the fitted model. This is done for every possible length \eqn{p} history
-  in the data. The GFEVD is then calculated as the average of the GFEVDs obtained from the GIRFs estimated for
+  in the data, or to a subset of the histories based in the settings given in the argument \code{data_gfevd_pars}.
+  The GFEVD is then calculated as the average of the GFEVDs obtained from the GIRFs estimated for
   the data shocks. The plot and print methods can be used as usual for this GFEVD. However, this feature also
   obtain the contribution of each shock to the variance of the forecast errors at various horizons in specific
   historical points of time. This can be done by using the plot method with the argument \code{data_shock_pars}.
   Note that the arguments \code{shock_size}, \code{initval_type}, and \code{init_regime} are ignored if
-  \code{use_data_shocks == TRUE}.
+  \code{use_data_shocks=TRUE}.
 }
 \section{Functions}{
 \itemize{
@@ -204,7 +206,8 @@ The GFEVD is a forecast error variance decomposition calculated with the general
  # for each history, the structural shock recovered from the fitted model is
  # used, and only include the histories in which Regime 1 is dominant (its
  # transition weight is at least 0.75):
- gfevd5 <- GFEVD(mod32logt, N=20, use_data_shocks=TRUE, data_gfevd_pars=c(1, 0.75), R1=10, use_parallel=FALSE)
+ gfevd5 <- GFEVD(mod32logt, N=20, use_data_shocks=TRUE, data_gfevd_pars=c(1, 0.75),
+   R1=10)
  plot(gfevd5) # Plot the GFEVD
  }
 }

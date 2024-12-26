@@ -22,6 +22,8 @@ GIRF(
   scale_type = c("instant", "peak"),
   scale_horizon = N,
   ci = c(0.95, 0.8),
+  use_data_shocks = FALSE,
+  data_girf_pars = c(0, 0.75, 0, 0, 1.5),
   ncores = 2,
   burn_in = 1000,
   exo_weights = NULL,
@@ -95,6 +97,27 @@ to which peak response is expected? Scaling won't based on values after this.}
 \item{ci}{a numeric vector with elements in \eqn{(0, 1)} specifying the
 confidence levels of the confidence intervals.}
 
+\item{use_data_shocks}{set \code{TRUE} for a special feature in which for every possible length \eqn{p} history in the data,
+or a subset of them if so specified in the argument \code{data_girf_pars}, the GIRF is estimated for a shock that has the
+sign and size of the corresponding structural shock recovered from the data. If used, the argument \code{which_shocks}
+must specify only one shock. See the details section.}
+
+\item{data_girf_pars}{a length five numeric vector with the following elements determining settings for \code{use_data_shocks=TRUE}
+(concerns the single shock specified in the argument \code{which_shocks}):
+\enumerate{
+  \item An integer between \code{0} and \code{M} determining the (dominant) regime for which the GIRF should be calculated (\code{0}
+    for all regimes).
+  \item A number between \code{0.5} and \code{1} determining how large transition weight a regime should have to be considered dominant
+    in a given time period (i.e., determining which histories are used to calculate the GIRF if the first element is not \code{0}).
+  \item Either \code{0}, \code{-1}, or \code{1}, determining whether the GIRF should be calculated using shocks of all signs,
+    only negative shocks, or only positive shocks, respectively.
+  \item Either, \code{0}, \code{1}, or \code{2}, determining whether the GIRF should be calculated using shocks of all sizes,
+    only small shocks, or only large shocks, respectively.
+  \item A strictly positive real number determining what size shocks are considered large and what size small "in the scale of standard
+    deviations" (for example, if set to \code{2}, shocks larger than that are considered large and shocks smaller than that are considered
+    small; note that the standard deviations of the shocks are normalized to unity).
+}}
+
 \item{ncores}{the number CPU cores to be used in parallel computing. Only
 single core computing is supported if an initial value is specified (and
 the GIRF won't thus be estimated multiple times).}
@@ -107,10 +130,16 @@ See the details section.}
 for the (after-the-impact) period \eqn{h-1} and regime \eqn{m} weight (\code{[1, m]}
 is for the impact period). Ignored if \code{weight_function!="exogenous"}.}
 
-\item{seeds}{a length \code{R2} vector containing the random number generator
-seed for estimation of each GIRF. A single number of an initial value is
-specified. or \code{NULL} for not initializing the seed. Exists for
-creating reproducible results.}
+\item{seeds}{A numeric vector initializing the seeds for the random number generator
+for estimation of each GIRF. Should have the length of at least (extra seeds are removed
+from the end of the vector)...
+ \describe{
+   \item{If initial values are drawn using \code{init_regime}:}{\code{R2}}
+   \item{If initial values are specified in \code{init_values}:}{\code{dim(init_values)[3]}}
+   \item{If \code{use_data_shocks=TRUE}:}{1 (the vector of seeds are generated according on the number of histories
+     in the data that satisfy the conditions given in the argument \code{data_girf_pars}).}
+ }
+ Set \code{NULL} for not initializing the seed.}
 
 \item{use_parallel}{employ parallel computing? If \code{FALSE}, does not print
 anything.}
@@ -158,6 +187,11 @@ The confidence bounds reflect uncertainty about the initial state (but
   the Monte Carlo simulations for the future sample paths of the process must
   the given in the argument \code{exo_weights}. The same weights are used as
   the transition weights across the Monte Carlo repetitions.
+
+  If \code{use_data_shocks=TRUE}, the GIRF is estimated using all, or a subset of, the length p histories in the data
+  as the initial values,  and using the sign and size of the corresponding structural shock recovered from the fitted model.
+  The subset of the length p histories are determined based in the settings given in the argument \code{data_girf_pars}.
+  Note that the arguments \code{shock_size}  and \code{init_regime} are ignored if \code{use_data_shocks=TRUE}.
 }
 \section{Functions}{
 \itemize{
@@ -202,6 +236,15 @@ The confidence bounds reflect uncertainty about the initial state (but
  girf3 <- GIRF(mod32logt, which_shocks=1, shock_size=-2, N=50, R1=50, R2=50,
   init_regime=1, scale_type="instant", scale=c(1, 1, 0.5))
  plot(girf3) # Plot the GIRFs
+
+ # GIRFs for the first shock, using the length p histories in the data where
+ # the first regime is dominant (its transition weight is at least 0.75),
+ # the shock is negative, and the size of the shock is less than 1.5.
+ # The responses are scaled to correspond a unit instantanous increase of the
+ # first variable.
+ girf4 <- GIRF(mod32logt, which_shocks=1, N=30, R1=10, use_data_shocks=TRUE,
+  data_girf_pars=c(1, 0.75, -1, 1, 1.5), scale_type="instant", scale=c(1, 1, 0.5))
+ plot(girf4) # Plot the GIRFs
  }
 }
 \seealso{
