@@ -189,7 +189,7 @@ The confidence bounds reflect uncertainty about the initial state (but
   the transition weights across the Monte Carlo repetitions.
 
   If \code{use_data_shocks=TRUE}, the GIRF is estimated using all, or a subset of, the length p histories in the data
-  as the initial values,  and using the sign and size of the corresponding structural shock recovered from the fitted model.
+  as the initial values, and using the sign and size of the corresponding structural shock recovered from the fitted model.
   The subset of the length p histories are determined based in the settings given in the argument \code{data_girf_pars}.
   Note that the arguments \code{shock_size}  and \code{init_regime} are ignored if \code{use_data_shocks=TRUE}.
 }

@@ -56,6 +56,8 @@
 * A new feature in GIRF: use_data_shocks, which allows to estimate the GIRF using the length p histories in the data, using the shocks recovered
   from the fitted model, with the possibility to filter the histories based on the dominance of a specific regime as well as on the sign and
   size of the shocks.
+* GFEVDs are now calculated as the average over the GFEVDs based on the different initial values (previously calculated based on the average of the GIRFs
+  based on the different initial values).
 * Fixed the function stvar_to_sstvars110.
 * Fixed a bug that caused GFEVD with data shocks to result in error when using model estimate with package versions <1.1.0.
 

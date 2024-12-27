@@ -10,16 +10,16 @@
 \usage{
 GFEVD(
   stvar,
-  shock_size = 1,
   N = 30,
+  shock_size = 1,
   initval_type = c("data", "random", "fixed"),
+  which_cumulative = numeric(0),
   use_data_shocks = FALSE,
   data_gfevd_pars = c(0, 0.75),
-  R1 = 250,
-  R2 = 250,
   init_regime = 1,
   init_values = NULL,
-  which_cumulative = numeric(0),
+  R1 = 250,
+  R2 = 250,
   ncores = 2,
   burn_in = 1000,
   exo_weights = NULL,
@@ -34,10 +34,10 @@ GFEVD(
 \arguments{
 \item{stvar}{an object of class \code{'stvar'}, created by, e.g., \code{fitSTVAR} or \code{fitSSTVAR}.}
 
+\item{N}{a positive integer specifying the horizon how far ahead should the GFEVD be calculated.}
+
 \item{shock_size}{What sign and size should be used for all shocks? By the normalization, the conditional
 covariance matrix of the structural error is an identity matrix.}
-
-\item{N}{a positive integer specifying the horizon how far ahead should the GFEVD be calculated.}
 
 \item{initval_type}{What type initial values are used for estimating the GIRFs that the GFEVD is based on?
 \describe{
@@ -47,10 +47,13 @@ covariance matrix of the structural error is an identity matrix.}
   \item{\code{"fixed"}:}{Estimate the GIRF for the initial values specified with the argument \code{init_values}.}
 }}
 
-\item{use_data_shocks}{set \code{TRUE} for a special feature in which for every possible length \eqn{p} history in the data,
-or a subset of them if so specified in the argument \code{data_gfevd_pars}, the GFEVD is estimated for a shock that
-has the sign and size of the corresponding structural shock recovered from the data.
-See the details section.}
+\item{which_cumulative}{a numeric vector with values in \eqn{1,...,d}
+(\code{d=ncol(data)}) specifying which the variables for which the impulse
+responses should be cumulative. Default is none.}
+
+\item{use_data_shocks}{set \code{TRUE} (\textbf{recommended}) for a special feature in which for every possible length \eqn{p} history
+in the data, or a subset of them if so specified in the argument \code{data_gfevd_pars}, the GFEVD is estimated for a shock that
+has the sign and size of the corresponding structural shock recovered from the data. See the details section.}
 
 \item{data_gfevd_pars}{a length two numeric vector with the following elements determining settings for \code{initval_type="data"}
 and \code{use_data_shocks=TRUE}:
@@ -60,11 +63,6 @@ and \code{use_data_shocks=TRUE}:
   \item A number between \code{0.5} and \code{1} determining how large transition weight a regime should have to be considered dominant
     in a given time period (i.e., determining which histories are used to calculate the GFEVD if the first element is not \code{0}).
 }}
-
-\item{R1}{the number of repetitions used to estimate GIRF for each initial
-value.}
-
-\item{R2}{the number of initial values to be drawn/used if \code{initval_type="random"} or \code{"fixed"}.}
 
 \item{init_regime}{an integer in \eqn{1,...,M} specifying the regime from which
 the initial values should be generated from. The initial values will be generated
@@ -78,9 +76,10 @@ is an argument of this function. In each slice, the \strong{last} row will be us
 for the first lag, the second last row for second lag etc. If not specified, initial values will be
 drawn from the regime specified in \code{init_regimes}.}
 
-\item{which_cumulative}{a numeric vector with values in \eqn{1,...,d}
-(\code{d=ncol(data)}) specifying which the variables for which the impulse
-responses should be cumulative. Default is none.}
+\item{R1}{the number of repetitions used to estimate GIRF for each initial
+value.}
+
+\item{R2}{the number of initial values to be drawn/used if \code{initval_type="random"} or \code{"fixed"}.}
 
 \item{ncores}{the number CPU cores to be used in parallel computing. Only
 single core computing is supported if an initial value is specified (and
@@ -125,7 +124,7 @@ The default is that all the values are printed.}
 Returns and object of class 'gfevd' containing the GFEVD for all the variables and to
   the transition weights. Note that the decomposition does not exist at horizon zero for transition weights
   because the related GIRFs are always zero at impact.
-  If \code{use_data_shocks=TRUE}, also contains the GFEVDs for each length \eqn{p} history in the data as
+  Also contains the individual GFEVDs for each used initial length \eqn{p} initial value (history) as
   4D array with dimensions \code{[horizon, variable, shock, time]}.
 }
 \description{
@@ -140,11 +139,10 @@ The GFEVD is a forecast error variance decomposition calculated with the general
   corresponding structural shock recovered from the fitted model. This is done for every possible length \eqn{p} history
   in the data, or to a subset of the histories based in the settings given in the argument \code{data_gfevd_pars}.
   The GFEVD is then calculated as the average of the GFEVDs obtained from the GIRFs estimated for
-  the data shocks. The plot and print methods can be used as usual for this GFEVD. However, this feature also
-  obtain the contribution of each shock to the variance of the forecast errors at various horizons in specific
+  the data shocks. The plot and print methods can be used as usual for this GFEVD, but there is also a special feature
+  that allows to plot the contribution of each shock to the variance of the forecast errors at various horizons in specific
   historical points of time. This can be done by using the plot method with the argument \code{data_shock_pars}.
-  Note that the arguments \code{shock_size}, \code{initval_type}, and \code{init_regime} are ignored if
-  \code{use_data_shocks=TRUE}.
+  Note that the arguments \code{shock_size}, \code{initval_type}, and \code{init_regime} are ignored if \code{use_data_shocks=TRUE}.
 }
 \section{Functions}{
 \itemize{
