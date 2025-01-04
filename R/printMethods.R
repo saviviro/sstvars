@@ -154,7 +154,7 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE, standard_error_pr
           cat(paste("Weight params:", paste0(format_value(all_gamma_m[,m]), collapse=", ")), "\n")
         }
       } else if(weight_function %in% c("logistic", "exponential")) {
-        if(m == M) {
+        if(m == 1) {
           cat(paste("Weight params:", paste0(format_value(weightpars[1]), " (location), ",
                                              format_value(weightpars[2]), " (scale)")), "\n")
         }

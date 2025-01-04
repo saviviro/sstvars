@@ -362,7 +362,7 @@ plot.gfevd <- function(x, ..., data_shock_pars=NULL) {
            heights=c(extra_marg, rep(1, times=nrows - 2), extra_marg))
     empty_plot <- function() plot(0, xaxt='n', yaxt='n', bty='n', pch='', ylab='', xlab='') # Plots empty plot
     # Time series of the GFEVDs
-    gfevd_ts <- ts(t(gfevd$data_gfevd_res[data_shock_pars[2]+1, , data_shock_pars[1], ]), frequency=frequency(gfevd$stvar$data),
+    gfevd_ts <- ts(t(gfevd$ind_gfevd_res[data_shock_pars[2]+1, , data_shock_pars[1], ]), frequency=frequency(gfevd$stvar$data),
        start=get_new_start(y_start=start(gfevd$stvar$data), y_freq=frequency(gfevd$stvar$data), steps_forward=p))
 
     # Plot the GFEVDs

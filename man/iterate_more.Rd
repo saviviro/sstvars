@@ -6,7 +6,7 @@
 \usage{
 iterate_more(
   stvar,
-  maxit = 100,
+  maxit = 1000,
   h = 0.001,
   penalized,
   penalty_params,

@@ -60,4 +60,4 @@
   based on the different initial values).
 * Fixed the function stvar_to_sstvars110.
 * Fixed a bug that caused GFEVD with data shocks to result in error when using model estimate with package versions <1.1.0.
-
+* Various small adjustments to printouts, documentation, etc. 

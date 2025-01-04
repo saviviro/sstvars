@@ -37,7 +37,7 @@
 #' }
 #' @export
 
-iterate_more <- function(stvar, maxit=100, h=1e-3, penalized, penalty_params, allow_unstab, calc_std_errors=TRUE, print_trace=TRUE) {
+iterate_more <- function(stvar, maxit=1000, h=1e-3, penalized, penalty_params, allow_unstab, calc_std_errors=TRUE, print_trace=TRUE) {
   check_stvar(stvar)
   stopifnot(maxit %% 1 == 0 & maxit >= 1)
   p <- stvar$model$p

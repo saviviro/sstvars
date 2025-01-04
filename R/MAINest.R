@@ -213,6 +213,10 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)
+  if(weight_function == "relative_dens" && M == 1) { # Use threshold weights for a linear model, so enable all appropriate features
+    weight_function <- "threshold"
+    weightfun_pars <- c(1, 1)
+  }
   if(missing(estim_method)) { # Determine the estimation method
     if(weight_function != "relative_dens" && is.null(mean_constraints)) {
       if(is.null(weight_constraints)) {
@@ -723,7 +727,6 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   }
 
   ### Wrap up ###
-  if(!no_prints) message("Calculating approximate standard errors...")
   ret <- STVAR(data=data, p=p, M=M, d=d, params=params,
                weight_function=weight_function,
                weightfun_pars=weightfun_pars,

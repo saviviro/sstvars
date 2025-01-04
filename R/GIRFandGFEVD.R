@@ -177,7 +177,7 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
   scale_type <- match.arg(scale_type)
   cond_dist <- stvar$model$cond_dist
   if(stvar$model$identification == "reduced_form" && cond_dist != "ind_Student" && cond_dist != "ind_skewed_t") {
-    warning(paste("Reduced form model supplied, so using recursive identification"))
+    message(paste("Reduced form model supplied, so using recursive identification"))
     stvar$model$identification <- "recursive"
   } else if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") {
     stvar$model$identification <- "non-Gaussianity" # Readily identified by non-Gaussianity
@@ -469,7 +469,7 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 #'        specified by the argument \code{init_regimes}. The number of initial values is set with the argument \code{R2}.}
 #'     \item{\code{"fixed"}:}{Estimate the GIRF for the initial values specified with the argument \code{init_values}.}
 #'   }
-#' @param use_data_shocks set \code{TRUE} (\textbf{recommended}) for a special feature in which for every possible length \eqn{p} history
+#' @param use_data_shocks set \code{TRUE} (\strong{recommended}) for a special feature in which for every possible length \eqn{p} history
 #'   in the data, or a subset of them if so specified in the argument \code{data_gfevd_pars}, the GFEVD is estimated for a shock that
 #'   has the sign and size of the corresponding structural shock recovered from the data. See the details section.
 #' @param data_gfevd_pars a length two numeric vector with the following elements determining settings for \code{initval_type="data"}

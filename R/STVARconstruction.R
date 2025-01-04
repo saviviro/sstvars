@@ -224,6 +224,7 @@ STVAR <- function(data, p, M, d, params,
       warning("Approximate standard errors can't be calculated without data")
       std_errors <- rep(NA, npars)
     } else {
+      message("Calculating approximate standard errors...")
       std_errors <- tryCatch(standard_errors(data=data, p=p, M=M, params=params, weight_function=weight_function,
                                              weightfun_pars=weightfun_pars, cond_dist=cond_dist,
                                              parametrization=parametrization, identification=identification,
@@ -1052,7 +1053,7 @@ filter_estimates <- function(stvar, which_largest=1, filter_stab=TRUE, calc_std_
     }
   }
 
-  # Build a STVAR model from the obtained estimates
+  # Build a STVAR model from the obtained estimate
   ret <- STVAR(data=data, p=p, M=M, d=d,
                params=all_estimates[[which_round]],
                weight_function=weight_function,

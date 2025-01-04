@@ -51,7 +51,7 @@ covariance matrix of the structural error is an identity matrix.}
 (\code{d=ncol(data)}) specifying which the variables for which the impulse
 responses should be cumulative. Default is none.}
 
-\item{use_data_shocks}{set \code{TRUE} (\textbf{recommended}) for a special feature in which for every possible length \eqn{p} history
+\item{use_data_shocks}{set \code{TRUE} (\strong{recommended}) for a special feature in which for every possible length \eqn{p} history
 in the data, or a subset of them if so specified in the argument \code{data_gfevd_pars}, the GFEVD is estimated for a shock that
 has the sign and size of the corresponding structural shock recovered from the data. See the details section.}
 
