@@ -35,6 +35,7 @@
 \contentsline {section}{Testing parameter constraints}{32}{section.5}%
 \contentsline {section}{Residual based model diagnostics}{33}{section.6}%
 \contentsline {section}{Impulse response analysis}{33}{section.7}%
+\contentsline {subsection}{Generalized impulse response function}{33}{subsection.7.1}%
 \contentsline {subsection}{Generalized forecast error variance decomposition}{35}{subsection.7.2}%
 \contentsline {subsection}{Linear impulse response functions}{36}{subsection.7.3}%
 \contentsline {section}{Building a STVAR model with specific parameter values}{36}{section.8}%

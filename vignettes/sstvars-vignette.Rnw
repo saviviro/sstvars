@@ -1127,6 +1127,8 @@ Remaining autocorrelation in the residuals can also be tested with the (adjusted
 \addcontentsline{toc}{section}{Impulse response analysis}
 
 \subsection{Generalized impulse response function}
+\addcontentsline{toc}{subsection}{Generalized impulse response function}
+
 The expected effects of the structural shocks in the structural STVAR models generally depend on the initial values as well as on the sign and size of the shock, which makes the conventional way of calculating impulse responses unsuitable \citep[see, e.g.,][Chapter~4]{Kilian+Lutkepohl:2017}. Therefore, we  consider the generalized impulse response function (GIRF) \citep{Koop+Pesaran+Potter:1996} defined as
 \begin{equation}\label{eq:girf}
 \text{GIRF}(n,\delta_j,\mathcal{F}_{t-1}) = \text{E}[y_{t+n}|\delta_j,\mathcal{F}_{t-1}] - \text{E}[y_{t+n}|\mathcal{F}_{t-1}],

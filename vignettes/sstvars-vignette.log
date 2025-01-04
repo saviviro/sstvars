@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  27 DEC 2024 17:48
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  4 JAN 2025 14:46
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -586,7 +586,7 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 ier (name{page.}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.38 ...ariance decomposition}{35}{subsection.7.2}
+l.38 ...lse response function}{33}{subsection.7.1}
                                                   % [2])
 \tf@toc=\write5
 \openout5 = `sstvars-vignette.toc'.
@@ -757,7 +757,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [23]
-<figures/seriesplot.pdf, id=847, 469.755pt x 364.36125pt>
+<figures/seriesplot.pdf, id=852, 469.755pt x 364.36125pt>
 File: figures/seriesplot.pdf Graphic file (type pdf)
 <use figures/seriesplot.pdf>
 Package pdftex.def Info: figures/seriesplot.pdf  used on input line 778.
@@ -768,7 +768,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [24 <./figures/seriesplot.pdf>]
-<figures/profilelogliks.pdf, id=860, 449.68pt x 364.36125pt>
+<figures/profilelogliks.pdf, id=865, 449.68pt x 364.36125pt>
 File: figures/profilelogliks.pdf Graphic file (type pdf)
 <use figures/profilelogliks.pdf>
 Package pdftex.def Info: figures/profilelogliks.pdf  used on input line 839.
@@ -854,11 +854,11 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 
 [38]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 1263.
+(Font)              <10> on input line 1265.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 1263.
+(Font)              <7> on input line 1265.
 
-Overfull \hbox (1.90445pt too wide) in paragraph at lines 1263--1297
+Overfull \hbox (1.90445pt too wide) in paragraph at lines 1265--1299
  [] 
  []
 
@@ -895,13 +895,13 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 
 [42] (./sstvars-vignette.aux)
 Package rerunfilecheck Info: File `sstvars-vignette.out' has not changed.
-(rerunfilecheck)             Checksum: E4A2AB4755A8EEAF0F27F9A96A9D017F;22326.
+(rerunfilecheck)             Checksum: 7C82CFFAAC2F6E07018CEA2B21449369;22578.
  ) 
 Here is how much of TeX's memory you used:
- 13096 strings out of 478353
- 207899 string characters out of 5848086
+ 13097 strings out of 478353
+ 207915 string characters out of 5848086
  514345 words of memory out of 5000000
- 30741 multiletter control sequences out of 15000+600000
+ 30742 multiletter control sequences out of 15000+600000
  509807 words of font info for 100 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  75i,13n,77p,1978b,500s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -933,10 +933,10 @@ blic/lm/lmsy8.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmt
 t10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtti10.pfb><
 /usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr/loca
 l/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on sstvars-vignette.pdf (45 pages, 693483 bytes).
+Output written on sstvars-vignette.pdf (45 pages, 693421 bytes).
 PDF statistics:
- 1235 PDF objects out of 1440 (max. 8388607)
- 1114 compressed objects within 12 object streams
+ 1239 PDF objects out of 1440 (max. 8388607)
+ 1118 compressed objects within 12 object streams
  245 named destinations out of 1000 (max. 500000)
- 739 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 747 words of extra memory for PDF output out of 10000 (max. 10000000)
 
