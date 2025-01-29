@@ -694,7 +694,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                                                                        identification="reduced_form"))
   }
 
-  # Sort and sign change the columns of the impact matrices if cond_dist == "ind_Student"
+  # Sort and sign change the columns of the impact matrices if cond_dist == "ind_Student" or "ind_skewed_t
   if(cond_dist == "ind_Student" || cond_dist == "ind_skewed_t") {
     params <- sort_impactmats(p=p, M=M, d=d, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
                               cond_dist=cond_dist, AR_constraints=AR_constraints, mean_constraints=mean_constraints,

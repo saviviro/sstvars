@@ -61,3 +61,8 @@
 * Fixed the function stvar_to_sstvars110.
 * Fixed a bug that caused GFEVD with data shocks to result in error when using model estimate with package versions <1.1.0.
 * Various small adjustments to printouts, documentation, etc. 
+
+# sstvars 1.1.3
+
+* Fixed a bug that prevented printing models that impose restrictions on the AR parameters. 
+* Now fitSTVAR normalizes the first row of the impact matrix B_1 to be positive and in a decreasing order also for skewed t models. 

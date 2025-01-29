@@ -437,9 +437,9 @@ reform_constrained_pars <- function(p, M, d, params,
 #'   is positive and in a decreasing order.
 #'
 #' @description \code{sort_impactmats} sorts and sign changes the columns of the impact matrices of the regimes so that the first element
-#'   in each column of \eqn{B_1} is positive and in a decreasing order (for skewed distributions, the signs are not normalized).
-#'   The same reordering and sign changes performed to the columns of \eqn{B_1} are applied to the rest of the impact matrices to
-#'   obtain an observationally equivalent model.
+#'   in each column of \eqn{B_1} is positive and in a decreasing order. The same reordering and sign changes performed to the columns of
+#'   \eqn{B_1} are applied to the rest of the impact matrices to obtain an observationally equivalent model. For skewed t models, also
+#'   the signs of the skewness parameters corresponding to the columns whose signs are changed are changed accordingly.
 #'
 #' @inheritParams loglikelihood
 #' @details This function is internally used by \code{GAfit} and \code{fitSTVAR}, so structural models or \code{B_constraints}
@@ -449,10 +449,11 @@ reform_constrained_pars <- function(p, M, d, params,
 #'   \describe{
 #'     \item{If \code{cond_dist == "ind_Student"}:}{The parameter vector with the columns of the impact
 #'           matrices sorted and sign changed so that the first element in each column of \eqn{B_1} is
-#'           positive and in a decreasing order. Sorts also the degrees of freedom and skewness parameters
-#'           (if any) accordingly.}
+#'           positive and in a decreasing order. Sorts also the degrees of freedom parameters accordingly.}
 #'     \item{If \code{cond_dist == "ind_skewed_t"}:}{The parameter vector with the columns of the impact
-#'           matrices sorted so that the first element in each column of \eqn{B_1} are in a decreasing order.}
+#'           matrices sorted so that the first element in each column of \eqn{B_1} are in a decreasing order.
+#'          Also sorts the degrees of freedom and skewness parameters accordingly. Moreover, if signs of any column
+#'          are changed, the signs of the corresponding skewness parameter values are also changed accordingly.}
 #'     \item{Otherwise:}{Nothing to sort, so returns the original parameter vector given in \code{param}.}
 #'   }
 #' @keywords internal
@@ -496,15 +497,14 @@ sort_impactmats <- function(p, M, d, params,
                    dim=c(d, d, M))
 
   # Determine which columns should go through sign change, and change the signs of those columns
-  if(cond_dist == "ind_Student") {
-    for(i1 in 1:d) {
-      if(all_B_m[1, i1, 1] < 0) {
-        all_B_m[, i1, 1] <- -all_B_m[, i1, 1]
-        # Change the signs of the corresponding columns in the rest of the impact matrices
-        if(M > 1) {
-          for(m in 2:M) {
-            all_B_m[, i1, m] <- -all_B_m[, i1, m]
-          }
+  which_changed_sign <- which(all_B_m[1, , 1] < 0) # Corresponds to the original ordering
+  for(i1 in 1:d) {
+    if(all_B_m[1, i1, 1] < 0) {
+      all_B_m[, i1, 1] <- -all_B_m[, i1, 1]
+      # Change the signs of the corresponding columns in the rest of the impact matrices
+      if(M > 1) {
+        for(m in 2:M) {
+          all_B_m[, i1, m] <- -all_B_m[, i1, m]
         }
       }
     }
@@ -525,7 +525,10 @@ sort_impactmats <- function(p, M, d, params,
     distpars <- params[(length(params) - n_distpars + 1):length(params)]
     params[(length(params) - n_distpars + 1):length(params)] <- distpars[new_ordering]
   } else { # ind_skewed_t, sort both degrees of freedom and skewness parameters
-    distpars <- matrix(params[(length(params) - n_distpars + 1):length(params)], ncol=2) # [d,]
+    distpars <- matrix(params[(length(params) - n_distpars + 1):length(params)], ncol=2) # [d,] skewness pars in the second column
+    if(length(which_changed_sign) > 0) {
+      distpars[which_changed_sign, 2] <- -distpars[which_changed_sign, 2]
+    }
     distpars <- distpars[new_ordering,]
     params[(length(params) - n_distpars + 1):length(params)] <- as.vector(distpars)
   }

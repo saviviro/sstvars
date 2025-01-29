@@ -47,6 +47,14 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE, standard_error_pr
   var_names <- colnames(stvar$data)
   if(is.null(var_names)) var_names <- paste0("Var.", 1:d)
 
+  npars <- length(params)
+  T_obs <- ifelse(is.null(stvar$data), NA, nrow(stvar$data) - p)
+  params <- reform_constrained_pars(p=p, M=M, d=d, params=params,
+                                    weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                    cond_dist=cond_dist, identification=identification, AR_constraints=AR_constraints,
+                                    mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                                    B_constraints=B_constraints)
+
   if(stvar$allow_unstab) { # Check the stability condition
     stab_satisfied <- stab_conds_satisfied(p=p, M=M, d=d, params=params)
   } else {
@@ -62,13 +70,6 @@ print.stvar <- function(x, ..., digits=2, summary_print=FALSE, standard_error_pr
       all_mu <- matrix(NA, nrow=d, ncol=M)
       all_sd <- matrix(NA, nrow=d, ncol=M)
     }
-    npars <- length(params)
-    T_obs <- ifelse(is.null(stvar$data), NA, nrow(stvar$data) - p)
-    params <- reform_constrained_pars(p=p, M=M, d=d, params=params,
-                                      weight_function=weight_function, weightfun_pars=weightfun_pars,
-                                      cond_dist=cond_dist, identification=identification, AR_constraints=AR_constraints,
-                                      mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                                      B_constraints=B_constraints)
     if(stvar$model$parametrization == "mean") {
       params <- change_parametrization(p=p, M=M, d=d, params=params, AR_constraints=NULL,
                                        mean_constraints=NULL, change_to="intercept")
