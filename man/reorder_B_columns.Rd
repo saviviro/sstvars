@@ -2,7 +2,7 @@
 % Please edit documentation in R/STVARconstruction.R
 \name{reorder_B_columns}
 \alias{reorder_B_columns}
-\title{Reorder columns of impact matrix B (and lambda parameters if any) of a structural STVAR model
+\title{Reorder columns of impact matrix B of a structural STVAR model
   that is identified by heteroskedasticity or non-Gaussianity.}
 \usage{
 reorder_B_columns(stvar, perm, calc_std_errors = FALSE)
@@ -16,7 +16,7 @@ For model identified by...
 \describe{
   \item{heteroskedasticity}{also lambda parameters of each regime will be reordered accordingly.}
   \item{non-Gaussianity}{the columns of the impact matrices of all the regimes and the component specific distribution
-    parameters (degrees of freedom parameters) are reordered accordingly.}
+    parameters (degrees of freedom and skewness parameters) are reordered accordingly.}
 }}
 
 \item{calc_std_errors}{should approximate standard errors be calculated?}
@@ -47,8 +47,10 @@ Returns an S3 object of class \code{'stvar'} defining a smooth transition VAR mo
      if mean parametrization is used), if applicable.}
 }
 \description{
-\code{reorder_B_columns} reorder columns of impact matrix B (and lambda parameters if any) of
-  a structural STVAR model that is identified by heteroskedasticity or non-Gaussianity.
+\code{reorder_B_columns} reorder columns of impact matrix B of a structural STVAR model that is
+ identified by heteroskedasticity or non-Gaussianity. For models identified by heteroskedasticity, also the
+ lambda parameters are reordered accordingly. For models with ind Student or skewed t shocks, also the degrees
+ of freedom and skewness parameters (latter for skewed t) are reordered accordingly.
 }
 \details{
 The order of the columns of the impact matrix can be changed without changing the implied reduced
@@ -57,9 +59,9 @@ The order of the columns of the impact matrix can be changed without changing th
   distribution  parameters is also changed accordingly). Note that constraints imposed on the impact matrix via \code{B_constraints}
   will also be modified accordingly.
 
-  Also all signs in any column of impact matrix can be swapped (without changing the implied reduced form model)
-  with the function \code{swap_B_signs}. This obviously also swaps the sign constraints (if any) in the corresponding columns of
-  the impact matrix.
+  Also all signs in any column of impact matrix can be swapped (without changing the implied reduced form model, as long as signs of
+  any skewness parameters are also swapped accordingly) with the function \code{swap_B_signs}. This obviously also swaps the sign constraints
+  (if any) in the corresponding columns of the impact matrix.
 }
 \examples{
 # Create a structural two-variate Student's t STVAR p=2, M=2 model with logistic transition

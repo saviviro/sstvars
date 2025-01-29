@@ -43,10 +43,12 @@ Returns an S3 object of class \code{'stvar'} defining a smooth transition VAR mo
 }
 \description{
 \code{swap_B_signs} swaps all signs in pointed columns of the impact matrix of
-  a structural STVAR model that is identified by heteroskedasticity or non-Gaussianity.
+  a structural STVAR model that is identified by heteroskedasticity or non-Gaussianity. For ind skewed t
+  models, also the signs of the skewness parameters are swapped accordingly.
 }
 \details{
-All signs in any column of the impact matrix can be swapped without changing the implied reduced form model.
+All signs in any column of the impact matrix can be swapped without changing the implied reduced form model,
+  but for ind skewed t models, also the signs of the corresponding skewness parameter values need to be swapped.
   For model identified by non-Gaussianity, the signs of the columns of the impact matrices of all the regimes are
   swapped accordingly. Note that the sign constraints imposed on the impact matrix via \code{B_constraints} are also
   swapped in the corresponding columns accordingly.

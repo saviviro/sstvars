@@ -603,11 +603,13 @@ get_hetsked_sstvar <- function(stvar, calc_std_errors=FALSE) {
 }
 
 
-#' @title Reorder columns of impact matrix B (and lambda parameters if any) of a structural STVAR model
+#' @title Reorder columns of impact matrix B of a structural STVAR model
 #'   that is identified by heteroskedasticity or non-Gaussianity.
 #'
-#' @description \code{reorder_B_columns} reorder columns of impact matrix B (and lambda parameters if any) of
-#'   a structural STVAR model that is identified by heteroskedasticity or non-Gaussianity.
+#' @description \code{reorder_B_columns} reorder columns of impact matrix B of a structural STVAR model that is
+#'  identified by heteroskedasticity or non-Gaussianity. For models identified by heteroskedasticity, also the
+#'  lambda parameters are reordered accordingly. For models with ind Student or skewed t shocks, also the degrees
+#'  of freedom and skewness parameters (latter for skewed t) are reordered accordingly.
 #'
 #' @inheritParams STVAR
 #' @param stvar a class 'stvar' object defining a structural STVAR model that is identified by heteroskedasticity
@@ -617,7 +619,7 @@ get_hetsked_sstvar <- function(stvar, calc_std_errors=FALSE) {
 #'   \describe{
 #'     \item{heteroskedasticity}{also lambda parameters of each regime will be reordered accordingly.}
 #'     \item{non-Gaussianity}{the columns of the impact matrices of all the regimes and the component specific distribution
-#'       parameters (degrees of freedom parameters) are reordered accordingly.}
+#'       parameters (degrees of freedom and skewness parameters) are reordered accordingly.}
 #'   }
 #' @details The order of the columns of the impact matrix can be changed without changing the implied reduced
 #'   form model (as long as, for models identified by heteroskedasticity, the order of lambda parameters is also changed accordingly;
@@ -625,9 +627,9 @@ get_hetsked_sstvar <- function(stvar, calc_std_errors=FALSE) {
 #'   distribution  parameters is also changed accordingly). Note that constraints imposed on the impact matrix via \code{B_constraints}
 #'   will also be modified accordingly.
 #'
-#'   Also all signs in any column of impact matrix can be swapped (without changing the implied reduced form model)
-#'   with the function \code{swap_B_signs}. This obviously also swaps the sign constraints (if any) in the corresponding columns of
-#'   the impact matrix.
+#'   Also all signs in any column of impact matrix can be swapped (without changing the implied reduced form model, as long as signs of
+#'   any skewness parameters are also swapped accordingly) with the function \code{swap_B_signs}. This obviously also swaps the sign constraints
+#'   (if any) in the corresponding columns of the impact matrix.
 #' @inherit STVAR return
 #' @seealso \code{\link{GIRF}}, \code{\link{fitSSTVAR}}, \code{\link{swap_B_signs}}
 #' @references
@@ -776,12 +778,14 @@ reorder_B_columns <- function(stvar, perm, calc_std_errors=FALSE) {
 #'   that is identified by heteroskedasticity or non-Gaussianity
 #'
 #' @description \code{swap_B_signs} swaps all signs in pointed columns of the impact matrix of
-#'   a structural STVAR model that is identified by heteroskedasticity or non-Gaussianity.
+#'   a structural STVAR model that is identified by heteroskedasticity or non-Gaussianity. For ind skewed t
+#'   models, also the signs of the skewness parameters are swapped accordingly.
 #'
 #' @inheritParams reorder_B_columns
 #' @param which_to_swap a numeric vector of length at most \eqn{d} and elemnts in \eqn{1,..,d}
 #'   specifying the columns of the impact matrix whose sign should be swapped.
-#' @details All signs in any column of the impact matrix can be swapped without changing the implied reduced form model.
+#' @details All signs in any column of the impact matrix can be swapped without changing the implied reduced form model,
+#'   but for ind skewed t models, also the signs of the corresponding skewness parameter values need to be swapped.
 #'   For model identified by non-Gaussianity, the signs of the columns of the impact matrices of all the regimes are
 #'   swapped accordingly. Note that the sign constraints imposed on the impact matrix via \code{B_constraints} are also
 #'   swapped in the corresponding columns accordingly.
@@ -895,9 +899,16 @@ swap_B_signs <- function(stvar, which_to_swap, calc_std_errors=FALSE) {
         new_all_B <- c(new_all_B, Wvec(all_B[, , m])) # Zeros removed (assumes no exact zeros in the estimates)
       }
     }
+    if(cond_dist == "ind_skewed_t") {
+      distpars <- matrix(distpars, ncol=2) # [i1, c(df, skewness)]
+      distpars[which_to_swap, 2] <- -distpars[which_to_swap, 2] # Swap the signs of the skewness parameters
+      distpars <- vec(distpars)
+    }
+
     new_params <- stvar$params
     new_params[(length(new_params) - (n_weight_pars + length(new_all_B) + n_distpars)
-                + 1):(length(new_params) - (n_weight_pars + n_distpars))] <- new_all_B # New impact matrix params
+                + 1):(length(new_params) - (n_weight_pars + n_distpars))] <- new_all_B # Insert new impact matrix params
+    new_params[(length(new_params) - n_distpars + 1):length(new_params)] <- distpars # Insert new distribution parameters
   }
 
 

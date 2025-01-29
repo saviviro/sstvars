@@ -23,7 +23,7 @@ fitSTVAR(
   min_obs_coef = 3,
   nrounds,
   ncores = 2,
-  maxit = 1000,
+  maxit = 2000,
   seeds = NULL,
   print_res = TRUE,
   use_parallel = TRUE,

@@ -207,7 +207,7 @@
 fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                      weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                      parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
-                     estim_method, penalized, penalty_params=c(0.05, 0.2), allow_unstab, min_obs_coef=3, nrounds, ncores=2, maxit=1000, seeds=NULL,
+                     estim_method, penalized, penalty_params=c(0.05, 0.2), allow_unstab, min_obs_coef=3, nrounds, ncores=2, maxit=2000, seeds=NULL,
                      print_res=TRUE, use_parallel=TRUE, calc_std_errors=TRUE, ...) {
   # Initial checks etc
   weight_function <- match.arg(weight_function)

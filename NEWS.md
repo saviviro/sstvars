@@ -66,3 +66,4 @@
 
 * Fixed a bug that prevented printing models that impose restrictions on the AR parameters. 
 * Now fitSTVAR normalizes the first row of the impact matrix B_1 to be positive and in a decreasing order also for skewed t models. 
+* Increased the default maxit from 1000 to 2000 in fitSTVAR.
