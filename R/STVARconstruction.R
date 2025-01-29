@@ -674,6 +674,7 @@ reorder_B_columns <- function(stvar, perm, calc_std_errors=FALSE) {
   p <- stvar$model$p
   M <- stvar$model$M
   d <- stvar$model$d
+  stopifnot(all(perm %in% 1:d) && length(unique(perm)) == d)
   weight_function <- stvar$model$weight_function
   weightfun_pars <- check_weightfun_pars(data=stvar$data, p=p, M=M, d=d, weight_function=weight_function,
                                          weightfun_pars=stvar$model$weightfun_pars)
