@@ -69,3 +69,7 @@
 * Now swap_B_signs also swaps the signs of the appropriate skewness parameter values for skewed t models, so that the resulting model
   is observationally equivalent to the original model.
 * Increased the default maxit from 1000 to 2000 in fitSTVAR.
+
+# sstvars 1.1.4
+
+* Updates to the documentation

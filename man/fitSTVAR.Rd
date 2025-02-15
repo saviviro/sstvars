@@ -124,7 +124,8 @@ is a tuning parameter for the penalization (a positive real number, a higher val
 \code{weight_function="relative_dens"}.}
 
 \item{min_obs_coef}{In the LS/NLS step of the three phase estimation, the smallest accepted number of observations
-(times variables) from each regime relative to the number of parameters in the regime.}
+(times variables) from each regime relative to the number of parameters in the regime. For models with AR constraints,
+the number of AR matrix parameters in each regimes is simplisticly assumed to be \code{ncol(AR_constraints)/M}.}
 
 \item{nrounds}{the number of estimation rounds that should be performed. The default is \code{(M*ncol(data))^3}
 when \code{estim_method="two-phase"} and \code{(M*ncol(data))^2} when \code{estim_method="three-phase"}.}

@@ -110,7 +110,8 @@ the first element determined how far from the boundary of the stability region t
 is a tuning parameter for the penalization (a positive real number, a higher value penalizes non-stability more).}
 
 \item{min_obs_coef}{the smallest accepted number of observations (times variables) from each regime
-relative to the number of parameters in the regime.}
+relative to the number of parameters in the regime. For models with AR constraints, the number of
+AR matrix parameters in each regimes is simplisticly assumed to be \code{ncol(AR_constraints)/M}.}
 
 \item{use_parallel}{employ parallel computing? If \code{FALSE}, does not print anything.}
 
