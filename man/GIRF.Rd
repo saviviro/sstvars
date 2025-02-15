@@ -95,7 +95,8 @@ of peak response in absolute value. Ignored if \code{scale} is not specified.}
 to which peak response is expected? Scaling won't based on values after this.}
 
 \item{ci}{a numeric vector with elements in \eqn{(0, 1)} specifying the
-confidence levels of the confidence intervals.}
+confidence levels of the "confidence intervals" that \strong{do not} quantify uncertainty about the true parameter value
+but only uncertainty about the initial value (and possibly sign and size of the shock) within the given regime.}
 
 \item{use_data_shocks}{set \code{TRUE} for a special feature in which for every possible length \eqn{p} history in the data,
 or a subset of them if so specified in the argument \code{data_girf_pars}, the GIRF is estimated for a shock that has the
@@ -175,10 +176,9 @@ Returns a class \code{'girf'} list with the GIRFs in the first
  structural STVAR models.
 }
 \details{
-The confidence bounds reflect uncertainty about the initial state (but
-  not about the parameter estimates) if initial values are not
-  specified. If initial values are specified, confidence intervals won't be
-  estimated.
+The "confidence bounds" \strong{do not} quantify uncertainty about the true parameter
+  value but only the initial values (and possibly sign and size of the shock) within the given regime.
+  If initial values are specified, confidence intervals won't be calculated.
 
   Note that if the argument \code{scale} is used, the scaled responses of
   the transition weights might be more than one in absolute value.
