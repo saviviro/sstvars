@@ -55,15 +55,18 @@ generalized impulse responses be calculated.}
 value.}
 
 \item{R2}{the number of initial values to use, i.e., to draw from \code{init_regime}
-if \code{init_values} are not specified. The confidence bounds
-will be sample quantiles of the GIRFs based on different initial values.
-Ignored if the argument \code{init_value} is specified.}
+ if \code{init_values} are not specified. The confidence bounds
+ will be sample quantiles of the GIRFs based on different initial values.
+ Ignored if the argument \code{init_value} is specified.
+@param init_regime an integer in \eqn{1,...,M} specifying the regime from which
+ the initial values should be generated from (see \code{?simulate.stvar}). If
+ \code{use_data_shocks=TRUE} this is argument not used and \code{data_girf_pars}
+ should be specified instead.}
 
 \item{init_regime}{an integer in \eqn{1,...,M} specifying the regime from which
-the initial values should be generated from. The initial values will be generated
-from the stationary distribution of the specific regime. Due to the lack of
-knowledge of the stationary distribution, models with other than Gaussian conditional distribution
-uses a simulation procedure with a burn-in period. See the details section.}
+the initial values should be generated from (using a simulation procedure with a burn-in period).
+For models with Gaussian conditional distribution, it is also possible to generate the starting
+values from the stationary distribution of a regime. See the details section.}
 
 \item{init_values}{a size \code{[p, d, R2]} array specifying the initial values in each slice
 for each Monte Carlo repetition, where d is the number of time series in the system and \code{R2}
@@ -123,8 +126,7 @@ must specify only one shock. See the details section.}
 single core computing is supported if an initial value is specified (and
 the GIRF won't thus be estimated multiple times).}
 
-\item{burn_in}{Burn-in period for simulating initial values from a regime when \code{cond_dist!="Gaussian"}.
-See the details section.}
+\item{burn_in}{Burn-in period for simulating initial values from a regime.}
 
 \item{exo_weights}{if \code{weight_function="exogenous"}, provide a size
 \eqn{(N+1 \times M)} matrix of exogenous transition weights for the regimes: \code{[h, m]}
@@ -178,7 +180,9 @@ Returns a class \code{'girf'} list with the GIRFs in the first
 \details{
 The "confidence bounds" \strong{do not} quantify uncertainty about the true parameter
   value but only the initial values (and possibly sign and size of the shock) within the given regime.
-  If initial values are specified, confidence intervals won't be calculated.
+  If initial values are specified, confidence intervals won't be calculated. Note that if the bounds
+  look weird in the figure produced by \code{plot.girf}, it is probably because the point estimate is not
+  inside the bounds. In this case, increasing the argument \code{R2} usually fixes the issue.
 
   Note that if the argument \code{scale} is used, the scaled responses of
   the transition weights might be more than one in absolute value.

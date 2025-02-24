@@ -229,7 +229,7 @@ plot.girf <- function(x, margs, ...) {
     # Plot point estimate
     point_est <- girf_i1$point_est[, resp_ind]
     conf_ints <- girf_i1$conf_ints[, , resp_ind]
-    plot(x=0:(length(point_est) - 1), y=point_est, type="l", ylim=c(min(0, min(conf_ints)), max(0, max(conf_ints))),
+    plot(x=0:(length(point_est) - 1), y=point_est, type="l", ylim=c(min(0, min(c(conf_ints, point_est))), max(0, max(c(conf_ints, point_est)))),
          main="", ylab="", xlab="", xaxt=xaxt, lwd=2, col="blue", ...)
     if(first_col) { # Add yaxis label to the first column of responses
       mtext(resp_names[resp_ind], side=2, cex=0.8, font=2, las=0, padj=-4)

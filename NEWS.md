@@ -72,6 +72,12 @@
 
 # sstvars 1.1.4
 
+* Now also for Gaussian models, the functions GIRF and GFEVD use simulation procedure to draw initial values from a specific regime when init_regime is used 
+  and not use_data_shocks. This ensures that the transition weights are high for the initial regime at impact, while with stationary distribution that was not checked.
+* In simulate.stvar the default for Gaussian models is now also use simulation procedure to draw initial values from a specific regime, ensuring that the transition weights
+  are high for the initial regime based on the initial values. The newly argument use_stat_for_Gaus can be set to TRUE to use stationary distribution instead (as was the 
+  old functionality).
+* Fixed a bug in plot.girf in which the y-axis was not wide enough when the point estimate is outside the "confidence bounds". 
 * Updated the datafile usacpu to include observations until the end of 2024.
 * Updated the references.
 * Updates to the documentation.

@@ -7,15 +7,19 @@
 #' @param seed set seed for the random number generator?
 #' @param ... currently not in use.
 #' @param init_values a size \eqn{(p\times d)} matrix specifying the initial values, where d is the number
-#'   of time series in the system. The \strong{last} row will be used as initial values for the first lag,
-#'   the second last row for second lag etc. If not specified, initial values will be drawn from
-#'   the regime specified in \code{init_regimes} (for Gaussian models only).
+#'  of time series in the system. The \strong{last} row will be used as initial values for the first lag,
+#'  the second last row for second lag etc. If not specified, initial values will be drawn from
+#'  the regime specified in \code{init_regimes} (for Gaussian models only).
 #' @param init_regime an integer in \eqn{1,...,M} specifying the regime from which
-#'   the initial values should be generated from. The initial values will be generated
-#'   from the stationary distribution of the specific regime. Due to the lack of
-#'   knowledge of the stationary distribution, models with other than Gaussian conditional distribution
-#'   uses a simulation procedure with a burn-in period. See the details section.
+#'  the initial values should be generated from (using a simulation procedure with a burn-in period).
+#'  For models with Gaussian conditional distribution, it is also possible to generate the starting
+#'  values from the stationary distribution of a regime. See the details section.
 #' @param ntimes how many sets of simulations should be performed?
+#' @param use_stat_for_Gaus if \code{TRUE} and \code{cond_dist=="Gaussian"}, uses the stationary distribution
+#'  of a regime to generate the initial values for the simulation. Note that if stationary distribution is used,
+#'  unlike with out simulation procedure, it is not guaranteed that the regime of interest has high transition weights
+#'  at the given points of time. Note that if the model allows for unstable estimates (\code{stvar$allow_unstab=TRUE}),
+#'  simulation procedure is always used.
 #' @param burn_in Burn-in period for simulating initial values from a regime when \code{cond_dist!="Gaussian"}.
 #'  See the details section.
 #' @param exo_weights if \code{weight_function="exogenous"}, provide a size \eqn{(nsim \times M)} matrix of exogenous
@@ -26,9 +30,9 @@
 #'   will be vector.
 #' @param girf_pars This argument is used internally in the estimation of generalized impulse response functions
 #'   (see \code{?GIRF}). You should ignore it (specifying something else than null to it will change how the function behaves).
-#' @details The stationary distribution of each regime is not known when \code{cond_dist!="Gaussian"}. Therefore, when using
-#'   \code{init_regime} to simulate the initial values from a given regime, we employ the following simulation procedure to
-#'   obtain the initial values. First, we set the initial values to the unconditional mean of the specified regime. Then,
+#' @details When using \code{init_regime} to simulate the initial values from a given regime, we employ the following simulation
+#'   procedure to obtain the initial values (unless \code{use_stat_for_Gaus=TRUE} and Gaussian model is considered).
+#'   First, we set the initial values to the unconditional mean of the specified regime. Then,
 #'   we simulate a large number observations from that regime as specified in the argument \code{burn_in}. Then, we simulate
 #'   \eqn{p + 100} observations more after the burn in period, and for the \eqn{100} observations calculate the transition
 #'   weights for them and take the consecutive \eqn{p} observations that yield the highest transition weight for the given regime.
@@ -91,8 +95,8 @@
 #' plot.ts(sim3$transition_weights) # Transition weights
 #' @export
 
-simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, init_regime, ntimes=1, burn_in=1000,
-                           exo_weights=NULL, drop=TRUE, girf_pars=NULL) {
+simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, init_regime, ntimes=1, use_stat_for_Gaus=FALSE,
+                           burn_in=1000, exo_weights=NULL, drop=TRUE, girf_pars=NULL) {
   # girf_pars$shock_numb - which shock?
   # girf_pars$shock_size - size of the structural shock?
   # Returns a size (N+1 x d+M) vector containing the estimated GIRFs for the variables and
@@ -120,6 +124,9 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   # Check the exogenous weights given for simulation
   if(weight_function == "exogenous") {
     check_exoweights(M=M, exo_weights=exo_weights, how_many_rows=nsim, name_of_row_number="nsim")
+  }
+  if(use_stat_for_Gaus) {
+    if(cond_dist != "Gaussian") stop("use_stat_for_Gaus can only be used with Gaussian conditional distribution")
   }
 
   if(is.null(init_values) & missing(init_regime)) {
@@ -203,7 +210,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
 
   # Set/generate initial values
   if(is.null(init_values)) {
-    if(cond_dist == "Gaussian" && !allow_unstab) {
+    if(cond_dist == "Gaussian" && use_stat_for_Gaus && !allow_unstab) {
       # Generate the initial values from the stationary distribution of init_regime; Gaussian dist
       mu <- rep(all_mu[, init_regime], p)
       L <- t(chol_Sigmas[, , init_regime]) # Lower triangle

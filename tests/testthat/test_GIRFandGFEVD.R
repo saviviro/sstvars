@@ -87,10 +87,9 @@ test_that("GIRF works correctly", {
                 ci=c(0.9), use_data_shocks=TRUE, data_girf_pars=c(0, 0.6, 1, 2, 0.8), scale_type="instant",
                 scale=c(2, 1, 0.5), use_parallel=FALSE, seeds=1)
 
-  expect_equal(unname(girf1$girf_res$shock1$point_est[4, ]), c(0.00851552, 0.02350278, 0.00000000), tol=1e-4)
-  expect_equal(c(unname(girf1$girf_res$shock1$conf_ints[4, , ])), c(0.0006007925, 0.0181154039, 0.0016581835, 0.0499984036,
-                                                                    0.0000000000, 0.0000000000), tol=1e-4)
-  expect_equal(unname(girf1$girf_res$shock2$point_est[4, ]), c(-0.04182505, 0.86688967, 0.00000000), tol=1e-4)
+  expect_equal(unname(girf1$girf_res$shock1$point_est[4, ]), c(0.01769087, 0.04882669, 0.00000000), tol=1e-4)
+  expect_equal(c(unname(girf1$girf_res$shock1$conf_ints[4, , ])), c(0.01073536, 0.02636506, 0.02962952, 0.07276740, 0.00000000, 0.00000000), tol=1e-4)
+  expect_equal(unname(girf1$girf_res$shock2$point_est[4, ]), c(-0.05690619, 1.17946990, 0.00000000), tol=1e-4)
 
   expect_equal(unname(girf2$girf_res$shock1$point_est[2, ]), c(0.099155053, -0.028546980, 0.006293229, -0.006293229), tol=1e-4)
   expect_equal(c(unname(girf2$girf_res$shock1$conf_ints[2, , ]))[1:5],

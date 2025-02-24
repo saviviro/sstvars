@@ -65,10 +65,9 @@ and \code{use_data_shocks=TRUE}:
 }}
 
 \item{init_regime}{an integer in \eqn{1,...,M} specifying the regime from which
-the initial values should be generated from. The initial values will be generated
-from the stationary distribution of the specific regime. Due to the lack of
-knowledge of the stationary distribution, models with other than Gaussian conditional distribution
-uses a simulation procedure with a burn-in period. See the details section.}
+the initial values should be generated from (using a simulation procedure with a burn-in period).
+For models with Gaussian conditional distribution, it is also possible to generate the starting
+values from the stationary distribution of a regime. See the details section.}
 
 \item{init_values}{a size \code{[p, d, R2]} array specifying the initial values in each slice
 for each Monte Carlo repetition, where d is the number of time series in the system and \code{R2}
@@ -85,8 +84,7 @@ value.}
 single core computing is supported if an initial value is specified (and
 the GIRF won't thus be estimated multiple times).}
 
-\item{burn_in}{Burn-in period for simulating initial values from a regime when \code{cond_dist!="Gaussian"}.
-See the details section.}
+\item{burn_in}{Burn-in period for simulating initial values from a regime.}
 
 \item{exo_weights}{if \code{weight_function="exogenous"}, provide a size
 \eqn{(N+1 \times M)} matrix of exogenous transition weights for the regimes: \code{[h, m]}

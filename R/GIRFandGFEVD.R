@@ -23,6 +23,10 @@
 #'   if \code{init_values} are not specified. The confidence bounds
 #'   will be sample quantiles of the GIRFs based on different initial values.
 #'   Ignored if the argument \code{init_value} is specified.
+#'  @param init_regime an integer in \eqn{1,...,M} specifying the regime from which
+#'   the initial values should be generated from (see \code{?simulate.stvar}). If
+#'   \code{use_data_shocks=TRUE} this is argument not used and \code{data_girf_pars}
+#'   should be specified instead.
 #' @param which_cumulative a numeric vector with values in \eqn{1,...,d}
 #'   (\code{d=ncol(data)}) specifying which the variables for which the impulse
 #'   responses should be cumulative. Default is none.
@@ -72,6 +76,7 @@
 #' @param ncores the number CPU cores to be used in parallel computing. Only
 #'   single core computing is supported if an initial value is specified (and
 #'   the GIRF won't thus be estimated multiple times).
+#' @param burn_in Burn-in period for simulating initial values from a regime.
 #' @param exo_weights if \code{weight_function="exogenous"}, provide a size
 #'  \eqn{(N+1 \times M)} matrix of exogenous transition weights for the regimes: \code{[h, m]}
 #'  for the (after-the-impact) period \eqn{h-1} and regime \eqn{m} weight (\code{[1, m]}
@@ -90,7 +95,9 @@
 #'   anything.
 #' @details The "confidence bounds" \strong{do not} quantify uncertainty about the true parameter
 #'   value but only the initial values (and possibly sign and size of the shock) within the given regime.
-#'   If initial values are specified, confidence intervals won't be calculated.
+#'   If initial values are specified, confidence intervals won't be calculated. Note that if the bounds
+#'   look weird in the figure produced by \code{plot.girf}, it is probably because the point estimate is not
+#'   inside the bounds. In this case, increasing the argument \code{R2} usually fixes the issue.
 #'
 #'   Note that if the argument \code{scale} is used, the scaled responses of
 #'   the transition weights might be more than one in absolute value.

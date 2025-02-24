@@ -12,6 +12,7 @@
   init_values = NULL,
   init_regime,
   ntimes = 1,
+  use_stat_for_Gaus = FALSE,
   burn_in = 1000,
   exo_weights = NULL,
   drop = TRUE,
@@ -33,12 +34,17 @@ the second last row for second lag etc. If not specified, initial values will be
 the regime specified in \code{init_regimes} (for Gaussian models only).}
 
 \item{init_regime}{an integer in \eqn{1,...,M} specifying the regime from which
-the initial values should be generated from. The initial values will be generated
-from the stationary distribution of the specific regime. Due to the lack of
-knowledge of the stationary distribution, models with other than Gaussian conditional distribution
-uses a simulation procedure with a burn-in period. See the details section.}
+the initial values should be generated from (using a simulation procedure with a burn-in period).
+For models with Gaussian conditional distribution, it is also possible to generate the starting
+values from the stationary distribution of a regime. See the details section.}
 
 \item{ntimes}{how many sets of simulations should be performed?}
+
+\item{use_stat_for_Gaus}{if \code{TRUE} and \code{cond_dist=="Gaussian"}, uses the stationary distribution
+of a regime to generate the initial values for the simulation. Note that if stationary distribution is used,
+unlike with out simulation procedure, it is not guaranteed that the regime of interest has high transition weights
+at the given points of time. Note that if the model allows for unstable estimates (\code{stvar$allow_unstab=TRUE}),
+simulation procedure is always used.}
 
 \item{burn_in}{Burn-in period for simulating initial values from a regime when \code{cond_dist!="Gaussian"}.
 See the details section.}
@@ -72,9 +78,9 @@ Returns a list containing the simulation results. If \code{drop==TRUE} and \code
 \code{simulate.stvar} is a simulate method for class 'stvar' objects.
 }
 \details{
-The stationary distribution of each regime is not known when \code{cond_dist!="Gaussian"}. Therefore, when using
-  \code{init_regime} to simulate the initial values from a given regime, we employ the following simulation procedure to
-  obtain the initial values. First, we set the initial values to the unconditional mean of the specified regime. Then,
+When using \code{init_regime} to simulate the initial values from a given regime, we employ the following simulation
+  procedure to obtain the initial values (unless \code{use_stat_for_Gaus=TRUE} and Gaussian model is considered).
+  First, we set the initial values to the unconditional mean of the specified regime. Then,
   we simulate a large number observations from that regime as specified in the argument \code{burn_in}. Then, we simulate
   \eqn{p + 100} observations more after the burn in period, and for the \eqn{100} observations calculate the transition
   weights for them and take the consecutive \eqn{p} observations that yield the highest transition weight for the given regime.
