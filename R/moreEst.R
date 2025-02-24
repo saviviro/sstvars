@@ -119,6 +119,7 @@ iterate_more <- function(stvar, maxit=1000, h=1e-3, penalized, penalty_params, a
     ret$all_estimates[[stvar$which_round]] <- ret$params
     ret$all_logliks[stvar$which_round] <- ret$loglik
     ret$which_converged[stvar$which_round] <- res$convergence == 0
+    ret$seeds <- stvar$seeds
   }
   ret$LS_estimates <- stvar$LS_estimates
   warn_eigens(ret, allow_unstab=allow_unstab)

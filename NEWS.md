@@ -77,7 +77,8 @@
 * In simulate.stvar the default for Gaussian models is now also use simulation procedure to draw initial values from a specific regime, ensuring that the transition weights
   are high for the initial regime based on the initial values. The newly argument use_stat_for_Gaus can be set to TRUE to use stationary distribution instead (as was the 
   old functionality).
-* Fixed a bug in plot.girf in which the y-axis was not wide enough when the point estimate is outside the "confidence bounds". 
+* Fixed a bug in plot.girf in which the y-axis was not wide enough when the point estimate is outside the "confidence bounds".
+* The object returned by fitSTVAR now includes also the seeds used in the estimation (if specified).
 * Updated the datafile usacpu to include observations until the end of 2024.
 * Updated the references.
 * Updates to the documentation.

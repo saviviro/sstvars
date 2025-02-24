@@ -30,6 +30,7 @@
 #'    \item{all_logliks}{The log-likelihood of the estimates from all estimation rounds, if applicable.}
 #'    \item{which_converged}{Indicators of which estimation rounds converged, if applicable.}
 #'    \item{which_round}{Indicators of which round of optimization each estimate belongs to, if applicable.}
+#'    \item{seeds}{The seeds used in the estimation in \code{fitSTVAR}, if applicable.}
 #'    \item{LS_estimates}{The least squares estimates of the parameters in the form
 #'      \eqn{(\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\alpha} (intercepts replaced by unconditional means
 #'      if mean parametrization is used), if applicable.}
@@ -401,6 +402,7 @@ alt_stvar <- function(stvar, which_largest=1, which_round, calc_std_errors=FALSE
   ret$all_estimates <- stvar$all_estimates
   ret$all_logliks <- stvar$all_logliks
   ret$which_converged <- stvar$which_converged
+  ret$seeds <- stvar$seeds
   if(!is.null(stvar$which_round)) {
     ret$which_round <- which_round
   }
@@ -1086,6 +1088,7 @@ filter_estimates <- function(stvar, which_largest=1, filter_stab=TRUE, calc_std_
   ret$all_estimates <- all_estimates
   ret$all_logliks <- all_logliks
   ret$which_converged <- stvar$which_converged
+  ret$seeds <- stvar$seeds
   if(!is.null(stvar$which_round)) {
     ret$which_round <- which_round
   }
