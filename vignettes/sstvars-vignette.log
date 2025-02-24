@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  15 FEB 2025 13:48
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  24 FEB 2025 16:05
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -883,7 +883,13 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 40 []
  []
 
-[40])
+[40]
+Underfull \hbox (badness 2707) in paragraph at lines 200--204
+\T1/lmr/m/n/10.95 tran-si-tion vec-tor au-tore-gres-sive mod-els.''  \T1/lmr/m/
+it/10.95 Un-pub-lished work-ing pa-per, avail-able as
+ []
+
+)
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 41
  []
@@ -900,7 +906,7 @@ Package rerunfilecheck Info: File `sstvars-vignette.out' has not changed.
 Here is how much of TeX's memory you used:
  13097 strings out of 478353
  207915 string characters out of 5848086
- 514345 words of memory out of 5000000
+ 514351 words of memory out of 5000000
  30742 multiletter control sequences out of 15000+600000
  509807 words of font info for 100 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -933,7 +939,7 @@ blic/lm/lmsy8.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmt
 t10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtti10.pfb><
 /usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr/loca
 l/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on sstvars-vignette.pdf (45 pages, 693581 bytes).
+Output written on sstvars-vignette.pdf (45 pages, 693686 bytes).
 PDF statistics:
  1239 PDF objects out of 1440 (max. 8388607)
  1118 compressed objects within 12 object streams

@@ -6,15 +6,15 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of `sstvars` is to provide a comprehensive toolkit for maximum
-likelihood (ML) estimation and analysis of reduced form and structural
-smooth transition vector autoregressive (STVAR) models (including
-threshold VAR models). Various transition weight functions, conditional
-distributions, and identification methods are accommodated. Also
-constrained ML estimation is supported with constraints on the
-autoregressive parameters, regimewise means, weight parameters, and the
-impact matrix. See the vignette for a more detailed description of the
-package.
+The goal of `sstvars` is to provide a comprehensive toolkit for
+(penalized and non-penalized) maximum likelihood (ML) estimation and
+analysis of reduced form and structural smooth transition vector
+autoregressive (STVAR) models (including threshold VAR models). Various
+transition weight functions, conditional distributions, and
+identification methods are accommodated. Also constrained ML estimation
+is supported with constraints on the autoregressive parameters,
+regimewise means, weight parameters, and the impact matrix. See the
+vignette for a more detailed description of the package.
 
 ## Installation
 
@@ -70,6 +70,9 @@ profile_logliks(fit) # Plot profile log-likelihood functions about the estimate
 # Check the stationarity condition for the estimated model, i.e., that the 
 # upper bound of the joint spectral radius is less than one:
 bound_JSR(fit, epsilon=0.1, ncores=2) # Adjust epsilon for a tighter bound
+# NOTE: For models that are not small, our implementation is not computationally
+# efficient enough. The MATLAB Toolbox JSR (by R. Jungers) for large can be used
+# larger models. 
 
 # Estimate the above model but with the autoregressive matrices restricted to be equal in both regimes
 # (so that only the intercepts and the conditional covariance matrix vary in time):
@@ -223,10 +226,10 @@ plot(irf2)
 - Koop G., Pesaran M.H., Potter S.M. (1996). Impulse response analysis
   in nonlinear multivariate models. *Journal of Econometrics*, **74**:1,
   119-147.
-- Lanne M., Virolainen S. 2024. A Gaussian smooth transition vector
+- Lanne M., Virolainen S. 2025. A Gaussian smooth transition vector
   autoregressive model: An application to the macroeconomic effects of
   severe weather shocks. Unpublished working paper, available as
   arXiv:2403.14216.
-- Virolainen S. 2024. Identification by non-Gaussianity in structural
+- Virolainen S. 2025. Identification by non-Gaussianity in structural
   threshold and smooth transition vector autoregressive. Unpublished
   working paper, available as arXiv:2404.19707.

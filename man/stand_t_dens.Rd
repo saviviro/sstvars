@@ -16,15 +16,16 @@ Returns a numeric vector of the same length as \code{y} containing the density v
 }
 \description{
 \code{stand_t_dens} calculates the density of the univariate t distribution with zero mean and unit variance,
-  described, for example, in Virolainen (2024).
+  described, for example, in Virolainen (2025).
 }
 \details{
-See Virolainen (2024) and the references therein, for example, for the details of the density function of
-  t-distribution with zero mean and unit variance.
+See Virolainen (2025) and the references therein, for example, for the details of the density function of
+  t-distribution with zero mean and unit variance (assume the skewness parameter value is zero to obtain the
+  non-skewed version of the t-distribution).
 }
 \references{
 \itemize{
-   \item Virolainen S. 2024. Identification by non-Gaussianity in structural threshold and
+   \item Virolainen S. 2025. Identification by non-Gaussianity in structural threshold and
       smooth transition vector autoregressive models. Unpublished working
       paper, available as arXiv:2404.19707.
  }

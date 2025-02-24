@@ -112,8 +112,8 @@ Lanne M, Nyberg H (2016).
   595--603.
 \newblock \doi{10.1111/obes.12125}.
 
-\bibitem[{Lanne and Virolainen(2024)}]{Lanne+Virolainen:2024}
-Lanne M, Virolainen S (2024).
+\bibitem[{Lanne and Virolainen(2025)}]{Lanne+Virolainen:2024}
+Lanne M, Virolainen S (2025).
 \newblock \enquote{A {Gaussian} smooth transition vector autoregressive model:
   An application to the macroeconomic effects of severe weather shocks.}
 \newblock \emph{Unpublished working paper, available as arXiv:2403.14216}.
@@ -196,8 +196,8 @@ Tsay R (1998).
   \textbf{93}(443), 1188--1202.
 \newblock \doi{10.1080/01621459.1998.10473779}.
 
-\bibitem[{Virolainen(2024)}]{Virolainen2:2024}
-Virolainen (2024).
+\bibitem[{Virolainen(2025{\natexlab{a}})}]{Virolainen2:2024}
+Virolainen (2025{\natexlab{a}}).
 \newblock \enquote{Identification by {non-Gaussianity} in structural threshold
   and smooth transition vector autoregressive models.}
 \newblock \emph{Unpublished working paper, available as arXiv:2404.19707}.
@@ -233,8 +233,8 @@ Virolainen S (2022{\natexlab{b}}).
   559--580.
 \newblock \doi{10.1515/snde-2020-0060}.
 
-\bibitem[{Virolainen(2025)}]{Virolainen:2025}
-Virolainen S (2025).
+\bibitem[{Virolainen(2025{\natexlab{b}})}]{Virolainen:2025}
+Virolainen S (2025{\natexlab{b}}).
 \newblock \enquote{A statistically identified structural vector autoregression
   with endogeneously switching volatility regime.}
 \newblock \emph{Journal of Business \& Economic Statistics}, \textbf{43}(1),

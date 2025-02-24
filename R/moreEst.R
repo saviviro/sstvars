@@ -179,7 +179,7 @@ iterate_more <- function(stvar, maxit=1000, h=1e-3, penalized, penalty_params, a
 #'
 #'   The arguments \code{B_pm_reg}, \code{B_perm}, and \code{B_signs} can be used to explore estimates based various orderings
 #'   and sign changes of the columns of the impact matrices \eqn{B_m} of specific regimes. This can be useful in the presence
-#'   of weak identification with respect to the ordering or signs of the columns \eqn{B_2,...,B_M} (see Virolainen 2024).
+#'   of weak identification with respect to the ordering or signs of the columns \eqn{B_2,...,B_M} (see Virolainen 2025).
 #' @inherit STVAR return
 #' @seealso \code{\link{fitSTVAR}}, \code{\link{STVAR}}, \code{\link[stats]{optim}}
 #' @references
@@ -188,7 +188,7 @@ iterate_more <- function(stvar, maxit=1000, h=1e-3, penalized, penalty_params, a
 #'    \emph{Cambridge University Press}, Cambridge.
 #'    \item Lütkepohl H., Netšunajev A. 2017. Structural vector autoregressions with smooth transition in variances.
 #'      \emph{Journal of Economic Dynamics & Control}, \strong{84}, 43-57.
-#'    \item Virolainen S. 2024. Identification by non-Gaussianity in structural threshold and
+#'    \item Virolainen S. 2025. Identification by non-Gaussianity in structural threshold and
 #'       smooth transition vector autoregressive models. Unpublished working
 #'       paper, available as arXiv:2404.19707.
 #'  }

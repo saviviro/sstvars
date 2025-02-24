@@ -80,7 +80,7 @@ print(mod112mu, standard_error_print=TRUE) # Standard errors are printed for the
      \emph{Journal of Econometrics}, \strong{84}:1, 1-36.
    \item Hubrich K., Teräsvirta. T. 2013. Thresholds and Smooth Transitions in Vector Autoregressive Models.
      \emph{CREATES Research Paper 2013-18, Aarhus University.}
-   \item Lanne M., Virolainen S. 2024. A Gaussian smooth transition vector autoregressive model:
+   \item Lanne M., Virolainen S. 2025. A Gaussian smooth transition vector autoregressive model:
       An application to the macroeconomic effects of severe weather shocks. Unpublished working
       paper, available as arXiv:2403.14216.
    \item Kheifets I.L., Saikkonen P.J. 2020. Stationarity and ergodicity of Vector STAR models.
@@ -89,7 +89,7 @@ print(mod112mu, standard_error_print=TRUE) # Standard errors are printed for the
      \emph{Journal of Economic Dynamics & Control}, \strong{84}, 43-57.
    \item Tsay R. 1998. Testing and Modeling Multivariate Threshold Models.
      \emph{Journal of the American Statistical Association}, \strong{93}:443, 1188-1202.
-   \item Virolainen S. 2024. Identification by non-Gaussianity in structural threshold and
+   \item Virolainen S. 2025. Identification by non-Gaussianity in structural threshold and
       smooth transition vector autoregressive models. Unpublished working
       paper, available as arXiv:2404.19707.
  }
