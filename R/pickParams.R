@@ -130,9 +130,9 @@ pick_allA <- function(p, M, d, params) {
 
 #' @title Pick covariance matrices
 #'
-#' @description \code{pick_Omegas} picks the covariance matrices \eqn{\Omega_{m} (m=1,..,M)}
-#'  from the given parameter vector so that they are arranged in a 3D array with the third
-#'  dimension indicating each component.
+#' @description \code{pick_Omegas} picks the covariance matrices \eqn{\Omega_{m}} or impact matrices \eqn{B_m}
+#'  from the given parameter vector so that they are arranged in a 3D array with the third dimension indicating
+#'  each regime.
 #'
 #' @inherit pick_Am
 #' @return Returns a 3D array containing...

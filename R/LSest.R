@@ -690,7 +690,7 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
         ncores <- parallel::detectCores()
       }
       n_weightvecs <- ifelse(M == 1 || !is.null(weight_constraints), 1, nrow(weightparvecs))
-      message(paste0("PHASE 1: Estimating the AR and weight parameters by least squares for ", n_weightvecs,
+      message(paste0("PHASE 1: Estimating the AR and weight parameters by nonlinear least squares for ", n_weightvecs,
                      " vectors of weight parameters...")) # "PHASE 1" print i related to the multiple-phase estimation procedure
       cl <- parallel::makeCluster(ncores)
       on.exit(try(parallel::stopCluster(cl), silent=TRUE)) # Close the cluster on exit, if not already closed.

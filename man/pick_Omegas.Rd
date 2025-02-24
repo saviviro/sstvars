@@ -81,9 +81,9 @@ Returns a 3D array containing...
   }
 }
 \description{
-\code{pick_Omegas} picks the covariance matrices \eqn{\Omega_{m} (m=1,..,M)}
- from the given parameter vector so that they are arranged in a 3D array with the third
- dimension indicating each component.
+\code{pick_Omegas} picks the covariance matrices \eqn{\Omega_{m}} or impact matrices \eqn{B_m}
+ from the given parameter vector so that they are arranged in a 3D array with the third dimension indicating
+ each regime.
 }
 \details{
 Constrained parameter vectors are not supported.
