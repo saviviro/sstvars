@@ -207,8 +207,8 @@
 fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                      weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                      parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
-                     estim_method, penalized, penalty_params=c(0.05, 0.2), allow_unstab, min_obs_coef=3, nrounds, ncores=2, maxit=2000, seeds=NULL,
-                     print_res=TRUE, use_parallel=TRUE, calc_std_errors=TRUE, ...) {
+                     estim_method, penalized, penalty_params=c(0.05, 0.2), allow_unstab, min_obs_coef=3, sparse_grid=FALSE,
+                     nrounds, ncores=2, maxit=2000, seeds=NULL, print_res=TRUE, use_parallel=TRUE, calc_std_errors=TRUE, ...) {
   # Initial checks etc
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -333,14 +333,14 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       LS_results <- estim_LS(data=data, p=p, M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
                              cond_dist=cond_dist, parametrization="intercept", AR_constraints=AR_constraints,
                              mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                             penalized=penalized, penalty_params=penalty_params,
-                             ncores=ncores, use_parallel=use_parallel) # Always intercept parametrization used here
+                             penalized=penalized, penalty_params=penalty_params, min_obs_coef=min_obs_coef,
+                             sparse_grid=sparse_grid, ncores=ncores, use_parallel=use_parallel) # Always intercept parametrization used here
     } else { # Use nonlinear least squares
       LS_results <- estim_NLS(data=data, p=p, M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
                               cond_dist=cond_dist, parametrization="intercept", AR_constraints=AR_constraints,
                               mean_constraints=mean_constraints, weight_constraints=weight_constraints,
-                              penalized=penalized, penalty_params=penalty_params,
-                              ncores=ncores, use_parallel=use_parallel) # Always intercept parametrization used here
+                              penalized=penalized, penalty_params=penalty_params, min_obs_coef=min_obs_coef,
+                              sparse_grid=sparse_grid, ncores=ncores, use_parallel=use_parallel) # Always intercept parametrization used here
     }
 
     # Check whether the least squares estimates satisfy the stability condition

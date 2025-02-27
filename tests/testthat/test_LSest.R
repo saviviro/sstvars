@@ -62,6 +62,13 @@ test_that("estim_LS works correctly", {
                  -11.3221301261482, 1.00487052179712, -1.33064072941913, -0.10661850904367, 1.25639661192596, -0.270837750765991,
                  0.230864371859296, 0.38506), tolerance=1e-4)
 
+  expect_equal(estim_LS(gdpdef[1:25,], p=1, M=3, weight_function="threshold", weightfun_pars=c(2, 1), use_parallel=FALSE, min_obs_coef=1.5,
+                        sparse_grid=TRUE),
+               c(2.36714379530292, 0.348740954662662, 3.94721381125168, -0.00284194993636204, 2.12009733634266, 0.57718658707643,
+                 -0.70395526927183, 0.131940113253948, -2.15885122994856, -0.858790670221793, 0.412534469646031, 0.0120419726396386,
+                 -11.3221301261482, 1.00487052179712, -1.33064072941913, -0.10661850904367, 1.25639661192596, -0.270837750765991,
+                 0.230864371859296, 0.38506), tolerance=1e-4) # Same as without sparse_grid though
+
   expect_equal(estim_LS(usamone, p=1, M=3, weight_function="threshold", weightfun_pars=c(2, 1), weight_constraints=list(R=0, r=c(0.5, 1)),
                         use_parallel=FALSE),
                c(0.440582833518931, 0.32738262842581, 0.204080051609945, 0.00552929395908314, 0.0502510939283292, -0.0629632827966964,
@@ -132,6 +139,13 @@ test_that("estim_NLS works correctly", {
                          min_obs_coef=1.1),
                c(0.5727287, 0.7042587, 2.5227436, -0.1069938, -0.5779311, 0.3004377, -1.2132161, -0.4901011), tolerance=1e-4)
 
+  # expect_equal(estim_NLS(gdpdef[1:20,], p=1, M=2, weight_function="logistic", weightfun_pars=c(1, 1),
+  #                        AR_constraints=rbind(diag(1*2^2), diag(1*2^2)), use_parallel=FALSE,
+  #                        min_obs_coef=1.1, sparse_grid=TRUE),
+  #              c(1.42600611, 0.36827734, -0.07213367, 0.68287135, 0.50116985, -0.06466479, -2.07634991, -0.24236217,
+  #                1.91955000, 12.90769231), tolerance=1e-4) # Tests sparse_grid but takes too long to be used in automatic testing; uncomment to test in development
+
+
   expect_equal(estim_NLS(gdpdef[1:30,], p=1, M=2, weight_function="exponential", weightfun_pars=c(1, 1), use_parallel=FALSE,
                          weight_constraints=list(R=0, r=c(0.5, 2)), min_obs_coef=1.3),
                c(0.17288528, 0.53099751, 0.81191988, 0.18943739, 0.97580964, -0.42119335, 1.72768163, 0.06092438, 0.11608078, 0.07478986,
@@ -161,5 +175,11 @@ test_that("estim_NLS works correctly", {
                                           weight_constraints=list(R=0, r=c(-0.1, 0.1, 0.2, -0.2)), min_obs_coef=1.01),
                c(3474364.6482, -155685.8412, -463167.5732, 22000.0581, -2578017.8168, 113999.8299, -126749.2284, 5620.2018, 195.0502, -1.6739, -28893.0525,
                  1397.3703, 92.7365, 0.6262, -277532.6599, 12668.6575, -290.4225, 3.5395), tolerance=1)
+
+  # expect_equal(estim_NLS(gdpdef[1:50,], p=1, M=3, weight_function="mlogit", weightfun_pars=list(1, 1), use_parallel=FALSE,
+  #                        sparse_grid=TRUE, min_obs_coef=1.01),
+  #              c(0.357135700, 0.173148447, 2.690586016, -0.081892886, 2.034396871, -0.007423291, -0.527916687, -0.018411182, 0.274082625, 0.839871246,
+  #                -0.678212109, 0.130056592, -0.135290813, 0.727828900, -0.772068788, 0.063968248, -0.691329060, 0.931194971, 5.000000000 ,-20.000000000,
+  #                -15.000000000, 10.000000000), tolerance=0.01) # Tests sparse_grid but takes too long to be used in automatic testing; uncomment to test in development
 })
 

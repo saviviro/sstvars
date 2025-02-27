@@ -77,6 +77,8 @@
 * In simulate.stvar the default for Gaussian models is now also use simulation procedure to draw initial values from a specific regime, ensuring that the transition weights
   are high for the initial regime based on the initial values. The newly argument use_stat_for_Gaus can be set to TRUE to use stationary distribution instead (as was the 
   old functionality).
+* Added the possibility to use more sparse grid in LS/NLS estimation by adding the argument sparse_grid to fitSTVAR.
+* Fixed a bug causing the argument min_obs_coef in fitSTVAR to be ignored in the LS/NLS estimation step.
 * Fixed a bug in plot.girf in which the y-axis was not wide enough when the point estimate is outside the "confidence bounds".
 * The object returned by fitSTVAR now includes also the seeds used in the estimation (if specified).
 * Updated the datafile usacpu to include observations until the end of 2024.

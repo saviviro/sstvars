@@ -20,6 +20,7 @@ estim_NLS(
   penalized = TRUE,
   penalty_params = c(0.05, 0.2),
   min_obs_coef = 3,
+  sparse_grid = FALSE,
   use_parallel = TRUE,
   ncores = 2
 )
@@ -112,6 +113,8 @@ is a tuning parameter for the penalization (a positive real number, a higher val
 \item{min_obs_coef}{the smallest accepted number of observations (times variables) from each regime
 relative to the number of parameters in the regime. For models with AR constraints, the number of
 AR matrix parameters in each regimes is simplisticly assumed to be \code{ncol(AR_constraints)/M}.}
+
+\item{sparse_grid}{should the grid of weight function values in LS/NLS estimation be more sparse (speeding up the estimation)?}
 
 \item{use_parallel}{employ parallel computing? If \code{FALSE}, does not print anything.}
 

@@ -9,6 +9,7 @@
 #' @param min_obs_coef the smallest accepted number of observations (times variables) from each regime
 #'  relative to the number of parameters in the regime. For models with AR constraints, the number of
 #'  AR matrix parameters in each regimes is simplisticly assumed to be \code{ncol(AR_constraints)/M}.
+#' @param sparse_grid should the grid of weight function values in LS/NLS estimation be more sparse (speeding up the estimation)?
 #' @param use_parallel employ parallel computing? If \code{FALSE}, does not print anything.
 #' @details Used internally in the multiple phase estimation procedure proposed by Koivisto,
 #'  Luoto, and Virolainen (2025). Mean constraints are not supported. Only weight constraints that
@@ -43,7 +44,7 @@
 estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                      weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                      parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
-                     penalized=TRUE, penalty_params=c(0.05, 0.2), min_obs_coef=3, use_parallel=TRUE, ncores=2) {
+                     penalized=TRUE, penalty_params=c(0.05, 0.2), min_obs_coef=3, sparse_grid=FALSE, use_parallel=TRUE, ncores=2) {
   # Checks
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -240,7 +241,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     # The maximum number of grid points is calculated so that the number M-1 dimensional of multisets
     # is at most 20000 for M <= 4.
     if(M >= 2) { # M=1 case is separately handled
-      max_thresholds <- 1000 # The maximum number of threshold values to considered
+      max_thresholds <- ifelse(sparse_grid, 500, 1000) # The maximum number of threshold values to considered
       if(M == 2) {
         if(length(switch_var_sorted) < max_thresholds) {
           grid_points <- switch_var_sorted
@@ -248,11 +249,11 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
           grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=max_thresholds)
         }
       } else if(M == 3) {
-        grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=min(200, max_thresholds))
+        grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=min(ifelse(sparse_grid, 150, 200), max_thresholds))
       } else if(M == 4) {
-        grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=50)
+        grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=ifelse(sparse_grid, 40, 50))
       } else {
-        grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=30)
+        grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=ifelse(sparse_grid, 25, 30))
       }
       thresholds <- t(utils::combn(x=grid_points, m=M - 1, simplify=TRUE)) # M-1 dim multisets of lexically ordered grid points
     }
@@ -400,7 +401,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
 estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                       weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                       parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
-                      penalized=TRUE, penalty_params=c(0.05, 0.2), min_obs_coef=3, use_parallel=TRUE, ncores=2) {
+                      penalized=TRUE, penalty_params=c(0.05, 0.2), min_obs_coef=3, sparse_grid=FALSE, use_parallel=TRUE, ncores=2) {
   # Checks
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -621,15 +622,15 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
     }
     if(weight_function %in% c("logistic", "exponential")) {
       # Here always M=2, the first weight parameter is location parameter, and the second one is strictly positive scale parameter
-      c_grid <- seq(from=min_switchvar, to=max_switchvar, length.out=100) # The grid for the location parameter
-      gamma_grid <- seq(from=0.1, to=100, length.out=100) # The grid for the scale parameter
+      c_grid <- seq(from=min_switchvar, to=max_switchvar, length.out=ifelse(sparse_grid, 40, 100)) # The grid for the location parameter
+      gamma_grid <- seq(from=0.1, to=100, length.out=ifelse(sparse_grid, 40, 100)) # The grid for the scale parameter
       weightparvecs <- unname(simplify2array(expand.grid(c_grid, gamma_grid))) # Each row for a vector of weight parameters
     } else if(weight_function == "mlogit") {
       n_weight_pars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
       weightparvecs <- unname(simplify2array(expand.grid(replicate(n=n_weight_pars,
                                                                    expr=seq(from=-20, to=20,
-                                                                            length.out=max(2, ceiling(10000^(1/n_weight_pars)))),
-                                                                   simplify=FALSE)))) # Roughly 10000-100000 grid points
+                                                                            length.out=max(2, ceiling(ifelse(sparse_grid, 5000, 10000)^(1/n_weight_pars)))),
+                                                                   simplify=FALSE)))) # Roughly 10000-100000 grid points without sparse grid
     } else if(weight_function == "threshold") {
       # Remove the values from the sorted switch variable series that would leave less than T_min observations
       # smaller or larger than the threshold.
@@ -640,7 +641,7 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
       # The maximum number of grid points is calculated so that the number M-1 dimensional of multisets
       # is at most 20000 for M <= 4.
       if(M >= 2) { # M=1 case is separately handled
-        max_thresholds <- 1000 # The maximum number of threshold values to considered
+        max_thresholds <- ifelse(sparse_grid, 500, 1000) # The maximum number of threshold values to considered
         if(M == 2) {
           if(length(switch_var_sorted) < max_thresholds) {
             grid_points <- switch_var_sorted
@@ -648,11 +649,11 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
             grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=max_thresholds)
           }
         } else if(M == 3) {
-          grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=min(200, max_thresholds))
+          grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=min(ifelse(sparse_grid, 150, 200), max_thresholds))
         } else if(M == 4) {
-          grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=50)
+          grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=ifelse(sparse_grid, 40, 50))
         } else {
-          grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=30)
+          grid_points <- seq(from=min_switchvar, to=max_switchvar, length.out=ifelse(sparse_grid, 25, 30))
         }
         thresholds <- t(utils::combn(x=grid_points, m=M - 1, simplify=TRUE)) # M-1 dim multisets of lexically ordered grid points
       }

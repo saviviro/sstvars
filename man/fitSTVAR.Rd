@@ -21,6 +21,7 @@ fitSTVAR(
   penalty_params = c(0.05, 0.2),
   allow_unstab,
   min_obs_coef = 3,
+  sparse_grid = FALSE,
   nrounds,
   ncores = 2,
   maxit = 2000,
