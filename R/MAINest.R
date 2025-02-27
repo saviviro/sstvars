@@ -17,6 +17,7 @@
 #' @param min_obs_coef In the LS/NLS step of the three phase estimation, the smallest accepted number of observations
 #'   (times variables) from each regime relative to the number of parameters in the regime. For models with AR constraints,
 #'   the number of AR matrix parameters in each regimes is simplisticly assumed to be \code{ncol(AR_constraints)/M}.
+#' @param sparse_grid should the grid of weight function values in LS/NLS estimation be more sparse (speeding up the estimation)?
 #' @param nrounds the number of estimation rounds that should be performed. The default is \code{(M*ncol(data))^3}
 #'   when \code{estim_method="two-phase"} and \code{(M*ncol(data))^2} when \code{estim_method="three-phase"}.
 #' @param ncores the number CPU cores to be used in parallel computing.
