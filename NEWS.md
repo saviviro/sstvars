@@ -89,4 +89,5 @@
 
 * Updated the vignette to align with latest version of the working paper \url{https://arxiv.org/abs/2404.19707} of Virolainen, 
   establishing identification by non-Gaussianity for TVAR and STVAR models.
+* In the documentation, simplified the notation of the intercept parameters from \phi_{m,0} to \phi_{m}.
 
