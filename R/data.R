@@ -102,7 +102,7 @@
 #' @source The Federal Reserve Bank of St. Louis database and the Federal Reserve Bank of Atlanta's website
 #' @references
 #'  \itemize{
-#'    \item K. Gavriilidis, 2021. Measuring climate policy uncertainty. \url{https://www.ssrn.com/abstract=3847388}.
+#'    \item K. Gavriilidis, 2021. Measuring climate policy uncertainty. https://www.ssrn.com/abstract=3847388.
 #'    \item Federal Reserve Bank of Chicago. 2023. Monthly GDP Growth Rate Data. \url{https://www.chicagofed.org/publications/bbki/index}.
 #'    \item Virolainen S. 2025. Identification by non-Gaussianity in structural threshold and smooth transition vector
 #'      autoregressive models. Unpublished working paper, available as arXiv.2404.19707.
