@@ -95,7 +95,7 @@ or \code{"ind_skewed_t"}, where \code{"ind_Student"} the Student's \eqn{t} distr
 \code{"ind_skewed_t"} is the skewed \eqn{t} distribution with independent components (see Hansen, 1994).}
 
 \item{parametrization}{\code{"intercept"} or \code{"mean"} determining whether the model is parametrized with intercept
-parameters \eqn{\phi_{m,0}} or regime means \eqn{\mu_{m}}, m=1,...,M.}
+parameters \eqn{\phi_{m}} or regime means \eqn{\mu_{m}}, m=1,...,M.}
 
 \item{AR_constraints}{a size \eqn{(Mpd^2 \times q)} constraint matrix \eqn{C} specifying linear constraints
 to the autoregressive parameters. The constraints are of the form
@@ -131,9 +131,9 @@ mixing weights practically at zero) so far.}
 
 \item{initpop}{a list of parameter vectors from which the initial population of the genetic algorithm
 will be generated from. The parameter vectors hould have the form
-\eqn{\theta = (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\sigma,\alpha,\nu)}, where (see exceptions below):
+\eqn{\theta = (\phi_{1},...,\phi_{M},\varphi_1,...,\varphi_M,\sigma,\alpha,\nu)}, where (see exceptions below):
 \itemize{
-  \item{\eqn{\phi_{m,0} = } the \eqn{(d \times 1)} intercept (or mean) vector of the \eqn{m}th regime.}
+  \item{\eqn{\phi_{m} = } the \eqn{(d \times 1)} intercept (or mean) vector of the \eqn{m}th regime.}
   \item{\eqn{\varphi_m = (vec(A_{m,1}),...,vec(A_{m,p}))} \eqn{(pd^2 \times 1)}.}
   \item{\describe{
     \item{if \code{cond_dist="Gaussian"} or \code{"Student"}:}{\eqn{\sigma = (vech(\Omega_1),...,vech(\Omega_M))}
@@ -170,17 +170,17 @@ For models with...
         \eqn{(M-1 \times 1)}, where \eqn{r_1,...,r_{M-1}} are the threshold values.}
   \item{\code{weight_function="exogenous"}:}{Omit \eqn{\alpha} from the parameter vector.}
   \item{AR_constraints:}{Replace \eqn{\varphi_1,...,\varphi_M} with \eqn{\psi} as described in the argument \code{AR_constraints}.}
-  \item{mean_constraints:}{Replace \eqn{\phi_{1,0},...,\phi_{M,0}} with \eqn{(\mu_{1},...,\mu_{g})} where
+  \item{mean_constraints:}{Replace \eqn{\phi_{1},...,\phi_{M}} with \eqn{(\mu_{1},...,\mu_{g})} where
         \eqn{\mu_i, \ (d\times 1)} is the mean parameter for group \eqn{i} and \eqn{g} is the number of groups.}
   \item{weight_constraints:}{If linear constraints are imposed, replace \eqn{\alpha} with \eqn{\xi} as described in the
    argument \code{weigh_constraints}. If weight functions parameters are imposed to be fixed values, simply drop \eqn{\alpha}
    from the parameter vector.}
 }
-Above, \eqn{\phi_{m,0}} is the intercept parameter, \eqn{A_{m,i}} denotes the \eqn{i}th coefficient matrix of the \eqn{m}th
+Above, \eqn{\phi_{m}} is the intercept parameter, \eqn{A_{m,i}} denotes the \eqn{i}th coefficient matrix of the \eqn{m}th
 regime, \eqn{\Omega_{m}} denotes the positive definite error term covariance matrix of the \eqn{m}th regime, and \eqn{B_m}
 is the invertible \eqn{(d\times d)} impact matrix of the \eqn{m}th regime. \eqn{\nu_m} is the degrees of freedom parameter
 of the \eqn{m}th regime.
-If \code{parametrization=="mean"}, just replace each \eqn{\phi_{m,0}} with regimewise mean \eqn{\mu_{m}}.
+If \code{parametrization=="mean"}, just replace each \eqn{\phi_{m}} with regimewise mean \eqn{\mu_{m}}.
 \eqn{vec()} is vectorization operator that stacks columns of a given matrix into a vector. \eqn{vech()} stacks columns
 of a given matrix from the principal diagonal downwards (including elements on the diagonal) into a vector.}
 
@@ -284,9 +284,9 @@ never survive. The default is \code{-(10^(ceiling(log10(n_obs)) + d) - 1)}.}
 
 \item{fixed_params}{a vector containing fixed parameter values for intercept, autoregressive, and weight parameters
 that should be fixed in the \strong{initial population}. Should have the form:
-\eqn{(\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\alpha}, where
+\eqn{(\phi_{1},...,\phi_{M},\varphi_1,...,\varphi_M,\alpha}, where
 \itemize{
-  \item{\eqn{(\phi_{m,0} = } the \eqn{(d \times 1)} intercept vector of the \eqn{m}th regime.}
+  \item{\eqn{(\phi_{m} = } the \eqn{(d \times 1)} intercept vector of the \eqn{m}th regime.}
   \item{\eqn{\varphi_m = (vec(A_{m,1}),...,vec(A_{m,p}))} \eqn{(pd^2 \times 1)}.}
   \item{\eqn{\alpha} vector of the weight parameters.}
 }

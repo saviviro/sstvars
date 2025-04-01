@@ -22,10 +22,10 @@ pick_Omegas(
 \item{d}{the number of time series in the system, i.e., the dimension}
 
 \item{params}{a real valued vector specifying the parameter values.
-Should have the form \eqn{\theta = (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\sigma,\alpha,\nu)},
+Should have the form \eqn{\theta = (\phi_{1},...,\phi_{M},\varphi_1,...,\varphi_M,\sigma,\alpha,\nu)},
 where (see exceptions below):
 \itemize{
-  \item{\eqn{\phi_{m,0} = } the \eqn{(d \times 1)} intercept (or mean) vector of the \eqn{m}th regime.}
+  \item{\eqn{\phi_{m} = } the \eqn{(d \times 1)} intercept (or mean) vector of the \eqn{m}th regime.}
   \item{\eqn{\varphi_m = (vec(A_{m,1}),...,vec(A_{m,p}))} \eqn{(pd^2 \times 1)}.}
   \item{\describe{
     \item{if \code{cond_dist="Gaussian"} or \code{"Student"}:}{\eqn{\sigma = (vech(\Omega_1),...,vech(\Omega_M))}
@@ -66,10 +66,10 @@ For models with...
         \eqn{\Omega_1=WW'} and \eqn{\Omega_m=W\Lambda_mW'}, \eqn{\Lambda_m=diag(\lambda_{m1},...,\lambda_{md})},
         \eqn{\lambda_{mi}>0}, \eqn{m=2,...,M}, \eqn{i=1,...,d}.}
 }
-Above, \eqn{\phi_{m,0}} is the intercept parameter, \eqn{A_{m,i}} denotes the \eqn{i}th coefficient matrix of the \eqn{m}th
+Above, \eqn{\phi_{m}} is the intercept parameter, \eqn{A_{m,i}} denotes the \eqn{i}th coefficient matrix of the \eqn{m}th
 regime, \eqn{\Omega_{m}} denotes the positive definite error term covariance matrix of the \eqn{m}th regime, and \eqn{B_m}
 is the invertible \eqn{(d\times d)} impact matrix of the \eqn{m}th regime. \eqn{\nu_m} is the degrees of freedom parameter
-of the \eqn{m}th regime. If \code{parametrization=="mean"}, just replace each \eqn{\phi_{m,0}} with regimewise mean
+of the \eqn{m}th regime. If \code{parametrization=="mean"}, just replace each \eqn{\phi_{m}} with regimewise mean
 \eqn{\mu_{m}}.}
 }
 \value{

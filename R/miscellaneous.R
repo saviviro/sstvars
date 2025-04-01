@@ -33,14 +33,14 @@ get_IC <- function(loglik, npars, T_obs) {
 
 
 #' @title Calculate "distance" between two (scaled) regimes
-#'  \strong{\eqn{\upsilon_{m}}}\eqn{ = (\phi_{m,0},}\strong{\eqn{\phi_{m}}}\eqn{,\sigma_{m})}
+#'  \strong{\eqn{\upsilon_{m}}}\eqn{ = (\phi_{m},}\strong{\eqn{\phi_{m}}}\eqn{,\sigma_{m})}
 #'
 #' @description \code{regime_distance} calculates "distance" between two scaled regimes.
 #'
 #' @param regime_pars1 a length \eqn{pd^2+d+d(d+1)/2} vector
-#'   \strong{\eqn{\upsilon_{m}}}\eqn{ = (\phi_{m,0},}\strong{\eqn{\phi_{m}}}\eqn{,\sigma_{m})}.
+#'   \strong{\eqn{\upsilon_{m}}}\eqn{ = (\phi_{m},}\strong{\eqn{\phi_{m}}}\eqn{,\sigma_{m})}.
 #' @param regime_pars2 a length \eqn{pd^2+d+d(d+1)/2} vector
-#'   \strong{\eqn{\upsilon_{m}}}\eqn{ = (\phi_{m,0},}\strong{\eqn{\phi_{m}}}\eqn{,\sigma_{m})}.
+#'   \strong{\eqn{\upsilon_{m}}}\eqn{ = (\phi_{m},}\strong{\eqn{\phi_{m}}}\eqn{,\sigma_{m})}.
 #' @return Returns "distance" between \code{regime_pars1} and \code{regime_pars2}. Values are scaled
 #'   before calculating the "distance". Read the source code for more details.
 #' @section Warning:

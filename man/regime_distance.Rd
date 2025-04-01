@@ -3,16 +3,16 @@
 \name{regime_distance}
 \alias{regime_distance}
 \title{Calculate "distance" between two (scaled) regimes
- \strong{\eqn{\upsilon_{m}}}\eqn{ = (\phi_{m,0},}\strong{\eqn{\phi_{m}}}\eqn{,\sigma_{m})}}
+ \strong{\eqn{\upsilon_{m}}}\eqn{ = (\phi_{m},}\strong{\eqn{\phi_{m}}}\eqn{,\sigma_{m})}}
 \usage{
 regime_distance(regime_pars1, regime_pars2)
 }
 \arguments{
 \item{regime_pars1}{a length \eqn{pd^2+d+d(d+1)/2} vector
-\strong{\eqn{\upsilon_{m}}}\eqn{ = (\phi_{m,0},}\strong{\eqn{\phi_{m}}}\eqn{,\sigma_{m})}.}
+\strong{\eqn{\upsilon_{m}}}\eqn{ = (\phi_{m},}\strong{\eqn{\phi_{m}}}\eqn{,\sigma_{m})}.}
 
 \item{regime_pars2}{a length \eqn{pd^2+d+d(d+1)/2} vector
-\strong{\eqn{\upsilon_{m}}}\eqn{ = (\phi_{m,0},}\strong{\eqn{\phi_{m}}}\eqn{,\sigma_{m})}.}
+\strong{\eqn{\upsilon_{m}}}\eqn{ = (\phi_{m},}\strong{\eqn{\phi_{m}}}\eqn{,\sigma_{m})}.}
 }
 \value{
 Returns "distance" between \code{regime_pars1} and \code{regime_pars2}. Values are scaled

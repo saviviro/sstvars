@@ -154,9 +154,9 @@ that satisfy the stability condition.}}
 
 \item{fixed_params}{a vector containing fixed parameter values for intercept, autoregressive, and weight parameters
 that should be fixed in the \strong{initial population}. Should have the form:
-\eqn{(\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\alpha}, where
+\eqn{(\phi_{1},...,\phi_{M},\varphi_1,...,\varphi_M,\alpha}, where
 \itemize{
-  \item{\eqn{(\phi_{m,0} = } the \eqn{(d \times 1)} intercept vector of the \eqn{m}th regime.}
+  \item{\eqn{(\phi_{m} = } the \eqn{(d \times 1)} intercept vector of the \eqn{m}th regime.}
   \item{\eqn{\varphi_m = (vec(A_{m,1}),...,vec(A_{m,p}))} \eqn{(pd^2 \times 1)}.}
   \item{\eqn{\alpha} vector of the weight parameters.}
 }

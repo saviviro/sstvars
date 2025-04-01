@@ -85,7 +85,7 @@ or \code{"ind_skewed_t"}, where \code{"ind_Student"} the Student's \eqn{t} distr
 \code{"ind_skewed_t"} is the skewed \eqn{t} distribution with independent components (see Hansen, 1994).}
 
 \item{parametrization}{\code{"intercept"} or \code{"mean"} determining whether the model is parametrized with intercept
-parameters \eqn{\phi_{m,0}} or regime means \eqn{\mu_{m}}, m=1,...,M.}
+parameters \eqn{\phi_{m}} or regime means \eqn{\mu_{m}}, m=1,...,M.}
 
 \item{AR_constraints}{a size \eqn{(Mpd^2 \times q)} constraint matrix \eqn{C} specifying linear constraints
 to the autoregressive parameters. The constraints are of the form
@@ -172,7 +172,7 @@ Returns an S3 object of class \code{'stvar'} defining a smooth transition VAR mo
    \item{which_round}{Indicators of which round of optimization each estimate belongs to, if applicable.}
    \item{seeds}{The seeds used in the estimation in \code{fitSTVAR}, if applicable.}
    \item{LS_estimates}{The least squares estimates of the parameters in the form
-     \eqn{(\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\alpha} (intercepts replaced by unconditional means
+     \eqn{(\phi_{1},...,\phi_{M},\varphi_1,...,\varphi_M,\alpha} (intercepts replaced by unconditional means
      if mean parametrization is used), if applicable.}
 }
 \description{

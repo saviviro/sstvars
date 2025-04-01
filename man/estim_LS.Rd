@@ -78,7 +78,7 @@ or \code{"ind_skewed_t"}, where \code{"ind_Student"} the Student's \eqn{t} distr
 \code{"ind_skewed_t"} is the skewed \eqn{t} distribution with independent components (see Hansen, 1994).}
 
 \item{parametrization}{\code{"intercept"} or \code{"mean"} determining whether the model is parametrized with intercept
-parameters \eqn{\phi_{m,0}} or regime means \eqn{\mu_{m}}, m=1,...,M.}
+parameters \eqn{\phi_{m}} or regime means \eqn{\mu_{m}}, m=1,...,M.}
 
 \item{AR_constraints}{a size \eqn{(Mpd^2 \times q)} constraint matrix \eqn{C} specifying linear constraints
 to the autoregressive parameters. The constraints are of the form
@@ -122,9 +122,9 @@ AR matrix parameters in each regimes is simplisticly assumed to be \code{ncol(AR
 }
 \value{
 Returns the estimated parameters in a vector of the form
- \eqn{(\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\alpha}, where
+ \eqn{(\phi_{1},...,\phi_{M},\varphi_1,...,\varphi_M,\alpha}, where
  \itemize{
-    \item{\eqn{\phi_{m,0} = } the \eqn{(d \times 1)} intercept vector of the \eqn{m}th regime.}
+    \item{\eqn{\phi_{m} = } the \eqn{(d \times 1)} intercept vector of the \eqn{m}th regime.}
     \item{\eqn{\varphi_m = (vec(A_{m,1}),...,vec(A_{m,p}))} \eqn{(pd^2 \times 1)}.}
     \item{\eqn{\alpha = (r_1,...,r_{M-1})} the \eqn{(M-1\times 1)} vector of the threshold parameters.}
  }

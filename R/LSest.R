@@ -16,9 +16,9 @@
 #'  specify the threshold parameters as fixed values are supported. Only intercept parametrization is
 #'  supported.
 #' @return Returns the estimated parameters in a vector of the form
-#'  \eqn{(\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\alpha}, where
+#'  \eqn{(\phi_{1},...,\phi_{M},\varphi_1,...,\varphi_M,\alpha}, where
 #'  \itemize{
-#'     \item{\eqn{\phi_{m,0} = } the \eqn{(d \times 1)} intercept vector of the \eqn{m}th regime.}
+#'     \item{\eqn{\phi_{m} = } the \eqn{(d \times 1)} intercept vector of the \eqn{m}th regime.}
 #'     \item{\eqn{\varphi_m = (vec(A_{m,1}),...,vec(A_{m,p}))} \eqn{(pd^2 \times 1)}.}
 #'     \item{\eqn{\alpha = (r_1,...,r_{M-1})} the \eqn{(M-1\times 1)} vector of the threshold parameters.}
 #'  }
@@ -358,9 +358,9 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
 #'  Only weight constraints that specify the weight parameters as fixed values are supported.
 #'  Only intercept parametrization is supported.
 #' @return Returns the estimated parameters in a vector of the form
-#'  \eqn{(\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\alpha}, where
+#'  \eqn{(\phi_{1},...,\phi_{M},\varphi_1,...,\varphi_M,\alpha}, where
 #'  \itemize{
-#'    \item{\eqn{\phi_{m,0} = } the \eqn{(d \times 1)} intercept vector of the \eqn{m}th regime.}
+#'    \item{\eqn{\phi_{m} = } the \eqn{(d \times 1)} intercept vector of the \eqn{m}th regime.}
 #'    \item{\eqn{\varphi_m = (vec(A_{m,1}),...,vec(A_{m,p}))} \eqn{(pd^2 \times 1)}.}
 #'    \item{\eqn{\alpha}} is the vector of the weight parameters: \describe{
 #'      \item{\code{weight_function="relative_dens"}:}{\eqn{\alpha = (\alpha_1,...,\alpha_{M-1})}
@@ -509,7 +509,7 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
 
     if(calc_estims) { # Exo weights or enough observations, no dummy estims at least yet
       # Storage for the data matrices \Psi_t in the form y_t = \Psi_t\beta + u_t,
-      # \beta = (vec(\Phi_1),...,vec(\Phi_M)), \Phi_m = [\phi_{m,0} : A_{m,1} : ... : A_{m,p}].
+      # \beta = (vec(\Phi_1),...,vec(\Phi_M)), \Phi_m = [\phi_{m} : A_{m,1} : ... : A_{m,p}].
       all_Psi <- array(NA, dim=c(d, M*d + M*p*d^2, T_obs)) # [, , t] for \Psi_t
       all_cPsi <- array(NA, dim=c(M*d + M*p*d^2, M*d + M*p*d^2, T_obs)) # [, , t] for crossprod(\Psi_t)
       all_tPsiy <- array(NA, dim=c(M*d + M*p*d^2, 1, T_obs)) # [, , t] for \Psi_t'y_t
@@ -550,8 +550,8 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
         sum_cPsi <- apply(all_cPsi, MARGIN=c(1, 2), FUN=sum)
         sum_tPsiy <- apply(all_tPsiy, MARGIN=c(1, 2), FUN=sum)
       }
-      ## Obtain the estimates in the vector \beta = (vec(\Phi_1),...,vec(\Phi_M)), where \Phi_m = [\phi_{m,0} : A_{m,1} : ... : A_{m,p}]
-      # (with AR_constraints \beta = (\phi_{1,0},...,\phi_{M,0},\psi)
+      ## Obtain the estimates in the vector \beta = (vec(\Phi_1),...,vec(\Phi_M)), where \Phi_m = [\phi_{m} : A_{m,1} : ... : A_{m,p}]
+      # (with AR_constraints \beta = (\phi_{1},...,\phi_{M},\psi)
       #estims <- solve(sum_cPsi, sum_tPsiy) # (M*d + M*p*d^2 x 1)
       estims <- tryCatch(solve(sum_cPsi, sum_tPsiy), # (M*d + M*p*d^2 x 1), fails if the system is singular
                          error=function(e) {
@@ -575,12 +575,12 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
       all_rss[t] <- crossprod(u_t, u_t) # The residual sum of squares for time period t
     }
 
-    ## Obtain the estimates in the vector (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M)
-    # (for models with AR constraints (\phi_{1,0},...,\phi_{M,0},\psi), already in the correct form):
+    ## Obtain the estimates in the vector (\phi_{1},...,\phi_{M},\varphi_1,...,\varphi_M)
+    # (for models with AR constraints (\phi_{1},...,\phi_{M},\psi), already in the correct form):
     if(is.null(AR_constraints)) {
       estims <- matrix(estims, nrow=d) # estims in the form [Phi_1,...,Phi_M]
       int_cols <- 0:(M - 1)*(d*p + 1) + 1 # which columns have the intercept parameters
-      estims <- c(estims[, int_cols], estims[, -int_cols]) # Estimates in the form (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M)
+      estims <- c(estims[, int_cols], estims[, -int_cols]) # Estimates in the form (\phi_{1},...,\phi_{M},\varphi_1,...,\varphi_M)
     }
 
     ## Return the estimates and the sum of squares of residuals, the last element is the for rss
@@ -590,7 +590,7 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
   ## A function to check whether the stability condition is satisfied for the AR matrices, and
   ## if not, to what extend it is not satisfied.
   stab_exceeded <- function(estims) {
-    # Estims should be a vector of the form (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M)
+    # Estims should be a vector of the form (\phi_{1},...,\phi_{M},\varphi_1,...,\varphi_M)
     if(!is.null(AR_constraints)) { # Expand the AR constraints
       pars_to_check <- c(estims[1:(M*d)], AR_constraints%*%estims[(M*d + 1):(M*d + ncol(AR_constraints))])
     } else {

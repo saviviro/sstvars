@@ -63,7 +63,7 @@ Returns an S3 object of class \code{'stvar'} defining a smooth transition VAR mo
    \item{which_round}{Indicators of which round of optimization each estimate belongs to, if applicable.}
    \item{seeds}{The seeds used in the estimation in \code{fitSTVAR}, if applicable.}
    \item{LS_estimates}{The least squares estimates of the parameters in the form
-     \eqn{(\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M,\alpha} (intercepts replaced by unconditional means
+     \eqn{(\phi_{1},...,\phi_{M},\varphi_1,...,\varphi_M,\alpha} (intercepts replaced by unconditional means
      if mean parametrization is used), if applicable.}
 }
 \description{
