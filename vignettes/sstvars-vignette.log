@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  24 FEB 2025 16:05
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  1 APR 2025 11:51
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -586,7 +586,7 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 ier (name{page.}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.38 ...lse response function}{33}{subsection.7.1}
+l.38 ...lse response function}{34}{subsection.7.1}
                                                   % [2])
 \tf@toc=\write5
 \openout5 = `sstvars-vignette.toc'.
@@ -608,9 +608,6 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [1]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 2 []
  []
@@ -671,19 +668,17 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [12]
-Overfull \hbox (15.03554pt too wide) in paragraph at lines 417--420
+Overfull \hbox (15.03554pt too wide) in paragraph at lines 421--422
 []\T1/lmr/m/it/10.95 Consider the STVAR model de-fined in Equa-tions ([][]1[][]
 ), ([][]2[][]), and ([][]12[][]) with $\OML/lmm/m/it/10.95 B[]; :::; B[]$
  []
 
 
-Overfull \hbox (3.10243pt too wide) in paragraph at lines 443--444
-[]\T1/lmr/m/it/10.95 the vec-tor $\OT1/lmr/m/n/10.95 (\OML/lmm/m/it/10.95 []; 
-:::; []\OT1/lmr/m/n/10.95 )$ \T1/lmr/m/it/10.95 and all its sub-vec-tors $\OT1
-/lmr/m/n/10.95 (\OML/lmm/m/it/10.95 []; :::; []\OT1/lmr/m/n/10.95 )$\T1/lmr/m
-/it/10.95 , $\OML/lmm/m/it/10.95 n[] \OMS/lmsy/m/n/10.95 2 []$\T1/lmr/m/it/10.9
-5 , $[] \OMS/lmsy/m/n/10.95 ^^Z f\OT1/lmr/m/n/10.95 1\OML/lmm/m/it/10.95 ; :::;
- M\OMS/lmsy/m/n/10.95 g$\T1/lmr/m/it/10.95 ,
+Overfull \hbox (18.82608pt too wide) in paragraph at lines 427--428
+\T1/lmr/m/it/10.95 Then, the ma-tri-ces $\OML/lmm/m/it/10.95 B[]; :::; B[]$ \T1
+/lmr/m/it/10.95 are uniquely iden-ti-fied al-most ev-ery-where in $\OT1/lmr/m/n
+/10.95 (\OML/lmm/m/it/10.95 y[]; :::; y[]; y[]; :::; y[]\OT1/lmr/m/n/10.95 ) \O
+MS/lmsy/m/n/10.95 2
  []
 
 
@@ -697,9 +692,6 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [14]
-Underfull \vbox (badness 1852) has occurred while \output is active []
-
-
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 15
  []
@@ -715,13 +707,6 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [17]
-Overfull \hbox (4.45988pt too wide) in paragraph at lines 528--529
-[]\T1/lmr/m/n/10.95 Estimate the au-tore-gres-sive and the thresh-old pa-ram-e-
-ters $[][] \OMS/lmsy/m/n/10.95 ^^Q \OT1/lmr/m/n/10.95 (\OML/lmm/m/it/10.95 ^^^[
-]; :::; ^^^[]; '[]; :::; '[]; \OT1/lmr/m/n/10.95 )$
- []
-
-
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 18 []
  []
@@ -738,7 +723,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 
 [20]
 LaTeX Font Info:    Trying to load font information for TS1+lmtt on input line 
-641.
+643.
  (/usr/local/texlive/2021/texmf-dist/tex/latex/lm/ts1lmtt.fd
 File: ts1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
@@ -757,10 +742,10 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [23]
-<figures/seriesplot.pdf, id=852, 469.755pt x 364.36125pt>
+<figures/seriesplot.pdf, id=876, 469.755pt x 364.36125pt>
 File: figures/seriesplot.pdf Graphic file (type pdf)
 <use figures/seriesplot.pdf>
-Package pdftex.def Info: figures/seriesplot.pdf  used on input line 778.
+Package pdftex.def Info: figures/seriesplot.pdf  used on input line 780.
 (pdftex.def)             Requested size: 362.37569pt x 281.07051pt.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -768,17 +753,17 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [24 <./figures/seriesplot.pdf>]
-<figures/profilelogliks.pdf, id=865, 449.68pt x 364.36125pt>
-File: figures/profilelogliks.pdf Graphic file (type pdf)
-<use figures/profilelogliks.pdf>
-Package pdftex.def Info: figures/profilelogliks.pdf  used on input line 839.
-(pdftex.def)             Requested size: 362.37569pt x 293.63542pt.
-
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 25
  []
 
 [25]
+<figures/profilelogliks.pdf, id=894, 449.68pt x 364.36125pt>
+File: figures/profilelogliks.pdf Graphic file (type pdf)
+<use figures/profilelogliks.pdf>
+Package pdftex.def Info: figures/profilelogliks.pdf  used on input line 841.
+(pdftex.def)             Requested size: 362.37569pt x 293.63542pt.
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 26 []
  []
@@ -799,7 +784,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [29]
-Overfull \hbox (10.14369pt too wide) in paragraph at lines 984--986
+Overfull \hbox (10.14369pt too wide) in paragraph at lines 986--988
 \T1/lmr/m/n/10.95 con-strained pa-ram-e-ters $\OT1/lmr/m/n/10.95 ([][]\OML/lmm/
 m/it/10.95 ; :::; [][]\OT1/lmr/m/n/10.95 )$\T1/lmr/m/n/10.95 , where the re-str
 ic-tions im-ply $[][] \OT1/lmr/m/n/10.95 = [] = (\OML/lmm/m/it/10.95 vec\OT1/lm
@@ -854,11 +839,11 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 
 [38]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 1265.
+(Font)              <10> on input line 1267.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 1265.
+(Font)              <7> on input line 1267.
 
-Overfull \hbox (1.90445pt too wide) in paragraph at lines 1265--1299
+Overfull \hbox (1.90445pt too wide) in paragraph at lines 1267--1301
  [] 
  []
 
@@ -873,7 +858,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [39
 
 ] (./sstvars-vignette.bbl
-Underfull \hbox (badness 1442) in paragraph at lines 68--72
+Underfull \hbox (badness 1442) in paragraph at lines 75--79
 []\T1/lmr/m/n/10.95 Jungers R (2023).  \T1/lmr/m/it/10.95 The JSR tool-box ([][
 ]$\T1/lmtt/m/it/10.95 https : / / www . mathworks . com / matlabcentral /
  []
@@ -884,39 +869,39 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [40]
-Underfull \hbox (badness 2707) in paragraph at lines 200--204
+Underfull \hbox (badness 2707) in paragraph at lines 207--211
 \T1/lmr/m/n/10.95 tran-si-tion vec-tor au-tore-gres-sive mod-els.''  \T1/lmr/m/
 it/10.95 Un-pub-lished work-ing pa-per, avail-able as
  []
 
-)
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 41
  []
 
-[41]
+[41])
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 42 []
  []
 
 [42] (./sstvars-vignette.aux)
 Package rerunfilecheck Info: File `sstvars-vignette.out' has not changed.
-(rerunfilecheck)             Checksum: 7C82CFFAAC2F6E07018CEA2B21449369;22578.
+(rerunfilecheck)             Checksum: 9810D0624A9C60421E75F711680D73FB;22902.
  ) 
 Here is how much of TeX's memory you used:
- 13097 strings out of 478353
- 207915 string characters out of 5848086
- 514351 words of memory out of 5000000
- 30742 multiletter control sequences out of 15000+600000
+ 13101 strings out of 478353
+ 208202 string characters out of 5848086
+ 514503 words of memory out of 5000000
+ 30748 multiletter control sequences out of 15000+600000
  509807 words of font info for 100 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,13n,77p,1978b,500s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 75i,14n,77p,2213b,506s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2021/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/local/
 texlive/2021/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/local/texlive/2021/
-texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/local/texlive/2021/texmf-dist
-/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2021/texmf-dist/fonts/enc/dvi
-ps/lm/lm-mathit.enc}{/usr/local/texlive/2021/texmf-dist/fonts/enc/dvips/lm/lm-m
-athex.enc}</usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmb10.pfb><
+texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2021/texmf-dist/fon
+ts/enc/dvips/lm/lm-mathit.enc}{/usr/local/texlive/2021/texmf-dist/fonts/enc/dvi
+ps/lm/lm-mathex.enc}{/usr/local/texlive/2021/texmf-dist/fonts/enc/dvips/lm/lm-m
+athsy.enc}</usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmb10.pfb><
 /usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></usr/local
 /texlive/2021/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></usr/local/texlive/2
 021/texmf-dist/fonts/type1/public/lm/lmex10.pfb></usr/local/texlive/2021/texmf-
@@ -934,15 +919,15 @@ usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmss10.pfb></usr/local/
 texlive/2021/texmf-dist/fonts/type1/public/lm/lmssbx10.pfb></usr/local/texlive/
 2021/texmf-dist/fonts/type1/public/lm/lmsso10.pfb></usr/local/texlive/2021/texm
 f-dist/fonts/type1/public/lm/lmsy10.pfb></usr/local/texlive/2021/texmf-dist/fon
-ts/type1/public/lm/lmsy6.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/pu
-blic/lm/lmsy8.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmt
-t10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtti10.pfb><
-/usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr/loca
-l/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on sstvars-vignette.pdf (45 pages, 693686 bytes).
+ts/type1/public/lm/lmsy8.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/pu
+blic/lm/lmtt10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lm
+tti10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtto10.pfb
+></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10
+.pfb>
+Output written on sstvars-vignette.pdf (45 pages, 690904 bytes).
 PDF statistics:
- 1239 PDF objects out of 1440 (max. 8388607)
- 1118 compressed objects within 12 object streams
- 245 named destinations out of 1000 (max. 500000)
+ 1260 PDF objects out of 1440 (max. 8388607)
+ 1141 compressed objects within 12 object streams
+ 243 named destinations out of 1000 (max. 500000)
  747 words of extra memory for PDF output out of 10000 (max. 10000000)
 

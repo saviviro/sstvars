@@ -87,5 +87,6 @@
 
 # sstvars 1.1.5
 
-
+* Updated the vignette to align with latest version of the working paper \url{https://arxiv.org/abs/2404.19707} of Virolainen, 
+  establishing identification by non-Gaussianity for TVAR and STVAR models.
 

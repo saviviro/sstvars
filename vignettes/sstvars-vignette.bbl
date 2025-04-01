@@ -1,4 +1,4 @@
-\begin{thebibliography}{33}
+\begin{thebibliography}{34}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -31,6 +31,13 @@ Buse A (1982).
   An Expository Note.}
 \newblock \emph{The American Statistician}, \textbf{36}(3a), 153--157.
 \newblock \doi{10.1080/00031305.1982.10482817}.
+
+\bibitem[{Carriero \emph{et~al.}(2024)Carriero, Marcellino, and
+  Tornese}]{Carriero+Marcellino+Tornese:2024}
+Carriero A, Marcellino M, Tornese T (2024).
+\newblock \enquote{Blended identification in structural {VARs}.}
+\newblock \emph{Journal of Monetary Economics}, \textbf{146}, {Article 103581}.
+\newblock \doi{10.1016/j.jmoneco.2024.103581}.
 
 \bibitem[{Chang and Blondel(2013)}]{Chang+Blondel:2013}
 Chang CT, Blondel V (2013).

@@ -3,7 +3,7 @@
 \contentsline {subsection}{General framework for STVAR models}{2}{subsection.2.1}%
 \contentsline {subsection}{Stationarity condition}{3}{subsection.2.2}%
 \contentsline {subsection}{Specifications of the conditional distribution}{4}{subsection.2.3}%
-\contentsline {subsubsection}{Gaussian distribution}{5}{subsubsection.2.3.1}%
+\contentsline {subsubsection}{Gaussian distribution}{4}{subsubsection.2.3.1}%
 \contentsline {subsubsection}{Student's t distribution}{5}{subsubsection.2.3.2}%
 \contentsline {subsubsection}{Independent Student's t distribution}{5}{subsubsection.2.3.3}%
 \contentsline {subsubsection}{Independent skewed t distribution}{6}{subsubsection.2.3.4}%
@@ -19,28 +19,28 @@
 \contentsline {subsection}{Identification via heteroskedasticity}{11}{subsection.3.2}%
 \contentsline {subsection}{Identification by non-Gaussianity}{11}{subsection.3.3}%
 \contentsline {subsubsection}{Identification of the shocks in TVAR models}{12}{subsubsection.3.3.1}%
-\contentsline {subsection}{Identification of the shocks in STVAR models}{13}{subsection.3.4}%
-\contentsline {subsubsection}{Labelling the shocks}{14}{subsubsection.3.4.1}%
+\contentsline {subsubsection}{Identification of the shocks in STVAR models}{14}{subsubsection.3.3.2}%
+\contentsline {subsubsection}{Labelling the shocks and blended identification}{14}{subsubsection.3.3.3}%
 \contentsline {section}{Estimation}{15}{section.4}%
-\contentsline {subsection}{The log-likelihood function}{15}{subsection.4.1}%
+\contentsline {subsection}{The log-likelihood function}{16}{subsection.4.1}%
 \contentsline {subsection}{The penalized log-likelihood function}{16}{subsection.4.2}%
 \contentsline {subsection}{Two-phase estimation procedure}{17}{subsection.4.3}%
-\contentsline {subsection}{Three-phase estimation procedure}{17}{subsection.4.4}%
+\contentsline {subsection}{Three-step estimation procedure}{18}{subsection.4.4}%
 \contentsline {subsection}{Examples of unconstrained estimation}{18}{subsection.4.5}%
 \contentsline {subsection}{Further examination of the estimates}{24}{subsection.4.6}%
 \contentsline {subsection}{Estimation of structural STVAR models}{27}{subsection.4.7}%
 \contentsline {subsubsection}{Linear constraints on the autoregressive parameters}{29}{subsubsection.4.8.1}%
-\contentsline {subsubsection}{Constraining the unconditional means of some regimes to be equal}{31}{subsubsection.4.8.2}%
+\contentsline {subsubsection}{Constraining the unconditional means of some regimes to be equal}{32}{subsubsection.4.8.2}%
 \contentsline {subsubsection}{Constraining weight functions parameters}{32}{subsubsection.4.8.3}%
-\contentsline {section}{Testing parameter constraints}{32}{section.5}%
+\contentsline {section}{Testing parameter constraints}{33}{section.5}%
 \contentsline {section}{Residual based model diagnostics}{33}{section.6}%
-\contentsline {section}{Impulse response analysis}{33}{section.7}%
-\contentsline {subsection}{Generalized impulse response function}{33}{subsection.7.1}%
+\contentsline {section}{Impulse response analysis}{34}{section.7}%
+\contentsline {subsection}{Generalized impulse response function}{34}{subsection.7.1}%
 \contentsline {subsection}{Generalized forecast error variance decomposition}{35}{subsection.7.2}%
 \contentsline {subsection}{Linear impulse response functions}{36}{subsection.7.3}%
 \contentsline {section}{Building a STVAR model with specific parameter values}{36}{section.8}%
 \contentsline {section}{Simulation and forecasting}{37}{section.9}%
 \contentsline {subsection}{Simulation}{37}{subsection.9.1}%
-\contentsline {subsection}{Simulation based forecasting}{37}{subsection.9.2}%
+\contentsline {subsection}{Simulation based forecasting}{38}{subsection.9.2}%
 \contentsline {section}{Summary}{38}{section.10}%
 \contentsline {section}{A table of some useful functions}{39}{section.10}%
