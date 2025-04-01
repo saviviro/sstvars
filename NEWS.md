@@ -84,3 +84,8 @@
 * Updated the datafile usacpu to include observations until the end of 2024.
 * Updated the references.
 * Updates to the documentation.
+
+# sstvars 1.1.5
+
+
+
