@@ -18,6 +18,7 @@
 #'   (times variables) from each regime relative to the number of parameters in the regime. For models with AR constraints,
 #'   the number of AR matrix parameters in each regimes is simplisticly assumed to be \code{ncol(AR_constraints)/M}.
 #' @param sparse_grid should the grid of weight function values in LS/NLS estimation be more sparse (speeding up the estimation)?
+#' @param h the strictly positive difference used in the finite difference approximation of the gradient used in numerical optimization.
 #' @param nrounds the number of estimation rounds that should be performed. The default is \code{(M*ncol(data))^3}
 #'   when \code{estim_method="two-phase"} and \code{(M*ncol(data))^2} when \code{estim_method="three-phase"}.
 #' @param ncores the number CPU cores to be used in parallel computing.
@@ -208,7 +209,7 @@
 fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                      weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                      parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
-                     estim_method, penalized, penalty_params=c(0.05, 0.2), allow_unstab, min_obs_coef=3, sparse_grid=FALSE,
+                     estim_method, penalized, penalty_params=c(0.05, 0.2), allow_unstab, min_obs_coef=3, sparse_grid=FALSE, h=1e-3,
                      nrounds, ncores=2, maxit=2000, seeds=NULL, print_res=TRUE, use_parallel=TRUE, calc_std_errors=TRUE, ...) {
   # Initial checks etc
   weight_function <- match.arg(weight_function)
@@ -266,6 +267,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   }
 
   if(length(M) != 1 && !all_pos_ints(M)) stop("Argument M must be a positive integer")
+  stopifnot(length(h) == 1 && h > 0)
   if(M == 1 && weight_function %in% c("logistic", "mlogit", "exponential")) {
     # Set to threshold if only regime (we assume two regimes for logistic and exponential weights)
     weight_function <- "threshold"
@@ -563,7 +565,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   }
 
   ## A function to calculate the gradient of the log-likelihood function# using central difference approximation:
-  h <- 1e-3
+  #h <- 1e-3
   I <- diag(rep(1, times=npars))
   loglik_grad <- function(params) {
     vapply(1:npars, function(i1) (loglik_fn(params + I[i1,]*h) - loglik_fn(params - I[i1,]*h))/(2*h),

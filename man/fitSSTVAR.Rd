@@ -14,6 +14,7 @@ fitSSTVAR(
   B_signs = NULL,
   maxit = 1000,
   maxit_robust = 1000,
+  h = 0.001,
   robust_method = c("Nelder-Mead", "SANN", "none"),
   print_res = TRUE,
   calc_std_errors = TRUE
@@ -52,6 +53,8 @@ with \code{cond_dist = "ind_Student"} or \code{"ind_skewed_t"}.}
 \item{maxit}{the maximum number of iterations in the variable metric algorithm.}
 
 \item{maxit_robust}{the maximum number of iterations on the first phase robust estimation, if employed.}
+
+\item{h}{the strictly positive difference used in the finite difference approximation of the gradient used in numerical optimization.}
 
 \item{robust_method}{Should some robust estimation method be used in the estimation before switching
 to the gradient based variable metric algorithm? See details.}

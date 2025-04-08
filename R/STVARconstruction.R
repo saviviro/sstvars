@@ -204,7 +204,20 @@ STVAR <- function(data, p, M, d, params,
                                    mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                                    B_constraints=B_constraints, standardize=TRUE,
                                    penalized=penalized, penalty_params=penalty_params, allow_unstab=allow_unstab)
-    IC <- get_IC(loglik=lok_and_tw$loglik, npars=npars, T_obs=nrow(data) - p)
+    if(penalized) { # Calculate the log-likelihood without the penalization term
+      nonpen_loglik <- loglikelihood(data=data, p=p, M=M, params=params,
+                                     weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                     cond_dist=cond_dist, parametrization=parametrization,
+                                     identification=identification, AR_constraints=AR_constraints,
+                                     mean_constraints=mean_constraints, weight_constraints=weight_constraints,
+                                     B_constraints=B_constraints, to_return="loglik", check_params=TRUE,
+                                     penalized=FALSE, penalty_params=penalty_params,
+                                     allow_unstab=allow_unstab, minval=NA)
+    } else {
+      nonpen_loglik <- lok_and_tw$loglik
+    }
+
+    IC <- get_IC(loglik=nonpen_loglik, npars=npars, T_obs=nrow(data) - p)
     if(identification == "reduced_form" && cond_dist != "ind_Student" && cond_dist != "ind_skewed_t") {
       # Struct shocks are available for ind_Student and skewed_t mods
       structural_shocks <- NA

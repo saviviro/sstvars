@@ -247,11 +247,12 @@ iterate_more <- function(stvar, maxit=1000, h=1e-3, penalized, penalty_params, a
 #' @export
 
 fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity", "non-Gaussianity"), B_constraints=NULL,
-                      B_pm_reg=NULL, B_perm=NULL, B_signs=NULL, maxit=1000, maxit_robust=1000,
+                      B_pm_reg=NULL, B_perm=NULL, B_signs=NULL, maxit=1000, maxit_robust=1000, h=1e-3,
                       robust_method=c("Nelder-Mead", "SANN", "none"), print_res=TRUE, calc_std_errors=TRUE) {
   check_stvar(stvar)
   stopifnot(maxit %% 1 == 0 & maxit >= 1)
   stopifnot(maxit_robust %% 1 == 0 & maxit_robust >= 1)
+  stopifnot(length(h) == 1 && h > 0)
   robust_method <- match.arg(robust_method)
   if(length(identification > 1) && match.arg(identification) == "recursive"
      && stvar$model$cond_dist %in% c("ind_Student", "ind_skewed_t")) {
@@ -695,7 +696,7 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
 
   ## Gradient of the log-likelihood function using central difference approximation
   npars <- length(new_params)
-  h <- 1e-3
+#  h <- 1e-3
   I <- diag(rep(1, times=npars))
   loglik_grad <- function(params) {
     vapply(1:npars, function(i1) (loglik_fn(params + I[i1,]*h) - loglik_fn(params - I[i1,]*h))/(2*h), numeric(1))

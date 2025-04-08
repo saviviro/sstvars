@@ -7,7 +7,7 @@
 get_IC(loglik, npars, T_obs)
 }
 \arguments{
-\item{loglik}{log-likelihood value}
+\item{loglik}{log-likelihood value, preferably non-penalized one.}
 
 \item{npars}{number of (freely estimated) parameters in the model}
 

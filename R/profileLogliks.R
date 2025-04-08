@@ -263,7 +263,7 @@ profile_logliks <- function(stvar, which_pars, scale=0.1, nrows, ncols, precisio
               }
             }
           }
-          main <- substitute(B(foo), list(foo=paste0(B_row_ind[col_ind], ", ", col_ind)))
+          main <- substitute(B[foo2](foo), list(foo=paste0(B_row_ind[col_ind], ", ", col_ind), foo2=m))
           B_row_ind[col_ind] <- B_row_ind[col_ind] + 1
         }
       }

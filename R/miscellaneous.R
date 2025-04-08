@@ -16,7 +16,7 @@ get_minval <- function(data) {
 #' @description \code{get_IC} calculates the information criteria values
 #'   AIC, HQIC, and BIC divided by the number of observations.
 #'
-#' @param loglik log-likelihood value
+#' @param loglik log-likelihood value, preferably non-penalized one.
 #' @param npars number of (freely estimated) parameters in the model
 #' @param T_obs numbers of observations with the \eqn{p} starting values excluded.
 #' @return Returns a data frame containing the information criteria values

@@ -91,3 +91,9 @@
   establishing identification by non-Gaussianity for TVAR and STVAR models.
 * In the documentation, simplified the notation of the intercept parameters from \phi_{m,0} to \phi_{m}.
 
+# sstvars 1.1.6
+
+* Now also for models estimated via penalized ML, the values of the information criteria are calculated using the log-likelihood without the penalization term.
+* Added the argument "h" to functions fitSTVAR and fitSSTVAR, which allows to specify the difference in finite difference approximation of the gradient used in
+  numerical optimization.
+* In the function profile_logliks, added the missing subscript to elements of the impact matrix B_m to indicate the corresponding regime.
