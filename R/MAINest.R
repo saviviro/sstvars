@@ -252,7 +252,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
 
   }
   if(parametrization == "mean") {
-    message("Unstable estimates are cannot be allowed with parametrization='mean' (how do you derive the mean?)")
+    message("Unstable estimates are cannot be allowed with parametrization='mean' (how do you derive the mean?). Using allow_unstab=FALSE.")
     allow_unstab <- FALSE
   }
 
