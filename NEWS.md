@@ -97,3 +97,8 @@
 * Added the argument "h" to functions fitSTVAR and fitSSTVAR, which allows to specify the difference in finite difference approximation of the gradient used in
   numerical optimization.
 * In the function profile_logliks, added the missing subscript to elements of the impact matrix B_m to indicate the corresponding regime.
+
+# sstvars 1.1.7
+
+* Previously the documentation of fitSTVAR incorrectly stated that two-phase estimation method is the default all but TVAR models, although it is the default for
+  only relative_dens models. The documentation has been updated to clarify this.

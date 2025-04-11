@@ -109,8 +109,8 @@ constraint matrix of full column rank (\eqn{a} is the dimension of \eqn{\alpha})
 and \eqn{\xi} is an unknown \eqn{(l\times 1)} parameter. \strong{Alternatively}, set \eqn{R=0} to constrain the
 weight parameters to the constant \eqn{r} (in this case, \eqn{\alpha} is dropped from the constrained parameter vector).}
 
-\item{estim_method}{either \code{"two-phase"} or \code{"three-phase"} (the latter is the default
-option for threshold models and the former is currently the only option for other models). See details.}
+\item{estim_method}{either \code{"two-phase"} or \code{"three-phase"} (the former is the default method for \code{relative_dens} models
+and the latter the default for the other models). See details.}
 
 \item{penalized}{should penalized log-likelihood function be used that penalizes the log-likelihood function when
 the parameter values are close the boundary of the stability region or outside it? If \code{TRUE}, estimates

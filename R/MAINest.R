@@ -4,8 +4,8 @@
 #'   or three phases. In additional ML estimation, also penalized ML estimation is available.
 #'
 #' @inheritParams GAfit
-#' @param estim_method either \code{"two-phase"} or \code{"three-phase"} (the latter is the default
-#'   option for threshold models and the former is currently the only option for other models). See details.
+#' @param estim_method either \code{"two-phase"} or \code{"three-phase"} (the former is the default method for \code{relative_dens} models
+#'   and the latter the default for the other models). See details.
 #' @param penalized should penalized log-likelihood function be used that penalizes the log-likelihood function when
 #'   the parameter values are close the boundary of the stability region or outside it? If \code{TRUE}, estimates
 #'   that do not satisfy the stability condition are allowed (except when \code{weight_function="relative_dens"}).

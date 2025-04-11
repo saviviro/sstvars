@@ -1,7 +1,7 @@
 Package: sstvars
 Type: Package
 Title: Toolkit for Reduced Form and Structural Smooth Transition Vector Autoregressive Models
-Version: 1.1.6
+Version: 1.1.7
 Authors@R: person("Savi", "Virolainen", email = "savi.virolainen@helsinki.fi",
                   role = c("aut", "cre"), comment = c(ORCID = "0000-0002-5075-6821"))
 Maintainer: Savi Virolainen <savi.virolainen@helsinki.fi>
