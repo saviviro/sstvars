@@ -100,5 +100,7 @@
 
 # sstvars 1.1.7
 
+* BUG FIX: There was an issue with the Phase 1 estimation of the three-phase estimation when weight_function = "exogenous" (NLS estimates were not calculated
+  correctly). This is now fixed.
 * Previously the documentation of fitSTVAR incorrectly stated that two-phase estimation method is the default all but TVAR models, although it is the default for
   only relative_dens models. The documentation has been updated to clarify this.

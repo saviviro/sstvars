@@ -408,6 +408,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                                                to_return="loglik", check_params=TRUE,
                                                                penalized=penalized, penalty_params=penalty_params,
                                                                allow_unstab=allow_unstab, minval=minval, alt_par=TRUE), numeric(1))
+
       G <- cbind(G, inds[, ind_loks > minval]) # Take good enough individuals
       if(ncol(G) >= popsize) {
         G <- G[, 1:popsize]
@@ -428,6 +429,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
         }
       }
     }
+
   } else {  # Initial population set by the user
     stopifnot(is.list(initpop))
     for(i1 in 1:length(initpop)) {

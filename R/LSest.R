@@ -612,7 +612,9 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
   ############################################
 
   ## Create the set of weight parameters for the optimization; M=1 will use numeric(0) and run the NLS only once
-  if(is.null(weight_constraints) && weight_function != "exogenous") {
+  if(M == 1) {
+    weightparvecs <- numeric(0)
+  } else if(is.null(weight_constraints) && weight_function != "exogenous") {
     if(weight_function != "mlogit") {
       switch_var_series <- data[,weightfun_pars[1]] # The switching variable time series
       sv_sorted_full <- sort(switch_var_series, decreasing=FALSE) # The sorted switch variable series
@@ -681,9 +683,9 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
   ## Estimate the model for all weight pars in weight_pars
   estim_length <- if(is.null(AR_constraints)) M*d + M*p*d^2 + 1 else M*d + ncol(AR_constraints) + 1
 
-  if(M == 1) {
+  if(M == 1 || weight_function == "exogenous") {
     if(use_parallel) message(paste("PHASE 1: Estimating the AR and weight parameters by nonlinear least squares..."))
-    estims <- as.matrix(NLS_est(numeric(0), AR_constraints=AR_constraints))
+    estims <- as.matrix(NLS_est(weightparvecs, AR_constraints=AR_constraints))
     all_stab_ex <- stab_exceeded(estims[,1])
   } else {
     if(use_parallel) {
@@ -703,7 +705,7 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
 
       if(penalized) {
         if(M > 2) {
-          message(paste0("Checking the stability condition for all the LS estimates..."))
+          message(paste0("Checking the stability condition for all the NLS estimates..."))
           all_stab_ex <- simplify2array(pbapply::pblapply(1:nrow(weightparvecs), FUN=function(i1) stab_exceeded(estims[,i1]), cl=cl))
         } else { # Less prints, since the calculations are fast enough
           all_stab_ex <- simplify2array(pbapply::pblapply(1:nrow(weightparvecs), FUN=function(i1) stab_exceeded(estims[,i1]), cl=cl))
@@ -746,5 +748,6 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
   } else {
     weightpar_estims <- weightparvecs[min_rss_index,]
   }
+
   c(int_and_ar_estims, weightpar_estims) # Return the estimates
 }

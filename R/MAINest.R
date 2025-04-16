@@ -509,6 +509,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
             allow_unstab=allow_unstab,
             seed=seeds[i1], ...)
     }
+
     GAresults <- lapply(1:nrounds, function(i1) tmpfunGA(i1, ...))
   }
 
