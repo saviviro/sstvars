@@ -946,6 +946,19 @@ theta_222exoiktngb_expanded <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222
                                 Wvec(B1_222c), Wvec(B2_222c), dfls_222_2_1)
 theta_222exoiktngb_2_1_alt <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), Wvec(B1_222c), Wvec(B2_222c)-Wvec(B1_222c), dfls_222_2_1)
 
+############################
+## Bound by weights check ##
+############################
+
+# p=1, M=3, d=2, weight_function="threshold", weightfun_pars=c(1, 1), cond_dist="ind_Student", identification="non-Gaussianity",
+# B_constraints=matrix(c(1, 0, NA, 1), nrow=2), bound_by_weights=TRUE, min_obs_coef=3, minval=0
+theta_132thresitngb_1_1_bw <- c(phi10_132, phi20_132, phi30_132, vec(A11_132), vec(A21_132), vec(A31_132),
+                                Wvec(B1_132c), Wvec(B2_132c), Wvec(B3_132c), 0, 0.01, dfs_132_1_1)
+
+# p=2, M=2, d=2, cond_dist="ind_skewed_t", weight_function="logistic", weightfun_pars=c(2, 1),
+# bound_by_weights=TRUE, min_obs_coef=3, minval=0
+theta_222logistikt_2_1_bw <- c(phi10_222, phi20_222, vec(A11_222), vec(A12_222), vec(A21_222), vec(A22_222),
+                            vec(B1_222), vec(B2_222), c(0, 20), dfls_222_2_1)
 
 test_that("loglikelihood works correctly", {
 
@@ -1506,4 +1519,19 @@ test_that("loglikelihood works correctly", {
                                identification="non-Gaussianity", B_constraints=matrix(c(NA, NA, 0, 1), nrow=2), alt_par=TRUE,
                                to_return="total_ccovs")[, , 242]),
                c(0.07106374, -0.04640166, -0.04640166, 0.04615817), tolerance=1e-3)
+
+  # Bound by weights checks
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=3, params=theta_132thresitngb_1_1_bw, weight_function="threshold", weightfun_pars=c(1, 1),
+                             cond_dist="ind_Student", identification="non-Gaussianity", B_constraints=matrix(c(1, 0, NA, 1), nrow=2),
+                             bound_by_weights=TRUE, min_obs_coef=3, minval=0), 0, tolerance=1e-3)
+
+  expect_equal(loglikelihood(data=gdpdef, p=1, M=3, params=theta_132thresitngb_1_1_bw, weight_function="threshold", weightfun_pars=c(1, 1),
+                             cond_dist="ind_Student", identification="non-Gaussianity", B_constraints=matrix(c(1, 0, NA, 1), nrow=2),
+                             bound_by_weights=TRUE, min_obs_coef=0.1, minval=0), -13341.47, tolerance=1)
+
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222logistikt_2_1_bw, cond_dist="ind_skewed_t", weight_function="logistic",
+                             weightfun_pars=c(2, 1), bound_by_weights=TRUE, min_obs_coef=1, minval=0), 0, tolerance=1e-3)
+
+  expect_equal(loglikelihood(data=gdpdef, p=2, M=2, params=theta_222logistikt_2_1_bw, cond_dist="ind_skewed_t", weight_function="logistic",
+                             weightfun_pars=c(2, 1), bound_by_weights=TRUE, min_obs_coef=0.5, minval=0), -508.9013, tolerance=1e-3)
 })

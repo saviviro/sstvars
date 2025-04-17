@@ -100,7 +100,10 @@
 
 # sstvars 1.1.7
 
+* NEW: It is not possible in the genetic algorithm to only allow for estimates that allocate the specified amount of observations to each regime
+  (see ??GAfit and the arguments bound_by_weights and min_obs_coef_ga).
 * BUG FIX: There was an issue with the Phase 1 estimation of the three-phase estimation when weight_function = "exogenous" (NLS estimates were not calculated
   correctly). This is now fixed.
 * Previously the documentation of fitSTVAR incorrectly stated that two-phase estimation method is the default all but TVAR models, although it is the default for
   only relative_dens models. The documentation has been updated to clarify this.
+* Adjusted the argument min_obs_coef to work slightly more accurately. This might have some effect on the obtained estimates. 

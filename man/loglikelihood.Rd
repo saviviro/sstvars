@@ -28,6 +28,7 @@ loglikelihood(
   penalty_params = c(0.05, 0.2),
   allow_unstab = FALSE,
   bound_by_weights = FALSE,
+  min_obs_coef = 2.5,
   indt_R = FALSE,
   alt_par = FALSE,
   minval = NULL,
@@ -224,7 +225,11 @@ is a tuning parameter for the penalization (a positive real number, a higher val
 \code{weight_function="relative_dens"}.}
 
 \item{bound_by_weights}{should \code{minval} be returned if the transition weights do not allocate enough weights to a regime
-compared to the number of observations in the regime? See the source code for details.}
+compared to the number of observations in the regime? See the argument \code{min_obs_coef} for details.}
+
+\item{min_obs_coef}{if \code{bound_by_weights=TRUE}, determines the smallest accepted number of observations (times variables)
+from each regime relative to the number of parameters in the regime. For models with AR constraints, the number of AR matrix
+ parameters in each regimes is simply assumed to be \code{ncol(AR_constraints)/M}. See the source code for further details.}
 
 \item{indt_R}{If \code{TRUE} calculates the independent Student's t density in R instead of C++ without any approximations
 employed for speed-up.}

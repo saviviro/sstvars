@@ -32,7 +32,7 @@ test_that("estim_LS works correctly", {
                c(0.65960789, 0.03526952, 2.66153644, -0.06036853, 0.25877903, 0.03617575, -0.15627433, 0.92984380, -0.56807458, 0.13839834,
                  -0.10073727, 0.72599353, 1.82058000), tolerance=1e-4)
   expect_equal(estim_LS(gdpdef[1:20,], p=1, M=2, weight_function="threshold", weightfun_pars=c(1, 1),
-                        AR_constraints=rbind(diag(1*2^2), diag(1*2^2)), use_parallel=FALSE, min_obs_coef=2),
+                        AR_constraints=rbind(diag(1*2^2), diag(1*2^2)), use_parallel=FALSE, min_obs_coef=2.4),
                c(1.1522529, 0.4571413, 1.8530941, 0.1888232, -0.1940042, 0.1311513, -1.3653882, -0.4211367, 0.6749000), tolerance=1e-4)
 
   expect_equal(estim_LS(usamone, p=3, M=2, weight_function="threshold", weightfun_pars=c(2, 3), use_parallel=FALSE, min_obs_coef=2),

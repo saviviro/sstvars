@@ -132,8 +132,13 @@
 #'   be considered "redundant". One should be careful when adjusting this argument (set \code{c(0, 0)} to fully disable
 #'   the 'redundant regime' features from the algorithm).
 #' @param bound_by_weights should the parameter space be constrained to areas where the transition weights do allocate
-#'   enough weights to each regime compared to the number of observations in the regime? See the source code of
-#'   the function \code{loglikelihood} for details.
+#'   enough weights to each regime compared to the number of observations in the regime? See the argument \code{min_obs_coef_ga},
+#'   and if three-phase estimation is used, \strong{carefully} adjust it to be small enough so that estimates obtained from LS/NLS
+#'   estimation are not discarded. A smaller number than \code{min_obs_coef} of LS/NLS estimation should be used.
+#' @param min_obs_coef_ga if \code{bound_by_weights=TRUE}, determines the smallest accepted number of observations (times variables)
+#'   from each regime relative to the number of parameters in the regime. For models with AR constraints, the number of AR matrix
+#'   parameters in each regimes is simply assumed to be \code{ncol(AR_constraints)/M}. See the source code of the function
+#'   \code{loglikelihood} for further details.
 #' @param pre_smart_mu_prob A number in \eqn{[0,1]} giving a probability of a "smart mutation" occuring randomly in each
 #'   iteration before the iteration given by the argument \code{smart_mu}.
 #' @param to_return should the genetic algorithm return the best fitting individual which has "positive enough" mixing
@@ -209,7 +214,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                   parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
                   ngen=200, popsize, smart_mu=min(100, ceiling(0.5*ngen)), initpop=NULL,  mu_scale, mu_scale2, omega_scale,
                   B_scale, weight_scale, ar_scale=0.2, upper_ar_scale=1, ar_scale2=1, regime_force_scale=1,
-                  penalized, penalty_params=c(0.05, 0.5), allow_unstab, red_criteria=c(0.05, 0.01), bound_by_weights,
+                  penalized, penalty_params=c(0.05, 0.5), allow_unstab, red_criteria=c(0.05, 0.01), bound_by_weights=FALSE, min_obs_coef_ga=2.5,
                   pre_smart_mu_prob=0, to_return=c("alt_ind", "best_ind"), minval, fixed_params=NULL,
                   fixed_params_in_smart_mu=TRUE, seed=NULL) {
 
@@ -227,6 +232,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
   if(!is.null(fixed_params) && parametrization != "intercept") {
     stop("fixed_params should be used with parametrization='intercept'")
   }
+  stopifnot(is.numeric(min_obs_coef_ga) && length(min_obs_coef_ga) == 1 && min_obs_coef_ga > 0)
   parametrization_to_use <- ifelse(is.null(fixed_params), "mean", "intercept") # Which parametrization is used in the GA estimation
 
   weightfun_pars <- check_weightfun_pars(data=data, p=p, d=d, M=M, weight_function=weight_function,
@@ -407,7 +413,8 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                                                weight_constraints=weight_constraints, B_constraints=NULL,
                                                                to_return="loglik", check_params=TRUE,
                                                                penalized=penalized, penalty_params=penalty_params,
-                                                               allow_unstab=allow_unstab, minval=minval, alt_par=TRUE), numeric(1))
+                                                               allow_unstab=allow_unstab, bound_by_weights=bound_by_weights,
+                                                               min_obs_coef=min_obs_coef_ga, minval=minval, alt_par=TRUE), numeric(1))
 
       G <- cbind(G, inds[, ind_loks > minval]) # Take good enough individuals
       if(ncol(G) >= popsize) {
@@ -501,6 +508,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                      weight_constraints=weight_constraints, B_constraints=NULL,
                                      to_return="loglik_and_tw", check_params=TRUE,
                                      penalized=penalized, penalty_params=penalty_params,
+                                     bound_by_weights=bound_by_weights, min_obs_coef=min_obs_coef_ga,
                                      allow_unstab=allow_unstab, minval=minval, alt_par=TRUE)
         fill_lok_and_red(i1, i2, loks_and_tw)
       }
@@ -542,6 +550,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                                   weight_constraints=weight_constraints, B_constraints=NULL,
                                                   to_return="loglik_and_tw", check_params=FALSE,
                                                   penalized=penalized, penalty_params=penalty_params,
+                                                  bound_by_weights=bound_by_weights, min_obs_coef=min_obs_coef_ga,
                                                   allow_unstab=allow_unstab, minval=minval, alt_par=TRUE),
                                     error=function(e) minval)
           } else {
@@ -552,6 +561,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                                   weight_constraints=weight_constraints, B_constraints=NULL,
                                                   to_return="loglik_and_tw", check_params=TRUE,
                                                   penalized=penalized, penalty_params=penalty_params,
+                                                  bound_by_weights=bound_by_weights, min_obs_coef=min_obs_coef_ga,
                                                   allow_unstab=allow_unstab, minval=minval, alt_par=TRUE),
                                     error=function(e) minval)
           }
@@ -572,6 +582,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                                                       weight_constraints=weight_constraints, B_constraints=NULL,
                                                       to_return="loglik", check_params=TRUE,
                                                       penalized=penalized, penalty_params=penalty_params,
+                                                      bound_by_weights=bound_by_weights, min_obs_coef=min_obs_coef_ga,
                                                       allow_unstab=allow_unstab, minval=minval, alt_par=TRUE)
       redundants[i1, which_to_best_ind] <- length(which_redundant)
     }
@@ -636,7 +647,8 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
                              cond_dist=cond_dist, parametrization=parametrization_to_use, identification="reduced_form",
                              AR_constraints=AR_constraints, mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                              B_constraints=NULL, to_return="tw", check_params=FALSE, penalized=penalized, penalty_params=penalty_params,
-                             allow_unstab=allow_unstab, minval=minval, alt_par=TRUE)
+                             bound_by_weights=bound_by_weights, min_obs_coef=min_obs_coef_ga, allow_unstab=allow_unstab, minval=minval,
+                             alt_par=TRUE)
 
     # Which regimes are wasted:
     which_redundant <- which(vapply(1:M, function(i2) sum(best_tw[,i2] > red_criteria[1]) < red_criteria[2]*n_obs, logical(1)))

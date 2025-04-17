@@ -80,9 +80,11 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   # Obtain relevant statistics
   n_obs <- nrow(data)
   T_obs <- n_obs - p
-  pars_per_regime <- d + ifelse(is.null(AR_constraints), p*d^2, ncol(AR_constraints)/M) + d^2
-  T_min <- min_obs_coef/d*pars_per_regime # Minimum number of obs in each regime
-  if(T_obs/M < T_min) { # Try smaller T_min
+  n_meanpars_reg <- ifelse(is.null(mean_constraints), d, length(mean_constraints)*d/M)
+  n_arpars_reg <- ifelse(is.null(AR_constraints), p*d^2, ncol(AR_constraints)/M) # The number of AR parameters in each regime
+  n_covmatpars_reg <- ifelse(cond_dist %in% c("ind_Student", "ind_skewed_t"), d^2, d*(d + 1)/2)
+  T_min <- min_obs_coef/d*(n_meanpars_reg + n_arpars_reg + n_covmatpars_reg) # Minimum number of obs in each regime
+  if(T_obs/M < T_min) {
     stop(paste("The number of observations is too small for reasonable estimation (according to the argument 'min_obs_coef').",
                "Decrease the order p or the number of regimes M."))
   }
@@ -438,9 +440,11 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
   n_obs <- nrow(data)
   T_obs <- n_obs - p
   if(weight_function != "exogenous") {
-    T_min <- min_obs_coef/d*ifelse(is.null(AR_constraints), (p + 1)*d^2 + d,
-                        ncol(AR_constraints)/M + d + d^2) # Minimum number of obs in each regime
-    if(T_obs/M < T_min) { # Try smaller T_min
+    n_meanpars_reg <- ifelse(is.null(mean_constraints), d, length(mean_constraints)*d/M)
+    n_arpars_reg <- ifelse(is.null(AR_constraints), p*d^2, ncol(AR_constraints)/M) # The number of AR parameters in each regime
+    n_covmatpars_reg <- ifelse(cond_dist %in% c("ind_Student", "ind_skewed_t"), d^2, d*(d + 1)/2)
+    T_min <- min_obs_coef/d*(n_meanpars_reg + n_arpars_reg + n_covmatpars_reg) # Minimum number of obs in each regime
+    if(T_obs/M < T_min) {
        stop(paste("The number of observations is too small for reasonable estimation (according to the argument 'min_obs_coef').",
                   "Decrease the order p or the number of regimes M."))
     }

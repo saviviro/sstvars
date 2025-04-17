@@ -170,7 +170,10 @@
 #' @param allow_unstab If \code{TRUE}, estimates not satisfying the stability condition are allowed. Always \code{FALSE} if
 #'  \code{weight_function="relative_dens"}.
 #' @param bound_by_weights should \code{minval} be returned if the transition weights do not allocate enough weights to a regime
-#'   compared to the number of observations in the regime? See the source code for details.
+#'   compared to the number of observations in the regime? See the argument \code{min_obs_coef} for details.
+#' @param min_obs_coef if \code{bound_by_weights=TRUE}, determines the smallest accepted number of observations (times variables)
+#'   from each regime relative to the number of parameters in the regime. For models with AR constraints, the number of AR matrix
+#'    parameters in each regimes is simply assumed to be \code{ncol(AR_constraints)/M}. See the source code for further details.
 #' @param indt_R If \code{TRUE} calculates the independent Student's t density in R instead of C++ without any approximations
 #'   employed for speed-up.
 #' @param alt_par If \code{TRUE} assumes that models identified by non-Gaussianiaty (or \code{cond_dist="Student"}) are
@@ -234,11 +237,11 @@ loglikelihood <- function(data, p, M, params,
                           weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                           parametrization=c("intercept", "mean"),
                           identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
-                          AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
-                          other_constraints=NULL,
+                          AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL, other_constraints=NULL,
                           to_return=c("loglik", "tw", "loglik_and_tw", "terms", "regime_cmeans", "total_cmeans", "total_ccovs", "B_t"),
                           check_params=TRUE, penalized=FALSE, penalty_params=c(0.05, 0.2), allow_unstab=FALSE, bound_by_weights=FALSE,
-                          indt_R=FALSE, alt_par=FALSE, minval=NULL, stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8, weightpar_tol=1e-8) {
+                          min_obs_coef=2.5, indt_R=FALSE, alt_par=FALSE, minval=NULL, stab_tol=1e-3, posdef_tol=1e-8, distpar_tol=1e-8,
+                          weightpar_tol=1e-8) {
 
   # Match args
   weight_function <- match.arg(weight_function)
@@ -331,7 +334,7 @@ loglikelihood <- function(data, p, M, params,
       ifelse(is.null(AR_constraints), p*d^2, ncol(AR_constraints)/M) + # AR params
       ifelse(cond_dist %in% c("ind_Student", "ind_skewed_t"), d^2, d*(d + 1)/2) # Covmat params
     obs_per_reg <- d*colSums(alpha_mt)
-    if(any(obs_per_reg < 1.2*pars_per_reg)) {
+    if(any(obs_per_reg < min_obs_coef*pars_per_reg)) {
       return(minval)
     }
   }

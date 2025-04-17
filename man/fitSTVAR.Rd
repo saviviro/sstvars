@@ -127,7 +127,7 @@ is a tuning parameter for the penalization (a positive real number, a higher val
 
 \item{min_obs_coef}{In the LS/NLS step of the three phase estimation, the smallest accepted number of observations
 (times variables) from each regime relative to the number of parameters in the regime. For models with AR constraints,
-the number of AR matrix parameters in each regimes is simplisticly assumed to be \code{ncol(AR_constraints)/M}.}
+the number of AR matrix parameters in each regimes is simply assumed to be \code{ncol(AR_constraints)/M}.}
 
 \item{sparse_grid}{should the grid of weight function values in LS/NLS estimation be more sparse (speeding up the estimation)?}
 
@@ -243,6 +243,10 @@ If you wish to estimate a structural model, estimate first the reduced form mode
  stationarity is close to break), or transition weights such that they are close to zero for almost all \eqn{t} for at least
  one regime. You can also always find the solutions of interest yourself by using the function \code{alt_stvar} as well since
  results from all estimation rounds are saved).
+
+ \strong{Passing arguments to the genetic algorithm:} The settings of the genetic algorithm can be adjusted by passing arguments
+ to it via the dot parameters. See all the available options from the documentation of the function \code{GAfit} with the command
+ \code{??GAfit}.
 }
 \section{S3 methods}{
 
