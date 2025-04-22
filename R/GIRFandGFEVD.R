@@ -122,9 +122,9 @@
 #'   The element \code{$all_girfs} is a list containing results from all the individual GIRFs
 #'   obtained from the MC repetitions. Each element is for one shock and results are in
 #'   array of the form \code{[horizon, variables, MC-repetitions]}.
-#' @seealso \code{\link{GFEVD}}, \code{\link{linear_IRF}}, \code{\link{fitSSTVAR}}
+#' @seealso \code{\link{GFEVD}}, \code{\link{linear_IRF}}, \code{\link{hist_decomp}}, \code{\link{fitSSTVAR}}
 #'  \itemize{
-#'    \item Kilian L., Lütkepohl H. 20017. Structural Vector Autoregressive Analysis. 1st edition.
+#'    \item Kilian L., Lütkepohl H. 2017. Structural Vector Autoregressive Analysis. 1st edition.
 #'      \emph{Cambridge University Press}, Cambridge.
 #'  }
 
@@ -513,7 +513,7 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 #'   because the related GIRFs are always zero at impact.
 #'   Also contains the individual GFEVDs for each used initial length \eqn{p} initial value (history) as
 #'   4D array with dimensions \code{[horizon, variable, shock, time]}.
-#' @seealso \code{\link{GIRF}}, \code{\link{linear_IRF}}, \code{\link{fitSSTVAR}}
+#' @seealso \code{\link{GIRF}}, \code{\link{linear_IRF}}, \code{\link{hist_decomp}}, \code{\link{fitSSTVAR}}
 #' @references
 #'  \itemize{
 #'    \item Lanne M. and Nyberg H. 2016. Generalized Forecast Error Variance Decomposition for Linear

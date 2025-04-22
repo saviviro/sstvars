@@ -98,7 +98,7 @@
   numerical optimization.
 * In the function profile_logliks, added the missing subscript to elements of the impact matrix B_m to indicate the corresponding regime.
 
-# sstvars 1.1.7
+# sstvars 1.2.0
 
 * NEW: It is not possible in the genetic algorithm to only allow for estimates that allocate the specified amount of observations to each regime
   (see ??GAfit and the arguments bound_by_weights and min_obs_coef_ga).
