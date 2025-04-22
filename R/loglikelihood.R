@@ -264,7 +264,7 @@ loglikelihood <- function(data, p, M, params,
                                          weightfun_pars=weightfun_pars, cond_dist=cond_dist)
 
   # Collect the parameter values
-  # First remove all constraints, if any; also switch to reduced form parameter vector;
+  # First remove all constraints if any:
   params <- reform_constrained_pars(p=p, M=M, d=d, params=params, weight_function=weight_function,
                                     cond_dist=cond_dist, identification=identification,
                                     AR_constraints=AR_constraints, mean_constraints=mean_constraints,

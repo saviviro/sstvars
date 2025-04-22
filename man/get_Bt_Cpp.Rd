@@ -19,6 +19,7 @@ An arma::cube value (3D array in R) such that each slice contains the weighted s
 \description{
 This internal function takes a cube of matrices (\code{all_Omegas}) and a matrix of weights (\code{alpha_mt}),
 and calculates the weighted sums of the matrices in the cube. For each row in \code{alpha_mt}, it computes
-a weighted sum of matrices, and returns the
+a weighted sum of matrices, and returns the (3D array) such that each slice contains the weighted sum of the matrices.
+Note that the argument \code{all_Omegas} should contain the impact matrices of the regimes (and not the covariance matrices).
 }
 \keyword{internal}

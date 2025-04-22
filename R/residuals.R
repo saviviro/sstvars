@@ -31,7 +31,7 @@ get_residuals <- function(data, p, M, params,
   parametrization <- match.arg(parametrization)
   identification <- match.arg(identification)
   if(structural_shocks && identification == "reduced_form" && !(cond_dist %in% c("ind_Student", "ind_skewed_t"))) {
-    stop("Structural shocks are not available if identification == \"reduced_form\" and cond_dist != \"ind_Student\".")
+    stop("Structural shocks are not available if identification == \"reduced_form\" and !(cond_dist %in% c(\"ind_Student\", \"ind_skewed_t\").")
   }
   T_obs <- nrow(data) - p
   d <- ncol(data)

@@ -252,9 +252,9 @@ The "confidence bounds" \strong{do not} quantify uncertainty about the true para
  }
 }
 \seealso{
-\code{\link{GFEVD}}, \code{\link{linear_IRF}}, \code{\link{fitSSTVAR}}
+\code{\link{GFEVD}}, \code{\link{linear_IRF}}, \code{\link{hist_decomp}}, \code{\link{fitSSTVAR}}
  \itemize{
-   \item Kilian L., Lütkepohl H. 20017. Structural Vector Autoregressive Analysis. 1st edition.
+   \item Kilian L., Lütkepohl H. 2017. Structural Vector Autoregressive Analysis. 1st edition.
      \emph{Cambridge University Press}, Cambridge.
  }
 }

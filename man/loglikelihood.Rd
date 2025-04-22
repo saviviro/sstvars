@@ -268,7 +268,7 @@ to the border of the parameter space than this are considered to be "outside" th
     \item{If \code{to_return=="total_ccovs"}:}{an \code{[d, d, n_obs-p]} array containing the conditional covariance matrices of
       the process.}
     \item{If \code{to_return=="B_t"}:}{an \code{[d, d, n_obs-p]} array containing the impact matrices \eqn{B_t} of
-      the process. Available only for models with \code{cond_dist="ind_Student"}.}
+      the process. Available only for models with \code{cond_dist="ind_Student" or "ind_skewed_t"}.}
   }
 }
 \description{
