@@ -1,7 +1,7 @@
 Package: sstvars
 Type: Package
 Title: Toolkit for Reduced Form and Structural Smooth Transition Vector Autoregressive Models
-Version: 1.1.7
+Version: 1.2.0
 Authors@R: person("Savi", "Virolainen", email = "savi.virolainen@helsinki.fi",
                   role = c("aut", "cre"), comment = c(ORCID = "0000-0002-5075-6821"))
 Maintainer: Savi Virolainen <savi.virolainen@helsinki.fi>
@@ -9,9 +9,10 @@ Description: Penalized and non-penalized maximum likelihood estimation of smooth
   transition vector autoregressive models with various types of transition weight
   functions, conditional distributions, and identification methods. Constrained
   estimation with various types of constraints is available. Residual based
-  model diagnostics, forecasting, simulations, and calculation of impulse
-  response functions, generalized impulse response functions, and generalized 
-  forecast error variance decompositions. See
+  model diagnostics, forecasting, simulations, counterfactual analysis, and
+  calculation of impulse response functions, generalized impulse response functions,
+  generalized forecast error variance decompositions, as well as historical
+  decompositions. See
   Heather Anderson, Farshid Vahid (1998) <doi:10.1016/S0304-4076(97)00076-6>,
   Helmut Lütkepohl, Aleksei Netšunajev (2017) <doi:10.1016/j.jedc.2017.09.001>,
   Markku Lanne, Savi Virolainen (2025) <doi:10.48550/arXiv.2403.14216>,
