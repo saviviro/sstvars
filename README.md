@@ -211,6 +211,10 @@ fitcmhet
 # 95% confidence bounds that reflect uncertainty about the parameter estimates:
 irf2 <- linear_IRF(fitcmhet, N=30, ci=0.95, bootstrap_reps=250)
 plot(irf2)
+
+# Compute historical decompositions of the variables in the model fitrec (see Wong 2018):
+histdec <- hist_decomp(fitrec)
+plot(histdec)
 ```
 
 ## References
@@ -233,3 +237,6 @@ plot(irf2)
 - Virolainen S. 2025. Identification by non-Gaussianity in structural
   threshold and smooth transition vector autoregressive. Unpublished
   working paper, available as arXiv:2404.19707.
+- Wong H. 2018. Historical decomposition for nonlinear vector
+  autoregressive models. *CAMA Working Paper No. 62/2017, available as
+  SSRN:3057759*.

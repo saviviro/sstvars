@@ -94,6 +94,6 @@ plot(histdec, plot_by_shock=TRUE, which_to_plot=1)
    \item Kilian L., Lütkepohl H. 2017. Structural Vector Autoregressive Analysis. 1st edition.
      \emph{Cambridge University Press}, Cambridge.
    \item Wong H. 2018. Historical decomposition for nonlinear vector autoregressive models.
-     \emph{CAMA Working Paper No. 62/2017, available as SSRN:3057759}
+     \emph{CAMA Working Paper No. 62/2017, available as SSRN:3057759}.
  }
 }
