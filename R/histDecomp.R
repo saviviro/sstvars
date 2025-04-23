@@ -198,7 +198,9 @@ hist_decomp <- function(stvar) {
       }
     }
   }
-  dimnames(contributions_of_shocks) <- list(1:T_obs, paste0("Shock ", 1:d), colnames(stvar$data))
+  tmp_ts <- ts(1:T_obs, start=get_new_start(y_start=start(stvar$data), y_freq=frequency(stvar$data), steps_forward=p),
+               frequency=frequency(stvar$data)) # [T_obs, 1]
+  dimnames(contributions_of_shocks) <- list(time(tmp_ts), paste0("Shock ", 1:d), colnames(stvar$data))
 
   # Return the results
   structure(list(stvar=stvar,
