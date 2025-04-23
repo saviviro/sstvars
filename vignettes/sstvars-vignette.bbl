@@ -1,4 +1,4 @@
-\begin{thebibliography}{34}
+\begin{thebibliography}{35}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -247,5 +247,12 @@ Virolainen S (2025{\natexlab{b}}).
 \newblock \emph{Journal of Business \& Economic Statistics}, \textbf{43}(1),
   44--54.
 \newblock \doi{10.1080/07350015.2024.2322090}.
+
+\bibitem[{Wong(2018)}]{Wong:2018}
+Wong B (2018).
+\newblock \enquote{Historical Decompositions for Nonlinear Vector
+  Autoregression Models.}
+\newblock \emph{CAMA Working Paper No. 62/2017, available as SSRN:3057759}.
+\newblock \doi{10.2139/ssrn.3057759}.
 
 \end{thebibliography}

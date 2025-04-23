@@ -107,4 +107,5 @@
   correctly). This is now fixed.
 * Previously the documentation of fitSTVAR incorrectly stated that two-phase estimation method is the default all but TVAR models, although it is the default for
   only relative_dens models. The documentation has been updated to clarify this.
+* Fixed some typos and similar type of editing issues from Section 2.1 of the vignette. 
 * Adjusted the argument min_obs_coef to work slightly more accurately. This might have some effect on the obtained estimates. 
