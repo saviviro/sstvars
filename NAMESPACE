@@ -3,6 +3,7 @@
 S3method(logLik,stvar)
 S3method(plot,gfevd)
 S3method(plot,girf)
+S3method(plot,histdecomp)
 S3method(plot,irf)
 S3method(plot,stvar)
 S3method(plot,stvarpred)
