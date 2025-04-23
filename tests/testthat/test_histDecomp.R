@@ -39,7 +39,7 @@ mod323relg <- STVAR(data=usamone, p=3, M=2, params=theta_323relg, weight_functio
 
 # p=2, M=2, d=2, weight_function="threshold", weighfun_pars=c(2, 1)
 theta_222thres_2_1 <- c(theta_222relg[-length(theta_222relg)], 1)
-mod222thres_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222thres_2_1, weight_function="threshold",
+mod222thres_2_1 <- STVAR(data=gdpdef[1:30,], p=2, M=2, d=2, params=theta_222thres_2_1, weight_function="threshold",
                          weightfun_pars=c(2, 1))
 
 ## weight_function == "exogenous"
@@ -112,8 +112,8 @@ mod222threst_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222threst_2_1
 # p=2, M=2, d=2, weight_function="mlogit", weightfun_pars=list(vars=1:2, lags=2), cond_dist="Student", mean_constraints=list(1:2),
 # AR_constraints=C_222, parametrization="mean"
 theta_222logcmt_12_2 <- c(theta_222logcm_12_2, 2.13)
-mod222logcmt_12_2 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logcmt_12_2, weight_function="mlogit", parametrization="mean",
-                          weightfun_pars=list(vars=1:2, lags=2), cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_222)
+mod222logcmt_12_2 <- STVAR(data=gdpdef[1:60,], p=2, M=2, d=2, params=theta_222logcmt_12_2, weight_function="mlogit", parametrization="mean",
+                           weightfun_pars=list(vars=1:2, lags=2), cond_dist="Student", mean_constraints=list(1:2), AR_constraints=C_222)
 
 # p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="Student", mean_constraints=list(1:2),
 # AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean"
@@ -204,7 +204,7 @@ mod222logistictsh_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logis
 theta_222expcmwtsh_2_1 <- c(0.7209658, 0.810858, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01, 0.08, 0.3, # mu + A
                             -0.03, 0.24, -0.76, -0.02, 3.36, 0.86, # W + lambdas
                             0.33, 4) # xi + nu
-mod222expcmwtsh_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222expcmwtsh_2_1, weight_function="exponential",
+mod222expcmwtsh_2_1 <- STVAR(data=gdpdef[1:25,], p=2, M=2, d=2, params=theta_222expcmwtsh_2_1, weight_function="exponential",
                              weightfun_pars=c(2, 1), identification="heteroskedasticity", cond_dist="Student",
                              mean_constraints=list(1:2), AR_constraints=C_222,
                              weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean")
@@ -227,10 +227,10 @@ mod222expcmwbtsh_2_1 <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222expcmw
 theta_222logistitb <- c(0.7209658, 0.810858, 0.22, 0.06, -0.15, 0.39, 0.41, -0.01, 0.08, 0.3, # mu + A
                         0.1, 0.2, 0.7, 0.11, -0.22, 0.73, # B mats
                         0.4, 7, 3)
-mod222logistitb <- STVAR(data=gdpdef, p=2, M=2, d=2, params=theta_222logistitb, weight_function="logistic", weightfun_pars=c(2, 1),
-                        cond_dist="ind_Student", mean_constraints=list(1:2), AR_constraints=C_222,
-                        weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), identification="non-Gaussianity",
-                        parametrization="mean", B_constraints=matrix(c(1, NA, 0, 1), nrow=2, ncol=2))
+mod222logistitb <- STVAR(data=gdpdef[1:55,], p=2, M=2, d=2, params=theta_222logistitb, weight_function="logistic", weightfun_pars=c(2, 1),
+                         cond_dist="ind_Student", mean_constraints=list(1:2), AR_constraints=C_222,
+                         weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), identification="non-Gaussianity",
+                         parametrization="mean", B_constraints=matrix(c(1, NA, 0, 1), nrow=2, ncol=2))
 
 # p=2, M=2, d=2, weight_function="logistic", weightfun_pars=c(2, 1), cond_dist="ind_skewed_t", mean_constraints=list(1:2),
 # AR_constraints=C_222, weight_constraints=list(R=matrix(c(0, 1), nrow=2), r=c(0.01, 0)), parametrization="mean",
@@ -257,54 +257,55 @@ test_that("hist_decomp works correctly", {
 
   # Relative_dens Gaussian STVAR
   mod <- mod123relg
-  tmp <- hist_decomp(mod112relg)
+  tmp <- hist_decomp(mod)
   expect_equal(nrow(tmp$shock_comp), nrow(mod$data) - mod$model$p, tolerance=1e-3)
   expect_equal(ncol(tmp$shock_comp), ncol(mod$data), tolerance=1e-3)
-  expect_equal(as.vector(tmp$contributions_of_shocks[38, 1:2, 1:2]), c(0.06564444, -0.0423097, 0.07958758, 0.10187280), tolerance=1e-3)
-  expect_equal(as.vector(tmp$shock_comp[1,]), c(1.0853846, -0.1644184), tolerance=1e-3)
-  expect_equal(as.vector(tmp$steady_state_comp[20,]), c(0.7703046, 0.7198234), tolerance=1e-3)
-  expect_equal(as.vector(tmp$init_cond_comp[13,]), c(-0.01645667, 0.06894541), tolerance=1e-3)
-
+  expect_equal(as.vector(tmp$contributions_of_shocks[1, 1:3, 1:3]), c(0.914503291, 0.00000000,0.000000000, 0.031418733, -0.054626079, 0.000000000,
+                                                                      0.128850291, 0.000182223, 0.386047482), tolerance=1e-3)
+  expect_equal(as.vector(tmp$shock_comp[2,]), c(2.35984923, 0.08606056, 1.28192832), tolerance=1e-3)
+  expect_equal(as.vector(tmp$steady_state_comp[29,]), c(0.2323376, 0.6148431, 4.1836223), tolerance=1e-3)
+  expect_equal(as.vector(tmp$init_cond_comp[1,]), c(-2.8550857, 0.1576592, 0.5904432), tolerance=1e-3)
 
   # Logistic
-  expect_equal(mod222logisticcmw_2_1$params, theta_222logisticcmw_2_1)
+  mod <- mod222logistitb
+  tmp <- hist_decomp(mod)
+  expect_equal(nrow(tmp$steady_state_comp), nrow(mod$data) - mod$model$p, tolerance=1e-3)
+  expect_equal(ncol(tmp$steady_state_comp), ncol(mod$data), tolerance=1e-3)
+  expect_equal(as.vector(tmp$contributions_of_shocks[53, 1:2, 1:2]), c(0.2339596, -0.1060613, -0.0192646, 0.4468686), tolerance=1e-3)
+  expect_equal(as.vector(tmp$shock_comp[13,]), c(0.4810497, -0.6244215), tolerance=1e-3)
 
   # Logit
-  expect_equal(mod222logcm_12_2$params, theta_222logcm_12_2)
-  expect_equal(mod222logcmw_12_2$params, theta_222logcmw_12_2)
+  mod <- mod222logcmt_12_2
+  tmp <- hist_decomp(mod)
+  expect_equal(nrow(tmp$shock_comp), nrow(mod$data) - mod$model$p, tolerance=1e-3)
+  expect_equal(ncol(tmp$shock_comp), ncol(mod$data), tolerance=1e-3)
+  expect_equal(as.vector(tmp$contributions_of_shocks[2, 1:2, 1:2]), c(-1.290197957, 0.006512080, -0.129881738, 0.004234886), tolerance=1e-3)
+  expect_equal(as.vector(tmp$steady_state_comp[1,]), c(0.3235174, 0.2153177), tolerance=1e-3)
 
   # Exponential
-  expect_equal(mod222expcmw_2_1$params, theta_222expcmw_2_1)
+  mod <- mod222expcmwtsh_2_1
+  tmp <- hist_decomp(mod)
+  expect_equal(nrow(tmp$shock_comp), nrow(mod$data) - mod$model$p, tolerance=1e-3)
+  expect_equal(ncol(tmp$shock_comp), ncol(mod$data), tolerance=1e-3)
+  expect_equal(as.vector(tmp$contributions_of_shocks[13, 1:2, 1:2]), c(0.18469984, 0.27703578, -0.62100932, 0.02921236), tolerance=1e-3)
+  expect_equal(as.vector(tmp$init_cond_comp[10,]), c(0.10549234, 0.06833528), tolerance=1e-3)
 
   # Threshold
-  expect_equal(mod222thres_2_1$params, theta_222thres_2_1)
+  mod <- mod222thres_2_1
+  tmp <- hist_decomp(mod)
+  expect_equal(nrow(tmp$shock_comp), nrow(mod$data) - mod$model$p, tolerance=1e-3)
+  expect_equal(ncol(tmp$shock_comp), ncol(mod$data), tolerance=1e-3)
+  expect_equal(as.vector(tmp$contributions_of_shocks[3, 1:2, 1:2]), c(0.948731552, -0.003302853, -0.068408863, 0.021511769), tolerance=1e-3)
+  expect_equal(as.vector(tmp$shock_comp[3,]), c(0.94542870, -0.04689709), tolerance=1e-3)
 
   # Exogenous
-  expect_equal(mod222exo$params, theta_222exo)
-
-  # Student
-  expect_equal(mod222logisticcmwt_2_1$params, theta_222logisticcmwt_2_1)
-  expect_equal(mod222logcmt_12_2$params, theta_222logcmt_12_2)
-  expect_equal(mod222expcmwt_2_1$params, theta_222expcmwt_2_1)
-  expect_equal(mod222threst_2_1$params, theta_222threst_2_1)
-
-  # ind_Student
-  expect_equal(mod123exoit$params, theta_123exoit)
-  expect_equal(mod222logistit$params, theta_222logistit)
-
-  # ind_skewed_t
-  expect_equal(mod123exoikt$params, theta_123exoikt)
-  expect_equal(mod222logistikt$params, theta_222logistikt)
-
-  # Structural
-  expect_equal(mod222thressr_2_1$params, theta_222thres_2_1)
-  expect_equal(mod122relgsh$params, theta_122relgsh)
-  expect_equal(mod222logistictsh_2_1$params, theta_222logistictsh_2_1)
-  expect_equal(mod222expcmwtsh_2_1$params, theta_222expcmwtsh_2_1)
-  expect_equal(mod222expcmwbtsh_2_1$params, theta_222expcmwbtsh_2_1)
-  expect_equal(mod222logistitb$params, theta_222logistitb)
-  expect_equal(mod222logistiktb$params, theta_222logistiktb)
+  mod <- mod123exoikt
+  tmp <- hist_decomp(mod)
+  expect_equal(nrow(tmp$shock_comp), nrow(mod$data) - mod$model$p, tolerance=1e-3)
+  expect_equal(ncol(tmp$shock_comp), ncol(mod$data), tolerance=1e-3)
+  expect_equal(as.vector(tmp$contributions_of_shocks[100, 1:3, 1:3]), c(27.692553, 69.150888, -15.227834, -1.056109, -15.145343, 2.088794,
+                                                                        1.614227, -130.984000, 27.353424), tolerance=1e-3)
+  expect_equal(as.vector(tmp$steady_state_comp[13,]), c(1.904346, 1.515495, 12.174645), tolerance=1e-3)
 })
-
 
 

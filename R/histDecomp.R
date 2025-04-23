@@ -60,7 +60,8 @@ hist_decomp <- function(stvar) {
   if(parametrization == "intercept") { # [d, M]
     all_phi0 <- pick_phi0(M=M, d=d, params=params)
   } else {
-    all_phi0 <- vapply(1:M, function(m) (Id - rowSums(all_A[, , , m, drop=FALSE], dims=2))%*%all_mu[,m], numeric(d))
+    all_mu <- pick_phi0(M=M, d=d, params=params)
+    all_phi0 <- vapply(1:M, function(m) (diag(d) - rowSums(all_A[, , , m, drop=FALSE], dims=2))%*%all_mu[,m], numeric(d))
   }
 
   ## Obtain the structural shocks
