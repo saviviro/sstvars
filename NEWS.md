@@ -30,9 +30,9 @@
 * Added a new functionality to fitSSTVAR: structural models identified by non-Gaussianity can be estimated based on different orderings
   or signs of the columns of any of B_1,...,B_M (to conveniently examine models corresponding to various orderings and signs in the presence
   of weak identification with respect to ordering or signs of the columns of B_2,...,B_M)
-* FIXED A BUG in the simulation algorithm for models incorporating independent Student's t conditional distributions
+* Fixed a bug in the simulation algorithm for models incorporating independent Student's t conditional distributions
   (the variance of each structural shock was not scaled to one). 
-* FIXED A BUG in the GIRF simulation algorithm: the transition weights were not necessarily high for 'init_regime' at impact (but
+* Fixed a bug in the GIRF simulation algorithm: the transition weights were not necessarily high for 'init_regime' at impact (but
   the initial values were generated from the correct regimes).
 * Made the function profile_logliks more user friendly. 
 * Added a simplified table of contents to the vignette. 
@@ -100,9 +100,10 @@
 
 # sstvars 1.2.0
 
-* NEW: It is not possible in the genetic algorithm to only allow for estimates that allocate the specified amount of observations to each regime
+* MAJOR: Added the new function hist_decomp that allows to compute historical decompositions for TVAR and STVAR models.
+* It is not possible in the genetic algorithm to only allow for estimates that allocate the specified amount of observations to each regime
   (see ??GAfit and the arguments bound_by_weights and min_obs_coef_ga).
-* BUG FIX: There was an issue with the Phase 1 estimation of the three-phase estimation when weight_function = "exogenous" (NLS estimates were not calculated
+* Bug fix: There was an issue with the Phase 1 estimation of the three-phase estimation when weight_function = "exogenous" (NLS estimates were not calculated
   correctly). This is now fixed.
 * Previously the documentation of fitSTVAR incorrectly stated that two-phase estimation method is the default all but TVAR models, although it is the default for
   only relative_dens models. The documentation has been updated to clarify this.
