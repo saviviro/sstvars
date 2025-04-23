@@ -650,7 +650,7 @@ print.irf <- function(x, ..., digits=2, N_to_print, shocks_to_print) {
 print.histdecomp <- function(x, ..., digits=3, which_vars, which_indices) {
   histdec <- x
   shock_contributions <- histdec$contributions_of_shocks
-  d <- 1:histdec$stvar$model$d
+  d <- histdec$stvar$model$d
   stopifnot(digits >= 0 & digits%%1 == 0)
   if(missing(which_vars)) {
     which_vars <- 1:d

@@ -29,7 +29,26 @@
 #'      \emph{CAMA Working Paper No. 62/2017, available as SSRN:3057759}
 #'  }
 #' @examples
-#'  ## FILL IN
+#' # Recursively identified logistic Student's t STVAR(p=3, M=2) model with the first
+#' # lag of the second variable as the switching variable:
+#' params32logt <- c(0.5959, 0.0447, 2.6279, 0.2897, 0.2837, 0.0504, -0.2188, 0.4008,
+#'   0.3128, 0.0271, -0.1194, 0.1559, -0.0972, 0.0082, -0.1118, 0.2391, 0.164, -0.0363,
+#'   -1.073, 0.6759, 3e-04, 0.0069, 0.4271, 0.0533, -0.0498, 0.0355, -0.4686, 0.0812,
+#'   0.3368, 0.0035, 0.0325, 1.2289, -0.047, 0.1666, 1.2067, 7.2392, 11.6091)
+#' mod32logt <- STVAR(gdpdef, p=3, M=2, params=params32logt, weight_function="logistic",
+#'   weightfun_pars=c(2, 1), cond_dist="Student", identification="recursive")
+#'
+#' # Calculate the historical decomposition:
+#' histdec <- hist_decomp(mod32logt)
+#'
+#' # Print historical decomposition for Variable 1 for the first ten time periods:
+#' print(histdec, which_vars=1, which_indices=1:10)
+#'
+#' # Plot the historical decomposition for all variables:
+#' plot(histdec)
+#'
+#' # Plot the contributions of Shock 1 on the movements of all the variables:
+#' plot(histdec, plot_by_shock=TRUE, which_to_plot=1)
 #' @export
 
 hist_decomp <- function(stvar) {

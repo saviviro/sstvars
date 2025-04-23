@@ -485,7 +485,7 @@ plot.irf <- function(x, shocks_to_plot, ...) {
 #' @param which_to_plot a numeric vector with the indices of the variables or shocks
 #'  (depending on the argument \code{plot_by_shock}) to be plotted. The default is to plot
 #'  all of them.
-#' @param ... additional parameters passed to the \code{'ts'} plot method. UPDATE
+#' @param ... additional parameters passed to \code{plot.default} plotting each individual series.
 #' @export
 
 plot.histdecomp <- function(x, ..., plot_by_shock=FALSE, which_to_plot) {
@@ -514,7 +514,7 @@ plot.histdecomp <- function(x, ..., plot_by_shock=FALSE, which_to_plot) {
   # Graphical settings
   old_par <- par(no.readonly=TRUE)
   on.exit(par(old_par))
-  par(las=1, mar=c(0, 4.5, 0, 1.2)) # Only right and left margins are not implemented by empty plots
+  par(las=1, mar=c(0, 4.5, 0, 1.5)) # Only right and left margins are not implemented by empty plots
   nrows <- d + 2 # +2 for bottom and top marginals
   ncols <- 1
   nfigs <- nrows*ncols
@@ -536,7 +536,7 @@ plot.histdecomp <- function(x, ..., plot_by_shock=FALSE, which_to_plot) {
     ind_vec <- ts_mat[, ind] # Not a class ts
     ylim <- c(min(0, min(ind_ts)), max(0, max(ind_ts)))
     plot(x=1:length(ind_vec), y=ind_vec, type="l", ylim=ylim,
-         main="", ylab="", xlab="", xaxt="n", lwd=2, col="black")
+         main="", ylab="", xlab="", xaxt="n", lwd=2, col="black", ...)
 
     mtext(ifelse(plot_by_shock, var_names[ind], shock_names[ind]), side=2, cex=0.8, font=2, las=0, padj=-4) # Add y-axis label
     if(ind == 1) mtext(main, padj=-0.5, cex=1, font=2)
