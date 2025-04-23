@@ -102,6 +102,7 @@ hist_decomp <- function(stvar) {
       }
     }
   } else { # Non-identified reduced form or recursive identification
+    B_yt <- array(0, dim=c(d, d, T_obs))
     for(i1 in 1:T_obs) {
       B_yt[, , i1] <- t(chol(stvar$total_ccovs[, , i1])) # Lower triangular Cholesky decomposition of Omega_t
     }

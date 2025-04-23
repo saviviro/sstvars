@@ -17,22 +17,26 @@
 //'
 //' @keywords internal
 // [[Rcpp::export(name = "get_Bt_Cpp")]]
-arma::cube get_Bt_Cpp(const arma::cube& all_Omegas, const arma::mat& alpha_mt) {
-  // Create a storage for the weighted sums of matrices
-  arma::cube weightedSums = arma::zeros<arma::cube>(all_Omegas.n_rows, all_Omegas.n_cols, alpha_mt.n_rows);
+arma::cube get_Bt_Cpp(const arma::cube& all_Omegas,
+                      const arma::mat&  alpha_mt) {
+  const auto n_rows   = all_Omegas.n_rows;
+  const auto n_cols   = all_Omegas.n_cols;
+  const auto n_slices = all_Omegas.n_slices;
+  const auto n_times  = alpha_mt.n_rows;
 
-  // Iterate through each row of alpha_mt:
-  for(unsigned int i = 0; i < alpha_mt.n_rows; ++i) {
-    arma::mat weightedSum = arma::zeros<arma::mat>(all_Omegas.n_rows, all_Omegas.n_cols);
-
-    // Compute the weighted sum of matrices in all_Omegas
-    for(unsigned int j = 0; j < alpha_mt.n_cols; ++j) {
-      weightedSum += all_Omegas.slice(j)*alpha_mt(i, j);
-    }
-
-    // Store the weighted sum of the matrices to weightedSums
-    weightedSums.slice(i) = weightedSum;
+  if(static_cast<unsigned>(alpha_mt.n_cols) != n_slices) {
+    Rcpp::stop("get_Bt_Cpp(): alpha_mt.n_cols (%u) != all_Omegas.n_slices (%u)",
+               alpha_mt.n_cols, n_slices);
   }
+  arma::cube weightedSums(n_rows, n_cols, n_times, arma::fill::zeros);
 
+  for(unsigned t = 0; t < n_times; ++t) {
+    arma::mat sum(n_rows, n_cols, arma::fill::zeros);
+    for(unsigned k = 0; k < n_slices; ++k) {
+      sum += all_Omegas.slice(k)*alpha_mt(t, k);
+    }
+    weightedSums.slice(t) = sum;
+  }
   return weightedSums;
 }
+
