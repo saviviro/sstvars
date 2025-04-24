@@ -515,7 +515,7 @@ loglikelihood <- function(data, p, M, params,
 #' @param all_mu an \eqn{(d \times M)} matrix containing the unconditional regime-specific means
 #' @param epsilon the smallest number such that its exponent is wont classified as numerically zero
 #'   (around \code{-698} is used).
-#' @param log_mvdvalues a \eqn{T x M} matrix containing log multivariate normal densities (can be used with
+#' @param log_mvdvalues a \eqn{(T \times M)} matrix containing log multivariate normal densities (can be used with
 #'   relative dens weight function only)
 #' @details Note that we index the time series as \eqn{-p+1,...,0,1,...,T}.
 #' @return Returns the mixing weights a \eqn{(T x M)} matrix, so that the \eqn{t}th row is for the time period \eqn{t}

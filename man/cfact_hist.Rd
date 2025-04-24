@@ -29,7 +29,9 @@ to which the policy variable should not react to. It is assumed that \code{mute_
 \code{type="muted_response"}.}
 
 \item{cfact_start}{a positive integer between \eqn{1} and \eqn{T} indicating the starting period for the counterfactual behavior
-of the specified policy variable.}
+of the specified policy variable. It is assumed that the observed time series in indexed as \eqn{y_{t-p+1},...,y_{0},y_1,...,y_T},
+i.e., that the first \eqn{p} observations are the initial values, and the "time period one" observation is the \eqn{p+1}th row in
+the data matrix.}
 
 \item{cfact_end}{a positive integer between \code{cfact_start} and \eqn{T} indicating the ending period for the counterfactual
 behavior of the specified policy variable.}
