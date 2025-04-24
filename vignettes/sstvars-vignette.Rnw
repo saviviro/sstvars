@@ -1244,7 +1244,7 @@ The lagged and contemporaneous effects of the $i_2$th variable to the $i_1$th va
 \begin{equation}\label{eq:i2effects}
 \sum_{l=1}^p a_{t,i,i_1i_2}y_{i_2t-l} + b_{t,i_1i_2}e_{i_2t}
 \end{equation}
-where $a_{t,i,i_1i_2}$ is the $i_1i_2$th element of the coefficient matrix $A_{t,i}$ and  $b_{t,i_1i_2}$ is the $i_1i_2$th element of the impact matrix $B_t$, (estimated) values of which are, conditionally on $\mathcal{F}_{t-1}$, by assumption known at the time $t$. Thus, subtracting the quantity
+where $a_{t,i,i_1i_2}$ is the $i_1i_2$th element of the coefficient matrix $A_{t,i}$ and $b_{t,i_1i_2}$ is the $i_1i_2$th element of the impact matrix $B_t$, (estimated) values of which are, conditionally on $\mathcal{F}_{t-1}$, by assumption known at the time $t$. Thus, subtracting the quantity
 \begin{equation}\label{eq:shut_e_t}
 b_{t,i_1i_1}^{-1}\left(\sum_{i=1}^p a_{t,i,i_1i_2}y_{i_2t-l} + b_{t,i_1i_2}e_{i_2t}\right)
 \end{equation}

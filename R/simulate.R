@@ -223,7 +223,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   # Take the last p rows of initial values as the initial values
   init_values <- init_values[(nrow(init_values) - p + 1):nrow(init_values), , drop=FALSE]
 
-  # Container for the simulated values and initial values. First row row initial values vector, and t:th row for (y_{i-1},...,y_{i-p})
+  # Container for the simulated values and initial values. First row row initial values vector, and t:th row for (y_{t-1},...,y_{t-p})
   Y <- matrix(nrow=nsim + 1, ncol=d*p)
   Y[1,] <- reform_data(init_values, p=p)
   if(!is.null(girf_pars)) Y2 <- Y # Storage for the second sample path in the GIRF algorithm
@@ -273,7 +273,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
 
   # Run through the time periods and repetitions
   for(j1 in seq_len(ntimes)) {
-    if(cond_dist == "ind_skewed_t") { # Genererate sequences of structural shocks here for computational efficiency
+    if(cond_dist == "ind_skewed_t") { # Generate sequences of structural shocks here for computational efficiency
       all_e_t <- matrix(nrow=nsim, ncol=d) # [nsim, d]
       for(i1 in 1:d) {
         all_e_t[,i1] <- generate_skewed_t(n=nsim, nu=all_nu[i1], lambda=all_lambda[i1],

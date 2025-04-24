@@ -71,6 +71,8 @@
 #' @export
 
 cfact_hist <- function(stvar, type=c("fixed_path", "muted_response"), policy_var=1, mute_var, cfact_start=1, cfact_end=1, cfact_path) {
+  check_stvar(object, object_name="stvar")
+  epsilon <- round(log(.Machine$double.xmin) + 10)
   type <- match.arg(type)
   data <- stvar$data
   p <- stvar$model$p
@@ -196,9 +198,13 @@ cfact_hist <- function(stvar, type=c("fixed_path", "muted_response"), policy_var
   }
 
   ## Obtain the data in a convenient form:
-  # i:th row denotes the vector \bold{y_{i-1}} = (y_{i-1},...,y_{i-p}) (dpx1), assuming the observed data is y_{-p+1},...,y_0,y_1,...,y_{T}.
+  # t:th row denotes the vector \bold{y_{i-1}} = (y_{t-1},...,y_{t-p}) (dpx1), assuming the observed data is y_{-p+1},...,y_0,y_1,...,y_{T}.
   Y <- reform_data(stvar$data, p) # (T+1 x dp)
-  #Y <- Y[1:T_obs, , drop=FALSE] # Last row removed; not needed when calculating something based on lagged observations
+
+  # Create a similar convenient form container for the counterfactual values, including also the original data prior to the countefactual period.
+  # First row row initial values vector, and t:th row for (y_{t-1},...,y_{t-p})
+  cfact_Y <- matrix(nrow=T_obs + 1, ncol=d*p)
+  cfact_Y[1:cfact_start,] <- Y[1:cfact_start,] # Original data, the first row is for the initial value vector
 
   ## Create a container for the counterfactual observations, including also the original data prior to the counterfactual period:
   cfact_data <- matrix(NA, nrow=nrow(data), ncol=d) # Note that the first p periods are for the initial values
@@ -217,22 +223,129 @@ cfact_hist <- function(stvar, type=c("fixed_path", "muted_response"), policy_var
     t_row_in_data <- t + p # The row in the data matrix (but not in the matrix Y)
 
     # Calculate the time period t transition weights
+    if(M == 1) {
+      alpha_mt_t <- c(1)
+    } else {
+      if(weight_function == "relative_dens") {
+        log_mvdvalues <- get_logmvdvalues(Y=cfact_Y, i1=t)
+        alpha_mt_t <- get_alpha_mt(M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                   weightpars=weightpars, log_mvdvalues=log_mvdvalues, epsilon=epsilon)
+      } else if(weight_function %in% c("logistic", "exponential", "threshold")) {
+        alpha_mt_t <- get_alpha_mt(M=M, d=d, Y2=cfact_Y[t, , drop=FALSE], weight_function=weight_function,
+                                   weightfun_pars=weightfun_pars, weightpars=weightpars, epsilon=epsilon)
+      } else if(weight_function == "mlogit") {
+        regression_values <- get_regression_values(Y=cfact_Y, i1=t) # Uses regressions as logmvd values in relative_dens fun
+        alpha_mt_t <- get_alpha_mt(M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                                   weightpars=rep(1, times=M), log_mvdvalues=regression_values, epsilon=epsilon)
+      } else if(weight_function == "exogenous") {
+        alpha_mt_t <- alpha_mt[t, , drop=FALSE] # The original transition weights at the time t
+      }
+    }
+    alpha_mt_t <- as.vector(alpha_mt_t)
+    cfact_alpha_mt[t, ] <- alpha_mt_t # Store the transition weights
+
+    # Calculate the intercept parameter value for the time period t
+    phi_yt <- get_phi_yt(all_phi0=all_phi0, alpha_mt=alpha_mt_t) # [d, 1]
+
+    # Calculate the autoregression matrices A_{y,t,i} for all lags i=1,...,p, for the time period t:
+    all_A_yti <- get_allA_yti(all_A=all_A, alpha_mt=alpha_mt_t) # [d, d, p], lag i is obtained from [, , i]
+
+    # Calculate the impact matrix B_{y,t} for the time period t:
+    # Obtain first the impact matrices of the regimes for this time period:
+
   }
 }
 
 
 #' @title Compute the intercept \eqn{\phi_{y,t}=\sum_{m=1}^M \alpha_{mt} \phi_{m}} parameter value for a single time period
 #'
-#' @description \code{get_next_phi_yt} computes the intercept \eqn{\phi_{y,t}=\sum_{m=1}^M \alpha_{mt} \phi_{m}} paramater
+#' @description \code{get_phi_yt} computes the intercept \eqn{\phi_{y,t}=\sum_{m=1}^M \alpha_{mt} \phi_{m}} parameter
 #'  value for a single time period based on the regime intercepts and transition weights.
 #'
 #' @param all_phi0 a \eqn{(d \times M)} matrix such that the \eqn{m}th column contains the intercept parameters of the \eqn{m}th regime.
 #' @param alpha_mt an \eqn{(M \times 1)} vector containing the time period \eqn{t} transition weights.
 #' @details This is used in simulation of the counterfactual scenarios.
-#' @return Returns a \eqn{(d \times 1)} vector of the intercept parameter values for the time period \eqn{t}.
+#' @return Returns the \eqn{(d \times 1)} vector of the intercept parameter values for the time period \eqn{t}.
 #' @keywords internal
 
 get_phi_yt <- function(all_phi0, alpha_mt) {
   # Calculate the intercept parameter value for the time period t
   as.numeric(all_phi0%*%alpha_mt) # [d, M] x [M, 1] = [d, 1]
+}
+
+
+#' @title Compute the autoregression matrices \eqn{A_{y,t,i}\equiv \sum_{m=1}^M\alpha_{m,t}A_{m,i}} for all lags \eqn{i=1,...,p}
+#'  for a single time period
+#'
+#' @description \code{get_allA_yti} computes the autoregression matrices \eqn{A_{y,t,i}\equiv \sum_{m=1}^M\alpha_{m,t}A_{m,i}}, for all lags \eqn{i=1,...,p}
+#'  for a single time period, based on the regime autoregression matrices and transition weights.
+#'
+#' @param all_A  4D array containing the coefficient matrices of all regimes so that coefficient matrix
+#'  \eqn{A_{m,i}} can be obtained by choosing \code{[, , i, m]} (as obtained from \code{pick_allA}).
+#' @param alpha_mt an \eqn{(M \times 1)} vector containing the time period \eqn{t} transition weights.
+#' @details This is used in simulation of the counterfactual scenarios.
+#' @return Returns the 3D array containing the coefficient matrices for the given time period so that the lag \eqn{i} coefficient matrix \eqn{A_{y,t,i}}
+#' can be obtained by choosing \code{[, , i]}.
+#' @keywords internal
+
+get_allA_yti <- function(all_A, alpha_mt) {
+  # Calculate the autoregression matrices A_{y,t,i} for all lags i=1,...,p
+  # all_A: [d, d, p, M], alpha_mt: length M
+  d <- dim(all_A)[1]
+  p <- dim(all_A)[3]
+  M <- dim(all_A)[4]
+  all_A_yti <- array(0, dim=c(d, d, p)) # Pre-allocate [d, d, p]
+
+  for(i1 in seq_len(p)) {
+    slice_i1 <- all_A[, ,i1 , , drop=FALSE] # Extract [d, d, M] slice for lag i
+    all_A_yti[, , i1] <- apply(slice_i1, MARGIN=c(1, 2),  FUN=function(x) sum(x*alpha_mt)) # At each (row, col), sum over regimes m with weights
+  }
+
+  all_A_yti
+}
+
+
+#' @title Compute the conditional mean \eqn{\mu_{y,t}=\phi_{y,t} + \sum_{i=1}^pA_{y,t,i}y_{t-i}} for a single time period
+#'
+#' @description \code{get_mu_yt} computes the conditional mean \eqn{\mu_{y,t}=\phi_{y,t} + \sum_{i=1}^pA_{y,t,i}y_{t-i}} for a single time period
+#'  based on the intercepts, AR matrices, and the vector of lagged observations.
+#'
+#' @param all_phi0 a \eqn{(d \times M)} matrix such that the \eqn{m}th column contains the intercept parameters of the \eqn{m}th regime.
+#' @param all_A_yti a 3D array containing the coefficient matrices for the given time period so that the lag \eqn{i} coefficient matrix
+#'  \eqn{A_{y,t,i}} can be obtained by choosing \code{[, , i]}.
+#' @param bold_y_t_minus_1 a \eqn{(dp \times 1)} vector \eqn{\boldsymbol{y}_{t-1}=(y_{t-1},...,y_{t-p})} containing the lagged observations
+#'  for the time period \eqn{t}.
+#' @details This is used in simulation of the counterfactual scenarios.
+#' @return Returns the \eqn{(d \times 1)} vector of the conditional mean for the time period \eqn{t}.
+#' @keywords internal
+
+get_mu_yt <- function(all_phi0, all_A_yti, bold_y_t_minus_1) {
+  d <- dim(all_A_yti)[1]
+  p <- dim(all_A_yti)[3]
+
+  # Create AR matrix for all lags
+  big_A <- matrix(0, nrow=d, ncol=d*p) # [d, dp]
+  for(i1 in seq_len(p)) {
+    big_A[, ((i1 - 1)*d + 1):(i1*d)] <- all_A_yti[, , i1] # Fill the i-th block of big_A
+  }
+
+  as.vector(all_phi0 + big_A%*%bold_y_t_minus_1) # [d, 1] + [d, dp] x [dp, 1] = [d, 1]
+}
+
+
+#' @title Compute the impact matrix \eqn{B_{y,t}=\sum_{m=1}^M\alpha_{m,t}B_m} for a single time period
+#'
+#' @description \code{get_B_yt} computes the conditional mean \eqn{B_{y,t}=\sum_{m=1}^M\alpha_{m,t}B_m} for a single time period
+#'  based on the impact matrices of the regimes and the vector of transition weights.
+#'
+#' @param all_Bm a 3D array such that the impact matrix of \eqn{m}th regime is obtained from \code{all_Bm[, , m]}.
+#' @param alpha_mt an \eqn{(M \times 1)} vector containing the time period \eqn{t} transition weights.
+#' @details This is used in simulation of the counterfactual scenarios.
+#' @return Returns the \eqn{(d \times d)} impact matrix for the time period \eqn{t}.
+#' @keywords internal
+
+get_B_yt <- function(all_Bm, alpha_mt) {
+  # Multiply each slice B_m by its weight and sum (vectorized via sweep + apply)
+  weighted <- sweep(all_Bm, MARGIN=3, STATS=alpha_mt, FUN="*")
+  apply(weighted, MARGIN=c(1, 2), FUN=sum)
 }

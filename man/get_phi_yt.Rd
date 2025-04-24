@@ -12,10 +12,10 @@ get_phi_yt(all_phi0, alpha_mt)
 \item{alpha_mt}{an \eqn{(M \times 1)} vector containing the time period \eqn{t} transition weights.}
 }
 \value{
-Returns a \eqn{(d \times 1)} vector of the intercept parameter values for the time period \eqn{t}.
+Returns the \eqn{(d \times 1)} vector of the intercept parameter values for the time period \eqn{t}.
 }
 \description{
-\code{get_next_phi_yt} computes the intercept \eqn{\phi_{y,t}=\sum_{m=1}^M \alpha_{mt} \phi_{m}} paramater
+\code{get_phi_yt} computes the intercept \eqn{\phi_{y,t}=\sum_{m=1}^M \alpha_{mt} \phi_{m}} parameter
  value for a single time period based on the regime intercepts and transition weights.
 }
 \details{

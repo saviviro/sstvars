@@ -65,7 +65,7 @@ of the \eqn{m}th regime. If \code{parametrization=="mean"}, just replace each \e
 \eqn{\mu_{m}}.}
 }
 \value{
-Returns a 4D array containing the coefficient matrices of the all components. Coefficient matrix
+Returns a 4D array containing the coefficient matrices of all regimes. Coefficient matrix
  \eqn{A_{m,i}} can be obtained by choosing \code{[, , i, m]}.
 }
 \description{

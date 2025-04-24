@@ -268,8 +268,181 @@ test_that("get_phi_yt works correctly", {
 })
 
 
+test_that("get_allA_yti works correctly", {
+  ## Simple (2x2x2x2) matrix
+  all_A <- array(NA, dim=c(2, 2, 2, 2))
+
+  # Regime 1
+  all_A[, , 1, 1] <- matrix(c(1, 2, 3, 4), nrow=2, byrow=TRUE)
+  all_A[, , 2, 1] <- matrix(c(5, 6, 7, 8), nrow=2, byrow=TRUE)
+
+  # Regime 2
+  all_A[, , 1, 2] <- matrix(c(2, 1, 0, 1), nrow=2, byrow=TRUE)
+  all_A[, , 2, 2] <- matrix(c(0, 1, 1, 0), nrow=2, byrow=TRUE)
+  alpha_mt <- c(0.6, 0.4)
+
+  result <- get_allA_yti(all_A, alpha_mt)
+
+  # lag 1: 0.6*regime1[, , 1] + 0.4*regime2[, , 1]
+  expected1 <- 0.6*all_A[, , 1, 1] + 0.4*all_A[, , 1, 2]
+  # lag 2: similarly
+  expected2 <- 0.6*all_A[, , 2, 1] + 0.4*all_A[, , 2, 2]
+
+  expect_equal(dim(result), c(2, 2, 2))
+  expect_equal(result[, , 1], expected1, tolerance=1e-6)
+  expect_equal(result[, , 2], expected2, tolerance=1e-6)
+
+  ## (3x3x2x2) case
+  # Regime 1: A_{1,i} = i1*I_3
+  # Regime 2: A_{2,i} = 2*i1*I_3
+  all_A <- array(0, dim = c(3, 3, 2, 2))
+  for(i1 in 1:2) {
+    all_A[, , i1, 1] <- i1*diag(3)
+    all_A[, , i1, 2] <- 2*i1*diag(3)
+  }
+  alpha_mt <- c(0.2, 0.8)
+
+  result <- get_allA_yti(all_A, alpha_mt)
+
+  # expected lag i: 0.2*(i1*I) + 0.8*(2*i1*I) = (0.2 + 1.6)*i1 * I = 1.8*i1*I
+  expected1 <- 1.8*1*diag(3)
+  expected2 <- 1.8*2*diag(3)
+
+  expect_equal(dim(result), c(3, 3, 2))
+  expect_equal(result[, , 1], expected1, tolerance=1e-6)
+  expect_equal(result[, , 2], expected2, tolerance=1e-6)
+
+  ## (2x2x1x3) case
+  all_A <- array(NA, dim=c(2, 2, 1, 3))
+  # Regime 1
+  all_A[, , 1, 1] <- matrix(c(1, 2, 3, 4), nrow=2, byrow=TRUE)
+  # Regime 2
+  all_A[, , 1, 2] <- matrix(c(2, 0, 0, 2), nrow=2, byrow=TRUE)
+  # Regime 3
+  all_A[, , 1, 3] <- matrix(c(0, 1, 1, 0), nrow=2, byrow=TRUE)
+
+  alpha_mt <- c(0.2, 0.3, 0.5)
+  result <- get_allA_yti(all_A, alpha_mt)
+
+  expect_equal(dim(result), c(2, 2, 1))
+  # expected = 0.2*regime1 + 0.3*regime2 + 0.5*regime3
+  expected <- 0.2*all_A[, , 1, 1] + 0.3*all_A[, , 1, 2] + 0.5*all_A[, , 1, 3]
+  expect_equal(result[ , , 1], expected, tolerance=1e-6)
+
+  ## (3×3×2×1) case
+  all_A <- array(NA, dim=c(3, 3, 2, 1))
+  # lag 1 matrix
+  all_A[, , 1, 1] <- matrix(c(1, 0, 2, 0, 3, 0, 4, 0, 5), nrow=3, byrow=TRUE)
+  # lag 2 matrix
+  all_A[, , 2, 1] <- matrix(c(5, 4, 3, 2, 1, 0, 0, 1, 2), nrow=3, byrow=TRUE)
+
+  alpha_mt <- 1
+  result <- get_allA_yti(all_A, alpha_mt)
+
+  expect_equal(dim(result), c(3, 3, 2))
+  expect_equal(result[, , 1], all_A[, , 1, 1], tolerance=1e-6)
+  expect_equal(result[, , 2], all_A[, , 2, 1], tolerance=1e-6)
+})
+
+
+test_that("get_mu_yt works correctly", {
+  # d=2, p=2 case
+  all_phi0 <- c(1, 2)
+  all_A_yti <- array(0, dim=c(2, 2, 2))
+  all_A_yti[, , 1] <- diag(2) # A_{y,t,1} = I
+  all_A_yti[, , 2] <- matrix(c(0, 2, 3, 0), nrow=2, byrow=TRUE) # A_{y,t,2}
+  bold_y_t_minus_1 <- c(1, 1, 2, 3) # [y_{t-1}; y_{t-2}]
+
+  # Compute result
+  result <- get_mu_yt(all_phi0, all_A_yti, bold_y_t_minus_1)
+
+  # Manual:
+  # big_A = [I | A2] = [1 0 0 2; 0 1 3 0]
+  # big_A %*% bold_y = c(1*1 + 0*1 + 0*2 + 2*3,
+  #                      0*1 + 1*1 + 3*2 + 0*3) = c(7 ,7)
+  # mu = phi0 + that = c(8, 9)
+  expect_equal(result, c(8, 9), tolerance=1e-8)
+
+  # d=3, p=1 case
+  d <- 3; p <- 1
+  all_phi0 <- c(-1, 0, 2)
+  all_A_yti <- array(0, dim=c(d, d, p))
+  all_A_yti[, , 1] <- 2*diag(3)
+  bold_y_t_minus_1 <- c(1, 2, 3)
+
+  # mu = phi0 + 2*bold_y = c(-1+2, 0+4, 2+6) = c(1,4,8)
+  result <- get_mu_yt(all_phi0, all_A_yti, bold_y_t_minus_1)
+  expect_equal(result, c(1, 4, 8), tolerance=1e-8)
+
+  # d=4, p=3 case
+  set.seed(42)
+  d <- 4; p <- 3
+  all_phi0 <- runif(d)
+  all_A_yti <- array(rnorm(d*d*p), dim=c(d, d, p))
+  bold_y_t_minus_1 <- rnorm(d*p)
+
+  # vectorized result
+  vec_res <- get_mu_yt(all_phi0, all_A_yti, bold_y_t_minus_1)
+
+  # loop result
+  loop_res <- all_phi0
+  for(i1 in seq_len(p)) {
+    ylag <- bold_y_t_minus_1[((i1 - 1)*d + 1):(i1*d)]
+    loop_res <- loop_res + all_A_yti[, , i1]%*%ylag
+  }
+  expect_equal(vec_res, as.numeric(loop_res), tolerance=1e-6)
+
+  # d = 2, p = 2
+  all_phi0 <- c(0.5, -0.5)
+  all_A_yti <- array(0, dim=c(2, 2, 2))
+  # A_{y,t,1} non-diagonal
+  all_A_yti[, , 1] <- matrix(c(1, 2, 3, 4), nrow=2, byrow=TRUE)
+  # A_{y,t,2} also non-diagonal
+  all_A_yti[, , 2] <- matrix(c(-1, 0, 0, 1), nrow=2, byrow=TRUE)
+  # y_{t-1} = (1,1), y_{t-2} = (-1,2)
+  bold_y_t_minus_1 <- c(1, 1, -1, 2)
+
+  result <- get_mu_yt(all_phi0, all_A_yti, bold_y_t_minus_1)
+
+  # manual:
+  # A1 %*% c(1,1) = c(3,7)
+  # A2 %*% c(-1,2) = c(1,2)
+  # sum = c(4,9), + phi0 = c(4.5, 8.5)
+  expect_equal(result, c(4.5, 8.5), tolerance=1e-6)
+})
+
+test_that("get_mu_yt works correctly", {
+  # d=2, M=2
+  all_Bm <- array(NA, dim=c(2, 2, 2))
+  all_Bm[, , 1] <- matrix(c(1, 2, 3, 4), nrow=2, byrow=TRUE)
+  all_Bm[, , 2] <- matrix(c(5, 6, 7, 8), nrow=2, byrow=TRUE)
+  alpha_mt <- c(0.3, 0.7)
+
+  expect_equal(get_B_yt(all_Bm, alpha_mt), 0.3*all_Bm[, , 1] + 0.7*all_Bm[, , 2], tolerance=1e-6)
+
+  # d=2, M=3
+  all_Bm <- array(NA, dim = c(2, 2, 3))
+  all_Bm[, , 1] <- matrix(c(1, 0, 0, 1), nrow=2, byrow=TRUE)
+  all_Bm[, , 2] <- matrix(c(2, 1, 1, 2), nrow=2, byrow=TRUE)
+  all_Bm[, , 3] <- matrix(c(0, 1, 2, 0), nrow=2, byrow=TRUE)
+  alpha_mt <- c(0.2, 0.3, 0.5)
+
+  expect_equal(get_B_yt(all_Bm, alpha_mt), 0.2*all_Bm[, , 1] + 0.3*all_Bm[, , 2] + 0.5*all_Bm[, , 3], tolerance=1e-6)
+
+  # d=3, M=2
+  all_Bm <- array(NA, dim=c(3, 3, 2))
+  all_Bm[, , 1] <- diag(3)
+  all_Bm[, , 2] <- 2*diag(3)
+  alpha_mt <- c(0.4, 0.6)
+
+  # expected = 0.4*I + 0.6*(2I) = (0.4 + 1.2) * I = 1.6 * I
+  expect_equal(get_B_yt(all_Bm, alpha_mt), 1.6*diag(3), tolerance=1e-6)
+})
+
 
 test_that("hist_decomp works correctly", {
+  expect_equal(1, 1, tolerance=1e-6)
+
   # Linear SVAR
   mod <- mod112relg
   tmp <- hist_decomp(mod112relg)

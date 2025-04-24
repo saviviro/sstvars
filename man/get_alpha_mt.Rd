@@ -92,7 +92,7 @@ obtained from \code{form_boldA}. Will be computed if not given.}
 \item{epsilon}{the smallest number such that its exponent is wont classified as numerically zero
 (around \code{-698} is used).}
 
-\item{log_mvdvalues}{a \eqn{T x M} matrix containing log multivariate normal densities (can be used with
+\item{log_mvdvalues}{a \eqn{(T \times M)} matrix containing log multivariate normal densities (can be used with
 relative dens weight function only)}
 }
 \value{
