@@ -3,28 +3,44 @@
 #' @description \code{cfact_hist} computes historical counterfactual for structural STVAR models.
 #'
 #' @inheritParams simulate.stvar
+#' @param type a character string indicating the type of counterfactual to be computed: should the path of the policy
+#'  variable be fixed to some hypothetical path (\code{type="fixed_path"}) in given points of time or should the responses
+#'  of the policy variable to lagged and contemporaneous movements of some given variable be muted (\code{type="muted_response"})?
+#'  See details for more information.
+#' @param policy_var a positive integer between \eqn{1} and \eqn{d} indicating the index of the policy variable considered in the
+#'  counterfactual scenario.
+#' @param mute_var a positive integer between \eqn{1} and \eqn{d} indicating the index of the variable to whose movements the policy variable
+#'  specified in the argument \code{policy_var} should not react to in the counterfactual scenario. This indicates also the index of the shock
+#'  to which the policy variable should not react to. It is assumed that \code{mute_var != policy_var}. This argument is only used when
+#'  \code{type="muted_response"}.
+#' @param cfact_start a positive integer between \eqn{1} and \eqn{T} indicating the starting period for the counterfactual behavior
+#'  of the specified policy variable.
+#' @param cfact_end a positive integer between \code{cfact_start} and \eqn{T} indicating the ending period for the counterfactual
+#'  behavior of the specified policy variable.
+#' @param cfact_path a numeric vector of length \code{cfact_end-cfact_start+1} indicating the hypothetical path of the policy variable
+#'  specified in the argument \code{policy_var}. This argument is only used when \code{type="fixed_path"}.
 #' @details Two types of historical counterfactuals are accommodated where in given historical points of time
-#'   either (1) the policy variable of interest takes some hypothetical path, or (2) its responses to lagged and
-#'   contemporaneous movements of some given variable are shut off. In both cases, the counterfactual scenarios
-#'   are simulated by creating hypothetical shocks to the policy variable of interest that yield the counterfactual
-#'   outcome. This approach has the appealing feature that the counterfactual deviations from the policy reaction
-#'   function are treated as policy surprises, allowing them to propagate normally, so that the dynamics of the model
-#'   are not, per se, tampered but just the policy surprises are.
+#'  either (1) the policy variable of interest takes some hypothetical path (\code{type="fixed_path"}), or (2)
+#'  its responses to lagged and contemporaneous movements of some given variable are shut off (\code{type="muted_response"}).
+#'  In both cases, the counterfactual scenarios are simulated by creating hypothetical shocks to the policy variable of interest
+#'  that yield the counterfactual outcome. This approach has the appealing feature that the counterfactual deviations from the
+#'  policy reaction function are treated as policy surprises, allowing them to propagate normally, so that the dynamics of the model
+#'  are not, per se, tampered but just the policy surprises are.
 #'
-#'   \strong{Important:} This function assumes that when the policy variable of interest is the \eqn{i_1}th variable, the shock
-#'   to it that is manipulated is the \eqn{i_1}th shock. This should be automatically satisfied for recursively identified models,
-#'   whereas for model identified by heteroskedasticity or non-Gaussianity, the ordering of the shocks can be generally changed
-#'   without loss of generality with the function \code{reorder_B_columns}. In type (2) counterfactuals it is additionally assumed
-#'   that, if the variable to whose movements the policy variable should not react to is the \eqn{i_2}:th variable, the shock to it
-#'   is the \eqn{i_2}th shock. If it is not clear whether the $i_2$th shock of interest can be interpreted as a shock to a variable
-#'   (but has a broader definition such as "a demand shock"), the type (2)counterfactual scenario is interpreted as follows: the $i_1$th
-#'   variable does not react to lagged movements of the $i_2$th variable nor to the $i_2$th shock.
+#'  \strong{Important:} This function assumes that when the policy variable of interest is the \eqn{i_1}th variable, the shock
+#'  to it that is manipulated is the \eqn{i_1}th shock. This should be automatically satisfied for recursively identified models,
+#'  whereas for model identified by heteroskedasticity or non-Gaussianity, the ordering of the shocks can be generally changed
+#'  without loss of generality with the function \code{reorder_B_columns}. In Type (2) counterfactuals it is additionally assumed
+#'  that, if the variable to whose movements the policy variable should not react to is the \eqn{i_2}:th variable, the shock to it
+#'  is the \eqn{i_2}th shock. If it is not clear whether the $i_2$th shock of interest can be interpreted as a shock to a variable
+#'  (but has a broader definition such as "a demand shock"), the Type (2)counterfactual scenario is interpreted as follows: the $i_1$th
+#'  variable does not react to lagged movements of the $i_2$th variable nor to the $i_2$th shock.
 #'
-#'   See the seminal paper of Bernanke et al (1997) for discussing about the "type (1)" counterfactuals and
-#'   Kilian and Lewis (2011) for discussion about the "type (2)" counterfactuals. See Kilian and Lütkepohl (2017), Section 4.3
-#'   for further discussion about the historical counterfactuals. The literature cited about considers linear models, but it is
-#'   explained in the vignette of this package how this function computes the historical counterfactuals for the STVAR models in
-#'   a way that accommodates nonlinear time-varying dynamics.
+#'  See the seminal paper of Bernanke et al (1997) for discussing about the "Type (1)" counterfactuals and
+#'  Kilian and Lewis (2011) for discussion about the "type (2)" counterfactuals. See Kilian and Lütkepohl (2017), Section 4.3
+#'  for further discussion about the historical counterfactuals. The literature cited about considers linear models, but it is
+#'  explained in the vignette of this package how this function computes the historical counterfactuals for the STVAR models in
+#'  a way that accommodates nonlinear time-varying dynamics.
 #' @return Returns a class \code{'histdecomp'} list with the following elements:
 #'   \describe{
 #'     \item{FILL IN}{FILL IN}
@@ -52,6 +68,6 @@
 #' # FILL IN
 #' @export
 
-cfact_hist <- function(stvar) {
+cfact_hist <- function(stvar, type=c("fixed_path", "muted_response"), policy_var=1, mute_var, cfact_start=1, cfact_end=1, cfact_path) {
 
 }
