@@ -123,6 +123,7 @@
 #'   obtained from the MC repetitions. Each element is for one shock and results are in
 #'   array of the form \code{[horizon, variables, MC-repetitions]}.
 #' @seealso \code{\link{GFEVD}}, \code{\link{linear_IRF}}, \code{\link{hist_decomp}}, \code{\link{fitSSTVAR}}
+#' @references
 #'  \itemize{
 #'    \item Kilian L., Lütkepohl H. 2017. Structural Vector Autoregressive Analysis. 1st edition.
 #'      \emph{Cambridge University Press}, Cambridge.

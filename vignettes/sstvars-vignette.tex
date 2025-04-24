@@ -23,6 +23,10 @@
 \usepackage{mathtools} % matrix*: [c] centered, [l] left-aligned, [r] right-aligned
 %\usepackage{bbm} % Indicator function \mathbbm{1}, causes issues in CRAN checks
 
+% Algorithm environment
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
 % Font encoding and fonts
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
@@ -66,7 +70,7 @@
 
 %% - \Abstract{} almost as usual
 \Abstract{
-  We describe the \proglang{R} package \pkg{sstvars}, which provides tools for estimating and analyzing the reduced form and structural smooth transition vector autoregressive (STVAR) models. This includes also threshold vector autoregressive models. The package implements various transition weight functions, conditional distributions, identification methods, and parameter restrictions. The model parameters are estimated with the method of (penalized) maximum likelihood (ML) by running multiple rounds of a two-phase or a three-step procedure estimation procedure. In the two-phase procedure, a genetic algorithm is used in the first phase to find starting values for a gradient based variable metric algorithm, which is ran in the second phase. In the three-step procedure, autoregressive and weight parameters are first estimated by (nonlinear) least squares, then the rest of the parameters are estimated by ML conditional on them with a genetic algorithm, and finally all the parameters are estimated by (penalized) ML by initializing the variable metric algorithm from the initial estimates obtained from the first two steps. Both penalized and "normal" ML estimation are supported. For evaluating the adequacy of the estimated models, \pkg{sstvars} utilizes residuals based diagnostics and provides functions for graphical diagnostics and for calculating formal diagnostic tests. \pkg{sstvars} also accommodates the estimation of linear impulse response functions, nonlinear generalized impulse response functions, and generalized forecast error variance decompositions. Further functionality includes hypothesis testing, plotting the profile log-likelihood functions about the estimate, simulation from STVAR processes, and forecasting, to name a few. We illustrate the use of \pkg{sstvars} with a quarterly series consisting of two U.S. variables: the percentage change of real GDP and the percentage change of GDP implicit price deflator.}
+  We describe the \proglang{R} package \pkg{sstvars}, which provides tools for estimating and analyzing the reduced form and structural smooth transition vector autoregressive (STVAR) models. This includes also threshold vector autoregressive models. The package implements various transition weight functions, conditional distributions, identification methods, and parameter restrictions. The model parameters are estimated with the method of (penalized) maximum likelihood (ML) by running multiple rounds of a two-phase or a three-step procedure estimation procedure. In the two-phase procedure, a genetic algorithm is used in the first phase to find starting values for a gradient based variable metric algorithm, which is ran in the second phase. In the three-step procedure, autoregressive and weight parameters are first estimated by (nonlinear) least squares, then the rest of the parameters are estimated by ML conditional on them with a genetic algorithm, and finally all the parameters are estimated by (penalized) ML by initializing the variable metric algorithm from the initial estimates obtained from the first two steps. Both penalized and "normal" ML estimation are supported. For evaluating the adequacy of the estimated models, \pkg{sstvars} utilizes residuals based diagnostics and provides functions for graphical diagnostics and for calculating formal diagnostic tests. \pkg{sstvars} also accommodates the computation of linear impulse response functions, nonlinear generalized impulse response functions,  generalized forecast error variance decompositions, and historical decompositions, as well as conducting counterfactual analysis. Further functionality includes hypothesis testing, plotting the profile log-likelihood functions about the estimate, simulation from STVAR processes, and forecasting, to name a few. We illustrate the use of \pkg{sstvars} with a quarterly series consisting of two U.S. variables: the percentage change of real GDP and the percentage change of GDP implicit price deflator.}
 
 %% - \Keywords{} with LaTeX markup, at least one required
 %% - \Plainkeywords{} without LaTeX markup (if necessary)
@@ -104,13 +108,13 @@ Linear vector autoregressive (VAR) models are a standard tools in time series ec
 
 In some cases, linear VAR models are not, however, capable of capturing all the relevant characteristics of the data. This includes shifts in the mean or volatility, and changes in the autoregressive dynamics of the process. Such nonlinear features frequently occur in economic time series when the underlying data generating dynamics vary in time, for example, depending the specific state of the economy. Various types of time series models capable of capturing this kind of regime-switching behavior have been proposed, one of them is the smooth transition vector autoregressive (STVAR) models that allow to capture gradual shifts in the dynamics of the data. They consist of a finite number of regimes, each of which are linear vector autoregressions that are characterized by different autoregressive coefficients or error term covariance matrices. The package \pkg{sstvars} considers STVAR models in which, at each point of time, the observation is a weighted average of the conditional means of the regimes plus a random error whose covariance matrix is a weighted average of the covariance matrices of the regimes. The weights, in turn, are expressed in terms of time-varying transition weights that either depend on the preceding observations or are exogenous. Different STVAR models can be created by specifying the transition weights or the error distribution in various ways.
 
-This manuscript describes the \proglang{R} package \pkg{sstvars} providing a set of easy-to-use tools for STVAR modeling, including also threshold vector autoregressive models. There are tools for unconstrained and constrained (penalized) maximum likelihood (ML) estimation of the model parameters, residual based model diagnostics, as well as computation of linear impulse response functions, nonlinear generalized impulse response functions, generalized forecast error variance decompositions, and historical decompositions. In addition to "normal" ML estimation, \pkg{sstvars} also accommodates penalized ML estimation, in which a penalization term is added to the log-likelihood function, penalizing parameter values that are inside or are close entering instability region (where the usual stability condition does not hold). This enables to allow for unstable parameter values in estimation, letting the optimization algorithm to explore the unstable region of the parameter space, often substantially improving its performance. By penalizing instability sufficiently, the optimization algorithm eventually steers back to the stable region. Further functionality includes hypothesis testing, plotting the profile log-likelihood functions about the estimate, simulation from STVAR processes, and forecasting, to name a few. Various transition weight functions are accommodated, including exogenous weights, logistic weights \citep{Anderson+Vahid:1998}, multinomial logit weights, exponential weights \citep[e.g.,][]{Hubrich+Terasvirta:2013}, threshold weights \citep{Tsay:1998}, and transition weights that defined as weighted relative likelihoods of the regimes corresponding to the preceding $p$ observations \citep{Lanne+Virolainen:2024}. Currently, the accommodated conditional distributions include Gaussian distribution, Student's $t$ distribution, Student's $t$ distribution with mutually independent components, and skewed $t$ distribution with mutually independent components. The accommodated identification methods include recursive identification, identification by heteroskedasticity \citep{Lutkepohl+Netsunajev:2017}, and identification by non-Gaussianity \citep{Virolainen2:2024}.
+This manuscript describes the \proglang{R} package \pkg{sstvars} providing a set of easy-to-use tools for STVAR modeling, including also threshold vector autoregressive models. There are tools for unconstrained and constrained (penalized) maximum likelihood (ML) estimation of the model parameters, residual based model diagnostics, counterfactual analysis, as well as for computation of linear impulse response functions, nonlinear generalized impulse response functions, generalized forecast error variance decompositions, and historical decompositions. In addition to "normal" ML estimation, \pkg{sstvars} also accommodates penalized ML estimation, in which a penalization term is added to the log-likelihood function, penalizing parameter values that are inside or are close entering instability region (where the usual stability condition does not hold). This enables to allow for unstable parameter values in estimation, letting the optimization algorithm to explore the unstable region of the parameter space, often substantially improving its performance. By penalizing instability sufficiently, the optimization algorithm eventually steers back to the stable region. Further functionality includes hypothesis testing, plotting the profile log-likelihood functions about the estimate, simulation from STVAR processes, and forecasting, to name a few. Various transition weight functions are accommodated, including exogenous weights, logistic weights \citep{Anderson+Vahid:1998}, multinomial logit weights, exponential weights \citep[e.g.,][]{Hubrich+Terasvirta:2013}, threshold weights \citep{Tsay:1998}, and transition weights that defined as weighted relative likelihoods of the regimes corresponding to the preceding $p$ observations \citep{Lanne+Virolainen:2024}. Currently, the accommodated conditional distributions include Gaussian distribution, Student's $t$ distribution, Student's $t$ distribution with mutually independent components, and skewed $t$ distribution with mutually independent components. The accommodated identification methods include recursive identification, identification by heteroskedasticity \citep{Lutkepohl+Netsunajev:2017}, and identification by non-Gaussianity \citep{Virolainen2:2024}.
 
 The estimation of the model parameters can, in some cases, be rather tricky. Particularly when the transition weights are determined endogenously, there is a very large number of modes to the (penalized) log-likelihood function, and large areas of the parameter space, where the (penalized) log-likelihood function is flat in multiple directions. Therefore, the model parameters are estimated by running multiple rounds of a two-phase or three phase estimation procedure. In the two-phase procedure, a genetic algorithm is used in the first phase to find starting values for a gradient based variable metric algorithm, which is ran in the second phase. In the three-step procedure, autoregressive and weight parameters are first estimated by (nonlinear) least squares (LS), then the rest of the parameters are estimated by (penalized) ML conditional on them with a genetic algorithm, and finally all the parameters are estimated by (penalized) ML by initializing the variable metric algorithm from the initial estimates obtained from the first two steps. Because of the multimodality of the (penalized) log-likelihood function, some of the estimation rounds may end up in different local maximum points, thereby enabling the researcher to build models not only based on the global maximum point but also on the local ones. The estimated models can be conveniently examined with the \code{summary} and \code{plot} methods.
 
 The three-step procedure facilitates estimating larger model and substantially reduces to computation time as opposed to the two-phase procedure, as a substantially smaller number of estimation rounds are required due to the initial estimates from (nonlinear) LS estimation. However, the three-step procedure tends to produce estimates that are close to the initial (N)LS estimates, while the two-phase procedure explores the parameter space more thoroughly (when a large enough number of estimation rounds is ran). The penalized ML estimation is particularly useful when the data is persistent (which macroeconomic data typically is), as it allows the optimization algorithm to explore the unstable region of the parameter space (including the boundary), often improving its performance substantially. Moreover, penalized estimation can more effectively make use of (N)LS estimates that are outside the stability region, as with penalized estimation they do not need to be adjusted when switching to ML estimation in the latter phases.
 
-The remainder of this paper is organized as follows. Section~\ref{sec:models} defines the implemented reduced form STVAR models and discusses some of their properties. Section~\ref{sec:struct_stvar} discusses the accommodated structural STVAR models and discusses identification of the structural shocks. Section~\ref{sec:estimation} discusses estimation of the model parameters. We also illustrate how the STVAR models can be estimated and examined with \pkg{sstvars} and how various parameter restrictions can be imposed in the estimation. Section~\ref{sec:res} discusses how to evaluate the model adequacy with \pkg{sstvars} using residual based diagnostics. Section~\ref{sec:impulseresponse} discusses impulse response analysis, including generalized impulse response functions and generalized forecast error variance decompositions. Section~\ref{sec:histdecomp} discusses computation of historical decompositions. Section~\ref{sec:STVAR} shows how the STVAR models can be constructed with given parameter values. In Section~\ref{sec:simufore}, we first show how to simulate observations from a STVAR process, and then we illustrate how to forecast future values of a STVAR process with a simulation-based Monte Carlo method. Finally, Section~\ref{sec:summary} concludes, and some useful functions in \pkg{sstvars} are collected to a single table in Section~\ref{sec:table} for convenience. Throughout this paper, we illustrate the use of \pkg{sstvars} with a quarterly series consisting of two U.S. variables: the percentage change of real GDP and the percentage change of GDP implicit price deflator, covering the period from 1959Q1 to 2019Q4.
+The remainder of this paper is organized as follows. Section~\ref{sec:models} defines the implemented reduced form STVAR models and discusses some of their properties. Section~\ref{sec:struct_stvar} discusses the accommodated structural STVAR models and discusses identification of the structural shocks. Section~\ref{sec:estimation} discusses estimation of the model parameters. We also illustrate how the STVAR models can be estimated and examined with \pkg{sstvars} and how various parameter restrictions can be imposed in the estimation. Section~\ref{sec:res} discusses how to evaluate the model adequacy with \pkg{sstvars} using residual based diagnostics. Section~\ref{sec:impulseresponse} discusses impulse response analysis, including generalized impulse response functions and generalized forecast error variance decompositions. Section~\ref{sec:histdecomp} discusses computation of historical decompositions and Section~\ref{sec:cfact} counterfactual analysis. Section~\ref{sec:STVAR} shows how the STVAR models can be constructed with given parameter values. In Section~\ref{sec:simufore}, we first show how to simulate observations from a STVAR process, and then we illustrate how to forecast future values of a STVAR process with a simulation-based Monte Carlo method. Finally, Section~\ref{sec:summary} concludes, and some useful functions in \pkg{sstvars} are collected to a single table in Section~\ref{sec:table} for convenience. Throughout this paper, we illustrate the use of \pkg{sstvars} with a quarterly series consisting of two U.S. variables: the percentage change of real GDP and the percentage change of GDP implicit price deflator, covering the period from 1959Q1 to 2019Q4.
 
 
 \section{Smooth Transition Vector Autoregressive Models}\label{sec:models}
@@ -1126,7 +1130,7 @@ Remaining autocorrelation in the residuals can also be tested with the (adjusted
 \section{Impulse response analysis}\label{sec:impulseresponse}
 \addcontentsline{toc}{section}{Impulse response analysis}
 
-\subsection{Generalized impulse response function}
+\subsection{Generalized impulse response function}\label{sec:girf}
 \addcontentsline{toc}{subsection}{Generalized impulse response function}
 
 The expected effects of the structural shocks in the structural STVAR models generally depend on the initial values as well as on the sign and size of the shock, which makes the conventional way of calculating impulse responses unsuitable \citep[see, e.g.,][Chapter~4]{Kilian+Lutkepohl:2017}. Therefore, we  consider the generalized impulse response function (GIRF) \citep{Koop+Pesaran+Potter:1996} defined as
@@ -1147,6 +1151,7 @@ Due to the nonlinear nature of the model, GIRFs estimated from different startin
 
 Because estimating the GIRF and their confidence intervals is computationally demanding, parallel computing is taken use of to shorten the estimation time. The number of CPU cores used can be set with the argument \code{ncores}. The objects returned by the \code{GIRF} function have their own \code{plot} and \code{print} methods. Also, cumulative impulse responses of the specified variables can be obtained directly by specifying the argument \code{which_cumulative}.
 
+
 \subsection{Generalized forecast error variance decomposition}
 \addcontentsline{toc}{subsection}{Generalized forecast error variance decomposition}
 
@@ -1166,10 +1171,12 @@ The shock size is the same for all scalar components of the structural shock and
 
 \code{sstvars} also implements a special feature in which for every possible length p history in the data, the GFEVD is estimated for a shock that has the sign and size of the corresponding structural shock recovered from the fitted model. This can be done by setting the argument \code{use_data_shocks=TRUE}. The GFEVD is then calculated as the average of the GFEVDs obtained from the GIRFs estimated for the data shocks. The plot and print methods can be used as usual for this GFEVD. However, this feature also estimates the contribution of each shock to the variance of the forecast errors at various horizons in specific historical points of time. This can be done by using the plot method with the argument \code{data_shock_pars}. Note that the arguments \code{shock_size}, \code{initval_type}, and \code{init_regime} are ignored if \code{use_data_shocks == TRUE}. Use the argument \code{data_gfevd_pars} to further adjust the settings with \code{initval_type="data"} or \code{use_data_shocks=TRUE}.
 
+
 \subsection{Linear impulse response functions}
 \addcontentsline{toc}{subsection}{Linear impulse response functions}
 
 It is also possible to calculate linear impulse response functions (IRF) based on a specific regime of the estimated model by using the function \code{linear_IRF}. If the autoregressive dynamics of the model are linear (i.e., either $M=1$ or mean and AR parameters are constrained identical across the regimes), confidence bounds can be estimated based on a type of a fixed-design wild residual bootstrap method. \code{sstvars} implements the method proposed \cite{Herwartz+Lutkepohl:2014}.
+
 
 \section{Historical decompositions}\label{sec:histdecomp}
 \addcontentsline{toc}{section}{Historical decompositions}
@@ -1207,6 +1214,131 @@ Suppose the observed time series is indexed as $y_{t-p+1},...,y_{0},y_1,...,y_T$
 The cumulative contributions of the shocks to the fluctuations of the variables are obtained form the block "Contribution of the shocks" in the above equation, whereas the effect of the initial conditions are obtained from the block "Initial conditions". The block "Steady state component" contains so-called steady-state component of the historical decomposition, which is discussed in \cite{Wong:2018}, Section~3.2.
 
 In \pkg{sstvars}, the historical decomposition is computed with the function \code{hist_decomp}, which should be supplied by a fitted STVAR model (a class \code{stvar} object). The returned historical decomposition object has its own plot and print methods for convenient examination of the contributions of the shocks. While included in the returned object, the initial condition and steady state -components are not included in the print and plot methods, however.
+
+
+\section{Counterfactual analysis}\label{sec:cfact}
+\addcontentsline{toc}{section}{Counterfactual analysis}
+
+Counterfactual analysis addresses questions of the form "What would (have) happen(ed) if...?", and many different types of counterfactuals have been discussed in the literature \citep[see, e.g.,][Chapter~4, and the references therein]{Kilian+Lutkepohl:2017}. Two different types of policy counterfactuals are implemented to \pkg{sstvars}: counterfactuals in which the policy variable takes some given path in given points of given \citep[e.g.,][]{Bernanke+Gertler+Watson:1997} and counterfactuals in which the policy variable does not response to lagged movements of some given variable nor to shock to it (or either) in given points of time \citep[e.g.,][]{Kilian+Lewis:2011}. Following \cite{Bernanke+Gertler+Watson:1997}, \cite{Kilian+Lewis:2011}, and others, we simulate the counterfactual scenarios by creating hypothetical shocks to the policy variable that yield the counterfactual outcome. This approach has the appealing feature that counterfactual deviations from the policy reaction function are treated as policy surprises, allowing them to propagate normally. Thus, the dynamics of the model are not, \textit{per se}, tampered but just the policy surprises are.
+
+Consider first counterfactual scenarios in which the policy variable of interest takes some given values in a given points of time. Here, it is shown for a single time period how the shock to policy variable that sets it take a given value is found. In the following sections, the algorithms simulating historical counterfactuals, counterfactual forecast scenarios, and counterfactual GIRFs are established by making use the single time period case iteratively.
+
+Consider the counterfactual scenario in which the $i_1$th variable takes some specific value in the time period $t$, and denote this counterfactual value of the $i_1$th variable as $y_{i_1t}^{*}\in\mathbb{R}$. To simulate the counterfactual scenario in which this observation of the $i_1$th variable is achieved, we follow \cite{Bernanke+Gertler+Watson:1997} and create a hypothetical shock to it that sets $y_{i_1t}=y_{i_1t}^{*}$. Assuming that the $i_1$th shock is the shock the $i_1$th variable, the task is then to manipulate the value of $e_{i_1t}$ to obtained the desired observation of the $i_1$th variable (the policy variable of interest). For recursively identified models, this should be automatically satisfied. In models identified by heteroskedasticity or non-Gaussianity, the ordering of the shocks can generally be changed without loss of generality, in which case the ordering be changed with the function \code{reorder_B_columns} so that the $i_1$th shock is the shock to the $i_1$th variable.
+
+Consider the STVAR model~(\ref{eq:stvar1}) in the form~(\ref{eq:stvarsimp}). The (estimated) values of $\phi_{y,t}$, $A_{y,t,1},...,A_{y,t,p}$, and $B_{y,t}$ are known by assumption conditionally on $\mathcal{F}_{t-1}$. Therefore, for a given time period $t$, the value of $e_{i_1t}$ that sets $y_{i_1t}=y_{i_1t}^{*}$ is found as a solution to the single linear equation obtained from the $i$th row of~(\ref{eq:stvarsimp}) with $y_{i_1t}=y_{i_1t}^{*}$ substituted:
+\begin{equation}
+ y_{i_1t}^{*} = \mu_{t,i_1} + \sum_{j=1}^d b_{t,i_1j} e_{jt},
+\end{equation}
+where $\mu_{t,i_1}$ is the $i_1$th element of the vector $\phi_{y,t} + \sum_{i=1}^pA_{y,t,i}y_{t-i}$ and $b_{t,i_1j}$ is the $i_1j$th element of the impact matrix $B_{y,t}$. Solving this equation with respect to $e_{i_1t}$ gives
+\begin{equation}\label{eq:val_e_t}
+e_{i_1t} = y_{i_1t}^{*} - \mu_{t,i_1} - \sum_{j=1, j\neq i_1}^d b_{t,i_1j} e_{jt}.
+\end{equation}
+Denote this solution of $e_{i_1t}$ as $e_{i_1t}^{*}$. The implied counterfactual time $t$ observations are obtained by replacing the $i_1$th shock in the vector $e_t$ by $e_{i_1t}^{*}$, and then calculating the implied observations from~(\ref{eq:stvarsimp}) by using the obtained hypothetical structural error.
+
+Consider then a counterfactual scenario in which the response of the policy variable is shut off to lagged and contemporaneous movements of a given variable, but policy variable is allowed to respond normally to movements of the other included included variables. Following \cite{Kilian+Lewis:2011}, we the simulate the counterfactual scenario by creating hypothetical shocks to the policy variable that off set the response of the policy variable to the movements of a given variable. Suppose the policy variable of interest is the $i_1$th variable and variable whose movements the policy variable should not react to at the time $t$ is the $i_2$th variable satisfying $i_2\neq i_1$. Assume that the $i_1$th shock is the shock to the $i_1$th variable and that the $i_2$th shock is the shock to the $i_2$th variable (again, this should be automatically satisfied for recursively identified models, whereas the function \code{reorder_B_columns} can be used to change the ordering of the shocks for model identified by heteroskedasticity or non-Gaussianity).\footnote{If it is not clear whether the $i_2$th shock of interest can be interpreted as a shock to a variable (but has a broader definition such as "a demand shock"), the counterfactual scenario is interpreted as follows: the $i_1$th variable does not react to lagged movements of the $i_2$th variable nor to the $i_2$th shock.}
+
+The lagged and contemporaneous effects of the $i_2$th variable to the $i_1$th variable are
+\begin{equation}\label{eq:i2effects}
+\sum_{l=1}^p a_{t,i,i_1i_2}y_{i_2t-l} + b_{t,i_1i_2}e_{i_2t}
+\end{equation}
+where $a_{t,i,i_1i_2}$ is the $i_1i_2$th element of the coefficient matrix $A_{t,i}$ and  $b_{t,i_1i_2}$ is the $i_1i_2$th element of the impact matrix $B_t$, (estimated) values of which are, conditionally on $\mathcal{F}_{t-1}$, by assumption known at the time $t$. Thus, subtracting the quantity
+\begin{equation}\label{eq:shut_e_t}
+b_{t,i_1i_1}^{-1}\left(\sum_{i=1}^p a_{t,i,i_1i_2}y_{i_2t-l} + b_{t,i_1i_2}e_{i_2t}\right)
+\end{equation}
+from the $i_1$th shock $e_{i_1t}$ shuts off these effects from the movements of the $i_1$th variable.
+
+Now, to simulate the counterfactual scenario in which the response of the $i_1$th variable does not respond to the lagged and contemporaneous movements of the $i_2$th variable, is obtained by first replacing the $i_1$th shock in the vector $e_t$ by
+\begin{equation}
+e_{i_1t}^* = e_{i_1t} - b_{t,i_1i_1}^{-1}\left(\sum_{i=1}^p a_{t,i,i_1i_2}y_{i_2t-l} + b_{t,i_1i_2}e_{i_2t}\right),
+\end{equation}
+where $e_{i_1t}$ is the $i_1$th element of $e_t$ before manipulating it. Then, the implied counterfactual observations are calculated from~(\ref{eq:stvarsimp}) by using the obtained hypothetical structural error.
+
+Next, we show how the above techniques derived for a single time period can be applied iteratively to simulate several types of counterfactual scenarios, including historical counterfactuals, forecast scenarios, and counterfactual GIRFs.
+
+
+\subsection{Historical counterfactuals}
+\addcontentsline{toc}{subsection}{Historical counterfactuals}
+
+We consider historical policy counterfactual scenarios where, in given historical points of time, the policy variable(s) of interest takes some hypothetical path, or its responses to lagged and contemporaneous movements of some given variable is shut off. Suppose the observed time series is $y_{t-p+1},...,y_0,y_1,...,y_T$. Consider a counterfactual scenario in which the $i_1$th variable either takes some specific values, or its responses to lagged and contemporaneous movements of the $i_2$th variable ($i_2\neq i_1$) are shut off, in the time periods $t^*, t^*+1,...,t^*+k$, $t^*\in\lbrace 1,....,T-k\rbrace$, $k\leq T - t^*$. Assuming that the $i_1$th shock is the shock the $i_1$th variable, the task is then to manipulate the values of $e_{i_1t^*},...,e_{i_1t^*+k}$, with the rest of the shocks are taken to be the structural shocks recovered from the (fitted) model, to obtain the desired counterfactual scenario. In the latter scenario we also assume that the $i_2$th shock is the shock to the $i_2$th variable.
+
+Using the results derived in Section~\ref{sec:cfact}, the counterfactual scenario can be simulated iteratively with the following algorithm:
+\begin{algorithm}[!ht]
+\caption{Historical counterfactual}
+\begin{algorithmic}[1]\label{algo:histcount}
+  \FOR{each $t$ in $t^*,...,T$}
+    \STATE Compute the values of $\phi_{t}$, $A_{t,1},...,A_{t,p}$, and $B_t$ based on the preceding observations, and take the structural error $e_{t}$ recovered from the (fitted) model.
+    \IF{$t\in \lbrace t^*,...,t^*+k \rbrace$}
+      \STATE Calculate the counterfactual shock $e_{i_1t}^*$ from~(\ref{eq:val_e_t}) or~(\ref{eq:shut_e_t}) depending on the type of the counterfactual, and replace the $i_1$th element of $e_{t}$ by this hypothetical shock.\label{step:hist_count_shock}
+    \ENDIF
+    \STATE Take the structural error $e_t$ obtained from the previous steps and compute the corresponding (counterfactual) observation $y_{t}$ from~(\ref{eq:stvarsimp}).
+  \ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+The resulting counterfactual path of the observable variables represents the model implied scenario in which, \textit{ceteris paribus}, the policy variable either takes the specified path or does not respond to movements of the $i_2$th variable (depending on the considered scenario) in the time periods $t^*,...,t^*+k$. In \pkg{sstvars}, the historical counterfactuals can be simulated with the function \code{cfact_hist}.
+
+
+\subsection{Forecast scenarios}\label{sec:forescen}
+\addcontentsline{toc}{subsection}{Forecast scenarios}
+
+Forecast scenarios refer to alternative predictions of future outcomes based on different hypothetical conditions or assumptions. For instance, when evaluating economic policy, one might create a baseline forecast assuming no policy change, and alternative scenarios assuming specific policy implementations. We consider the type of forecast scenarios in which a policy variable either takes some specific values at given forecast horizons (as opposed to its predicted values without such assumptions) or its responses to lagged and contemporaneous movements of some given variable are shut off.
+
+Deriving multistep predictions and prediction intervals analytically for nonlinear SVAR models can be challenging, as the dynamics of the model may vary depending the realized observations. Therefore, we consider simulation based forecasting in which a large number of potential future sample paths of the process is simulated, and the sample mean (or median) over the Monte Carlo (MC) repetitions is taken as the point prediction and sample quantiles as the prediction intervals. See Section~\ref{sec:simufore} discussion about forecasting by simulation. The counterfactual forecast scenario is created by manipulating the shocks to the policy variable in each MC repetition.
+
+To formally describe the method, consider the counterfactual scenario in which the $i_1$th variable either takes some specific values, or its responses to the movements the $i_2$th variable ($i_2\neq i_1$) are shut off, in the forecast horizons $h^*, h^*+1,...,h^*+k$, where $h^*>0$ and $k\geq 0$. Again, we assume that the $i_1$th shock is the shock to the $i_1$th variable (and in the latter type of scenario also that the $i_2$th shock is the shock to the $i_2$th variable). Suppose that the forecast is based on the information up to the time $T$. The forecast scenario is simulated iteratively with the following steps:
+
+\begin{algorithm}[!ht]
+\caption{Counterfactual forecast scenario}
+\begin{algorithmic}[1]\label{algo:forescen}
+  \STATE Set the horizon $H$ and the number of repetitions $R$.
+  \FOR{each $h$ in $1,2...,H$}\label{step:fore_forstart}
+    \STATE Conditionally on $\mathcal{F}_{T+h-1}$, draw $e_{T+h}$ from its (estimated) distribution.
+    \IF{$h\in \lbrace h^*,...,h^*+k \rbrace$}\label{step:fore_forifstart}
+      \STATE Calculate the counterfactual shock $e_{i_1T+h}^*$ from~(\ref{eq:val_e_t}) or~(\ref{eq:shut_e_t}) depending on the type of the counterfactual, and replace the $i_1$th element of $e_{T+h}$ by this hypothetical shock.\label{step:fore_count_shock}
+    \ENDIF\label{step:fore_forifend}
+  \STATE Conditionally on $\mathcal{F}_{T+h-1}$ and $e_{T+h}$ obtained from the previous steps, compute the corresponding observation $y_{T+h}$ from~(\ref{eq:stvarsimp}).
+  \ENDFOR\label{step:fore_forend}
+  \STATE Repeat Steps~\ref{step:fore_forstart}-\ref{step:fore_forend} $R$ times, and the sample mean or median over the MC repetitions for the point prediction and desired sample quantiles for the prediction intervals.
+\end{algorithmic}
+\end{algorithm}
+
+The baseline (not counterfactual) point prediction and prediction intervals are obtained from Algorithm~\ref{algo:forescen} by dropping Steps~\ref{step:fore_forifstart}-\ref{step:fore_forifend} from it. See also Section~\ref{sec:simufore}. In \pkg{sstvars}, the counterfactual forecast scenarios can be simulated with the function \code{cfact_fore}.
+
+
+\subsection{Counterfactual GIRFs}\label{sec:countgirf}
+\addcontentsline{toc}{subsection}{Counterfactual GIRFs}
+
+It can also be interesting to incorporate counterfactual scenarios impulse response analysis, to assess what the effects a shock if the policy variable moves in a some specific way. Similarly to the historical counterfactuals and forecast scenarios, we consider the type of counterfactual GIRFs in which a policy variable either takes some specific values at given GIRF horizons (as opposed to its simulated values without such assumptions) or its responses to lagged and contemporaneous movements of some given variable are shut off. In particular, we simulate the counterfactuals by creating hypothetical shocks to the policy variable that yield the counterfactual outcome. See Section~\ref{sec:girf} for the definition of GIRFs.
+
+Consider a counterfactual scenario in which the $i_1$th variable either takes some specific values, or its responses to lagged and contemporaneous movements of the $i_2$th variable ($i_2\neq 1$) is shut off, in the GIRF horizons $h^*, h^*+1,...,h^*+k$, where $h^*\geq 0$ and $k\geq 0$. In the following, for the $l$th Monte Carlo repetition, $y_{t+h}^{(l)}(\delta_j,\boldsymbol{y}_{t-1})$ denotes a realization of the process at time $t+h$ conditional on the history $\boldsymbol{y}_{t-1}$ and the $j$th structural shock of sign and size $\delta_j \in\mathbb{R}$ arriving at time $t$, whereas $y_{t+h}^{(l)}(\boldsymbol{y}_{t-1})$ denotes an alternative realization conditional on the history $\boldsymbol{y}_{t-1}$ only.
+
+For a single history $\boldsymbol{y}_{t-1}$ and given sign and size $\delta_j$ of the $j$th structural shock, the counterfactual GIRF can be estimated with the following algorithm \citep[adapted from the GIRF algorithm in][Appendix~B]{Lanne+Virolainen:2024}, where we assume that the shock $j$ is not the shock to the policy variable, i.e., $j\neq i_1$:
+
+\begin{algorithm}[!ht]
+\caption{Counterfactual GIRF}
+\begin{algorithmic}[1]\label{algo:countgirf}
+  \STATE Set the horizon $H$ and the number of repetitions $R$.
+  \FOR{each $h$ in $0,1,...,H$}\label{step:countgirf_start2}
+    \STATE Conditionally on $\mathcal{F}_{t+h-1}$, draw $e_{t+h}$ from its (estimated) distribution.\label{step:girf_shock_starts}
+    \IF{$h=0$}
+      \STATE Impose the sign and size $\delta_j$ to the $j$th element of $e_{t+h}$ to obtain the modified structural error $\tilde{e}_{t+h}$.
+    \ENDIF
+    \IF{$h\in \lbrace h^*,...,h^*+k \rbrace$}\label{step:girf_count_starts}
+      \STATE Calculate the counterfactual shock $e_{i_1t+h}^*$ from~(\ref{eq:val_e_t}) or~(\ref{eq:shut_e_t}) depending on the type of the counterfactual, and replace the $i_1$th element of $e_{t+h}$ by this hypothetical shock.
+      \IF{$h=0$}
+        \STATE Calculate also the modified counterfactual shock $\tilde{e}_{i_1t+h}^*$ using the modified structural error $\tilde{e}_{t+h}$  in~(\ref{eq:val_e_t}) or~(\ref{eq:shut_e_t}) depending on the type of the counterfactual, and replace the $i_1$th element of $\tilde{e}_{t+h}$ by this hypothetical shock.
+      \ENDIF
+    \ENDIF\label{step:girf_shockif_ends}
+  \STATE Calculate $y_{t+h}^{(l)}(\delta_j,\boldsymbol{y}_{t-1})$ by using the previous observations $(\boldsymbol{y}_{t-1},y_{t}^{(l)}(\delta_j,\boldsymbol{y}_{t-1}),...,$ $y_{t+h-1}^{(l)}(\delta_j,\boldsymbol{y}_{t-1})$ and the structural error $e_{t+h}$ (or $\tilde{e}_{t+h}$ if $h=0$) obtained from Steps~\ref{step:girf_shock_starts}-\ref{step:girf_shockif_ends}.
+  \STATE Calculate $y_{t+h}^{(l)}(\boldsymbol{y}_{t-1})$ by using the previous observations $(\boldsymbol{y}_{t-1},y_{t}^{(l)}(\boldsymbol{y}_{t-1}),...,y_{t+h-1}^{(l)}(\boldsymbol{y}_{t-1})$ and the structural error $e_{t+h}$ obtained from Steps~\ref{step:girf_shock_starts}-\ref{step:girf_shockif_ends}.
+  \ENDFOR
+\STATE Calculate $y_{t+h}^{(l)}(\delta_j,\boldsymbol{y}_{t-1}) - y_{t+h}^{(l)}(\boldsymbol{y}_{t-1})$.\label{step:countgirf_end1}
+\STATE Repeat Steps~\ref{step:countgirf_start2}-\ref{step:countgirf_end1} $R$ times and calculate the sample mean of $y_{t+h}^{(l)}(\delta_j,\boldsymbol{y}_{t-1}) - y_{t+h}^{(l)}(\boldsymbol{y}_{t-1})$ over the Monte Carl repetitions $l=1,...,R$ to obtain the (counterfactual) GIRF related to the history $\boldsymbol{y}_{t-1}$ for the $j$th structural shock of sign and size $\delta_j$.
+\end{algorithmic}
+\end{algorithm}
+
+The GIRF that does not impose a counterfactual scenario is obtained from Algorithm~\ref{algo:countgirf} by simply dropping the Steps~\ref{step:girf_count_starts}-\ref{step:girf_shockif_ends} from it. See also Section~\ref{sec:girf}. In \pkg{sstvars}, the counterfactual GIRFs can be simulated with the function \code{cfact_girf}.
+
 
 \section{Building a STVAR model with specific parameter values}\label{sec:STVAR}
 \addcontentsline{toc}{section}{Building a STVAR model with specific parameter values}
@@ -1290,7 +1422,7 @@ The results can be printed with the print method using the command \code{print(m
 \section{Summary}\label{sec:summary}
 \addcontentsline{toc}{section}{Summary}
 
-Smooth transition vector autoregressive models are a valuable tool in modelling multivariate time series in which the data generating dynamics vary in time, exhibiting gradual shifts in the autoregressive coefficients or conditional covariance matrices. We described the \proglang{R} package \pkg{sstvars}, which accommodates STVAR models with various transition weight functions, including exogenous weights, logistic weights \citep{Anderson+Vahid:1998}, multinomial logit weights, exponential weights \citep[e.g.,][]{Hubrich+Terasvirta:2013}, threshold weights \citep{Tsay:1998}, and transition weights that defined as weighted relative likelihoods of the regimes corresponding to the preceding $p$ observations \citep{Lanne+Virolainen:2024}. Currently, the accommodated conditional distributions include Gaussian distribution, Student's $t$ distribution, Student's $t$ distribution with mutually independent components, and skewed $t$ distribution with mutually independent components \citep[see][]{Hansen:1994}. The accommodated identification methods include recursive identification, identification by heteroskedasticity, and identification by non-Gaussianity. We discussed the various model specifications and several features implemented in \pkg{sstvars} for STVAR modeling: unconstrained and constrained maximum likelihood estimation of the model parameters, impulse response analysis, historical decompositions, residual based diagnostics, hypothesis testing, simulation, forecasting, and more. For convenience, we have collected some useful functions in \pkg{sstvars} to Table~\ref{tab:functions}. For all the exported functions and their usage, see the reference manual.
+Smooth transition vector autoregressive models are a valuable tool in modelling multivariate time series in which the data generating dynamics vary in time, exhibiting gradual shifts in the autoregressive coefficients or conditional covariance matrices. We described the \proglang{R} package \pkg{sstvars}, which accommodates STVAR models with various transition weight functions, including exogenous weights, logistic weights \citep{Anderson+Vahid:1998}, multinomial logit weights, exponential weights \citep[e.g.,][]{Hubrich+Terasvirta:2013}, threshold weights \citep{Tsay:1998}, and transition weights that defined as weighted relative likelihoods of the regimes corresponding to the preceding $p$ observations \citep{Lanne+Virolainen:2024}. Currently, the accommodated conditional distributions include Gaussian distribution, Student's $t$ distribution, Student's $t$ distribution with mutually independent components, and skewed $t$ distribution with mutually independent components \citep[see][]{Hansen:1994}. The accommodated identification methods include recursive identification, identification by heteroskedasticity, and identification by non-Gaussianity. We discussed the various model specifications and several features implemented in \pkg{sstvars} for STVAR modeling: unconstrained and constrained maximum likelihood estimation of the model parameters, impulse response analysis, historical decompositions, counterfactual analysis residual based diagnostics, hypothesis testing, simulation, forecasting, and more. For convenience, we have collected some useful functions in \pkg{sstvars} to Table~\ref{tab:functions}. For all the exported functions and their usage, see the reference manual.
 
 
 \clearpage
@@ -1298,10 +1430,10 @@ Smooth transition vector autoregressive models are a valuable tool in modelling 
 \addcontentsline{toc}{section}{A table of some useful functions}
 
 \begin{table}[!h]
-\begin{adjustwidth}{-0cm}{} % Shifts the table to the left
+\begin{adjustwidth}{-0.5cm}{} % Shifts the table to the left
 \centering
 \small
-\begin{tabular}{llp{8.0cm}}
+\begin{tabular}{llp{9.0cm}}
 \hline
 Related to     & Name                      & Description \\ \hline
 Estimation     & \code{fitSTVAR}           & Estimate STVAR models.\\
@@ -1328,6 +1460,9 @@ Impulse responses & \code{GIRF}            & Estimate generalized impulse respon
                & \code{GFEVD}              & Estimate generalized forecast error variance decomposition.\\
                & \code{linear_IRF}         & Estimate linear impulse response functions.\\
 Hist. decomp.  & \code{hist_decomp}        & Compute historical decompositions.\\
+Counterfactuals & \code{cfact_hist}        & Simulate historical counterfactuals.\\
+               & \code{cfact_fore}         & Simulate counterfactual forecast scenarios.\\
+               & \code{cfact_girf}         & Simulate counterfactual generalized impulse response functions.\\
 Other          & \code{bound_JSR}          & Calculate bounds for the joint spectral radius of the companion form AR matrices of the regimes.\\
                & \code{swap_parametrization} & Swap between mean and intercept parametrizations \\
                & \code{uncond_moments}     & Calculate unconditional moments of the regimes.\\

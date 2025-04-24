@@ -1,0 +1,57 @@
+#' @title Compute historical counterfactual for structural STVAR models.
+#'
+#' @description \code{cfact_hist} computes historical counterfactual for structural STVAR models.
+#'
+#' @inheritParams simulate.stvar
+#' @details Two types of historical counterfactuals are accommodated where in given historical points of time
+#'   either (1) the policy variable of interest takes some hypothetical path, or (2) its responses to lagged and
+#'   contemporaneous movements of some given variable are shut off. In both cases, the counterfactual scenarios
+#'   are simulated by creating hypothetical shocks to the policy variable of interest that yield the counterfactual
+#'   outcome. This approach has the appealing feature that the counterfactual deviations from the policy reaction
+#'   function are treated as policy surprises, allowing them to propagate normally, so that the dynamics of the model
+#'   are not, per se, tampered but just the policy surprises are.
+#'
+#'   \strong{Important:} This function assumes that when the policy variable of interest is the \eqn{i_1}th variable, the shock
+#'   to it that is manipulated is the \eqn{i_1}th shock. This should be automatically satisfied for recursively identified models,
+#'   whereas for model identified by heteroskedasticity or non-Gaussianity, the ordering of the shocks can be generally changed
+#'   without loss of generality with the function \code{reorder_B_columns}. In type (2) counterfactuals it is additionally assumed
+#'   that, if the variable to whose movements the policy variable should not react to is the \eqn{i_2}:th variable, the shock to it
+#'   is the \eqn{i_2}th shock. If it is not clear whether the $i_2$th shock of interest can be interpreted as a shock to a variable
+#'   (but has a broader definition such as "a demand shock"), the type (2)counterfactual scenario is interpreted as follows: the $i_1$th
+#'   variable does not react to lagged movements of the $i_2$th variable nor to the $i_2$th shock.
+#'
+#'   See the seminal paper of Bernanke et al (1997) for discussing about the "type (1)" counterfactuals and
+#'   Kilian and Lewis (2011) for discussion about the "type (2)" counterfactuals. See Kilian and Lütkepohl (2017), Section 4.3
+#'   for further discussion about the historical counterfactuals. The literature cited about considers linear models, but it is
+#'   explained in the vignette of this package how this function computes the historical counterfactuals for the STVAR models in
+#'   a way that accommodates nonlinear time-varying dynamics.
+#' @return Returns a class \code{'histdecomp'} list with the following elements:
+#'   \describe{
+#'     \item{FILL IN}{FILL IN}
+#'     \item{stvar}{The original STVAR model object.}
+#'  }
+#' @seealso \code{\link{GIRF}}, \code{\link{GFEVD}}, \code{\link{linear_IRF}}, \code{\link{hist_decomp}}, \code{\link{fitSSTVAR}}
+#' @references
+#'  \itemize{
+#'    \item Bernanke B., Gertler M., Watson M. 1997. Systematic monetary policy and the effects of oilprice shocks.
+#'      \emph{Brookings Papers on Economic Activity}, 1, 91—142.
+#'    \item Kilian L., Lewis L. 2011. Does the fed respond to oil price shocks? \emph{The Economic Journal}, \strong{121}:555.
+#'    \item Kilian L., Lütkepohl H. 2017. Structural Vector Autoregressive Analysis. 1st edition.
+#'      \emph{Cambridge University Press}, Cambridge.
+#'  }
+#' @examples
+#' # Recursively identified logistic Student's t STVAR(p=3, M=2) model with the first
+#' # lag of the second variable as the switching variable:
+#' params32logt <- c(0.5959, 0.0447, 2.6279, 0.2897, 0.2837, 0.0504, -0.2188, 0.4008,
+#'   0.3128, 0.0271, -0.1194, 0.1559, -0.0972, 0.0082, -0.1118, 0.2391, 0.164, -0.0363,
+#'   -1.073, 0.6759, 3e-04, 0.0069, 0.4271, 0.0533, -0.0498, 0.0355, -0.4686, 0.0812,
+#'   0.3368, 0.0035, 0.0325, 1.2289, -0.047, 0.1666, 1.2067, 7.2392, 11.6091)
+#' mod32logt <- STVAR(gdpdef, p=3, M=2, params=params32logt, weight_function="logistic",
+#'   weightfun_pars=c(2, 1), cond_dist="Student", identification="recursive")
+#'
+#' # FILL IN
+#' @export
+
+cfact_hist <- function(stvar) {
+
+}

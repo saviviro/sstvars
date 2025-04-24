@@ -50,7 +50,7 @@ Returns a class \code{'histdecomp'} list with the following elements:
 Returns the input object \code{x} invisibly.
 }
 \description{
-\code{hist_decomp} compute historical decompositions for structural STVAR models.
+\code{hist_decomp} computes historical decompositions for structural STVAR models.
 }
 \details{
 The historical decomposition quantifies the cumulative effects the shocks to the movements of
@@ -88,12 +88,14 @@ plot(histdec)
 # Plot the contributions of Shock 1 on the movements of all the variables:
 plot(histdec, plot_by_shock=TRUE, which_to_plot=1)
 }
-\seealso{
-\code{\link{GIRF}}, \code{\link{GFEVD}}, \code{\link{linear_IRF}}, \code{\link{fitSSTVAR}}
- \itemize{
+\references{
+\itemize{
    \item Kilian L., Lütkepohl H. 2017. Structural Vector Autoregressive Analysis. 1st edition.
      \emph{Cambridge University Press}, Cambridge.
    \item Wong H. 2018. Historical decomposition for nonlinear vector autoregressive models.
      \emph{CAMA Working Paper No. 62/2017, available as SSRN:3057759}.
  }
+}
+\seealso{
+\code{\link{GIRF}}, \code{\link{GFEVD}}, \code{\link{linear_IRF}}, \code{\link{fitSSTVAR}}
 }

@@ -1,8 +1,8 @@
 \contentsline {section}{Introduction}{1}{section.1}%
 \contentsline {section}{Smooth Transition Vector Autoregressive Models}{2}{section.2}%
-\contentsline {subsection}{General framework for STVAR models}{2}{subsection.2.1}%
+\contentsline {subsection}{General framework for STVAR models}{3}{subsection.2.1}%
 \contentsline {subsection}{Stationarity condition}{4}{subsection.2.2}%
-\contentsline {subsection}{Specifications of the conditional distribution}{4}{subsection.2.3}%
+\contentsline {subsection}{Specifications of the conditional distribution}{5}{subsection.2.3}%
 \contentsline {subsubsection}{Gaussian distribution}{5}{subsubsection.2.3.1}%
 \contentsline {subsubsection}{Student's t distribution}{5}{subsubsection.2.3.2}%
 \contentsline {subsubsection}{Independent Student's t distribution}{5}{subsubsection.2.3.3}%
@@ -39,9 +39,13 @@
 \contentsline {subsection}{Generalized forecast error variance decomposition}{35}{subsection.7.2}%
 \contentsline {subsection}{Linear impulse response functions}{36}{subsection.7.3}%
 \contentsline {section}{Historical decompositions}{36}{section.8}%
-\contentsline {section}{Building a STVAR model with specific parameter values}{37}{section.9}%
-\contentsline {section}{Simulation and forecasting}{38}{section.10}%
-\contentsline {subsection}{Simulation}{38}{subsection.10.1}%
-\contentsline {subsection}{Simulation based forecasting}{39}{subsection.10.2}%
-\contentsline {section}{Summary}{39}{section.11}%
-\contentsline {section}{A table of some useful functions}{41}{section.11}%
+\contentsline {section}{Counterfactual analysis}{37}{section.9}%
+\contentsline {subsection}{Historical counterfactuals}{39}{subsection.9.1}%
+\contentsline {subsection}{Forecast scenarios}{39}{subsection.9.2}%
+\contentsline {subsection}{Counterfactual GIRFs}{41}{subsection.9.3}%
+\contentsline {section}{Building a STVAR model with specific parameter values}{42}{section.10}%
+\contentsline {section}{Simulation and forecasting}{43}{section.11}%
+\contentsline {subsection}{Simulation}{43}{subsection.11.1}%
+\contentsline {subsection}{Simulation based forecasting}{43}{subsection.11.2}%
+\contentsline {section}{Summary}{43}{section.12}%
+\contentsline {section}{A table of some useful functions}{45}{section.12}%

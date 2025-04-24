@@ -251,10 +251,12 @@ The "confidence bounds" \strong{do not} quantify uncertainty about the true para
  plot(girf4) # Plot the GIRFs
  }
 }
-\seealso{
-\code{\link{GFEVD}}, \code{\link{linear_IRF}}, \code{\link{hist_decomp}}, \code{\link{fitSSTVAR}}
- \itemize{
+\references{
+\itemize{
    \item Kilian L., Lütkepohl H. 2017. Structural Vector Autoregressive Analysis. 1st edition.
      \emph{Cambridge University Press}, Cambridge.
  }
+}
+\seealso{
+\code{\link{GFEVD}}, \code{\link{linear_IRF}}, \code{\link{hist_decomp}}, \code{\link{fitSSTVAR}}
 }

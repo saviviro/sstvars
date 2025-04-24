@@ -1,6 +1,6 @@
 #' @title Compute historical decompositions for structural STVAR models.
 #'
-#' @description \code{hist_decomp} compute historical decompositions for structural STVAR models.
+#' @description \code{hist_decomp} computes historical decompositions for structural STVAR models.
 #'
 #' @inheritParams simulate.stvar
 #' @details The historical decomposition quantifies the cumulative effects the shocks to the movements of
@@ -22,6 +22,7 @@
 #'     \item{stvar}{The original STVAR model object.}
 #'  }
 #' @seealso \code{\link{GIRF}}, \code{\link{GFEVD}}, \code{\link{linear_IRF}}, \code{\link{fitSSTVAR}}
+#' @references
 #'  \itemize{
 #'    \item Kilian L., Lütkepohl H. 2017. Structural Vector Autoregressive Analysis. 1st edition.
 #'      \emph{Cambridge University Press}, Cambridge.
