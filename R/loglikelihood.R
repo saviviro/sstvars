@@ -305,7 +305,7 @@ loglikelihood <- function(data, p, M, params,
 
   # i:th row denotes the vector \bold{y_{i-1}} = (y_{i-1},...,y_{i-p}) (dpx1),
   # assuming the observed data is y_{-p+1},...,y_0,y_1,...,y_{T}
-  Y <- reform_data(data, p)
+  Y <- reform_data(data, p=p)
   Y2 <- Y[1:T_obs, , drop=FALSE] # Last row removed; not needed when calculating something based on lagged observations
 
   # Calculate unconditional regime-specific expected values (column per component) or phi0-parameters if using mean-parametrization

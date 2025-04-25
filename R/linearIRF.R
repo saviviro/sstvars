@@ -56,7 +56,7 @@
 #'        is then the in a form similar to \code{$point_est}.}
 #'     \item{Other elements:}{contains some of the arguments the \code{linear_IRF} was called with.}
 #'   }
-#' @seealso \code{\link{GIRF}}, \code{\link{GFEVD}}, \code{\link{hist_decomp}}, \code{\link{fitSTVAR}}, \code{\link{STVAR}},
+#' @seealso \code{\link{GIRF}}, \code{\link{GFEVD}}, \code{\link{hist_decomp}}, \code{\link{cfact_hist}}, \code{\link{fitSTVAR}}, \code{\link{STVAR}},
 #'   \code{\link{reorder_B_columns}}, \code{\link{swap_B_signs}}
 #' @references
 #'  \itemize{

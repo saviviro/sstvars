@@ -43,10 +43,13 @@
 #'  for further discussion about the historical counterfactuals. The literature cited about considers linear models, but it is
 #'  explained in the vignette of this package how this function computes the historical counterfactuals for the STVAR models in
 #'  a way that accommodates nonlinear time-varying dynamics.
-#' @return Returns a class \code{'histdecomp'} list with the following elements:
+#' @return Returns a class \code{'cfacthist'} list with the following elements:
 #'   \describe{
-#'     \item{FILL IN}{FILL IN}
+#'     \item{cfact_data}{A matrix of size \eqn{(T \times d)} containing the counterfactual time series.}
+#'     \item{cfact_shocks}{A matrix of size \eqn{(T \times d)} containing the counterfactual shocks.}
+#'     \item{cfact_weights}{A matrix of size \eqn{(T \times M)} containing the counterfactual transition weights.}
 #'     \item{stvar}{The original STVAR model object.}
+#'     \item{input}{A list containing the arguments used to calculate the counterfactual.}
 #'  }
 #' @seealso \code{\link{GIRF}}, \code{\link{GFEVD}}, \code{\link{linear_IRF}}, \code{\link{hist_decomp}}, \code{\link{fitSSTVAR}}
 #' @references
@@ -70,7 +73,7 @@
 #' # FILL IN
 #' @export
 
-cfact_hist <- function(stvar, type=c("fixed_path", "muted_response"), policy_var=1, mute_var, cfact_start=1, cfact_end=1, cfact_path) {
+cfact_hist <- function(stvar, type=c("fixed_path", "muted_response"), policy_var=1, mute_var=NULL, cfact_start=1, cfact_end=1, cfact_path=NULL) {
   check_stvar(object, object_name="stvar")
   epsilon <- round(log(.Machine$double.xmin) + 10)
   type <- match.arg(type)
@@ -94,14 +97,16 @@ cfact_hist <- function(stvar, type=c("fixed_path", "muted_response"), policy_var
     stop("The argument cfact_end should be a positive integer between cfact_start and T")
   }
   if(type == "fixed_path") {
-    if(!is.numeric(cfact_path) || length(cfact_path) != cfact_end - cfact_start + 1) {
+    if(is.null(cfact_path)) {
+      stop("The argument cfact_path needs to be specified")
+    } else if(!is.numeric(cfact_path) || length(cfact_path) != cfact_end - cfact_start + 1) {
       stop("The argument cfact_path should be a numeric vector of length cfact_end-cfact_start+1")
     } else if(!is.numeric(cfact_path) || any(is.na(cfact_path))) {
       stop("The argument cfact_path should not contain NA values")
     }
   } else { # type == "muted_response"
-    if(missing(mute_var)) {
-      stop("The argument mute_var is missing with no default")
+    if(is.null(mute_var)) {
+      stop("The argument mute_var needs to be specified")
     } else if(!is.numeric(mute_var) || length(mute_var) != 1 || mute_var < 1 || mute_var > d || mute_var%%1 != 0) {
       stop("The argument mute_var should be a positive integer between 1 and d")
     } else if(policy_var == mute_var) {
@@ -162,29 +167,13 @@ cfact_hist <- function(stvar, type=c("fixed_path", "muted_response"), policy_var
   } else {
     identification_to_use <- identification
   }
-  all_e_t <- get_residuals(data=stvar$data, p=p, M=M, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
-                           cond_dist=cond_dist, parametrization=parametrization, identification=identification_to_use, AR_constraints=NULL,
-                           mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL, standardize=TRUE, structural_shocks=TRUE,
-                           penalized=stvar$penalized, penalty_params=stvar$penalty_params, allow_unstab=stvar$allow_unstab)
+  e_t <- get_residuals(data=stvar$data, p=p, M=M, params=params, weight_function=weight_function, weightfun_pars=weightfun_pars,
+                       cond_dist=cond_dist, parametrization=parametrization, identification=identification_to_use, AR_constraints=NULL,
+                       mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL, standardize=TRUE, structural_shocks=TRUE,
+                       penalized=stvar$penalized, penalty_params=stvar$penalty_params, allow_unstab=stvar$allow_unstab)
 
   ## Obtain the transition weights
   alpha_mt <- stvar$transition_weights # [T_obs, M]
-
-  ## Calculate all_Bm if available
-  if(cond_dist %in% c("ind_Student", "ind_skewed_t")) { # Identification by non-Gaussianity
-    all_Bm <- all_Omegas
-  } else if(identification == "heteroskedasticity") {
-    all_Bm <- array(0, dim=c(d, d, M)) # Pre-allocate [d, d, M]
-    for(m in 1:M) {
-      if(m == 1) {
-        all_Bm[, , m] <- W
-      } else {
-        all_Bm[, , m] <- W%*%diag(sqrt(lambdas[, m-1])) # [d, d]
-      }
-    }
-  } else { # Recursive identification, no impact matrices of the regimes, B_yt calculated directly from the conditional covariance matrix
-    all_Bm <- NULL
-  }
 
   # Some functions to be used to obtain the transition weights during the counterfactual simulation
   if(weight_function == "relative_dens") {
@@ -212,7 +201,7 @@ cfact_hist <- function(stvar, type=c("fixed_path", "muted_response"), policy_var
 
   ## Obtain the data in a convenient form:
   # t:th row denotes the vector \bold{y_{i-1}} = (y_{t-1},...,y_{t-p}) (dpx1), assuming the observed data is y_{-p+1},...,y_0,y_1,...,y_{T}.
-  Y <- reform_data(stvar$data, p) # (T+1 x dp)
+  Y <- reform_data(stvar$data, p=p) # (T+1 x dp)
 
   # Create a similar convenient form container for the counterfactual values, including also the original data prior to the countefactual period.
   # First row row initial values vector, and t:th row for (y_{t-1},...,y_{t-p})
@@ -229,7 +218,7 @@ cfact_hist <- function(stvar, type=c("fixed_path", "muted_response"), policy_var
 
   ## Create a container for the counterfactual shocks, including also the original ones prior to the counterfactual period:
   cfact_e_t <- matrix(NA, nrow=T_obs, ncol=d) # Note that there are no initial values, so the indexing is different to cfact_data
-  cfact_e_t[1:(cfact_start - 1),] <- all_e_t[1:(cfact_start - 1),] # Original transition weights
+  cfact_e_t[1:(cfact_start - 1),] <- e_t[1:(cfact_start - 1),] # Original transition weights
 
   ## Simulate the counterfactual observations
   for(t in cfact_start:T_obs) { # Loop through the time periods starting from the beginning of the counterfactual
@@ -264,12 +253,53 @@ cfact_hist <- function(stvar, type=c("fixed_path", "muted_response"), policy_var
     all_A_yti <- get_allA_yti(all_A=all_A, alpha_mt=alpha_mt_t) # [d, d, p], lag i is obtained from [, , i]
 
     # Calculate the impact matrix B_{y,t} for the time period t:
+    B_yt <- get_B_yt(all_Omegas=all_Omegas, alpha_mt=alpha_mt_t, W=W, lambdas=lambdas, cond_dist=cond_dist,
+                     identification=identification) # [d, d]
 
+    if(t %in% cfact_start:cfact_end) { # Counterfactual period
+      # Compute the autoregression part of the model, is not affected by the period t shocks:
+      mu_yt <- get_mu_yt(all_phi0=all_phi0, all_A_yti=all_A_yti, bold_y_t_minus_1=cfact_Y[t,]) # cfact_t t:th row is one lagged
 
-    # Obtain first the impact matrices of the regimes for this time period:
+      # Compute the counterfactual shock
+      if(type == "fixed_path") {
+        cfact_path_t <- cfact_path[t - cfact_start + 1] # The hypothetical path of the policy variable
+        effect_of_other_shocks <- crossprod(B_yt[policy_var, -policy_var], cfact_e_t[t, -policy_var]) # The effect of the other shocks to the policy var
+        cfact_policy_e_t <- cfact_path_t - mu_yt - effect_of_other_shocks # The counterfactual shock to the policy variable, yielding the counterfactual path
+        e_t_to_use <- e_t[t,] # Recovered shocks for time period t
+        e_t_to_use[policy_var] <- cfact_policy_e_t # Insert the counterfactual shock to the policy variable
+        cfact_e_t[t,] <- e_t_to_use # Store the counterfactual shock vector
+      } else if(type == "muted_response") {
+        # Lagged effects of mute_var on policy_var:
+        lagged_effects <- crossprod(all_A_yti[policy_var, mute_var, ], # (p x 1) vector of i_1i_2:th elements of A_yt so that lag i is in the i:th element.
+                                    matrix(cfact_Y[t,], nrow=d)[mute_var,]) # i:th column is the vector y_{t-i}, and the mute_var:th row is the mute_var
+        # Contemporaneous effects of mute_var:th shock on policy_var:
+        cont_effects <- B_yt[policy_var, mute_var]*e_t[t, mute_var]
+        # Calculate the counterfactual shock to the policy variable that mutes the response to mute_var:
+        e_t_to_use <- e_t[t,] # Recovered shocks for time period t
+        cfact_policy_e_t <- e_t_to_use[policy_var] - (1/B_yt[policy_var, policy_var])(lagged_effects + cont_effects) # The cfact shock to the policy var
+        e_t_to_use[policy_var] <- cfact_policy_e_t # Insert the counterfactual shock to the policy variable
+        cfact_e_t[t,] <- e_t_to_use # Store the counterfactual shock vector
+      }
+    } else { # Outside the counterfactual period
+      cfact_e_t[t,] <- all_e_t[t,] # Use the structural shocks recovered from the fitted model
+    }
 
+    # Compute the corresponding observation for the time period t based on the obtained shock vector:
+    cfact_data[t_row_in_data, ] <- get_y_t(mu_yt=mu_yt, B_yt=B_yt, e_t=cfact_e_t[t,])
 
+    # Update cfact_Y for the next iteration:
+    cfact_Y[t,] <- reform_data(cfact_data[1:t_row_in_data,], p=p)[t,] # The t:th row of cfact_Y is the vector y_{t-1},...,y_{t-p}
   }
+
+  # Return the results
+  structure(list(cfact_data=cfact_data,
+                 cfact_e_t=cfact_e_t,
+                 cfact_alpha_mt=cfact_alpha_mt,
+                 stvar=stvar,
+                 input=list(policy_var=policy_var, mute_var=mute_var, type=type,
+                            cfact_start=cfact_start, cfact_end=cfact_end, cfact_path=cfact_path),
+                 type=type, policy_var=policy_var, mute_var=mute_var, cfact_start=cfact_start,
+                 cfact_end=cfact_end, cfact_path=cfact_path), class="cfacthist")
 }
 
 
@@ -392,3 +422,20 @@ get_B_yt <- function(all_Omegas, alpha_mt, W, lambdas, cond_dist=c("Gaussian", "
   }
 }
 
+
+#' @title Compute the observation \eqn{y_t=\mu_{y,t} + B_{y,t}e_t} for a single time period
+#'
+#' @description \code{get_y_t} computes the observation \eqn{y_t=\mu_{y,t} + B_{y,t}e_t} for a single time period
+#'  based on the conditional mean, impact matrix, and shock vector.
+#'
+#' @param mu_yt a \eqn{(d \times 1)} vector of the conditional mean for the time period \eqn{t}.
+#' @param B_yt a \eqn{(d \times d)} impact matrix for the time period \eqn{t}.
+#' @param e_t a \eqn{(d \times 1)} vector of the structural shocks for the time period \eqn{t}.
+#' @details This is used in simulation of the counterfactual scenarios.
+#' @return Returns the \eqn{(d \times 1)} vector of observations for the time period \eqn{t}.
+#' @keywords internal
+
+get_y_t <- function(mu_yt, B_yt, e_t) {
+  # Compute the corresponding observation for the time period t based on the obtained shock vector:
+  as.vector(mu_yt + B_yt%*%e_t) # [d, 1] + [d, d] x [d, 1] = [d, 1]
+}

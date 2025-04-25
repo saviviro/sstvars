@@ -191,6 +191,6 @@ plot(irf4)
  }
 }
 \seealso{
-\code{\link{GIRF}}, \code{\link{GFEVD}}, \code{\link{hist_decomp}}, \code{\link{fitSTVAR}}, \code{\link{STVAR}},
+\code{\link{GIRF}}, \code{\link{GFEVD}}, \code{\link{hist_decomp}}, \code{\link{cfact_hist}}, \code{\link{fitSTVAR}}, \code{\link{STVAR}},
   \code{\link{reorder_B_columns}}, \code{\link{swap_B_signs}}
 }

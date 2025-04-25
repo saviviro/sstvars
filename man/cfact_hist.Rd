@@ -8,10 +8,10 @@ cfact_hist(
   stvar,
   type = c("fixed_path", "muted_response"),
   policy_var = 1,
-  mute_var,
+  mute_var = NULL,
   cfact_start = 1,
   cfact_end = 1,
-  cfact_path
+  cfact_path = NULL
 )
 }
 \arguments{
@@ -40,10 +40,13 @@ behavior of the specified policy variable.}
 specified in the argument \code{policy_var}. This argument is only used when \code{type="fixed_path"}.}
 }
 \value{
-Returns a class \code{'histdecomp'} list with the following elements:
+Returns a class \code{'cfacthist'} list with the following elements:
   \describe{
-    \item{FILL IN}{FILL IN}
+    \item{cfact_data}{A matrix of size \eqn{(T \times d)} containing the counterfactual time series.}
+    \item{cfact_shocks}{A matrix of size \eqn{(T \times d)} containing the counterfactual shocks.}
+    \item{cfact_weights}{A matrix of size \eqn{(T \times M)} containing the counterfactual transition weights.}
     \item{stvar}{The original STVAR model object.}
+    \item{input}{A list containing the arguments used to calculate the counterfactual.}
  }
 }
 \description{
