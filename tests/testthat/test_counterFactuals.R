@@ -411,14 +411,17 @@ test_that("get_mu_yt works correctly", {
   expect_equal(result, c(4.5, 8.5), tolerance=1e-6)
 })
 
-test_that("get_mu_yt works correctly", {
+test_that("get_B_yt works correctly", {
+  ## non-Gaussianity
+
   # d=2, M=2
   all_Bm <- array(NA, dim=c(2, 2, 2))
   all_Bm[, , 1] <- matrix(c(1, 2, 3, 4), nrow=2, byrow=TRUE)
   all_Bm[, , 2] <- matrix(c(5, 6, 7, 8), nrow=2, byrow=TRUE)
   alpha_mt <- c(0.3, 0.7)
 
-  expect_equal(get_B_yt(all_Bm, alpha_mt), 0.3*all_Bm[, , 1] + 0.7*all_Bm[, , 2], tolerance=1e-6)
+  expect_equal(get_B_yt(all_Omegas=all_Bm, alpha_mt=alpha_mt, cond_dist="ind_Student"),
+               0.3*all_Bm[, , 1] + 0.7*all_Bm[, , 2], tolerance=1e-6)
 
   # d=2, M=3
   all_Bm <- array(NA, dim = c(2, 2, 3))
@@ -427,7 +430,8 @@ test_that("get_mu_yt works correctly", {
   all_Bm[, , 3] <- matrix(c(0, 1, 2, 0), nrow=2, byrow=TRUE)
   alpha_mt <- c(0.2, 0.3, 0.5)
 
-  expect_equal(get_B_yt(all_Bm, alpha_mt), 0.2*all_Bm[, , 1] + 0.3*all_Bm[, , 2] + 0.5*all_Bm[, , 3], tolerance=1e-6)
+  expect_equal(get_B_yt(all_Omegas=all_Bm, alpha_mt=alpha_mt, cond_dist="ind_skewed_t"),
+               0.2*all_Bm[, , 1] + 0.3*all_Bm[, , 2] + 0.5*all_Bm[, , 3], tolerance=1e-6)
 
   # d=3, M=2
   all_Bm <- array(NA, dim=c(3, 3, 2))
@@ -436,7 +440,78 @@ test_that("get_mu_yt works correctly", {
   alpha_mt <- c(0.4, 0.6)
 
   # expected = 0.4*I + 0.6*(2I) = (0.4 + 1.2) * I = 1.6 * I
-  expect_equal(get_B_yt(all_Bm, alpha_mt), 1.6*diag(3), tolerance=1e-6)
+  expect_equal(get_B_yt(all_Omegas=all_Bm, alpha_mt=alpha_mt, cond_dist="ind_skewed_t"), 1.6*diag(3), tolerance=1e-6)
+
+  ## heteroskedasticity
+  # d=2, M=3
+  d <- 2; M <- 3
+  all_Omegas <- array(0, dim=c(d, d, M)) # not used in this test
+  alpha_mt <- c(0.2, 0.3, 0.5)
+  W <- matrix(c(1, 0, 0, 2), nrow=d)
+  lambdas <- c(4, 6, 5, 7)
+
+  result <- get_B_yt(all_Omegas=all_Omegas, alpha_mt=alpha_mt, W=W, lambdas=lambdas, cond_dist="Gaussian",
+                     identification="heteroskedasticity")
+
+  Lambda_sum <- alpha_mt[1]*diag(d) + alpha_mt[2]*diag(c(4, 6)) + alpha_mt[3]*diag(c(5, 7)) # manual calculation
+  expected <- W%*%sqrt(Lambda_sum)
+  expect_equal(result, expected, tolerance=1e-6)
+
+  # d=3, M=2
+  d <- 3; M <- 2
+  all_Omegas <- array(0, dim=c(d, d, M))
+  alpha_mt   <- c(0.6, 0.4)
+  W <- matrix(c(2, 0, 0, 0, 1, 0, 1, 0, 3), nrow=d, byrow=TRUE)
+  lambdas <- c(9, 4, 1)
+  B_yt <- get_B_yt(all_Omegas=all_Omegas, alpha_mt=alpha_mt, W=W, lambdas=lambdas, cond_dist="Student",
+                   identification="heteroskedasticity")
+
+  # Manual calculation:
+  Lambda_sum <- alpha_mt[1]*diag(d) + alpha_mt[2]*diag(lambdas)
+  expected <- W%*%sqrt(Lambda_sum)
+  expect_equal(B_yt, expected, tolerance=1e-6)
+
+  ## recursive
+  # d=3, M=2
+  d <- 3; M <- 2
+  all_Omegas <- array(NA, dim=c(d, d, M))
+
+  # regime 1
+  all_Omegas[, , 1] <- matrix(c(4, 1, 0, 1, 5, 2, 0, 2, 6), nrow=d, byrow=TRUE)
+
+  # regime 2
+  all_Omegas[, , 2] <- matrix(c(9, 0, 1, 0, 7, 0, 1, 0, 10), nrow=d, byrow=TRUE)
+  alpha_mt <- c(0.7, 0.3)
+
+  result <- get_B_yt(all_Omegas=all_Omegas, alpha_mt=alpha_mt, W=NULL, lambdas=NULL, cond_dist="Gaussian",
+                     identification="recursive")
+
+  # Manual calculation:
+  Omega_t <- alpha_mt[1]*all_Omegas[, , 1] + alpha_mt[2]*all_Omegas[, , 2]
+  expected <- t(chol(Omega_t)) # lower-triangular
+
+  expect_equal(result, expected, tolerance=1e-6)
+
+  # additional check:  B_t%*%t(B_t) == Ω_t
+  expect_equal(tcrossprod(result, result), Omega_t, tolerance=1e-6)
+
+  # d=2, M=3
+  d <- 2; M <- 3
+  all_Omegas <- array(NA, dim=c(d, d, M))
+  all_Omegas[, , 1] <- matrix(c(4, 1, 1, 3), nrow=2, byrow=TRUE)
+  all_Omegas[, , 2] <- matrix(c(10, 2, 2, 8), nrow=2, byrow=TRUE)
+  all_Omegas[, , 3] <- matrix(c(6, 0, 0, 5), nrow=2, byrow=TRUE)
+  alpha_mt <- c(0.2, 0.5, 0.3)
+
+  B_yt <- get_B_yt(all_Omegas=all_Omegas, alpha_mt=alpha_mt, W=NULL, lambdas=NULL, cond_dist="Student",
+                  identification="reduced_form")
+
+  # expected
+  Omega_t  <- alpha_mt[1]*all_Omegas[, , 1] + alpha_mt[2]*all_Omegas[, , 2] + alpha_mt[3]*all_Omegas[, , 3]
+  expected <- t(chol(Omega_t)) # lower-triangular
+
+  expect_equal(B_yt, expected, tolerance=1e-6)
+  expect_equal(B_yt%*%t(B_yt), Omega_t, tolerance=1e-6)
 })
 
 

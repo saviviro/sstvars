@@ -10,7 +10,8 @@ get_B_yt(
   W,
   lambdas,
   cond_dist = c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
-  identification = c("recursive", "non-Gaussianity", "heteroskedasticity")
+  identification = c("reduced_form", "recursive", "non-Gaussianity",
+    "heteroskedasticity")
 )
 }
 \arguments{

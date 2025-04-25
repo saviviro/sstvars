@@ -365,23 +365,29 @@ get_mu_yt <- function(all_phi0, all_A_yti, bold_y_t_minus_1) {
 #' @keywords internal
 
 get_B_yt <- function(all_Omegas, alpha_mt, W, lambdas, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
-                     identification=c("recursive", "non-Gaussianity", "heteroskedasticity")) {
+                     identification=c("reduced_form", "recursive", "non-Gaussianity", "heteroskedasticity")) {
   cond_dist <- match.arg(cond_dist)
   identification <- match.arg(identification)
 
   if(cond_dist %in% c("ind_Student", "ind_skewed_t")) {
-    #return(apply(sweep(all_Omegas, MARGIN=3, STATS=alpha_mt, FUN="*"), MARGIN=c(1, 2), FUN=sum)) # Multiply each slice by weight and sum over regimes
-    return(matrix(rowSums(vapply(1:M, function(m) alpha_mt[m]*as.vector(all_Omegas[, , m]), numeric(d*d))), nrow=d, ncol=d)) # Faster
+    #d <- dim(all_Omegas)[1]
+    #return(matrix(rowSums(vapply(1:dim(all_Omegas)[3], function(m) alpha_mt[m]*as.vector(all_Omegas[, , m]),
+    #                             numeric(d*d))), nrow=d, ncol=d)) # Faster, but not as readable
+    return(apply(sweep(all_Omegas, MARGIN=3, STATS=alpha_mt, FUN="*"),
+                 MARGIN=c(1, 2), FUN=sum)) # Multiply each slice B_m by its weight and sum over the regimes
   } else if(identification == "heteroskedasticity") {
+    d <- dim(all_Omegas)[1]
+    M <- dim(all_Omegas)[3]
+    lambdas <- matrix(lambdas, ncol=M - 1)
     tmp <- array(dim=c(d, d, M)) # Store alpha_mt[m]*Lambda_m
     tmp[, , 1] <- alpha_mt[1]*diag(d) # m=1, Lambda = I_d
     for(m in 2:M) {
       tmp[, , m] <- alpha_mt[m]*diag(lambdas[, m - 1])
     }
-    return(W%*%sqrt(apply(tmp2, MARGIN=1:2, FUN=sum))) # Calculate B_yt as in Virolainen 2025 (JBES)
+    return(W%*%sqrt(apply(tmp, MARGIN=1:2, FUN=sum))) # Calculate B_yt as in Virolainen 2025 (JBES)
   } else { # Recursive identification, B_yt calculated from the conditional covariance matrix
-    weighted <- sweep(all_Omegas, MARGIN=3, STATS=alpha_mt, FUN="*") # Multiply each slice Omega_m by its weight
-    Omega_yt <- apply(weighted, MARGIN=c(1, 2), FUN=sum) # Sum over the regimes
+    Omega_yt <- apply(sweep(all_Omegas, MARGIN=3, STATS=alpha_mt, FUN="*"),
+                      MARGIN=c(1, 2), FUN=sum) # Multiply each slice Omega_m by its weight and sum over the regimes
     return(t(chol(Omega_yt))) # Cholesky decomposition of the conditional covariance matrix, zeros in the upper triangle
   }
 }
