@@ -130,12 +130,8 @@ cfact_hist <- function(stvar, type=c("fixed_path", "muted_response"), policy_var
   weightpars <- pick_weightpars(p=p, M=M, d=d, params=params, weight_function=weight_function, cond_dist=cond_dist, weightfun_pars=weightfun_pars)
   all_boldA <- form_boldA(p=p, M=M, d=d, all_A=all_A) # The bold A matrices of the regimes to be used later
   distpars <- pick_distpars(d=d, params=params, cond_dist=cond_dist)
-
-  # Structural pars (recursive just takes Cholesky and model identified by non-Gaussianity have B_m in all_Omegas)
-  if(identification == "heteroskedasticity") {
-    W <- pick_W(p=p, M=M, d=d, params=params, identification=identification)
-    lambdas <- matrix(pick_lambdas(p=p, M=M, d=d, params=params, identification=identification), nrow=d, ncol=M-1)
-  }
+  W <- pick_W(p=p, M=M, d=d, params=params, identification=identification) # NULL for non het.sked ident models
+  lambdas <- pick_lambdas(p=p, M=M, d=d, params=params, identification=identification) # NULL for non het.sked ident models
 
   ## Calculate required statistics that remain constant through the iterations
   if(weight_function == "relative_dens") {  # relative_dens weight function uses this
@@ -174,6 +170,22 @@ cfact_hist <- function(stvar, type=c("fixed_path", "muted_response"), policy_var
   ## Obtain the transition weights
   alpha_mt <- stvar$transition_weights # [T_obs, M]
 
+  ## Calculate all_Bm if available
+  if(cond_dist %in% c("ind_Student", "ind_skewed_t")) { # Identification by non-Gaussianity
+    all_Bm <- all_Omegas
+  } else if(identification == "heteroskedasticity") {
+    all_Bm <- array(0, dim=c(d, d, M)) # Pre-allocate [d, d, M]
+    for(m in 1:M) {
+      if(m == 1) {
+        all_Bm[, , m] <- W
+      } else {
+        all_Bm[, , m] <- W%*%diag(sqrt(lambdas[, m-1])) # [d, d]
+      }
+    }
+  } else { # Recursive identification, no impact matrices of the regimes, B_yt calculated directly from the conditional covariance matrix
+    all_Bm <- NULL
+  }
+
   # Some functions to be used to obtain the transition weights during the counterfactual simulation
   if(weight_function == "relative_dens") {
     # Get log multivariate normal densities for calculating the transition weights
@@ -196,6 +208,7 @@ cfact_hist <- function(stvar, type=c("fixed_path", "muted_response"), policy_var
   } else if(weight_function == "exogenous") {
     # Nothing to do here, uses exo_weights directly
   }
+
 
   ## Obtain the data in a convenient form:
   # t:th row denotes the vector \bold{y_{i-1}} = (y_{t-1},...,y_{t-p}) (dpx1), assuming the observed data is y_{-p+1},...,y_0,y_1,...,y_{T}.
@@ -251,7 +264,10 @@ cfact_hist <- function(stvar, type=c("fixed_path", "muted_response"), policy_var
     all_A_yti <- get_allA_yti(all_A=all_A, alpha_mt=alpha_mt_t) # [d, d, p], lag i is obtained from [, , i]
 
     # Calculate the impact matrix B_{y,t} for the time period t:
+
+
     # Obtain first the impact matrices of the regimes for this time period:
+
 
   }
 }
@@ -333,19 +349,40 @@ get_mu_yt <- function(all_phi0, all_A_yti, bold_y_t_minus_1) {
 }
 
 
-#' @title Compute the impact matrix \eqn{B_{y,t}=\sum_{m=1}^M\alpha_{m,t}B_m} for a single time period
+#' @title Compute the impact matrix \eqn{B_{y,t}} for a single time period
 #'
-#' @description \code{get_B_yt} computes the conditional mean \eqn{B_{y,t}=\sum_{m=1}^M\alpha_{m,t}B_m} for a single time period
-#'  based on the impact matrices of the regimes and the vector of transition weights.
+#' @description \code{get_B_yt} computes the impact matrix \eqn{B_{y,t}}. For \code{"ind_Student"} and \code{"ind_skewed_t"} models
+#'  \eqn{B_{y,t}=\sum_{m=1}^M\alpha_{m,t}B_m}. For models identified by heteroskedasticity \eqn{B_{y,t}=W\sqrt{\sum_{m=1}^M\alpha_{m,t}\Lambda_m}}.
+#'  For recursive identification \eqn{B_{y,t}} is obtained from the Cholesky decomposition of the conditional covariance matrix.
 #'
-#' @param all_Bm a 3D array such that the impact matrix of \eqn{m}th regime is obtained from \code{all_Bm[, , m]}.
+#' @inheritParams loglikelihood
+#' @param all_Omegas a 3D array such that the covariance matrix (or impact matrix \eqn{B_m}) of the \eqn{m}th regime is obtained from \code{all_Omegas[, , m]}.
 #' @param alpha_mt an \eqn{(M \times 1)} vector containing the time period \eqn{t} transition weights.
+#' @param W a \eqn{(d \times d)} matrix containing the matrix \eqn{W} for models identified by heteroskedasticity (as returned by \code{pick_W}).
+#' @param lambdas a \eqn{(d(M-1)\times 1)} vector \eqn{\lambda_2,...,\lamda_M} for models identified by heteroskedasticity (as returned by \code{pick_lambdas}).
 #' @details This is used in simulation of the counterfactual scenarios.
 #' @return Returns the \eqn{(d \times d)} impact matrix for the time period \eqn{t}.
 #' @keywords internal
 
-get_B_yt <- function(all_Bm, alpha_mt) {
-  # Multiply each slice B_m by its weight and sum (vectorized via sweep + apply)
-  weighted <- sweep(all_Bm, MARGIN=3, STATS=alpha_mt, FUN="*")
-  apply(weighted, MARGIN=c(1, 2), FUN=sum)
+get_B_yt <- function(all_Omegas, alpha_mt, W, lambdas, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
+                     identification=c("recursive", "non-Gaussianity", "heteroskedasticity")) {
+  cond_dist <- match.arg(cond_dist)
+  identification <- match.arg(identification)
+
+  if(cond_dist %in% c("ind_Student", "ind_skewed_t")) {
+    #return(apply(sweep(all_Omegas, MARGIN=3, STATS=alpha_mt, FUN="*"), MARGIN=c(1, 2), FUN=sum)) # Multiply each slice by weight and sum over regimes
+    return(matrix(rowSums(vapply(1:M, function(m) alpha_mt[m]*as.vector(all_Omegas[, , m]), numeric(d*d))), nrow=d, ncol=d)) # Faster
+  } else if(identification == "heteroskedasticity") {
+    tmp <- array(dim=c(d, d, M)) # Store alpha_mt[m]*Lambda_m
+    tmp[, , 1] <- alpha_mt[1]*diag(d) # m=1, Lambda = I_d
+    for(m in 2:M) {
+      tmp[, , m] <- alpha_mt[m]*diag(lambdas[, m - 1])
+    }
+    return(W%*%sqrt(apply(tmp2, MARGIN=1:2, FUN=sum))) # Calculate B_yt as in Virolainen 2025 (JBES)
+  } else { # Recursive identification, B_yt calculated from the conditional covariance matrix
+    weighted <- sweep(all_Omegas, MARGIN=3, STATS=alpha_mt, FUN="*") # Multiply each slice Omega_m by its weight
+    Omega_yt <- apply(weighted, MARGIN=c(1, 2), FUN=sum) # Sum over the regimes
+    return(t(chol(Omega_yt))) # Cholesky decomposition of the conditional covariance matrix, zeros in the upper triangle
+  }
 }
+

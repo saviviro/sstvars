@@ -305,7 +305,7 @@ pick_regime <- function(p, M, d, params, m, cond_dist=c("Gaussian", "Student", "
 #'   of a structural model identified by heteroskedasticity.
 #' @inheritParams loglikelihood
 #' @details Constrained parameter vectors are not supported. Not even constraints in \eqn{W}!
-#' @return Returns a \eqn{(d x d)} matrix \eqn{W} for structural models identified by heteroskedasticity
+#' @return Returns a \eqn{(d \times d)} matrix \eqn{W} for structural models identified by heteroskedasticity
 #'   and \code{NULL} for other models.
 #' @references
 #' \itemize{

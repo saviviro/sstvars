@@ -95,7 +95,7 @@ that are constrained to zero by the argument \code{B_constraints} are excluded.}
 }}
 }
 \value{
-Returns a \eqn{(d x d)} matrix \eqn{W} for structural models identified by heteroskedasticity
+Returns a \eqn{(d \times d)} matrix \eqn{W} for structural models identified by heteroskedasticity
   and \code{NULL} for other models.
 }
 \description{

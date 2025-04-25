@@ -2,21 +2,48 @@
 % Please edit documentation in R/counterFactuals.R
 \name{get_B_yt}
 \alias{get_B_yt}
-\title{Compute the impact matrix \eqn{B_{y,t}=\sum_{m=1}^M\alpha_{m,t}B_m} for a single time period}
+\title{Compute the impact matrix \eqn{B_{y,t}} for a single time period}
 \usage{
-get_B_yt(all_Bm, alpha_mt)
+get_B_yt(
+  all_Omegas,
+  alpha_mt,
+  W,
+  lambdas,
+  cond_dist = c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
+  identification = c("recursive", "non-Gaussianity", "heteroskedasticity")
+)
 }
 \arguments{
-\item{all_Bm}{a 3D array such that the impact matrix of \eqn{m}th regime is obtained from \code{all_Bm[, , m]}.}
+\item{all_Omegas}{a 3D array such that the covariance matrix (or impact matrix \eqn{B_m}) of the \eqn{m}th regime is obtained from \code{all_Omegas[, , m]}.}
 
 \item{alpha_mt}{an \eqn{(M \times 1)} vector containing the time period \eqn{t} transition weights.}
+
+\item{W}{a \eqn{(d \times d)} matrix containing the matrix \eqn{W} for models identified by heteroskedasticity (as returned by \code{pick_W}).}
+
+\item{lambdas}{a \eqn{(d(M-1)\times 1)} vector \eqn{\lambda_2,...,\lamda_M} for models identified by heteroskedasticity (as returned by \code{pick_lambdas}).}
+
+\item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"}, \code{"Student"}, \code{"ind_Student"},
+or \code{"ind_skewed_t"}, where \code{"ind_Student"} the Student's \eqn{t} distribution with independent components, and
+\code{"ind_skewed_t"} is the skewed \eqn{t} distribution with independent components (see Hansen, 1994).}
+
+\item{identification}{is it reduced form model or an identified structural model; if the latter, how is it identified
+(see the vignette or the references for details)?
+\describe{
+  \item{\code{"reduced_form"}:}{Reduced form model.}
+  \item{\code{"recursive"}:}{The usual lower-triangular recursive identification of the shocks via their impact responses.}
+  \item{\code{"heteroskedasticity"}:}{Identification by conditional heteroskedasticity, which imposes constant relative
+    impact responses for each shock.}
+  \item{\code{"non-Gaussianity"}:}{Identification by non-Gaussianity; requires mutually independent non-Gaussian shocks, thus,
+    currently available only with the conditional distribution \code{"ind_Student"}.}
+}}
 }
 \value{
 Returns the \eqn{(d \times d)} impact matrix for the time period \eqn{t}.
 }
 \description{
-\code{get_B_yt} computes the conditional mean \eqn{B_{y,t}=\sum_{m=1}^M\alpha_{m,t}B_m} for a single time period
- based on the impact matrices of the regimes and the vector of transition weights.
+\code{get_B_yt} computes the impact matrix \eqn{B_{y,t}}. For \code{"ind_Student"} and \code{"ind_skewed_t"} models
+ \eqn{B_{y,t}=\sum_{m=1}^M\alpha_{m,t}B_m}. For models identified by heteroskedasticity \eqn{B_{y,t}=W\sqrt{\sum_{m=1}^M\alpha_{m,t}\Lambda_m}}.
+ For recursive identification \eqn{B_{y,t}} is obtained from the Cholesky decomposition of the conditional covariance matrix.
 }
 \details{
 This is used in simulation of the counterfactual scenarios.
