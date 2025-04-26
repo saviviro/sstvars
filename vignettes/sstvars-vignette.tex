@@ -1231,7 +1231,7 @@ Consider the STVAR model~(\ref{eq:stvar1}) in the form~(\ref{eq:stvarsimp}). The
 \end{equation}
 where $\mu_{t,i_1}$ is the $i_1$th element of the vector $\phi_{y,t} + \sum_{i=1}^pA_{y,t,i}y_{t-i}$ and $b_{t,i_1j}$ is the $i_1j$th element of the impact matrix $B_{y,t}$. Solving this equation with respect to $e_{i_1t}$ gives
 \begin{equation}\label{eq:val_e_t}
-e_{i_1t} = y_{i_1t}^{*} - \mu_{t,i_1} - \sum_{j=1, j\neq i_1}^d b_{t,i_1j} e_{jt}.
+e_{i_1t} = b_{t,i_1i_1}^{-1}\left(y_{i_1t}^{*} - \mu_{t,i_1} - \sum_{j=1, j\neq i_1}^d b_{t,i_1j} e_{jt}\right).
 \end{equation}
 Denote this solution of $e_{i_1t}$ as $e_{i_1t}^{*}$. The implied counterfactual time $t$ observations are obtained by replacing the $i_1$th shock in the vector $e_t$ by $e_{i_1t}^{*}$, and then calculating the implied observations from~(\ref{eq:stvarsimp}) by using the obtained hypothetical structural error.
 

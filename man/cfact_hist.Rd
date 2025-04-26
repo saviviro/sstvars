@@ -42,7 +42,8 @@ specified in the argument \code{policy_var}. This argument is only used when \co
 \value{
 Returns a class \code{'cfacthist'} list with the following elements:
   \describe{
-    \item{cfact_data}{A matrix of size \eqn{(T \times d)} containing the counterfactual time series.}
+    \item{cfact_data}{A matrix of size \eqn{(T+p \times d)} containing the counterfactual time series. Note that the first \eqn{p} rows
+     are for the initial values prior the time period \eqn{t=1}.}
     \item{cfact_shocks}{A matrix of size \eqn{(T \times d)} containing the counterfactual shocks.}
     \item{cfact_weights}{A matrix of size \eqn{(T \times M)} containing the counterfactual transition weights.}
     \item{stvar}{The original STVAR model object.}
@@ -86,7 +87,7 @@ params32logt <- c(0.5959, 0.0447, 2.6279, 0.2897, 0.2837, 0.0504, -0.2188, 0.400
 mod32logt <- STVAR(gdpdef, p=3, M=2, params=params32logt, weight_function="logistic",
   weightfun_pars=c(2, 1), cond_dist="Student", identification="recursive")
 
-# FILL IN
+# Simulate historical counterfactual where ..
 }
 \references{
 \itemize{

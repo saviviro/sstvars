@@ -4,10 +4,10 @@
 \alias{get_mu_yt}
 \title{Compute the conditional mean \eqn{\mu_{y,t}=\phi_{y,t} + \sum_{i=1}^pA_{y,t,i}y_{t-i}} for a single time period}
 \usage{
-get_mu_yt(all_phi0, all_A_yti, bold_y_t_minus_1)
+get_mu_yt(phi_yt, all_A_yti, bold_y_t_minus_1)
 }
 \arguments{
-\item{all_phi0}{a \eqn{(d \times M)} matrix such that the \eqn{m}th column contains the intercept parameters of the \eqn{m}th regime.}
+\item{phi_yt}{a \eqn{(d \times M)} matrix such that the \eqn{m}th column contains the intercept parameters of the \eqn{m}th regime.}
 
 \item{all_A_yti}{a 3D array containing the coefficient matrices for the given time period so that the lag \eqn{i} coefficient matrix
 \eqn{A_{y,t,i}} can be obtained by choosing \code{[, , i]}.}

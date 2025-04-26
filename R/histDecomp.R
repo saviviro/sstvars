@@ -186,6 +186,7 @@ hist_decomp <- function(stvar) {
     # j=0:
     C_tj <- array(0, dim=c(d*p, d, t)) # C_{t,j} in [dp, d, j+1]
     C_tj[, , 1] <- H%*%B_yt[, , t] # [dp, d] matrix C_{t,0}
+    inv_B_yt <- solve(B_yt[, , t]) # [d, d] matrix
     for(j in 1:(t-1)) { # j=1,...,t-1
       if(j == 1) {
         tmp_cum_A_yt <- boldA_yt[, , t] # [dp, dp] matrix \prod_{i=0}^{j-1}A_{y,t-i}
@@ -196,7 +197,7 @@ hist_decomp <- function(stvar) {
     }
     # Calculate the steady state component:
     tmp <- matrix(nrow=d*p, ncol=t)
-    inv_B_yt <- solve(B_yt[, , t]) # [d, d] matrix
+    #inv_B_yt <- solve(B_yt[, , t]) # [d, d] matrix, calculated above
     for(j in 0:(t-1)) {
       tmp[, j + 1] <- C_tj[, , j + 1]%*%inv_B_yt%*%phi_yt[t-j,] # [dp, 1] matrix
     }
@@ -214,7 +215,7 @@ hist_decomp <- function(stvar) {
       for(s in 1:d) { # variable = s
         # C_tj[s, k, ] = c_sk elements in the order j=0,1,...,t-j and we need to match j:th C_tj with t-j:th e_t.
         # So, e.g., the first slice in C_tj (j=0) is multiplied with e_t (t-j=0), and the second slice in C_tj (j=1) is multiplied with e_{t-1} (t-j=1), etc.
-        contributions_of_shocks[t, k, s] <- crossprod(C_tj[s, k, ], rev(all_e_t[1:t, k])) # [t, shock=k, var=s]
+        contributions_of_shocks[t, k, s] <- as.numeric(crossprod(C_tj[s, k, ], rev(all_e_t[1:t, k]))) # [t, shock=k, var=s]
       }
     }
   }

@@ -45,7 +45,8 @@
 #'  a way that accommodates nonlinear time-varying dynamics.
 #' @return Returns a class \code{'cfacthist'} list with the following elements:
 #'   \describe{
-#'     \item{cfact_data}{A matrix of size \eqn{(T \times d)} containing the counterfactual time series.}
+#'     \item{cfact_data}{A matrix of size \eqn{(T+p \times d)} containing the counterfactual time series. Note that the first \eqn{p} rows
+#'      are for the initial values prior the time period \eqn{t=1}.}
 #'     \item{cfact_shocks}{A matrix of size \eqn{(T \times d)} containing the counterfactual shocks.}
 #'     \item{cfact_weights}{A matrix of size \eqn{(T \times M)} containing the counterfactual transition weights.}
 #'     \item{stvar}{The original STVAR model object.}
@@ -70,11 +71,11 @@
 #' mod32logt <- STVAR(gdpdef, p=3, M=2, params=params32logt, weight_function="logistic",
 #'   weightfun_pars=c(2, 1), cond_dist="Student", identification="recursive")
 #'
-#' # FILL IN
+#' # Simulate historical counterfactual where ..
 #' @export
 
 cfact_hist <- function(stvar, type=c("fixed_path", "muted_response"), policy_var=1, mute_var=NULL, cfact_start=1, cfact_end=1, cfact_path=NULL) {
-  check_stvar(object, object_name="stvar")
+  check_stvar(stvar, object_name="stvar")
   epsilon <- round(log(.Machine$double.xmin) + 10)
   type <- match.arg(type)
   data <- stvar$data
@@ -256,39 +257,40 @@ cfact_hist <- function(stvar, type=c("fixed_path", "muted_response"), policy_var
     B_yt <- get_B_yt(all_Omegas=all_Omegas, alpha_mt=alpha_mt_t, W=W, lambdas=lambdas, cond_dist=cond_dist,
                      identification=identification) # [d, d]
 
-    if(t %in% cfact_start:cfact_end) { # Counterfactual period
-      # Compute the autoregression part of the model, is not affected by the period t shocks:
-      mu_yt <- get_mu_yt(all_phi0=all_phi0, all_A_yti=all_A_yti, bold_y_t_minus_1=cfact_Y[t,]) # cfact_t t:th row is one lagged
+    # Compute the conditional mean of the model, is not affected by the period t shocks:
+    mu_yt <- get_mu_yt(phi_yt=phi_yt, all_A_yti=all_A_yti, bold_y_t_minus_1=cfact_Y[t,]) # cfact_t t:th row is one lagged
 
+    if(t %in% cfact_start:cfact_end) { # Counterfactual period
       # Compute the counterfactual shock
       if(type == "fixed_path") {
-        cfact_path_t <- cfact_path[t - cfact_start + 1] # The hypothetical path of the policy variable
-        effect_of_other_shocks <- crossprod(B_yt[policy_var, -policy_var], cfact_e_t[t, -policy_var]) # The effect of the other shocks to the policy var
-        cfact_policy_e_t <- cfact_path_t - mu_yt - effect_of_other_shocks # The counterfactual shock to the policy variable, yielding the counterfactual path
         e_t_to_use <- e_t[t,] # Recovered shocks for time period t
+        cfact_path_t <- cfact_path[t - cfact_start + 1] # The hypothetical path of the policy variable
+        effect_of_other_shocks <- as.numeric(crossprod(B_yt[policy_var, -policy_var], e_t_to_use[-policy_var])) # The effect of the other shocks to the policy var
+        cfact_policy_e_t <- (cfact_path_t - mu_yt[policy_var] -
+                               effect_of_other_shocks)/B_yt[policy_var, policy_var] # The counterfactual shock to the policy var, yielding the cfactual path
         e_t_to_use[policy_var] <- cfact_policy_e_t # Insert the counterfactual shock to the policy variable
         cfact_e_t[t,] <- e_t_to_use # Store the counterfactual shock vector
       } else if(type == "muted_response") {
         # Lagged effects of mute_var on policy_var:
-        lagged_effects <- crossprod(all_A_yti[policy_var, mute_var, ], # (p x 1) vector of i_1i_2:th elements of A_yt so that lag i is in the i:th element.
-                                    matrix(cfact_Y[t,], nrow=d)[mute_var,]) # i:th column is the vector y_{t-i}, and the mute_var:th row is the mute_var
+        lagged_effects <- as.numeric(crossprod(all_A_yti[policy_var, mute_var, ], # (p x 1) vector of i_1i_2:th elements of A_yt so that lag i is in the i:th element.
+                                               matrix(cfact_Y[t,], nrow=d)[mute_var,])) # i:th column is the vector y_{t-i}, and the mute_var:th row is the mute_var
         # Contemporaneous effects of mute_var:th shock on policy_var:
         cont_effects <- B_yt[policy_var, mute_var]*e_t[t, mute_var]
         # Calculate the counterfactual shock to the policy variable that mutes the response to mute_var:
         e_t_to_use <- e_t[t,] # Recovered shocks for time period t
-        cfact_policy_e_t <- e_t_to_use[policy_var] - (1/B_yt[policy_var, policy_var])(lagged_effects + cont_effects) # The cfact shock to the policy var
+        cfact_policy_e_t <- e_t_to_use[policy_var] - (1/B_yt[policy_var, policy_var])*(lagged_effects + cont_effects) # The cfact shock to the policy var
         e_t_to_use[policy_var] <- cfact_policy_e_t # Insert the counterfactual shock to the policy variable
         cfact_e_t[t,] <- e_t_to_use # Store the counterfactual shock vector
       }
     } else { # Outside the counterfactual period
-      cfact_e_t[t,] <- all_e_t[t,] # Use the structural shocks recovered from the fitted model
+      cfact_e_t[t,] <- e_t[t,] # Use the structural shocks recovered from the fitted model
     }
 
     # Compute the corresponding observation for the time period t based on the obtained shock vector:
     cfact_data[t_row_in_data, ] <- get_y_t(mu_yt=mu_yt, B_yt=B_yt, e_t=cfact_e_t[t,])
 
     # Update cfact_Y for the next iteration:
-    cfact_Y[t,] <- reform_data(cfact_data[1:t_row_in_data,], p=p)[t,] # The t:th row of cfact_Y is the vector y_{t-1},...,y_{t-p}
+    cfact_Y[t + 1,] <- reform_data(cfact_data[1:t_row_in_data,], p=p)[t + 1,] # The t:th row of cfact_Y is the vector y_{t-1},...,y_{t-p}
   }
 
   # Return the results
@@ -356,7 +358,7 @@ get_allA_yti <- function(all_A, alpha_mt) {
 #' @description \code{get_mu_yt} computes the conditional mean \eqn{\mu_{y,t}=\phi_{y,t} + \sum_{i=1}^pA_{y,t,i}y_{t-i}} for a single time period
 #'  based on the intercepts, AR matrices, and the vector of lagged observations.
 #'
-#' @param all_phi0 a \eqn{(d \times M)} matrix such that the \eqn{m}th column contains the intercept parameters of the \eqn{m}th regime.
+#' @param phi_yt a \eqn{(d \times M)} matrix such that the \eqn{m}th column contains the intercept parameters of the \eqn{m}th regime.
 #' @param all_A_yti a 3D array containing the coefficient matrices for the given time period so that the lag \eqn{i} coefficient matrix
 #'  \eqn{A_{y,t,i}} can be obtained by choosing \code{[, , i]}.
 #' @param bold_y_t_minus_1 a \eqn{(dp \times 1)} vector \eqn{\boldsymbol{y}_{t-1}=(y_{t-1},...,y_{t-p})} containing the lagged observations
@@ -365,7 +367,7 @@ get_allA_yti <- function(all_A, alpha_mt) {
 #' @return Returns the \eqn{(d \times 1)} vector of the conditional mean for the time period \eqn{t}.
 #' @keywords internal
 
-get_mu_yt <- function(all_phi0, all_A_yti, bold_y_t_minus_1) {
+get_mu_yt <- function(phi_yt, all_A_yti, bold_y_t_minus_1) {
   d <- dim(all_A_yti)[1]
   p <- dim(all_A_yti)[3]
 
@@ -375,7 +377,7 @@ get_mu_yt <- function(all_phi0, all_A_yti, bold_y_t_minus_1) {
     big_A[, ((i1 - 1)*d + 1):(i1*d)] <- all_A_yti[, , i1] # Fill the i-th block of big_A
   }
 
-  as.vector(all_phi0 + big_A%*%bold_y_t_minus_1) # [d, 1] + [d, dp] x [dp, 1] = [d, 1]
+  as.vector(phi_yt + big_A%*%bold_y_t_minus_1) # [d, 1] + [d, dp] x [dp, 1] = [d, 1]
 }
 
 

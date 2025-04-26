@@ -347,14 +347,14 @@ test_that("get_allA_yti works correctly", {
 
 test_that("get_mu_yt works correctly", {
   # d=2, p=2 case
-  all_phi0 <- c(1, 2)
+  phi_yt <- c(1, 2)
   all_A_yti <- array(0, dim=c(2, 2, 2))
   all_A_yti[, , 1] <- diag(2) # A_{y,t,1} = I
   all_A_yti[, , 2] <- matrix(c(0, 2, 3, 0), nrow=2, byrow=TRUE) # A_{y,t,2}
   bold_y_t_minus_1 <- c(1, 1, 2, 3) # [y_{t-1}; y_{t-2}]
 
   # Compute result
-  result <- get_mu_yt(all_phi0, all_A_yti, bold_y_t_minus_1)
+  result <- get_mu_yt(phi_yt=phi_yt, all_A_yti=all_A_yti, bold_y_t_minus_1=bold_y_t_minus_1)
 
   # Manual:
   # big_A = [I | A2] = [1 0 0 2; 0 1 3 0]
@@ -365,27 +365,27 @@ test_that("get_mu_yt works correctly", {
 
   # d=3, p=1 case
   d <- 3; p <- 1
-  all_phi0 <- c(-1, 0, 2)
+  phi_yt <- c(-1, 0, 2)
   all_A_yti <- array(0, dim=c(d, d, p))
   all_A_yti[, , 1] <- 2*diag(3)
   bold_y_t_minus_1 <- c(1, 2, 3)
 
   # mu = phi0 + 2*bold_y = c(-1+2, 0+4, 2+6) = c(1,4,8)
-  result <- get_mu_yt(all_phi0, all_A_yti, bold_y_t_minus_1)
+  result <- get_mu_yt(phi_yt=phi_yt, all_A_yti=all_A_yti, bold_y_t_minus_1=bold_y_t_minus_1)
   expect_equal(result, c(1, 4, 8), tolerance=1e-8)
 
   # d=4, p=3 case
   set.seed(42)
   d <- 4; p <- 3
-  all_phi0 <- runif(d)
+  phi_yt <- runif(d)
   all_A_yti <- array(rnorm(d*d*p), dim=c(d, d, p))
   bold_y_t_minus_1 <- rnorm(d*p)
 
   # vectorized result
-  vec_res <- get_mu_yt(all_phi0, all_A_yti, bold_y_t_minus_1)
+  vec_res <- get_mu_yt(phi_yt=phi_yt, all_A_yti=all_A_yti, bold_y_t_minus_1=bold_y_t_minus_1)
 
   # loop result
-  loop_res <- all_phi0
+  loop_res <- phi_yt
   for(i1 in seq_len(p)) {
     ylag <- bold_y_t_minus_1[((i1 - 1)*d + 1):(i1*d)]
     loop_res <- loop_res + all_A_yti[, , i1]%*%ylag
@@ -393,7 +393,7 @@ test_that("get_mu_yt works correctly", {
   expect_equal(vec_res, as.numeric(loop_res), tolerance=1e-6)
 
   # d = 2, p = 2
-  all_phi0 <- c(0.5, -0.5)
+  phi_yt <- c(0.5, -0.5)
   all_A_yti <- array(0, dim=c(2, 2, 2))
   # A_{y,t,1} non-diagonal
   all_A_yti[, , 1] <- matrix(c(1, 2, 3, 4), nrow=2, byrow=TRUE)
@@ -402,7 +402,7 @@ test_that("get_mu_yt works correctly", {
   # y_{t-1} = (1,1), y_{t-2} = (-1,2)
   bold_y_t_minus_1 <- c(1, 1, -1, 2)
 
-  result <- get_mu_yt(all_phi0, all_A_yti, bold_y_t_minus_1)
+  result <- get_mu_yt(phi_yt=phi_yt, all_A_yti=all_A_yti, bold_y_t_minus_1=bold_y_t_minus_1)
 
   # manual:
   # A1 %*% c(1,1) = c(3,7)
@@ -515,40 +515,62 @@ test_that("get_B_yt works correctly", {
 })
 
 
-test_that("hist_decomp works correctly", {
-  expect_equal(1, 1, tolerance=1e-6)
+test_that("cfact_hist works correctly", {
 
   # Linear SVAR
+  theta_112relg <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103, 0.601786, -0.002945, 0.067224)
+  mod112relg <- STVAR(data=gdpdef[1:50,], p=1, M=1, params=theta_112relg, weight_function="relative_dens")
   mod <- mod112relg
-  tmp <- hist_decomp(mod112relg)
+  tmp <- cfact_hist(mod, type="fixed_path", policy_var=1, cfact_start=1, cfact_end=1, cfact_path=c(13))
+  expect_equal(c(tmp$cfact_data[1:3,]), c(1.9195500, 13.0000000, 3.1782960, 0.2331600, 0.1004573, 0.5717706), tolerance=1e-3)
+  expect_equal(tmp$cfact_alpha_mt[1:3], c(1, 1, 1), tolerance=1e-3)
+  expect_equal(c(tmp$cfact_e_t[1:2,]), c(15.2500610, -1.5566894, -0.6137239, 0.4870329), tolerance=1e-3)
 
   # Relative_dens Gaussian STVAR
   mod <- mod123relg
-  tmp <- hist_decomp(mod)
-
+  tmp <- cfact_hist(mod, type="fixed_path", policy_var=2, cfact_start=3, cfact_end=4, cfact_path=c(1, -1))
+  expect_equal(c(tmp$cfact_data[4:6,]), c(0.58931119, 0.89152424, 1.15595397, 1.00000000, -1.00000000, 0.06629706,
+                                          1.49926178, 1.88890671, 2.23420120), tolerance=1e-3)
+  expect_equal(c(tmp$cfact_alpha_mt[4:6,]), c(0.907111044, 0.866407293, 0.996805256, 0.092888956, 0.133592707, 0.003194744), tolerance=1e-3)
+  expect_equal(c(tmp$cfact_e_t[4:6,]), c(0.2715842, -0.4813848, -1.4705232, -6.8484605, 1.6189520, 0.8025761,
+                                         0.9507210, 0.6733533, 0.1111197), tolerance=1e-3)
 
   # Logistic
   mod <- mod222logistitb
-  tmp <- hist_decomp(mod)
-
+  tmp <- cfact_hist(mod, type="muted_response", policy_var=1, mute_var=2, cfact_start=2, cfact_end=3)
+  expect_equal(c(tmp$cfact_data[2:5,]), c(2.2551700, 0.0705600, 0.5191495, 2.5195128, 0.1530400, 0.3850600, 0.5493942, 0.4989937), tolerance=1e-3)
+  expect_equal(c(tmp$cfact_alpha_mt[2:5,]), c(0.4625642, 0.4462689, 0.4512559, 0.4446424, 0.5374358, 0.5537311, 0.5487441, 0.5553576), tolerance=1e-3)
+  expect_equal(c(tmp$cfact_e_t[2:5,]), c(-6.63344471, 19.94040937, -11.92495765, -4.20250133, -0.02000102, 0.79938909, -0.72334832, 0.06099980), tolerance=1e-3)
 
   # Logit
   mod <- mod222logcmt_12_2
-  tmp <- hist_decomp(mod)
+  tmp <- cfact_hist(mod, type="muted_response", policy_var=2, mute_var=1, cfact_start=2, cfact_end=2)
+  expect_equal(c(tmp$cfact_data[2:4,]), c(2.2551700, 0.0705600, 0.4736337, 0.1530400, 0.3850600, 0.5935747), tolerance=1e-3)
+  expect_equal(c(tmp$cfact_alpha_mt[2:4,]), c(0.6688768, 0.5993153, 0.7225385, 0.3311232, 0.4006847, 0.2774615), tolerance=1e-3)
+  expect_equal(c(tmp$cfact_e_t[2:4,]), c(-1.0479836, 2.6930322, -1.7982568, 0.9072007, 0.1117878, -0.7601725), tolerance=1e-3)
 
   # Exponential
   mod <- mod222expcmwtsh_2_1
-  tmp <- hist_decomp(mod)
-
+  tmp <- cfact_hist(mod, type="fixed_path", policy_var=2, cfact_start=1, cfact_end=2, cfact_path=c(-1, -2))
+  expect_equal(c(tmp$cfact_data[2:5,]), c(2.255170, -58.633289, 43.205010, -12.043863, 0.153040, -1.000000, -2.000000, 2.380093), tolerance=1e-3)
+  expect_equal(c(tmp$cfact_alpha_mt[1:3,]), c(0.993270797, 0.714170893, 0.263623587, 0.006729203, 0.285829107, 0.736376413), tolerance=1e-3)
+  expect_equal(c(tmp$cfact_e_t[1:3,]), c(0.51127304, 0.73815826, 0.03739836, 79.27445159, -73.48881182, -2.70788018), tolerance=1e-3)
 
   # Threshold
   mod <- mod222thres_2_1
-  tmp <- hist_decomp(mod)
-
+  tmp <- cfact_hist(mod, type="muted_response", policy_var=1, mute_var=2, cfact_start=10, cfact_end=10)
+  expect_equal(c(tmp$cfact_data[11:13,]), c(1.9195900, 1.9501847, 1.7821673, 0.2562900, 0.3148065, 0.5151003), tolerance=1e-3)
+  expect_equal(c(tmp$cfact_alpha_mt[9:11,]), c(1, 1, 1, 0, 0, 0), tolerance=1e-3)
+  expect_equal(c(tmp$cfact_e_t[9:11,]), c(2.2251009, 1.2056860, 0.6142575, -0.6701476, -0.4580799, 0.6173660), tolerance=1e-3)
 
   # Exogenous
   mod <- mod123exoikt
-  tmp <- hist_decomp(mod)
+  tmp <- cfact_hist(mod, type="fixed_path", policy_var=3, cfact_start=10, cfact_end=10, cfact_path=c(-5))
+  expect_equal(c(tmp$cfact_data[10:12,]), c(-0.5522708, 4.3789027, 4.6584843, 0.4013990, -0.6250584, -0.6618279, 2.9266667,
+                                            -5.0000000 ,-3.9782313), tolerance=1e-3)
+  expect_equal(c(tmp$cfact_alpha_mt[8:10,]), c(0.2946009, 0.5776099, 0.6309793, 0.7053991, 0.4223901, 0.3690207), tolerance=1e-3)
+  expect_equal(c(tmp$cfact_e_t[8:10,]), c(-1.8250055, 0.6423156, -1.2923466, 0.2980476, -0.8033733, 0.4184558, 0.8974124,
+                                          0.1082131, -6.2418672), tolerance=1e-3)
 
 })
 
