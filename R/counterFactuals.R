@@ -71,7 +71,11 @@
 #' mod32logt <- STVAR(gdpdef, p=3, M=2, params=params32logt, weight_function="logistic",
 #'   weightfun_pars=c(2, 1), cond_dist="Student", identification="recursive")
 #'
-#' # Simulate historical counterfactual where ..
+#' # Simulate historical counterfactual where the first variable takes the values 3 and 4
+#' # in the first and second time periods.
+#' cfact1 <- cfact_hist(mod32logt, type="fixed_path", policy_var=1, cfact_start=1,
+#'   cfact_end=2, cfact_path=c(3, 4))
+#' print(cfact1, start=c(1959, 1), end=c(1960, 4)) # Print cfact data from 1959Q1 to 1960Q4
 #' @export
 
 cfact_hist <- function(stvar, type=c("fixed_path", "muted_response"), policy_var=1, mute_var=NULL, cfact_start=1, cfact_end=1, cfact_path=NULL) {
@@ -294,7 +298,7 @@ cfact_hist <- function(stvar, type=c("fixed_path", "muted_response"), policy_var
   }
 
   # Return the results
-  structure(list(cfact_data=cfact_data,
+  structure(list(cfact_data=ts(cfact_data, start=start(stvar$data), frequency=frequency(stvar$data)),
                  cfact_e_t=cfact_e_t,
                  cfact_alpha_mt=cfact_alpha_mt,
                  stvar=stvar,
