@@ -71,11 +71,17 @@
 #' mod32logt <- STVAR(gdpdef, p=3, M=2, params=params32logt, weight_function="logistic",
 #'   weightfun_pars=c(2, 1), cond_dist="Student", identification="recursive")
 #'
-#' # Simulate historical counterfactual where the first variable takes the values 3 and 4
+#' # Simulate historical counterfactual where the first variable takes the values 5 and -5
 #' # in the first and second time periods.
 #' cfact1 <- cfact_hist(mod32logt, type="fixed_path", policy_var=1, cfact_start=1,
 #'   cfact_end=2, cfact_path=c(3, 4))
 #' print(cfact1, start=c(1959, 1), end=c(1960, 4)) # Print cfact data from 1959Q1 to 1960Q4
+#'
+#' # Simulate historical counterfactual where the first variable does not respond to lagged
+#' # movements of the second variable nor to the second shock in time periods from 10 to 100.
+#' cfact2 <- cfact_hist(mod32logt, type="muted_response", policy_var=1, mute_var=2,
+#'  cfact_start=10, cfact_end=100)
+#' print(cfact2, start=c(1960, 4), end=c(1963, 4)) # Print cfact data from 1960Q4 to 1963Q4
 #' @export
 
 cfact_hist <- function(stvar, type=c("fixed_path", "muted_response"), policy_var=1, mute_var=NULL, cfact_start=1, cfact_end=1, cfact_path=NULL) {
@@ -296,6 +302,8 @@ cfact_hist <- function(stvar, type=c("fixed_path", "muted_response"), policy_var
     # Update cfact_Y for the next iteration:
     cfact_Y[t + 1,] <- reform_data(cfact_data[1:t_row_in_data,], p=p)[t + 1,] # The t:th row of cfact_Y is the vector y_{t-1},...,y_{t-p}
   }
+
+  colnames(cfact_data) <- colnames(data) # Set the column names
 
   # Return the results
   structure(list(cfact_data=ts(cfact_data, start=start(stvar$data), frequency=frequency(stvar$data)),
