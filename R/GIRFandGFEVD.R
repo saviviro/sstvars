@@ -123,7 +123,7 @@
 #'   obtained from the MC repetitions. Each element is for one shock and results are in
 #'   array of the form \code{[horizon, variables, MC-repetitions]}.
 #' @seealso \code{\link{GFEVD}}, \code{\link{linear_IRF}}, \code{\link{hist_decomp}}, \code{\link{cfact_hist}}, \code{\link{cfact_fore}},
-#'  \code{\link{fitSSTVAR}}
+#'  \code{\link{cfact_girf}}, \code{\link{fitSSTVAR}}
 #' @references
 #'  \itemize{
 #'    \item Kilian L., Lütkepohl H. 2017. Structural Vector Autoregressive Analysis. 1st edition.
@@ -182,6 +182,50 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
                  which_cumulative=numeric(0), scale=NULL, scale_type=c("instant", "peak"), scale_horizon=N,
                  ci=c(0.95, 0.80), use_data_shocks=FALSE, data_girf_pars=c(0, 0.75, 0, 0, 1.5), ncores=2,
                  burn_in=1000, exo_weights=NULL, seeds=NULL, use_parallel=TRUE) {
+  GIRF_int(stvar=stvar, which_shocks=which_shocks, shock_size=shock_size, N=N, R1=R1, R2=R2,
+           init_regime=init_regime, init_values=init_values, which_cumulative=which_cumulative,
+           scale=scale, scale_type=scale_type, scale_horizon=scale_horizon, ci=ci,
+           use_data_shocks=use_data_shocks, data_girf_pars=data_girf_pars, ncores=ncores,
+           burn_in=burn_in, exo_weights=exo_weights, seeds=seeds, use_parallel=use_parallel,
+           cfact_pars=NULL)
+}
+
+
+#' @title INTERNAL Estimate generalized impulse response function for structural STVAR models.
+#'
+#' @description \code{GIRF_int} in an INTERNAL function that estimates generalized impulse response function for
+#'  structural STVAR models.
+#'
+#' @inheritParams GIRF
+#' @param cfact_pars a list parameters used for calculating counterfactual GIRFs (set to \code{NULL} for regular GIRFs).
+#'   Contains the elements:
+#'   \describe{
+#'     \item{\code{cfact_metatype}}{should be always \code{"counterfactual_girf"}.}
+#'     \item{\code{cfact_type}}{a character string indicating the type of counterfactual to be computed: should the path of the policy
+#'      variable be fixed to some hypothetical path (\code{cfact_type="fixed_path"}) in given impulse response horizons or should the responses
+#'      of the policy variable to lagged and contemporaneous movements of some given variable be muted (\code{cfact_type="muted_response"})?
+#'      See details for more information.}
+#'     \item{\code{policy_var}}{a positive integer between \eqn{1} and \eqn{d} indicating the index of the policy variable considered in the
+#'      counterfactual scenario. Note that \code{policy_var} is assumed to satisfy \code{!(policy_var \%in\% which_shocks)}.}
+#'     \item{\code{mute_var}}{a positive integer between \eqn{1} and \eqn{d} indicating the index of the variable to whose movements the policy variable
+#'      specified in the argument \code{policy_var} should not react to in the counterfactual scenario. This indicates also the index of the shock
+#'      to which the policy variable should not react to. It is assumed that \code{mute_var != policy_var}. This argument is only used when
+#'      \code{cfact_type="muted_response"}.}
+#'     \item{\code{cfact_start}}{a positive integer between \eqn{1} and \eqn{nsteps} indicating the starting impulse response horizon period for the
+#'      counterfactual behavior of the specified policy variable.}
+#'    \item{\code{cfact_end}}{a positive integer between \code{cfact_start} and \eqn{nsteps} indicating the ending period for the counterfactual
+#'      behavior of the specified policy variable.}
+#'    \item{\code{cfact_path}}{a numeric vector of length \code{cfact_end-cfact_start+1} indicating the hypothetical path of the policy variable
+#'     specified in the argument \code{policy_var}. This argument is only used when \code{cfact_type="fixed_path"}.}
+#'   }
+#'   \strong{Important:} If this is something else than \code{NULL}, it will change how the function behaves!
+#' @inherit GIRF details return references seealso
+#' @keywords internal
+
+GIRF_int <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_regime=1, init_values=NULL,
+                     which_cumulative=numeric(0), scale=NULL, scale_type=c("instant", "peak"), scale_horizon=N,
+                     ci=c(0.95, 0.80), use_data_shocks=FALSE, data_girf_pars=c(0, 0.75, 0, 0, 1.5), ncores=2,
+                     burn_in=1000, exo_weights=NULL, seeds=NULL, use_parallel=TRUE, cfact_pars=NULL) {
   check_stvar(stvar)
   scale_type <- match.arg(scale_type)
   cond_dist <- stvar$model$cond_dist
@@ -278,8 +322,8 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
     }
   }
   if(length(which_cumulative) > 0) {
-     which_cumulative <- unique(which_cumulative)
-     stopifnot(all(which_cumulative %in% 1:d))
+    which_cumulative <- unique(which_cumulative)
+    stopifnot(all(which_cumulative %in% 1:d))
   }
 
   # Obtain the length p histories that satisfy the conditions specified in the argument data_girf_pars
@@ -347,7 +391,7 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
     }
     simulate.stvar(stvar, nsim=N+1, seed=seed, init_values=init_v, init_regime=init_regime,
                    ntimes=R1, burn_in=burn_in, exo_weights=exo_weights,
-                   girf_pars=list(shock_numb=shock_numb, shock_size=shock_size))
+                   girf_pars=list(shock_numb=shock_numb, shock_size=shock_size, cfact_pars=cfact_pars))
   }
 
   GIRF_shocks <- vector("list", length=length(which_shocks)) # Storage for the GIRFs [[shock]]
@@ -359,10 +403,10 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
     }
     if(is.null(init_values)) {
       message(paste("Using", ncores, "cores to estimate", R2,"GIRFs for", length(which_shocks), "structural shocks,",
-                "each based on", R1, "Monte Carlo repetitions."))
+                    "each based on", R1, "Monte Carlo repetitions."))
     } else {
       message(paste("Using", ncores, "cores to estimate one GIRF for", length(which_shocks), "structural shocks, each based on",
-              R1, "Monte Carlo repetitions."))
+                    R1, "Monte Carlo repetitions."))
     }
 
     ### Calculate the GIRFs ###
@@ -461,6 +505,8 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 
 
 
+
+
 #' @title Estimate generalized forecast error variance decomposition for structural
 #'  STVAR models.
 #'
@@ -516,7 +562,7 @@ GIRF <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_r
 #'   Also contains the individual GFEVDs for each used initial length \eqn{p} initial value (history) as
 #'   4D array with dimensions \code{[horizon, variable, shock, time]}.
 #' @seealso \code{\link{GIRF}}, \code{\link{linear_IRF}}, \code{\link{hist_decomp}}, \code{\link{cfact_hist}}, \code{\link{cfact_fore}},
-#'  \code{\link{fitSSTVAR}}
+#'  \code{\link{cfact_girf}}, \code{\link{fitSSTVAR}}
 #' @references
 #'  \itemize{
 #'    \item Lanne M. and Nyberg H. 2016. Generalized Forecast Error Variance Decomposition for Linear

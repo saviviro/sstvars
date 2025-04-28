@@ -98,5 +98,5 @@ plot(histdec, plot_by_shock=TRUE, which_to_plot=1)
 }
 \seealso{
 \code{\link{GIRF}}, \code{\link{GFEVD}}, \code{\link{linear_IRF}}, \code{\link{fitSSTVAR}}, \code{\link{cfact_hist}},
- \code{\link{cfact_fore}}
+ \code{\link{cfact_fore}}, \code{\link{cfact_girf}}
 }

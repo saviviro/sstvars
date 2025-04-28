@@ -2,13 +2,13 @@
 % Please edit documentation in R/counterFactuals.R
 \name{cfact_fore}
 \alias{cfact_fore}
-\title{Simulates historical counterfactual for structural STVAR models.}
+\title{Simulate counterfactual forecast scenarios for structural STVAR models.}
 \usage{
 cfact_fore(
   stvar,
   nsteps,
   nsim = 1000,
-  pi = c(0.95, 0.8),
+  pi = 0.95,
   pred_type = c("mean", "median"),
   exo_weights = NULL,
   cfact_type = c("fixed_path", "muted_response"),
@@ -20,16 +20,16 @@ cfact_fore(
 )
 }
 \arguments{
-\item{nsteps}{how many steps ahead should be predicted, i.e., the forecast forecast horizon?}
+\item{nsteps}{how many steps ahead should be predicted, i.e., the forecast horizon?}
 
-\item{nsim}{number of observations to be simulated.}
+\item{nsim}{to how many independent simulations should the forecast be based on?}
 
 \item{pi}{a numeric vector specifying the confidence levels of the prediction intervals.}
 
 \item{pred_type}{should the pointforecast be based on sample "median" or "mean"?}
 
-\item{exo_weights}{if \code{weight_function="exogenous"}, provide a size \eqn{(nsim \times M)} matrix of exogenous
-transition weights for the regimes: \code{[t, m]} for a time \eqn{t} and regime \eqn{m} weight. Ignored
+\item{exo_weights}{if \code{weight_function="exogenous"}, provide a size \eqn{(nsteps x M)} matrix of exogenous
+transition weights for the regimes: \code{[step, m]} for \eqn{step} steps ahead and regime \eqn{m} weight. Ignored
 if \code{weight_function!="exogenous"}.}
 
 \item{cfact_type}{a character string indicating the type of counterfactual to be computed: should the path of the policy
@@ -92,9 +92,9 @@ Two types of counterfactual forecast scenarios are accommodated where in given f
  variable does not react to lagged movements of the \eqn{i_2}th variable nor to the \eqn{i_2}th shock.
 
  See the seminal paper of Bernanke et al (1997) for discussing about the "Type (1)" counterfactuals and
- Kilian and Lewis (2011) for discussion about the "Type (2)" counterfactuals. See Kilian and Lütkepohl (2017), Section 4.3
- for further discussion about the historical counterfactuals. The literature cited about considers linear models, but it is
- explained in the vignette of this package how this function computes the historical counterfactuals for the STVAR models in
+ Kilian and Lewis (2011) for discussion about the "Type (2)" counterfactuals. See Kilian and Lütkepohl (2017), Section 4.4
+ for further discussion about counterfactual forecast scenarios. The literature cited about considers linear models, but it is
+ explained in the vignette of this package how this function computes the counterfactual forecast scenarios for the STVAR models in
  a way that accommodates nonlinear time-varying dynamics.
 }
 \examples{
@@ -119,5 +119,6 @@ mod32logt <- STVAR(gdpdef, p=3, M=2, params=params32logt, weight_function="logis
  }
 }
 \seealso{
-\code{\link{GIRF}}, \code{\link{GFEVD}}, \code{\link{linear_IRF}}, \code{\link{hist_decomp}}, \code{\link{cfact_hist}},  \code{\link{fitSSTVAR}}
+\code{\link{GIRF}}, \code{\link{GFEVD}}, \code{\link{linear_IRF}}, \code{\link{hist_decomp}}, \code{\link{cfact_hist}},
+ \code{\link{cfact_girf}},  \code{\link{fitSSTVAR}}
 }

@@ -22,7 +22,7 @@
 #'     \item{stvar}{The original STVAR model object.}
 #'  }
 #' @seealso \code{\link{GIRF}}, \code{\link{GFEVD}}, \code{\link{linear_IRF}}, \code{\link{fitSSTVAR}}, \code{\link{cfact_hist}},
-#'  \code{\link{cfact_fore}}
+#'  \code{\link{cfact_fore}}, \code{\link{cfact_girf}}
 #' @references
 #'  \itemize{
 #'    \item Kilian L., Lütkepohl H. 2017. Structural Vector Autoregressive Analysis. 1st edition.

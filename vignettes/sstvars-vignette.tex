@@ -1231,9 +1231,9 @@ Consider the STVAR model~(\ref{eq:stvar1}) in the form~(\ref{eq:stvarsimp}). The
 \end{equation}
 where $\mu_{t,i_1}$ is the $i_1$th element of the vector $\phi_{y,t} + \sum_{i=1}^pA_{y,t,i}y_{t-i}$ and $b_{t,i_1j}$ is the $i_1j$th element of the impact matrix $B_{y,t}$. Solving this equation with respect to $e_{i_1t}$ gives
 \begin{equation}\label{eq:val_e_t}
-e_{i_1t} = b_{t,i_1i_1}^{-1}\left(y_{i_1t}^{*} - \mu_{t,i_1} - \sum_{j=1, j\neq i_1}^d b_{t,i_1j} e_{jt}\right).
+e_{i_1t} = b_{t,i_1i_1}^{-1}\left(y_{i_1t}^{*} - \mu_{t,i_1} - \sum_{j=1, j\neq i_1}^d b_{t,i_1j} e_{jt}\right),
 \end{equation}
-Denote this solution of $e_{i_1t}$ as $e_{i_1t}^{*}$. The implied counterfactual time $t$ observations are obtained by replacing the $i_1$th shock in the vector $e_t$ by $e_{i_1t}^{*}$, and then calculating the implied observations from~(\ref{eq:stvarsimp}) by using the obtained hypothetical structural error.
+where it is assumed that $b_{t,i_1i_1}\neq 0$ (i.e., that the shock to the policy variable affects the policy on impact). Denote this solution of $e_{i_1t}$ as $e_{i_1t}^{*}$. The implied counterfactual time $t$ observations are obtained by replacing the $i_1$th shock in the vector $e_t$ by $e_{i_1t}^{*}$, and then calculating the implied observations from~(\ref{eq:stvarsimp}) by using the obtained hypothetical structural error.
 
 Consider then a counterfactual scenario in which the response of the policy variable is shut off to lagged and contemporaneous movements of a given variable, but policy variable is allowed to respond normally to movements of the other included included variables. Following \cite{Kilian+Lewis:2011}, we the simulate the counterfactual scenario by creating hypothetical shocks to the policy variable that off set the response of the policy variable to the movements of a given variable. Suppose the policy variable of interest is the $i_1$th variable and variable whose movements the policy variable should not react to at the time $t$ is the $i_2$th variable satisfying $i_2\neq i_1$. Assume that the $i_1$th shock is the shock to the $i_1$th variable and that the $i_2$th shock is the shock to the $i_2$th variable (again, this should be automatically satisfied for recursively identified models, whereas the function \code{reorder_B_columns} can be used to change the ordering of the shocks for model identified by heteroskedasticity or non-Gaussianity).\footnote{If it is not clear whether the $i_2$th shock of interest can be interpreted as a shock to a variable (but has a broader definition such as "a demand shock"), the counterfactual scenario is interpreted as follows: the $i_1$th variable does not react to lagged movements of the $i_2$th variable nor to the $i_2$th shock.}
 
@@ -1245,7 +1245,7 @@ where $a_{t,i,i_1i_2}$ is the $i_1i_2$th element of the coefficient matrix $A_{t
 \begin{equation}\label{eq:shut_e_t}
 b_{t,i_1i_1}^{-1}\left(\sum_{i=1}^p a_{t,i,i_1i_2}y_{i_2t-i} + b_{t,i_1i_2}e_{i_2t}\right)
 \end{equation}
-from the $i_1$th shock $e_{i_1t}$ shuts off these effects from the movements of the $i_1$th variable.
+from the $i_1$th shock $e_{i_1t}$ shuts off these effects from the movements of the $i_1$th variable (assuming $b_{t,i_1i_1}\neq 0$).
 
 Now, to simulate the counterfactual scenario in which the response of the $i_1$th variable does not respond to the lagged and contemporaneous movements of the $i_2$th variable, is obtained by first replacing the $i_1$th shock in the vector $e_t$ by
 \begin{equation}

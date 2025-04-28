@@ -215,5 +215,5 @@ The GFEVD is a forecast error variance decomposition calculated with the general
 }
 \seealso{
 \code{\link{GIRF}}, \code{\link{linear_IRF}}, \code{\link{hist_decomp}}, \code{\link{cfact_hist}}, \code{\link{cfact_fore}},
- \code{\link{fitSSTVAR}}
+ \code{\link{cfact_girf}}, \code{\link{fitSSTVAR}}
 }

@@ -518,8 +518,6 @@ test_that("get_B_yt works correctly", {
 test_that("cfact_hist works correctly", {
 
   # Linear SVAR
-  theta_112relg <- c(0.649526, 0.066507, 0.288526, 0.021767, -0.144024, 0.897103, 0.601786, -0.002945, 0.067224)
-  mod112relg <- STVAR(data=gdpdef[1:50,], p=1, M=1, params=theta_112relg, weight_function="relative_dens")
   mod <- mod112relg
   tmp <- cfact_hist(mod, cfact_type="fixed_path", policy_var=1, cfact_start=1, cfact_end=1, cfact_path=c(13))
   expect_equal(c(tmp$cfact_data[1:3,]), c(1.9195500, 13.0000000, 3.1782960, 0.2331600, 0.1004573, 0.5717706), tolerance=1e-3)
@@ -575,3 +573,68 @@ test_that("cfact_hist works correctly", {
 })
 
 
+
+# stvar, nsteps, nsim=1000, pi=0.95, pred_type=c("mean", "median"), exo_weights=NULL,
+# cfact_type=c("fixed_path", "muted_response"), policy_var=1, mute_var=NULL, cfact_start=1, cfact_end=1, cfact_path=NULL
+
+test_that("cfact_fore works correctly", {
+  # Linear SVAR
+  mod <- mod112relg
+  set.seed(1); tmp <- cfact_fore(mod, nsteps=2, nsim=1, pi=0.95, pred_type="mean", cfact_type="fixed_path", policy_var=1, cfact_start=1, cfact_end=1, cfact_path=c(13))
+  expect_equal(c(tmp$cfact_pred[1:2,]), c(13.000000, 3.566238, 1.259185, 1.895067), tolerance=1e-3)
+  expect_equal(tmp$cfact_pred_ints[c(1, 8)], c(13.000000, 1.895067), tolerance=1e-3)
+  expect_equal(c(tmp$cfact_trans_pred[1:2,]), c(1, 1), tolerance=1e-3)
+  expect_equal(c(tmp$cfact_trans_pred_ints[1:2, ,]), c(1, 1, 1, 1), tolerance=1e-3)
+  expect_equal(c(tmp$pred[1:2,]), c(0.8743667, 1.1275558, 1.0433457, 1.2115593), tolerance=1e-3)
+  expect_equal(tmp$pred_ints[c(1, 8)], c(0.8743667, 1.2115593), tolerance=1e-3)
+  expect_equal(c(tmp$trans_pred[1:2,]), c(1, 1), tolerance=1e-3)
+  expect_equal(c(tmp$trans_pred_ints[1:2, ,]), c(1, 1, 1, 1), tolerance=1e-3)
+
+  # Relative_dens Gaussian STVAR
+  mod <- mod123relg
+  set.seed(2); tmp <- cfact_fore(mod, nsteps=3, nsim=3, pi=0.9, pred_type="median", cfact_type="muted_response", policy_var=3, mute_var=2, cfact_start=2, cfact_end=3)
+  expect_equal(unname(c(tmp$cfact_pred[3,])), c(0.6479103, 0.4293333, 3.5803017), tolerance=1e-3)
+  expect_equal(tmp$cfact_pred_ints[c(1, 11, 17)], c(1.010682, 0.826568, 4.279469), tolerance=1e-3)
+  expect_equal(unname(c(tmp$cfact_trans_pred[3,])), c(0.994834639, 0.005165361), tolerance=1e-3)
+  expect_equal(c(tmp$cfact_trans_pred_ints[c(1, 9)]), c(0.994135488, 0.004216029), tolerance=1e-3)
+  expect_equal(c(tmp$pred[c(2, 5)]), c(1.6822459, 0.1661626), tolerance=1e-3)
+
+  # Logistic
+  mod <- mod222logistitb
+  set.seed(3); tmp <- cfact_fore(mod, nsteps=3, nsim=2, pi=0.9, pred_type="median", cfact_type="fixed_path", policy_var=2, cfact_start=2,
+                                 cfact_end=3, cfact_path=c(1, -1))
+  expect_equal(unname(c(tmp$cfact_pred[2:3,])), c(0.8880295, 1.0383006, 1.0000000, -1.0000000), tolerance=1e-3)
+  expect_equal(tmp$cfact_pred_ints[c(1, 7, 9)], c(1.3338063, 0.9898941, -1.0000000), tolerance=1e-3)
+  expect_equal(unname(c(tmp$cfact_trans_pred[3,])), c(0.4022738, 0.5977262), tolerance=1e-3)
+  expect_equal(c(tmp$cfact_trans_pred_ints[c(2, 8)]), c(0.3544091, 0.5966858), tolerance=1e-3)
+  expect_equal(c(tmp$pred[c(2, 5)]), c(0.9215264, 1.0140519), tolerance=1e-3)
+
+  # Logit
+  mod <- mod222logcmt_12_2
+  set.seed(4); tmp <- cfact_fore(mod, nsteps=3, nsim=2, pi=0.9, pred_type="median", cfact_type="muted_response", policy_var=2, cfact_start=1,
+                                 cfact_end=1, mute_var=1)
+  expect_equal(unname(c(tmp$cfact_pred[1:2,])), c(0.3849129, 0.8063971, 1.5854783, 1.4866707), tolerance=1e-3)
+  expect_equal(tmp$cfact_pred_ints[c(1, 7, 9)], c(0.218715, 1.554466, 1.308472), tolerance=1e-3)
+
+  # Exponential
+  mod <- mod222expcmwtsh_2_1
+  set.seed(5); tmp <- cfact_fore(mod, nsteps=3, nsim=3, pi=0.8, pred_type="mean", cfact_type="fixed_path", policy_var=2, cfact_start=1,
+                                 cfact_end=1, cfact_path=c(-20))
+  expect_equal(unname(c(tmp$cfact_pred[1:2,])), c(-788.7226, -169.2069, -20.0000, -54.1639), tolerance=1e-3)
+  expect_equal(unname(c(tmp$cfact_trans_pred[1,])), c(0.92357051, 0.07642949), tolerance=1e-3)
+
+  # Threshold
+  mod <- mod222thres_2_1
+  set.seed(3); tmp <- cfact_fore(mod, nsteps=3, nsim=1, pi=0.95, pred_type="mean", cfact_type="fixed_path", policy_var=2, cfact_start=1,
+                                 cfact_end=3, cfact_path=c(-1, 2, -3))
+  expect_equal(unname(c(tmp$cfact_pred[1:3,])), c(0.9936570, 1.2205136, 0.9502944, -1.0000000, 2.0000000, -3.0000000), tolerance=1e-3)
+  expect_equal(tmp$cfact_pred_ints[c(1, 6, 9)], c(0.9936570, 0.9502944, -3.0000000), tolerance=1e-3)
+  expect_equal(c(tmp$cfact_trans_pred_ints[c(2, 8)]), c(1, 0), tolerance=1e-3)
+
+  # Exogenous
+  mod <- mod123exoikt
+  set.seed(6); tmp <- cfact_fore(mod, nsteps=3, nsim=2, pi=0.9, pred_type="mean", cfact_type="muted_response", policy_var=2, cfact_start=1,
+                                 cfact_end=2, mute_var=3, exo_weights=cbind(c(0.8, 0, 0.3), c(0.2, 1, 0.7)))
+  expect_equal(unname(c(tmp$cfact_pred[c(1, 2, 5, 7, 9)])), c(2.4966361, -7.3056026, 2.0205320, 0.5530254, -0.6760020), tolerance=1e-3)
+  expect_equal(tmp$cfact_pred_ints[c(1, 7, 9, 16)], c(1.919356, 1.292601, 1.360463, 1.671384), tolerance=1e-3)
+})

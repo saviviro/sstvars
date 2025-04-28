@@ -384,16 +384,23 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
       # THIS IS OUTSIDE THE SECOND GIRF SAMPLE PATH
       if(!is.null(girf_pars$cfact_pars)) {
         if(i1 %in% cfact_period) { # Counterfactual horizons
+          if(B_t[girf_pars$cfact_pars$policy_var, girf_pars$cfact_pars$policy_var] == 0) {
+            stop(paste("The obtained impact matrix B_t implies that the shock policy_var has zero impact on the policy variable.",
+                       "Thus, it is not possible to manipulate shocks to the policy variable to obtain any countefactual scenarios."))
+          } else if(abs(B_t[girf_pars$cfact_pars$policy_var, girf_pars$cfact_pars$policy_var]) < 1e-6) {
+            warning(paste("The shock to the policy variable seems to have a very small effect to the policy variable.",
+                          "This can create weird results in the counterfactual scenario.",))
+          }
           if(girf_pars$cfact_pars$cfact_type == "fixed_path") { # Fixed path of policy variable in certain horizons
             e_t_orig <- e_t # The original shock, used in GIRF sample path 2, particularly for muted_response cfactuals
-            cfact_path_t <- girf_pars$cfact_pars$cfact_path[i1] # The hypothetical path of the policy variable
+            cfact_path_t <- girf_pars$cfact_pars$cfact_path[i1 - girf_pars$cfact_pars$cfact_start + 1] # The hypothetical path of the policy variable
             effect_of_other_shocks <- as.numeric(crossprod(B_t[girf_pars$cfact_pars$policy_var, -girf_pars$cfact_pars$policy_var],
                                                            e_t[-girf_pars$cfact_pars$policy_var])) # The effect of the other shocks to the policy var
             cfact_policy_e_t <- (cfact_path_t - as.vector(mu_yt)[girf_pars$cfact_pars$policy_var] -
                                    effect_of_other_shocks)/B_t[girf_pars$cfact_pars$policy_var,
                                                                girf_pars$cfact_pars$policy_var] # The cfactual shock to the policy var, yielding the cfactual path
-            e_t[policy_var] <- cfact_policy_e_t # Insert the counterfactual shock to the policy variable
-          } else if(cfact_type == "muted_response") { # Muting the response of policy_var to mute_var in certain horizons
+            e_t[girf_pars$cfact_pars$policy_var] <- cfact_policy_e_t # Insert the counterfactual shock to the policy variable
+          } else if(girf_pars$cfact_pars$cfact_type == "muted_response") { # Muting the response of policy_var to mute_var in certain horizons
             e_t_orig <- e_t # The original shock, used in GIRF sample path 2, particularly for muted_response cfactuals
             # Calculate the autoregression matrices A_{y,t,i} for all lags i=1,...,p, for the time period t:
             all_A_yti <- get_allA_yti(all_A=all_A, alpha_mt=as.vector(alpha_mt)) # [d, d, p], lag i is obtained from [, , i]
@@ -401,7 +408,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
             # Lagged effects of mute_var on policy_var:
             lagged_effects <- as.numeric(crossprod(all_A_yti[girf_pars$cfact_pars$policy_var,
                                                              girf_pars$cfact_pars$mute_var, ], # (px1) vec of i_1i_2:th elmts of A_yt s.t. lag i is in the i:th elmt.
-                                                   matrix(Y[t,], nrow=d)[girf_pars$cfact_pars$mute_var,])) # i:th col is the vec y_{t-i}, and mute_var row is mute_var
+                                                   matrix(Y[i1,], nrow=d)[girf_pars$cfact_pars$mute_var,])) # i:th col is the vec y_{t-i}, and mute_var row is mute_var
             # Contemporaneous effects of mute_var:th shock on policy_var:
             cont_effects <- B_t[girf_pars$cfact_pars$policy_var, girf_pars$cfact_pars$mute_var]*e_t[girf_pars$cfact_pars$mute_var]
             # Calculate the counterfactual shock to the policy variable that mutes the response to mute_var:
@@ -492,22 +499,29 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
         # (it is assumed girf_pars$cfact_pars$policy_var is not the same as girf_pars$shock_number)
         if(!is.null(girf_pars$cfact_pars)) {
           if(i1 %in% cfact_period) { # Counterfactual horizons
+            if(B_t2[girf_pars$cfact_pars$policy_var, girf_pars$cfact_pars$policy_var] == 0) {
+              stop(paste("The obtained impact matrix B_t implies that the shock policy_var has zero impact on the policy variable.",
+                         "Thus, it is not possible to manipulate shocks to the policy variable to obtain any countefactual scenarios."))
+            } else if(abs(B_t2[girf_pars$cfact_pars$policy_var, girf_pars$cfact_pars$policy_var]) < 1e-6) {
+              warning(paste("The shock to the policy variable seems to have a very small effect to the policy variable.",
+                            "This can create weird results in the counterfactual scenario.",))
+            }
             if(girf_pars$cfact_pars$cfact_type == "fixed_path") { # Fixed path of policy variable in certain horizons
-              cfact_path_t <- girf_pars$cfact_pars$cfact_path[i1] # The hypothetical path of the policy variable
+              cfact_path_t <- girf_pars$cfact_pars$cfact_path[i1 - girf_pars$cfact_pars$cfact_start + 1] # The hypothetical path of the policy variable
               effect_of_other_shocks <- as.numeric(crossprod(B_t2[girf_pars$cfact_pars$policy_var, -girf_pars$cfact_pars$policy_var],
                                                              e_t[-girf_pars$cfact_pars$policy_var])) # The effect of the other shocks to the policy var
               cfact_policy_e_t <- (cfact_path_t - as.vector(mu_yt2)[girf_pars$cfact_pars$policy_var] -
                                      effect_of_other_shocks)/B_t2[girf_pars$cfact_pars$policy_var,
                                                                   girf_pars$cfact_pars$policy_var] # The cfactual shock to the policy var, yielding the cfactual path
-              e_t[policy_var] <- cfact_policy_e_t # Insert the counterfactual shock to the policy variable
-            } else if(cfact_type == "muted_response") { # Muting the response of policy_var to mute_var in certain horizons
+              e_t[girf_pars$cfact_pars$policy_var] <- cfact_policy_e_t # Insert the counterfactual shock to the policy variable
+            } else if(girf_pars$cfact_pars$cfact_type == "muted_response") { # Muting the response of policy_var to mute_var in certain horizons
               # Calculate the autoregression matrices A_{y,t,i} for all lags i=1,...,p, for the time period t:
               all_A_yti <- get_allA_yti(all_A=all_A, alpha_mt=as.vector(alpha_mt2)) # [d, d, p], lag i is obtained from [, , i]
 
               # Lagged effects of mute_var on policy_var:
               lagged_effects <- as.numeric(crossprod(all_A_yti[girf_pars$cfact_pars$policy_var,
                                                                girf_pars$cfact_pars$mute_var,], # (px1) vec of i_1i_2:th elmts of A_yt s.t. lag i is in the i:th elmt.
-                                                     matrix(Y2[t,], nrow=d)[girf_pars$cfact_pars$mute_var,])) # i:th col is the vec y_{t-i}, and mute_var row is mute_var
+                                                     matrix(Y2[i1,], nrow=d)[girf_pars$cfact_pars$mute_var,])) # i:th col is the vec y_{t-i}, and mute_var row is mute_var
               # Contemporaneous effects of mute_var:th shock on policy_var:
               cont_effects <- B_t2[girf_pars$cfact_pars$policy_var, girf_pars$cfact_pars$mute_var]*e_t[girf_pars$cfact_pars$mute_var]
               # Calculate the counterfactual shock to the policy variable that mutes the response to mute_var:

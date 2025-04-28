@@ -57,7 +57,7 @@
 #'     \item{Other elements:}{contains some of the arguments the \code{linear_IRF} was called with.}
 #'   }
 #' @seealso \code{\link{GIRF}}, \code{\link{GFEVD}}, \code{\link{hist_decomp}}, \code{\link{cfact_hist}}, \code{\link{cfact_fore}},
-#'  \code{\link{fitSTVAR}}, \code{\link{STVAR}}, \code{\link{reorder_B_columns}}, \code{\link{swap_B_signs}}
+#'  \code{\link{cfact_girf}}, \code{\link{fitSTVAR}}, \code{\link{STVAR}}, \code{\link{reorder_B_columns}}, \code{\link{swap_B_signs}}
 #' @references
 #'  \itemize{
 #'    \item Herwartz H. and Lütkepohl H. 2014. Structural vector autoregressions with Markov switching:

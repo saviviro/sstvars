@@ -53,7 +53,7 @@ predict.stvar <- function(object, ..., nsteps, nsim=1000, pi=c(0.95, 0.80), pred
   stopifnot(all(pi > 0 & pi < 1))
   dat <- stvar$data
   pred_type <- match.arg(pred_type)
-  if(!all_pos_ints(c(nsim, nsteps))) stop("nsim and n_ahaed should be positive integers")
+  if(!all_pos_ints(c(nsim, nsteps))) stop("nsim and nsteps should be positive integers")
 
   # Check the exogenous weights given for simulation
   if(stvar$model$weight_function == "exogenous") {

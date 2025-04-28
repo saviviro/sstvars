@@ -91,7 +91,7 @@ Two types of historical counterfactuals are accommodated where in given historic
  variable does not react to lagged movements of the \eqn{i_2}th variable nor to the \eqn{i_2}th shock.
 
  See the seminal paper of Bernanke et al (1997) for discussing about the "Type (1)" counterfactuals and
- Kilian and Lewis (2011) for discussion about the "Type (2)" counterfactuals. See Kilian and Lütkepohl (2017), Section 4.3
+ Kilian and Lewis (2011) for discussion about the "Type (2)" counterfactuals. See Kilian and Lütkepohl (2017), Section 4.5
  for further discussion about the historical counterfactuals. The literature cited about considers linear models, but it is
  explained in the vignette of this package how this function computes the historical counterfactuals for the STVAR models in
  a way that accommodates nonlinear time-varying dynamics.
@@ -138,5 +138,5 @@ plot(cfact2) # plot the observed and counterfactual data
 }
 \seealso{
 \code{\link{GIRF}}, \code{\link{GFEVD}}, \code{\link{linear_IRF}}, \code{\link{hist_decomp}}, \code{\link{cfact_fore}},
- \code{\link{fitSSTVAR}}
+ \code{\link{cfact_girf}}, \code{\link{fitSSTVAR}}
 }

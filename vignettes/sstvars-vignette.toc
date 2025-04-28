@@ -43,9 +43,9 @@
 \contentsline {subsection}{Historical counterfactuals}{39}{subsection.9.1}%
 \contentsline {subsection}{Forecast scenarios}{39}{subsection.9.2}%
 \contentsline {subsection}{Counterfactual GIRFs}{41}{subsection.9.3}%
-\contentsline {section}{Building a STVAR model with specific parameter values}{42}{section.10}%
+\contentsline {section}{Building a STVAR model with specific parameter values}{41}{section.10}%
 \contentsline {section}{Simulation and forecasting}{43}{section.11}%
 \contentsline {subsection}{Simulation}{43}{subsection.11.1}%
 \contentsline {subsection}{Simulation based forecasting}{43}{subsection.11.2}%
-\contentsline {section}{Summary}{43}{section.12}%
+\contentsline {section}{Summary}{44}{section.12}%
 \contentsline {section}{A table of some useful functions}{45}{section.12}%
