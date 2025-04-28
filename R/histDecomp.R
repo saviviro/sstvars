@@ -21,7 +21,8 @@
 #'      \code{i2} at the time \code{t}.}
 #'     \item{stvar}{The original STVAR model object.}
 #'  }
-#' @seealso \code{\link{GIRF}}, \code{\link{GFEVD}}, \code{\link{linear_IRF}}, \code{\link{fitSSTVAR}}
+#' @seealso \code{\link{GIRF}}, \code{\link{GFEVD}}, \code{\link{linear_IRF}}, \code{\link{fitSSTVAR}}, \code{\link{cfact_hist}},
+#'  \code{\link{cfact_fore}}
 #' @references
 #'  \itemize{
 #'    \item Kilian L., Lütkepohl H. 2017. Structural Vector Autoregressive Analysis. 1st edition.

@@ -258,5 +258,6 @@ The "confidence bounds" \strong{do not} quantify uncertainty about the true para
  }
 }
 \seealso{
-\code{\link{GFEVD}}, \code{\link{linear_IRF}}, \code{\link{hist_decomp}}, \code{\link{cfact_hist}}, \code{\link{fitSSTVAR}}
+\code{\link{GFEVD}}, \code{\link{linear_IRF}}, \code{\link{hist_decomp}}, \code{\link{cfact_hist}}, \code{\link{cfact_fore}},
+ \code{\link{fitSSTVAR}}
 }
