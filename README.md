@@ -215,6 +215,8 @@ plot(irf2)
 # Compute historical decompositions of the variables in the model fitrec (see Wong 2018):
 histdec <- hist_decomp(fitrec)
 plot(histdec)
+
+# Simulate historical counterfactuals with the function cfact_hist. 
 ```
 
 ## References

@@ -634,7 +634,12 @@ plot.cfacthist <- function(x, ...) {
     lines(cfact_ts, lty=2, col="red")
 
     mtext(var_names[ind], side=2, cex=0.8, font=2, las=0, padj=-4) # Add y-axis label
-    if(ind == 1) mtext(main, padj=-0.5, cex=1, font=2)
+    if(ind == 1) {
+      mtext(main, padj=-0.5, cex=1, font=2) # And the main title
+      legend("topleft", legend=c("Observed", "Counterfactual"), bty="n",
+             col=c("black", "red"), lty=c(1, 2), lwd=2,
+             text.font=2, cex=0.9, x.intersp=0.5, y.intersp=1) # Add legent
+    }
     # if(ind == d) { # Create x-axis
     #   tnum <- time(ind_ts)
     #   year <- floor(tnum) # Year
