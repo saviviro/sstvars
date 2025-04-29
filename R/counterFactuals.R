@@ -464,9 +464,7 @@ cfact_hist <- function(stvar, cfact_type=c("fixed_path", "muted_response"), poli
                  cfact_alpha_mt=cfact_alpha_mt,
                  stvar=stvar,
                  input=list(policy_var=policy_var, mute_var=mute_var, cfact_type=cfact_type,
-                            cfact_start=cfact_start, cfact_end=cfact_end, cfact_path=cfact_path),
-                 cfact_type=cfact_type, policy_var=policy_var, mute_var=mute_var, cfact_start=cfact_start,
-                 cfact_end=cfact_end, cfact_path=cfact_path), class="cfacthist")
+                            cfact_start=cfact_start, cfact_end=cfact_end, cfact_path=cfact_path)), class="cfacthist")
 }
 
 
@@ -487,7 +485,7 @@ cfact_hist <- function(stvar, cfact_type=c("fixed_path", "muted_response"), poli
 #'  specified in the argument \code{policy_var} should not react to in the counterfactual scenario. This indicates also the index of the shock
 #'  to which the policy variable should not react to. It is assumed that \code{mute_var != policy_var}. This argument is only used when
 #'  \code{cfact_type="muted_response"}.
-#' @param cfact_start a positive integer between \eqn{1} and \core{nsteps} indicating the starting forecast horizon period for the counterfactual
+#' @param cfact_start a positive integer between \eqn{1} and \code{nsteps} indicating the starting forecast horizon period for the counterfactual
 #'  behavior of the specified policy variable.
 #' @param cfact_end a positive integer between \code{cfact_start} and \code{nsteps} indicating the ending period for the counterfactual
 #'  behavior of the specified policy variable.
@@ -517,15 +515,8 @@ cfact_hist <- function(stvar, cfact_type=c("fixed_path", "muted_response"), poli
 #'  a way that accommodates nonlinear time-varying dynamics.
 #' @return Returns a class \code{'cfactfore'} list with the following elements:
 #'   \describe{
-#'     \item{$cfact_pred}{Counterfactual point forecasts.}
-#'     \item{$cfact_pred_ints}{Counterfactual rediction intervals, as \code{[, , d]}.}
-#'     \item{$cfact_trans_pred}{Counterfactual point forecasts for the transition weights.}
-#'     \item{$cfact_trans_pred_ints}{Counterfactual individual prediction intervals for transition weights, as \code{[, , m]}, m=1,..,M.}
-#'     \item{$pred}{Point forecasts that do not impose the counterfactual scenario.}
-#'     \item{$pred_ints}{Prediction intervals that do not impose the counterfactual scenario, as \code{[, , d]}.}
-#'     \item{$trans_pred}{Point forecasts for the transition weights that do not impose the counterfactual scenario.}
-#'     \item{$trans_pred_ints}{Individual prediction intervals for transition weights that do not impose the counterfactual scenario,
-#'      as \code{[, , m]}, m=1,..,M.}
+#'     \item{$cfact_pred}{Counterfactual forecast in a class '\code{stvarpred}' object (see \code{?predict.stvar}).}
+#'     \item{$pred}{Forecast that does not impose the counterfactual scenario, in a class '\code{stvarpred}' object.}
 #'     \item{stvar}{The original STVAR model object.}
 #'     \item{input}{A list containing the arguments used to calculate the counterfactual.}
 #'  }
@@ -542,7 +533,23 @@ cfact_hist <- function(stvar, cfact_type=c("fixed_path", "muted_response"), poli
 #' mod32logt <- STVAR(gdpdef, p=3, M=2, params=params32logt, weight_function="logistic",
 #'   weightfun_pars=c(2, 1), cond_dist="Student", identification="recursive")
 #'
-#' # FILL IN
+#' # Counteractual forecast scenario 5 steps ahead (using only 100 Monte Carlo repetitions
+#' # to save computation time), where the first variable takes values 1, -2, and 3 in the
+#' # horizons 1, 2, and 3, respectively:
+#' set.seed(1)
+#' cfact1 <- cfact_fore(mod32logt, nsteps=5, nsim=100, cfact_type="fixed_path", policy_var=1,
+#'  cfact_start=1, cfact_end=3, cfact_path=c(1, -2, 3))
+#' cfact1 # Print the results
+#' plot(cfact1) # Plot the factual and counterfactual forecasts
+#'
+#' # Counteractual forecast scenario 5 steps ahead (using only 100 Monte Carlo repetitions
+#' # to save computation time), where the first variable does not respond to lagged
+#' # movements of the second variable nor to the second shock in time periods from 1 to 3:
+#' set.seed(1)
+#' cfact2 <- cfact_fore(mod32logt, nsteps=5, nsim=100, cfact_type="muted_response", policy_var=1,
+#'  mute_var=2, cfact_start=1, cfact_end=3)
+#' cfact2 # Print the results
+#' plot(cfact2) # Plot the factual and counterfactual forecasts
 #' @export
 
 cfact_fore <- function(stvar, nsteps, nsim=1000, pi=0.95, pred_type=c("mean", "median"), exo_weights=NULL,
@@ -591,14 +598,8 @@ cfact_fore <- function(stvar, nsteps, nsim=1000, pi=0.95, pred_type=c("mean", "m
   all_pred <- predict.stvar(stvar, nsteps=nsteps, nsim=nsim, pi=pi, pred_type=pred_type, exo_weights=exo_weights)
 
   # Return the results
-  structure(list(cfact_pred=all_cfact_pred$pred,
-                 cfact_pred_ints=all_cfact_pred$pred_ints,
-                 cfact_trans_pred=all_cfact_pred$trans_pred,
-                 cfact_trans_pred_ints=all_cfact_pred$trans_pred_ints,
-                 pred=all_pred$pred,
-                 pred_ints=all_pred$pred_ints,
-                 trans_pred=all_pred$trans_pred,
-                 trans_pred_ints=all_pred$trans_pred_ints,
+  structure(list(cfact_pred=all_cfact_pred,
+                 pred=all_pred,
                  stvar=stvar,
                  input=list(policy_var=policy_var,
                             mute_var=mute_var,
@@ -677,10 +678,24 @@ cfact_fore <- function(stvar, nsteps, nsim=1000, pi=0.95, pred_type=c("mean", "m
 #' mod32logt <- STVAR(gdpdef, p=3, M=2, params=params32logt, weight_function="logistic",
 #'   weightfun_pars=c(2, 1), cond_dist="Student", identification="recursive")
 #'
-#' # FILL IN
+#' # Counterfactual GIRFs for Shock 2 with horizon N=5 (using only R1=R2=100 Monte Carlo repetitions
+#' # to save computation time), where the first variable takes values 1, -2, and 3 in the
+#' # horizons 1, 2, and 3, respectively:
+#' cfact1 <- cfact_girf(mod32logt, which_shocks=2, N=5, R1=100, R2=100, init_regime=1, seeds=1:100,
+#'  cfact_type="fixed_path", policy_var=1, cfact_start=1, cfact_end=3, cfact_path=c(1, -2, 3))
+#' cfact1 # Print the results
+#' plot(cfact1) # Plot the counterfactual GIRF
+#'
+#' # Counterfactual GIRFs for Shock 2 with horizon N=5 (using only R1=R2=100 Monte Carlo repetitions
+#' # to save computation time), where the first variable does not respond to lagged movements
+#' # of the second variable nor to the second shock in time periods from 1 to 3:
+#' cfact2 <- cfact_girf(mod32logt, which_shocks=2, N=5, R1=100, R2=100, init_regime=1, seeds=1:100,
+#'  cfact_type="muted_response", policy_var=1, mute_var=2, cfact_start=1, cfact_end=3)
+#' cfact2 # Print the results
+#' plot(cfact2) # Plot the counterfactual GIRF
 #' @export
 
-cfact_girf <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, init_regime=1, init_values=NULL,
+cfact_girf <- function(stvar, which_shocks, shock_size=1, N=30, R1=200, R2=250, init_regime=1, init_values=NULL,
                        which_cumulative=numeric(0), scale=NULL, scale_type=c("instant", "peak"), scale_horizon=N,
                        ci=c(0.95, 0.80), use_data_shocks=FALSE, data_girf_pars=c(0, 0.75, 0, 0, 1.5), ncores=2,
                        burn_in=1000, exo_weights=NULL, seeds=NULL, use_parallel=TRUE,

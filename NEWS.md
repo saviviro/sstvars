@@ -109,3 +109,4 @@
   only relative_dens models. The documentation has been updated to clarify this.
 * Fixed some typos and similar type of editing issues from Section 2.1 of the vignette. 
 * Adjusted the argument min_obs_coef to work slightly more accurately. This might have some effect on the obtained estimates. 
+* Removed the internally used argument girf_pars from simulate.stvar.

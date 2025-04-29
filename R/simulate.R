@@ -28,8 +28,6 @@
 #' @param drop if \code{TRUE} (default) then the components of the returned list are coerced to lower dimension if
 #'  \code{ntimes==1}, i.e., \code{$sample} and \code{$transition_weights} will be matrices, and \code{$component}
 #'   will be vector.
-#' @param girf_pars This argument is used internally in the estimation of generalized impulse response functions
-#'   (see \code{?GIRF}). You should ignore it (specifying something else than null to it will change how the function behaves).
 #' @details When using \code{init_regime} to simulate the initial values from a given regime, we employ the following simulation
 #'   procedure to obtain the initial values (unless \code{use_stat_for_Gaus=TRUE} and Gaussian model is considered).
 #'   First, we set the initial values to the unconditional mean of the specified regime. Then,
@@ -96,7 +94,36 @@
 #' @export
 
 simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, init_regime, ntimes=1, use_stat_for_Gaus=FALSE,
-                           burn_in=1000, exo_weights=NULL, drop=TRUE, girf_pars=NULL) {
+                           burn_in=1000, exo_weights=NULL, drop=TRUE) {
+  simulate_stvar_int(object=object, nsim=nsim, seed=seed, ..., init_values=init_values, init_regime=init_regime, ntimes=ntimes,
+                     use_stat_for_Gaus=use_stat_for_Gaus, burn_in=burn_in, exo_weights=exo_weights, drop=drop)
+}
+
+#' @title INTERNAL Simulate method for class 'stvar' objects
+#'
+#' @description \code{simulate_stvar_int} is an internal simulate function for class 'stvar' objects.
+#'
+#' @inheritParams simulate.stvar
+#' @param girf_pars This argument is used internally in the estimation of generalized impulse response functions.
+#'  Specifying something else than null to it will change how the function behaves. Should be a list with following elements
+#'  \describe{
+#'    \item{shock_numb}{The number of the shock to be used in the GIRF.}
+#'    \item{shock_size}{The size of the shock to be used in the GIRF.}
+#'    \item{cfact_pars}{A list with the following elements (only for simulating counterfactuals):
+#'      \describe{
+#'        \item{cfact_metatype}{The metatype of the counterfactual, \code{c("counterfactual_fore", "counterfactual_girf").}}
+#'        \item{cfact_type}{The type of the counterfactual, \code{c("fixed_path", "muted_response").}}
+#'        \item{policy_var}{The variable to be used as the policy variable.}
+#'        \item{mute_var}{The variable to be used as the mute variable.}
+#'        \item{cfact_start}{The start of the counterfactual period.}
+#'        \item{cfact_end}{The end of the counterfactual period.}
+#'      }
+#'    }
+#'  }
+#' @inherit simulate.stvar references return details seealso
+#' @keywords internal
+simulate_stvar_int <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, init_regime, ntimes=1, use_stat_for_Gaus=FALSE,
+                               burn_in=1000, exo_weights=NULL, drop=TRUE, girf_pars=NULL) {
   ## girf_pars for GIRF use:
   # girf_pars$shock_numb - which shock?
   # girf_pars$shock_size - size of the structural shock?
@@ -204,15 +231,15 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   if((cond_dist == "Gaussian" && !allow_unstab) || weight_function == "relative_dens") {
     # Initial regime Gaussian stat dist simu + relative_dens weight function uses this;
     # relative dens only has Gaussian cond dist, but it is used in simulate_from_regime with Student cond dist
-     Sigmas <- get_Sigmas(p=p, M=M, d=d, all_A=all_A, all_boldA=all_boldA, all_Omegas=all_Omegas)
-     inv_Sigmas <- array(NA, dim=c(d*p, d*p, M)) # Store inverses of the (dpxdp) covariance matrices
-     det_Sigmas <- numeric(M) # Store determinants of the (dpxdp) covariance matrices
-     chol_Sigmas <- array(dim=c(d*p, d*p, M)) # Cholesky decompositions of the  (dpxdp) covariance matrices
-     for(m in 1:M) {
-       chol_Sigmas[, , m] <- chol(Sigmas[, , m]) # Upper triangle
-       inv_Sigmas[, , m] <- chol2inv(chol_Sigmas[, , m]) # Faster inverse
-       det_Sigmas[m] <- prod(diag(chol_Sigmas[, , m]))^2 # Faster determinant
-     }
+    Sigmas <- get_Sigmas(p=p, M=M, d=d, all_A=all_A, all_boldA=all_boldA, all_Omegas=all_Omegas)
+    inv_Sigmas <- array(NA, dim=c(d*p, d*p, M)) # Store inverses of the (dpxdp) covariance matrices
+    det_Sigmas <- numeric(M) # Store determinants of the (dpxdp) covariance matrices
+    chol_Sigmas <- array(dim=c(d*p, d*p, M)) # Cholesky decompositions of the  (dpxdp) covariance matrices
+    for(m in 1:M) {
+      chol_Sigmas[, , m] <- chol(Sigmas[, , m]) # Upper triangle
+      inv_Sigmas[, , m] <- chol2inv(chol_Sigmas[, , m]) # Faster inverse
+      det_Sigmas[m] <- prod(diag(chol_Sigmas[, , m]))^2 # Faster determinant
+    }
   }
   if(weight_function == "mlogit") {
     all_gamma_m <- matrix(weightpars, ncol=M-1)
@@ -263,7 +290,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
   }
 
   if(!is.null(girf_pars$cfact_pars)) {
-      # Obtain what the indices for the counterfactual period for i1 running from 1 to nsim:
+    # Obtain what the indices for the counterfactual period for i1 running from 1 to nsim:
     if(calc_girf) {
       # i1 = 1 is the impact, i.e., horizon 0, and more generally i1 = n is the horizon n-1.
       # So the counterfactual period goes in terms of i1 from cfact_start+1 to cfact_end+1
@@ -280,20 +307,20 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
     get_logmvdvalues <- function(Y, i1) {
       vapply(1:M,
              function(m) -0.5*d*p*log(2*base::pi) - 0.5*log(det_Sigmas[m]) - 0.5*(crossprod(Y[i1,] - rep(all_mu[, m], p),
-                                                                                  inv_Sigmas[, , m])%*%(Y[i1,] - rep(all_mu[, m], p))),
+                                                                                            inv_Sigmas[, , m])%*%(Y[i1,] - rep(all_mu[, m], p))),
              numeric(1))
     } # Returns M x 1 vector; transformed into a matrix in get_alpha_mt
   } else if(weight_function %in% c("logistic", "exponential", "threshold")) {
-     # Nothing to do here, can use get_alpha_mt directly
+    # Nothing to do here, can use get_alpha_mt directly
   } else if(weight_function == "mlogit") {
-     # Calculate the sub model regressions for calculating the transition weights
-     get_regression_values <- function(Y, i1) {
-        regressions_mt <- numeric(M) # Vector of zeros
-        for(i2 in 1:ncol(all_gamma_m)) {
-          regressions_mt[i2] <- crossprod(all_gamma_m[,i2], cbind(1, Y)[i1, inds_of_switching_vars])
-        }
-        regressions_mt
-     }
+    # Calculate the sub model regressions for calculating the transition weights
+    get_regression_values <- function(Y, i1) {
+      regressions_mt <- numeric(M) # Vector of zeros
+      for(i2 in 1:ncol(all_gamma_m)) {
+        regressions_mt[i2] <- crossprod(all_gamma_m[,i2], cbind(1, Y)[i1, inds_of_switching_vars])
+      }
+      regressions_mt
+    }
   } else if(weight_function == "exogenous") {
     # Nothing to do here, uses exo_weights directly
   }
@@ -444,7 +471,7 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
                                       weightpars=weightpars, log_mvdvalues=log_mvdvalues2, epsilon=epsilon)
           } else if(weight_function %in% c("logistic", "exponential", "threshold")) {
             alpha_mt2 <- get_alpha_mt(M=M, d=d, Y2=Y2[i1, , drop=FALSE], weight_function=weight_function,
-                                     weightfun_pars=weightfun_pars, weightpars=weightpars, epsilon=epsilon)
+                                      weightfun_pars=weightfun_pars, weightpars=weightpars, epsilon=epsilon)
           } else if(weight_function == "mlogit") {
             regression_values2 <- get_regression_values(Y=Y2, i1=i1) # Uses regressions as logmvd values in relative_dens fun
             alpha_mt2 <- get_alpha_mt(M=M, weight_function=weight_function, weightfun_pars=weightfun_pars,

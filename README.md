@@ -216,7 +216,9 @@ plot(irf2)
 histdec <- hist_decomp(fitrec)
 plot(histdec)
 
-# Simulate historical counterfactuals with the function cfact_hist. 
+# Simulate historical counterfactuals with the function cfact_hist,
+# counterfactual forecast scenarios with the function cfact_fore, and
+# counterfactual GIRFs with the function cfact_girf.
 ```
 
 ## References
