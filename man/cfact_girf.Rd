@@ -129,7 +129,7 @@ the GIRF won't thus be estimated multiple times).}
 \item{exo_weights}{if \code{weight_function="exogenous"}, provide a size
 \eqn{(N+1 \times M)} matrix of exogenous transition weights for the regimes: \code{[h, m]}
 for the (after-the-impact) period \eqn{h-1} and regime \eqn{m} weight (\code{[1, m]}
-is for the impact period). Ignored if \code{weight_function!="exogenous"}.}
+is for the impact period). Ignored if \code{weight_function != "exogenous"}.}
 
 \item{seeds}{A numeric vector initializing the seeds for the random number generator
 for estimation of each GIRF. Should have the length of at least (extra seeds are removed
@@ -158,10 +158,10 @@ specified in the argument \code{policy_var} should not react to in the counterfa
 to which the policy variable should not react to. It is assumed that \code{mute_var != policy_var}. This argument is only used when
 \code{cfact_type="muted_response"}.}
 
-\item{cfact_start}{a positive integer between \eqn{1} and \eqn{nsteps} indicating the starting impulse response horizon period for the
+\item{cfact_start}{a positive integer between \eqn{0} and \code{N} indicating the starting impulse response horizon period for the
 counterfactual behavior of the specified policy variable.}
 
-\item{cfact_end}{a positive integer between \code{cfact_start} and \eqn{nsteps} indicating the ending period for the counterfactual
+\item{cfact_end}{a positive integer between \code{cfact_start} and \code{N} indicating the ending period for the counterfactual
 behavior of the specified policy variable.}
 
 \item{cfact_path}{a numeric vector of length \code{cfact_end-cfact_start+1} indicating the hypothetical path of the policy variable

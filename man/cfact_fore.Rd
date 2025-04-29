@@ -45,10 +45,10 @@ specified in the argument \code{policy_var} should not react to in the counterfa
 to which the policy variable should not react to. It is assumed that \code{mute_var != policy_var}. This argument is only used when
 \code{cfact_type="muted_response"}.}
 
-\item{cfact_start}{a positive integer between \eqn{1} and \eqn{nsteps} indicating the starting forecast horizon period for the counterfactual
+\item{cfact_start}{a positive integer between \eqn{1} and \core{nsteps} indicating the starting forecast horizon period for the counterfactual
 behavior of the specified policy variable.}
 
-\item{cfact_end}{a positive integer between \code{cfact_start} and \eqn{nsteps} indicating the ending period for the counterfactual
+\item{cfact_end}{a positive integer between \code{cfact_start} and \code{nsteps} indicating the ending period for the counterfactual
 behavior of the specified policy variable.}
 
 \item{cfact_path}{a numeric vector of length \code{cfact_end-cfact_start+1} indicating the hypothetical path of the policy variable

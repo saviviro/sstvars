@@ -573,10 +573,6 @@ test_that("cfact_hist works correctly", {
 })
 
 
-
-# stvar, nsteps, nsim=1000, pi=0.95, pred_type=c("mean", "median"), exo_weights=NULL,
-# cfact_type=c("fixed_path", "muted_response"), policy_var=1, mute_var=NULL, cfact_start=1, cfact_end=1, cfact_path=NULL
-
 test_that("cfact_fore works correctly", {
   # Linear SVAR
   mod <- mod112relg
@@ -637,4 +633,55 @@ test_that("cfact_fore works correctly", {
                                  cfact_end=2, mute_var=3, exo_weights=cbind(c(0.8, 0, 0.3), c(0.2, 1, 0.7)))
   expect_equal(unname(c(tmp$cfact_pred[c(1, 2, 5, 7, 9)])), c(2.4966361, -7.3056026, 2.0205320, 0.5530254, -0.6760020), tolerance=1e-3)
   expect_equal(tmp$cfact_pred_ints[c(1, 7, 9, 16)], c(1.919356, 1.292601, 1.360463, 1.671384), tolerance=1e-3)
+})
+
+
+test_that("cfact_girf works correctly", {
+  # Linear SVAR
+  mod <- mod112relg
+  mod$model$identification <- "recursive" # Reduced form model, flag to recursive to avoid messages
+  tmp <- cfact_girf(mod, which_shocks=2, N=2, R1=2, R2=2, init_regime=1, scale=c(1, 1, 0.3), ci=0.9, seeds=1:2, use_parallel=FALSE,
+                    cfact_type="muted_response", policy_var=1, mute_var=2, cfact_start=0, cfact_end=1)
+  expect_equal(tmp$girf$girf_res$shock2$point_est[c(1, 2, 3, 4, 5)], c(0.000000, 0.000000, -0.067445, 0.522410, 0.468287), tolerance=1e-3)
+
+  # Relative_dens Gaussian STVAR
+  mod <- mod123relg
+  mod$model$identification <- "recursive" # Reduced form model, flag to recursive to avoid messages
+  tmp <- cfact_girf(mod, which_shocks=1, N=2, R1=2, R2=3, init_regime=1, scale=c(1, 1, 0.3), ci=0.9, seeds=1:3, use_parallel=FALSE,
+                    cfact_type="muted_response", policy_var=3, mute_var=2, cfact_start=0, cfact_end=2)
+  expect_equal(tmp$girf$girf_res$shock1$conf_ints[c(1, 6, 7, 14, 17)], c(0.30000000, 0.22600039, 0.01028607, 0.08353936, 0.08483720), tolerance=1e-3)
+
+  # Logistic
+  mod <- mod222logistitb
+  tmp <- cfact_girf(mod, which_shocks=1, N=3, R1=3, R2=2, init_regime=1, scale=c(1, 2, 0.3), ci=0.9, seeds=4:5, use_parallel=FALSE,
+                    cfact_type="fixed_path", policy_var=2, cfact_start=1, cfact_end=2, cfact_path=c(1, -1))
+  expect_equal(tmp$girf$girf_res$shock1$point_est[c(1, 2, 5, 6, 7, 8)], c(0.939669, 0.161927, 0.300000, 0.000000, 0.000000, 0.025074), tolerance=1e-3)
+
+  # Logit
+  mod <- mod222logcmt_12_2
+  mod$model$identification <- "recursive" # Reduced form model, flag to recursive to avoid messages
+  tmp <- cfact_girf(mod, which_shocks=2, N=2, R1=3, R2=2, init_regime=1, scale=c(1, 2, 0.3), ci=0.9, seeds=1:2, use_parallel=FALSE,
+                    cfact_type="fixed_path", policy_var=1, cfact_start=2, cfact_end=2, cfact_path=c(3))
+  expect_equal(tmp$girf$girf_res$shock2$point_est[c(1, 2, 3, 5, 6, 8)], c(0.000000000, -0.052473993, 0.000000000, 0.137319453,
+                                                                          0.156611490, 0.007277011), tolerance=1e-3)
+
+  # Exponential
+  mod <- mod222expcmwtsh_2_1
+  tmp <- cfact_girf(mod, which_shocks=1, N=3, R1=3, R2=3, init_regime=1, scale=c(1, 1, 0.3), ci=0.9, seeds=1:3, use_parallel=FALSE,
+                    cfact_type="muted_response", policy_var=2, mute_var=1, cfact_start=3, cfact_end=3)
+  expect_equal(tmp$girf$girf_res$shock1$conf_ints[c(1, 6, 7, 14, 17)], c(0.3000000, 0.4284184, 0.1788517, -0.8757628, 0.0000000), tolerance=1e-3)
+
+  # Threshold
+  mod <- mod222thres_2_1
+  mod$model$identification <- "recursive" # Reduced form model, flag to recursive to avoid messages
+  tmp <- cfact_girf(mod, which_shocks=1, N=1, R1=1, R2=1, init_regime=1, scale=c(1, 1, 0.3), ci=0.9, seeds=1:3, use_parallel=FALSE,
+                    cfact_type="muted_response", policy_var=2, mute_var=1, cfact_start=0, cfact_end=0)
+  expect_equal(tmp$girf$girf_res$shock1$point_est[1:5], c(0.3000000, 0.0419880, 0.0000000, 0.0105516, 0.0000000), tolerance=1e-3)
+
+  # Exogenous
+  mod <- mod123exoikt
+  tmp <- cfact_girf(mod, which_shocks=1:2, N=2, R1=3, R2=2, init_regime=1, scale=c(1, 2, 0.3), ci=0.9, seeds=1:2, use_parallel=FALSE,
+                    exo_weights=cbind(c(0.8, 0, 0.3), c(0.2, 1, 0.7)), cfact_type="fixed_path", policy_var=3, cfact_start=0, cfact_end=0, cfact_path=c(3))
+  expect_equal(tmp$girf$girf_res$shock1$point_est[c(1, 5, 7, 8, 9)], c(-0.856752, 0.155998, 0.000000, -0.252371, -0.503199), tolerance=1e-3)
+  expect_equal(tmp$girf$girf_res$shock2$point_est[c(1, 5, 7, 8, 9)], c(0.844930, 0.701460, 0.000000, 0.238668, 0.007718), tolerance=1e-3)
 })

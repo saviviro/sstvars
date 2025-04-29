@@ -487,9 +487,9 @@ cfact_hist <- function(stvar, cfact_type=c("fixed_path", "muted_response"), poli
 #'  specified in the argument \code{policy_var} should not react to in the counterfactual scenario. This indicates also the index of the shock
 #'  to which the policy variable should not react to. It is assumed that \code{mute_var != policy_var}. This argument is only used when
 #'  \code{cfact_type="muted_response"}.
-#' @param cfact_start a positive integer between \eqn{1} and \eqn{nsteps} indicating the starting forecast horizon period for the counterfactual
+#' @param cfact_start a positive integer between \eqn{1} and \core{nsteps} indicating the starting forecast horizon period for the counterfactual
 #'  behavior of the specified policy variable.
-#' @param cfact_end a positive integer between \code{cfact_start} and \eqn{nsteps} indicating the ending period for the counterfactual
+#' @param cfact_end a positive integer between \code{cfact_start} and \code{nsteps} indicating the ending period for the counterfactual
 #'  behavior of the specified policy variable.
 #' @param cfact_path a numeric vector of length \code{cfact_end-cfact_start+1} indicating the hypothetical path of the policy variable
 #'  specified in the argument \code{policy_var}. This argument is only used when \code{cfact_type="fixed_path"}.
@@ -630,9 +630,9 @@ cfact_fore <- function(stvar, nsteps, nsim=1000, pi=0.95, pred_type=c("mean", "m
 #'  specified in the argument \code{policy_var} should not react to in the counterfactual scenario. This indicates also the index of the shock
 #'  to which the policy variable should not react to. It is assumed that \code{mute_var != policy_var}. This argument is only used when
 #'  \code{cfact_type="muted_response"}.
-#' @param cfact_start a positive integer between \eqn{1} and \eqn{nsteps} indicating the starting impulse response horizon period for the
+#' @param cfact_start a positive integer between \eqn{0} and \code{N} indicating the starting impulse response horizon period for the
 #'  counterfactual behavior of the specified policy variable.
-#' @param cfact_end a positive integer between \code{cfact_start} and \eqn{nsteps} indicating the ending period for the counterfactual
+#' @param cfact_end a positive integer between \code{cfact_start} and \code{N} indicating the ending period for the counterfactual
 #'  behavior of the specified policy variable.
 #' @param cfact_path a numeric vector of length \code{cfact_end-cfact_start+1} indicating the hypothetical path of the policy variable
 #'  specified in the argument \code{policy_var}. This argument is only used when \code{cfact_type="fixed_path"}.
@@ -693,10 +693,10 @@ cfact_girf <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, 
   ## Check the arguments
   if(!is.numeric(policy_var) || length(policy_var) != 1 || policy_var < 1 || policy_var > d || policy_var%%1 != 0) {
     stop("The argument policy_var should be a positive integer between 1 and d")
-  } else if(!is.numeric(cfact_start) || length(cfact_start) != 1 || cfact_start < 1 || cfact_start > nsteps || cfact_start%%1 != 0) {
-    stop("The argument cfact_start should be a positive integer between 1 and nsteps")
-  } else if(!is.numeric(cfact_end) || length(cfact_end) != 1 || cfact_end < cfact_start || cfact_end > nsteps || cfact_end%%1 != 0) {
-    stop("The argument cfact_end should be a positive integer between cfact_start and nsteps")
+  } else if(!is.numeric(cfact_start) || length(cfact_start) != 1 || cfact_start < 0 || cfact_start > N || cfact_start%%1 != 0) {
+    stop("The argument cfact_start should be a positive integer between 0 and N")
+  } else if(!is.numeric(cfact_end) || length(cfact_end) != 1 || cfact_end < cfact_start || cfact_end > N || cfact_end%%1 != 0) {
+    stop("The argument cfact_end should be a positive integer between cfact_start and N")
   }
   if(cfact_type == "fixed_path") {
     if(is.null(cfact_path)) {
@@ -715,21 +715,24 @@ cfact_girf <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, 
       stop("The arguments policy_var and mute_var should not be equal")
     }
   }
+  if(policy_var %in% which_shocks) {
+    stop("The argument policy_var should not be in the argument which_shocks")
+  }
 
   ## Compute the counterfactual GIRF:
-  mygirf <- GIRF(stvar, which_shocks=which_shocks, shock_size=shock_size, N=N, R1=R1, R2=R2,
-                 init_regime=init_regime, init_values=init_values, which_cumulative=which_cumulative,
-                 scale=scale, scale_type=scale_type, scale_horizon=scale_horizon,
-                 ci=ci, use_data_shocks=use_data_shocks, data_girf_pars=data_girf_pars,
-                 ncores=ncores, burn_in=burn_in, exo_weights=exo_weights,
-                 seeds=seeds, use_parallel=use_parallel,
-                 girf_pars=list(cfact_pars=list(cfact_metatype="counterfactual_girf",
-                                                cfact_type=cfact_type,
-                                                policy_var=policy_var,
-                                                mute_var=mute_var,
-                                                cfact_start=cfact_start,
-                                                cfact_end=cfact_end,
-                                                cfact_path=cfact_path)))
+  mygirf <- GIRF_int(stvar, which_shocks=which_shocks, shock_size=shock_size, N=N, R1=R1, R2=R2,
+                     init_regime=init_regime, init_values=init_values, which_cumulative=which_cumulative,
+                     scale=scale, scale_type=scale_type, scale_horizon=scale_horizon,
+                     ci=ci, use_data_shocks=use_data_shocks, data_girf_pars=data_girf_pars,
+                     ncores=ncores, burn_in=burn_in, exo_weights=exo_weights,
+                     seeds=seeds, use_parallel=use_parallel,
+                     cfact_pars=list(cfact_metatype="counterfactual_girf",
+                                     cfact_type=cfact_type,
+                                     policy_var=policy_var,
+                                     mute_var=mute_var,
+                                     cfact_start=cfact_start,
+                                     cfact_end=cfact_end,
+                                     cfact_path=cfact_path))
 
   # Return the results
   structure(list(girf=mygirf,
@@ -758,9 +761,5 @@ cfact_girf <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, 
                             cfact_type=cfact_type,
                             cfact_start=cfact_start,
                             cfact_end=cfact_end,
-                            cfact_path=cfact_path,
-                            nsteps=nsteps,
-                            nsim=nsim,
-                            pi=pi,
-                            pred_type=pred_type)), class="cfactgirf")
+                            cfact_path=cfact_path)), class="cfactgirf")
 }

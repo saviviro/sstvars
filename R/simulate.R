@@ -393,7 +393,10 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
           }
           if(girf_pars$cfact_pars$cfact_type == "fixed_path") { # Fixed path of policy variable in certain horizons
             e_t_orig <- e_t # The original shock, used in GIRF sample path 2, particularly for muted_response cfactuals
-            cfact_path_t <- girf_pars$cfact_pars$cfact_path[i1 - girf_pars$cfact_pars$cfact_start + 1] # The hypothetical path of the policy variable
+            index_in_cfact_path <- ifelse(calc_girf,
+                                          i1 - girf_pars$cfact_pars$cfact_start,     # GIRF: i1 is current horizon + 1
+                                          i1 - girf_pars$cfact_pars$cfact_start + 1) # Forecast scenario: i1 is current horizon
+            cfact_path_t <- girf_pars$cfact_pars$cfact_path[index_in_cfact_path] # The hypothetical path of the policy variable
             effect_of_other_shocks <- as.numeric(crossprod(B_t[girf_pars$cfact_pars$policy_var, -girf_pars$cfact_pars$policy_var],
                                                            e_t[-girf_pars$cfact_pars$policy_var])) # The effect of the other shocks to the policy var
             cfact_policy_e_t <- (cfact_path_t - as.vector(mu_yt)[girf_pars$cfact_pars$policy_var] -
@@ -507,7 +510,10 @@ simulate.stvar <- function(object, nsim=1, seed=NULL, ..., init_values=NULL, ini
                             "This can create weird results in the counterfactual scenario.",))
             }
             if(girf_pars$cfact_pars$cfact_type == "fixed_path") { # Fixed path of policy variable in certain horizons
-              cfact_path_t <- girf_pars$cfact_pars$cfact_path[i1 - girf_pars$cfact_pars$cfact_start + 1] # The hypothetical path of the policy variable
+              index_in_cfact_path <- ifelse(calc_girf,
+                                            i1 - girf_pars$cfact_pars$cfact_start,     # GIRF: i1 is current horizon + 1
+                                            i1 - girf_pars$cfact_pars$cfact_start + 1) # Forecast scenario: i1 is current horizon
+              cfact_path_t <- girf_pars$cfact_pars$cfact_path[index_in_cfact_path] # The hypothetical path of the policy variable
               effect_of_other_shocks <- as.numeric(crossprod(B_t2[girf_pars$cfact_pars$policy_var, -girf_pars$cfact_pars$policy_var],
                                                              e_t[-girf_pars$cfact_pars$policy_var])) # The effect of the other shocks to the policy var
               cfact_policy_e_t <- (cfact_path_t - as.vector(mu_yt2)[girf_pars$cfact_pars$policy_var] -

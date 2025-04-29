@@ -89,7 +89,7 @@ the GIRF won't thus be estimated multiple times).}
 \item{exo_weights}{if \code{weight_function="exogenous"}, provide a size
 \eqn{(N+1 \times M)} matrix of exogenous transition weights for the regimes: \code{[h, m]}
 for the (after-the-impact) period \eqn{h-1} and regime \eqn{m} weight (\code{[1, m]}
-is for the impact period). Ignored if \code{weight_function!="exogenous"}.}
+is for the impact period). Ignored if \code{weight_function != "exogenous"}.}
 
 \item{seeds}{a numeric vector containing the random number generator seed for estimation
 of each GIRF. Should have the length of at least...
