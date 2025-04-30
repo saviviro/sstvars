@@ -22,6 +22,10 @@ cfact_hist(
 \method{print}{cfacthist}(x, ..., digits = 3)
 }
 \arguments{
+\item{stvar}{an object of class \code{'stvar'} defining a structural or reduced form
+STVAR model. For a reduced form model (that is not readily identified statiscally),
+the shocks are automatically identified by the lower triangular Cholesky decomposition.}
+
 \item{cfact_type}{a character string indicating the type of counterfactual to be computed: should the path of the policy
 variable be fixed to some hypothetical path (\code{cfact_type="fixed_path"}) in given points of time or should the responses
 of the policy variable to lagged and contemporaneous movements of some given variable be muted (\code{cfact_type="muted_response"})?

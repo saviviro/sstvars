@@ -27,6 +27,10 @@ cfact_fore(
 \method{print}{cfactfore}(x, ..., digits = 3)
 }
 \arguments{
+\item{stvar}{an object of class \code{'stvar'} defining a structural or reduced form
+STVAR model. For a reduced form model (that is not readily identified statiscally),
+the shocks are automatically identified by the lower triangular Cholesky decomposition.}
+
 \item{nsteps}{how many steps ahead should be predicted, i.e., the forecast horizon?}
 
 \item{nsim}{to how many independent simulations should the forecast be based on?}

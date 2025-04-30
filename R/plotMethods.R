@@ -501,7 +501,7 @@ plot.histdecomp <- function(x, ..., plot_by_shock=FALSE, which_to_plot) {
     which_to_plot <- sort(unique(which_to_plot), decreasing=FALSE)
   }
   if(is.null(colnames(histdec$stvar$data))) {
-    var_names <- paste("Variable", 1:n_vars)
+    var_names <- paste("Variable", 1:d)
   } else {
     var_names <- colnames(histdec$stvar$data)
   }

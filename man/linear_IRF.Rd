@@ -27,8 +27,8 @@ linear_IRF(
 }
 \arguments{
 \item{stvar}{an object of class \code{'stvar'} defining a structural or reduced form
-STVAR model. For a reduced form model, the shocks are automatically identified by
-the lower triangular Cholesky decomposition.}
+STVAR model. For a reduced form model (that is not readily identified statiscally),
+the shocks are automatically identified by the lower triangular Cholesky decomposition.}
 
 \item{N}{a positive integer specifying the horizon how far ahead should the
 linear impulse responses be calculated.}

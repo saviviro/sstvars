@@ -3,6 +3,7 @@
 #' @description \code{hist_decomp} computes historical decompositions for structural STVAR models.
 #'
 #' @inheritParams simulate.stvar
+#' @inheritParams linear_IRF
 #' @details The historical decomposition quantifies the cumulative effects the shocks to the movements of
 #'   the variables (see, e.g., Kilian and Lütkepohl, 2017, Section~4.3) The historical decompositions are
 #'   computed as described in Wong (2018). Note that due to the effect of the "initial conditions" and the

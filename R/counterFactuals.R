@@ -142,6 +142,7 @@ get_y_t <- function(mu_yt, B_yt, e_t) {
 #' @description \code{cfact_hist} simulates historical counterfactual for structural STVAR models.
 #'
 #' @inheritParams simulate.stvar
+#' @inheritParams linear_IRF
 #' @param cfact_type a character string indicating the type of counterfactual to be computed: should the path of the policy
 #'  variable be fixed to some hypothetical path (\code{cfact_type="fixed_path"}) in given points of time or should the responses
 #'  of the policy variable to lagged and contemporaneous movements of some given variable be muted (\code{cfact_type="muted_response"})?
@@ -474,6 +475,7 @@ cfact_hist <- function(stvar, cfact_type=c("fixed_path", "muted_response"), poli
 #' @description \code{cfact_fore} simulates counterfactual forecast scenarios for structural STVAR models.
 #'
 #' @inheritParams predict.stvar
+#' @inheritParams linear_IRF
 #' @param nsteps how many steps ahead should be predicted, i.e., the forecast horizon?
 #' @param cfact_type a character string indicating the type of counterfactual to be computed: should the path of the policy
 #'  variable be fixed to some hypothetical path (\code{cfact_type="fixed_path"}) in given forecast horizons or should the responses
@@ -678,18 +680,18 @@ cfact_fore <- function(stvar, nsteps, nsim=1000, pi=0.95, pred_type=c("mean", "m
 #' mod32logt <- STVAR(gdpdef, p=3, M=2, params=params32logt, weight_function="logistic",
 #'   weightfun_pars=c(2, 1), cond_dist="Student", identification="recursive")
 #'
-#' # Counterfactual GIRFs for Shock 2 with horizon N=5 (using only R1=R2=100 Monte Carlo repetitions
+#' # Counterfactual GIRFs for Shock 2 with horizon N=5 (using only R1=R2=50 Monte Carlo repetitions
 #' # to save computation time), where the first variable takes values 1, -2, and 3 in the
 #' # horizons 1, 2, and 3, respectively:
-#' cfact1 <- cfact_girf(mod32logt, which_shocks=2, N=5, R1=100, R2=100, init_regime=1, seeds=1:100,
+#' cfact1 <- cfact_girf(mod32logt, which_shocks=2, N=5, R1=50, R2=50, init_regime=1, seeds=1:50,
 #'  cfact_type="fixed_path", policy_var=1, cfact_start=1, cfact_end=3, cfact_path=c(1, -2, 3))
 #' cfact1 # Print the results
 #' plot(cfact1) # Plot the counterfactual GIRF
 #'
-#' # Counterfactual GIRFs for Shock 2 with horizon N=5 (using only R1=R2=100 Monte Carlo repetitions
+#' # Counterfactual GIRFs for Shock 2 with horizon N=5 (using only R1=R2=50 Monte Carlo repetitions
 #' # to save computation time), where the first variable does not respond to lagged movements
 #' # of the second variable nor to the second shock in time periods from 1 to 3:
-#' cfact2 <- cfact_girf(mod32logt, which_shocks=2, N=5, R1=100, R2=100, init_regime=1, seeds=1:100,
+#' cfact2 <- cfact_girf(mod32logt, which_shocks=2, N=5, R1=50, R2=50, init_regime=1, seeds=1:50,
 #'  cfact_type="muted_response", policy_var=1, mute_var=2, cfact_start=1, cfact_end=3)
 #' cfact2 # Print the results
 #' plot(cfact2) # Plot the counterfactual GIRF

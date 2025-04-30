@@ -13,6 +13,10 @@ hist_decomp(stvar)
 \method{print}{histdecomp}(x, ..., digits = 3, which_vars, which_indices)
 }
 \arguments{
+\item{stvar}{an object of class \code{'stvar'} defining a structural or reduced form
+STVAR model. For a reduced form model (that is not readily identified statiscally),
+the shocks are automatically identified by the lower triangular Cholesky decomposition.}
+
 \item{x}{object of class \code{'histdecomp'} created by the function \code{hist_decomp}.}
 
 \item{...}{currently not in use.}
