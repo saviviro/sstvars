@@ -100,7 +100,10 @@
 
 # sstvars 1.2.0
 
-* MAJOR: Added the new function hist_decomp that allows to compute historical decompositions for TVAR and STVAR models.
+* MAJOR: Added three new functions for conducting counterfactual analysis, policy counterfactuals in particular. The new functions are
+  cfact_hist (for historical counterfactuals), cfact_fore (for counterfactual forecast scenarios), and cfact_girf (for counterfactual
+  generalized impulse response functions). See the vignette for details on the implemented methods.
+* MAJOR: Added the new function hist_decomp that allows to compute historical decompositions for TVAR and STVAR models. See the vignette for details.
 * It is not possible in the genetic algorithm to only allow for estimates that allocate the specified amount of observations to each regime
   (see ??GAfit and the arguments bound_by_weights and min_obs_coef_ga).
 * Bug fix: There was an issue with the Phase 1 estimation of the three-phase estimation when weight_function = "exogenous" (NLS estimates were not calculated
