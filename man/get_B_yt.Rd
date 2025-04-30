@@ -21,7 +21,7 @@ get_B_yt(
 
 \item{W}{a \eqn{(d \times d)} matrix containing the matrix \eqn{W} for models identified by heteroskedasticity (as returned by \code{pick_W}).}
 
-\item{lambdas}{a \eqn{(d(M-1)\times 1)} vector \eqn{\lambda_2,...,\lamda_M} for models identified by heteroskedasticity (as returned by \code{pick_lambdas}).}
+\item{lambdas}{a \eqn{(d(M-1)\times 1)} vector \eqn{\lambda_2,...,\lambda_M} for models identified by heteroskedasticity (as returned by \code{pick_lambdas}).}
 
 \item{cond_dist}{specifies the conditional distribution of the model as \code{"Gaussian"}, \code{"Student"}, \code{"ind_Student"},
 or \code{"ind_skewed_t"}, where \code{"ind_Student"} the Student's \eqn{t} distribution with independent components, and

@@ -85,7 +85,7 @@ get_mu_yt <- function(phi_yt, all_A_yti, bold_y_t_minus_1) {
 #' @param all_Omegas a 3D array such that the covariance matrix (or impact matrix \eqn{B_m}) of the \eqn{m}th regime is obtained from \code{all_Omegas[, , m]}.
 #' @param alpha_mt an \eqn{(M \times 1)} vector containing the time period \eqn{t} transition weights.
 #' @param W a \eqn{(d \times d)} matrix containing the matrix \eqn{W} for models identified by heteroskedasticity (as returned by \code{pick_W}).
-#' @param lambdas a \eqn{(d(M-1)\times 1)} vector \eqn{\lambda_2,...,\lamda_M} for models identified by heteroskedasticity (as returned by \code{pick_lambdas}).
+#' @param lambdas a \eqn{(d(M-1)\times 1)} vector \eqn{\lambda_2,...,\lambda_M} for models identified by heteroskedasticity (as returned by \code{pick_lambdas}).
 #' @details This is used in simulation of the counterfactual scenarios.
 #' @return Returns the \eqn{(d \times d)} impact matrix for the time period \eqn{t}.
 #' @keywords internal
@@ -680,18 +680,18 @@ cfact_fore <- function(stvar, nsteps, nsim=1000, pi=0.95, pred_type=c("mean", "m
 #' mod32logt <- STVAR(gdpdef, p=3, M=2, params=params32logt, weight_function="logistic",
 #'   weightfun_pars=c(2, 1), cond_dist="Student", identification="recursive")
 #'
-#' # Counterfactual GIRFs for Shock 2 with horizon N=5 (using only R1=R2=50 Monte Carlo repetitions
+#' # Counterfactual GIRFs for Shock 2 with horizon N=5 (using only R1=R2=20 Monte Carlo repetitions
 #' # to save computation time), where the first variable takes values 1, -2, and 3 in the
 #' # horizons 1, 2, and 3, respectively:
-#' cfact1 <- cfact_girf(mod32logt, which_shocks=2, N=5, R1=50, R2=50, init_regime=1, seeds=1:50,
+#' cfact1 <- cfact_girf(mod32logt, which_shocks=2, N=5, R1=20, R2=20, init_regime=1, seeds=1:20,
 #'  cfact_type="fixed_path", policy_var=1, cfact_start=1, cfact_end=3, cfact_path=c(1, -2, 3))
 #' cfact1 # Print the results
 #' plot(cfact1) # Plot the counterfactual GIRF
 #'
-#' # Counterfactual GIRFs for Shock 2 with horizon N=5 (using only R1=R2=50 Monte Carlo repetitions
+#' # Counterfactual GIRFs for Shock 2 with horizon N=5 (using only R1=R2=20 Monte Carlo repetitions
 #' # to save computation time), where the first variable does not respond to lagged movements
 #' # of the second variable nor to the second shock in time periods from 1 to 3:
-#' cfact2 <- cfact_girf(mod32logt, which_shocks=2, N=5, R1=50, R2=50, init_regime=1, seeds=1:50,
+#' cfact2 <- cfact_girf(mod32logt, which_shocks=2, N=5, R1=20, R2=20, init_regime=1, seeds=1:20,
 #'  cfact_type="muted_response", policy_var=1, mute_var=2, cfact_start=1, cfact_end=3)
 #' cfact2 # Print the results
 #' plot(cfact2) # Plot the counterfactual GIRF

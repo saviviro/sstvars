@@ -18,7 +18,6 @@
 #'   The vignette is a good place to start, and see also the readme file.
 #'
 #' @docType package
-#' @author you <savi.virolainen@helsinki.fi>
 #' @import Rcpp RcppArmadillo parallel pbapply
 #' @importFrom Rcpp evalCpp
 #' @useDynLib sstvars
