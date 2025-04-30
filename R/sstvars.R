@@ -10,10 +10,10 @@
 #'   on the NLS estimates, and finally a gradient based variable metric algorithm is initialized from the estimates obtained
 #'   from the previous two steps. For evaluating the adequacy of the estimated models, \code{sstvars} utilizes residuals based
 #'   diagnostics and provides functions for graphical diagnostics as well as for calculating formal diagnostic tests.
-#'   \code{sstvars} also accommodates the computations of linear impulse response functions, nonlinear generalized impulse response
-#'   functions, generalized forecast error variance decompositions, and historical decompositions. Further functionality includes
-#'   hypothesis testing, plotting the profile log-likelihood functions about the estimate, simulation from STVAR processes, and forecasting,
-#'   for example.
+#'   \code{sstvars} also accommodates tools for conducting counterfactual analysis as well as computation of impulse
+#'   response functions, generalized impulse response functions, generalized forecast error variance decompositions,
+#'   and historical decompositions. Further functionality includes hypothesis testing, plotting the profile log-likelihood
+#'   functions about the estimate, simulation from STVAR processes, and forecasting, for example.
 #'
 #'   The vignette is a good place to start, and see also the readme file.
 #'

@@ -10,7 +10,7 @@ Description: Penalized and non-penalized maximum likelihood estimation of smooth
   functions, conditional distributions, and identification methods. Constrained
   estimation with various types of constraints is available. Residual based
   model diagnostics, forecasting, simulations, counterfactual analysis, and
-  calculation of impulse response functions, generalized impulse response functions,
+  computation of impulse response functions, generalized impulse response functions,
   generalized forecast error variance decompositions, as well as historical
   decompositions. See
   Heather Anderson, Farshid Vahid (1998) <doi:10.1016/S0304-4076(97)00076-6>,
