@@ -225,6 +225,7 @@ Two types of counterfactual generalized impulse response functions (GIRFs) are a
 
 }}
 \examples{
+\donttest{
 # Recursively identified logistic Student's t STVAR(p=3, M=2) model with the first
 # lag of the second variable as the switching variable:
 params32logt <- c(0.5959, 0.0447, 2.6279, 0.2897, 0.2837, 0.0504, -0.2188, 0.4008,
@@ -234,21 +235,22 @@ params32logt <- c(0.5959, 0.0447, 2.6279, 0.2897, 0.2837, 0.0504, -0.2188, 0.400
 mod32logt <- STVAR(gdpdef, p=3, M=2, params=params32logt, weight_function="logistic",
   weightfun_pars=c(2, 1), cond_dist="Student", identification="recursive")
 
-# Counterfactual GIRFs for Shock 2 with horizon N=5 (using only R1=R2=20 Monte Carlo repetitions
+# Counterfactual GIRFs for Shock 2 with horizon N=5 (using only R1=R2=10 Monte Carlo repetitions
 # to save computation time), where the first variable takes values 1, -2, and 3 in the
 # horizons 1, 2, and 3, respectively:
-cfact1 <- cfact_girf(mod32logt, which_shocks=2, N=5, R1=20, R2=20, init_regime=1, seeds=1:20,
+cfact1 <- cfact_girf(mod32logt, which_shocks=2, N=5, R1=10, R2=10, init_regime=1, seeds=1:10,
  cfact_type="fixed_path", policy_var=1, cfact_start=1, cfact_end=3, cfact_path=c(1, -2, 3))
 cfact1 # Print the results
 plot(cfact1) # Plot the counterfactual GIRF
 
-# Counterfactual GIRFs for Shock 2 with horizon N=5 (using only R1=R2=20 Monte Carlo repetitions
+# Counterfactual GIRFs for Shock 2 with horizon N=5 (using only R1=R2=10 Monte Carlo repetitions
 # to save computation time), where the first variable does not respond to lagged movements
 # of the second variable nor to the second shock in time periods from 1 to 3:
-cfact2 <- cfact_girf(mod32logt, which_shocks=2, N=5, R1=20, R2=20, init_regime=1, seeds=1:20,
+cfact2 <- cfact_girf(mod32logt, which_shocks=2, N=5, R1=10, R2=10, init_regime=1, seeds=1:20,
  cfact_type="muted_response", policy_var=1, mute_var=2, cfact_start=1, cfact_end=3)
 cfact2 # Print the results
 plot(cfact2) # Plot the counterfactual GIRF
+}
 }
 \references{
 \itemize{

@@ -2,8 +2,11 @@ Package: sstvars
 Type: Package
 Title: Toolkit for Reduced Form and Structural Smooth Transition Vector Autoregressive Models
 Version: 1.2.0
-Authors@R: person("Savi", "Virolainen", email = "savi.virolainen@helsinki.fi",
-                  role = c("aut", "cre"), comment = "https://orcid.org/0000-0002-5075-6821")
+Authors@R: person("Savi", "Virolainen",
+                  email = "savi.virolainen@helsinki.fi",
+                  role = c("aut", "cre"),
+                  comment = c(ORCID = "https://orcid.org/0000-0002-5075-6821"))
+Author: Savi Virolainen [aut, cre] (<https://orcid.org/0000-0002-5075-6821>)
 Maintainer: Savi Virolainen <savi.virolainen@helsinki.fi>
 Description: Penalized and non-penalized maximum likelihood estimation of smooth
   transition vector autoregressive models with various types of transition weight
