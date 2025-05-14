@@ -243,6 +243,12 @@ GIRF_int <- function(stvar, which_shocks, shock_size=1, N=30, R1=250, R2=250, in
   stopifnot(N %% 1 == 0 && N > 0)
   stopifnot(scale_horizon %in% 0:N)
   if(!is.null(init_values)) {
+    if(is.matrix(init_values)) {
+      cat("The provided argument init_values is a matrix. Converging it to an array and setting R2=1 and seeds=seeds[1].")
+      R2 <- 1
+      seeds <- seeds[1]
+      init_values <- array(init_values, dim=c(p, d, R2))
+    }
     stopifnot(is.array(init_values) && all(dim(init_values) == c(p, d, R2)))
   }
 
@@ -643,6 +649,12 @@ GFEVD <- function(stvar, N=30, shock_size=1, initval_type=c("data", "random", "f
   M <- stvar$model$M
   d <- stvar$model$d
   if(!is.null(init_values)) {
+    if(is.matrix(init_values)) {
+      cat("The provided argument init_values is a matrix. Converging it to an array and setting R2=1 and seeds=seeds[1].")
+      R2 <- 1
+      seeds <- seeds[1]
+      init_values <- array(init_values, dim=c(p, d, R2))
+    }
     stopifnot(is.array(init_values) && all(dim(init_values) == c(p, d, R2)))
   }
   stopifnot(is.numeric(data_gfevd_pars) && length(data_gfevd_pars) == 2)

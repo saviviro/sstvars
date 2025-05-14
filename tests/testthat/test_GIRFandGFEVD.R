@@ -69,7 +69,7 @@ test_that("GIRF works correctly", {
                 ci=c(0.99, 0.5), scale_type="peak", scale=c(1, 1, 0.5), use_parallel=FALSE, seeds=1:3)
   girf3 <- GIRF(mod123relgh, which_shocks=2:3, shock_size=-2, N=2, R1=3, R2=4, which_cumulative=1:2,
                 ci=c(0.95, 0.2), scale_type="instant", scale=cbind(c(2, 1, 0.5), c(3, 3, -0.25)), use_parallel=FALSE,
-                seeds=1:4, init_values=array(mod123relgh$data, dim=c(1, 3, 4)))
+                seeds=1:4, init_values=array(mod123relgh$data, dim=c(1, 3, 4))) # Just random init_vals, not even appropriate obs vectors from data
   girf4 <- GIRF(mod122exocit, which_shocks=2, shock_size=1.3, N=3, R1=2, R2=2, init_regime=1, which_cumulative=1:2,
                 ci=c(0.95), scale_type="instant", scale=c(2, 1, 0.3), use_parallel=FALSE, exo_weights=twmat[3:6,],
                 seeds=1:2)
@@ -131,8 +131,8 @@ test_that("GFEVD works correctly", {
                   use_parallel=FALSE, seeds=1:nrow(mod112rec$data))
   gfevd2 <- GFEVD(mod322logt, shock_size=-2.2, N=2, initval_type="random", R1=5, R2=3, init_regime=2,
                   which_cumulative=numeric(0), use_parallel=FALSE, seeds=1:3)
-  gfevd3 <- GFEVD(mod123relgh, shock_size=2, N=1, initval_type="fixed", R1=1, R2=4, init_values=array(mod123relgh$data, dim=c(1, 3, 4)),
-                  which_cumulative=c(1, 3), use_parallel=FALSE, seeds=1:4)
+  gfevd3 <- GFEVD(mod123relgh, shock_size=2, N=1, initval_type="fixed", R1=1, R2=4, which_cumulative=c(1, 3), use_parallel=FALSE,
+                  seeds=1:4, init_values=array(mod123relgh$data, dim=c(1, 3, 4))) # Just random init_vals, not even appropriate obs vectors from data)
   gfevd4 <- GFEVD(mod322logt2, use_data_shocks=TRUE, R1=1, N=2, use_parallel=FALSE, seeds=1:(nrow(mod322logt2$data)-3))
   gfevd5 <- GFEVD(mod123relgh2, use_data_shocks=TRUE, R1=2, N=3, which_cumulative=1:2,
                   use_parallel=FALSE, seeds=1:(nrow(mod123relgh2$data)-1))
