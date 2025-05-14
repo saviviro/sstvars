@@ -67,7 +67,7 @@ test_that("GIRF works correctly", {
                 use_parallel=FALSE, seeds=1:4, ci=0.9)
   girf2 <- GIRF(mod322logt, which_shocks=1, shock_size=1, N=1, R1=2, R2=3, init_regime=2, which_cumulative=numeric(0),
                 ci=c(0.99, 0.5), scale_type="peak", scale=c(1, 1, 0.5), use_parallel=FALSE, seeds=1:3)
-  girf3 <- GIRF(mod123relgh, which_shocks=2:3, shock_size=-2, N=2, R1=3, R2=4, init_regime=1, which_cumulative=1:2,
+  girf3 <- GIRF(mod123relgh, which_shocks=2:3, shock_size=-2, N=2, R1=3, R2=4, which_cumulative=1:2,
                 ci=c(0.95, 0.2), scale_type="instant", scale=cbind(c(2, 1, 0.5), c(3, 3, -0.25)), use_parallel=FALSE,
                 seeds=1:4, init_values=array(mod123relgh$data, dim=c(1, 3, 4)))
   girf4 <- GIRF(mod122exocit, which_shocks=2, shock_size=1.3, N=3, R1=2, R2=2, init_regime=1, which_cumulative=1:2,

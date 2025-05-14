@@ -115,3 +115,6 @@
 * Removed the internally used argument girf_pars from simulate.stvar.
 
 # sstvars 1.2.1
+
+* Fixed the labels for variables in GIRFs etc when they were calculated using a model either not containing any data or containing data without variable names. 
+* Removed the fixed "lwd" setting from the plot method for historical decompositions. The line thickness can now be adjust with the dot parameters. 

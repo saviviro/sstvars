@@ -582,9 +582,13 @@ simulate_stvar_int <- function(object, nsim=1, seed=NULL, ..., init_values=NULL,
   if(calc_girf) {
     one_girf <- apply(X=sample2 - sample, MARGIN=1:2, FUN=mean)
     if(!is.null(stvar$data)) {
-      colnames(one_girf) <- colnames(stvar$data)
+      if(is.null(colnames(stvar$data))) {
+        colnames(one_girf) <- paste("Variable", 1:d)
+      } else {
+        colnames(one_girf) <- colnames(stvar$data)
+      }
     } else {
-      colnames(one_girf) <- paste("Shock", 1:d)
+      colnames(one_girf) <- paste("Variable", 1:d)
     }
     tw_girf <- apply(X=transition_weights2 - transition_weights, MARGIN=1:2, FUN=mean)
     colnames(tw_girf) <- paste("tw Reg.", 1:M)

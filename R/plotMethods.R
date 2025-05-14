@@ -342,7 +342,7 @@ plot.gfevd <- function(x, ..., data_shock_pars=NULL) {
       if(i1 > 1) grDevices::devAskNewPage(TRUE)
       plot_gfevd(var_ind=i1, main=ifelse(i1 <= n_shocks,
                                          paste("GFEVD for ", varnames[i1]),
-                                         paste("GFEVD for regime", i1 - n_shocks, "trans. weight")))
+                                         paste("GFEVD for Regime", i1 - n_shocks, "trans. weight")))
 
     }
   } else {
@@ -534,7 +534,7 @@ plot.histdecomp <- function(x, ..., plot_by_shock=FALSE, which_to_plot) {
     ind_vec <- ts_mat[, ind] # Not a class ts
     ylim <- c(min(0, min(ind_ts)), max(0, max(ind_ts)))
     plot(x=1:length(ind_vec), y=ind_vec, type="l", ylim=ylim,
-         main="", ylab="", xlab="", xaxt="n", lwd=2, col="black", ...)
+         main="", ylab="", xlab="", xaxt="n", col="black", ...)
 
     mtext(ifelse(plot_by_shock, var_names[ind], shock_names[ind]), side=2, cex=0.8, font=2, las=0, padj=-4) # Add y-axis label
     if(ind == 1) mtext(main, padj=-0.5, cex=1, font=2)

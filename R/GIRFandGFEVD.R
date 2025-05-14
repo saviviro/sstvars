@@ -767,12 +767,12 @@ GFEVD <- function(stvar, N=30, shock_size=1, initval_type=c("data", "random", "f
   }
 
   if(is.null(colnames(stvar$data))) {
-    varnames <- paste0("Variable", 1:d)
+    varnames <- paste("Variable", 1:d)
   } else {
     varnames <- colnames(stvar$data)
   }
   varnames <- c(varnames, paste0("tw", 1:M))
-  shocknames <- paste0("Shock", 1:d)
+  shocknames <- paste("Shock", 1:d)
 
   # GIRF_square_cumsum <- array(dim=c(N + 1, length(varnames), d),
   #                             dimnames=list(0:N, varnames, shocknames)) # [horizon, variable, shock]
