@@ -113,7 +113,7 @@ Note that we index the time series as \eqn{-p+1,...,0,1,...,T}.
    \item Lanne M., Virolainen S. 2025. A Gaussian smooth transition vector autoregressive model:
       An application to the macroeconomic effects of severe weather shocks. Unpublished working
       paper, available as arXiv:2403.14216.
-   \item Virolainen S. 2025. Identification by non-Gaussianity in structural threshold and
+   \item Virolainen S. 2025. Identification by non-Gaussianity in structural
       smooth transition vector autoregressive models. Unpublished working
       paper, available as arXiv:2404.19707.
  }

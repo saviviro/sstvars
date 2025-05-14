@@ -358,7 +358,7 @@ plot(fitlogistic32w) # Plot the fitted transition weights
      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
    \item Tsay R. 1998. Testing and Modeling Multivariate Threshold Models.
      \emph{Journal of the American Statistical Association}, \strong{93}:443, 1188-1202.
-   \item Virolainen S. 2025. Identification by non-Gaussianity in structural threshold and
+   \item Virolainen S. 2025. Identification by non-Gaussianity in structural
       smooth transition vector autoregressive models. Unpublished working
       paper, available as arXiv:2404.19707.
  }

@@ -95,9 +95,9 @@ bound_JSR(mod122, epsilon=0.001, adaptive_eps=TRUE)
      234, 43–60.
    \item I.L. Kheifets, P.J. Saikkonen. 2020. Stationarity and ergodicity of Vector STAR models.
      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
-   \item Virolainen S. 2025. Identification by non-Gaussianity in structural threshold and
+   \item Virolainen S. 2025. Identification by non-Gaussianity in structural
       smooth transition vector autoregressive models. Unpublished working
-      paper, available in ArXiv.
+      paper, available as arXiv:2404.19707.
  }
 }
 \seealso{

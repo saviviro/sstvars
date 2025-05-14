@@ -91,7 +91,7 @@ fit12_alt2$loglik # Log-likelihood of the alternative solution
      \emph{Journal of Economic Dynamics & Control}, \strong{84}, 43-57.
    \item Tsay R. 1998. Testing and Modeling Multivariate Threshold Models.
      \emph{Journal of the American Statistical Association}, \strong{93}:443, 1188-1202.
-   \item Virolainen S. 2025. Identification by non-Gaussianity in structural threshold and
+   \item Virolainen S. 2025. Identification by non-Gaussianity in structural
       smooth transition vector autoregressive models. Unpublished working
       paper, available as arXiv:2404.19707.
  }

@@ -172,7 +172,7 @@ fit12c3 <- fitSSTVAR(fit12c, B_pm_reg=2, B_perm=c(2, 1), B_signs=2)
    \emph{Cambridge University Press}, Cambridge.
    \item Lütkepohl H., Netšunajev A. 2017. Structural vector autoregressions with smooth transition in variances.
      \emph{Journal of Economic Dynamics & Control}, \strong{84}, 43-57.
-   \item Virolainen S. 2025. Identification by non-Gaussianity in structural threshold and
+   \item Virolainen S. 2025. Identification by non-Gaussianity in structural
       smooth transition vector autoregressive models. Unpublished working
       paper, available as arXiv:2404.19707.
  }
