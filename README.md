@@ -4,6 +4,7 @@
 # sstvars
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
 The goal of `sstvars` is to provide a comprehensive toolkit for
@@ -239,8 +240,8 @@ plot(histdec)
   severe weather shocks. Unpublished working paper, available as
   arXiv:2403.14216.
 - Virolainen S. 2025. Identification by non-Gaussianity in structural
-  threshold and smooth transition vector autoregressive. Unpublished
-  working paper, available as arXiv:2404.19707.
+  smooth transition vector autoregressive. Unpublished working paper,
+  available as arXiv:2404.19707.
 - Wong H. 2018. Historical decomposition for nonlinear vector
   autoregressive models. *CAMA Working Paper No. 62/2017, available as
   SSRN:3057759*.
