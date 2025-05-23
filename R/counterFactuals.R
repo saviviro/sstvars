@@ -417,7 +417,7 @@ cfact_hist <- function(stvar, cfact_type=c("fixed_path", "muted_response"), poli
     } else if(abs(B_yt[policy_var, policy_var]) < 1e-6) {
       if(t %in% cfact_start:cfact_end) {
         warning(paste("The shock to the policy variable seems to have a very small effect to the policy variable.",
-                      "This can create weird results in the counterfactual scenario.",))
+                      "This can create weird results in the counterfactual scenario."))
       }
     }
 

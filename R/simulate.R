@@ -416,7 +416,7 @@ simulate_stvar_int <- function(object, nsim=1, seed=NULL, ..., init_values=NULL,
                        "Thus, it is not possible to manipulate shocks to the policy variable to obtain any countefactual scenarios."))
           } else if(abs(B_t[girf_pars$cfact_pars$policy_var, girf_pars$cfact_pars$policy_var]) < 1e-6) {
             warning(paste("The shock to the policy variable seems to have a very small effect to the policy variable.",
-                          "This can create weird results in the counterfactual scenario.",))
+                          "This can create weird results in the counterfactual scenario."))
           }
           if(girf_pars$cfact_pars$cfact_type == "fixed_path") { # Fixed path of policy variable in certain horizons
             e_t_orig <- e_t # The original shock, used in GIRF sample path 2, particularly for muted_response cfactuals
@@ -534,7 +534,7 @@ simulate_stvar_int <- function(object, nsim=1, seed=NULL, ..., init_values=NULL,
                          "Thus, it is not possible to manipulate shocks to the policy variable to obtain any countefactual scenarios."))
             } else if(abs(B_t2[girf_pars$cfact_pars$policy_var, girf_pars$cfact_pars$policy_var]) < 1e-6) {
               warning(paste("The shock to the policy variable seems to have a very small effect to the policy variable.",
-                            "This can create weird results in the counterfactual scenario.",))
+                            "This can create weird results in the counterfactual scenario."))
             }
             if(girf_pars$cfact_pars$cfact_type == "fixed_path") { # Fixed path of policy variable in certain horizons
               index_in_cfact_path <- ifelse(calc_girf,
