@@ -1,6 +1,6 @@
-#' U.S. real GDP percent change and GDP implicit price deflator percent change.
-#'
-#' A dataset containing a quarterly U.S. time series with two components:
+#' @title U.S. real GDP percent change and GDP implicit price deflator percent change
+
+#' @description A dataset containing a quarterly U.S. time series with two components:
 #' the percentage change of real GDP and the percentage change of GDP implicit price deflator,
 #' covering the period from 1959Q1 - 2019Q4.
 #'
@@ -13,8 +13,9 @@
 #' @source The Federal Reserve Bank of St. Louis database
 "gdpdef"
 
+#' @title U.S. real GDP, GDP implicit price deflator, and interest rate data
 
-#' A quarterly U.S. data covering the period from 1954Q3 to 2021Q4 (270 observations) and consisting three variables:
+#' @description A quarterly U.S. data covering the period from 1954Q3 to 2021Q4 (270 observations) and consisting three variables:
 #' cyclical component of the log of real GDP, the log-difference of GDP implicit price deflator, and an interest rate variable.
 #' The interest rate variable is the effective federal funds rate from 1954Q3 to 2008Q2 and after that the Wu and Xia (2016)
 #' shadow rate, which is not constrained by the zero lower bound and also quantifies unconventional monetary policy measures.
@@ -45,8 +46,9 @@
 #'  }
 "usamone"
 
+#' @title U.S. Actuaries Climate Index, GDP growth rate, CPI, and interest rate data
 
-#' A monthly  U.S. data covering the period from 1961I to 2022III (735 observations) and consisting four variables.
+#' @description A monthly  U.S. data covering the period from 1961I to 2022III (735 observations) and consisting four variables.
 #' First, The Actuaries Climate Index (ACI), which is a measure of the frequency of severe weather and the extend changes in sea levels.
 #' Second, the monthly GDP growth rate constructed by the Federal Reserve Bank of Chicago from a collapsed dynamic factor analysis of
 #' a panel of 500 monthly measures of real economic activity and quarterly real GDP growth. Third, the monthly growth rate of the
@@ -74,8 +76,9 @@
 #'  }
 "acidata"
 
+#' @title U.S. climate policy uncertainty, economic policy uncertainty, industrial production, consumer price index,
 
-#' A monthly  U.S. data covering the period from 1987:4 to 2024:12 (453 observations) and consisting six variables.
+#' @description A monthly  U.S. data covering the period from 1987:4 to 2024:12 (453 observations) and consisting six variables.
 #' First, the climate policy uncertainty index (CPUI) (Gavridiilis, 2021), which is a news based measure of climate policy uncertainty.
 #' Second, the economic policy uncertainty index (EPUI), which is a news based measure of economic policy uncertainty, including also
 #' components quantifying the present value of future scheduled tax code expirations and disagreement among professional forecasters

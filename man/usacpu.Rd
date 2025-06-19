@@ -3,18 +3,7 @@
 \docType{data}
 \name{usacpu}
 \alias{usacpu}
-\title{A monthly  U.S. data covering the period from 1987:4 to 2024:12 (453 observations) and consisting six variables.
-First, the climate policy uncertainty index (CPUI) (Gavridiilis, 2021), which is a news based measure of climate policy uncertainty.
-Second, the economic policy uncertainty index (EPUI), which is a news based measure of economic policy uncertainty, including also
-components quantifying the present value of future scheduled tax code expirations and disagreement among professional forecasters
-over future goverment purchases and consumer prices.
-Third, the log-difference of real indsitrial production index (IPI).
-Fourth, the log-difference of the consumer price index (CPI).
-Fifth, the log-difference of the producer price index (PPI).
-Sixth, an interest rate variable, which is the effective federal funds rate that is replaced by the
-the Wu and Xia (2016) shadow rate during zero-lower-bound periods. The Wu and Xia (2016) shadow rate is not bounded by the zero
-lower bound and also quantifies unconventional monetary policy measures, while it closely follows the federal funds rate when the
-zero lower bound does not bind. This is the dataset used in Virolainen (2025)}
+\title{U.S. climate policy uncertainty, economic policy uncertainty, industrial production, consumer price index,}
 \format{
 A numeric matrix of class \code{'ts'} with 443 rows and 4 columns with one time series in each column:
 \describe{

@@ -120,3 +120,4 @@
 * Removed the fixed "lwd" setting from the plot method for historical decompositions. The line thickness can now be adjust with the dot parameters. 
 * If a matrix is provided as the argument "init_vals" in GIRF or GFEVD, it is now automatically converted to the appropriate array. 
 * Fixed a bug in the counterfactual functions that caused an error when only a warning (about the small effect of the shock the policy variable) should have been thrown.
+* Improved the data documentation.

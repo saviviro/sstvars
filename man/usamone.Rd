@@ -3,11 +3,7 @@
 \docType{data}
 \name{usamone}
 \alias{usamone}
-\title{A quarterly U.S. data covering the period from 1954Q3 to 2021Q4 (270 observations) and consisting three variables:
-cyclical component of the log of real GDP, the log-difference of GDP implicit price deflator, and an interest rate variable.
-The interest rate variable is the effective federal funds rate from 1954Q3 to 2008Q2 and after that the Wu and Xia (2016)
-shadow rate, which is not constrained by the zero lower bound and also quantifies unconventional monetary policy measures.
-The log-differences of the GDP deflator and producer price index are multiplied by hundred.}
+\title{U.S. real GDP, GDP implicit price deflator, and interest rate data}
 \format{
 A numeric matrix of class \code{'ts'} with 270 rows and 4 columns with one time series in each column:
 \describe{
@@ -24,6 +20,12 @@ The Federal Reserve Bank of St. Louis database and the Federal Reserve Bank of A
 usamone
 }
 \description{
+A quarterly U.S. data covering the period from 1954Q3 to 2021Q4 (270 observations) and consisting three variables:
+cyclical component of the log of real GDP, the log-difference of GDP implicit price deflator, and an interest rate variable.
+The interest rate variable is the effective federal funds rate from 1954Q3 to 2008Q2 and after that the Wu and Xia (2016)
+shadow rate, which is not constrained by the zero lower bound and also quantifies unconventional monetary policy measures.
+The log-differences of the GDP deflator and producer price index are multiplied by hundred.
+
 The cyclical component of the log of real GDP was obtained by applying a one-sided Hodrick-Prescott (HP) filter with the
 standard smoothing parameter lambda=1600. The one-sided filter was obtained from the two-sided HP filter by applying the
 filter up to horizon t, taking the last observation, and repeating this procedure for the full sample t=1,...,T.

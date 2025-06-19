@@ -3,14 +3,7 @@
 \docType{data}
 \name{acidata}
 \alias{acidata}
-\title{A monthly  U.S. data covering the period from 1961I to 2022III (735 observations) and consisting four variables.
-First, The Actuaries Climate Index (ACI), which is a measure of the frequency of severe weather and the extend changes in sea levels.
-Second, the monthly GDP growth rate constructed by the Federal Reserve Bank of Chicago from a collapsed dynamic factor analysis of
-a panel of 500 monthly measures of real economic activity and quarterly real GDP growth. Third, the monthly growth rate of the
-consumer price index (CPI). Third, an interest rate variable, which is the effective federal funds rate that is replaced by the
-the Wu and Xia (2016) shadow rate during zero-lower-bound periods. The Wu and Xia (2016) shadow rate is not bounded by the zero
-lower bound and also quantifies unconventional monetary policy measures, while it closely follows the federal funds rate when the
-zero lower bound does not bind.}
+\title{U.S. Actuaries Climate Index, GDP growth rate, CPI, and interest rate data}
 \format{
 A numeric matrix of class \code{'ts'} with 735 rows and 4 columns with one time series in each column:
 \describe{

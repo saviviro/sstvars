@@ -3,7 +3,7 @@
 \docType{data}
 \name{gdpdef}
 \alias{gdpdef}
-\title{U.S. real GDP percent change and GDP implicit price deflator percent change.}
+\title{U.S. real GDP percent change and GDP implicit price deflator percent change}
 \format{
 A numeric matrix of class \code{'ts'} with 244 rows and 2 columns with one time series in each column:
 \describe{
