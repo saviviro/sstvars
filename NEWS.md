@@ -121,3 +121,7 @@
 * If a matrix is provided as the argument "init_vals" in GIRF or GFEVD, it is now automatically converted to the appropriate array. 
 * Fixed a bug in the counterfactual functions that caused an error when only a warning (about the small effect of the shock the policy variable) should have been thrown.
 * Improved the data documentation.
+
+# sstvarss 1.2.2
+
+* Now fitSTVAR returns also all initial estimates obtained from the genetic algorithm
