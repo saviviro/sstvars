@@ -754,6 +754,7 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   ret$which_converged <- converged
   ret$which_round <- which_best_fit # Which estimation round induced the largest log-likelihood?
   ret$seeds <- seeds
+  ret$GA_results <- GAresults # Results from the genetic algorithm
   if(estim_method == "three-phase") {
     ret$LS_estimates <- LS_res_to_ret # Least squares estimates (mean or intercept parametrization)
   }
