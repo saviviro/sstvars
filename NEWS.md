@@ -124,4 +124,3 @@
 
 # sstvarss 1.2.2
 
-* Now fitSTVAR returns also all initial estimates obtained from the genetic algorithm

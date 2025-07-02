@@ -100,16 +100,16 @@ weight parameters to the constant \eqn{r} (in this case, \eqn{\alpha} is dropped
 AR matrices that always satisfy the stability condition? Not supported if AR constraints are
 employed.}
 
-\item{mu_scale}{a size \eqn{(dx1)} vector defining \strong{means} of the normal distributions from which each
+\item{mu_scale}{a size \eqn{(d\times 1)} vector defining \strong{means} of the normal distributions from which each
 mean parameter \eqn{\mu_{m}} is drawn from in random mutations. Default is \code{colMeans(data)}. Note that
 mean-parametrization is always used for optimization in \code{GAfit} - even when \code{parametrization=="intercept"}.
 However, input (in \code{initpop}) and output (return value) parameter vectors can be intercept-parametrized.}
 
-\item{mu_scale2}{a size \eqn{(dx1)} strictly positive vector defining \strong{standard deviations} of the normal
+\item{mu_scale2}{a size \eqn{(d\times 1)} strictly positive vector defining \strong{standard deviations} of the normal
 distributions from which each mean parameter \eqn{\mu_{m}} is drawn from in random mutations.
 Default is \code{vapply(1:d, function(i1) sd(data[,i1]), numeric(1))}.}
 
-\item{omega_scale}{a size \eqn{(dx1)} strictly positive vector specifying the scale and variability of the
+\item{omega_scale}{a size \eqn{(d\times 1)} strictly positive vector specifying the scale and variability of the
 random covariance matrices in random mutations. The covariance matrices are drawn from (scaled) Wishart
 distribution. Expected values of the random covariance matrices are \code{diag(omega_scale)}. Standard
 deviations of the diagonal elements are \code{sqrt(2/d)*omega_scale[i]}

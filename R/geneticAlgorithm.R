@@ -70,14 +70,14 @@
 #'   If \code{parametrization=="mean"}, just replace each \eqn{\phi_{m}} with regimewise mean \eqn{\mu_{m}}.
 #'   \eqn{vec()} is vectorization operator that stacks columns of a given matrix into a vector. \eqn{vech()} stacks columns
 #'   of a given matrix from the principal diagonal downwards (including elements on the diagonal) into a vector.
-#' @param mu_scale a size \eqn{(dx1)} vector defining \strong{means} of the normal distributions from which each
+#' @param mu_scale a size \eqn{(d\times 1)} vector defining \strong{means} of the normal distributions from which each
 #'   mean parameter \eqn{\mu_{m}} is drawn from in random mutations. Default is \code{colMeans(data)}. Note that
 #'   mean-parametrization is always used for optimization in \code{GAfit} - even when \code{parametrization=="intercept"}.
 #'   However, input (in \code{initpop}) and output (return value) parameter vectors can be intercept-parametrized.
-#' @param mu_scale2 a size \eqn{(dx1)} strictly positive vector defining \strong{standard deviations} of the normal
+#' @param mu_scale2 a size \eqn{(d\times 1)} strictly positive vector defining \strong{standard deviations} of the normal
 #'   distributions from which each mean parameter \eqn{\mu_{m}} is drawn from in random mutations.
 #'   Default is \code{vapply(1:d, function(i1) sd(data[,i1]), numeric(1))}.
-#' @param omega_scale a size \eqn{(dx1)} strictly positive vector specifying the scale and variability of the
+#' @param omega_scale a size \eqn{(d\times 1)} strictly positive vector specifying the scale and variability of the
 #'   random covariance matrices in random mutations. The covariance matrices are drawn from (scaled) Wishart
 #'   distribution. Expected values of the random covariance matrices are \code{diag(omega_scale)}. Standard
 #'   deviations of the diagonal elements are \code{sqrt(2/d)*omega_scale[i]}
@@ -597,8 +597,6 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
     logliks[i1, which(logliks[i1,] < minval)] <- minval
     redundants[i1, which(logliks[i1,] <= minval)] <- M
 
-    #print(paste("Generation", i1, "Best log-lik:", round(max(logliks[i1,]), 2), "Mean log-lik:", round(mean(logliks[i1,]), 2)))
-
     ## Selection and the reproduction pool ##
     if(length(unique(logliks[i1,])) == 1) {
       choosing_probs <- rep(1, popsize) # If all individuals are the same, the surviving probability weight is 1.
@@ -622,7 +620,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
     ## Cross-overs ##
     # Individually adaptive cross-over rates as described by Patnaik and Srinivas (1994) with the modification of
     # setting the crossover rate to be at least 0.4 for all individuals (so that the best genes mix in the population too).
-    indeces <- seq(from=1, to=popsize - 1, by=2)
+    indeces <- seq(from=1, to=popsize - 1, by=2) # pairs i3 and i3+1 for each i3
     parent_max <- vapply(indeces, function(i2) max(survivor_liks[i2], survivor_liks[i2+1]), numeric(1))
     co_rates <- vapply(1:length(indeces), function(i2) max(min((max_lik - parent_max[i2])/(max_lik - mean_lik), 1), 0.4), numeric(1))
 
@@ -634,7 +632,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
       if(which_co[i2] == 1) {
         c(c(H[1:I[i2], i3], H[(I[i2]+1):npars, i3+1]), c(H[1:I[i2], i3+1], H[(I[i2]+1):npars, i3]))
       } else {
-        c(H[,i3], H[,i3+1])
+        c(H[,i3], H[,i3+1]) # No crossover, just copy the parents
       }
     }, numeric(2*npars))
     H2 <- matrix(H2, nrow=npars, byrow=FALSE)
@@ -673,6 +671,7 @@ GAfit <- function(data, p, M, weight_function=c("relative_dens", "logistic", "ml
     which_mutate <- which(mutate == 1)
     pre_smart_mu <- runif(1, min=1e-6, max=1-1e-6) < pre_smart_mu_prob
     ar_scale <- runif(1, min=1e-6, max=upper_ar_scale - 1e-6) # Random AR scale
+
     if(i1 <= smart_mu & length(which_mutate) >= 1 & !pre_smart_mu) { # Random mutations
       if(!is.null(AR_constraints) || runif(1, min=1e-6, max=1 - 1e-6) > 0.5) { # Does not always satisfy the stability conditions
         stat_mu <- FALSE

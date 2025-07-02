@@ -7,7 +7,7 @@
 random_covmat(d, omega_scale)
 }
 \arguments{
-\item{omega_scale}{a size \eqn{(dx1)} strictly positive vector specifying the scale and variability of the
+\item{omega_scale}{a size \eqn{(d\times 1)} strictly positive vector specifying the scale and variability of the
 random covariance matrices in random mutations. The covariance matrices are drawn from (scaled) Wishart
 distribution. Expected values of the random covariance matrices are \code{diag(omega_scale)}. Standard
 deviations of the diagonal elements are \code{sqrt(2/d)*omega_scale[i]}
