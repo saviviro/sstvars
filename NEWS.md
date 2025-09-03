@@ -126,3 +126,4 @@
 
 * The returned object from reorder_B_columns, swap_B_signs, and swap_parametrization now includes estimation results from all estimation rounds identically to
   the original model (i.e., these results do now have the impact matrices nor the parametrization changed).
+* Updated the vignette. 

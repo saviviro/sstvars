@@ -9,7 +9,7 @@
 \contentsline {subsubsection}{Independent skewed t distribution}{6}{subsubsection.2.3.4}%
 \contentsline {subsection}{Specifications of the transition weights}{7}{subsection.2.4}%
 \contentsline {subsubsection}{Weighted relative likelihoods}{7}{subsubsection.2.4.1}%
-\contentsline {subsubsection}{Logistic transition weights}{7}{subsubsection.2.4.2}%
+\contentsline {subsubsection}{Logistic transition weights}{8}{subsubsection.2.4.2}%
 \contentsline {subsubsection}{Multinomial logit transition weights}{8}{subsubsection.2.4.3}%
 \contentsline {subsubsection}{Exponential transition weights}{9}{subsubsection.2.4.4}%
 \contentsline {subsubsection}{Threshold transition weights}{9}{subsubsection.2.4.5}%
@@ -18,34 +18,34 @@
 \contentsline {subsection}{Recursive identification}{10}{subsection.3.1}%
 \contentsline {subsection}{Identification via heteroskedasticity}{11}{subsection.3.2}%
 \contentsline {subsection}{Identification by non-Gaussianity}{12}{subsection.3.3}%
-\contentsline {subsubsection}{Identification of the shocks in TVAR models}{12}{subsubsection.3.3.1}%
-\contentsline {subsubsection}{Identification of the shocks in STVAR models}{14}{subsubsection.3.3.2}%
-\contentsline {subsubsection}{Labelling the shocks and blended identification}{15}{subsubsection.3.3.3}%
+\contentsline {subsubsection}{Identification of the shocks in STVAR models}{12}{subsubsection.3.3.1}%
+\contentsline {subsubsection}{Identification of the shocks in TVAR models}{13}{subsubsection.3.3.2}%
+\contentsline {subsubsection}{Labelling the shocks and blended identification}{14}{subsubsection.3.3.3}%
 \contentsline {section}{Estimation}{15}{section.4}%
-\contentsline {subsection}{The log-likelihood function}{16}{subsection.4.1}%
-\contentsline {subsection}{The penalized log-likelihood function}{17}{subsection.4.2}%
+\contentsline {subsection}{The log-likelihood function}{15}{subsection.4.1}%
+\contentsline {subsection}{The penalized log-likelihood function}{16}{subsection.4.2}%
 \contentsline {subsection}{Two-phase estimation procedure}{17}{subsection.4.3}%
-\contentsline {subsection}{Three-step estimation procedure}{18}{subsection.4.4}%
-\contentsline {subsection}{Examples of unconstrained estimation}{19}{subsection.4.5}%
+\contentsline {subsection}{Three-step estimation procedure}{17}{subsection.4.4}%
+\contentsline {subsection}{Examples of unconstrained estimation}{18}{subsection.4.5}%
 \contentsline {subsection}{Further examination of the estimates}{24}{subsection.4.6}%
 \contentsline {subsection}{Estimation of structural STVAR models}{27}{subsection.4.7}%
-\contentsline {subsubsection}{Linear constraints on the autoregressive parameters}{30}{subsubsection.4.8.1}%
-\contentsline {subsubsection}{Constraining the unconditional means of some regimes to be equal}{32}{subsubsection.4.8.2}%
+\contentsline {subsubsection}{Linear constraints on the autoregressive parameters}{29}{subsubsection.4.8.1}%
+\contentsline {subsubsection}{Constraining the unconditional means of some regimes to be equal}{31}{subsubsection.4.8.2}%
 \contentsline {subsubsection}{Constraining weight functions parameters}{32}{subsubsection.4.8.3}%
-\contentsline {section}{Testing parameter constraints}{33}{section.5}%
-\contentsline {section}{Residual based model diagnostics}{34}{section.6}%
-\contentsline {section}{Impulse response analysis}{34}{section.7}%
-\contentsline {subsection}{Generalized impulse response function}{34}{subsection.7.1}%
-\contentsline {subsection}{Generalized forecast error variance decomposition}{36}{subsection.7.2}%
-\contentsline {subsection}{Linear impulse response functions}{37}{subsection.7.3}%
-\contentsline {section}{Historical decompositions}{37}{section.8}%
-\contentsline {section}{Counterfactual analysis}{38}{section.9}%
+\contentsline {section}{Testing parameter constraints}{32}{section.5}%
+\contentsline {section}{Residual based model diagnostics}{33}{section.6}%
+\contentsline {section}{Impulse response analysis}{33}{section.7}%
+\contentsline {subsection}{Generalized impulse response function}{33}{subsection.7.1}%
+\contentsline {subsection}{Generalized forecast error variance decomposition}{35}{subsection.7.2}%
+\contentsline {subsection}{Linear impulse response functions}{36}{subsection.7.3}%
+\contentsline {section}{Historical decompositions}{36}{section.8}%
+\contentsline {section}{Counterfactual analysis}{37}{section.9}%
 \contentsline {subsection}{Historical counterfactuals}{39}{subsection.9.1}%
-\contentsline {subsection}{Forecast scenarios}{40}{subsection.9.2}%
-\contentsline {subsection}{Counterfactual GIRFs}{41}{subsection.9.3}%
+\contentsline {subsection}{Forecast scenarios}{39}{subsection.9.2}%
+\contentsline {subsection}{Counterfactual GIRFs}{40}{subsection.9.3}%
 \contentsline {section}{Building a STVAR model with specific parameter values}{41}{section.10}%
-\contentsline {section}{Simulation and forecasting}{43}{section.11}%
-\contentsline {subsection}{Simulation}{43}{subsection.11.1}%
+\contentsline {section}{Simulation and forecasting}{42}{section.11}%
+\contentsline {subsection}{Simulation}{42}{subsection.11.1}%
 \contentsline {subsection}{Simulation based forecasting}{43}{subsection.11.2}%
-\contentsline {section}{Summary}{44}{section.12}%
-\contentsline {section}{A table of some useful functions}{45}{section.12}%
+\contentsline {section}{Summary}{43}{section.12}%
+\contentsline {section}{A table of some useful functions}{44}{section.12}%
