@@ -11,8 +11,7 @@ A numeric matrix of class \code{'ts'} with 443 rows and 4 columns with one time 
   \item{Second column (EPUI):}{The economic policy uncertainty index, \url{https://www.policyuncertainty.com/us_monthly.html}.}
   \item{Third column (IPI):}{The log-difference of real indsitrial production index, \url{https://fred.stlouisfed.org/series/INDPRO}.}
   \item{Fourth column (CPI):}{The log-difference of the consumer price index, \url{https://fred.stlouisfed.org/series/CPIAUCSL}.}
-  \item{Fifth column (PPI):}{The log-difference of the producer price index, \url{https://fred.stlouisfed.org/series/PPIACO}.}
-  \item{Sixth column (RATE):}{The Federal funds rate from 1954Q3 to 2008Q2 and after that the Wu and Xia (2016) shadow rate,
+  \item{Fifth column (RATE):}{The Federal funds rate from 1954Q3 to 2008Q2 and after that the Wu and Xia (2016) shadow rate,
    \url{https://fred.stlouisfed.org/series/FEDFUNDS}, \url{https://www.atlantafed.org/cqer/research/wu-xia-shadow-federal-funds-rate}.}
 }
 }
@@ -23,15 +22,14 @@ The Federal Reserve Bank of St. Louis database and the Federal Reserve Bank of A
 usacpu
 }
 \description{
-A monthly  U.S. data covering the period from 1987:4 to 2024:12 (453 observations) and consisting six variables.
+A monthly  U.S. data covering the period from 1987:4 to 2024:12 (453 observations) and consisting five variables.
 First, the climate policy uncertainty index (CPUI) (Gavridiilis, 2021), which is a news based measure of climate policy uncertainty.
 Second, the economic policy uncertainty index (EPUI), which is a news based measure of economic policy uncertainty, including also
 components quantifying the present value of future scheduled tax code expirations and disagreement among professional forecasters
 over future goverment purchases and consumer prices.
 Third, the log-difference of real indsitrial production index (IPI).
 Fourth, the log-difference of the consumer price index (CPI).
-Fifth, the log-difference of the producer price index (PPI).
-Sixth, an interest rate variable, which is the effective federal funds rate that is replaced by the
+Fifth, an interest rate variable, which is the effective federal funds rate that is replaced by the
 the Wu and Xia (2016) shadow rate during zero-lower-bound periods. The Wu and Xia (2016) shadow rate is not bounded by the zero
 lower bound and also quantifies unconventional monetary policy measures, while it closely follows the federal funds rate when the
 zero lower bound does not bind. This is the dataset used in Virolainen (2025)
