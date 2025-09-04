@@ -128,3 +128,4 @@
   the original model (i.e., these results do now have the impact matrices nor the parametrization changed).
 * Updated the vignette to match the current version of Virolainen (2025). 
 * Updated the data file usacpu to match the current version of Virolainen (2025).
+* Updated the reference to Lanne and Virolainen (2025).

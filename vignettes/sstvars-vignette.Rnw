@@ -1486,6 +1486,7 @@ Other          & \code{bound_JSR}          & Calculate bounds for the joint spec
 \end{table}
 
 \pagebreak
+\addcontentsline{toc}{section}{References}
 \bibliography{refs}
 
 \end{document}

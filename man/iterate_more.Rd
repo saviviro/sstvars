@@ -102,8 +102,8 @@ get_foc(fit12) # Close (enough) to zero!
    \item Hubrich K., Teräsvirta. T. 2013. Thresholds and Smooth Transitions in Vector Autoregressive Models.
      \emph{CREATES Research Paper 2013-18, Aarhus University.}
    \item Lanne M., Virolainen S. 2025. A Gaussian smooth transition vector autoregressive model:
-      An application to the macroeconomic effects of severe weather shocks. Unpublished working
-      paper, available as arXiv:2403.14216.
+      An application to the macroeconomic effects of severe weather shocks.
+      \emph{Journal of Economic Dynamics and Control}, \strong{178}, 105162.
    \item Kheifets I.L., Saikkonen P.J. 2020. Stationarity and ergodicity of Vector STAR models.
      \emph{Econometric Reviews}, \strong{39}:4, 407-414.
    \item Tsay R. 1998. Testing and Modeling Multivariate Threshold Models.

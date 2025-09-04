@@ -49,3 +49,4 @@
 \contentsline {subsection}{Simulation based forecasting}{43}{subsection.11.2}%
 \contentsline {section}{Summary}{43}{section.12}%
 \contentsline {section}{A table of some useful functions}{44}{section.12}%
+\contentsline {section}{References}{45}{table.1}%

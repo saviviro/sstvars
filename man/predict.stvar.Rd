@@ -100,8 +100,8 @@ The forecasts are computed by simulating multiple sample paths of the future obs
    \item Kheifets I.L., Saikkonen P.J. 2020. Stationarity and ergodicity of Vector STAR models.
      \emph{International Economic Review}, \strong{35}:3, 407-414.
    \item Lanne M., Virolainen S. 2025. A Gaussian smooth transition vector autoregressive model:
-      An application to the macroeconomic effects of severe weather shocks. Unpublished working
-      paper, available as arXiv:2403.14216.
+      An application to the macroeconomic effects of severe weather shocks.
+      \emph{Journal of Economic Dynamics and Control}, \strong{178}, 105162.
    \item Lütkepohl H. 2005. New Introduction to Multiple Time Series Analysis,
          \emph{Springer}.
    \item McElroy T. 2017. Computation of vector ARMA autocovariances.

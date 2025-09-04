@@ -136,9 +136,9 @@ Lanne M, Nyberg H (2016).
 Lanne M, Virolainen S (2025).
 \newblock \enquote{A {Gaussian} smooth transition vector autoregressive model:
   An application to the macroeconomic effects of severe weather shocks.}
-\newblock \emph{Unpublished working paper, available as arXiv:2403.14216}.
-\newblock \doi{10.48550/arXiv.2403.14216}.
-\newblock \urlprefix\url{https://doi.org/10.48550/arXiv.2403.14216}.
+\newblock \emph{Journal of Economic Dynamics and Control}, \textbf{178},
+  105162.
+\newblock \doi{10.1016/j.jedc.2025.105162}.
 
 \bibitem[{L{\"u}tkepohl(2005)}]{Lutkepohl:2005}
 L{\"u}tkepohl H (2005).
