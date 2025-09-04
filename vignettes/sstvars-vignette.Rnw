@@ -407,7 +407,7 @@ When to shocks are mutually independent and at most one of them is Gaussian (i.e
 \begin{assumption}\label{as:shocks}
 \begin{enumerate}%[label=(\roman*)]
 \item The structural error process $e_t=(e_{1t},...,e_{dt})$ is a sequence of independent and identically distributed random vectors such that $e_t$ is independent of $\mathcal{F}_{t-1}$ and each component $e_{it}$, $i=1,...,d$, follows a continuous distribution with zero mean, unit variance, and a density that is strictly positive almost everywhere in $\mathbb{R}$.\label{cond:shockiid}
-\item The components of $e_t=(e_{1t},...,e_{dt})$ are mutually independent and at most one them has a Gaussian marginal distribution.
+\item The components of $e_t=(e_{1t},...,e_{dt})$ are mutually independent and at most one of them has a Gaussian marginal distribution.
 \end{enumerate}
 \end{assumption}
 
