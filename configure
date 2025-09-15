@@ -9,6 +9,7 @@ if [ "$OS" = "Linux" ]; then
   echo "Generating src/Makevars file for Linux..."
   {
     echo "PKG_CXXFLAGS = \$(SHLIB_OPENMP_CXXFLAGS)"
+    echo "PKG_CPPFLAGS += -DARMA_USE_CURRENT"
     echo "PKG_LIBS = \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS) \$(SHLIB_OPENMP_CXXFLAGS)"
   } > src/Makevars
 
