@@ -6,17 +6,22 @@ echo "Operating System detected: $OS"
 
 # Only create Makevars for Linux
 if [ "$OS" = "Linux" ]; then
-  echo "Generating src/Makevars file for Linux..."
+  echo "Generating src/Makevars for Linux (Debian/CRAN)..."
   mkdir -p src
   cat > src/Makevars <<'EOF'
-# Preserve site / CRAN flags without GNU '+=' and without self-reference
+# Preserve site / CRAN flags (no GNU '+='; no self-reference)
 PKG_CXXFLAGS_ORIG = $(PKG_CXXFLAGS)
 PKG_CPPFLAGS_ORIG = $(PKG_CPPFLAGS)
 PKG_LIBS_ORIG     = $(PKG_LIBS)
 
+# Add OpenMP compile flags (if provided by site) and keep existing CXX flags
 PKG_CXXFLAGS = $(PKG_CXXFLAGS_ORIG) $(SHLIB_OPENMP_CXXFLAGS)
+
+# Select 'current' Armadillo via RcppArmadillo
 PKG_CPPFLAGS = $(PKG_CPPFLAGS_ORIG) -DARMA_USE_CURRENT
-PKG_LIBS     = $(PKG_LIBS_ORIG)     $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+
+# Link with site flags + OpenMP + BLAS/LAPACK/Fortran libs (if provided by site)
+PKG_LIBS = $(PKG_LIBS_ORIG) $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 EOF
 
   echo "Contents of src/Makevars:"
