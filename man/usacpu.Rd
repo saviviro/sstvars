@@ -29,7 +29,7 @@ components quantifying the present value of future scheduled tax code expiration
 over future goverment purchases and consumer prices.
 Third, the log-difference of real indsitrial production index (IPI).
 Fourth, the log-difference of the consumer price index (CPI).
-Fifth, an interest rate variable, which is the effective federal funds rate that is replaced by the
+Fifth, an interest rate variable (RATE), which is the effective federal funds rate that is replaced by the
 the Wu and Xia (2016) shadow rate during zero-lower-bound periods. The Wu and Xia (2016) shadow rate is not bounded by the zero
 lower bound and also quantifies unconventional monetary policy measures, while it closely follows the federal funds rate when the
 zero lower bound does not bind. This is the dataset used in Virolainen (2025)
