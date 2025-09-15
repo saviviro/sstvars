@@ -6,13 +6,17 @@ echo "Operating System detected: $OS"
 
 # Only create Makevars for Linux
 if [ "$OS" = "Linux" ]; then
-    echo "Generating src/Makevars file for Linux..."
+  echo "Generating src/Makevars file for Linux..."
   mkdir -p src
   cat > src/Makevars <<'EOF'
-# Preserve any CRAN/user-provided flags (portable; no GNU '+=')
-PKG_CXXFLAGS = $(PKG_CXXFLAGS) $(SHLIB_OPENMP_CXXFLAGS)
-PKG_CPPFLAGS = $(PKG_CPPFLAGS) -DARMA_USE_CURRENT
-PKG_LIBS     = $(PKG_LIBS) $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+# Preserve site / CRAN flags without GNU '+=' and without self-reference
+PKG_CXXFLAGS_ORIG = $(PKG_CXXFLAGS)
+PKG_CPPFLAGS_ORIG = $(PKG_CPPFLAGS)
+PKG_LIBS_ORIG     = $(PKG_LIBS)
+
+PKG_CXXFLAGS = $(PKG_CXXFLAGS_ORIG) $(SHLIB_OPENMP_CXXFLAGS)
+PKG_CPPFLAGS = $(PKG_CPPFLAGS_ORIG) -DARMA_USE_CURRENT
+PKG_LIBS     = $(PKG_LIBS_ORIG)     $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 EOF
 
   echo "Contents of src/Makevars:"
