@@ -6,13 +6,17 @@ echo "Operating System detected: $OS"
 
 # Only create Makevars for Linux
 if [ "$OS" = "Linux" ]; then
-  echo "Generating src/Makevars file for Linux..."
-  {
-    echo "PKG_CXXFLAGS = \$(SHLIB_OPENMP_CXXFLAGS)"
-    echo "PKG_LIBS = \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(FLIBS) \$(SHLIB_OPENMP_CXXFLAGS)"
-  } > src/Makevars
+  echo "Generating src/Makevars for Linux (CRAN/Debian)..."
+  mkdir -p src
+  cat > src/Makevars <<'EOF'
+# Use C++14 so Armadillo 'current' is allowed; define macro for all TUs (incl. RcppExports.cpp)
+CXX_STD = CXX14
+PKG_CPPFLAGS = -DARMA_USE_CURRENT
 
-  # Output the generated Makevars for verification
+# Your original flags (kept exactly as you wanted them)
+PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS)
+PKG_LIBS     = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) $(SHLIB_OPENMP_CXXFLAGS)
+EOF
   echo "Contents of src/Makevars:"
   cat src/Makevars
 else

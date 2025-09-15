@@ -1,4 +1,4 @@
-#include "arma_current.h"
+#include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 using namespace Rcpp;
 

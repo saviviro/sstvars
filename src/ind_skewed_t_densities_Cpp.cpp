@@ -1,4 +1,4 @@
-#include "arma_current.h"
+#include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 
 //' @name ind_skewed_t_densities_Cpp

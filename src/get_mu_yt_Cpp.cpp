@@ -1,4 +1,4 @@
-#include "arma_current.h"
+#include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 
 //' @name get_mu_yt_Cpp
