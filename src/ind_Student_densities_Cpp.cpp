@@ -1,4 +1,4 @@
-#include <RcppArmadillo.h>
+#include "arma_current.h"
 // [[Rcpp::depends(RcppArmadillo)]]
 
 //' @name ind_Student_densities_Cpp
