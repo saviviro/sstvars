@@ -31,7 +31,7 @@ simulate_stvar_int(
 \item{init_values}{a size \eqn{(p\times d)} matrix specifying the initial values, where d is the number
 of time series in the system. The \strong{last} row will be used as initial values for the first lag,
 the second last row for second lag etc. If not specified, initial values will be drawn from
-the regime specified in \code{init_regimes} (for Gaussian models only).}
+the regime specified in \code{init_regimes}.}
 
 \item{init_regime}{an integer in \eqn{1,...,M} specifying the regime from which
 the initial values should be generated from (using a simulation procedure with a burn-in period).
@@ -78,13 +78,13 @@ Specifying something else than null to it will change how the function behaves. 
 Returns a list containing the simulation results. If \code{drop==TRUE} and \code{ntimes==1} (default),
   contains the following entries:
   \item{sample}{a size (\code{nsim}\eqn{\times d}) matrix containing the simulated time series.}
-  \item{transition weights:}{a size (\code{nsim}\eqn{\times M}) matrix containing the transition weights corresponding
+  \item{transition weights}{a size (\code{nsim}\eqn{\times M}) matrix containing the transition weights corresponding
         to the simulated sample.}
   Otherwise, returns a list with the following entries:
-  \item{\code{$sample}}{a size (\code{nsim}\eqn{\times d\times}\code{ntimes}) array containing the samples: the dimension
+  \item{sample}{a size (\code{nsim}\eqn{\times d\times}\code{ntimes}) array containing the samples: the dimension
      \code{[t, , ]} is the time index, the dimension \code{[, d, ]} indicates the marginal time series, and the dimension
      \code{[, , i]} indicates the i:th set of simulations.}
-  \item{\code{$transition_weights}}{a size (\code{nsim}\eqn{\times M \times}\code{ntimes}) array containing the transition weights
+  \item{transition_weights}{a size (\code{nsim}\eqn{\times M \times}\code{ntimes}) array containing the transition weights
      corresponding to the sample: the dimension \code{[t, , ]} is the time index, the dimension \code{[, m, ]} indicates the
      regime, and the dimension \code{[, , i]} indicates the i:th set of simulations.}
 }

@@ -129,3 +129,7 @@
 * Updated the vignette to match the current version of Virolainen (2025). 
 * Updated the data file usacpu to match the current version of Virolainen (2025).
 * Updated the reference to Lanne and Virolainen (2025).
+
+# sstvarss 1.2.3
+
+* Minor updates to the documentation.
