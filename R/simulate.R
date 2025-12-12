@@ -253,7 +253,6 @@ simulate_stvar_int <- function(object, nsim=1, seed=NULL, ..., init_values=NULL,
 
   # GIRF stuff, particularly for reduced form models, which assume Cholesky identification
   if(calc_girf) {
-    R1 <- girf_pars$R1
     all_Omegas_as_matrix <- t(matrix(all_Omegas, nrow=d^2, ncol=M)) # Used for reduced form model GIRF [,m]
   }
 
