@@ -278,7 +278,6 @@ simulate_stvar_int <- function(object, nsim=1, seed=NULL, ..., init_values=NULL,
 
   # Initialize data structures
   sample <- array(dim=c(nsim, d, ntimes))
-  component <- matrix(nrow=nsim, ncol=ntimes)
   transition_weights <- array(dim=c(nsim, M, ntimes))
   if(calc_girf) {
     sample2 <- array(dim=c(nsim, d, ntimes))
