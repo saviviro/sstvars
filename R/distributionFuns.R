@@ -101,16 +101,21 @@ generate_skewed_t <- function(n, nu, lambda, bc_M) {
   if(missing(bc_M)) {
     bc_M <- bounding_const_M(nu=nu, lambda=lambda)
   } # Note that the same proposal dist needs to be used in computing M as well as in the sampling algorithm
-  proposal_nu <- ifelse(nu > 3, 3, nu) # Proposal dist needs to have heavy tails to accommodate skewness in the target dist
+  proposal_nu <-  max(2 + 1e-6, min(3, nu)) # Proposal dist needs to have heavy tails to accommodate skewness in the target dist
   y_vals <- numeric(n)
+  scale <- sqrt((proposal_nu - 2)/proposal_nu)
 
   # Iterate throught the algorithm
   for(i1 in 1:n) {
     accept <- FALSE
+    tries <- 0
     while(!accept) {
-      y_cand <- sqrt((proposal_nu - 2)/proposal_nu)*rt(1, df=proposal_nu)
+      tries <- tries + 1
+      if(tries > 1e6) stop("Acceptance-rejection did not accept within 1 million tries.")
+      y_cand <- scale*rt(1, df=proposal_nu)
       u <- runif(1)
-      if(u < skewed_t_dens(y_cand, nu=nu, lambda=lambda)/(bc_M*stand_t_dens(y_cand, nu=proposal_nu))) {
+      acceptance_prob <- skewed_t_dens(y_cand, nu=nu, lambda=lambda)/(bc_M*stand_t_dens(y_cand, nu=proposal_nu))
+      if(!is.na(acceptance_prob) && is.finite(acceptance_prob) && u < acceptance_prob) {
         y_vals[i1] <- y_cand
         accept <- TRUE
       }

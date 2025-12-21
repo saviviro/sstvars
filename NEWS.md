@@ -132,4 +132,5 @@
 
 # sstvarss 1.2.3
 
+* Improved the robustness of the function drawing independent skewed t random variables to extreme values. 
 * Minor updates to the documentation.
