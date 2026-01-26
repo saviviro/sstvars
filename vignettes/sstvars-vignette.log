@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  4 SEP 2025 16:52
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  26 JAN 2026 14:18
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -881,6 +881,11 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [39]
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+\T1/lmr/m/n/10.95 40 []
+ []
+
+[40]
 Underfull \hbox (badness 1430) in paragraph at lines 1338--1339
 [] []\T1/lmr/m/n/10.95 Calculate $\OML/lmm/m/it/10.95 y[]\OT1/lmr/m/n/10.95 (\O
 ML/lmm/m/it/10.95 ^^N[]; [][]\OT1/lmr/m/n/10.95 )$ \T1/lmr/m/n/10.95 by us-ing 
@@ -890,11 +895,6 @@ mm/m/it/10.95 ; :::;$
  []
 
 
-Overfull \hbox (10.94998pt too wide) has occurred while \output is active
-\T1/lmr/m/n/10.95 40 []
- []
-
-[40]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 41
  []
@@ -910,6 +910,11 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [43]
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+\T1/lmr/m/n/10.95 44 []
+ []
+
+[44]
 LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <10> on input line 1442.
 LaTeX Font Info:    External font `lmex10' loaded for size
@@ -924,10 +929,10 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
-\T1/lmr/m/n/10.95 44 []
+[] \T1/lmr/m/n/10.95 45
  []
 
-[44
+[45
 
 pdfTeX warning (ext4): destination with the same identifier (name{table.1}) has
  been already used, duplicate ignored
@@ -942,27 +947,27 @@ Underfull \hbox (badness 1442) in paragraph at lines 82--86
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
-[] \T1/lmr/m/n/10.95 45
- []
-
-[45]
-Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 46 []
  []
 
-[46])
+[46]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 47
  []
 
-[47] (./sstvars-vignette.aux)
+[47])
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+\T1/lmr/m/n/10.95 48 []
+ []
+
+[48] (./sstvars-vignette.aux)
 Package rerunfilecheck Info: File `sstvars-vignette.out' has not changed.
 (rerunfilecheck)             Checksum: B61E79C8D29C2C61AA1F336928B8D330;24811.
  ) 
 Here is how much of TeX's memory you used:
- 13561 strings out of 478353
- 215695 string characters out of 5848086
- 525096 words of memory out of 5000000
+ 13562 strings out of 478353
+ 215702 string characters out of 5848086
+ 521096 words of memory out of 5000000
  31126 multiletter control sequences out of 15000+600000
  518339 words of font info for 102 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -995,10 +1000,10 @@ blic/lm/lmsy8.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmt
 t10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtti10.pfb><
 /usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr/loca
 l/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on sstvars-vignette.pdf (50 pages, 732325 bytes).
+Output written on sstvars-vignette.pdf (51 pages, 733136 bytes).
 PDF statistics:
- 1460 PDF objects out of 1728 (max. 8388607)
- 1332 compressed objects within 14 object streams
- 309 named destinations out of 1000 (max. 500000)
+ 1464 PDF objects out of 1728 (max. 8388607)
+ 1335 compressed objects within 14 object streams
+ 310 named destinations out of 1000 (max. 500000)
  835 words of extra memory for PDF output out of 10000 (max. 10000000)
 

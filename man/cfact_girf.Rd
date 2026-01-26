@@ -160,7 +160,7 @@ See details for more information.}
 \item{policy_var}{a positive integer between \eqn{1} and \eqn{d} indicating the index of the policy variable considered in the
 counterfactual scenario. Note that \code{policy_var} is assumed to satisfy \code{!(policy_var \%in\% which_shocks)}.}
 
-\item{mute_var}{a positive integer between \eqn{1} and \eqn{d} indicating the index of the variable to whose movements the policy variable
+\item{mute_var}{a positive integer between \eqn{1} and \eqn{d} indicating the index of the variable to whose lagged movements the policy variable
 specified in the argument \code{policy_var} should not react to in the counterfactual scenario. This indicates also the index of the shock
 to which the policy variable should not react to. It is assumed that \code{mute_var != policy_var}. This argument is only used when
 \code{cfact_type="muted_response"}.}
@@ -196,26 +196,24 @@ Returns the input object \code{x} invisibly.
 \details{
 Two types of counterfactual generalized impulse response functions (GIRFs) are accommodated where in given impulse response
  horizons either (1) the policy variable of interest takes some hypothetical path (\code{cfact_type="fixed_path"}), or (2)
- its responses to lagged and contemporaneous movements of some given variable are shut off (\code{cfact_type="muted_response"}).
+ its responses to lagged movements of some given variable and some given shock are shut off (\code{cfact_type="muted_response"}).
  In both cases, the counterfactual scenarios are simulated by creating hypothetical shocks to the policy variable of interest
  that yield the counterfactual outcome. This approach has the appealing feature that the counterfactual deviations from the
  policy reaction function are treated as policy surprises, allowing them to propagate normally, so that the dynamics of the model
  are not, per se, tampered but just the policy surprises are.
 
  \strong{Important:} This function assumes that when the policy variable of interest is the \eqn{i_1}th variable, the shock
- to it that is manipulated is the \eqn{i_1}th shock. This should be automatically satisfied for recursively identified models,
+ related to it that is manipulated is the \eqn{i_1}th shock. This should be automatically satisfied for recursively identified models,
  whereas for model identified by heteroskedasticity or non-Gaussianity, the ordering of the shocks can be generally changed
  without loss of generality with the function \code{reorder_B_columns}. In Type (2) counterfactuals it is additionally assumed
- that, if the variable to whose movements the policy variable should not react to is the \eqn{i_2}th variable, the shock to it
- is the \eqn{i_2}th shock. If it is not clear whether the \eqn{i_2}th shock can be interpreted as a shock to a variable
- (but has a broader definition such as "a demand shock"), the Type (2) counterfactual scenario is interpreted as follows: the \eqn{i_1}th
- variable does not react to lagged movements of the \eqn{i_2}th variable nor to the \eqn{i_2}th shock.
+ that, if the variable to whose lagged movements the policy variable should not react to is the \eqn{i_2}th variable, the shock to
+ which the policy variable does not reach to is the \eqn{i_2}th shock.
 
  See the seminal paper of Bernanke et al (1997) for discussing about the "Type (1)" counterfactuals and
- Kilian and Lewis (2011) for discussion about the "Type (2)" counterfactuals. See Kilian and Lütkepohl (2017), Section 4.5
- for further discussion about counterfactuals. The literature cited about considers linear models, but it is
- explained in the vignette of this package how this function computes the historical counterfactuals for the STVAR models in
- a way that accommodates nonlinear time-varying dynamics.
+ Kilian and Lewis (2011) for discussion about a type of counterfactual closely related to the "Type (2)" counterfactuals.
+ See Kilian and Lütkepohl (2017), Section 4.5 for further discussion about counterfactuals. The literature cited about considers
+ linear models, but it is explained in the vignette of this package how this function computes the historical counterfactuals
+ for the STVAR models in a way that accommodates nonlinear time-varying dynamics.
 }
 \section{Functions}{
 \itemize{
