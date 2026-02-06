@@ -97,7 +97,7 @@ bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=FALSE, ncores=2, print_pro
   ### Step 0: create functions and storages used in the algorithm
 
   # Function to calculate the norm that we employ as our norm in the algorithm:
-  #matrix_norm <- function(A) sqrt(sum(A^2)) # Frobenius norm
+  #matrix_norm <- function(A) norm(A, type="F") # Frobenius norm
   matrix_norm <- function(A) sqrt(max(eigen(crossprod(A), symmetric=TRUE)$values)) # Spectral norm
 
   # An environment for storing the matrix products calculated in the algorithm similarly to a hash map
@@ -116,6 +116,7 @@ bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=FALSE, ncores=2, print_pro
   for(i1 in 1:m) {
     S_norms[i1] <- matrix_norm(S[, , i1])
     norm_env[[paste(i1, collapse="")]] <- S_norms[i1]
+
   }
 
   # A function to calculate the product of a set of matrices in P in an [n, n, k] array
@@ -217,7 +218,7 @@ bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=FALSE, ncores=2, print_pro
                                   FUN=function(i1) mu(inds=all_matprod_inds[,i1], k=k, matprod_env=matprod_env))
 
     ## Update the matprod_env to the cluster for calculation of alphas and for the next iteration.
-    parallel::clusterExport(cl=cl, varlist="matprod_env", envir=environment())
+    #parallel::clusterExport(cl=cl, varlist="matprod_env", envir=environment()) # Removed since is not useful enough and slows down the algorithm
 
     ## Construct the new set of candidates MP, i.e., the products for which mu(MP) > alpha_{k-1} + epsilon
     which_new_candidates <- which(all_mu > all_alpha[k-1] + epsilon)
@@ -282,6 +283,10 @@ bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=FALSE, ncores=2, print_pro
                         max(parallel::parSapply(cl=cl, X=1:ncol(new_candidates),
                                                 FUN=function(i1) max(abs(eigen(matprod_hash(inds=new_candidates[,i1],
                                                                                             matprod_env=matprod_env))$values))^(1/k))))
+    ## NOTE: Calculation of the sprectral radius in this alpha calculation is the big bottle neck in the computation speed of the algorithm.
+    ## What can be tried: put everything inside C++.
+
+
 
     ## Calculate the new upper bound beta_k
     all_beta[k] <- min(all_beta[k - 1], max(all_alpha[k - 1] + epsilon, max(all_mu[which_new_candidates])))
@@ -333,14 +338,14 @@ bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=FALSE, ncores=2, print_pro
 #'  This function calculates an upper (and lower) bound for the JSR and is implemented to assess the validity of this condition
 #'  in practice. If the bound is smaller than one, the model is deemed ergodic stationary.
 #'
-#'  Implements the branch-and-bound method by Gripenberg (1996) in the conventional form (\code{adaptive_eps=FALSE}) and in a form
-#'  incorporating "adaptive tightness" (\code{adaptive_eps=FALSE}). The latter approach is unconventional and does not guarantee
-#'  appropriate convergence of the bounds close to the desired tightness given in the argument \code{epsilon}, but it usually
-#'  substantially speeds up the algorithm. When \code{print_progress==TRUE}, the tightest bounds found so-far are printed in each
-#'  iteration of the algorithm, so you can also just terminate the algorithm when the bounds are tight enough for your purposes.
-#'  Consider also adjusting the argument \code{epsilon}, in particular when \code{adaptive_eps=FALSE}, as larger epsilon does not
-#'  just make the bounds less tight but also speeds up the algorithm significantly. See Chang and Blondel (2013) for a discussion
-#'  on variuous methods for bounding the JSR.
+#'  Implements the branch-and-bound method by Gripenberg (1996). When \code{print_progress==TRUE}, the tightest bounds found so-far
+#'  are printed in each iteration of the algorithm, so you can also just terminate the algorithm when the bounds are tight enough for
+#'  your purposes. Consider also adjusting the argument \code{epsilon} as larger epsilon does not just make the bounds less tight but
+#'  also speeds up the algorithm significantly. See Chang and Blondel (2013) for a discussion on variuous methods for bounding the JSR.
+#'
+#'  This function uses a C++ implementation for speed improvements. If you prefer an R implementation with parallel computing and
+#'  "adaptive epsilon" specialfunctionality, you can directly use the function \code{bound_jsr_G} with the "companion form AR matrices"
+#'   of the regimes as the input.
 #' @return Returns lower and upper bounds for the joint spectral radius of the "companion form AR matrices" of the regimes.
 #' @seealso \code{\link{bound_jsr_G}}
 #' @inherit bound_jsr_G references
@@ -369,24 +374,20 @@ bound_jsr_G <- function(S, epsilon=0.01, adaptive_eps=FALSE, ncores=2, print_pro
 #' # to one, we likely won't need very thight bounds to verify the JSR is smaller
 #' # than one. Thus, using a small epsilon would make the algorithm unnecessarily slow,
 #' # so we use the (still quite small) epsilon=0.01:
-#' bound_JSR(mod122, epsilon=0.01, adaptive_eps=FALSE)
+#' bound_JSR(mod122, epsilon=0.01)
 #' # The upper bound is smaller than one, so the model is ergodic stationary.
 #'
 #' # If we want tighter bounds, we can set smaller epsilon, e.g., epsilon=0.001:
-#' bound_JSR(mod122, epsilon=0.001, adaptive_eps=FALSE)
-#'
-#' # Using adaptive_eps=TRUE usually speeds up the algorithm when the model
-#' # is large, but with the small model here, the speed-difference is small:
-#' bound_JSR(mod122, epsilon=0.001, adaptive_eps=TRUE)
+#' bound_JSR(mod122, epsilon=0.001)
 #' }
 #' @export
 
-bound_JSR <- function(stvar, epsilon=0.02, adaptive_eps=FALSE, ncores=2, print_progress=TRUE) {
+bound_JSR <- function(stvar, epsilon=0.02, print_progress=TRUE) {
   check_stvar(stvar)
   stopifnot(is.numeric(epsilon) && epsilon > 0)
   all_A <- pick_allA(p=stvar$model$p, M=stvar$model$M, d=stvar$model$d, params=stvar$params)
   all_boldA <- form_boldA(p=stvar$model$p, M=stvar$model$M, d=stvar$model$d, all_A=all_A)
-  bound_jsr_G(S=all_boldA, epsilon=epsilon, ncores=ncores, print_progress=print_progress)
+  bound_jsr_G_Cpp(S=all_boldA, epsilon=epsilon, print_progress=print_progress)
 }
 
 

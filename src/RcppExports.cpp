@@ -53,6 +53,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// bound_jsr_G_Cpp
+NumericVector bound_jsr_G_Cpp(const arma::cube& S, double epsilon, int maxit, bool print_progress);
+RcppExport SEXP _sstvars_bound_jsr_G_Cpp(SEXP SSEXP, SEXP epsilonSEXP, SEXP maxitSEXP, SEXP print_progressSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::cube& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< double >::type epsilon(epsilonSEXP);
+    Rcpp::traits::input_parameter< int >::type maxit(maxitSEXP);
+    Rcpp::traits::input_parameter< bool >::type print_progress(print_progressSEXP);
+    rcpp_result_gen = Rcpp::wrap(bound_jsr_G_Cpp(S, epsilon, maxit, print_progress));
+    return rcpp_result_gen;
+END_RCPP
+}
 // check_Bt_Cpp
 bool check_Bt_Cpp(const arma::cube& all_Omegas, const arma::mat& alpha_mt, double posdef_tol);
 RcppExport SEXP _sstvars_check_Bt_Cpp(SEXP all_OmegasSEXP, SEXP alpha_mtSEXP, SEXP posdef_tolSEXP) {
@@ -132,6 +146,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_sstvars_Gaussian_densities_Cpp", (DL_FUNC) &_sstvars_Gaussian_densities_Cpp, 4},
     {"_sstvars_Gaussian_densities_const_Cpp", (DL_FUNC) &_sstvars_Gaussian_densities_const_Cpp, 3},
     {"_sstvars_Student_densities_Cpp", (DL_FUNC) &_sstvars_Student_densities_Cpp, 5},
+    {"_sstvars_bound_jsr_G_Cpp", (DL_FUNC) &_sstvars_bound_jsr_G_Cpp, 4},
     {"_sstvars_check_Bt_Cpp", (DL_FUNC) &_sstvars_check_Bt_Cpp, 3},
     {"_sstvars_get_Bt_Cpp", (DL_FUNC) &_sstvars_get_Bt_Cpp, 2},
     {"_sstvars_get_mu_yt_Cpp", (DL_FUNC) &_sstvars_get_mu_yt_Cpp, 4},

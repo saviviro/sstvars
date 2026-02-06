@@ -60,6 +60,52 @@ Student_densities_Cpp <- function(obs, means, covmats, alpha_mt, df) {
     .Call('_sstvars_Student_densities_Cpp', PACKAGE = 'sstvars', obs, means, covmats, alpha_mt, df)
 }
 
+#' @name spectral_radius
+#' @title Compute the spectral radius of a square matrix.
+#'
+#' @description This internal helper function computes the spectral radius of a square matrix,
+#'   defined as the maximum modulus of its eigenvalues. The computation is carried
+#'   out using an exact eigenvalue decomposition via \code{RcppArmadillo}, ensuring
+#'   numerical accuracy and mathematical correctness.
+#' @param A an \code{arma::mat} representing a square real-valued matrix.
+#' @return A numeric scalar giving the spectral radius of \code{A}.
+#'
+#' @keywords internal
+NULL
+
+#' @name bound_jsr_G_Cpp
+#' @title Compute lower and upper bounds for the joint spectral radius
+#'  using Gripenberg's branch-and-bound algorithm (C++ implementation).
+#' @description This internal function computes lower and upper bounds for the joint
+#'   spectral radius (JSR) of a finite set of square matrices using a branch-and-bound
+#'   algorithm of the type proposed by Gripenberg (1996).
+#' @param S an \code{arma::cube} of dimension \eqn{n \times n \times m} containing the
+#'   set of \eqn{m} square matrices whose joint spectral radius is to be bounded.
+#' @param epsilon a positive scalar specifying the desired tolerance for the
+#'   difference between the upper and lower bounds. The algorithm terminates once
+#'   the upper bound minus the lower bound is less than or equal to \code{epsilon}.
+#' @param maxit An integer specifying the maximum number of iterations of the
+#'   branch-and-bound algorithm.
+#' @param print_progress Logical; if \code{TRUE}, progress information (iteration
+#'   number, current bounds, and number of candidate products) is printed to the
+#'   console during execution.
+#'
+#' @return A numeric vector of length two containing the certified lower and upper
+#'   bounds for the joint spectral radius, in the order \code{c(lower_bound, upper_bound)}.
+#'
+#' @details The implementation mirrors the logic of the corresponding R function  \code{bound_jsr_G},
+#'   but performs the entire iteration process in C++ using \code{Rcpp} and \code{RcppArmadillo}
+#'   for improved performance.
+#'
+#'   The algorithm iteratively constructs candidate matrix products, prunes them using
+#'   norm-based upper bounds, and tightens the lower and upper bounds on the joint
+#'   spectral radius until the desired tolerance is reached or a maximum number of
+#'   iterations is exceeded.
+#' @keywords internal
+bound_jsr_G_Cpp <- function(S, epsilon = 0.01, maxit = 1000L, print_progress = TRUE) {
+    .Call('_sstvars_bound_jsr_G_Cpp', PACKAGE = 'sstvars', S, epsilon, maxit, print_progress)
+}
+
 #' @name check_Bt_Cpp
 #' @title Check Matrix B Invertibility with C++ (Internal Function)
 #'

@@ -33,11 +33,10 @@ theta_123relg <- c(0.10741, 0.13813, -0.12092, 3.48957, 0.60615, 0.45646, 0.8722
                    0.05544, 0.00212, 0.12708, 0.78618, 0.00922, 0.42627, 0.23765, 0.25386, 3.40834, 0.77357)
 mod123relg <- STVAR(data=usamone, p=1, M=2, params=theta_123relg, weight_function="relative_dens")
 
-
 test_that("bound_JSR works correctly", {
   # Lower and upper bound by the Gripenberg's (1996) branch-and-bound method
-  expect_equal(bound_JSR(mod112relg, epsilon=0.01, adaptive_eps=TRUE, print_progress=FALSE), c(0.8919073, 0.9022341), tol=1e-4)
-  expect_equal(bound_JSR(mod222relg, epsilon=0.02, adaptive_eps=FALSE, print_progress=FALSE), c(0.9205818, 0.9421805), tol=1e-4)
-  expect_equal(bound_JSR(mod123relg, epsilon=0.3, adaptive_eps=TRUE, print_progress=FALSE), c(0.9609557, 1.3269630), tol=1e-4)
+  expect_equal(bound_JSR(mod112relg, epsilon=0.01, print_progress=FALSE), c(0.8919073, 0.9022341), tol=1e-4)
+  expect_equal(bound_JSR(mod222relg, epsilon=0.02, print_progress=FALSE), c(0.9205818, 0.9421805), tol=1e-4)
+  expect_equal(bound_JSR(mod123relg, epsilon=0.3, print_progress=FALSE), c(0.9609557, 1.3269630), tol=1e-4)
 })
 

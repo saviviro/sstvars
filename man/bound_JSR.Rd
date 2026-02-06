@@ -4,13 +4,7 @@
 \alias{bound_JSR}
 \title{Calculate upper bound for the joint spectral radius of the "companion form AR matrices" of the regimes}
 \usage{
-bound_JSR(
-  stvar,
-  epsilon = 0.02,
-  adaptive_eps = FALSE,
-  ncores = 2,
-  print_progress = TRUE
-)
+bound_JSR(stvar, epsilon = 0.02, print_progress = TRUE)
 }
 \arguments{
 \item{stvar}{object of class \code{"stvar"}}
@@ -19,13 +13,6 @@ bound_JSR(
 and upper bounds. A smaller epsilon value results in a narrower interval, thus providing better accuracy for the bounds,
 but at the cost of increased computational effort. Note that the bounds are always wider than \code{epsilon} and it is not
 obvious what \code{epsilon} should be chosen obtain bounds of specific tightness.}
-
-\item{adaptive_eps}{logical: if \code{TRUE}, starts with a large epsilon and then decreases it gradually whenever the progress
-of the algorithm requires, until the value given in the argument \code{epsilon} is reached. Usually speeds up the algorithm
-substantially but is an unconventional approach, and there is no guarantee that the algorithm converges appropriately towards
-bounds with the tightness given by the argument \code{epsilon}.}
-
-\item{ncores}{the number of cores to be used in parallel computing.}
 
 \item{print_progress}{logical: should the progress of the algorithm be printed?}
 }
@@ -42,14 +29,14 @@ A sufficient condition for ergodic stationarity of the STVAR processes implement
  This function calculates an upper (and lower) bound for the JSR and is implemented to assess the validity of this condition
  in practice. If the bound is smaller than one, the model is deemed ergodic stationary.
 
- Implements the branch-and-bound method by Gripenberg (1996) in the conventional form (\code{adaptive_eps=FALSE}) and in a form
- incorporating "adaptive tightness" (\code{adaptive_eps=FALSE}). The latter approach is unconventional and does not guarantee
- appropriate convergence of the bounds close to the desired tightness given in the argument \code{epsilon}, but it usually
- substantially speeds up the algorithm. When \code{print_progress==TRUE}, the tightest bounds found so-far are printed in each
- iteration of the algorithm, so you can also just terminate the algorithm when the bounds are tight enough for your purposes.
- Consider also adjusting the argument \code{epsilon}, in particular when \code{adaptive_eps=FALSE}, as larger epsilon does not
- just make the bounds less tight but also speeds up the algorithm significantly. See Chang and Blondel (2013) for a discussion
- on variuous methods for bounding the JSR.
+ Implements the branch-and-bound method by Gripenberg (1996). When \code{print_progress==TRUE}, the tightest bounds found so-far
+ are printed in each iteration of the algorithm, so you can also just terminate the algorithm when the bounds are tight enough for
+ your purposes. Consider also adjusting the argument \code{epsilon} as larger epsilon does not just make the bounds less tight but
+ also speeds up the algorithm significantly. See Chang and Blondel (2013) for a discussion on variuous methods for bounding the JSR.
+
+ This function uses a C++ implementation for speed improvements. If you prefer an R implementation with parallel computing and
+ "adaptive epsilon" specialfunctionality, you can directly use the function \code{bound_jsr_G} with the "companion form AR matrices"
+  of the regimes as the input.
 }
 \examples{
 \donttest{
@@ -76,15 +63,11 @@ summary(mod122)$abs_boldA_eigens
 # to one, we likely won't need very thight bounds to verify the JSR is smaller
 # than one. Thus, using a small epsilon would make the algorithm unnecessarily slow,
 # so we use the (still quite small) epsilon=0.01:
-bound_JSR(mod122, epsilon=0.01, adaptive_eps=FALSE)
+bound_JSR(mod122, epsilon=0.01)
 # The upper bound is smaller than one, so the model is ergodic stationary.
 
 # If we want tighter bounds, we can set smaller epsilon, e.g., epsilon=0.001:
-bound_JSR(mod122, epsilon=0.001, adaptive_eps=FALSE)
-
-# Using adaptive_eps=TRUE usually speeds up the algorithm when the model
-# is large, but with the small model here, the speed-difference is small:
-bound_JSR(mod122, epsilon=0.001, adaptive_eps=TRUE)
+bound_JSR(mod122, epsilon=0.001)
 }
 }
 \references{
