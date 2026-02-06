@@ -135,3 +135,7 @@
 * Improved the robustness of the function drawing independent skewed t random variables to extreme values. 
 * Corrected some interpretations related to the counterfactuals in the vignette and function documentations. 
 * Minor updates to the documentation.
+
+# sstvarss 1.2.4
+
+* Minor updates to the documentation.

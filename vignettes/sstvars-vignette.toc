@@ -13,7 +13,7 @@
 \contentsline {subsubsection}{Multinomial logit transition weights}{8}{subsubsection.2.4.3}%
 \contentsline {subsubsection}{Exponential transition weights}{9}{subsubsection.2.4.4}%
 \contentsline {subsubsection}{Threshold transition weights}{9}{subsubsection.2.4.5}%
-\contentsline {subsubsection}{Exogenous transition weights}{10}{subsubsection.2.4.6}%
+\contentsline {subsubsection}{Nonrandom exogenous transition weights}{10}{subsubsection.2.4.6}%
 \contentsline {section}{Structural STVAR models}{10}{section.3}%
 \contentsline {subsection}{Recursive identification}{10}{subsection.3.1}%
 \contentsline {subsection}{Identification via heteroskedasticity}{11}{subsection.3.2}%
