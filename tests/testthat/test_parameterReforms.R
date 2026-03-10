@@ -1,5 +1,3 @@
-context("parameterReforms")
-library(sstvars)
 
 data0 <- t(t(gdpdef))
 data2 <- unname(data0)

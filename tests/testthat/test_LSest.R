@@ -1,5 +1,4 @@
-context("LSest")
-library(sstvars)
+
 
 
 test_that("estim_LS works correctly", {

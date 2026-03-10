@@ -1,5 +1,4 @@
-context("matcal")
-library(sstvars)
+
 
 a1 <- 1
 a2 <- 1:4

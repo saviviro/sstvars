@@ -1,5 +1,4 @@
-context("MAINest")
-library(sstvars)
+
 
 # The estimation process computationally very demanding and sometimes numerical errors due to machine (in)accuracy
 # yield varying results even with a fixed seed. Therefore, we only employ minimal tests that check that the function

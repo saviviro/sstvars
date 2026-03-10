@@ -1,6 +1,3 @@
-context("jointSpectralRadius")
-library(sstvars)
-
 
 test_that("bound_jsr_G works correctly", {
   set.seed(1); S1 <- array(rnorm(3*3*2), dim=c(3, 3, 2))

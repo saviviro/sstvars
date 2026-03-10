@@ -1,5 +1,3 @@
-context("moreEst")
-library(sstvars)
 
 # The estimation process computationally demanding. Therefore, we only employ minimal
 # tests checking that the functions work correctly without producing any errors.

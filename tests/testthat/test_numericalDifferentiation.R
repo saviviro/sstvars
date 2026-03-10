@@ -1,5 +1,4 @@
-context("numericalDifferentiation")
-library(sstvars)
+
 
 foo1 <- function(x) x^2
 foo2 <- function(x, a=1, b=1) a*x[1]^2 - b*x[2]^2

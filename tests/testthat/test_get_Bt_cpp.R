@@ -1,5 +1,3 @@
-context("get_Bt_Cpp")
-library(sstvars)
 
 # Test for basic functionality with known output
 test_that("get_Bt_Cpp calculates correct weighted sums", {

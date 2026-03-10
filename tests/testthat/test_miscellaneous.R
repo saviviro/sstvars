@@ -1,5 +1,3 @@
-context("miscellaneous")
-library(sstvars)
 
 set.seed(1); data2 <- cbind(gdpdef, round(rnorm(nrow(gdpdef)), 3))
 

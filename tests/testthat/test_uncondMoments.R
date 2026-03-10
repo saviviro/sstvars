@@ -1,6 +1,3 @@
-context("uncondMoments")
-library(sstvars)
-
 
 alt_pcovmat <- function(p, d, all_A, all_Omegas) {
   # Calculate the (dp x dp) covariance matrix Sigma_{m,p} (Lutkepohl 2005, eq. (2.1.39))

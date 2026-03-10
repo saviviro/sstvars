@@ -1,5 +1,3 @@
-context("GIRFandGFEVD")
-library(sstvars)
 
 # NOTE: predict uses simulate, so some of the setups are only tested in predict, which breaks if simulate breaks
 

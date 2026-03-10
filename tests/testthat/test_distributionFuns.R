@@ -1,5 +1,3 @@
-context("distributionFuns")
-library(sstvars)
 
 test_that("skewed_t_dens when lambda = 0", {
   expect_equal(skewed_t_dens(y=-5, nu=3, lambda=0), 0.0009417452, tolerance = 1e-4)

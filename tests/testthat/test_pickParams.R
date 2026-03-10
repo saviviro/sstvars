@@ -1,5 +1,3 @@
-context("pickParams")
-library(sstvars)
 
 ## A(M)(p)_(p)(M)(d)
 

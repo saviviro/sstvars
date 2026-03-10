@@ -1,5 +1,3 @@
-context("check_Bt_Cpp")
-library(sstvars)
 
 # Test with invertible matrices
 test_that("check_Bt_Cpp works with invertible matrices", {

@@ -1,5 +1,3 @@
-context("diagTests")
-library(sstvars)
 
 # p=2, M=2, d=2, STVAR with relative_dens weight function:
 theta_222relg <- c(0.357, 0.107, 0.356, 0.086, 0.14, 0.035, -0.165, 0.387, 0.452, 0.013, 0.228, 0.336, 0.239, 0.024,
