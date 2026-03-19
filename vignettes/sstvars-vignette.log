@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  18 MAR 2026 16:12
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  19 MAR 2026 18:12
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -965,10 +965,10 @@ Package rerunfilecheck Info: File `sstvars-vignette.out' has not changed.
 (rerunfilecheck)             Checksum: 1AC15B6A26245AE0F2BF09FE683F8B4D;24927.
  ) 
 Here is how much of TeX's memory you used:
- 13562 strings out of 478353
- 215725 string characters out of 5848086
- 521096 words of memory out of 5000000
- 31126 multiletter control sequences out of 15000+600000
+ 13563 strings out of 478353
+ 215738 string characters out of 5848086
+ 521125 words of memory out of 5000000
+ 31127 multiletter control sequences out of 15000+600000
  518339 words of font info for 102 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  75i,33n,77p,2281b,718s stack positions out of 5000i,500n,10000p,200000b,80000s

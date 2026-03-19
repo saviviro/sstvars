@@ -1257,7 +1257,7 @@ b_{t,i_1i_1}^{-1}\left(\sum_{i=1}^p a_{t,i,i_1i_2}y_{i_2t-i} + b_{t,i_1i_2}e_{i_
 from the $i_1$th shock $e_{i_1t}$ shuts off these effects from the movements of the $i_1$th variable (assuming $b_{t,i_1i_1}\neq 0$).
 
 Now, to simulate the counterfactual scenario in which the response of the $i_1$th variable does not respond to the lagged movements of the $i_2$th variable nor to the $i_2$th shock, is obtained by first replacing the $i_1$th shock in the vector $e_t$ by
-\begin{equation}
+\begin{equation}\label{eq:val_e_t2}
 e_{i_1t}^* = e_{i_1t} - b_{t,i_1i_1}^{-1}\left(\sum_{i=1}^p a_{t,i,i_1i_2}y_{i_2t-i} + b_{t,i_1i_2}e_{i_2t}\right),
 \end{equation}
 where $e_{i_1t}$ is the $i_1$th element of $e_t$ before manipulating it. Then, the implied counterfactual observations are calculated from~(\ref{eq:stvarsimp}) by using the obtained hypothetical structural error.
@@ -1277,7 +1277,7 @@ Using the results derived in Section~\ref{sec:cfact}, the counterfactual scenari
   \FOR{each $t$ in $t^*,...,T$}
     \STATE Compute the values of $\phi_{t}$, $A_{t,1},...,A_{t,p}$, and $B_t$ based on the preceding observations, and take the structural error $e_{t}$ recovered from the (fitted) model.
     \IF{$t\in \lbrace t^*,...,t^*+k \rbrace$}
-      \STATE Calculate the counterfactual shock $e_{i_1t}^*$ from~(\ref{eq:val_e_t}) or~(\ref{eq:shut_e_t}) depending on the type of the counterfactual, and replace the $i_1$th element of $e_{t}$ by this hypothetical shock.\label{step:hist_count_shock}
+      \STATE Calculate the counterfactual shock $e_{i_1t}^*$ from~(\ref{eq:val_e_t}) or~(\ref{eq:val_e_t2}) depending on the type of the counterfactual, and replace the $i_1$th element of $e_{t}$ by this hypothetical shock.\label{step:hist_count_shock}
     \ENDIF
     \STATE Take the structural error $e_t$ obtained from the previous steps and compute the corresponding (counterfactual) observation $y_{t}$ from~(\ref{eq:stvarsimp}).
   \ENDFOR
@@ -1303,7 +1303,7 @@ To formally describe the method, consider the counterfactual scenario in which t
   \FOR{each $h$ in $1,2...,H$}\label{step:fore_forstart}
     \STATE Conditionally on $\mathcal{F}_{T+h-1}$, draw $e_{T+h}$ from its (estimated) distribution.
     \IF{$h\in \lbrace h^*,...,h^*+k \rbrace$}\label{step:fore_forifstart}
-      \STATE Calculate the counterfactual shock $e_{i_1T+h}^*$ from~(\ref{eq:val_e_t}) or~(\ref{eq:shut_e_t}) depending on the type of the counterfactual, and replace the $i_1$th element of $e_{T+h}$ by this hypothetical shock.\label{step:fore_count_shock}
+      \STATE Calculate the counterfactual shock $e_{i_1T+h}^*$ from~(\ref{eq:val_e_t}) or~(\ref{eq:val_e_t2}) depending on the type of the counterfactual, and replace the $i_1$th element of $e_{T+h}$ by this hypothetical shock.\label{step:fore_count_shock}
     \ENDIF\label{step:fore_forifend}
   \STATE Conditionally on $\mathcal{F}_{T+h-1}$ and $e_{T+h}$ obtained from the previous steps, compute the corresponding observation $y_{T+h}$ from~(\ref{eq:stvarsimp}).
   \ENDFOR\label{step:fore_forend}
@@ -1333,9 +1333,9 @@ For a single history $\boldsymbol{y}_{t-1}$ and given sign and size $\delta_j$ o
       \STATE Impose the sign and size $\delta_j$ to the $j$th element of $e_{t+h}$ to obtain the modified structural error $\tilde{e}_{t+h}$.
     \ENDIF
     \IF{$h\in \lbrace h^*,...,h^*+k \rbrace$}\label{step:girf_count_starts}
-      \STATE Calculate the counterfactual shock $e_{i_1t+h}^*$ from~(\ref{eq:val_e_t}) or~(\ref{eq:shut_e_t}) depending on the type of the counterfactual, and replace the $i_1$th element of $e_{t+h}$ by this hypothetical shock.
+      \STATE Calculate the counterfactual shock $e_{i_1t+h}^*$ from~(\ref{eq:val_e_t}) or~(\ref{eq:val_e_t2}) depending on the type of the counterfactual, and replace the $i_1$th element of $e_{t+h}$ by this hypothetical shock.
       \IF{$h=0$}
-        \STATE Calculate also the modified counterfactual shock $\tilde{e}_{i_1t+h}^*$ using the modified structural error $\tilde{e}_{t+h}$  in~(\ref{eq:val_e_t}) or~(\ref{eq:shut_e_t}) depending on the type of the counterfactual, and replace the $i_1$th element of $\tilde{e}_{t+h}$ by this hypothetical shock.
+        \STATE Calculate also the modified counterfactual shock $\tilde{e}_{i_1t+h}^*$ using the modified structural error $\tilde{e}_{t+h}$  in~(\ref{eq:val_e_t}) or~(\ref{eq:val_e_t2}) depending on the type of the counterfactual, and replace the $i_1$th element of $\tilde{e}_{t+h}$ by this hypothetical shock.
       \ENDIF
     \ENDIF\label{step:girf_shockif_ends}
   \STATE Calculate $y_{t+h}^{(l)}(\delta_j,\boldsymbol{y}_{t-1})$ by using the previous observations $(\boldsymbol{y}_{t-1},y_{t}^{(l)}(\delta_j,\boldsymbol{y}_{t-1}),...,$ $y_{t+h-1}^{(l)}(\delta_j,\boldsymbol{y}_{t-1})$ and the structural error $e_{t+h}$ (or $\tilde{e}_{t+h}$ if $h=0$) obtained from Steps~\ref{step:girf_shock_starts}-\ref{step:girf_shockif_ends}.

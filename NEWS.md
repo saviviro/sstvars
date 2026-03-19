@@ -140,4 +140,4 @@
 
 * Implemented the brach-and-bound method of Gripenberg (1996) for bounding the JSR in C++ for speed improvements in the function "bound_JSR".
   The old R implementation is still available in the function "bound_JSR_G".
-* Minor updates to the documentation.
+* Minor updates to the documentation, including typo fixes.
