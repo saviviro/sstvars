@@ -16,12 +16,12 @@ get_minval <- function(data) {
 #' @description \code{get_IC} calculates the information criteria values
 #'   AIC, HQIC, and BIC divided by the number of observations.
 #'
-#' @param loglik log-likelihood value, preferably non-penalized one.
+#' @param loglik log-likelihood value, penalized or non-penalized one.
 #' @param npars number of (freely estimated) parameters in the model
 #' @param T_obs numbers of observations with the \eqn{p} starting values excluded.
 #' @return Returns a data frame containing the information criteria values
 #'   divided by the number of observations.
-#' @keywords internal
+#' @internal
 
 get_IC <- function(loglik, npars, T_obs) {
   AIC <- (-2*loglik + 2*npars)/T_obs
@@ -30,6 +30,31 @@ get_IC <- function(loglik, npars, T_obs) {
   data.frame(AIC=AIC, HQIC=HQIC, BIC=BIC)
 }
 
+#' @title Calculate penalized AIC, HQIC, and BIC
+#' @description \code{get_penalized_IC} calculates the penalized information criteria values
+#'  AIC, HQIC, and BIC divided by the number of observations, i.e., using the penalized log-likelihood
+#'  function if that was used for estimation.
+#' @param sstvar an object of class \code{'sstvar'}.
+#' @return Returns a data frame containing the penalized information criteria values.
+#' @examples
+#' # Logistic Student's t STVAR with p=1, M=2, and the first lag of the second variable
+#' # as the switching variable, with penalized log-likelihood, with very strong penalization:
+#' params12 <- c(0.62906848, 0.14245295, 2.41245785, 0.66719269, 0.3534745, 0.06041779, -0.34909745,
+#'   0.61783824, 0.125769, -0.04094521, -0.99122586, 0.63805416, 0.371575, 0.00314754, 0.03440824,
+#'   1.29072533, -0.06067807, 0.18737385, 1.21813844, 5.00884263, 7.70111672)
+#' mod12 <- STVAR(data=gdpdef, p=1, M=2, params=params12, weight_function="logistic",
+#'   weightfun_pars=c(2, 1), cond_dist="Student", penalized=TRUE, penalty_params=c(0.4, 0.4))
+#'
+#' mod12$IC # IC without penalization term in loglik
+#' get_penalized_IC(mod12) # IC with penalization term in loglik
+#' @export
+
+get_penalized_IC <- function(stvar) {
+  if(!stvar$penalized) {
+    message("The model was not estimated with penalized log-likelihood, so nonpenalized information criteria are calculated.")
+  }
+  get_IC(loglik=stvar$loglik, npars=length(stvar$params), T_obs=nrow(stvar$data) - stvar$model$p)
+}
 
 
 #' @title Calculate "distance" between two (scaled) regimes

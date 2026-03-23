@@ -123,7 +123,7 @@ STVAR <- function(data, p, M, d, params,
                   parametrization=c("intercept", "mean"),
                   identification=c("reduced_form", "recursive", "heteroskedasticity", "non-Gaussianity"),
                   AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL, B_constraints=NULL,
-                  penalized=FALSE, penalty_params=c(0.05, 1), allow_unstab=FALSE, calc_std_errors=FALSE) {
+                  penalized=FALSE, penalty_params=c(0.05, 0.02), allow_unstab=FALSE, calc_std_errors=FALSE) {
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
   parametrization <- match.arg(parametrization)

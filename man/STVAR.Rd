@@ -28,7 +28,7 @@ STVAR(
   weight_constraints = NULL,
   B_constraints = NULL,
   penalized = FALSE,
-  penalty_params = c(0.05, 1),
+  penalty_params = c(0.05, 0.02),
   allow_unstab = FALSE,
   calc_std_errors = FALSE
 )
