@@ -183,20 +183,29 @@ plot.stvarpred <- function(x, ..., nt, trans_weights=TRUE) {
 
 #' @describeIn GIRF plot method
 #' @inheritParams print.girf
+#' @param type character that specifies the type of the plot. The default is \code{type="interval"}, which plots the point estimates
+#'   of the GIRFs together with GIRF intervals. The alternative is \code{type="shotgun"}, which plots all GIRFs obtained from different
+#'   initial values in a "shotgun" style.
 #' @param margs numeric vector of length four that adjusts the
 #'  \code{[bottom_marginal, left_marginal, top_marginal, right_marginal]}
 #'  as the relative sizes of the marginals to the figures of the responses.
+#' @param opacity numeric between 0 and 1 that specifies the opacity of the lines in the shotgun plot. Only used if \code{type="shotgun"}.
 #' @param ... graphical parameters passed to \code{plot} method plotting the GIRFs
 #' @export
 
-plot.girf <- function(x, margs, ...) {
+plot.girf <- function(x, type=c("interval", "shotgun"), opacity=0.05, margs, ...) {
 
   # Relevant statistics etc
+  type <- match.arg(type)
   girf <- x
   girf_res <- girf$girf_res
   nresps <- ncol(girf_res[[1]]$point_est)
   resp_names <- colnames(girf_res[[1]]$point_est)
   ngirfs <- length(girf_res)
+
+  if(type == "shotgun") {
+    girf_res <- girf$all_girfs # All girfs for the shotgun plot; [[shock]][horizon, variable, MCrep]
+  }
 
   # Graphical settings
   if(missing(margs)) {
@@ -223,27 +232,39 @@ plot.girf <- function(x, margs, ...) {
   # Function to plot empty plots (for the marginals)
   empty_plot <- function() plot(0, xaxt='n', yaxt='n', bty='n', pch='', ylab='', xlab='')
 
-  # Function to plot the GIRF for each response separately
-  plot_girf <- function(resp_ind, main="", xaxt="n", ylab="", first_col=FALSE, ...) {
+  # Function to plot the GIRF for each response separately; takes girf_i1 as an informal argument from the parent environment
+  plot_girf <- function(resp_ind, type, main="", xaxt="n", ylab="", first_col=FALSE, ...) {
 
-    # Plot point estimate
-    point_est <- girf_i1$point_est[, resp_ind]
-    conf_ints <- girf_i1$conf_ints[, , resp_ind]
-    plot(x=0:(length(point_est) - 1), y=point_est, type="l", ylim=c(min(0, min(c(conf_ints, point_est))), max(0, max(c(conf_ints, point_est)))),
-         main="", ylab="", xlab="", xaxt=xaxt, lwd=2, col="blue", ...)
-    if(first_col) { # Add yaxis label to the first column of responses
-      mtext(resp_names[resp_ind], side=2, cex=0.8, font=2, las=0, padj=-4)
-    }
-    if(resp_ind == 1) mtext(main, padj=-0.5, cex=1, font=2)
+    if(type == "interval") {
+      # Plot point estimate
+      point_est <- girf_i1$point_est[, resp_ind]
+      conf_ints <- girf_i1$conf_ints[, , resp_ind]
+      plot(x=0:(length(point_est) - 1), y=point_est, type="l", ylim=c(min(0, min(c(conf_ints, point_est))), max(0, max(c(conf_ints, point_est)))),
+           main="", ylab="", xlab="", xaxt=xaxt, lwd=2, col="blue", ...)
+      if(first_col) { # Add yaxis label to the first column of responses
+        mtext(resp_names[resp_ind], side=2, cex=0.8, font=2, las=0, padj=-4)
+      }
+      if(resp_ind == 1) mtext(main, padj=-0.5, cex=1, font=2)
 
-    # Plot confidence intervals
-    inds <- 0:girf$N
-    draw_poly <- function(up_or_low) polygon(x=c(inds, rev(inds)), y=c(up_or_low, rev(point_est)),
-                                             col=grDevices::rgb(0, 0, 1, 0.2), border=NA)
+      # Plot confidence intervals
+      inds <- 0:girf$N
+      draw_poly <- function(up_or_low) polygon(x=c(inds, rev(inds)), y=c(up_or_low, rev(point_est)),
+                                               col=grDevices::rgb(0, 0, 1, 0.2), border=NA)
 
-    for(i1 in 1:length(girf$ci)) {
-      draw_poly(conf_ints[, i1]) # lower
-      draw_poly(conf_ints[, ncol(conf_ints) + 1 - i1]) # upper
+      for(i1 in 1:length(girf$ci)) {
+        draw_poly(conf_ints[, i1]) # lower
+        draw_poly(conf_ints[, ncol(conf_ints) + 1 - i1]) # upper
+      }
+    } else { # Shotgun plot
+      plot(x=0:(nrow(girf_i1[, , 1]) - 1), y=girf_i1[, resp_ind, 1], type="l", ylim=c(min(0, min(girf_i1[, resp_ind, ])), max(0, max(girf_i1[, resp_ind, ]))),
+           main="", ylab="", xlab="", xaxt=xaxt, lwd=2, col=grDevices::rgb(0, 0, 0, opacity), ...)
+      for(MCrep in 2:dim(girf_i1)[3]) { # Go through the initial values
+        lines(x=0:(nrow(girf_i1[, , 1]) - 1), y=girf_i1[, resp_ind, MCrep], col=grDevices::rgb(0, 0, 0, opacity))
+      }
+      if(first_col) { # Add yaxis label to the first column of responses
+        mtext(resp_names[resp_ind], side=2, cex=0.8, font=2, las=0, padj=-4)
+      }
+      if(resp_ind == 1) mtext(main, padj=-0.5, cex=1, font=2)
     }
 
     abline(h=0, lty=3, col="red")
@@ -261,14 +282,13 @@ plot.girf <- function(x, margs, ...) {
 
     # Plot the GIRF of shocks i1
     first_col <- i1 == 1
-    plot_girf(resp_ind=1, main=paste("Shock", girf$shocks[i1]),
-              ylab=resp_names[1], first_col=first_col)
+    plot_girf(resp_ind=1, type=type, main=paste("Shock", girf$shocks[i1]), ylab=resp_names[1], first_col=first_col)
     if(nresps > 2) {
       for(i2 in 2:(nresps - 1)) {
-        plot_girf(resp_ind=i2, ylab=resp_names[i2], first_col=first_col)
+        plot_girf(resp_ind=i2, type=type, ylab=resp_names[i2], first_col=first_col)
       }
     }
-    plot_girf(resp_ind=nresps, xaxt="s", ylab=resp_names[nresps], first_col=first_col)
+    plot_girf(resp_ind=nresps, type=type, xaxt="s", ylab=resp_names[nresps], first_col=first_col)
     empty_plot() # To bottom margin of the last row of responses
 
     # Plot a column of empty plots as the right margins

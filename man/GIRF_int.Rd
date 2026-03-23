@@ -91,7 +91,7 @@ of peak response in absolute value. Ignored if \code{scale} is not specified.}
 to which peak response is expected? Scaling won't based on values after this.}
 
 \item{ci}{a numeric vector with elements in \eqn{(0, 1)} specifying the
-confidence levels of the "confidence intervals" that \strong{do not} quantify uncertainty about the true parameter value
+"confidence levels" of the "GIRF intervals" that \strong{do not} quantify uncertainty about the true parameter value
 but only uncertainty about the initial value (and possibly sign and size of the shock) within the given regime.}
 
 \item{use_data_shocks}{set \code{TRUE} for a special feature in which for every possible length \eqn{p} history in the data,
@@ -166,9 +166,9 @@ Contains the elements:
 \value{
 Returns a class \code{'girf'} list with the GIRFs in the first
   element (\code{$girf_res}) and the used arguments the rest. The first
-  element containing the GIRFs is a list with the \eqn{m}th element
+  element containing the GIRFs is a list with the \eqn{i}th element for the \eqn{i}th shock
   containing the point estimates for the GIRF in \code{$point_est} (the first
-  element) and confidence intervals in \code{$conf_ints} (the second
+  element) and GIRF intervals in \code{$conf_ints} (the second
   element). The first row is for the GIRF at impact \eqn{(n=0)}, the second
   for \eqn{n=1}, the third for \eqn{n=2}, and so on.
 
@@ -181,7 +181,7 @@ Returns a class \code{'girf'} list with the GIRFs in the first
  structural STVAR models.
 }
 \details{
-The "confidence bounds" \strong{do not} quantify uncertainty about the true parameter
+The "GIRF intervals" \strong{do not} quantify uncertainty about the true parameter
   value but only the initial values (and possibly sign and size of the shock) within the given regime.
   If initial values are specified, confidence intervals won't be calculated. Note that if the bounds
   look weird in the figure produced by \code{plot.girf}, it is probably because the point estimate is not

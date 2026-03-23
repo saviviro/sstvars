@@ -138,7 +138,8 @@
 
 # sstvarss 1.2.4
 
-* Implemented the brach-and-bound method of Gripenberg (1996) for bounding the JSR in C++ for speed improvements in the function "bound_JSR".
+* Implemented the branch-and-bound method of Gripenberg (1996) for bounding the JSR in C++ for speed improvements in the function "bound_JSR".
   The old R implementation is still available in the function "bound_JSR_G".
 * Added the function get_penalized_IC to compute the information criteria based on the penalized log-likelihood function for models estimated via penalized ML.
-* Minor updates to the documentation, including typo fixes.
+* Added the functionality to plot so-called "shotgun plots" for the GIRFs. To plot a shotgun plot, use the argument "type=shotgun" the plot method for GIRF objects.
+* Minor updates to the documentation, including typo fixes etc.

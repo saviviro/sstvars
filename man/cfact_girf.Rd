@@ -103,7 +103,7 @@ of peak response in absolute value. Ignored if \code{scale} is not specified.}
 to which peak response is expected? Scaling won't based on values after this.}
 
 \item{ci}{a numeric vector with elements in \eqn{(0, 1)} specifying the
-confidence levels of the "confidence intervals" that \strong{do not} quantify uncertainty about the true parameter value
+"confidence levels" of the "GIRF intervals" that \strong{do not} quantify uncertainty about the true parameter value
 but only uncertainty about the initial value (and possibly sign and size of the shock) within the given regime.}
 
 \item{use_data_shocks}{set \code{TRUE} for a special feature in which for every possible length \eqn{p} history in the data,

@@ -52,7 +52,7 @@
 #'   for the first lag, the second last row for second lag etc. If not specified, initial values will be
 #'   drawn from the regime specified in \code{init_regimes}.
 #' @param ci a numeric vector with elements in \eqn{(0, 1)} specifying the
-#'   confidence levels of the "confidence intervals" that \strong{do not} quantify uncertainty about the true parameter value
+#'   "confidence levels" of the "GIRF intervals" that \strong{do not} quantify uncertainty about the true parameter value
 #'   but only uncertainty about the initial value (and possibly sign and size of the shock) within the given regime.
 #' @param use_data_shocks set \code{TRUE} for a special feature in which for every possible length \eqn{p} history in the data,
 #'   or a subset of them if so specified in the argument \code{data_girf_pars}, the GIRF is estimated for a shock that has the
@@ -93,7 +93,7 @@
 #'   Set \code{NULL} for not initializing the seed.
 #' @param use_parallel employ parallel computing? If \code{FALSE}, does not print
 #'   anything.
-#' @details The "confidence bounds" \strong{do not} quantify uncertainty about the true parameter
+#' @details The "GIRF intervals" \strong{do not} quantify uncertainty about the true parameter
 #'   value but only the initial values (and possibly sign and size of the shock) within the given regime.
 #'   If initial values are specified, confidence intervals won't be calculated. Note that if the bounds
 #'   look weird in the figure produced by \code{plot.girf}, it is probably because the point estimate is not
@@ -113,9 +113,9 @@
 #'   Note that the arguments \code{shock_size}  and \code{init_regime} are ignored if \code{use_data_shocks=TRUE}.
 #' @return Returns a class \code{'girf'} list with the GIRFs in the first
 #'   element (\code{$girf_res}) and the used arguments the rest. The first
-#'   element containing the GIRFs is a list with the \eqn{m}th element
+#'   element containing the GIRFs is a list with the \eqn{i}th element for the \eqn{i}th shock
 #'   containing the point estimates for the GIRF in \code{$point_est} (the first
-#'   element) and confidence intervals in \code{$conf_ints} (the second
+#'   element) and GIRF intervals in \code{$conf_ints} (the second
 #'   element). The first row is for the GIRF at impact \eqn{(n=0)}, the second
 #'   for \eqn{n=1}, the third for \eqn{n=2}, and so on.
 #'
@@ -152,6 +152,7 @@
 #'   init_regime=2)
 #'  print(girf1) # Print the results
 #'  plot(girf1) # Plot the GIRFs
+#'  plot(girf1, type="shotgun") # Shotgun plot: shows GIRF from each initial value.
 #'
 #'  # GIRF for one-standard-error positive structural shocks, N=30 steps ahead,
 #'  # with the inital values drawn from the second regime. The responses of the
@@ -159,6 +160,7 @@
 #'  girf2 <- GIRF(mod32logt, which_shocks=1:2, which_cumulative=1:2, shock_size=1,
 #'   N=30, R1=50, R2=50, init_regime=2)
 #'  plot(girf2) # Plot the GIRFs
+#'  plot(girf2, type="shotgun") # Shotgun plot: shows GIRF from each initial value.
 #'
 #'  # GIRF for two-standard-error negative structural shock - the first shock only.
 #'  # N=50 steps ahead with the inital values drawn from the first regime. The responses
@@ -166,6 +168,7 @@
 #'  girf3 <- GIRF(mod32logt, which_shocks=1, shock_size=-2, N=50, R1=50, R2=50,
 #'   init_regime=1, scale_type="instant", scale=c(1, 1, 0.5))
 #'  plot(girf3) # Plot the GIRFs
+#'  plot(girf3, type="shotgun") # Shotgun plot: shows GIRF from each initial value.
 #'
 #'  # GIRFs for the first shock, using the length p histories in the data where
 #'  # the first regime is dominant (its transition weight is at least 0.75),
@@ -175,6 +178,7 @@
 #'  girf4 <- GIRF(mod32logt, which_shocks=1, N=30, R1=10, use_data_shocks=TRUE,
 #'   data_girf_pars=c(1, 0.75, -1, 1, 1.5), scale_type="instant", scale=c(1, 1, 0.5))
 #'  plot(girf4) # Plot the GIRFs
+#'  plot(girf4, type="shotgun") # Shotgun plot: shows GIRF from each initial value.
 #'  }
 #' @export
 
