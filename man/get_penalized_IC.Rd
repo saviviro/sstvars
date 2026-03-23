@@ -7,7 +7,7 @@
 get_penalized_IC(stvar)
 }
 \arguments{
-\item{sstvar}{an object of class \code{'sstvar'}.}
+\item{stvar}{an object of class \code{'sstvar'}.}
 }
 \value{
 Returns a data frame containing the penalized information criteria values.

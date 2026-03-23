@@ -34,7 +34,7 @@ get_IC <- function(loglik, npars, T_obs) {
 #' @description \code{get_penalized_IC} calculates the penalized information criteria values
 #'  AIC, HQIC, and BIC divided by the number of observations, i.e., using the penalized log-likelihood
 #'  function if that was used for estimation.
-#' @param sstvar an object of class \code{'sstvar'}.
+#' @param stvar an object of class \code{'sstvar'}.
 #' @return Returns a data frame containing the penalized information criteria values.
 #' @examples
 #' # Logistic Student's t STVAR with p=1, M=2, and the first lag of the second variable
