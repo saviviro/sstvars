@@ -96,6 +96,8 @@
 #'  to it via the dot parameters. See all the available options from the documentation of the function \code{GAfit} with the command
 #'  \code{??GAfit}.
 #'
+#'  Note that even when penalized ML estimation is used, information criteria values are calculated based on the non-penalized log-likelihood function.
+#'  If you wish to calculate the information criteria values using penalized log-likelihood function, you can use the function \code{get_penalized_IC}.
 #' @inherit STVAR return
 #' @section S3 methods:
 #'   The following S3 methods are supported for class \code{'stvar'}: \code{logLik}, \code{residuals}, \code{print}, \code{summary},

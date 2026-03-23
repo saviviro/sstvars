@@ -21,7 +21,7 @@ get_minval <- function(data) {
 #' @param T_obs numbers of observations with the \eqn{p} starting values excluded.
 #' @return Returns a data frame containing the information criteria values
 #'   divided by the number of observations.
-#' @internal
+#' @keywords internal
 
 get_IC <- function(loglik, npars, T_obs) {
   AIC <- (-2*loglik + 2*npars)/T_obs

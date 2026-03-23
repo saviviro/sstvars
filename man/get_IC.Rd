@@ -21,3 +21,4 @@ Returns a data frame containing the information criteria values
 \code{get_IC} calculates the information criteria values
   AIC, HQIC, and BIC divided by the number of observations.
 }
+\keyword{internal}
