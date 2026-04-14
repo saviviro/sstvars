@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  23 MAR 2026 19:10
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  14 APR 2026 16:54
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -886,12 +886,12 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [40]
-Underfull \hbox (badness 1430) in paragraph at lines 1338--1339
+Underfull \hbox (badness 4569) in paragraph at lines 1338--1339
 [] []\T1/lmr/m/n/10.95 Calculate $\OML/lmm/m/it/10.95 y[]\OT1/lmr/m/n/10.95 (\O
 ML/lmm/m/it/10.95 ^^N[]; [][]\OT1/lmr/m/n/10.95 )$ \T1/lmr/m/n/10.95 by us-ing 
-the pre-vi-ous ob-ser-va-tions $\OT1/lmr/m/n/10.95 ([][]\OML/lmm/m/it/10.95 ; y
-[]\OT1/lmr/m/n/10.95 (\OML/lmm/m/it/10.95 ^^N[]; [][]\OT1/lmr/m/n/10.95 )\OML/l
-mm/m/it/10.95 ; :::;$
+the pre-vi-ous ob-ser-va-tions $\OT1/lmr/m/n/10.95 (\OML/lmm/m/it/10.95 y[]\OT1
+/lmr/m/n/10.95 (\OML/lmm/m/it/10.95 ^^N[]; [][]\OT1/lmr/m/n/10.95 )\OML/lmm/m/i
+t/10.95 ; :::;$
  []
 
 
@@ -1000,7 +1000,7 @@ blic/lm/lmsy8.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmt
 t10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtti10.pfb><
 /usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr/loca
 l/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on sstvars-vignette.pdf (51 pages, 733413 bytes).
+Output written on sstvars-vignette.pdf (51 pages, 733411 bytes).
 PDF statistics:
  1460 PDF objects out of 1728 (max. 8388607)
  1331 compressed objects within 14 object streams
