@@ -138,6 +138,8 @@
 
 # sstvarss 1.2.4
 
+* Updated the discussion on identitication by non-Gaussianity in the vignette to match the latest version of the manuscript introducing the method,
+  Virolainen (2025/in press).
 * Implemented the branch-and-bound method of Gripenberg (1996) for bounding the JSR in C++ for speed improvements in the function "bound_JSR".
   The old R implementation is still available in the function "bound_JSR_G".
 * Added the function get_penalized_IC to compute the information criteria based on the penalized log-likelihood function for models estimated via penalized ML.
