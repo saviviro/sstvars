@@ -224,24 +224,24 @@ plot(histdec)
 
 ## References
 
-- Anderson H., Vahid F. (1998) Testing multiple equation systems for
+- Anderson H., Vahid F. 1998. Testing multiple equation systems for
   common nonlinear components. *Journal of Econometrics*, **84**:1,
   1-36.
-- Hubrich K., Teräsvirta. T. (2013). Thresholds and Smooth Transitions
-  in Vector Autoregressive Models. *CREATES Research Paper 2013-18,
-  Aarhus University.*
-- Kheifets I., Saikkonen P. (2020). Stationarity and ergodicity of
-  vector STAR models. *Econometrics Review*, **39**:407-414, 1311-1324.
-- Koop G., Pesaran M.H., Potter S.M. (1996). Impulse response analysis
-  in nonlinear multivariate models. *Journal of Econometrics*, **74**:1,
+- Hubrich K., Teräsvirta. T. 2013. Thresholds and Smooth Transitions in
+  Vector Autoregressive Models. *CREATES Research Paper 2013-18, Aarhus
+  University.*
+- Kheifets I., Saikkonen P. 2020. Stationarity and ergodicity of vector
+  STAR models. *Econometrics Review*, **39**:407-414, 1311-1324.
+- Koop G., Pesaran M.H., Potter S.M. 1996. Impulse response analysis in
+  nonlinear multivariate models. *Journal of Econometrics*, **74**:1,
   119-147.
 - Lanne M., Virolainen S. 2025. A Gaussian smooth transition vector
   autoregressive model: An application to the macroeconomic effects of
   severe weather shocks. *Journal of Economic Dynamics and Control*,
   **178**, 105162.
-- Virolainen S. 2025. Identification by non-Gaussianity in structural
-  smooth transition vector autoregressive. Unpublished working paper,
-  available as arXiv:2404.19707.
+- Virolainen S. in press. Identification by non-Gaussianity in
+  structural smooth transition vector autoregressive models.
+  *Econometric Reviews*.
 - Wong B. 2018. Historical decomposition for nonlinear vector
   autoregressive models. *CAMA Working Paper No. 62/2017, available as
   SSRN:3057759*.

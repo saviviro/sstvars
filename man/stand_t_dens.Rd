@@ -25,9 +25,8 @@ See Virolainen (2025) and the references therein, for example, for the details o
 }
 \references{
 \itemize{
-   \item Virolainen S. 2025. Identification by non-Gaussianity in structural
-      smooth transition vector autoregressive models. Unpublished working
-      paper, available as arXiv:2404.19707.
+   \item Virolainen S. in press. Identification by non-Gaussianity in structural
+      smooth transition vector autoregressive models. \emph{Econometric Reviews}.
  }
 }
 \keyword{internal}

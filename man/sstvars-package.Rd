@@ -34,4 +34,9 @@ Useful links:
 \author{
 \strong{Maintainer}: Savi Virolainen \email{savi.virolainen@helsinki.fi} (\href{https://orcid.org/0000-0002-5075-6821}{ORCID})
 
+Authors:
+\itemize{
+  \item Savi Virolainen \email{savi.virolainen@helsinki.fi} (\href{https://orcid.org/0000-0002-5075-6821}{ORCID})
+}
+
 }

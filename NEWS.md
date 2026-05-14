@@ -142,6 +142,6 @@
   The old R implementation is still available in the function "bound_JSR_G".
 * Added the function get_penalized_IC to compute the information criteria based on the penalized log-likelihood function for models estimated via penalized ML.
 * Added the functionality to plot so-called "shotgun plots" for the GIRFs. To plot a shotgun plot, use the argument "type=shotgun" the plot method for GIRF objects.
-* Updated the discussion on identitication by non-Gaussianity in the vignette to match the latest version of the manuscript introducing the method,
-  Virolainen (2025/in press).
+* Updated the reference Virolainen (2025) to Virolainen (in press) (identification by non-Gaussianity in structural smooth transition vector autoregressive models)
+* Updated the discussion on identitication by non-Gaussianity in the vignette to match the latest version of the paper introducing the method (Virolainen, in press).
 * Minor updates to the documentation, including typo fixes etc.

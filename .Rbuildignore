@@ -6,3 +6,5 @@
 ^\.git$
 ^\.gitignore$
 ^tests$
+^\.positai$
+^\.claude$

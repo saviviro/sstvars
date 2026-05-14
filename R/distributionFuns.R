@@ -34,9 +34,8 @@ skewed_t_dens <- function(y, nu, lambda) {
 #' @return Returns a numeric vector of the same length as \code{y} containing the density values.
 #' @references
 #'  \itemize{
-#'    \item Virolainen S. 2025. Identification by non-Gaussianity in structural
-#'       smooth transition vector autoregressive models. Unpublished working
-#'       paper, available as arXiv:2404.19707.
+#'    \item Virolainen S. in press. Identification by non-Gaussianity in structural
+#'       smooth transition vector autoregressive models. \emph{Econometric Reviews}.
 #'  }
 #' @keywords internal
 

@@ -119,7 +119,7 @@ unvech <- function(d, a) {
 #'   \item Muirhead R.J. 1982. Aspects of Multivariate Statistical Theory, \emph{Wiley}.
 #' }
 #' @examples
-#' # Create two (2x2) coviance matrices using the parameters W and lambdas:
+#' # Create two (2x2) covariance matrices using the parameters W and lambdas:
 #' d <- 2 # The dimension
 #' W0 <- matrix(1:(d^2), nrow=2) # W
 #' lambdas0 <- 1:d # The eigenvalues

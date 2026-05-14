@@ -167,9 +167,8 @@ Used internally in the multiple phase estimation procedure proposed by Virolaine
 \itemize{
    \item Hubrich K., Teräsvirta. T. 2013. Thresholds and Smooth Transitions in Vector Autoregressive Models.
      \emph{CREATES Research Paper 2013-18, Aarhus University.}
-   \item Virolainen S. 2025. Identification by non-Gaussianity in structural
-      smooth transition vector autoregressive models. Unpublished working
-      paper, available as arXiv:2404.19707.
+   \item Virolainen S. in press. Identification by non-Gaussianity in structural
+      smooth transition vector autoregressive models. \emph{Econometric Reviews}.
  }
 }
 \keyword{internal}

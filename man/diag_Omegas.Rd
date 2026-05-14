@@ -34,7 +34,7 @@ See the return value and Muirhead (1982), Theorem A9.9 for details.
 }
 
 \examples{
-# Create two (2x2) coviance matrices using the parameters W and lambdas:
+# Create two (2x2) covariance matrices using the parameters W and lambdas:
 d <- 2 # The dimension
 W0 <- matrix(1:(d^2), nrow=2) # W
 lambdas0 <- 1:d # The eigenvalues

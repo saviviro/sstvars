@@ -88,7 +88,7 @@
 #' Fifth, an interest rate variable (RATE), which is the effective federal funds rate that is replaced by the
 #' the Wu and Xia (2016) shadow rate during zero-lower-bound periods. The Wu and Xia (2016) shadow rate is not bounded by the zero
 #' lower bound and also quantifies unconventional monetary policy measures, while it closely follows the federal funds rate when the
-#' zero lower bound does not bind. This is the dataset used in Virolainen (2025)
+#' zero lower bound does not bind. This is the dataset used in Virolainen (in press)
 #'
 #' @format A numeric matrix of class \code{'ts'} with 443 rows and 4 columns with one time series in each column:
 #' \describe{
@@ -105,8 +105,8 @@
 #'  \itemize{
 #'    \item K. Gavriilidis, 2021. Measuring climate policy uncertainty. https://www.ssrn.com/abstract=3847388.
 #'    \item Federal Reserve Bank of Chicago. 2023. Monthly GDP Growth Rate Data. \url{https://www.chicagofed.org/publications/bbki/index}.
-#'    \item Virolainen S. 2025. Identification by non-Gaussianity in structural smooth transition vector
-#'      autoregressive models. Unpublished working paper, available as arXiv:2404.19707.
+#'    \item Virolainen S. in press. Identification by non-Gaussianity in structural
+#'       smooth transition vector autoregressive models. \emph{Econometric Reviews}.
 #'    \item Wu J. and Xia F. 2016. Measuring the macroeconomic impact of monetary policy at the zero lower bound.
 #'      \emph{Journal of Money, Credit and Banking}, 48(2-3): 253-291.
 #'  }

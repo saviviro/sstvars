@@ -230,9 +230,8 @@ The parameter vector in the argument \code{params} should be unconstrained and r
    \item Lanne M., Virolainen S. 2025. A Gaussian smooth transition vector autoregressive model:
       An application to the macroeconomic effects of severe weather shocks.
       \emph{Journal of Economic Dynamics and Control}, \strong{178}, 105162.
-   \item Virolainen S. 2025. Identification by non-Gaussianity in structural
-      smooth transition vector autoregressive models. Unpublished working
-      paper, available as arXiv:2404.19707.
+   \item Virolainen S. in press. Identification by non-Gaussianity in structural
+      smooth transition vector autoregressive models. \emph{Econometric Reviews}.
  }
  @keywords internal
 }
