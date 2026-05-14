@@ -4,3 +4,7 @@
 .Ruserdata
 inst/doc
 .positai
+src/*.o
+src/*.so
+src/*.dll
+src/*.dylib
