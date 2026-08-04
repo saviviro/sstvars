@@ -239,9 +239,9 @@ plot(histdec)
   autoregressive model: An application to the macroeconomic effects of
   severe weather shocks. *Journal of Economic Dynamics and Control*,
   **178**, 105162.
-- Virolainen S. in press. Identification by non-Gaussianity in
-  structural smooth transition vector autoregressive models.
-  *Econometric Reviews*.
+- Virolainen S. 2026. Identification by non-Gaussianity in structural
+  smooth transition vector autoregressive models. *Econometric Reviews*.
+  **45**:8, 1230-1248.
 - Wong B. 2018. Historical decomposition for nonlinear vector
   autoregressive models. *CAMA Working Paper No. 62/2017, available as
   SSRN:3057759*.

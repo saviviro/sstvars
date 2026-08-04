@@ -229,6 +229,6 @@ References
 - Koop G., Pesaran M.H., Potter S.M. 1996. Impulse response analysis in nonlinear multivariate models. *Journal of Econometrics*, **74**:1, 119-147.
 - Lanne M., Virolainen S. 2025. A Gaussian smooth transition vector autoregressive model: An application to the macroeconomic effects of severe weather shocks.
   *Journal of Economic Dynamics and Control*, **178**, 105162.
-- Virolainen S. in press. Identification by non-Gaussianity in structural smooth transition vector autoregressive models. *Econometric Reviews*.
+- Virolainen S. 2026. Identification by non-Gaussianity in structural smooth transition vector autoregressive models. *Econometric Reviews*. **45**:8, 1230-1248.
 - Wong B. 2018. Historical decomposition for nonlinear vector autoregressive models. *CAMA Working Paper No. 62/2017, available as SSRN:3057759*.
 

@@ -254,12 +254,13 @@ Virolainen S (2025).
   44--54.
 \newblock \doi{10.1080/07350015.2024.2322090}.
 
-\bibitem[{Virolainen({in press})}]{Virolainen2:2024}
-Virolainen S ({in press}).
+\bibitem[{Virolainen(2026)}]{Virolainen2:2024}
+Virolainen S (2026).
 \newblock \enquote{Identification by non-{Gaussianity} in structural smooth
   transition vector autoregressive models.}
-\newblock \emph{Econometric Reviews}.
+\newblock \emph{Econometric Reviews}, \textbf{45}(8), 1230--1248.
 \newblock \doi{10.1080/07474938.2026.2673986}.
+\newblock \urlprefix\url{https://doi.org/10.1080/07474938.2026.2673986}.
 
 \bibitem[{Wong(2018)}]{Wong:2018}
 Wong B (2018).

@@ -38,8 +38,8 @@ zero lower bound does not bind. This is the dataset used in Virolainen (in press
 \itemize{
    \item K. Gavriilidis, 2021. Measuring climate policy uncertainty. https://www.ssrn.com/abstract=3847388.
    \item Federal Reserve Bank of Chicago. 2023. Monthly GDP Growth Rate Data. \url{https://www.chicagofed.org/publications/bbki/index}.
-   \item Virolainen S. in press. Identification by non-Gaussianity in structural
-      smooth transition vector autoregressive models. \emph{Econometric Reviews}.
+   \item Virolainen S. 2026. Identification by non-Gaussianity in structural
+      smooth transition vector autoregressive models. \emph{Econometric Reviews}, \strong{45}:8, 1230-1248.
    \item Wu J. and Xia F. 2016. Measuring the macroeconomic impact of monetary policy at the zero lower bound.
      \emph{Journal of Money, Credit and Banking}, 48(2-3): 253-291.
  }

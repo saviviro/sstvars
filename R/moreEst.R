@@ -189,8 +189,8 @@ iterate_more <- function(stvar, maxit=1000, h=1e-3, penalized, penalty_params, a
 #'    \emph{Cambridge University Press}, Cambridge.
 #'    \item Lütkepohl H., Netšunajev A. 2017. Structural vector autoregressions with smooth transition in variances.
 #'      \emph{Journal of Economic Dynamics & Control}, \strong{84}, 43-57.
-#'    \item Virolainen S. in press. Identification by non-Gaussianity in structural
-#'       smooth transition vector autoregressive models. \emph{Econometric Reviews}.
+#'    \item Virolainen S. 2026. Identification by non-Gaussianity in structural
+#'       smooth transition vector autoregressive models. \emph{Econometric Reviews}, \strong{45}:8, 1230-1248.
 #'  }
 #' @examples
 #' \donttest{

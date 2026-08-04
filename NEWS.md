@@ -145,3 +145,8 @@
 * Updated the reference Virolainen (2025) to Virolainen (in press) (identification by non-Gaussianity in structural smooth transition vector autoregressive models)
 * Updated the discussion on identitication by non-Gaussianity in the vignette to match the latest version of the paper introducing the method (Virolainen, in press).
 * Minor updates to the documentation, including typo fixes etc.
+
+# sstvarss 1.2.5
+
+* Updated the reference to Virolainen (in press) (identification by non-Gaussianity in structural smooth transition vector autoregressive models); it is now Virolainen (2026).
+* Updated the maintainer contact information.

@@ -128,8 +128,8 @@ Returns the number of parameters in the parameter vector of the specified model.
    \item Lanne M., Virolainen S. 2025. A Gaussian smooth transition vector autoregressive model:
       An application to the macroeconomic effects of severe weather shocks.
       \emph{Journal of Economic Dynamics and Control}, \strong{178}, 105162.
-   \item Virolainen S. in press. Identification by non-Gaussianity in structural
-      smooth transition vector autoregressive models. \emph{Econometric Reviews}.
+   \item Virolainen S. 2026. Identification by non-Gaussianity in structural
+      smooth transition vector autoregressive models. \emph{Econometric Reviews}, \strong{45}:8, 1230-1248.
  }
  @keywords internal
 }

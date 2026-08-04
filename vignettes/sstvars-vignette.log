@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  14 MAY 2026 15:24
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  4 AUG 2026 14:11
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -764,7 +764,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [23]
-<figures/seriesplot.pdf, id=932, 469.755pt x 364.36125pt>
+<figures/seriesplot.pdf, id=929, 469.755pt x 364.36125pt>
 File: figures/seriesplot.pdf Graphic file (type pdf)
 <use figures/seriesplot.pdf>
 Package pdftex.def Info: figures/seriesplot.pdf  used on input line 793.
@@ -785,7 +785,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [25]
-<figures/profilelogliks.pdf, id=950, 449.68pt x 364.36125pt>
+<figures/profilelogliks.pdf, id=947, 449.68pt x 364.36125pt>
 File: figures/profilelogliks.pdf Graphic file (type pdf)
 <use figures/profilelogliks.pdf>
 Package pdftex.def Info: figures/profilelogliks.pdf  used on input line 854.
@@ -967,7 +967,7 @@ Package rerunfilecheck Info: File `sstvars-vignette.out' has not changed.
 Here is how much of TeX's memory you used:
  13566 strings out of 478353
  215780 string characters out of 5848086
- 522166 words of memory out of 5000000
+ 522162 words of memory out of 5000000
  31129 multiletter control sequences out of 15000+600000
  518339 words of font info for 102 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -1000,10 +1000,10 @@ blic/lm/lmsy8.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmt
 t10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtti10.pfb><
 /usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr/loca
 l/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on sstvars-vignette.pdf (51 pages, 735014 bytes).
+Output written on sstvars-vignette.pdf (51 pages, 734968 bytes).
 PDF statistics:
- 1469 PDF objects out of 1728 (max. 8388607)
- 1340 compressed objects within 14 object streams
+ 1468 PDF objects out of 1728 (max. 8388607)
+ 1339 compressed objects within 14 object streams
  311 named destinations out of 1000 (max. 500000)
  835 words of extra memory for PDF output out of 10000 (max. 10000000)
 
