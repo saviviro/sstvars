@@ -150,3 +150,7 @@
 
 * Updated the reference to Virolainen (in press) (identification by non-Gaussianity in structural smooth transition vector autoregressive models); it is now Virolainen (2026).
 * Updated the maintainer contact information.
+
+# sstvarss 1.2.6
+
+* Fixed a bug that caused error in certain cases when estimating models with weight_function="exogenous".

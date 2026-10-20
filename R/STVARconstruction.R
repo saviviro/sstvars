@@ -597,6 +597,8 @@ get_hetsked_sstvar <- function(stvar, calc_std_errors=FALSE) {
       n_weight_pars <- 2
     } else if(weight_function == "mlogit") {
       n_weight_pars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])
+    } else if(weight_function == "exogenous") {
+      n_weight_pars <- 0
     }
   } else { # Constraints on the weight parameters
     if(all(weight_constraints[[1]] == 0)) {
@@ -608,8 +610,11 @@ get_hetsked_sstvar <- function(stvar, calc_std_errors=FALSE) {
 
   mean_pars <- pars_orig[1:n_mean_pars]
   ar_pars <- pars_orig[(n_mean_pars + 1):(n_mean_pars + n_ar_pars)]
-  weight_pars <- pars_orig[(n_mean_pars + n_ar_pars + n_covmat_pars
-                            + 1):(n_mean_pars + n_ar_pars + n_covmat_pars + n_weight_pars)]
+  weight_pars <- if (n_weight_pars == 0) {
+    numeric(0)
+  } else {
+    weight_pars <- pars_orig[(n_mean_pars + n_ar_pars + n_covmat_pars + 1):(n_mean_pars + n_ar_pars + n_covmat_pars + n_weight_pars)]
+  }
   if(cond_dist == "Gaussian") {
     dist_pars <- numeric(0)
   } else { # cond_dist == "Student"
