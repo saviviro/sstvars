@@ -609,7 +609,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     NEWTONresults <- lapply(1:nrounds, function(i1) tmpfunNE(i1))
   }
 
-  loks <- vapply(1:nrounds, function(i1) NEWTONresults[[i1]]$value, numeric(1)) # Log-likelihoods
+  # BFGS may return a value that differs from the likelihood at its returned parameters near a threshold
+  loks <- vapply(1:nrounds, function(i1) loglik_fn(NEWTONresults[[i1]]$par), numeric(1)) # Log-likelihoods
   converged <- vapply(1:nrounds, function(i1) NEWTONresults[[i1]]$convergence == 0, logical(1)) # Which coverged
 
   if(print_res) {

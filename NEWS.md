@@ -159,3 +159,5 @@
 * It is now possible to use custom gamma and location parameter grids for the NLS estimation with the argument weightfun_grid when the logistic or exponential
   weight function is used.
 * Bug fix: Fixed a bug that caused error in certain cases when estimating models with weight_function="exogenous".
+* Bug fix: Due to R's BFGS behavior a mismatch could sometimes occurred between the recorded log-likelihood and estimates in fitSTVAR. 
+  This is now fixed by always recalculating the log-likelihood using the final estimates.

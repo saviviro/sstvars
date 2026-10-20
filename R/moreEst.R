@@ -706,14 +706,14 @@ fitSSTVAR <- function(stvar, identification=c("recursive", "heteroskedasticity",
     robust_results <- stats::optim(par=new_params, fn=loglik_fn, gr=loglik_grad, method=robust_method,
                                    control=list(fnscale=-1, maxit=maxit_robust))
     new_params <- robust_results$par
-    if(print_res) message(paste0("The log-likelihood after robust estimation:  ", round(robust_results$value, 3)))
+    if(print_res) message(paste0("The log-likelihood after robust estimation:  ", round(loglik_fn(new_params), 3)))
   }
 
   ## Estimation by the variable metric algorithm...
   final_results <- stats::optim(par=new_params, fn=loglik_fn, gr=loglik_grad, method="BFGS",
                                 control=list(fnscale=-1, maxit=maxit))
   new_params <- final_results$par
-  if(print_res) message(paste0("The log-likelihood after final estimation:   ", round(final_results$value, 3)))
+  if(print_res) message(paste0("The log-likelihood after final estimation:   ", round(loglik_fn(new_params), 3)))
 
   if(alt_par) {
     new_params <- change_parametrization(p=p, M=M, d=d, params=new_params, cond_dist=cond_dist,
