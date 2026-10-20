@@ -381,6 +381,11 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
 #'   by the method of least squares (\code{relative_dens} weight function is not supported).
 #'
 #' @inheritParams estim_LS
+#' @param weightfun_grid a list containing finite numeric grid points for the location parameter in \code{location} and/or
+#'  the strictly positive scale parameter in \code{gamma}. Only available for logistic and exponential weight functions
+#'  with freely estimated weight parameters. If \code{NULL}, the default grids are used. If only one grid is specified,
+#'  the default grid is used for the other parameter. The number of weight parameter vectors evaluated equals the product
+#'  of the lengths of the two grids.
 #' @details Used internally in the multiple phase estimation procedure proposed by Virolainen (2025).
 #'  The weight function \code{relative_dens} is not supported.  Mean constraints are not supported.
 #'  Only weight constraints that specify the weight parameters as fixed values are supported.
@@ -428,7 +433,8 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
 estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                       weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                       parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
-                      penalized=TRUE, penalty_params=c(0.05, 0.2), min_obs_coef=3, sparse_grid=FALSE, use_parallel=TRUE, ncores=2) {
+                      penalized=TRUE, penalty_params=c(0.05, 0.2), min_obs_coef=3, sparse_grid=FALSE, weightfun_grid=NULL,
+                      use_parallel=TRUE, ncores=2) {
   # Checks
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -445,6 +451,22 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
     if(!all(weight_constraints[[1]] == 0)) {
       stop(paste("Only such weight_constraints that specify the threshold parameters some known fixed values",
                  "are supported in the least squares estimation."))
+    }
+  }
+  if(!is.null(weightfun_grid)) {
+    if(!(weight_function %in% c("logistic", "exponential")) || M != 2 || !is.null(weight_constraints)) {
+      stop("weightfun_grid is available only for freely estimated logistic and exponential weight functions with M=2")
+    }
+    if(!is.list(weightfun_grid) || length(weightfun_grid) == 0 || is.null(names(weightfun_grid)) ||
+       any(!names(weightfun_grid) %in% c("location", "gamma")) || anyDuplicated(names(weightfun_grid))) {
+      stop("weightfun_grid must be a list with location and/or gamma as named elements")
+    }
+    for(grid_name in names(weightfun_grid)) {
+      grid_points <- weightfun_grid[[grid_name]]
+      if(!is.numeric(grid_points) || !is.null(dim(grid_points)) || length(grid_points) == 0 ||
+         any(!is.finite(grid_points)) || (grid_name == "gamma" && any(grid_points <= 0))) {
+        stop("Each weightfun_grid element must be a nonempty vector of finite numbers, with gamma strictly positive")
+      }
     }
   }
   data <- check_data(data, p=p)
@@ -655,6 +677,8 @@ estim_NLS <- function(data, p, M, weight_function=c("relative_dens", "logistic",
       # Here always M=2, the first weight parameter is location parameter, and the second one is strictly positive scale parameter
       c_grid <- seq(from=min_switchvar, to=max_switchvar, length.out=ifelse(sparse_grid, 40, 100)) # The grid for the location parameter
       gamma_grid <- seq(from=0.1, to=100, length.out=ifelse(sparse_grid, 40, 100)) # The grid for the scale parameter
+      if(!is.null(weightfun_grid$location)) c_grid <- weightfun_grid$location # Replace the location grid if supplied
+      if(!is.null(weightfun_grid$gamma)) gamma_grid <- weightfun_grid$gamma # Replace the scale grid if supplied
       weightparvecs <- unname(simplify2array(expand.grid(c_grid, gamma_grid))) # Each row for a vector of weight parameters
     } else if(weight_function == "mlogit") {
       n_weight_pars <- (M - 1)*(1 + length(weightfun_pars[[1]])*weightfun_pars[[2]])

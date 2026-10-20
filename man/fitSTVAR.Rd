@@ -22,6 +22,7 @@ fitSTVAR(
   allow_unstab,
   min_obs_coef = 3,
   sparse_grid = FALSE,
+  weightfun_grid = NULL,
   h = 0.001,
   nrounds,
   ncores = 2,
@@ -130,6 +131,11 @@ is a tuning parameter for the penalization (a positive real number, a higher val
 the number of AR matrix parameters in each regimes is simply assumed to be \code{ncol(AR_constraints)/M}.}
 
 \item{sparse_grid}{should the grid of weight function values in LS/NLS estimation be more sparse (speeding up the estimation)?}
+
+\item{weightfun_grid}{a list containing finite numeric grid points for the location parameter in \code{location} and/or
+the strictly positive scale parameter in \code{gamma} in the NLS step of three-phase estimation. Available only
+for logistic and exponential weight functions with freely estimated weight parameters. If \code{NULL}, the default
+grids are used. If only one grid is specified, the default grid is used for the other parameter.}
 
 \item{h}{the strictly positive difference used in the finite difference approximation of the gradient used in numerical optimization.}
 

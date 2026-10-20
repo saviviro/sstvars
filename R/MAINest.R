@@ -18,6 +18,10 @@
 #'   (times variables) from each regime relative to the number of parameters in the regime. For models with AR constraints,
 #'   the number of AR matrix parameters in each regimes is simply assumed to be \code{ncol(AR_constraints)/M}.
 #' @param sparse_grid should the grid of weight function values in LS/NLS estimation be more sparse (speeding up the estimation)?
+#' @param weightfun_grid a list containing finite numeric grid points for the location parameter in \code{location} and/or
+#'  the strictly positive scale parameter in \code{gamma} in the NLS step of three-phase estimation. Available only
+#'  for logistic and exponential weight functions with freely estimated weight parameters. If \code{NULL}, the default
+#'  grids are used. If only one grid is specified, the default grid is used for the other parameter.
 #' @param h the strictly positive difference used in the finite difference approximation of the gradient used in numerical optimization.
 #' @param nrounds the number of estimation rounds that should be performed. The default is \code{(M*ncol(data))^3}
 #'   when \code{estim_method="two-phase"} and \code{(M*ncol(data))^2} when \code{estim_method="three-phase"}.
@@ -219,8 +223,8 @@
 fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", "mlogit", "exponential", "threshold", "exogenous"),
                      weightfun_pars=NULL, cond_dist=c("Gaussian", "Student", "ind_Student", "ind_skewed_t"),
                      parametrization=c("intercept", "mean"), AR_constraints=NULL, mean_constraints=NULL, weight_constraints=NULL,
-                     estim_method, penalized, penalty_params=c(0.05, 0.2), allow_unstab, min_obs_coef=3, sparse_grid=FALSE, h=1e-3,
-                     nrounds, ncores=2, maxit=2000, seeds=NULL, print_res=TRUE, use_parallel=TRUE, calc_std_errors=TRUE, ...) {
+                     estim_method, penalized, penalty_params=c(0.05, 0.2), allow_unstab, min_obs_coef=3, sparse_grid=FALSE, weightfun_grid=NULL,
+                     h=1e-3, nrounds, ncores=2, maxit=2000, seeds=NULL, print_res=TRUE, use_parallel=TRUE, calc_std_errors=TRUE, ...) {
   # Initial checks etc
   weight_function <- match.arg(weight_function)
   cond_dist <- match.arg(cond_dist)
@@ -282,6 +286,12 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     # Set to threshold if only regime (we assume two regimes for logistic and exponential weights)
     weight_function <- "threshold"
     weightfun_pars <- c(1, 1) # There have no affect with M == 1
+  }
+  if(!is.null(weightfun_grid)) { # The custom grid is used in the NLS step only
+    if(estim_method != "three-phase") stop("weightfun_grid is available for three-phase estimation only")
+    if(!(weight_function %in% c("logistic", "exponential")) || M != 2 || !is.null(weight_constraints)) {
+      stop("weightfun_grid is available only for freely estimated logistic and exponential weight functions with M=2")
+    }
   }
   check_pMd(p=p, M=M, weight_function=weight_function, identification="reduced_form")
   no_prints <- !use_parallel && !print_res
@@ -353,7 +363,8 @@ fitSTVAR <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
                               cond_dist=cond_dist, parametrization="intercept", AR_constraints=AR_constraints,
                               mean_constraints=mean_constraints, weight_constraints=weight_constraints,
                               penalized=penalized, penalty_params=penalty_params, min_obs_coef=min_obs_coef,
-                              sparse_grid=sparse_grid, ncores=ncores, use_parallel=use_parallel) # Always intercept parametrization used here
+                              sparse_grid=sparse_grid, weightfun_grid=weightfun_grid, ncores=ncores,
+                              use_parallel=use_parallel) # Always intercept parametrization used here
     }
 
     # Check whether the least squares estimates satisfy the stability condition

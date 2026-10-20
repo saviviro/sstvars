@@ -21,6 +21,7 @@ estim_NLS(
   penalty_params = c(0.05, 0.2),
   min_obs_coef = 3,
   sparse_grid = FALSE,
+  weightfun_grid = NULL,
   use_parallel = TRUE,
   ncores = 2
 )
@@ -115,6 +116,12 @@ relative to the number of parameters in the regime. For models with AR constrain
 AR matrix parameters in each regimes is simplisticly assumed to be \code{ncol(AR_constraints)/M}.}
 
 \item{sparse_grid}{should the grid of weight function values in LS/NLS estimation be more sparse (speeding up the estimation)?}
+
+\item{weightfun_grid}{a list containing finite numeric grid points for the location parameter in \code{location} and/or
+the strictly positive scale parameter in \code{gamma}. Only available for logistic and exponential weight functions
+with freely estimated weight parameters. If \code{NULL}, the default grids are used. If only one grid is specified,
+the default grid is used for the other parameter. The number of weight parameter vectors evaluated equals the product
+of the lengths of the two grids.}
 
 \item{use_parallel}{employ parallel computing? If \code{FALSE}, does not print anything.}
 
