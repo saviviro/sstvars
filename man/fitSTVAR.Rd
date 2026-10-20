@@ -197,6 +197,11 @@ If you wish to estimate a structural model, estimate first the reduced form mode
  procedure tends to produce estimates close to the initial (penalized) LS estimates, while the two-phase procedure explores
  the parameter space more thoroughly (when a large enough number of estimation rounds is ran).
 
+ With threshold weights and Gaussian errors, the LS step selects the threshold vector according to the Gaussian
+ log-likelihood evaluated at the LS estimates and regime-specific residual covariance matrices, including the
+ stability penalty if \code{penalized=TRUE}. With other conditional distributions, the (penalized) sum of squared
+ residuals is used.
+
  \strong{Penalized estimation.} The penalized estimation (\code{penalized=TRUE}) maximizes the penalized log-likelihood function
  in which a penalty term is added. The penalty term becomes nonzero when the parameter values are close to the boundary of the
  stability region or outside it, it increases in the modulus of the eigenvalues of the companion form AR matrices of the regimes.

@@ -145,6 +145,11 @@ Used internally in the multiple phase estimation procedure proposed by Koivisto,
  Luoto, and Virolainen (2025). Mean constraints are not supported. Only weight constraints that
  specify the threshold parameters as fixed values are supported. Only intercept parametrization is
  supported.
+
+ With Gaussian errors, the threshold vector is selected by the Gaussian log-likelihood
+ evaluated at the LS estimates and regime-specific residual covariance matrices. If \code{penalized=TRUE},
+ the stability penalty is subtracted from the log-likelihood. With other conditional distributions,
+ the threshold vector is selected by the (penalized) sum of squared residuals.
 }
 \references{
 \itemize{

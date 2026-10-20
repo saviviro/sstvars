@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  4 AUG 2026 14:11
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2022.1.10)  20 OCT 2026 09:49
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -774,17 +774,17 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 24 []
  []
 
-[24pdfTeX warning (ext4): destination with the same identifier (name{figure.1})
- has been already used, duplicate ignored
-<argument> ...shipout:D \box_use:N \l_shipout_box 
-                                                  \__shipout_drop_firstpage_...
-l.798 
-       <./figures/seriesplot.pdf>]
+[24]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 25
  []
 
-[25]
+[25pdfTeX warning (ext4): destination with the same identifier (name{figure.1})
+ has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.841 
+       <./figures/seriesplot.pdf>]
 <figures/profilelogliks.pdf, id=947, 449.68pt x 364.36125pt>
 File: figures/profilelogliks.pdf Graphic file (type pdf)
 <use figures/profilelogliks.pdf>
@@ -1000,7 +1000,7 @@ blic/lm/lmsy8.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmt
 t10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtti10.pfb><
 /usr/local/texlive/2021/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr/loca
 l/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on sstvars-vignette.pdf (51 pages, 734968 bytes).
+Output written on sstvars-vignette.pdf (51 pages, 735155 bytes).
 PDF statistics:
  1468 PDF objects out of 1728 (max. 8388607)
  1339 compressed objects within 14 object streams

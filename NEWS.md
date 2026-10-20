@@ -153,4 +153,7 @@
 
 # sstvarss 1.2.6
 
-* Fixed a bug that caused error in certain cases when estimating models with weight_function="exogenous".
+* Now with threshold weights and Gaussian errors, the LS step selects the threshold vector according to the Gaussian log-likelihood evaluated at
+  the LS estimates and regime-specific residual covariance matrices, including the stability penalty if penalized=TRUE. With other conditional distributions,
+  the old behavior is retained and the (penalized) sum of squared residuals is used. 
+* Bug fix: Fixed a bug that caused error in certain cases when estimating models with weight_function="exogenous".

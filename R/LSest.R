@@ -15,6 +15,11 @@
 #'  Luoto, and Virolainen (2025). Mean constraints are not supported. Only weight constraints that
 #'  specify the threshold parameters as fixed values are supported. Only intercept parametrization is
 #'  supported.
+#'
+#'  With Gaussian errors, the threshold vector is selected by the Gaussian log-likelihood
+#'  evaluated at the LS estimates and regime-specific residual covariance matrices. If \code{penalized=TRUE},
+#'  the stability penalty is subtracted from the log-likelihood. With other conditional distributions,
+#'  the threshold vector is selected by the (penalized) sum of squared residuals.
 #' @return Returns the estimated parameters in a vector of the form
 #'  \eqn{(\phi_{1},...,\phi_{M},\varphi_1,...,\varphi_M,\alpha}, where
 #'  \itemize{
@@ -92,6 +97,16 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   ## Create estim etc functions ##
   ################################
 
+  # Gaussian log-likelihood at the LS estimates, with Omega_m estimated from the regime residuals
+  gaussian_regime_loglik <- function(U_m) {
+    n_m <- nrow(U_m)
+    if(n_m == 0) return(-Inf)
+    Omega_m <- crossprod(U_m)/n_m
+    logdet <- determinant(Omega_m, logarithm=TRUE)
+    if(logdet$sign <= 0 || !is.finite(logdet$modulus)) return(-Inf)
+    -n_m*d/2*(log(2*pi) + 1) - n_m/2*as.numeric(logdet$modulus)
+  }
+
   ## Least squares estimation function given thresholds for models without AR constraints
   LS_without_AR_constraints <- function(thresholds) {
     # threshold = length M-1 vector of the thresholds r_1,...,r_{M-1}; if M=1 anything is ok
@@ -103,6 +118,7 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
 
     # Storage for the sums of squares of residuals
     all_rss <- numeric(M) # The sum of squares of residuals for each regime
+    if(cond_dist == "Gaussian") all_loglik <- numeric(M) # Log-likelihood contributions from the regimes
 
     # In Y, i:th row denotes the vector \bold{y_{i-1}} = (y_{i-1},...,y_{i-p}) (dpx1),
     # assuming the observed data is y_{-p+1},...,y_0,y_1,...,y_{T}. The last row is for
@@ -137,13 +153,14 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
       # Calculate the sum of squares of residuals
       U_m <- Y_m - X_m%*%C_m # (T_m x d), residuals
       all_rss[m] <- sum(diag((crossprod(U_m, U_m)))) # The sum of squares of residuals
+      if(cond_dist == "Gaussian") all_loglik[m] <- gaussian_regime_loglik(U_m)
     }
 
     # Obtain the estimates in the vector (\phi_{1,0},...,\phi_{M,0},\varphi_1,...,\varphi_M)
     estims <- c(all_intercepts, all_AR_mats)
 
-    # Return the estimates and the sum of squares of residuals, the last element is the for rss
-    c(estims, sum(all_rss))
+    # Select Gaussian thresholds by log-likelihood; retain the RSS criterion for other distributions
+    c(estims, if(cond_dist == "Gaussian") sum(all_loglik) else sum(all_rss))
   }
 
   ## Least squares estimation function given thresholds for models with AR constraints
@@ -200,8 +217,13 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     U <- Y - X_bold%*%estims # (Td x 1), residuals
     rss <- crossprod(U, U) # The sum of squares of residuals
 
-    # Return the estimates and the sum of squares of residuals, the last element is the for rss
-    c(estims, rss)
+    if(cond_dist == "Gaussian") {
+      U_mat <- t(matrix(U, nrow=d, ncol=T_obs)) # (T x d), residuals ordered by time
+      loglik <- sum(vapply(1:M, function(m) gaussian_regime_loglik(U_mat[alpha_mt[,m] == 1, , drop=FALSE]), numeric(1)))
+    }
+
+    # Return the estimates and the criterion used to select the thresholds
+    c(estims, if(cond_dist == "Gaussian") loglik else rss)
   }
 
   ## A function to check whether the stability condition is satisfied for the AR matrices, and
@@ -318,8 +340,13 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
   }
   # Each column in estims corresponds to each vector of thresholds
 
-  ## Obtain the LS estimates, possibly among stable estimates
-  if(penalized) {
+  ## Obtain the LS estimates according to the relevant criterion
+  if(cond_dist == "Gaussian") {
+    # Use the same stability penalty as in the Gaussian log-likelihood
+    all_loglik <- estims[nrow(estims),]
+    if(penalized) all_loglik <- all_loglik - tuning_par*T_obs*d*all_stab_ex
+    best_index <- which.max(all_loglik)[1]
+  } else if(penalized) {
     # Determine the tuning parameter value that controls the extend of the penalization
     all_rss <- estims[nrow(estims),]
     min_rss <- min(all_rss) # The smallest residual sum of squares
@@ -328,20 +355,20 @@ estim_LS <- function(data, p, M, weight_function=c("relative_dens", "logistic", 
     # Obtain the index with the smallest penalized sum of squares
     penalized_stab_ex <- penalty_coef*all_stab_ex # Penalization for non-stable estimates
     all_pen_rss <- all_rss + penalized_stab_ex # Penalized sum of squares of residuals
-    min_rss_index <- which.min(all_pen_rss)[1] # The index for which the penalized sum of squares is the smallest
+    best_index <- which.min(all_pen_rss)[1] # The index for which the penalized sum of squares is the smallest
 
   } else {
     # Find the index for which the sum of squares of residuals is the smallest (regardless of stability)
-    min_rss_index <- which.min(estims[nrow(estims),])[1]
+    best_index <- which.min(estims[nrow(estims),])[1]
   }
 
 
-  ## Obtain and return the estimates corresponding the smallest sum of squares of residuals
-  int_and_ar_estims <- estims[1:(nrow(estims) - 1), min_rss_index]
+  ## Obtain and return the estimates corresponding to the selected threshold vector
+  int_and_ar_estims <- estims[1:(nrow(estims) - 1), best_index]
   if(M == 1 || !is.null(weight_constraints)) {
     threshold_estims <- numeric(0) # No threshold estimates
   } else {
-    threshold_estims <- thresvecs[min_rss_index,]
+    threshold_estims <- thresvecs[best_index,]
   }
   c(int_and_ar_estims, threshold_estims) # Return the estimates
 }
